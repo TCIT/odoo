@@ -8,7 +8,6 @@ from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
 
 @tagged('post_install', '-at_install')
 class TestWebsiteSaleComboConfigurator(HttpCase, WebsiteSaleCommon):
-
     def test_website_sale_combo_configurator(self):
         no_variant_attribute = self.env['product.attribute'].create({
             'name': "No variant attribute",
@@ -51,6 +50,7 @@ class TestWebsiteSaleComboConfigurator(HttpCase, WebsiteSaleCommon):
                 Command.link(combo_b.id),
             ],
         )
+        self.website.show_line_subtotals_tax_selection = 'tax_included'
         self.start_tour('/', 'website_sale_combo_configurator')
 
     def test_website_sale_combo_configurator_single_configuration(self):
@@ -68,6 +68,7 @@ class TestWebsiteSaleComboConfigurator(HttpCase, WebsiteSaleCommon):
                     'value_ids': [Command.set(no_variant_attribute.value_ids.ids)],
                 }),
             ],
+            'website_published': True,
         })
         combo = self.env['product.combo'].create({
             'name': "Test combo",

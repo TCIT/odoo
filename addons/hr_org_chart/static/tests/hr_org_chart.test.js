@@ -24,12 +24,15 @@ defineModels([Employee]);
 defineMailModels();
 
 test("hr org chart: empty render", async () => {
-    expect.assertions(2);
+    expect.assertions(3);
 
     onRpc("/hr/get_org_chart", async (request) => {
         const { params: args } = await request.json();
-        expect("employee_id" in args).toBe(true, {
+        expect(args).toInclude("employee_id", {
             message: "it should have 'employee_id' as argument",
+        });
+        expect("new_parent_id" in args).toBe(true, {
+            message: "it should have 'new_parent_id' as argument",
         });
         return {
             children: [],
@@ -37,46 +40,58 @@ test("hr org chart: empty render", async () => {
             managers_more: false,
         };
     });
-    onRpc("/hr/get_redirect_model", () => {
-        return "hr.employee";
-    });
+    onRpc("/hr/get_redirect_model", () => "hr.employee");
     await mountView({
         type: "form",
         resModel: "hr.employee",
-        arch: `<form><field name="child_ids" widget="hr_org_chart"/></form>`,
+        arch: `
+            <form>
+                <field name="child_ids" widget="hr_org_chart"/>
+                <field name="id" invisible="1"/>
+            </form>`,
         resId: 1,
     });
-    expect(queryOne('[name="child_ids"]').children).toHaveLength(1, {
-        message: "the chart should have 1 child",
+    expect(queryOne('[name="child_ids"]').children).toHaveLength(3, {
+        message: "the chart should have 3 child",
     });
 });
 test("hr org chart: render without data", async () => {
-    expect.assertions(2);
+    expect.assertions(3);
 
     onRpc("/hr/get_org_chart", async (request) => {
         const { params: args } = await request.json();
-        expect("employee_id" in args).toBe(true, {
+        expect(args).toInclude("employee_id", {
             message: "it should have 'employee_id' as argument",
+        });
+        expect("new_parent_id" in args).toBe(true, {
+            message: "it should have 'new_parent_id' as argument",
         });
         return {}; // return no data
     });
     await mountView({
         type: "form",
         resModel: "hr.employee",
-        arch: `<form><field name="child_ids" widget="hr_org_chart"/></form>`,
+        arch: `
+            <form>
+                <field name="child_ids" widget="hr_org_chart"/>
+                <field name="id" invisible="1"/>
+            </form>`,
         resId: 1,
     });
-    expect(queryOne('[name="child_ids"]').children).toHaveLength(1, {
-        message: "the chart should have 1 child",
+    expect(queryOne('[name="child_ids"]').children).toHaveLength(3, {
+        message: "the chart should have 3 child",
     });
 });
 test("hr org chart: basic render", async () => {
-    expect.assertions(3);
+    expect.assertions(4);
 
     onRpc("/hr/get_org_chart", async (request) => {
         const { params: args } = await request.json();
-        expect("employee_id" in args).toBe(true, {
+        expect(args).toInclude("employee_id", {
             message: "it should have 'employee_id' as argument",
+        });
+        expect("new_parent_id" in args).toBe(true, {
+            message: "it should have 'new_parent_id' as argument",
         });
         return {
             children: [
@@ -103,9 +118,7 @@ test("hr org chart: basic render", async () => {
             },
         };
     });
-    onRpc("/hr/get_redirect_model", () => {
-        return "hr.employee";
-    });
+    onRpc("/hr/get_redirect_model", () => "hr.employee");
     await mountView({
         type: "form",
         resModel: "hr.employee",
@@ -113,8 +126,9 @@ test("hr org chart: basic render", async () => {
                 <sheet>
                     <div id="o_employee_container">
                         <div id="o_employee_main">
-                            <div id="o_employee_right">
+                            <div id="o_employee_org_chart">
                                 <field name="child_ids" widget="hr_org_chart"/>
+                                <field name="id" invisible="1"/>
                             </div>
                         </div>
                     </div>
@@ -130,12 +144,15 @@ test("hr org chart: basic render", async () => {
     });
 });
 test("hr org chart: basic manager render", async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     onRpc("/hr/get_org_chart", async (request) => {
         const { params: args } = await request.json();
-        expect("employee_id" in args).toBe(true, {
+        expect(args).toInclude("employee_id", {
             message: "it should have 'employee_id' as argument",
+        });
+        expect("new_parent_id" in args).toBe(true, {
+            message: "it should have 'new_parent_id' as argument",
         });
         return {
             children: [
@@ -172,9 +189,7 @@ test("hr org chart: basic manager render", async () => {
             },
         };
     });
-    onRpc("/hr/get_redirect_model", () => {
-        return "hr.employee";
-    });
+    onRpc("/hr/get_redirect_model", () => "hr.employee");
     await mountView({
         type: "form",
         resModel: "hr.employee",
@@ -182,8 +197,9 @@ test("hr org chart: basic manager render", async () => {
                 <sheet>
                     <div id="o_employee_container">
                         <div id="o_employee_main">
-                            <div id="o_employee_right">
+                            <div id="o_employee_org_chart">
                                 <field name="child_ids" widget="hr_org_chart"/>
+                                <field name="id" invisible="1"/>
                             </div>
                         </div>
                     </div>

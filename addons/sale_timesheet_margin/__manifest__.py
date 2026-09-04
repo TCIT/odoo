@@ -9,8 +9,9 @@
 Allows to compute accurate margin for Service sales.
 ======================================================
 """,
-    'category': 'Hidden',
+    'category': 'Sales/Sales',
     'depends': ['sale_margin', 'sale_timesheet'],
     'auto_install': True,
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

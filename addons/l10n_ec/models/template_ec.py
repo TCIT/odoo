@@ -11,11 +11,7 @@ class AccountChartTemplate(models.AbstractModel):
         return {
             'property_account_receivable_id': 'ec1102050101',
             'property_account_payable_id': 'ec210301',
-            'property_account_expense_categ_id': 'ec110307',
             'journal_account_expense_categ_id': 'ec52022816',
-            'property_account_income_categ_id': 'ec410101',
-            'property_stock_account_input_categ_id': 'ec110307',
-            'property_stock_account_output_categ_id': 'ec510102',
             'property_stock_valuation_account_id': 'ec110306',
             'loss_stock_valuation_account': 'ec510112',
             'production_stock_valuation_account': 'ec110302',
@@ -39,6 +35,11 @@ class AccountChartTemplate(models.AbstractModel):
                 'default_cash_difference_expense_account_id': 'ec_expense_cash_difference',
                 'account_sale_tax_id': 'tax_vat_15_411_goods',
                 'account_purchase_tax_id': 'tax_vat_15_510_sup_01',
+                'expense_account_id': 'ec110307',
+                'income_account_id': 'ec410101',
+                'tax_calculation_rounding_method': 'round_per_line',
+                'account_stock_journal_id': 'inventory_valuation',
+                'account_stock_valuation_id': 'ec110306',
             },
         }
 
@@ -59,3 +60,12 @@ class AccountChartTemplate(models.AbstractModel):
         # Setup default Income/Expense Accounts on Sale/Purchase journals
         if (purchase_journal := self.ref("purchase", raise_if_not_found=False)) and (expense_account_ref := template_data.get('journal_account_expense_categ_id')):
             purchase_journal.default_account_id = self.ref(expense_account_ref, raise_if_not_found=False)
+
+    @template('ec', 'account.account')
+    def _get_ec_account_account(self):
+        return {
+            'ec110306': {
+                'account_stock_expense_id': 'ec510106',
+                'account_stock_variation_id': 'ec110310',
+            },
+        }

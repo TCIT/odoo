@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
+from odoo.fields import Command
 
 
 class StockWarehouse(models.Model):
@@ -27,7 +28,6 @@ class StockWarehouse(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         res = super().create(vals_list)
-        res._update_subcontracting_locations_rules()
         # if new warehouse has resupply enabled, enable global route
         if any([vals.get('subcontracting_to_resupply', False) for vals in vals_list]):
             res._update_global_route_resupply_subcontractor()
@@ -44,7 +44,7 @@ class StockWarehouse(models.Model):
         return res
 
     def get_rules_dict(self):
-        result = super(StockWarehouse, self).get_rules_dict()
+        result = super().get_rules_dict()
         subcontract_location_id = self._get_subcontracting_location()
         for warehouse in self:
             result[warehouse.id].update({
@@ -61,6 +61,7 @@ class StockWarehouse(models.Model):
             route_id.active = False
         else:
             route_id.active = True
+            self.route_ids = [Command.link(route_id.id)]
 
     def _get_routes_values(self):
         routes = super(StockWarehouse, self)._get_routes_values()
@@ -195,14 +196,7 @@ class StockWarehouse(models.Model):
         return self.company_id.subcontracting_location_id
 
     def _get_subcontracting_locations(self):
-        return self.env['stock.location'].search([
-            ('company_id', 'in', self.company_id.ids),
-            ('is_subcontracting_location', '=', True),
-        ])
-
-    def _update_subcontracting_locations_rules(self):
-        subcontracting_locations = self._get_subcontracting_locations()
-        subcontracting_locations._activate_subcontracting_location_rules()
+        return self.company_id.subcontracting_location_id.child_internal_location_ids
 
     def _update_resupply_rules(self):
         '''update (archive/unarchive) any warehouse subcontracting location resupply rules'''

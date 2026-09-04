@@ -2,18 +2,17 @@
 
 from odoo.fields import Command
 
-from odoo.addons.base.tests.common import BaseCommon
 from odoo.addons.uom.tests.common import UomCommon
 
 
-class ProductCommon(
-    BaseCommon,  # enforce constant test currency (USD)
-    UomCommon,
-):
+class ProductCommon(UomCommon):
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+
+        cls.group_product_pricelist = cls.quick_ref('product.group_product_pricelist')
+        cls.group_product_variant = cls.quick_ref('product.group_product_variant')
 
         cls.product_category = cls.env['product.category'].create({
             'name': 'Test Category',
@@ -32,18 +31,23 @@ class ProductCommon(
         cls.pricelist = cls.env['product.pricelist'].create({
             'name': 'Test Pricelist',
         })
-        cls._archive_other_pricelists()
+        # Archive all existing pricelists
+        cls.env['product.pricelist'].search([
+            ('id', '!=', cls.pricelist.id),
+        ]).action_archive()
 
     @classmethod
     def get_default_groups(cls):
         groups = super().get_default_groups()
-        return groups | cls.env.ref('base.group_system')  # For the management/creation of products
+        return groups | cls.quick_ref('product.group_product_manager')
 
     @classmethod
-    def _archive_other_pricelists(cls):
-        cls.env['product.pricelist'].search([
-            ('id', '!=', cls.pricelist.id),
-        ]).action_archive()
+    def _enable_pricelists(cls):
+        cls.env.user.group_ids += cls.group_product_pricelist
+
+    @classmethod
+    def _enable_variants(cls):
+        cls.env.user.group_ids += cls.group_product_variant
 
     @classmethod
     def _create_pricelist(cls, **create_vals):
@@ -59,12 +63,13 @@ class ProductCommon(
             'type': 'consu',
             'list_price': 100.0,
             'standard_price': 50.0,
+            'uom_id': cls.uom_unit.id,
             'categ_id': cls.product_category.id,
             **create_vals,
         })
 
 
-class ProductAttributesCommon(ProductCommon):
+class ProductVariantsCommon(ProductCommon):
 
     @classmethod
     def setUpClass(cls):
@@ -120,17 +125,9 @@ class ProductAttributesCommon(ProductCommon):
             ]
         })
 
-
-class ProductVariantsCommon(ProductAttributesCommon):
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
         cls.product_template_sofa = cls.env['product.template'].create({
             'name': 'Sofa',
             'uom_id': cls.uom_unit.id,
-            'uom_po_id': cls.uom_unit.id,
             'categ_id': cls.product_category.id,
             'attribute_line_ids': [Command.create({
                 'attribute_id': cls.color_attribute.id,
@@ -142,62 +139,31 @@ class ProductVariantsCommon(ProductAttributesCommon):
             })]
         })
 
-        cls.product_template_shirt = cls.env['product.template'].create({
-            'name': 'Shirt',
-            'categ_id': cls.product_category.id,
-            'attribute_line_ids': [
-                Command.create({
-                    'attribute_id': cls.size_attribute.id,
-                    'value_ids': [Command.set([cls.size_attribute_l.id])],
-                }),
-            ],
+        cls.product_sofa_red = cls.product_template_sofa.product_variant_ids.filtered(
+            lambda pp:
+                pp.product_template_attribute_value_ids.product_attribute_value_id
+                ==
+                cls.color_attribute_red
+        )
+        cls.product_sofa_blue = cls.product_template_sofa.product_variant_ids.filtered(
+            lambda pp:
+                pp.product_template_attribute_value_ids.product_attribute_value_id
+                ==
+                cls.color_attribute_blue
+        )
+        cls.product_sofa_green = cls.product_template_sofa.product_variant_ids.filtered(
+            lambda pp:
+                pp.product_template_attribute_value_ids.product_attribute_value_id
+                ==
+                cls.color_attribute_green
+        )
+        cls.custom_attribute = cls.env['product.attribute'].create({
+            'name': 'Custom',
+            'display_type': 'radio',
+            'create_variant': 'no_variant',
         })
-
-
-class TestProductCommon(ProductVariantsCommon):
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
-        # Product environment related data
-        cls.uom_dunit = cls.env['uom.uom'].create({
-            'name': 'DeciUnit',
-            'category_id': cls.uom_unit.category_id.id,
-            'factor_inv': 0.1,
-            'factor': 10.0,
-            'uom_type': 'smaller',
-            'rounding': 0.001,
+        cls.custom_attribute_value = cls.env['product.attribute.value'].create({
+            'name': 'Custom',
+            'attribute_id': cls.custom_attribute.id,
+            'is_custom': True,
         })
-
-        cls.product_1, cls.product_2 = cls.env['product.product'].create([{
-            'name': 'Courage',  # product_1
-            'type': 'consu',
-            'default_code': 'PROD-1',
-            'uom_id': cls.uom_dunit.id,
-            'uom_po_id': cls.uom_dunit.id,
-        }, {
-            'name': 'Wood',  # product_2
-        }])
-
-        # Kept for reduced diff in other modules (mainly stock & mrp)
-        cls.prod_att_1 = cls.color_attribute
-        cls.prod_attr1_v1 = cls.color_attribute_red
-        cls.prod_attr1_v2 = cls.color_attribute_blue
-        cls.prod_attr1_v3 = cls.color_attribute_green
-
-        cls.product_7_template = cls.product_template_sofa
-
-        cls.product_7_attr1_v1 = cls.product_7_template.attribute_line_ids[
-            0].product_template_value_ids[0]
-        cls.product_7_attr1_v2 = cls.product_7_template.attribute_line_ids[
-            0].product_template_value_ids[1]
-        cls.product_7_attr1_v3 = cls.product_7_template.attribute_line_ids[
-            0].product_template_value_ids[2]
-
-        cls.product_7_1 = cls.product_7_template._get_variant_for_combination(
-            cls.product_7_attr1_v1)
-        cls.product_7_2 = cls.product_7_template._get_variant_for_combination(
-            cls.product_7_attr1_v2)
-        cls.product_7_3 = cls.product_7_template._get_variant_for_combination(
-            cls.product_7_attr1_v3)

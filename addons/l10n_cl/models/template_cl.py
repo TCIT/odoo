@@ -1,5 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import models
+from odoo import models, _
 from odoo.addons.account.models.chart_template import template
 
 
@@ -12,10 +12,6 @@ class AccountChartTemplate(models.AbstractModel):
             'code_digits': '6',
             'property_account_receivable_id': 'account_110310',
             'property_account_payable_id': 'account_210210',
-            'property_account_expense_categ_id': 'account_410235',
-            'property_account_income_categ_id': 'account_310115',
-            'property_stock_account_input_categ_id': 'account_210230',
-            'property_stock_account_output_categ_id': 'account_110640',
             'property_stock_valuation_account_id': 'account_110610',
         }
 
@@ -34,5 +30,31 @@ class AccountChartTemplate(models.AbstractModel):
                 'tax_calculation_rounding_method': 'round_globally',
                 'account_sale_tax_id': 'ITAX_19',
                 'account_purchase_tax_id': 'OTAX_19',
+                'expense_account_id': 'account_410235',
+                'income_account_id': 'account_310115',
+                'account_stock_journal_id': 'inventory_valuation',
+                'account_stock_valuation_id': 'account_110612',
             },
+        }
+
+    @template('cl', 'account.account')
+    def _get_cl_account_account(self):
+        return {
+            'account_110612': {
+                'account_stock_expense_id': 'account_410230',
+                'account_stock_variation_id': 'account_603100',
+            },
+        }
+
+    @template('cl', 'account.journal')
+    def _get_cl_account_journal(self):
+        return {
+            'domestic_purchase': {
+                'name': _("Domestic Purchases"),
+                'code': 'DMP',
+                'type': 'purchase',
+                'sequence': 2,
+                'l10n_latam_use_documents': True,
+                'default_account_id': 'account_410235',
+            }
         }

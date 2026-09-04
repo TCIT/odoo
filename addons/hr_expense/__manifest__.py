@@ -4,7 +4,7 @@
 
 {
     'name': 'Expenses',
-    'version': '2.0',
+    'version': '2.1',
     'category': 'Human Resources/Expenses',
     'sequence': 70,
     'summary': 'Submit, validate and reinvoice employee expenses',
@@ -38,9 +38,12 @@ This module also uses analytic accounting and is compatible with the invoice on 
         'data/hr_expense_sequence.xml',
         'data/hr_expense_data.xml',
         'data/hr_expense_tour.xml',
+        'data/hr_expense_cron.xml',
         'wizard/hr_expense_refuse_reason_views.xml',
         'wizard/hr_expense_approve_duplicate_views.xml',
         'wizard/hr_expense_split_wizard_views.xml',
+        'wizard/hr_expense_post_wizard_views.xml',
+        'views/product_product_views.xml',
         'views/hr_expense_views.xml',
         'views/mail_activity_views.xml',
         'security/ir_rule.xml',
@@ -49,6 +52,7 @@ This module also uses analytic accounting and is compatible with the invoice on 
         'views/account_payment_views.xml',
         'views/hr_department_views.xml',
         'views/res_config_settings_views.xml',
+        'views/hr_employee_views.xml',
     ],
     'demo': ['data/hr_expense_demo.xml'],
     'installable': True,
@@ -67,11 +71,14 @@ This module also uses analytic accounting and is compatible with the invoice on 
         'web.assets_tests': [
             'hr_expense/static/tests/tours/expense_upload_tours.js',
             'hr_expense/static/tests/tours/expense_form_tours.js',
-            'hr_expense/static/tests/tours/expense_form_in_sheet_tours.js',
         ],
         'web.report_assets_common': [
             'hr_expense/static/src/scss/hr_expense.scss',
         ],
+        'web.assets_unit_tests': [
+            'hr_expense/static/tests/expense_list_view.test.js',
+        ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

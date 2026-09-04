@@ -1,11 +1,14 @@
 import { _t } from "@web/core/l10n/translation";
 import { browser } from "../browser/browser";
-import { ConnectionLostError, RPCError, rpc } from "../network/rpc";
+import { ConnectionLostError, RPCError, RequestEntityTooLargeError, rpc } from "../network/rpc";
 import { registry } from "../registry";
+import { session } from "@web/session";
+import { user } from "@web/core/user";
 import {
     ClientErrorDialog,
     ErrorDialog,
     NetworkErrorDialog,
+    RequestEntityTooLargeErrorDialog,
     RPCErrorDialog,
 } from "./error_dialogs";
 import { UncaughtClientError, ThirdPartyScriptError, UncaughtPromiseError } from "./error_service";
@@ -71,7 +74,6 @@ export function rpcErrorHandler(env, error, originalError) {
             code: originalError.code,
             type: originalError.type,
             serverHost: error.event?.target?.location.host,
-            id: originalError.id,
             model: originalError.model,
         });
         return true;
@@ -129,6 +131,27 @@ export function lostConnectionHandler(env, error, originalError) {
 errorHandlerRegistry.add("lostConnectionHandler", lostConnectionHandler, { sequence: 98 });
 
 // -----------------------------------------------------------------------------
+// Request entity too large errors
+// -----------------------------------------------------------------------------
+
+/**
+ * @param {OdooEnv} env
+ * @param {UncaughError} error
+ * @param {Error} originalError
+ * @returns {boolean}
+ */
+export function requestEntityTooLargeHandler(env, error, originalError) {
+    if (!(error instanceof UncaughtPromiseError)) {
+        return false;
+    }
+    if (originalError instanceof RequestEntityTooLargeError) {
+        env.services.dialog.add(RequestEntityTooLargeErrorDialog);
+        return true;
+    }
+}
+errorHandlerRegistry.add("requestEntityTooLargeHandler", requestEntityTooLargeHandler, { sequence: 99 });
+
+// -----------------------------------------------------------------------------
 // Default handler
 // -----------------------------------------------------------------------------
 
@@ -157,3 +180,29 @@ export function defaultHandler(env, error) {
     return true;
 }
 errorHandlerRegistry.add("defaultHandler", defaultHandler, { sequence: 100 });
+
+// -----------------------------------------------------------------------------
+// Frontend visitors errors
+// -----------------------------------------------------------------------------
+
+/**
+ * We don't want to show tracebacks to non internal users. This handler swallows
+ * all errors if we're not an internal user (except in debug or test mode).
+ */
+export function swallowAllVisitorErrors(env, error, originalError) {
+    if (!user.isInternalUser && !odoo.debug && !session.test_mode) {
+        return true;
+    }
+}
+
+if (user.isInternalUser === undefined) {
+    // Only warn about this while on the "frontend": the session info might
+    // apparently not be present in all Odoo screens at the moment... TODO ?
+    if (session.is_frontend) {
+        console.warn(
+            "isInternalUser information is required for this handler to work. It must be available in the page."
+        );
+    }
+} else {
+    registry.category("error_handlers").add("swallowAllVisitorErrors", swallowAllVisitorErrors, { sequence: 0 });
+}

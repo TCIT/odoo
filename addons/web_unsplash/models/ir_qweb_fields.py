@@ -3,7 +3,7 @@ from werkzeug import urls
 from odoo import models, api
 
 
-class Image(models.AbstractModel):
+class IrQwebFieldImage(models.AbstractModel):
     _inherit = 'ir.qweb.field.image'
 
     @api.model
@@ -27,4 +27,4 @@ class Image(models.AbstractModel):
                 ], limit=1)
                 return attachment.datas
 
-        return super(Image, self).from_html(model, field, element)
+        return super().from_html(model, field, element)

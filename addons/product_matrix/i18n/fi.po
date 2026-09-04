@@ -1,28 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* product_matrix
-# 
-# Translators:
-# Tiffany Chang, 2024
-# Kari Lindgren <kari.lindgren@emsystems.fi>, 2024
-# Martin Trigaux, 2024
-# Simo Suurla <simo@suurla.fi>, 2024
-# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2024
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024
-# 
+# * product_matrix
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Saara Hakanen <sahak@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024\n"
-"Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 14:02+0000\n"
+"Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-19/"
+"product_matrix/fi/>\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fi\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: product_matrix
 #: model_terms:ir.ui.view,arch_db:product_matrix.matrix
@@ -37,11 +33,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:product_matrix.matrix
 msgid "<strong>Product matrix block</strong>"
 msgstr "<strong>Tuotematriisilohko</strong>"
-
-#. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_color_1
-msgid "Blue"
-msgstr "Sininen"
 
 #. module: product_matrix
 #: model_terms:ir.ui.view,arch_db:product_matrix.matrix
@@ -72,14 +63,16 @@ msgid "Discard"
 msgstr "Hylkää"
 
 #. module: product_matrix
-#: model:product.attribute,name:product_matrix.product_attribute_gender
-msgid "Gender"
-msgstr "Sukupuoli"
+#: model:ir.model.fields,field_description:product_matrix.field_product_template__display_name
+#: model:ir.model.fields,field_description:product_matrix.field_product_template_attribute_value__display_name
+msgid "Display Name"
+msgstr "Näyttönimi"
 
 #. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_m
-msgid "Men"
-msgstr "Miehet"
+#: model:ir.model.fields,field_description:product_matrix.field_product_template__id
+#: model:ir.model.fields,field_description:product_matrix.field_product_template_attribute_value__id
+msgid "ID"
+msgstr "Tunnus"
 
 #. module: product_matrix
 #: model:product.template,name:product_matrix.matrix_product_template_shirt
@@ -93,11 +86,6 @@ msgid "Not available"
 msgstr "Ei saatavilla"
 
 #. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_color_2
-msgid "Pink"
-msgstr "Vaaleanpunainen"
-
-#. module: product_matrix
 #: model:ir.model,name:product_matrix.model_product_template
 msgid "Product"
 msgstr "Tuote"
@@ -105,22 +93,12 @@ msgstr "Tuote"
 #. module: product_matrix
 #: model:ir.model,name:product_matrix.model_product_template_attribute_value
 msgid "Product Template Attribute Value"
-msgstr "Tuotemallin ominaisuuden arvo"
-
-#. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_color_4
-msgid "Rainbow"
-msgstr "Sateenkaari"
+msgstr "Tuotepohjan ominaisuuden arvo"
 
 #. module: product_matrix
 #: model:product.template,description_sale:product_matrix.matrix_product_template_shirt
 msgid "Show your company love around you =)."
 msgstr "Näytä yrityksesi rakkautta ympärilläsi =)."
-
-#. module: product_matrix
-#: model:product.attribute,name:product_matrix.product_attribute_size
-msgid "Size"
-msgstr "Koko"
 
 #. module: product_matrix
 #: model_terms:ir.ui.view,arch_db:product_matrix.matrix
@@ -134,23 +112,3 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:product_matrix.extra_price
 msgid "Variant price"
 msgstr "Variantin hinta"
-
-#. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_w
-msgid "Women"
-msgstr "Naiset"
-
-#. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_size_xl
-msgid "XL"
-msgstr "XL"
-
-#. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_size_xs
-msgid "XS"
-msgstr "XS"
-
-#. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_color_3
-msgid "Yellow"
-msgstr "Keltainen"

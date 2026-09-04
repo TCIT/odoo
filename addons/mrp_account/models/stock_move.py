@@ -1,5 +1,6 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+from collections import defaultdict
 
 from odoo import models
 
@@ -7,59 +8,40 @@ from odoo import models
 class StockMove(models.Model):
     _inherit = "stock.move"
 
-    def _filter_anglo_saxon_moves(self, product):
-        res = super(StockMove, self)._filter_anglo_saxon_moves(product)
-        res += self.filtered(lambda m: m.bom_line_id.bom_id.product_tmpl_id.id == product.product_tmpl_id.id)
-        return res
-
-    def _should_force_price_unit(self):
+    def _get_value_from_production(self, quantity, at_date=None):
+        # TODO: Maybe move _cal_price here
         self.ensure_one()
-        return ((self.picking_type_id.code == 'mrp_operation' and self.production_id) or
-                super()._should_force_price_unit()
+        if not self.production_id:
+            return super()._get_value_from_production(quantity, at_date)
+        value = quantity * self.price_unit
+        return {
+            'value': value,
+            'quantity': quantity,
+            'description': self.env._('%(value)s for %(quantity)s %(unit)s from %(production)s',
+                value=self.company_currency_id.format(value), quantity=quantity, unit=self.product_id.uom_id.name,
+                production=self.production_id.display_name),
+        }
+
+    def _get_all_related_sm(self, product):
+        moves = super()._get_all_related_sm(product)
+        return moves | self.filtered(
+            lambda m:
+            m.bom_line_id.bom_id.type == 'phantom' and
+            m.bom_line_id.bom_id == moves.bom_line_id.bom_id
         )
 
-    def _ignore_automatic_valuation(self):
-        return super()._ignore_automatic_valuation() or bool(self.raw_material_production_id)
-
-    def _get_src_account(self, accounts_data):
-        if self._is_production():
-            return self.location_id.valuation_out_account_id.id or accounts_data['production'].id or accounts_data['stock_input'].id
-        return super()._get_src_account(accounts_data)
-
-    def _get_dest_account(self, accounts_data):
-        if self._is_production_consumed():
-            return self.location_dest_id.valuation_in_account_id.id or accounts_data['production'].id or accounts_data['stock_output'].id
-        return super()._get_dest_account(accounts_data)
-
-    def _is_production(self):
-        self.ensure_one()
-        return self.location_id.usage == 'production' and self.location_dest_id._should_be_valued()
-
-    def _is_production_consumed(self):
-        self.ensure_one()
-        return self.location_dest_id.usage == 'production' and self.location_id._should_be_valued()
-
-    def _get_out_svl_vals(self, forced_quantity):
-        unbuild_moves = self.filtered('unbuild_id')
-        # 'real cost' of finished product moves @ build time
-        price_unit_map = {
-            move.id: (
-                move.unbuild_id.mo_id.move_finished_ids.stock_valuation_layer_ids.filtered(
-                    lambda svl: svl.product_id == move.unbuild_id.mo_id.product_id
-                )[0].unit_cost,
-                move.company_id.currency_id.round,
-            )
-            for move in unbuild_moves.sudo()
-            if move.product_id.cost_method != 'standard' and
-            move.unbuild_id.mo_id.move_finished_ids.stock_valuation_layer_ids
-        }
-        svl_vals_list = super()._get_out_svl_vals(forced_quantity)
-        if price_unit_map:
-            for svl_vals in svl_vals_list:
-                if (move_id := svl_vals['stock_move_id']) in price_unit_map:
-                    unit_cost = price_unit_map[move_id][0]
-                    svl_vals.update({
-                        'unit_cost': unit_cost,
-                        'value': price_unit_map[move_id][1](unit_cost * svl_vals['quantity']),
-                    })
-        return svl_vals_list
+    def _get_kit_price_unit(self, product, kit_bom, valuated_quantity):
+        """ Override the value for kit products """
+        _dummy, exploded_lines = kit_bom.explode(product, valuated_quantity)
+        total_price_unit = 0
+        component_qty_per_kit = defaultdict(float)
+        for line in exploded_lines:
+            component_qty_per_kit[line[0].product_id] += line[0].product_uom_id._compute_quantity(line[1]['qty'], line[0].product_id.uom_id, round=False)
+        for component, valuated_moves in self.grouped('product_id').items():
+            if any(m._is_dropshipped() for m in valuated_moves):
+                price_unit = super(StockMove, valuated_moves)._get_price_unit_dropshipped()
+            else:
+                price_unit = super(StockMove, valuated_moves)._get_price_unit()
+            qty_per_kit = component_qty_per_kit[component] / kit_bom.product_qty
+            total_price_unit += price_unit * qty_per_kit
+        return total_price_unit / valuated_quantity if not product.uom_id.is_zero(valuated_quantity) else 0

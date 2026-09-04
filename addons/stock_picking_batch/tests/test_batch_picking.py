@@ -3,7 +3,7 @@
 
 from datetime import datetime, timedelta
 
-from odoo import Command
+from odoo import Command, fields
 from odoo.tools import float_round
 
 from odoo.exceptions import UserError
@@ -26,12 +26,10 @@ class TestBatchPicking(TransactionCase):
         cls.productA = cls.env['product.product'].create({
             'name': 'Product A',
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
         })
         cls.productB = cls.env['product.product'].create({
             'name': 'Product B',
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
         })
 
         cls.client_1 = cls.env['res.partner'].create({'name': 'Client 1'})
@@ -44,7 +42,6 @@ class TestBatchPicking(TransactionCase):
         })
 
         cls.env['stock.move'].create({
-            'name': cls.productA.name,
             'product_id': cls.productA.id,
             'product_uom_qty': 10,
             'product_uom': cls.productA.uom_id.id,
@@ -63,7 +60,6 @@ class TestBatchPicking(TransactionCase):
         })
 
         cls.env['stock.move'].create({
-            'name': cls.productB.name,
             'product_id': cls.productB.id,
             'product_uom_qty': 10,
             'product_uom': cls.productA.uom_id.id,
@@ -80,7 +76,6 @@ class TestBatchPicking(TransactionCase):
         })
 
         cls.env['stock.move'].create({
-            'name': cls.productB.name,
             'product_id': cls.productB.id,
             'product_uom_qty': 10,
             'product_uom': cls.productA.uom_id.id,
@@ -291,6 +286,60 @@ class TestBatchPicking(TransactionCase):
         self.assertFalse(sum(quant_A.mapped('quantity')))
         self.assertFalse(sum(quant_B.mapped('quantity')))
 
+    def test_batch_with_backorder_wizard_partially_done(self):
+        """ Validate a batch when only one picking has done quantities.
+            Scenario:
+            - Two pickings are auto-batched together (same partner).
+            - Only one move line in the first picking has a done quantity; the other move lines are removed.
+            - The second picking has no move lines.
+            Expectation:
+            - The backorder wizard must include only the picking with done quantities.
+            - The backorder created for that picking must NOT be linked to the batch currently being validated.
+            - The other picking must remain assigned (not validated).
+        """
+        self.env['stock.picking.type'].browse(self.picking_type_in).write({
+            'auto_batch': True,
+            'batch_group_by_partner': True
+        })
+        partner = self.env['res.partner'].create({'name': 'Supplier'})
+        pickings = self.env['stock.picking'].create([{
+            'partner_id': partner_id,
+            'picking_type_id': type_id,
+            'location_id': from_loc.id,
+            'location_dest_id': to_loc.id,
+            'move_ids': [Command.create({
+                'product_id': product.id,
+                'product_uom': product.uom_id.id,
+                'product_uom_qty': 10,
+                'location_id': from_loc.id,
+                'location_dest_id': to_loc.id,
+            }) for product in [self.productA, self.productB]],
+        } for partner_id, type_id, from_loc, to_loc in [
+            # receipts
+            (partner.id, self.picking_type_in, self.supplier_location, self.stock_location),
+            (partner.id, self.picking_type_in, self.supplier_location, self.stock_location),
+        ]])
+        pickings.action_confirm()
+        batch = pickings.mapped('batch_id')
+        # Ask to assign, so pickings should be assigned now.
+        batch.action_assign()
+        self.assertEqual(pickings[0].state, 'assigned', 'Picking 1 should be ready')
+        self.assertEqual(pickings[1].state, 'assigned', 'Picking 2 should be ready')
+
+        pickings[0].move_line_ids[0].write({'quantity': 4})
+        pickings[0].move_line_ids[1].unlink()
+        pickings[1].move_ids.move_line_ids.unlink()
+        # There should be a wizard asking to process backorder
+        back_order_wizard_dict = batch.action_done()
+        self.assertTrue(back_order_wizard_dict, "A backorder wizard action should be returned")
+        back_order_wizard = Form.from_action(self.env, back_order_wizard_dict).save()
+        self.assertEqual(len(back_order_wizard.pick_ids), 1, "Only one picking should be in the wizard")
+        back_order_wizard.process()
+        self.assertEqual(pickings[1].state, 'assigned', 'Picking 2 should remain assigned')
+        self.assertEqual(pickings[0].state, 'done', 'Picking 1 should be done')
+        self.assertEqual(pickings[0].move_ids.product_uom_qty, 4, 'initial demand should be 4 after picking split')
+        self.assertTrue(self.env['stock.picking'].search([('backorder_id', '=', pickings[0].id)]), 'no back order created')
+
     def test_batch_with_immediate_transfer_and_backorder_wizard_with_manual_operations(self):
         """ Test a simple batch picking with only one quantity fully available.
         The user set the quantity done only for the partially available picking.
@@ -413,7 +462,6 @@ class TestBatchPicking(TransactionCase):
             'partner_id': partner_1.id
         })
         self.env['stock.move'].create({
-            'name': self.productA.name,
             'product_id': self.productA.id,
             'product_uom_qty': 10,
             'product_uom': self.productA.uom_id.id,
@@ -430,7 +478,6 @@ class TestBatchPicking(TransactionCase):
             'partner_id': partner_2.id
         })
         self.env['stock.move'].create({
-            'name': self.productB.name,
             'product_id': self.productB.id,
             'product_uom_qty': 10,
             'product_uom': self.productB.uom_id.id,
@@ -447,7 +494,6 @@ class TestBatchPicking(TransactionCase):
             'partner_id': partner_1.id
         })
         self.env['stock.move'].create({
-            'name': self.productB.name,
             'product_id': self.productB.id,
             'product_uom_qty': 10,
             'product_uom': self.productB.uom_id.id,
@@ -466,6 +512,7 @@ class TestBatchPicking(TransactionCase):
         self.assertTrue(picking_out_3.batch_id)
         self.assertEqual(picking_out_1.batch_id.id, picking_out_3.batch_id.id)
         self.assertTrue(picking_out_2.batch_id)
+        self.assertTrue(picking_out_2.user_id == picking_out_2.batch_id.user_id == self.env.user)
         self.assertNotEqual(picking_out_2.batch_id.id, picking_out_1.batch_id.id)
         # If Picking 1 is validated without Picking 3, Picking 1 should be removed from the batch
         picking_out_1.move_ids.write({'quantity': 10, 'picked': True})
@@ -509,21 +556,12 @@ class TestBatchPicking(TransactionCase):
         })
         self.env['stock.quant']._update_available_quantity(self.productA, warehouse_1.lot_stock_id, 10)
         self.env['stock.quant']._update_available_quantity(self.productB, warehouse_1.lot_stock_id, 10)
-        procurement_1 = self.env['procurement.group'].create({
-            'move_type': 'direct',
-            'partner_id': self.client_1.id
-        })
-        procurement_2 = self.env['procurement.group'].create({
-            'move_type': 'direct',
-            'partner_id': self.client_1.id
-        })
         op1 = self.env['stock.warehouse.orderpoint'].create({
             'name': 'Product A',
             'location_id': warehouse_2.lot_stock_id.id,
             'product_id': self.productA.id,
             'product_min_qty': 1,
             'product_max_qty': 1,
-            'group_id': procurement_1.id,
             'route_id': warehouse_2.resupply_route_ids[0].id,
         })
         op2 = self.env['stock.warehouse.orderpoint'].create({
@@ -532,43 +570,112 @@ class TestBatchPicking(TransactionCase):
             'product_id': self.productB.id,
             'product_min_qty': 1,
             'product_max_qty': 1,
-            'group_id': procurement_2.id,
             'route_id': warehouse_2.resupply_route_ids[0].id,
         })
         self.productA.route_ids = warehouse_2.resupply_route_ids
         self.productB.route_ids = warehouse_2.resupply_route_ids
         (op1 | op2)._procure_orderpoint_confirm()
         # Only delivery pickings from WH1/Stock -> Inter-warehouse should be 'ready', so only one batch
-        current_batch = procurement_1.stock_move_ids.picking_id.batch_id
-        self.assertNotEqual(current_batch.id, False)
-        self.assertEqual(len(procurement_1.stock_move_ids.picking_id.batch_id), 1)
-        self.assertEqual(procurement_1.stock_move_ids.picking_id.filtered(lambda p: p.picking_type_code == 'outgoing').batch_id,
-                         procurement_2.stock_move_ids.picking_id.filtered(lambda p: p.picking_type_code == 'outgoing').batch_id)
+        pAbatch = self.env['stock.move'].search([
+            ('warehouse_id', '=', warehouse_1.id),
+            ('product_id', '=', self.productA.id),
+            ('state', 'in', ['done', 'assigned']),
+        ]).picking_id.batch_id
+        pBbatch = self.env['stock.move'].search([
+            ('warehouse_id', '=', warehouse_1.id),
+            ('product_id', '=', self.productB.id),
+            ('state', 'in', ['done', 'assigned']),
+        ]).picking_id.batch_id
+        self.assertEqual(len(pAbatch), 1)
+        self.assertEqual(pAbatch, pBbatch)
 
         # Validate the batch so the next round of pickings become 'ready' -> Incoming pickings to Inter-warehouse -> WH2/Input
-        current_batch.move_ids.write({'quantity': 1, 'picked': True})
-        current_batch.action_done()
-        done_batches = current_batch
-        self.assertEqual(len(procurement_1.stock_move_ids.picking_id.batch_id), 2)
-        self.assertEqual(procurement_1.stock_move_ids.picking_id.filtered(lambda p: p.picking_type_code == 'incoming').batch_id,
-                         procurement_2.stock_move_ids.picking_id.filtered(lambda p: p.picking_type_code == 'incoming').batch_id)
+        pAbatch.move_ids.write({'quantity': 1, 'picked': True})
+        pAbatch.action_done()
+        done_batches = pAbatch
+        pAbatch = self.env['stock.move'].search([
+            ('warehouse_id', '=', warehouse_2.id),
+            ('product_id', '=', self.productA.id),
+            ('state', 'in', ['done', 'assigned']),
+        ]).picking_id.batch_id
+        self.assertEqual(len(pAbatch), 1)
+        pBbatch = self.env['stock.move'].search([
+            ('warehouse_id', '=', warehouse_2.id),
+            ('product_id', '=', self.productB.id),
+            ('state', 'in', ['done', 'assigned']),
+        ]).picking_id.batch_id
+        self.assertEqual(pAbatch, pBbatch)
 
         # Validate the batch so the next round of pickings become 'ready' -> Internal pickings : WH2/Input -> WH2/Quality Control
-        current_batch = procurement_1.stock_move_ids.picking_id.batch_id - done_batches
+        current_batch = pAbatch - done_batches
         current_batch.move_ids.write({'quantity': 1, 'picked': True})
         current_batch.action_done()
-        done_batches += current_batch
-        self.assertEqual(len(procurement_1.stock_move_ids.picking_id.batch_id), 3)
-        self.assertEqual(procurement_1.stock_move_ids.picking_id.filtered(lambda p: p.picking_type_code == 'internal' and p.location_id == warehouse_2.in_type_id).batch_id,
-                         procurement_2.stock_move_ids.picking_id.filtered(lambda p: p.picking_type_code == 'internal' and p.location_id == warehouse_2.in_type_id).batch_id)
+        done_batches += pAbatch
+        pAbatch = self.env['stock.move'].search([
+            ('warehouse_id', '=', warehouse_2.id),
+            ('picking_code', '=', 'internal'),
+            ('product_id', '=', self.productA.id),
+            ('state', 'in', ['done', 'assigned']),
+        ]).picking_id.batch_id
+        self.assertEqual(len(pAbatch), 1)
+        pBbatch = self.env['stock.move'].search([
+            ('warehouse_id', '=', warehouse_2.id),
+            ('picking_code', '=', 'internal'),
+            ('product_id', '=', self.productB.id),
+            ('state', 'in', ['done', 'assigned']),
+        ]).picking_id.batch_id
+        self.assertEqual(pAbatch, pBbatch)
 
         # Validate the batch so the next round of pickings become 'ready' -> Internal pickings : WH2/Input -> WH2/Quality Control
-        current_batch = procurement_1.stock_move_ids.picking_id.batch_id - done_batches
+        current_batch = pAbatch - done_batches
         current_batch.move_ids.write({'quantity': 1, 'picked': True})
         current_batch.action_done()
-        self.assertEqual(len(procurement_1.stock_move_ids.picking_id.batch_id), 4)
-        self.assertEqual(procurement_1.stock_move_ids.picking_id.filtered(lambda p: p.picking_type_code == 'internal' and p.location_dest_id == warehouse_2.lot_stock_id).batch_id,
-                         procurement_2.stock_move_ids.picking_id.filtered(lambda p: p.picking_type_code == 'internal' and p.location_dest_id == warehouse_2.lot_stock_id).batch_id)
+        pAbatch = self.env['stock.move'].search([
+            ('location_dest_id', '=', warehouse_2.lot_stock_id.id),
+            ('picking_code', '=', 'internal'),
+            ('product_id', '=', self.productA.id),
+            ('state', 'in', ['done', 'assigned']),
+        ]).picking_id.batch_id
+        self.assertEqual(len(pAbatch), 1)
+        pBbatch = self.env['stock.move'].search([
+            ('location_dest_id', '=', warehouse_2.lot_stock_id.id),
+            ('picking_code', '=', 'internal'),
+            ('product_id', '=', self.productB.id),
+            ('state', 'in', ['done', 'assigned']),
+        ]).picking_id.batch_id
+        self.assertEqual(pAbatch, pBbatch)
+
+    def test_auto_batch_3(self):
+        """ Test a simple auto-batch scenario with a manually assigned picking.
+        """
+        # Create picking type to avoid conflicts with existing pickings with auto-batch enabled grouping by partner.
+        warehouse = self.env['stock.warehouse'].search([], limit=1)
+        warehouse.out_type_id.write({
+            'auto_batch': True,
+            'batch_group_by_partner': True,
+        })
+        partner = self.env['res.partner'].create({'name': 'Lovely product'})
+        delivery = self.env['stock.picking'].create({
+            'location_id': warehouse.lot_stock_id.id,
+            'location_dest_id': self.customer_location.id,
+            'picking_type_id': warehouse.out_type_id.id,
+            'partner_id': partner.id,
+            'move_ids': [Command.create({
+                'product_id': self.productA.id,
+                'product_uom_qty': 10,
+                'product_uom': self.productA.uom_id.id,
+                'location_id': warehouse.lot_stock_id.id,
+                'location_dest_id': self.customer_location.id,
+            })],
+        })
+        delivery.action_confirm()
+
+        self.assertRecordValues(delivery, [
+            {'state': 'confirmed', 'batch_id': False},
+        ])
+        delivery.move_ids.quantity = 1
+        self.assertEqual(delivery.state, 'assigned')
+        self.assertTrue(delivery.batch_id)
 
     def test_remove_all_transfers_from_confirmed_batch(self):
         """
@@ -614,7 +721,7 @@ class TestBatchPicking(TransactionCase):
         Create a third picking with same partner
         - Should be added to the batch
         """
-        self.env.user.groups_id = [(4, self.ref('stock.group_reception_report'))]
+        self.env.user.group_ids = [(4, self.ref('stock.group_reception_report'))]
         self.env['stock.picking.type'].browse(self.picking_type_in).write({
             'auto_show_reception_report': True,
             'auto_batch': True,
@@ -629,7 +736,6 @@ class TestBatchPicking(TransactionCase):
             'location_id': from_loc.id,
             'location_dest_id': to_loc.id,
             'move_ids': [(0, 0, {
-                'name': '/',
                 'product_id': product.id,
                 'product_uom': product.uom_id.id,
                 'product_uom_qty': 1,
@@ -666,7 +772,6 @@ class TestBatchPicking(TransactionCase):
             'location_id': self.supplier_location.id,
             'location_dest_id': self.stock_location.id,
             'move_ids': [(0, 0, {
-                'name': '/',
                 'product_id': self.productA.id,
                 'product_uom': self.productA.uom_id.id,
                 'product_uom_qty': 1,
@@ -676,6 +781,39 @@ class TestBatchPicking(TransactionCase):
         })
         receipt03.action_confirm()
         self.assertEqual(batch.picking_ids, backorder | receipt02 | receipt03)
+
+    def test_batch_merge(self):
+        descriptions = ['Great batch', 'Amazing batch', 'Without scheduled date batch']
+        pickings = [self.picking_client_1, self.picking_client_2, self.picking_client_3]
+
+        batches = self.env['stock.picking.batch'].create([{
+            'company_id': self.env.company.id,
+            'picking_ids': [Command.link(picking.id)],
+            'description': description,
+            'user_id': self.env.user.id,
+        } for description, picking in zip(descriptions, pickings)])
+        batch_1, batch_2, batch_3 = batches
+
+        batch_1.action_confirm()
+        with self.assertRaises(UserError):
+            (batch_1 | batch_2).action_merge()
+        batch_2.action_confirm()
+        batch_3.action_confirm()
+        batch_3.scheduled_date = False
+
+        # Ensure that merging is only allowed when at least two batches are selected.
+        with self.assertRaises(UserError):
+            batch_1.action_merge()
+
+        early_date = fields.Datetime.now() - timedelta(days=1)
+        batch_2.scheduled_date = early_date
+
+        # Ensure that merging works correctly even when one of the batches has no scheduled_date.
+        (batch_1 | batch_2 | batch_3).action_merge()
+        self.assertEqual(batch_1.picking_ids, self.picking_client_1 | self.picking_client_2 | self.picking_client_3)
+        self.assertEqual(batch_1.description, 'Amazing batch', 'The description should be the one of the earliest batch')
+        self.assertEqual(batch_1.scheduled_date, early_date)
+
 
 @tagged('-at_install', 'post_install')
 class TestBatchPicking02(TransactionCase):
@@ -695,12 +833,10 @@ class TestBatchPicking02(TransactionCase):
         self.productA = self.env['product.product'].create({
             'name': 'Product A',
             'is_storable': True,
-            'categ_id': self.env.ref('product.product_category_all').id,
         })
         self.productB = self.env['product.product'].create({
             'name': 'Product B',
             'is_storable': True,
-            'categ_id': self.env.ref('product.product_category_all').id,
         })
         self.package_type = self.env['stock.package.type'].create({
             'name': 'Big box',
@@ -717,7 +853,7 @@ class TestBatchPicking02(TransactionCase):
         package. It should be possible to transfer the whole package across the
         two pickings
         """
-        package = self.env['stock.quant.package'].create({
+        package = self.env['stock.package'].create({
             'name': 'superpackage',
             'package_type_id': self.package_type.id,
         })
@@ -733,14 +869,12 @@ class TestBatchPicking02(TransactionCase):
             'location_dest_id': loc2.id,
             'picking_type_id': self.picking_type_internal.id,
             'move_ids': [(0, 0, {
-                'name': 'test_put_in_pack_from_multiple_pages',
                 'location_id': loc1.id,
                 'location_dest_id': loc2.id,
                 'product_id': self.productA.id,
                 'product_uom': self.productA.uom_id.id,
                 'product_uom_qty': qty,
             }), (0, 0, {
-                'name': 'test_put_in_pack_from_multiple_pages',
                 'location_id': loc1.id,
                 'location_dest_id': loc2.id,
                 'product_id': self.productB.id,
@@ -763,7 +897,7 @@ class TestBatchPicking02(TransactionCase):
 
         batch.action_done()
         self.assertEqual(batch.estimated_shipping_weight, 10 + 10*10 + 10*15)
-        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        precision = self.env['decimal.precision'].precision_get('Product Unit')
         volume = float_round((500*500*500)/1000**3, precision_digits=precision)
         self.assertEqual(batch.estimated_shipping_volume, volume)
         self.assertRecordValues(pickings.move_ids, [
@@ -773,35 +907,6 @@ class TestBatchPicking02(TransactionCase):
             {'state': 'done', 'quantity': 7},
         ])
         self.assertEqual(pickings.move_line_ids.result_package_id, package)
-
-    def test_add_batch_move_line(self):
-        """
-        Adding a stock move line in a batch form triggers a calculation of the
-        default dest location. This test checks if that calculation doesn't
-        raise any exceptions for a new, empty StockMoveLine object.
-        """
-        loc1, loc2 = self.stock_location.child_ids
-        picking = self.env['stock.picking'].create({
-            'location_id': loc1.id,
-            'location_dest_id': loc2.id,
-            'picking_type_id': self.picking_type_internal.id,
-            'state': 'draft',
-        })
-        batch_form = Form(self.env['stock.picking.batch'])
-        batch_form.picking_ids.add(picking)
-        batch = batch_form.save()
-        batch.action_confirm()
-        confirmed_form = Form(batch)
-        # Adding a new line should not raise an error
-        confirmed_form.move_line_ids.new()
-        # Adding a line should work also for users in multi_locations (former storage categories) group
-        self.env.user.groups_id += self.env.ref('stock.group_stock_multi_locations')
-        batch_form = Form(self.env['stock.picking.batch'])
-        batch_form.picking_ids.add(picking)
-        batch = batch_form.save()
-        batch.action_confirm()
-        confirmed_form = Form(batch)
-        confirmed_form.move_line_ids.new()
 
     def test_batch_validation_without_backorder(self):
         loc1, loc2 = self.stock_location.child_ids
@@ -814,7 +919,6 @@ class TestBatchPicking02(TransactionCase):
             'company_id': self.env.company.id,
         })
         self.env['stock.move'].create({
-            'name': self.productA.name,
             'product_id': self.productA.id,
             'product_uom_qty': 1,
             'product_uom': self.productA.uom_id.id,
@@ -830,7 +934,6 @@ class TestBatchPicking02(TransactionCase):
             'company_id': self.env.company.id,
         })
         self.env['stock.move'].create({
-            'name': self.productB.name,
             'product_id': self.productB.id,
             'product_uom_qty': 5,
             'product_uom': self.productB.uom_id.id,
@@ -892,7 +995,6 @@ class TestBatchPicking02(TransactionCase):
         picking_1, picking_2 = pickings
         self.env['stock.move'].create([
             {
-                'name': productA.name,
                 'product_id': productA.id,
                 'product_uom_qty': 1.0,
                 'product_uom': productA.uom_id.id,
@@ -901,7 +1003,6 @@ class TestBatchPicking02(TransactionCase):
                 'location_dest_id': picking_1.location_dest_id.id,
             },
             {
-                'name': productA.name,
                 'product_id': productA.id,
                 'product_uom_qty': 1.0,
                 'product_uom': productA.uom_id.id,
@@ -910,7 +1011,6 @@ class TestBatchPicking02(TransactionCase):
                 'location_dest_id': picking_2.location_dest_id.id,
             },
             {
-                'name': productB.name,
                 'product_id': productB.id,
                 'product_uom_qty': 1.0,
                 'product_uom': productB.uom_id.id,
@@ -948,7 +1048,6 @@ class TestBatchPicking02(TransactionCase):
         ])
         self.env['stock.move'].create([
             {
-                'name': productA.name,
                 'product_id': productA.id,
                 'product_uom_qty': 4.0,
                 'product_uom': productA.uom_id.id,
@@ -957,7 +1056,6 @@ class TestBatchPicking02(TransactionCase):
                 'location_dest_id': pickings[0].location_dest_id.id,
             },
             {
-                'name': productB.name,
                 'product_id': productB.id,
                 'product_uom_qty': 4.0,
                 'product_uom': productB.uom_id.id,
@@ -966,7 +1064,6 @@ class TestBatchPicking02(TransactionCase):
                 'location_dest_id': pickings[1].location_dest_id.id,
             },
             {
-                'name': productA.name,
                 'product_id': productA.id,
                 'product_uom_qty': 1.0,
                 'product_uom': productA.uom_id.id,
@@ -1048,7 +1145,6 @@ class TestBatchPicking02(TransactionCase):
         ])
         self.env['stock.move'].create([
             {
-                'name': productA.name,
                 'product_id': productA.id,
                 'product_uom_qty': 1.0,
                 'product_uom': productA.uom_id.id,
@@ -1057,7 +1153,6 @@ class TestBatchPicking02(TransactionCase):
                 'location_dest_id': pickings[0].location_dest_id.id,
             },
             {
-                'name': productB.name,
                 'product_id': productB.id,
                 'product_uom_qty': 4.0,
                 'product_uom': productB.uom_id.id,
@@ -1066,7 +1161,6 @@ class TestBatchPicking02(TransactionCase):
                 'location_dest_id': pickings[0].location_dest_id.id,
             },
             {
-                'name': productA.name,
                 'product_id': productA.id,
                 'product_uom_qty': 1.0,
                 'product_uom': productA.uom_id.id,
@@ -1112,7 +1206,6 @@ class TestBatchPicking02(TransactionCase):
         ])
         self.env['stock.move'].create([
             {
-                'name': productA.name,
                 'product_id': productA.id,
                 'product_uom_qty': 1.0,
                 'product_uom': productA.uom_id.id,
@@ -1121,7 +1214,6 @@ class TestBatchPicking02(TransactionCase):
                 'location_dest_id': pickings[0].location_dest_id.id,
             },
             {
-                'name': productB.name,
                 'product_id': productB.id,
                 'product_uom_qty': 4.0,
                 'product_uom': productB.uom_id.id,
@@ -1130,7 +1222,6 @@ class TestBatchPicking02(TransactionCase):
                 'location_dest_id': pickings[0].location_dest_id.id,
             },
             {
-                'name': productA.name,
                 'product_id': productA.id,
                 'product_uom_qty': 1.0,
                 'product_uom': productA.uom_id.id,
@@ -1156,6 +1247,39 @@ class TestBatchPicking02(TransactionCase):
         self.assertEqual(batch.state, 'done')
         self.assertFalse(pickings[1].batch_id)
 
+    def test_batch_name_with_wrong_separator_prefix(self):
+        """Check that no error is raised if a wrong separator is used in the prefix."""
+        # Fetch an existing sequence and update its prefix
+        sequence = self.env['ir.sequence'].search([('code', '=', 'picking.batch')], limit=1)
+        self.assertTrue(sequence, "Sequence with code 'picking.batch' should exist.")
+        sequence.prefix = 'BATCH-'
+        batch = self.env['stock.picking.batch'].create({
+            'company_id': self.env.company.id,
+        })
+        batch.write({
+            'picking_type_id': self.picking_type_internal.id,
+        })
+
+        self.assertTrue(batch.name.startswith('INT/BATCH-'))
+        self.assertIn(
+            "The sequence 'picking.batch' is misconfigured. Its prefix should end with a '/' separator.",
+            batch.message_ids[0].body,
+        )
+
+    def test_batch_name_with_complex_prefix(self):
+        """Check that batch name is correctly generated with a complex prefix."""
+        # Fetch an existing sequence and update its prefix
+        sequence = self.env['ir.sequence'].search([('code', '=', 'picking.batch')], limit=1)
+        self.assertTrue(sequence, "Sequence with code 'picking.batch' should exist.")
+        sequence.prefix = 'BATCH/test/2026/'
+        # Create an empty batch with a picking type
+        batch = self.env['stock.picking.batch'].create({
+            'picking_type_id': self.picking_type_internal.id,
+            'company_id': self.env.company.id,
+        })
+        # Assert the generated name starts with the complex prefix and contains the picking_type code
+        self.assertTrue(batch.name.startswith('BATCH/test/2026/'))
+        self.assertIn(self.picking_type_internal.sequence_code, batch.name)
 
 
 @tagged('post_install', '-at_install')
@@ -1179,7 +1303,6 @@ class TestBatchPickingSynchronization(HttpCase):
         productA = self.env['product.product'].create({
             'name': 'Product A',
             'is_storable': True,
-            'categ_id': self.env.ref('product.product_category_all').id,
         })
 
         picking_type_internal = self.env.ref('stock.picking_type_internal')
@@ -1191,7 +1314,6 @@ class TestBatchPickingSynchronization(HttpCase):
             'company_id': self.env.company.id,
         })
         self.env['stock.move'].create({
-            'name': productA.name,
             'product_id': productA.id,
             'product_uom_qty': 1,
             'product_uom': productA.uom_id.id,

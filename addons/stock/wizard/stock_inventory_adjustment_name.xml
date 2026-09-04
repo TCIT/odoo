@@ -9,6 +9,7 @@
                 <div>
                     <group>
                         <field name="inventory_adjustment_name"/>
+                        <field name="counting_date" widget="datetime" placeholder="Today"/>
                     </group>
                 </div>
                 <footer>
@@ -19,7 +20,7 @@
         </field>
     </record>
     <record id="action_stock_inventory_adjustement_name" model="ir.actions.act_window">
-        <field name="name">Inventory Adjustment</field>
+        <field name="name">Physical Inventory</field>
         <field name="res_model">stock.inventory.adjustment.name</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="stock_inventory_adjustment_name_form_view"/>

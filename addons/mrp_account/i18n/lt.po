@@ -1,44 +1,39 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* mrp_account
-# 
+# * mrp_account
+#
 # Translators:
-# Anatolij, 2024
-# Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2024
-# Denis Knotko <denis_knotko@yahoo.com>, 2024
-# digitouch UAB <digitouchagencyeur@gmail.com>, 2024
-# Arunas V. <arunas@devoro.com>, 2024
-# Silvija Butko <silvija.butko@gmail.com>, 2024
-# Gailius Kazlauskas <gailius@vialaurea.lt>, 2024
-# Vytautas Dženkauskas, 2024
-# Jonas Zinkevicius <jozi@odoo.com>, 2024
-# Martin Trigaux, 2024
-# UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2024
-# Audrius Palenskis <audrius.palenskis@gmail.com>, 2024
-# Linas Versada <linaskrisiukenas@gmail.com>, 2024
-# 
+# Silvija Butko <silvija.butko@gmail.com>, 2022
+# Arunas V. <arunas@devoro.com>, 2022
+# Jonas Zinkevicius <jozi@odoo.com>, 2022
+# UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2022
+# digitouch UAB <digitouchagencyeur@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Linas Versada <linaskrisiukenas@gmail.com>, 2023
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Linas Versada <linaskrisiukenas@gmail.com>, 2024\n"
-"Language-Team: Lithuanian (https://app.transifex.com/odoo/teams/41243/lt/)\n"
+"POT-Creation-Date: 2026-06-05 19:29+0000\n"
+"PO-Revision-Date: 2026-08-02 17:38+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Lithuanian <https://translate.odoo.com/projects/odoo-19/"
+"mrp_account/lt/>\n"
+"Language: lt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: lt\n"
-"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);\n"
+"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < "
+"11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 "
+": n % 1 != 0 ? 2: 3);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "$1000"
-msgstr ""
-
-#. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "$5000"
+#. odoo-python
+#: code:addons/mrp_account/models/stock_move.py:0
+msgid "%(value)s for %(quantity)s %(unit)s from %(production)s"
 msgstr ""
 
 #. module: mrp_account
@@ -48,18 +43,13 @@ msgid "%s - Labour"
 msgstr ""
 
 #. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "2023-08-15"
-msgstr "2023-08-15"
-
-#. module: mrp_account
 #: model_terms:ir.ui.view,arch_db:mrp_account.view_move_form_inherit_mrp_account
 msgid "<span class=\"o_stat_text\">Manufacturing</span>"
 msgstr "<span class=\"o_stat_text\">Gamyba</span>"
 
 #. module: mrp_account
 #: model_terms:ir.ui.view,arch_db:mrp_account.mrp_production_form_view_inherited
-msgid "<span class=\"o_stat_text\">Valuation</span>"
+msgid "<span class=\"o_stat_text\">WIP</span>"
 msgstr ""
 
 #. module: mrp_account
@@ -118,11 +108,6 @@ msgid "Account move line to be created when posting WIP account move"
 msgstr ""
 
 #. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "Acme Corp."
-msgstr ""
-
-#. module: mrp_account
 #: model:ir.model,name:mrp_account.model_account_analytic_account
 msgid "Analytic Account"
 msgstr "Analitinė sąskaita"
@@ -170,6 +155,11 @@ msgid "Category"
 msgstr "Kategorija"
 
 #. module: mrp_account
+#: model:ir.model,name:mrp_account.model_res_company
+msgid "Companies"
+msgstr ""
+
+#. module: mrp_account
 #: model:ir.actions.server,name:mrp_account.action_compute_price_bom_product
 #: model:ir.actions.server,name:mrp_account.action_compute_price_bom_template
 #: model_terms:ir.ui.view,arch_db:mrp_account.product_product_ext_form_view2
@@ -188,6 +178,15 @@ msgid ""
 msgstr ""
 "Skaičiuoti produkto kainą naudojant susijusios komplektavimo specifikacijos "
 "produktus ir operacijas. Tik pagamintiems produktams."
+
+#. module: mrp_account
+#. odoo-javascript
+#. odoo-python
+#: code:addons/mrp_account/report/stock_valuation_report.py:0
+#: code:addons/mrp_account/static/src/stock_valuation/stock_valuation_report.js:0
+#: code:addons/mrp_account/static/src/stock_valuation/stock_valuation_report.xml:0
+msgid "Cost of Production"
+msgstr ""
 
 #. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_workcenter__costs_hour_account_ids
@@ -232,8 +231,24 @@ msgid "Discard"
 msgstr "Atmesti"
 
 #. module: mrp_account
+#: model:ir.model.fields,field_description:mrp_account.field_account_analytic_account__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_account_analytic_applicability__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_account_analytic_line__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_account_move__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_account_move_line__display_name
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting__display_name
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting_line__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_production__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_workcenter__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_workcenter_productivity__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_workorder__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_product_category__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_product_product__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_product_template__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_report_mrp_report_mo_overview__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_res_company__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_stock_account_stock_valuation_report__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_stock_move__display_name
 msgid "Display Name"
 msgstr "Rodomas pavadinimas"
 
@@ -258,8 +273,24 @@ msgid "Extra Unit Cost"
 msgstr ""
 
 #. module: mrp_account
+#: model:ir.model.fields,field_description:mrp_account.field_account_analytic_account__id
+#: model:ir.model.fields,field_description:mrp_account.field_account_analytic_applicability__id
+#: model:ir.model.fields,field_description:mrp_account.field_account_analytic_line__id
+#: model:ir.model.fields,field_description:mrp_account.field_account_move__id
+#: model:ir.model.fields,field_description:mrp_account.field_account_move_line__id
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting__id
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting_line__id
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_production__id
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_workcenter__id
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_workcenter_productivity__id
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_workorder__id
+#: model:ir.model.fields,field_description:mrp_account.field_product_category__id
+#: model:ir.model.fields,field_description:mrp_account.field_product_product__id
+#: model:ir.model.fields,field_description:mrp_account.field_product_template__id
+#: model:ir.model.fields,field_description:mrp_account.field_report_mrp_report_mo_overview__id
+#: model:ir.model.fields,field_description:mrp_account.field_res_company__id
+#: model:ir.model.fields,field_description:mrp_account.field_stock_account_stock_valuation_report__id
+#: model:ir.model.fields,field_description:mrp_account.field_stock_move__id
 msgid "ID"
 msgstr "ID"
 
@@ -284,11 +315,6 @@ msgid "Label"
 msgstr "Etiketė"
 
 #. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "Laptop"
-msgstr ""
-
-#. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting__write_uid
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting_line__write_uid
 msgid "Last Updated by"
@@ -303,13 +329,13 @@ msgstr "Paskutinį kartą atnaujinta"
 #. module: mrp_account
 #: model:ir.model,name:mrp_account.model_report_mrp_report_mo_overview
 msgid "MO Overview Report"
-msgstr ""
+msgstr "GU apžvalgos ataskaita"
 
 #. module: mrp_account
 #. odoo-python
 #: code:addons/mrp_account/wizard/mrp_wip_accounting.py:0
 msgid "Manual Entry"
-msgstr ""
+msgstr "Manual Entry"
 
 #. module: mrp_account
 #: model:ir.model,name:mrp_account.model_mrp_production
@@ -351,8 +377,7 @@ msgstr ""
 #. module: mrp_account
 #. odoo-python
 #: code:addons/mrp_account/wizard/mrp_wip_accounting.py:0
-msgid ""
-"Please make sure the total credit amount equals the total debit amount."
+msgid "Please make sure the total credit amount equals the total debit amount."
 msgstr ""
 
 #. module: mrp_account
@@ -396,11 +421,6 @@ msgid "Production Account"
 msgstr ""
 
 #. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "REF123"
-msgstr ""
-
-#. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting__reference
 msgid "Reference"
 msgstr "Numeris"
@@ -439,6 +459,11 @@ msgid "Stock Move"
 msgstr "Atsargų perkėlimas"
 
 #. module: mrp_account
+#: model:ir.model,name:mrp_account.model_stock_account_stock_valuation_report
+msgid "Stock Valuation"
+msgstr "Atsargų vertinimas"
+
+#. module: mrp_account
 #: model:ir.model.fields,help:mrp_account.field_account_bank_statement_line__wip_production_ids
 #: model:ir.model.fields,help:mrp_account.field_account_move__wip_production_ids
 msgid ""
@@ -449,16 +474,18 @@ msgstr ""
 #. module: mrp_account
 #: model:ir.model.fields,help:mrp_account.field_mrp_workcenter__expense_account_id
 msgid ""
-"The expense is accounted for when the manufacturing order is marked as done."
-" If not set, it is the expense account of the final product that will be "
-"used instead."
+"The expense is accounted for when the manufacturing order is marked as done. "
+"If not set, it is the expense account of the final product that will be used "
+"instead."
 msgstr ""
 
 #. module: mrp_account
 #: model:ir.model.fields,help:mrp_account.field_product_category__property_stock_account_production_cost_id
 msgid ""
-"This account will be used as a valuation counterpart for both components and final products for manufacturing orders.\n"
-"                If there are any workcenter/employee costs, this value will remain on the account once the production is completed."
+"This account will be used as a valuation counterpart for both components and "
+"final products for manufacturing orders.\n"
+"                If there are any workcenter/employee costs, this value will "
+"remain on the account once the production is completed."
 msgstr ""
 
 #. module: mrp_account
@@ -472,11 +499,6 @@ msgid "Total Debit"
 msgstr "Visas debetas"
 
 #. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "Units"
-msgstr "Vienetai"
-
-#. module: mrp_account
 #. odoo-python
 #: code:addons/mrp_account/wizard/mrp_wip_accounting.py:0
 msgid "WIP - Component Value"
@@ -486,6 +508,17 @@ msgstr ""
 #. odoo-python
 #: code:addons/mrp_account/wizard/mrp_wip_accounting.py:0
 msgid "WIP - Overhead"
+msgstr ""
+
+#. module: mrp_account
+#. odoo-python
+#: code:addons/mrp_account/models/mrp_production.py:0
+msgid "WIP Entries of %s"
+msgstr ""
+
+#. module: mrp_account
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_production__wip_move_count
+msgid "WIP Journal Entry Count"
 msgstr ""
 
 #. module: mrp_account
@@ -520,6 +553,11 @@ msgid "Wc Analytic Account Line"
 msgstr ""
 
 #. module: mrp_account
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_production__wip_move_ids
+msgid "Wip Move"
+msgstr ""
+
+#. module: mrp_account
 #: model:ir.model,name:mrp_account.model_mrp_account_wip_accounting
 msgid "Wizard to post Manufacturing WIP account move"
 msgstr ""
@@ -528,11 +566,6 @@ msgstr ""
 #: model:ir.model,name:mrp_account.model_mrp_workcenter
 msgid "Work Center"
 msgstr "Darbo centras"
-
-#. module: mrp_account
-#: model:ir.model,name:mrp_account.model_mrp_routing_workcenter
-msgid "Work Center Usage"
-msgstr "Darbo centro naudojimas"
 
 #. module: mrp_account
 #: model:ir.model,name:mrp_account.model_mrp_workorder
@@ -566,3 +599,21 @@ msgstr "Darbo centro produktyvumo žurnalas"
 #: code:addons/mrp_account/models/mrp_workorder.py:0
 msgid "[WC] %s"
 msgstr ""
+
+#~ msgid "Units"
+#~ msgstr "Vienetai"
+
+#~ msgid "2023-08-15"
+#~ msgstr "2023-08-15"
+
+#~ msgid "Bill of Material"
+#~ msgstr "Komplektavimo specifikacija"
+
+#~ msgid "Production Order"
+#~ msgstr "Gamybos užsakymas"
+
+#~ msgid "Stock Rule"
+#~ msgstr "Atsargų taisyklė"
+
+#~ msgid "Work Center Usage"
+#~ msgstr "Darbo centro naudojimas"

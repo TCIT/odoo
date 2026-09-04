@@ -13,13 +13,11 @@ class StockMove(TransactionCase):
         cls.product = cls.env['product.product'].create({
             'name': 'Product A',
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
         })
         cls.env['stock.quant']._update_available_quantity(cls.product, cls.stock_location, 10.0)
         cls.product_consu = cls.env['product.product'].create({
             'name': 'Product A',
             'type': 'consu',
-            'categ_id': cls.env.ref('product.product_category_all').id,
         })
 
     def test_show_detailed(self):
@@ -29,10 +27,10 @@ class StockMove(TransactionCase):
         """
         # create a delivery order
         picking = Form(self.env['stock.picking'].with_context(default_picking_type_id=self.ref('stock.picking_type_out')))
-        with picking.move_ids_without_package.new() as move:
+        with picking.move_ids.new() as move:
             move.product_id = self.product
             move.product_uom_qty = 1.0
-        with picking.move_ids_without_package.new() as move:
+        with picking.move_ids.new() as move:
             move.product_id = self.product_consu
             move.product_uom_qty = 1.0
         picking = picking.save()
@@ -46,17 +44,17 @@ class StockMove(TransactionCase):
         """
         # create a delivery order
         picking = Form(self.env['stock.picking'].with_context(default_picking_type_id=self.ref('stock.picking_type_out')))
-        with picking.move_ids_without_package.new() as move:
+        with picking.move_ids.new() as move:
             move.product_id = self.product
             move.product_uom_qty = 2.0
         picking = picking.save()
 
         # we check that changing the quantity while still in draft doesn't change the state of the move
-        picking.move_ids_without_package.write({'product_uom_qty': 1})
-        self.assertEqual(picking.move_ids_without_package.state, 'draft')
+        picking.move_ids.write({'product_uom_qty': 1})
+        self.assertEqual(picking.move_ids.state, 'draft')
 
         self.env['stock.move.line'].create({
-            'move_id': picking.move_ids_without_package.id,
+            'move_id': picking.move_ids.id,
             'product_id': self.product.id,
             'quantity': 1.0,
         })

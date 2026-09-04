@@ -8,9 +8,18 @@ from PIL import Image
 from odoo.fields import Command
 from odoo.tests import HttpCase, tagged
 
+from odoo.addons.website.tests.common import HttpCaseWithWebsiteUser
+
+
+def _create_image(color='black', dims=(1920, 1080), format='JPEG'):
+    f = io.BytesIO()
+    Image.new('RGB', dims, color).save(f, format)  # type: ignore
+    f.seek(0)
+    return base64.b64encode(f.read())
+
 
 @tagged('post_install', '-at_install')
-class TestWebsiteSaleImage(HttpCase):
+class TestWebsiteSaleImage(HttpCaseWithWebsiteUser):
 
     # registry_test_mode = False  # uncomment to save the product to test in browser
 
@@ -50,43 +59,25 @@ class TestWebsiteSaleImage(HttpCase):
         })
 
         # first image (blue) for the template
-        f = io.BytesIO()
-        Image.new('RGB', (1920, 1080), color_blue).save(f, 'JPEG')
-        f.seek(0)
-        blue_image = base64.b64encode(f.read())
+        blue_image = _create_image(color=color_blue)
 
         # second image (red) for the variant 1, small image (no zoom)
-        f = io.BytesIO()
-        Image.new('RGB', (800, 500), color_red).save(f, 'JPEG')
-        f.seek(0)
-        red_image = base64.b64encode(f.read())
+        red_image = _create_image(color=color_red, dims=(800, 500))
 
         # second image (green) for the variant 2, big image (zoom)
-        f = io.BytesIO()
-        Image.new('RGB', (1920, 1080), color_green).save(f, 'JPEG')
-        f.seek(0)
-        green_image = base64.b64encode(f.read())
+        green_image = _create_image(color=color_green)
 
         # Template Extra Image 1
-        f = io.BytesIO()
-        Image.new('RGB', (124, 147)).save(f, 'GIF')
-        f.seek(0)
-        image_gif = base64.b64encode(f.read())
+        image_gif = _create_image(dims=(124, 147), format='GIF')
 
         # Template Extra Image 2
         image_svg = base64.b64encode(b'<svg></svg>')
 
         # Red Variant Extra Image 1
-        f = io.BytesIO()
-        Image.new('RGB', (767, 247)).save(f, 'BMP')
-        f.seek(0)
-        image_bmp = base64.b64encode(f.read())
+        image_bmp = _create_image(dims=(767, 247), format='BMP')
 
         # Green Variant Extra Image 1
-        f = io.BytesIO()
-        Image.new('RGB', (2147, 3251)).save(f, 'PNG')
-        f.seek(0)
-        image_png = base64.b64encode(f.read())
+        image_png = _create_image(dims=(2147, 3251), format='PNG')
 
         # create the template, without creating the variants
         template = self.env['product.template'].create({
@@ -210,9 +201,6 @@ class TestWebsiteSaleImage(HttpCase):
 
         # Make sure we have zoom on click
         self.env['ir.ui.view'].with_context(active_test=False).search(
-            [('key', 'in', ('website_sale.product_picture_magnify_hover', 'website_sale.product_picture_magnify_click', 'website_sale.product_picture_magnify_both'))]
-        ).write({'active': False})
-        self.env['ir.ui.view'].with_context(active_test=False).search(
             [('key', '=', 'website_sale.product_picture_magnify_click')]
         ).write({'active': True})
 
@@ -220,7 +208,7 @@ class TestWebsiteSaleImage(HttpCase):
         # This ensures that tours with triggers on the amounts will run properly.
         self.env['product.pricelist'].search([]).action_archive()
 
-        self.start_tour("/", 'shop_zoom', login="admin")
+        self.start_tour("/", 'shop_zoom', login="website_user")
 
         # CASE: unlink move image to fallback if fallback image empty
         template.image_1920 = False
@@ -276,10 +264,7 @@ class TestWebsiteSaleImage(HttpCase):
         self.assertEqual(variant_image.product_variant_id.id, product.id)
 
     def test_02_image_holder(self):
-        f = io.BytesIO()
-        Image.new('RGB', (800, 500), '#FF0000').save(f, 'JPEG')
-        f.seek(0)
-        image = base64.b64encode(f.read())
+        image = _create_image(color='#FF0000', dims=(800, 500))
 
         # create the color attribute
         product_attribute = self.env['product.attribute'].create({
@@ -326,7 +311,7 @@ class TestWebsiteSaleImage(HttpCase):
         # when there are no template image but there are variants, the image must be obtained from the first variant
         self.assertEqual(product_red, template._get_image_holder())
 
-        product_red.toggle_active()
+        product_red.action_archive()
 
         # but when some variants are not available, the image must be obtained from the first available variant
         self.assertEqual(product_green, template._get_image_holder())
@@ -336,26 +321,52 @@ class TestWebsiteSaleImage(HttpCase):
         # when there is a template image, the image must be obtained from the template
         self.assertEqual(template, template._get_image_holder())
 
+    def test_03_shop_zoom_grid_image_order(self):
+        image_red = _create_image(color='#FF0000', dims=(1800, 1500))
+        image_green = _create_image(color='#00FF00')
+        image_blue = _create_image(color='#0000FF')
+        image_purple = _create_image(color='#FF00FF')
+
+        product = self.env['product.product'].create({
+            'name': 'A Colorful Image',
+            'image_1920': image_red,
+            'website_published': True,
+            'product_variant_image_ids': [
+                Command.create({'name': 'image 1', 'image_1920': image_green}),
+                Command.create({'name': 'image 2', 'image_1920': image_blue}),
+                Command.create({'name': 'image 3', 'image_1920': image_purple}),
+            ],
+        })
+
+        self.env['website'].get_current_website().write({
+            'product_page_image_layout': 'grid',
+            'product_page_image_ratio': 'auto',
+        })
+
+        self.start_tour(product.website_url, 'website_sale.zoom_grid_image_order')
+
 @tagged('post_install', '-at_install')
 class TestWebsiteSaleRemoveImage(HttpCase):
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Attachment needed for the replacement of images
-        cls.env['ir.attachment'].create({
-            'public': True,
-            'name': 's_default_image.jpg',
-            'type': 'url',
-            'url': f'{cls.base_url()}/web/image/website.s_banner_default_image.jpg',
-        })
-
         # First image (blue) for the template.
         color_blue = '#4169E1'
         name_blue = 'Royal Blue'
         # Red for the variant.
         color_red = '#CD5C5C'
         name_red = 'Indian Red'
+        # Green for the replacement
+        color_green = '#228B22'
+
+        # Attachment needed for the replacement of images
+        cls.env['ir.attachment'].create({
+            'public': True,
+            'name': 'green.jpg',
+            'type': 'binary',
+            'datas': _create_image(color=color_green)
+        })
 
         # Create the color attribute.
         cls.product_attribute = cls.env['product.attribute'].create({
@@ -376,14 +387,10 @@ class TestWebsiteSaleRemoveImage(HttpCase):
             'sequence': 2,
         },
         ])
-        f = io.BytesIO()
-        Image.new('RGB', (1920, 1080), color_blue).save(f, 'JPEG')
-        f.seek(0)
-        blue_image = base64.b64encode(f.read())
 
         cls.template = cls.env['product.template'].with_context(create_product_product=False).create({
             'name': 'Test Remove Image',
-            'image_1920': blue_image,
+            'image_1920': _create_image(color=color_blue),
         })
 
     def test_website_sale_add_and_remove_main_product_image_no_variant(self):

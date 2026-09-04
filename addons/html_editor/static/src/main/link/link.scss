@@ -3,15 +3,36 @@
     color: black !important;
     border: 1px dashed #008f8c;
     margin: -1px;
+    -webkit-text-fill-color: black;
 }
 
 .odoo-editor-editable {
-    .btn {
-        user-select: auto;
-        cursor: text;
+    &[contenteditable=true], [contenteditable=true] {
+        &.btn, .btn {
+            user-select: auto;
+            cursor: text;
+        }
     }
 
-    [contenteditable=false] .btn.btn-link {
+    [contenteditable=false] .btn {
         cursor: pointer;
+    }
+
+    // Unset the font size and family applied by `.btn` 
+    // if inside `FONT_SIZE_CLASSES`.
+    span[class$="-fs"],
+    span.small,
+    span[style*="font-size"] {
+        .btn:not(:has(span[class$="-fs"], span.small, span[style*="font-size"])) {
+            font-family: unset;
+            font-size: unset;
+        }
+        a:not(.btn) {
+            font-size: inherit !important;
+        }
+    }
+    font[class^="text-o-"] a,
+    font[style*="color"] a {
+        color: inherit !important;
     }
 }

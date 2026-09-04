@@ -279,13 +279,13 @@ class TestPosMargin(TestPoSCommon):
         product2 = self.create_product('Product 2', self.categ_basic, 50, 30)
 
         move1 = self.env['stock.move'].create({
-            'name': 'IN 2 unit @ 3 per unit',
             'location_id': self.supplier_location.id,
             'location_dest_id': self.stock_location.id,
             'product_id': product1.id,
             'product_uom': self.uom_unit.id,
             'product_uom_qty': 2,
             'price_unit': 3,
+            'value_manual': 6,
         }).sudo()
         move1._action_confirm()
         move1._action_assign()
@@ -294,13 +294,13 @@ class TestPosMargin(TestPoSCommon):
         move1._action_done()
 
         move2 = self.env['stock.move'].create({
-            'name': 'IN 1 unit @ 7 per unit',
             'location_id': self.supplier_location.id,
             'location_dest_id': self.stock_location.id,
             'product_id': product1.id,
             'product_uom': self.uom_unit.id,
             'product_uom_qty': 1,
             'price_unit': 7,
+            'value_manual': 7,
         }).sudo()
         move2._action_confirm()
         move2._action_assign()
@@ -341,13 +341,13 @@ class TestPosMargin(TestPoSCommon):
 
 
         move1 = self.env['stock.move'].create({
-            'name': 'IN 2 unit @ 3 per unit',
             'location_id': self.supplier_location.id,
             'location_dest_id': self.stock_location.id,
             'product_id': product1.id,
             'product_uom': self.uom_unit.id,
             'product_uom_qty': 2,
             'price_unit': 3,
+            'value_manual': 6,
         }).sudo()
         move1._action_confirm()
         move1._action_assign()
@@ -356,13 +356,13 @@ class TestPosMargin(TestPoSCommon):
         move1._action_done()
 
         move2 = self.env['stock.move'].create({
-            'name': 'IN 1 unit @ 6 per unit',
             'location_id': self.supplier_location.id,
             'location_dest_id': self.stock_location.id,
             'product_id': product1.id,
             'product_uom': self.uom_unit.id,
             'product_uom_qty': 1,
             'price_unit': 6,
+            'value_manual': 6,
         }).sudo()
         move2._action_confirm()
         move2._action_assign()

@@ -1,9 +1,8 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import { Component, onWillStart, useState } from "@odoo/owl";
 import { download } from "@web/core/network/download";
 import { registry } from "@web/core/registry";
+import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { useSetupAction } from "@web/search/action_hook";
 import { Layout } from "@web/search/layout";
@@ -94,16 +93,23 @@ export class TraceabilityReport extends Component {
         });
     }
 
-    onCLickOpenLot(line) {
+    onClickPartner(line) {
         this.actionService.doAction({
-            type: "ir.actions.client",
-            tag: "stock_report_generic",
-            name: line.lot_name !== undefined && line.lot_name.toString(),
-            context: {
-                active_id: line.lot_id,
-                active_model: "stock.lot",
-                url: "/stock/output_format/stock?active_id=:active_id&active_model=:active_model",
-            },
+            type: "ir.actions.act_window",
+            res_model: "res.partner",
+            res_id: line.partner_id,
+            views: [[false, "form"]],
+            target: "current",
+        });
+    }
+
+    onClickOpenLot(line) {
+        this.actionService.doAction({
+            type: 'ir.actions.act_window',
+            res_model: 'stock.lot',
+            res_id: line.lot_id,
+            views: [[false, 'form']],
+            target: 'current',
         });
     }
 
@@ -117,20 +123,21 @@ export class TraceabilityReport extends Component {
                 active_model: line.model,
                 auto_unfold: true,
                 lot_name: line.lot_name !== undefined && line.lot_name,
-                url: "/stock/output_format/stock/active_id",
+                url: "/stock/output_format/stock?active_id=:active_id&active_model=:active_model",
             },
         });
     }
 
     onClickPrint() {
         const data = JSON.stringify(extractPrintData(this.state.lines));
+        const context = JSON.stringify(user.context);
         const url = this.controllerUrl
             .replace(":active_id", this.context.active_id)
             .replace(":active_model", this.context.model)
             .replace("output_format", "pdf");
 
         download({
-            data: { data },
+            data: { data, context },
             url,
         });
     }

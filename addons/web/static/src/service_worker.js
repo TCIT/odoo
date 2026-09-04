@@ -2,26 +2,102 @@
 
 /* eslint-disable no-restricted-globals */
 const cacheName = "odoo-sw-cache";
-const cachedRequests = ["/odoo/offline"];
+const homepageURL = "/odoo";
+const offLineURL = `${homepageURL}/offline`;
+
+let sessionInfo = null;
 
 self.addEventListener("install", (event) => {
-    event.waitUntil(caches.open(cacheName).then((cache) => cache.addAll(cachedRequests)));
+    event.waitUntil(
+        Promise.all([
+            // Needed because the sw is register after the initial fetch
+            fetch(homepageURL).then((res) => (res.ok ? storeDataOnCache(homepageURL, res) : null)),
+            // offLine Page
+            caches.open(cacheName).then((cache) => cache.add(offLineURL)),
+        ])
+    );
 });
 
+const extractSessionInfo = (htmlContent) => {
+    const match = htmlContent.match(/odoo\.__session_info__\s*=\s*({.*?});/s);
+    return match && match[1] ? match[1] : null;
+};
+
+const getTextFromResponse = async (response) => {
+    const reader = response.clone().body.getReader();
+    const decoder = new TextDecoder();
+    let result = "";
+    async function read() {
+        const { value, done } = await reader.read();
+        if (done) {
+            reader.releaseLock();
+            return;
+        }
+        result += decoder.decode(value, { stream: true });
+        await read();
+    }
+    await read();
+    return result;
+};
+
+const storeDataOnCache = async (url, response) => {
+    const htmlBody = await getTextFromResponse(response);
+    // store on ram, the session info
+    sessionInfo = extractSessionInfo(htmlBody);
+    const cache = await caches.open(cacheName);
+    return cache.put(
+        url.endsWith(offLineURL) ? url : homepageURL,
+        new Response(htmlBody.replace(sessionInfo, "@@@session_info_secret@@@"), {
+            headers: response.headers,
+        })
+    );
+};
+
+const readDataOnCache = async (url) => {
+    const cache = await caches.open(cacheName);
+    const response = await cache.match(url);
+    if (url === offLineURL) {
+        return response;
+    }
+    // if you come from /odoo to project the url is now /odoo/project, but it doesn't exist in cache so use /odoo instead
+    if (!response) {
+        return readDataOnCache(homepageURL);
+    }
+    const htmlBody = await getTextFromResponse(response);
+    return new Response(htmlBody.replaceAll("@@@session_info_secret@@@", sessionInfo), {
+        headers: response.headers,
+    });
+};
+
+const fetchErrorMessages = [
+    "Failed to fetch", // Chromium
+    "Load failed", // WebKit
+    "NetworkError when attempting to fetch resource.", // Firefox
+];
+
 const navigateOrDisplayOfflinePage = async (request) => {
+    const isDebugAssets = new URL(request.url).searchParams.get("debug")?.includes("assets");
     try {
-        return await fetch(request);
+        const response = await fetch(request);
+        if (response.ok && !isDebugAssets) {
+            storeDataOnCache(request.url, response.clone());
+        }
+        return response;
     } catch (requestError) {
         if (
             request.method === "GET" &&
-            ["Failed to fetch", "Load failed"].includes(requestError.message)
+            requestError instanceof TypeError &&
+            fetchErrorMessages.includes(requestError.message)
         ) {
-            if (cachedRequests.includes("/odoo/offline")) {
-                const cache = await caches.open(cacheName);
-                const cachedResponse = await cache.match("/odoo/offline");
+            if (sessionInfo?.length && !isDebugAssets) {
+                const cachedResponse = await readDataOnCache(request.url);
                 if (cachedResponse) {
                     return cachedResponse;
                 }
+            }
+            const offlinePage = await readDataOnCache(offLineURL);
+            if (offlinePage) {
+                return offlinePage;
             }
         }
         throw requestError;
@@ -71,14 +147,13 @@ const nextMessageMap = new Map();
  * @param message : string
  * @return {Promise}
  */
-const waitingMessage = async (message) => {
-    return new Promise((resolve) => {
+const waitingMessage = async (message) =>
+    new Promise((resolve) => {
         if (!nextMessageMap.has(message)) {
             nextMessageMap.set(message, []);
         }
         nextMessageMap.get(message).push(resolve);
     });
-};
 
 self.addEventListener("message", (event) => {
     const messageNotifiers = nextMessageMap.get(event.data);
@@ -87,5 +162,8 @@ self.addEventListener("message", (event) => {
             messageNotified();
         }
         nextMessageMap.delete(event.data);
+    }
+    if (event.data === "user_logout") {
+        sessionInfo = null;
     }
 });

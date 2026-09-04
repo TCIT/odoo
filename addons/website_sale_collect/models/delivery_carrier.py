@@ -2,8 +2,8 @@
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.fields import Command
 from odoo.http import request
-from odoo.tools.misc import format_duration
 
 from odoo.addons.website_sale_collect import utils
 
@@ -16,7 +16,7 @@ class DeliveryCarrier(models.Model):
     )
     warehouse_ids = fields.Many2many(string="Stores", comodel_name='stock.warehouse')
 
-    @api.constrains('is_published', 'warehouse_ids')
+    @api.constrains('delivery_type', 'is_published', 'warehouse_ids')
     def _check_in_store_dm_has_warehouses_when_published(self):
         if any(self.filtered(
             lambda dm: dm.delivery_type == 'in_store'
@@ -27,7 +27,7 @@ class DeliveryCarrier(models.Model):
                 _("The delivery method must have at least one warehouse to be published.")
             )
 
-    @api.constrains('company_id', 'warehouse_ids')
+    @api.constrains('delivery_type', 'company_id', 'warehouse_ids')
     def _check_warehouses_have_same_company(self):
         for dm in self:
             if dm.delivery_type == 'in_store' and dm.company_id and any(
@@ -41,13 +41,39 @@ class DeliveryCarrier(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get('delivery_type') == 'in_store':
-                vals['integration_level'] = 'rate'
+                vals.update(self._get_in_store_default_vals())
+
+                # Set the default warehouses and publish if one is found.
+                if 'company_id' in vals:
+                    company_id = vals.get('company_id')
+                else:
+                    company_id = (
+                        self.env['product.product'].browse(vals.get('product_id')).company_id.id
+                        or self.env.company.id
+                    )
+                warehouses = self.env['stock.warehouse'].search(
+                    [('company_id', 'in', company_id)]
+                )
+                vals.update({
+                    'warehouse_ids': [Command.set(warehouses.ids)],
+                    'is_published': bool(warehouses),
+                })
         return super().create(vals_list)
 
     def write(self, vals):
         if vals.get('delivery_type') == 'in_store':
-            vals['integration_level'] = 'rate'
+            vals.update(self._get_in_store_default_vals())
         return super().write(vals)
+
+    @staticmethod
+    def _get_in_store_default_vals():
+        return {
+            "integration_level": "rate",
+            "allow_cash_on_delivery": False,
+            "country_ids": False,
+            "state_ids": False,
+            "zip_prefix_ids": False,
+        }
 
     # === BUSINESS METHODS ===#
 
@@ -70,51 +96,23 @@ class DeliveryCarrier(models.Model):
         partner_address.geo_localize()  # Calculate coordinates.
 
         pickup_locations = []
-        order_sudo = request.website.sale_get_order()
+        order_sudo = request.cart
         for wh in self.warehouse_ids:
+            pickup_location_values = wh._prepare_pickup_location_data()
+            if not pickup_location_values:  # Ignore warehouses with badly configured addresses.
+                continue
+
             # Prepare the stock data based on either the product or the order.
             if product:  # Called from the product page.
                 in_store_stock_data = utils.format_product_stock_values(product, wh.id)
             else:  # Called from the checkout page.
                 in_store_stock_data = {'in_stock': order_sudo._is_in_stock(wh.id)}
 
-            # Prepare the warehouse location.
-            wh_location = wh.partner_id
-            if not wh_location.partner_latitude or not wh_location.partner_longitude:
-                wh_location.geo_localize()  # Find the longitude and latitude of the warehouse.
-
-            # Format the pickup location values of the warehouse.
-            try:
-                pickup_location_values = {
-                    'id': wh.id,
-                    'name': wh_location['name'].title(),
-                    'street': wh_location['street'].title(),
-                    'city': wh_location.city.title(),
-                    'zip_code': wh_location.zip,
-                    'country_code': wh_location.country_code,
-                    'latitude': wh_location.partner_latitude,
-                    'longitude': wh_location.partner_longitude,
-                    'additional_data': {'in_store_stock': in_store_stock_data},
-                }
-            except AttributeError:
-                continue  # Ignore warehouses with badly configured address.
-
-            # Prepare the opening hours data.
-            if wh.opening_hours:
-                opening_hours_dict = {str(i): [] for i in range(7)}
-                for att in wh.opening_hours.attendance_ids:
-                    if att.day_period in ('morning', 'afternoon'):
-                        opening_hours_dict[att.dayofweek].append(
-                            f'{format_duration(att.hour_from)} - {format_duration(att.hour_to)}'
-                        )
-                pickup_location_values['opening_hours'] = opening_hours_dict
-            else:
-                pickup_location_values['opening_hours'] = {}
-
             # Calculate the distance between the partner address and the warehouse location.
-            pickup_location_values['distance'] = utils.calculate_partner_distance(
-                partner_address, wh_location
-            )
+            pickup_location_values.update({
+                'additional_data': {'in_store_stock_data': in_store_stock_data},
+                'distance': utils.calculate_partner_distance(partner_address, wh.partner_id),
+            })
             pickup_locations.append(pickup_location_values)
 
         return sorted(pickup_locations, key=lambda k: k['distance'])

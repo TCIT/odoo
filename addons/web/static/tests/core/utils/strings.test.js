@@ -9,9 +9,15 @@ import {
     isEmail,
     isNumeric,
     sprintf,
-    unaccent,
 } from "@web/core/utils/strings";
-import { _t } from "@web/core/l10n/translation";
+import { _t as basic_t } from "@web/core/l10n/translation";
+
+function _t() {
+    odoo.translationContext = "web";
+    const translatedTerm = basic_t(...arguments);
+    odoo.translationContext = null;
+    return translatedTerm;
+}
 
 describe.current.tags("headless");
 
@@ -78,6 +84,7 @@ describe("sprintf", () => {
         expect(sprintf("Hello!")).toBe("Hello!");
         expect(sprintf("Hello %s!")).toBe("Hello %s!");
         expect(sprintf("Hello %(value)s!")).toBe("Hello %(value)s!");
+        expect(sprintf("Hello %(value)s!", {})).toBe("Hello !");
     });
 
     test("properly formats numbers", () => {
@@ -95,25 +102,28 @@ describe("sprintf", () => {
     });
 
     test("supports lazy translated string", () => {
-        patchTranslations({ one: "en", two: "två" });
+        patchTranslations({ web: { one: "en", two: "två" } });
         expect(sprintf("Hello %s", _t("one"))).toBe("Hello en");
         expect(sprintf("Hello %s %s", _t("one"), _t("two"))).toBe("Hello en två");
 
         const vals = { one: _t("one"), two: _t("two") };
         expect(sprintf("Hello %(two)s %(one)s", vals)).toBe("Hello två en");
     });
+
+    test("supports escaped '%' signs", () => {
+        expect(sprintf("Escape %s", "%s")).toBe("Escape %s");
+        expect(sprintf("Escape %%s", "this!")).toBe("Escape %s");
+        expect(sprintf("Escape %%%s", "this!")).toBe("Escape %this!");
+        expect(sprintf("Escape %%%%s!", "this")).toBe("Escape %%s!");
+        expect(sprintf("Escape %s%s", "this!")).toBe("Escape this!");
+        expect(sprintf("Escape %%s%s", "this!")).toBe("Escape %sthis!");
+        expect(sprintf("Escape %foo!", "this")).toBe("Escape %foo!");
+    });
 });
 
 test("capitalize", () => {
     expect(capitalize("abc def")).toBe("Abc def");
     expect(capitalize("Abc def")).toBe("Abc def");
-});
-
-test("unaccent", () => {
-    expect(unaccent("éèàôù")).toBe("eeaou");
-    expect(unaccent("ⱮɀꝾƶⱵȥ")).toBe("mzgzhz"); // single characters
-    expect(unaccent("ǱǄꝎꜩꝡƕ")).toBe("dzdzootzvyhv"); // doubled characters
-    expect(unaccent("ⱮɀꝾƶⱵȥ", true)).toBe("MzGzHz"); // case sensitive characters
 });
 
 test("isEmail", () => {

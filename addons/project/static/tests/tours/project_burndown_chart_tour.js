@@ -1,7 +1,5 @@
-/** @odoo-module */
-
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 
 registry.category("web_tour.tours").add('burndown_chart_tour', {
     url: '/odoo',
@@ -34,7 +32,7 @@ registry.category("web_tour.tours").add('burndown_chart_tour', {
     run: `edit Burndown`,
 }, {
     content: 'Validate search',
-    trigger: '.o_searchview_autocomplete .o_menu_item:contains("Project")',
+    trigger: '.o_searchview_autocomplete .o-dropdown-item:contains("Project")',
     run: "click",
 }, {
     content: 'Remove the group by "Date: Month > Stage"',
@@ -84,7 +82,4 @@ registry.category("web_tour.tours").add('burndown_chart_tour', {
     content: 'Open the search panel menu',
     trigger: '.o_control_panel .o_searchview_dropdown_toggler',
     run: "click",
-}, {
-    content: 'The comparison menu is not rendered',
-    trigger: ':not(:has(.o_comparison_menu))',
 }]});

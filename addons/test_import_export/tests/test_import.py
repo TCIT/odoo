@@ -1,5 +1,6 @@
 import base64
 import csv
+import datetime
 import difflib
 import io
 import pprint
@@ -8,7 +9,7 @@ import unittest
 from PIL import Image
 
 from odoo.tests.common import TransactionCase, can_import, RecordCapturer
-from odoo.tools import mute_logger
+from odoo.tools import mute_logger, DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.tools.misc import file_open
 from odoo.addons.base_import.models.base_import import ImportValidationError
 
@@ -43,6 +44,77 @@ def sorted_fields(fields):
     """ recursively sort field lists to ease comparison """
     recursed = [dict(field, fields=sorted_fields(field['fields'])) for field in fields]
     return sorted(recursed, key=lambda field: field['id'])
+
+
+def generate_xls(data):
+    """
+    Generates an XLS file from the given data dictionary. Each key in the `data` dictionary represents a column header,
+    and its corresponding values are written as rows under that column.
+
+    Date and datetime objects in the values will automatically set the style of the cell to a date/datetime.
+
+    :param dict data: keys are column headers, values are rows.
+    :return bytes: the xls file as bytes.
+    """
+    import xlwt  # noqa: PLC0415
+
+    wb = xlwt.Workbook()
+    ws = wb.add_sheet('Sheet1')
+
+    default_style = xlwt.XFStyle()
+
+    date_style = xlwt.XFStyle()
+    date_style.num_format_str = 'yyyy-mm-dd'
+
+    datetime_style = xlwt.XFStyle()
+    datetime_style.num_format_str = 'yyyy-mm-dd hh:mm:ss'
+
+    for column, (key, values) in enumerate(data.items()):
+        ws.write(0, column, key, default_style)
+        for row, value in enumerate(values, 1):
+            style = default_style
+            if isinstance(value, datetime.datetime):
+                style = datetime_style
+            elif isinstance(value, datetime.date):
+                style = date_style
+            ws.write(row, column, value, style)
+
+    output = io.BytesIO()
+    wb.save(output)
+    return output.getvalue()
+
+
+def generate_xlsx(data):
+    """
+    Generates an XLSX file from the given data dictionary. Each key in the `data` dictionary represents a column header,
+    and its corresponding values are written as rows under that column.
+
+    Date and datetime objects in the values will automatically set the style of the cell to a date/datetime.
+
+    :param dict data: keys are column headers, values are rows.
+    :return bytes: the xls file as bytes.
+    """
+    import openpyxl  # noqa: PLC0415
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+
+    date_style = openpyxl.styles.NamedStyle(name="date", number_format='yyyy-mm-dd')
+    datetime_style = openpyxl.styles.NamedStyle(name="datetime", number_format='yyyy-mm-dd hh:mm:ss')
+
+    for column, (key, values) in enumerate(data.items(), 1):
+        ws.cell(row=1, column=column).value = key
+        for row, value in enumerate(values, 2):
+            cell = ws.cell(row=row, column=column)
+            cell.value = value
+            if isinstance(value, datetime.datetime):
+                cell.style = datetime_style
+            elif isinstance(value, datetime.date):
+                cell.style = date_style
+
+    output = io.BytesIO()
+    wb.save(output)
+    return output.getvalue()
 
 
 class BaseImportCase(TransactionCase):
@@ -89,8 +161,8 @@ class TestBasicFields(BaseImportCase):
         self.assertEqualFields(self.get_fields('m2o'), make_field(
             field_type='many2one', comodel_name='import.m2o.related', model_name='import.m2o',
             fields=[
-                {'id': 'value', 'name': 'id', 'string': 'External ID', 'required': False, 'fields': [], 'type': 'id', 'model_name': 'import.m2o'},
-                {'id': 'value', 'name': '.id', 'string': 'Database ID', 'required': False, 'fields': [], 'type': 'id', 'model_name': 'import.m2o'},
+                {'id': 'value', 'name': 'id', 'string': 'External ID', 'required': False, 'fields': [], 'type': 'id', 'model_name': 'import.m2o.related'},
+                {'id': 'value', 'name': '.id', 'string': 'Database ID', 'required': False, 'fields': [], 'type': 'id', 'model_name': 'import.m2o.related'},
         ]))
 
     def test_m2o_required(self):
@@ -101,19 +173,17 @@ class TestBasicFields(BaseImportCase):
         self.assertEqualFields(self.get_fields('m2o.required'), make_field(
             field_type='many2one', required=True, comodel_name='import.m2o.required.related', model_name='import.m2o.required',
             fields=[
-                {'id': 'value', 'name': 'id', 'string': 'External ID', 'required': True, 'fields': [], 'type': 'id', 'model_name': 'import.m2o.required'},
-                {'id': 'value', 'name': '.id', 'string': 'Database ID', 'required': True, 'fields': [], 'type': 'id', 'model_name': 'import.m2o.required'},
+                {'id': 'value', 'name': 'id', 'string': 'External ID', 'required': True, 'fields': [], 'type': 'id', 'model_name': 'import.m2o.required.related'},
+                {'id': 'value', 'name': '.id', 'string': 'Database ID', 'required': True, 'fields': [], 'type': 'id', 'model_name': 'import.m2o.required.related'},
         ]))
 
 
 class TestO2M(BaseImportCase):
 
-    def get_fields(self, field):
-        return self.env['base_import.import'].get_fields_tree(f"import.{field}")
-
     def test_shallow(self):
         self.assertEqualFields(
-            self.get_fields('o2m'), [
+            self.env['base_import.import'].get_fields_tree("import.o2m"), 
+            [
                 get_id_field("import.o2m"),
                 {'id': 'name', 'name': 'name', 'string': "Name", 'required': False, 'fields': [], 'type': 'char', 'model_name': 'import.o2m'},
                 {
@@ -125,13 +195,16 @@ class TestO2M(BaseImportCase):
                             'id': 'parent_id', 'name': 'parent_id', 'model_name': 'import.o2m.child',
                             'string': 'Parent', 'type': 'many2one', 'comodel_name': 'import.o2m',
                             'required': False, 'fields': [
-                                {'id': 'parent_id', 'name': 'id', 'model_name': 'import.o2m.child',
+                                {'id': 'parent_id', 'name': 'id', 'model_name': 'import.o2m',
                                  'string': 'External ID', 'required': False,
                                  'fields': [], 'type': 'id'},
-                                {'id': 'parent_id', 'name': '.id', 'model_name': 'import.o2m.child',
+                                {'id': 'parent_id', 'name': '.id', 'model_name': 'import.o2m',
                                  'string': 'Database ID', 'required': False,
                                  'fields': [], 'type': 'id'},
                             ]
+                        },
+                        {'id': 'name', 'name': 'name', 'string': 'Name',
+                         'required': False, 'fields': [], 'type': 'char', 'model_name': 'import.o2m.child',
                         },
                         {'id': 'value', 'name': 'value', 'string': 'Value',
                          'required': False, 'fields': [], 'type': 'integer', 'model_name': 'import.o2m.child',
@@ -140,6 +213,42 @@ class TestO2M(BaseImportCase):
                 }
             ]
         )
+
+    def test_shallow_debug(self):
+        with self.debug_mode():
+            self.assertEqualFields(
+                self.env['base_import.import'].get_fields_tree("import.o2m"),
+                [
+                    get_id_field("import.o2m"),
+                    {'id': 'name', 'name': 'name', 'string': "Name", 'required': False, 'fields': [], 'type': 'char', 'model_name': 'import.o2m'},
+                    {
+                        'id': 'value', 'name': 'value', 'string': 'Value', 'model_name': 'import.o2m',
+                        'required': False, 'type': 'one2many', 'comodel_name': 'import.o2m.child',
+                        'fields': [
+                            get_id_field("import.o2m.child"),
+                            {
+                                'id': 'parent_id', 'name': 'parent_id', 'model_name': 'import.o2m.child',
+                                'string': 'Parent', 'type': 'many2one', 'comodel_name': 'import.o2m',
+                                'required': False, 'fields': [
+                                    {'id': 'parent_id', 'name': 'id', 'model_name': 'import.o2m',
+                                    'string': 'External ID', 'required': False,
+                                    'fields': [], 'type': 'id'},
+                                    {'id': 'parent_id', 'name': '.id', 'model_name': 'import.o2m',
+                                    'string': 'Database ID', 'required': False,
+                                    'fields': [], 'type': 'id'},
+                                ]
+                            },
+                            {'id': 'name', 'name': 'name', 'string': 'Name',
+                             'required': False, 'fields': [], 'type': 'char', 'model_name': 'import.o2m.child',
+                            },
+                            {'id': 'value', 'name': 'value', 'string': 'Value',
+                            'required': False, 'fields': [], 'type': 'integer', 'model_name': 'import.o2m.child',
+                            },
+                            {'id': 'value', 'name': '.id', 'string': 'Database ID', 'required': False, 'fields': [], 'type': 'id', 'model_name': 'import.o2m.child'}
+                        ]
+                    }
+                ]
+            )
 
 
 class TestMatchHeadersSingle(TransactionCase):
@@ -350,7 +459,7 @@ class TestPreview(TransactionCase):
         self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue']})
         self.assertEqual(result['headers'], ['name', 'Some Value', 'Counter'])
         # Order depends on iteration order of fields_get
-        self.assertItemsEqual(result['fields'], [
+        self.assertItemsEqual(result['fields'][:4], [
             get_id_field('import.preview'),
             {'id': 'name', 'name': 'name', 'string': 'Name', 'required': False, 'fields': [], 'type': 'char', 'model_name': 'import.preview'},
             {'id': 'somevalue', 'name': 'somevalue', 'string': 'Some Value', 'required': True, 'fields': [], 'type': 'integer', 'model_name': 'import.preview'},
@@ -373,7 +482,7 @@ class TestPreview(TransactionCase):
         self.assertIsNone(result.get('error'))
         self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue']})
         self.assertEqual(result['headers'], ['name', 'Some Value', 'Counter'])
-        self.assertItemsEqual(result['fields'], [
+        self.assertItemsEqual(result['fields'][:4], [
             get_id_field('import.preview'),
             {'id': 'name', 'name': 'name', 'string': 'Name', 'required': False, 'fields': [], 'type': 'char', 'model_name': 'import.preview'},
             {'id': 'somevalue', 'name': 'somevalue', 'string': 'Some Value', 'required': True, 'fields': [], 'type': 'integer', 'model_name': 'import.preview'},
@@ -396,7 +505,7 @@ class TestPreview(TransactionCase):
         self.assertIsNone(result.get('error'))
         self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue']})
         self.assertEqual(result['headers'], ['name', 'Some Value', 'Counter'])
-        self.assertItemsEqual(result['fields'], [
+        self.assertItemsEqual(result['fields'][:4], [
             get_id_field('import.preview'),
             {'id': 'name', 'name': 'name', 'string': 'Name', 'required': False, 'fields': [], 'type': 'char', 'model_name': 'import.preview'},
             {'id': 'somevalue', 'name': 'somevalue', 'string': 'Some Value', 'required': True, 'fields': [], 'type': 'integer', 'model_name': 'import.preview'},
@@ -419,7 +528,7 @@ class TestPreview(TransactionCase):
         self.assertIsNone(result.get('error'))
         self.assertEqual(result['matches'], {0: ['name'], 1: ['somevalue']})
         self.assertEqual(result['headers'], ['name', 'Some Value', 'Counter'])
-        self.assertItemsEqual(result['fields'], [
+        self.assertItemsEqual(result['fields'][:4], [
             get_id_field('import.preview'),
             {'id': 'name', 'name': 'name', 'string': 'Name', 'required': False, 'fields': [], 'type': 'char', 'model_name': 'import.preview'},
             {'id': 'somevalue', 'name': 'somevalue', 'string': 'Some Value', 'required': True, 'fields': [], 'type': 'integer', 'model_name': 'import.preview'},
@@ -503,6 +612,66 @@ class test_convert_import_data(TransactionCase):
             ['c', 'd', 'dt'],
             [],
             {**opts},
+        )
+
+        # if results empty, no errors
+        self.assertItemsEqual(results['messages'], [])
+
+    def test_date_fields_with_slash_ymd(self):
+        self.env['res.lang']._activate_lang('de_DE')
+        import_wizard = self.env['base_import.import'].with_context(lang='de_DE').create({
+            'res_model': 'import.complex',
+            'file': 'c,d,create_date\n'
+                    '"foo","2023/01/01","2023.01.01 15:15:15"\n',
+            'file_type': 'text/csv',
+        })
+
+        opts = {
+            'date_format': '',
+            'datetime_format': '',
+            'quoting': '"',
+            'separator': ',',
+            'float_decimal_separator': '.',
+            'float_thousand_separator': ',',
+            'has_headers': True
+        }
+        result_parse = import_wizard.parse_preview({**opts})
+
+        opts = result_parse['options']
+        results = import_wizard.execute_import(
+            ['c', 'd', 'create_date'],
+            [],
+            {**opts}
+        )
+
+        # if results empty, no errors
+        self.assertItemsEqual(results['messages'], [])
+
+    def test_date_fields_with_slash_dmy(self):
+        self.env['res.lang']._activate_lang('de_DE')
+        import_wizard = self.env['base_import.import'].with_context(lang='de_DE').create({
+            'res_model': 'import.complex',
+            'file': 'c,d,create_date\n'
+                    '"foo","01/01/2023","2023.01.01 15:15:15"\n',
+            'file_type': 'text/csv',
+        })
+
+        opts = {
+            'date_format': '',
+            'datetime_format': '',
+            'quoting': '"',
+            'separator': ',',
+            'float_decimal_separator': '.',
+            'float_thousand_separator': ',',
+            'has_headers': True
+        }
+        result_parse = import_wizard.parse_preview({**opts})
+
+        opts = result_parse['options']
+        results = import_wizard.execute_import(
+            ['c', 'd', 'create_date'],
+            [],
+            {**opts}
         )
 
         # if results empty, no errors
@@ -753,7 +922,7 @@ foo3,US,0,persons\n""",
             ['Joel', 'US', 'Portal', '', 'tag1', 'tag3'],
         ]
 
-        with RecordCapturer(self.env['res.partner'], []) as capture:
+        with RecordCapturer(self.env['res.partner']) as capture:
             import_wizard = self.env['base_import.import'].create({
                 'res_model': 'res.partner',
                 'file': '\n'.join([';'.join(partner_values) for partner_values in file_partner_values]),
@@ -782,6 +951,203 @@ foo3,US,0,persons\n""",
         self.assertEqual(tag1 | tag2 | tag3, partners[0].category_id)
         self.assertEqual(tag3, partners[1].category_id)
         self.assertEqual(tag1 | tag3, partners[2].category_id)
+
+    def test_multi_mapping_hmtl(self):
+        import_wizard = self.env['base_import.import'].create({
+            'res_model': 'import.complex',
+            'file': 'html,html\n'
+                    '"<p>foo</p>","<p>bar</p>"\n',
+            'file_type': 'text/csv',
+        })
+
+        results = import_wizard.execute_import(
+            ['html', 'html'],
+            [],
+            {
+                'quoting': '"',
+                'separator': ',',
+                'has_headers': True,
+            },
+        )
+        self.assertItemsEqual(results['messages'], [])  # No error
+
+        last_record = self.env['import.complex'].search([], order='id DESC', limit=1)
+        self.assertItemsEqual(last_record.html, "<p>foo</p><br><p>bar</p>")
+
+    @mute_logger('odoo.addons.base_import.models.base_import')
+    @unittest.skipUnless(can_import('xlwt') and can_import('openpyxl'), "xlwt/openpyxl not available")
+    def test_xls_datetime_values(self):
+        """ Test the support of having dates set as strings with the user format and date/datetime objects
+        in the same xls(x) file.
+
+        xls(x) allows to set a date/datetime format on a cell.
+        e.g.
+        foo,06/30/2025
+        bar,datetime.date(2025, 7, 1)
+
+        In particular, Google Spreadsheet tends to automatically convert cells to date/datetime when it detects
+        their value is a date.
+        e.g. create a new google spreadsheet
+        in the first cell, enter `foo`
+        in the second cell, enter `01/07/2025`.
+        Notice that the date has been aligned to the right of the cell, while foo remained on the left.
+        It's because the cell holding the date has been automatically converted into a date format.
+        In a third cell, enter `30/07/2025`. It's possible it stays aligned to the left,
+        because it wasn't converted automatically into the date format.
+        It's because the day is higher than 12, and Google spreadsheet didn't detect it was a date
+        because it was expecting the Americam date format `%d/%m/%Y`.
+
+        In such a case, you have a file with dates visually looking using the same format in the user interface,
+        but in reality some are stored as simple strings, some are stored as date objects within the xls(x) file.
+
+        Given how easy this is to land in such a situation using Google Spreadhseet, Odoo should support it.
+        """
+        for data, expected_preview in [
+            ({
+                'Some Value': [1, 2],
+                'Date': ['06/30/2025', datetime.date(2025, 7, 1)],
+                'Datetime': ['06/30/2025 13:37:42', datetime.datetime(2025, 7, 1, 9, 8, 7)],
+            }, [
+                ['1', '2'],
+                # /!\ American format, July 1st is 07/01
+                ['06/30/2025', '07/01/2025'],
+                ['06/30/2025 13:37:42', '07/01/2025 09:08:07'],
+            ]),
+            ({
+                'Some Value': [1, 2],
+                'Date': ['2025-06-30', datetime.date(2025, 7, 1)],
+                'Datetime': ['2025-06-30 13:37:42', datetime.datetime(2025, 7, 1, 9, 8, 7)],
+            }, [
+                ['1', '2'],
+                ['2025-06-30', '2025-07-01'],
+                ['2025-06-30 13:37:42', '2025-07-01 09:08:07'],
+            ])
+        ]:
+            for file_content, file_type in [
+                (generate_xls(data), 'application/vnd.ms-excel'),
+                (generate_xlsx(data), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
+            ]:
+                import_wizard = self.env['base_import.import'].create({
+                    'res_model': 'import.preview',
+                    'file': file_content,
+                    'file_type': file_type,
+                })
+                result = import_wizard.parse_preview({'has_headers': True})
+
+                self.assertEqual(result['preview'], expected_preview)
+                options = result.get('options', {})
+
+                response = import_wizard.execute_import(
+                    ['somevalue', 'date', 'datetime'],
+                    ['Some Value', 'Date', 'Datetime'],
+                    {
+                        'has_headers': True, 'quoting': '"', 'separator': ',',
+                        'date_format': options.get('date_format'), 'datetime_format': options.get('datetime_format'),
+                    },
+                )
+
+                self.assertFalse(response.get('messages'))
+
+    @unittest.skipUnless(can_import('xlwt') and can_import('openpyxl'), "xlwt/openpyxl not available")
+    def test_xlsx_datetime_values_assigned_to_char_field(self):
+        """Test that importing datetime values to char field is converted"""
+
+        file_content = generate_xlsx({
+            'Some Value': [1, 3, 5],
+            'Name': ['foo', datetime.datetime(2020, 1, 6, 8, 10), datetime.date(2025, 7, 1)]   # Invalid Date like object in a char field
+        })
+
+        file_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+        import_wizard = self.env['base_import.import'].create({
+            'res_model': 'import.preview',
+            'file': file_content,
+            'file_type': file_type,
+        })
+
+        import_wizard.parse_preview({'has_headers': True})
+
+        response = import_wizard.execute_import(
+            ['somevalue', 'name'],
+            ['Some Value', 'Name'],
+            {
+                'has_headers': True,
+                'quoting': '"',
+                'separator': ',',
+                'datetime_format': '%H:%M:%S %d/%m/%Y',
+                'date_format': '%d/%m/%Y',
+            }
+        )
+        self.assertFalse(response.get('messages'))
+        self.assertEqual(response['name'], ['foo', '08:10:00 06/01/2020', '01/07/2025', '', '', ''])
+
+    @unittest.skipUnless(can_import('xlwt') and can_import('openpyxl'), "xlwt/openpyxl not available")
+    def test_xlsx_datetime_values_assigned_to_related_char_field(self):
+        """Test that importing datetime values to a related char field is converted"""
+        file_content = generate_xlsx(
+            {
+                'Child/Name': ['foo', datetime.datetime(2020, 1, 6, 8, 10), datetime.date(2024, 7, 1)],
+            }
+        )
+        file_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        import_wizard = self.env["base_import.import"].create({
+            'res_model': "import.o2m",
+            'file': file_content,
+            'file_type': file_type,
+        })
+        import_wizard.parse_preview({'has_headers': True})
+        response = import_wizard.execute_import(
+            ["value/name"],
+            ["Child/Name"],
+            {
+                'quoting': '"', 'separator': ',', 'has_headers': True,
+                'datetime_format': '%H:%M:%S %d/%m/%Y', 'date_format': '%d/%m/%Y',
+            }
+        )
+        self.assertFalse(response.get('messages'))
+        self.assertEqual(
+            self.env['import.o2m'].browse(response['ids']).value.mapped('name'),
+            ['foo', '08:10:00 06/01/2020', '01/07/2024']
+        )
+
+    @unittest.skipUnless(can_import('xlwt') and can_import('openpyxl'), "xlwt/openpyxl not available")
+    def test_xlsx_datetime_values_assigned_to_property_char_field(self):
+        """Test that importing datetime values to a property char field is converted"""
+        def_record = self.env['import.properties.definition'].create([
+            {
+                'properties_definition': [
+                    {'name': 'char_prop', 'type': 'char', 'string': 'TextType'},
+                    {'name': 'date_prop', 'type': 'date', 'string': 'DateType'},
+                ]
+            },
+        ])
+        file_content = generate_xlsx({
+            "Property Definition": [def_record.id, def_record.id],
+            f"TextType ({def_record.display_name})": [datetime.datetime(2020, 1, 6, 8, 10), datetime.date(2025, 7, 1)],
+            f"DateType ({def_record.display_name})": [datetime.datetime(2020, 2, 6, 8, 10), datetime.date(2025, 7, 2)],
+        })
+        file_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        import_wizard = self.env['base_import.import'].create({
+            'res_model': 'import.properties',
+            'file': file_content,
+            'file_type': file_type,
+        })
+        import_wizard.parse_preview({'has_headers': True})
+        response = import_wizard.execute_import(
+            ["record_definition_id", "properties.char_prop", "properties.date_prop"],
+            ["Property Definition", "Property/TextType", "Property/DateType"],
+            {
+                'quoting': '"', 'separator': ',', 'has_headers': True,
+            }
+        )
+        self.assertFalse(response.get('messages'))
+        self.assertEqual(
+            [prop['char_prop'] for prop in self.env['import.properties'].browse(response['ids']).mapped('properties')],
+            [
+                datetime.datetime(2020, 1, 6, 8, 10).strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                datetime.date(2025, 7, 1).strftime(DEFAULT_SERVER_DATE_FORMAT),
+            ],
+        )
 
 
 class TestBatching(TransactionCase):
@@ -909,6 +1275,44 @@ g,g@example.com
         self.assertEqual(results['nextrow'], 0)
         partners_3 = self.env['res.partner'].search([]) - (partners_before | partners_1 | partners_2)
         self.assertEqual(partners_3.mapped('name'), ['d', 'e', 'f', 'g'])
+
+
+class TestImageImport(TransactionCase):
+    webp = base64.b64decode(
+        b'UklGRjoAAABXRUJQVlA4IC4AAAAwAQCdASoBAAEAAUAmJaAAA3AA/u/uY//8s//2W/7LeM///5Bj'
+    )
+
+    def _import_image(self, content):
+        response = unittest.mock.Mock(
+            headers={},
+            iter_content=unittest.mock.Mock(return_value=[content]),
+        )
+        session = unittest.mock.Mock()
+        session.get.return_value = response
+        return self.env['base_import.import']._import_file_by_url(
+            'https://example.com/image.webp', session, 'image', 0,
+        )
+
+    def test_import_webp_by_url(self):
+        self.assertEqual(self._import_image(self.webp), base64.b64encode(self.webp))
+
+    def test_import_unsupported_webp_by_url(self):
+        # ImageProcess accepts unknown WebP codecs and returns the source bytes.
+        content = b'RIFF\x08\x00\x00\x00WEBPVP8?'
+        self.assertEqual(self._import_image(content), base64.b64encode(content))
+
+    def test_import_oversized_webp_by_url(self):
+        # Above IMAGE_MAX_RESOLUTION (50e6); 8000x8000 = 64e6
+        width = height = 8000
+        dimensions = b''.join(
+            (size - 1).to_bytes(3, 'little') for size in (width, height)
+        )
+        chunk = b'VP8X' + (10).to_bytes(4, 'little') + b'\x00\x00\x00\x00' + dimensions
+        content = b'RIFF' + (len(chunk) + 4).to_bytes(4, 'little') + b'WEBP' + chunk
+
+        with mute_logger('odoo.addons.base_import.models.base_import'), \
+             self.assertRaisesRegex(ImportValidationError, r'Too large image \(above 50\.0Mpx\)'):
+            self._import_image(content)
 
 
 class test_failures(TransactionCase):

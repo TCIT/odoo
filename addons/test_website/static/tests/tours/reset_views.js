@@ -1,4 +1,3 @@
-/** @odoo-module **/
 /* global ace */
 
 import { clickOnSave, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
@@ -21,7 +20,8 @@ registerWebsitePreviewTour(
     () => [
         {
             content: "Drag the Intro snippet group and drop it in #oe_structure_test_website_page.",
-            trigger: '#oe_snippets .oe_snippet[name="Intro"] .oe_snippet_thumbnail:not(.o_we_ongoing_insertion)',
+            trigger:
+                ".o_block_tab:not(.o_we_ongoing_insertion) #snippet_groups .o_snippet[name='Intro'] .o_snippet_thumbnail .o_snippet_thumbnail_area",
             // id starting by 'oe_structure..' will actually create an inherited view
             run: "drag_and_drop :iframe #oe_structure_test_website_page",
         },
@@ -71,7 +71,7 @@ registerWebsitePreviewTour(
     () => [
         {
             content: "check that the view got fixed",
-            trigger: ":iframe p:contains(/^Test Page View$/)",
+            trigger: ":iframe p:text(Test Page View)",
         },
         {
             content: "check that the inherited COW view is still there (created during edit mode)",

@@ -1,32 +1,50 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* mail_group
-# 
-# Translators:
-# Will Sensors, 2024
-# JanisJanis <jbojars@gmail.com>, 2024
-# Martin Trigaux, 2024
-# ievaputnina <ievai.putninai@gmail.com>, 2024
-# Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2025
-# Arnis Putniņš <arnis@allegro.lv>, 2025
-# 
+# * mail_group
+#
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:40+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Arnis Putniņš <arnis@allegro.lv>, 2025\n"
-"Language-Team: Latvian (https://app.transifex.com/odoo/teams/41243/lv/)\n"
+"POT-Creation-Date: 2026-04-10 18:39+0000\n"
+"PO-Revision-Date: 2026-08-04 01:52+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Latvian <https://translate.odoo.com/projects/odoo-19/"
+"mail_group/lv/>\n"
+"Language: lv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: lv\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n % 10 == 0 || n % 100 >= 11 && n % 100 <= "
+"19) ? 0 : ((n % 10 == 1 && n % 100 != 11) ? 1 : 2);\n"
+"X-Generator: Weblate 2026.6.1\n"
+
+#. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_list
+msgid "#Members"
+msgstr ""
+
+#. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_list
+msgid "#Messages"
+msgstr ""
+
+#. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_list
+msgid "#To Review"
+msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_reject_form
 msgid ") <span invisible=\"not send_email\">and send them an email</span>."
+msgstr ""
+
+#. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.messages_short
+msgid ""
+"<br/>\n"
+"                    Get the conversation started by sending an email to"
 msgstr ""
 
 #. module: mail_group
@@ -39,11 +57,15 @@ msgstr ""
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "                Hello,<br/><br/>\n"
-"                You have requested to be subscribed to the mailing list <strong t-out=\"object.name or ''\"/>.\n"
+"                You have requested to be subscribed to the mailing list "
+"<strong t-out=\"object.name or ''\"/>.\n"
 "                <br/><br/>\n"
-"                To confirm, please visit the following link: <strong t-if=\"ctx.get('token_url')\"><a t-att-href=\"ctx['token_url']\"><t t-out=\"ctx['token_url'] or ''\"/></a></strong>\n"
+"                To confirm, please visit the following link: <strong t-"
+"if=\"ctx.get('token_url')\"><a t-att-href=\"ctx['token_url']\"><t t-"
+"out=\"ctx['token_url'] or ''\"/></a></strong>\n"
 "                <br/><br/>\n"
-"                If this was a mistake or you did not requested this action, please ignore this message.\n"
+"                If this was a mistake or you did not requested this action, "
+"please ignore this message.\n"
 "            </div>\n"
 "        "
 msgstr ""
@@ -53,11 +75,15 @@ msgstr ""
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "                Hello,<br/><br/>\n"
-"                You have requested to be unsubscribed to the mailing list <strong t-out=\"object.name or ''\"/>.\n"
+"                You have requested to be unsubscribed to the mailing list "
+"<strong t-out=\"object.name or ''\"/>.\n"
 "                <br/><br/>\n"
-"                To confirm, please visit the following link: <strong t-if=\"ctx.get('token_url')\"><a t-att-href=\"ctx['token_url']\"><t t-out=\"ctx['token_url'] or ''\"/></a></strong>.\n"
+"                To confirm, please visit the following link: <strong t-"
+"if=\"ctx.get('token_url')\"><a t-att-href=\"ctx['token_url']\"><t t-"
+"out=\"ctx['token_url'] or ''\"/></a></strong>.\n"
 "                <br/><br/>\n"
-"                If this was a mistake or you did not requested this action, please ignore this message.\n"
+"                If this was a mistake or you did not requested this action, "
+"please ignore this message.\n"
 "            </div>\n"
 "        "
 msgstr ""
@@ -67,25 +93,39 @@ msgstr ""
 msgid ""
 "<div>\n"
 "                <p>Hello <t t-out=\"object.partner_id.name or ''\"/>,</p>\n"
-"                <p>Please find below the guidelines of the <t t-out=\"object.mail_group_id.name\"/> mailing list.</p>\n"
-"                <p><t t-out=\"object.mail_group_id.moderation_guidelines_msg or ''\"/></p>\n"
+"                <p>Please find below the guidelines of the <t t-"
+"out=\"object.mail_group_id.name\"/> mailing list.</p>\n"
+"                <p><t t-out=\"object.mail_group_id.moderation_guidelines_msg "
+"or ''\"/></p>\n"
 "            </div>\n"
 "        "
 msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.message_footer
-msgid "<i class=\"fa fa-calendar\" role=\"img\" aria-label=\"Date\" title=\"Date\"/>"
+msgid ""
+"<i class=\"fa fa-calendar\" role=\"img\" aria-label=\"Date\" title=\"Date\"/>"
 msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_groups
-msgid "<i class=\"fa fa-envelope-o me-1\" role=\"img\" aria-label=\"Alias\" title=\"Alias\"/>"
+msgid ""
+"<i class=\"fa fa-envelope-o me-1\" role=\"img\" aria-label=\"Alias\" "
+"title=\"Alias\"/>"
 msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.group_name
-msgid "<i class=\"fa fa-envelope-o\" role=\"img\" aria-label=\"Alias\" title=\"Alias\"/>"
+msgid ""
+"<i class=\"fa fa-envelope-o\" role=\"img\" aria-label=\"Alias\" "
+"title=\"Alias\"/>"
+msgstr ""
+
+#. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.mail_groups
+msgid ""
+"<i class=\"fa fa-fw fa-envelope-o\" role=\"img\" aria-label=\"Traffic\" "
+"title=\"Traffic\"/>"
 msgstr ""
 
 #. module: mail_group
@@ -112,8 +152,8 @@ msgstr ""
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.message_attachments
 msgid ""
-"<i class=\"oi oi-chevron-down\" role=\"img\" aria-label=\"Show attachments\""
-" title=\"Show attachments\"/>"
+"<i class=\"oi oi-chevron-down\" role=\"img\" aria-label=\"Show attachments\" "
+"title=\"Show attachments\"/>"
 msgstr ""
 
 #. module: mail_group
@@ -145,8 +185,10 @@ msgstr ""
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_form
 msgid ""
-"<span class=\"ms-2 badge text-bg-success\" invisible=\"author_moderation != 'allow'\">Whitelisted</span>\n"
-"                            <span class=\"ms-2 badge text-bg-danger\" invisible=\"author_moderation != 'ban'\">Banned</span>"
+"<span class=\"ms-2 badge text-bg-success\" invisible=\"author_moderation != "
+"'allow'\">Whitelisted</span>\n"
+"                            <span class=\"ms-2 badge text-bg-danger\" "
+"invisible=\"author_moderation != 'ban'\">Banned</span>"
 msgstr ""
 
 #. module: mail_group
@@ -168,6 +210,7 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_defaults
+#, fuzzy
 msgid ""
 "A Python dictionary that will be evaluated to provide default values when "
 "creating new records for this alias."
@@ -178,22 +221,26 @@ msgstr ""
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_form
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_list
+#, fuzzy
 msgid "Accept"
 msgstr "Apstiprināt"
 
 #. module: mail_group
 #: model:ir.model.fields.selection,name:mail_group.selection__mail_group_message__moderation_status__accepted
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_form
+#, fuzzy
 msgid "Accepted"
 msgstr "Apstiprināts"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message_reject__action
+#, fuzzy
 msgid "Action"
 msgstr "Darbība"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__active
+#, fuzzy
 msgid "Active"
 msgstr "Aktīvs"
 
@@ -207,22 +254,25 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_id
-#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_list
+#, fuzzy
 msgid "Alias"
 msgstr "Alias"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_contact
+#, fuzzy
 msgid "Alias Contact Security"
 msgstr "Alias Contact Security"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_domain_id
+#, fuzzy
 msgid "Alias Domain"
 msgstr "Aizstājvārda domēns"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_domain
+#, fuzzy
 msgid "Alias Domain Name"
 msgstr "Aizstājvārda domēna nosaukums"
 
@@ -233,6 +283,7 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_name
+#, fuzzy
 msgid "Alias Name"
 msgstr "Alias Name"
 
@@ -248,6 +299,7 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_model_id
+#, fuzzy
 msgid "Aliased Model"
 msgstr "Aliased Model"
 
@@ -273,27 +325,31 @@ msgstr ""
 
 #. module: mail_group
 #. odoo-javascript
-#: code:addons/mail_group/static/src/js/mail_group.js:0
+#: code:addons/mail_group/static/src/interactions/mail_group.js:0
 msgid "An email with instructions has been sent."
 msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_search
+#, fuzzy
 msgid "Archived"
 msgstr "Arhivēts"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.group_archive_menu
+#, fuzzy
 msgid "Archives"
 msgstr "Arhīvi"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__attachment_ids
+#, fuzzy
 msgid "Attachments"
 msgstr "Pielikumi"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__author_id
+#, fuzzy
 msgid "Author"
 msgstr "Autors"
 
@@ -304,15 +360,17 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group_message__author_id
+#, fuzzy
 msgid ""
-"Author of the message. If not set, email_from may hold an email address that"
-" did not match any partner."
+"Author of the message. If not set, email_from may hold an email address that "
+"did not match any partner."
 msgstr ""
 "Ziņas autors. Ja nav iestatīts, email_from lauks var saturēt epasta adresi, "
 "kas neatbilst nevienam partnerim."
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__access_group_id
+#, fuzzy
 msgid "Authorized Group"
 msgstr "Autorizēta grupa"
 
@@ -369,12 +427,28 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__group_message_child_ids
+#, fuzzy
 msgid "Children"
-msgstr "Bērni"
+msgstr "Apakšobjekti"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
 msgid "Choose or configure a custom domain"
+msgstr ""
+
+#. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.group_name
+#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
+#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_kanban
+#: model_terms:ir.ui.view,arch_db:mail_group.mail_groups
+#, fuzzy
+msgid "Closed"
+msgstr "Slēgts"
+
+#. module: mail_group
+#: model:ir.model.fields,help:mail_group.field_mail_group__is_closed
+msgid ""
+"Closed groups might still be accessed, but emails sent to it will bounce"
 msgstr ""
 
 #. module: mail_group
@@ -390,6 +464,7 @@ msgstr ""
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__body
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message_reject__body
+#, fuzzy
 msgid "Contents"
 msgstr "Saturs"
 
@@ -409,6 +484,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__create_uid
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message_reject__create_uid
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_moderation__create_uid
+#, fuzzy
 msgid "Created by"
 msgstr "Izveidoja"
 
@@ -417,6 +493,7 @@ msgstr "Izveidoja"
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_member__create_date
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message_reject__create_date
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_moderation__create_date
+#, fuzzy
 msgid "Created on"
 msgstr "Izveidots"
 
@@ -427,21 +504,25 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_bounced_content
+#, fuzzy
 msgid "Custom Bounced Message"
 msgstr "Pielāgots atlēkušais ziņojums"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_defaults
+#, fuzzy
 msgid "Default Values"
 msgstr "Noklusējuma vērtības"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__description
+#, fuzzy
 msgid "Description"
 msgstr "Apraksts"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_reject_form
+#, fuzzy
 msgid "Discard"
 msgstr "Atmest"
 
@@ -451,12 +532,15 @@ msgstr "Atmest"
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__display_name
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message_reject__display_name
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_moderation__display_name
+#, fuzzy
 msgid "Display Name"
-msgstr "Nosaukums"
+msgstr "Attēlotais nosaukums"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_member__email
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_moderation__email
+#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_member_view_tree
+#, fuzzy
 msgid "Email"
 msgstr "E-pasts"
 
@@ -469,6 +553,7 @@ msgstr ""
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_email
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
+#, fuzzy
 msgid "Email Alias"
 msgstr "Email Alias"
 
@@ -479,6 +564,7 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group_message__email_from
+#, fuzzy
 msgid ""
 "Email address of the sender. This field is set when no matching partner is "
 "found and replaces the author_id field in the chatter."
@@ -488,11 +574,13 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_domain
+#, fuzzy
 msgid "Email domain e.g. 'example.com' in 'odoo@example.com'"
 msgstr "E-pasta domēns piem., 'piemers.lv' e-pastā 'odoo@piemers.lv'"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
+#, fuzzy
 msgid "Emails"
 msgstr "E-pasti"
 
@@ -503,6 +591,7 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields.selection,name:mail_group.selection__mail_group__access_mode__public
+#, fuzzy
 msgid "Everyone"
 msgstr "Ikviens"
 
@@ -514,6 +603,7 @@ msgstr ""
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__email_from
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_form
+#, fuzzy
 msgid "From"
 msgstr "No"
 
@@ -523,14 +613,9 @@ msgstr "No"
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_moderation__mail_group_id
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_kanban
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_groups
+#, fuzzy
 msgid "Group"
 msgstr "Grupa"
-
-#. module: mail_group
-#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_search
-#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_search
-msgid "Group By"
-msgstr "Grupēt pēc"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_form
@@ -539,14 +624,22 @@ msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
+#, fuzzy
 msgid "Group Name"
-msgstr "Grupas nosaukums"
+msgstr "Grupas Nosaukums"
 
 #. module: mail_group
 #. odoo-python
 #: code:addons/mail_group/models/mail_group_message.py:0
 msgid "Group message can only be linked to mail group. Current model is %s."
 msgstr ""
+
+#. module: mail_group
+#. odoo-python
+#: code:addons/mail_group/controllers/portal.py:0
+#, fuzzy
+msgid "Groups"
+msgstr "Grupas"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__moderation_guidelines_msg
@@ -561,8 +654,20 @@ msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_notify_moderation
+#, fuzzy
 msgid "Hello"
 msgstr "Sveicināti"
+
+#. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.email_template_mail_group_closed
+msgid ""
+"Hello there,\n"
+"    <br/><br/>\n"
+"    The mailing list you are trying to reach has been closed, and will not "
+"accept new messages.\n"
+"    <br/><br/>\n"
+"    Kind Regards,"
+msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__id
@@ -570,14 +675,16 @@ msgstr "Sveicināti"
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__id
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message_reject__id
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_moderation__id
+#, fuzzy
 msgid "ID"
 msgstr "ID"
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_parent_thread_id
+#, fuzzy
 msgid ""
-"ID of the parent record holding the alias (example: project holding the task"
-" creation alias)"
+"ID of the parent record holding the alias (example: project holding the task "
+"creation alias)"
 msgstr ""
 "Sākotnējā ieraksta ID, kurā ir aizstājvārds (piemērs: projekts, kurā ir "
 "uzdevuma izveides aizstājvārds)"
@@ -591,6 +698,7 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__image_128
+#, fuzzy
 msgid "Image"
 msgstr "Attēls"
 
@@ -622,18 +730,25 @@ msgid "Is Banned"
 msgstr ""
 
 #. module: mail_group
+#: model:ir.model.fields,field_description:mail_group.field_mail_group__is_closed
+msgid "Is Closed"
+msgstr ""
+
+#. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__is_group_moderated
 msgid "Is Group Moderated"
 msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__is_member
+#, fuzzy
 msgid "Is Member"
 msgstr "Ir biedrs"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_kanban
+#, fuzzy
 msgid "Join"
 msgstr "Pievienoties"
 
@@ -643,8 +758,9 @@ msgstr "Pievienoties"
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__write_uid
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message_reject__write_uid
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_moderation__write_uid
+#, fuzzy
 msgid "Last Updated by"
-msgstr "Pēdējo reizi atjaunoja"
+msgstr "Pēdējoreiz atjaunināja"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__write_date
@@ -652,12 +768,14 @@ msgstr "Pēdējo reizi atjaunoja"
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__write_date
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message_reject__write_date
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_moderation__write_date
+#, fuzzy
 msgid "Last Updated on"
-msgstr "Pēdējās izmaiņas"
+msgstr "Pēdējoreiz atjaunināts"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_kanban
+#, fuzzy
 msgid "Leave"
 msgstr "Prombūtne"
 
@@ -711,6 +829,7 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__mail_message_id
+#, fuzzy
 msgid "Mail Message"
 msgstr "Pasta ziņojums"
 
@@ -747,16 +866,10 @@ msgid "Mailing-List:"
 msgstr ""
 
 #. module: mail_group
-#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_kanban
-msgid "Member"
-msgstr "Dalībnieks"
-
-#. module: mail_group
 #: model:ir.actions.act_window,name:mail_group.mail_group_member_action
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__member_ids
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
-#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_kanban
-#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_list
+#, fuzzy
 msgid "Members"
 msgstr "Biedri"
 
@@ -777,6 +890,7 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message_reject__mail_group_message_id
+#, fuzzy
 msgid "Message"
 msgstr "Ziņojums"
 
@@ -787,11 +901,13 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.actions.act_window,name:mail_group.mail_group_message_action
+#, fuzzy
 msgid "Messages"
 msgstr "Ziņojumi"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__mail_group_message_count
+#, fuzzy
 msgid "Messages Count"
 msgstr "Ziņojumu skaits"
 
@@ -812,17 +928,16 @@ msgid "Messages that need an action"
 msgstr ""
 
 #. module: mail_group
+#: model:ir.model.fields,field_description:mail_group.field_mail_group__moderation
+msgid "Moderate"
+msgstr ""
+
+#. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_notify_moderation
 msgid "Moderate Messages"
 msgstr ""
 
 #. module: mail_group
-#: model:ir.model.fields,field_description:mail_group.field_mail_group__moderation
-msgid "Moderate this group"
-msgstr ""
-
-#. module: mail_group
-#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_list
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_search
 msgid "Moderated"
 msgstr ""
@@ -898,6 +1013,7 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__name
+#, fuzzy
 msgid "Name"
 msgstr "Nosaukums"
 
@@ -926,6 +1042,7 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_member__email_normalized
+#, fuzzy
 msgid "Normalized Email"
 msgstr "Normalizēts e-pasts"
 
@@ -969,7 +1086,13 @@ msgid "Only selected groups of users can send email to the mailing list."
 msgstr ""
 
 #. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.messages_short
+msgid "Oops, there are no messages here."
+msgstr ""
+
+#. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_force_thread_id
+#, fuzzy
 msgid ""
 "Optional ID of a thread (record) to which all incoming messages will be "
 "attached, even if they did not reply to it. If set, this will disable the "
@@ -981,32 +1104,37 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__group_message_parent_id
+#, fuzzy
 msgid "Parent"
 msgstr "Virs"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_parent_model_id
+#, fuzzy
 msgid "Parent Model"
 msgstr "Virsmodelis"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_parent_thread_id
+#, fuzzy
 msgid "Parent Record Thread ID"
 msgstr "Virsieraksta sarakstes ID"
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_parent_model_id
+#, fuzzy
 msgid ""
-"Parent model holding the alias. The model holding the alias reference is not"
-" necessarily the model given by alias_model_id (example: project "
+"Parent model holding the alias. The model holding the alias reference is not "
+"necessarily the model given by alias_model_id (example: project "
 "(parent_model) and task (model))"
 msgstr ""
-"Parent model holding the alias. The model holding the alias reference is not"
-" necessarily the model given by alias_model_id (example: project "
+"Parent model holding the alias. The model holding the alias reference is not "
+"necessarily the model given by alias_model_id (example: project "
 "(parent_model) and task (model))"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_member__partner_id
+#, fuzzy
 msgid "Partner"
 msgstr "Partneris"
 
@@ -1027,6 +1155,7 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields.selection,name:mail_group.selection__mail_group_message__moderation_status__pending_moderation
+#, fuzzy
 msgid "Pending Moderation"
 msgstr "Gaida moderāciju"
 
@@ -1044,16 +1173,19 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_contact
+#, fuzzy
 msgid ""
 "Policy to post a message on the document using the mailgateway.\n"
 "- everyone: everyone can post\n"
 "- partners: only authenticated partners\n"
-"- followers: only followers of the related document or members of following channels\n"
+"- followers: only followers of the related document or members of following "
+"channels\n"
 msgstr ""
-"Veids, kādā notiek ziņojumu ievietošana dokumentā:\n"
-"- visi: ikviens var izlikt\n"
-"- partneri: tikai autentificēti partneri\n"
-"- sekotāji: tikai saistītā dokumenta sekotāji vai sekojošo kanālu dalībnieki\n"
+"Policy to post a message on the document using the mailgateway.\n"
+"- everyone: everyone can post\n"
+"- partners: only authenticated partners\n"
+"- followers: only followers of the related document or members of following "
+"channels\n"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_footer
@@ -1062,12 +1194,14 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__create_date
+#, fuzzy
 msgid "Posted"
 msgstr "Grāmatots"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__access_mode
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
+#, fuzzy
 msgid "Privacy"
 msgstr "Privātums"
 
@@ -1084,19 +1218,22 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_force_thread_id
+#, fuzzy
 msgid "Record Thread ID"
 msgstr "Ierakstīt sarakstes ID"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.group_message
+#, fuzzy
 msgid "Reference"
-msgstr "Reference"
+msgstr "Atsauksme"
 
 #. module: mail_group
 #: model:ir.model.fields.selection,name:mail_group.selection__mail_group_message_reject__action__reject
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_reject_form
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_form
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_list
+#, fuzzy
 msgid "Reject"
 msgstr "Noraidīt"
 
@@ -1118,6 +1255,7 @@ msgstr ""
 #. module: mail_group
 #: model:ir.model.fields.selection,name:mail_group.selection__mail_group_message__moderation_status__rejected
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_form
+#, fuzzy
 msgid "Rejected"
 msgstr "Noraidīts"
 
@@ -1129,7 +1267,7 @@ msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
-msgid "Responsible Users"
+msgid "Responsibles"
 msgstr ""
 
 #. module: mail_group
@@ -1153,13 +1291,20 @@ msgid "Search Moderation List"
 msgstr ""
 
 #. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
+msgid "Select users"
+msgstr ""
+
+#. module: mail_group
 #: model:ir.model.fields.selection,name:mail_group.selection__mail_group__access_mode__groups
+#, fuzzy
 msgid "Selected group of users"
 msgstr "Selected group of users"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_form
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_list
+#, fuzzy
 msgid "Send"
 msgstr "Nosūtīt"
 
@@ -1175,13 +1320,9 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message_reject__send_email
+#, fuzzy
 msgid "Send Email"
 msgstr "Nosūtīt e-pastu"
-
-#. module: mail_group
-#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
-msgid "Send Guidelines"
-msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group_message_reject__send_email
@@ -1189,8 +1330,14 @@ msgid "Send an email to the author of the message"
 msgstr ""
 
 #. module: mail_group
+#: model:ir.actions.act_window,name:mail_group.mail_compose_message_action_mail_group
+#, fuzzy
+msgid "Send email"
+msgstr "Sūtīt e-pastu"
+
+#. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__moderation_guidelines
-msgid "Send guidelines to new subscribers"
+msgid "Send guidelines to new members"
 msgstr ""
 
 #. module: mail_group
@@ -1207,6 +1354,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__moderation_status
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_moderation__status
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_moderation_view_search
+#, fuzzy
 msgid "Status"
 msgstr "Statuss"
 
@@ -1218,13 +1366,13 @@ msgstr ""
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__subject
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message_reject__subject
+#, fuzzy
 msgid "Subject"
-msgstr "Priekšmets"
+msgstr "Temats"
 
 #. module: mail_group
-#. odoo-javascript
-#: code:addons/mail_group/static/src/js/mail_group.js:0
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_groups
+#, fuzzy
 msgid "Subscribe"
 msgstr "Abonēt"
 
@@ -1237,14 +1385,15 @@ msgstr ""
 #. odoo-python
 #: code:addons/mail_group/models/mail_group.py:0
 msgid ""
-"Template \"mail_group.mail_template_guidelines\" was not found. No email has"
-" been sent. Please contact an administrator to fix this issue."
+"Template \"mail_group.mail_template_guidelines\" was not found. No email has "
+"been sent. Please contact an administrator to fix this issue."
 msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_notify_moderation
+#, fuzzy
 msgid "Thank you!"
-msgstr "Paldies Jums!"
+msgstr "Paldies!"
 
 #. module: mail_group
 #. odoo-python
@@ -1283,17 +1432,19 @@ msgstr ""
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_model_id
+#, fuzzy
 msgid ""
-"The model (Odoo Document Kind) to which this alias corresponds. Any incoming"
-" email that does not reply to an existing record will cause the creation of "
-"a new record of this model (e.g. a Project Task)"
+"The model (Odoo Document Kind) to which this alias corresponds. Any incoming "
+"email that does not reply to an existing record will cause the creation of a "
+"new record of this model (e.g. a Project Task)"
 msgstr ""
-"The model (Odoo Document Kind) to which this alias corresponds. Any incoming"
-" email that does not reply to an existing record will cause the creation of "
-"a new record of this model (e.g. a Project Task)"
+"The model (Odoo Document Kind) to which this alias corresponds. Any incoming "
+"email that does not reply to an existing record will cause the creation of a "
+"new record of this model (e.g. a Project Task)"
 
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_name
+#, fuzzy
 msgid ""
 "The name of the email alias, e.g. 'jobs' if you want to catch emails for "
 "<jobs@example.odoo.com>"
@@ -1321,13 +1472,13 @@ msgstr ""
 
 #. module: mail_group
 #. odoo-javascript
-#: code:addons/mail_group/static/src/js/mail_group.js:0
+#: code:addons/mail_group/static/src/interactions/mail_group.js:0
 msgid "This email is already subscribed."
 msgstr ""
 
 #. module: mail_group
 #. odoo-javascript
-#: code:addons/mail_group/static/src/js/mail_group.js:0
+#: code:addons/mail_group/static/src/interactions/mail_group.js:0
 msgid "This email is not subscribed."
 msgstr ""
 
@@ -1354,9 +1505,8 @@ msgid "To Review"
 msgstr ""
 
 #. module: mail_group
-#. odoo-javascript
-#: code:addons/mail_group/static/src/js/mail_group.js:0
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_groups
+#, fuzzy
 msgid "Unsubscribe"
 msgstr "Atrakstīties"
 
@@ -1394,13 +1544,20 @@ msgid "You can create only one rule for a given email address in a group."
 msgstr ""
 
 #. module: mail_group
-#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_notify_moderation
-msgid "You have messages to moderate, please go for the proceedings."
+#. odoo-python
+#: code:addons/mail_group/models/mail_group.py:0
+msgid "You can not join a closed group."
 msgstr ""
 
 #. module: mail_group
-#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_footer
-msgid "_______________________________________________"
+#. odoo-python
+#: code:addons/mail_group/models/mail_group.py:0
+msgid "You can not send guidelines for a closed group."
+msgstr ""
+
+#. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_notify_moderation
+msgid "You have messages to moderate, please go for the proceedings."
 msgstr ""
 
 #. module: mail_group
@@ -1420,8 +1577,9 @@ msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.message_footer
+#, fuzzy
 msgid "by"
-msgstr " "
+msgstr "by"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
@@ -1430,7 +1588,18 @@ msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
+msgid "e.g. \"This group is about ...\""
+msgstr ""
+
+#. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
+#, fuzzy
 msgid "e.g. mycompany.com"
+msgstr "piemēram, mycompany.com"
+
+#. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
+msgid "e.g.\"Please be polite and ...\""
 msgstr ""
 
 #. module: mail_group
@@ -1440,19 +1609,23 @@ msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.confirmation_subscription
+#, fuzzy
 msgid "has been"
 msgstr "has been"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_groups
-msgid ""
-"members<br/>\n"
-"                        <i class=\"fa fa-fw fa-envelope-o\" role=\"img\" aria-label=\"Traffic\" title=\"Traffic\"/>"
+msgid "members<br/>"
 msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_groups
 msgid "messages / month"
+msgstr ""
+
+#. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_kanban
+msgid "messages to review"
 msgstr ""
 
 #. module: mail_group
@@ -1482,5 +1655,6 @@ msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_groups
+#, fuzzy
 msgid "your email..."
 msgstr "Jūsu e-pasts..."

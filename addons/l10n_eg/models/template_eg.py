@@ -12,8 +12,6 @@ class AccountChartTemplate(models.AbstractModel):
             'code_digits': '6',
             'property_account_receivable_id': 'egy_account_102011',
             'property_account_payable_id': 'egy_account_201002',
-            'property_account_expense_categ_id': 'egy_account_400028',
-            'property_account_income_categ_id': 'egy_account_500001',
             }
 
     @template('eg', 'res.company')
@@ -34,6 +32,11 @@ class AccountChartTemplate(models.AbstractModel):
                 'default_cash_difference_expense_account_id': 'egy_account_999001',
                 'account_sale_tax_id': 'eg_standard_sale_14',
                 'account_purchase_tax_id': 'eg_standard_purchase_14',
+                'expense_account_id': 'egy_account_400028',
+                'income_account_id': 'egy_account_500001',
+                'tax_calculation_rounding_method': 'round_per_line',
+                'account_stock_journal_id': 'inventory_valuation',
+                'account_stock_valuation_id': 'egy_account_132100',
             },
         }
 
@@ -45,7 +48,7 @@ class AccountChartTemplate(models.AbstractModel):
                 "name": "Tax Adjustments",
                 "code": "TA",
                 "type": "general",
-                "sequence": 1,
+                "sequence": 10,
                 "show_on_dashboard": True,
             },
             "ifrs": {
@@ -53,6 +56,15 @@ class AccountChartTemplate(models.AbstractModel):
                 "code": "IFRS",
                 "type": "general",
                 "show_on_dashboard": True,
-                "sequence": 10,
+                "sequence": 11,
+            },
+        }
+
+    @template('eg', 'account.account')
+    def _get_eg_account_account(self):
+        return {
+            'egy_account_132100': {
+                'account_stock_expense_id': 'egy_account_400080',
+                'account_stock_variation_id': 'egy_account_400036',
             },
         }

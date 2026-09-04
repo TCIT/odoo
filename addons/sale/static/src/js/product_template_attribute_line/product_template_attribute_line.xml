@@ -2,21 +2,24 @@
 <templates xml:space="preserve">
     <!-- Attributes line template -->
     <t t-name="sale.ProductTemplateAttributeLine">
-        <div name="ptal" t-attf-class="#{this.props.attribute_values.length === 1 &amp;&amp; hasPTAVCustom() ? 'd-flex' : ''}">
+        <div
+            name="ptal"
+            t-attf-class="#{this.props.attribute_values.length === 1 &amp;&amp; hasPTAVCustom() ? 'd-md-flex' : ''}"
+        >
         <!-- If the attribute line contains only one attribute value, we don't show the attribute
              value template or the attribute line title unless the single attribute value is custom,
              whereas in this case, only the title of the attribute line and the custom value
              template are rendered. -->
-            <div class="d-flex flex-column flex-lg-row gap-2 mb-2">
+            <div class="d-flex gap-2 flex-column align-items-start justify-content-start mb-2 small">
                 <label
                     t-if="showValuesChoice || isSelectedPTAVCustom()"
                     t-out="this.props.attribute.name"
-                    t-attf-class="fw-bold text-break #{this.props.attribute_values.length === 1
-                        &amp;&amp; hasPTAVCustom() ? '' : 'col-lg-3'}"/>
+                    class="fw-bold me-3"
+                />
                 <t t-if="showValuesChoice" t-call="{{getPTAVTemplate()}}"/>
             </div>
             <input
-                class="o_input w-lg-75 mb-4 ms-lg-auto"
+                class="o_input form-control w-100 w-md-75 mb-4"
                 type="text"
                 t-att-placeholder="customValuePlaceholder"
                 t-if="hasPTAVCustom &amp;&amp; isSelectedPTAVCustom()"
@@ -27,9 +30,11 @@
     </t>
     <!-- Attributes value templates -->
     <t t-name="sale.ptav_select">
-        <select class="o_input w-lg-50 flex-grow-1"
+        <select
+            class="form-select form-select-sm w-auto"
             t-on-change="updateSelectedPTAV"
-            t-att-name="'ptal-' + this.props.id">
+            t-att-name="'ptal-' + this.props.id"
+        >
             <option
                 t-foreach="this.props.attribute_values"
                 t-as="ptav"
@@ -37,23 +42,24 @@
                 t-att-value="ptav.id"
                 t-att-selected="this.props.selected_attribute_value_ids.includes(ptav.id)"
                 t-out="getPTAVSelectName(ptav)"
-                t-att-class="{ 'css_not_available': ptav.excluded }"/>
+                t-att-class="{ 'css_not_available': ptav.excluded }"
+            />
         </select>
     </t>
     <t t-name="sale.ptav_radio">
-        <ul class="list-unstyled flex-grow-1 m-0">
-            <li t-foreach="this.props.attribute_values" t-as="ptav" t-key="ptav.id"
-                class="mb-2">
+        <ul class="d-flex flex-column flex-lg-row flex-wrap gap-3 row-gap-0 row-gap-lg-3 align-items-lg-center list-unstyled mb-0">
+            <li t-foreach="this.props.attribute_values" t-as="ptav" t-key="ptav.id" class="mb-0">
                 <div class="form-check">
                     <label
-                        class="form-check-label d-inline-flex align-items-center flex-wrap"
+                        class="form-check-label d-inline-flex align-items-center"
                         t-att-class="{ 'css_not_available': ptav.excluded }"
                         t-attf-for="ptav-{{ptav.id}}-input">
                         <span class="me-1" t-out="ptav.name"/>
                         <BadgeExtraPrice
-                            t-if="ptav.price_extra"
+                            t-if="ptav.price_extra &amp;&amp; this.props.show_extra_price"
                             price="ptav.price_extra"
-                            currencyId="this.env.currency.id"/>
+                            currencyId="this.env.currency.id"
+                        />
                     </label>
                     <input
                         type="radio"
@@ -62,7 +68,8 @@
                         t-att-value="ptav.id"
                         t-att-checked="this.props.selected_attribute_value_ids.includes(ptav.id)"
                         t-att-name="'ptal-' + this.props.id"
-                        t-on-change="updateSelectedPTAV"/>
+                        t-on-change="updateSelectedPTAV"
+                    />
                 </div>
             </li>
         </ul>
@@ -75,12 +82,14 @@
                 <label
                     class="btn btn-outline-secondary"
                     t-att-class="{ 'css_not_available': ptav.excluded }"
-                    t-attf-for="ptav-{{ptav.id}}-input">
+                    t-attf-for="ptav-{{ptav.id}}-input"
+                >
                     <span t-out="ptav.name"/>
                     <BadgeExtraPrice
                         t-if="ptav.price_extra"
                         price="ptav.price_extra"
-                        currencyId="this.env.currency.id"/>
+                        currencyId="this.env.currency.id"
+                    />
                 </label>
                 <input
                     class="btn-check"
@@ -89,7 +98,8 @@
                     t-att-value="ptav.id"
                     t-att-name="'ptal-' + this.props.id"
                     t-att-checked="this.props.selected_attribute_value_ids.includes(ptav.id)"
-                    t-on-change="updateSelectedPTAV"/>
+                    t-on-change="updateSelectedPTAV"
+                />
             </li>
         </ul>
     </t>
@@ -114,15 +124,47 @@
                         t-att-value="ptav.id"
                         t-att-name="'ptal-' + this.props.id"
                         t-att-checked="this.props.selected_attribute_value_ids.includes(ptav.id)"
-                        t-on-change="updateSelectedPTAV"/>
+                        t-on-change="updateSelectedPTAV"
+                    />
+                </label>
+            </li>
+        </ul>
+    </t>
+    <t t-name="sale.ptav_image">
+        <ul class="list-inline flex-grow-1 mb-0">
+            <li
+                t-foreach="this.props.attribute_values"
+                t-as="ptav"
+                t-key="ptav.id"
+                class="list-inline-item me-2"
+            >
+                <label
+                    class="position-relative d-inline-block text-center o_sale_product_configurator_ptav_image rounded-3 cursor-pointer"
+                    t-att-title="ptav.name"
+                    t-attf-style="#{ptav.image ? 'background-image:url(/web/image/product.template.attribute.value/'+ptav.id+'/image); background-size:cover;' : ''}"
+                    t-att-class="{
+                        'active': this.props.selected_attribute_value_ids.includes(ptav.id),
+                        'custom_value': ptav.is_custom,
+                        'transparent': !ptav.is_custom and !ptav.html_color,
+                        'css_not_available': ptav.excluded
+                    }"
+                >
+                    <input
+                        type="radio"
+                        t-attf-id="ptav-{{ptav.id}}-input"
+                        t-att-value="ptav.id"
+                        t-att-name="'ptal-' + this.props.id"
+                        t-att-checked="this.props.selected_attribute_value_ids.includes(ptav.id)"
+                        t-on-change="updateSelectedPTAV"
+                        class="w-100 h-100 opacity-0 cursor-pointer"
+                    />
                 </label>
             </li>
         </ul>
     </t>
     <t t-name="sale.ptav_multi">
          <ul class="list-unstyled flex-grow-1 m-0">
-            <li t-foreach="this.props.attribute_values" t-as="ptav" t-key="ptav.id"
-                class="mb-2">
+            <li t-foreach="this.props.attribute_values" t-as="ptav" t-key="ptav.id" class="mb-2">
                 <div class="form-check">
                     <input
                         type="checkbox"
@@ -131,15 +173,17 @@
                         t-att-value="ptav.id"
                         t-att-name="'ptal-' + this.props.id"
                         t-att-checked="this.props.selected_attribute_value_ids.includes(ptav.id)"
-                        t-on-change="updateSelectedPTAV"/>
+                        t-on-change="updateSelectedPTAV"
+                    />
                     <label
                         class="form-check-label"
                         t-attf-for="ptav-{{ptav.id}}-input">
-                        <span t-out="ptav.name"/>
+                        <span class="me-1" t-out="ptav.name"/>
                         <BadgeExtraPrice
                             t-if="ptav.price_extra"
                             price="ptav.price_extra"
-                            currencyId="this.env.currency.id"/>
+                            currencyId="this.env.currency.id"
+                        />
                     </label>
                 </div>
             </li>

@@ -1,30 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* event_crm
-# 
-# Translators:
-# Đurđica Žarković <durdica.zarkovic@storm.hr>, 2024
-# Luka Carević <luka@uvid.hr>, 2024
-# storm_mpildek <matija.pildek@storm.hr>, 2024
-# Vladimir Vrgoč, 2024
-# Stjepan Lovasić <stjepan.lovasic@gmail.com>, 2024
-# Mario Jureša <mario.juresa@uvid.hr>, 2024
-# Bole <bole@dajmi5.com>, 2024
-# Martin Trigaux, 2024
-# 
+# * event_crm
+#
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Martin Trigaux, 2024\n"
-"Language-Team: Croatian (https://app.transifex.com/odoo/teams/41243/hr/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-07 00:59+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Croatian <https://translate.odoo.com/projects/odoo-19/"
+"event_crm/hr/>\n"
+"Language: hr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: hr\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: event_crm
 #: model:ir.model.fields,field_description:event_crm.field_event_event__lead_count
@@ -56,7 +50,22 @@ msgstr "<span class=\"o_stat_text\"> Potencijali</span>"
 #. module: event_crm
 #: model:ir.model.fields,field_description:event_crm.field_event_lead_rule__active
 msgid "Active"
-msgstr "Aktivno"
+msgstr "Aktivan"
+
+#. module: event_crm
+#: model_terms:ir.ui.view,arch_db:event_crm.event_question_view_form
+msgid "Add a rule"
+msgstr "Dodaj pravilo"
+
+#. module: event_crm
+#: model_terms:ir.ui.view,arch_db:event_crm.event_lead_rule_view_form
+msgid "All Event templates"
+msgstr ""
+
+#. module: event_crm
+#: model_terms:ir.ui.view,arch_db:event_crm.event_lead_rule_view_form
+msgid "All Events"
+msgstr "Svi događaji"
 
 #. module: event_crm
 #: model_terms:ir.ui.view,arch_db:event_crm.event_lead_rule_view_form
@@ -72,7 +81,7 @@ msgstr "Polaznici su kreirani"
 #. module: event_crm
 #: model:ir.model.fields.selection,name:event_crm.selection__event_lead_rule__lead_creation_trigger__confirm
 msgid "Attendees are registered"
-msgstr ""
+msgstr "Polaznici su prijavljeni"
 
 #. module: event_crm
 #: model:ir.model.fields.selection,name:event_crm.selection__event_lead_rule__lead_creation_trigger__done
@@ -121,6 +130,11 @@ msgid "Create a Lead Generation Rule"
 msgstr "Kreiraj pravilo generiranja potencijala"
 
 #. module: event_crm
+#: model:ir.model,website_form_label:event_crm.model_crm_lead
+msgid "Create an Opportunity"
+msgstr "Kreiraj priliku"
+
+#. module: event_crm
 #: model:ir.model.fields,field_description:event_crm.field_event_lead_rule__lead_ids
 msgid "Created Leads"
 msgstr ""
@@ -138,7 +152,7 @@ msgstr "Kreirano"
 #. module: event_crm
 #: model_terms:ir.ui.view,arch_db:event_crm.event_lead_rule_view_search
 msgid "Creation Type"
-msgstr ""
+msgstr "Vrsta stvaranja"
 
 #. module: event_crm
 #: model:ir.model.fields,help:event_crm.field_event_lead_rule__lead_creation_trigger
@@ -154,10 +168,14 @@ msgid "Default lead type when this rule is applied."
 msgstr ""
 
 #. module: event_crm
+#: model:ir.model.fields,field_description:event_crm.field_crm_lead__display_name
+#: model:ir.model.fields,field_description:event_crm.field_event_event__display_name
 #: model:ir.model.fields,field_description:event_crm.field_event_lead_request__display_name
 #: model:ir.model.fields,field_description:event_crm.field_event_lead_rule__display_name
+#: model:ir.model.fields,field_description:event_crm.field_event_question_answer__display_name
+#: model:ir.model.fields,field_description:event_crm.field_event_registration__display_name
 msgid "Display Name"
-msgstr "Naziv za prikaz"
+msgstr "Naziv"
 
 #. module: event_crm
 #: model:ir.model,name:event_crm.model_event_event
@@ -182,14 +200,24 @@ msgid "Event Lead Rules"
 msgstr ""
 
 #. module: event_crm
+#: model:ir.model,name:event_crm.model_event_question_answer
+msgid "Event Question Answer"
+msgstr ""
+
+#. module: event_crm
 #: model:ir.model,name:event_crm.model_event_registration
 msgid "Event Registration"
-msgstr "Registracija za događaj"
+msgstr "Organizacija događaja"
 
 #. module: event_crm
 #: model:ir.model.fields,field_description:event_crm.field_event_lead_rule__event_type_ids
 msgid "Event Templates"
 msgstr "Predlošci događanja"
+
+#. module: event_crm
+#: model:ir.actions.act_window,name:event_crm.event_lead_rule_answer_action
+msgid "Event lead Rule"
+msgstr ""
 
 #. module: event_crm
 #: model:ir.actions.act_window,name:event_crm.event_registration_action_from_lead
@@ -207,6 +235,16 @@ msgid "Event:"
 msgstr ""
 
 #. module: event_crm
+#: model_terms:ir.ui.view,arch_db:event_crm.event_lead_rule_view_form
+msgid "Execute Rule"
+msgstr ""
+
+#. module: event_crm
+#: model_terms:ir.ui.view,arch_db:event_crm.event_lead_rule_view_form
+msgid "Execute this rule for all ongoing and future events."
+msgstr ""
+
+#. module: event_crm
 #: model:ir.model.fields,help:event_crm.field_event_lead_rule__event_registration_filter
 msgid "Filter the attendees that will or not generate leads."
 msgstr ""
@@ -221,8 +259,8 @@ msgstr ""
 #. module: event_crm
 #: model:ir.model.fields,help:event_crm.field_event_lead_rule__event_id
 msgid ""
-"Filter the attendees to include those of this specific event. If not set, no"
-" event restriction will be applied."
+"Filter the attendees to include those of this specific event. If not set, no "
+"event restriction will be applied."
 msgstr ""
 
 #. module: event_crm
@@ -231,7 +269,7 @@ msgid "For any of these Events"
 msgstr "Za bilo koji od ovih događaja"
 
 #. module: event_crm
-#: model_terms:ir.ui.view,arch_db:event_crm.event_view_form
+#: model:ir.actions.server,name:event_crm.action_generate_leads
 msgid "Generate Leads"
 msgstr "Generiraj potencijale"
 
@@ -242,15 +280,19 @@ msgid "Got it! We've noted your request. Your leads will be created soon!"
 msgstr ""
 
 #. module: event_crm
+#: model:ir.model.fields,field_description:event_crm.field_crm_lead__id
+#: model:ir.model.fields,field_description:event_crm.field_event_event__id
 #: model:ir.model.fields,field_description:event_crm.field_event_lead_request__id
 #: model:ir.model.fields,field_description:event_crm.field_event_lead_rule__id
+#: model:ir.model.fields,field_description:event_crm.field_event_question_answer__id
+#: model:ir.model.fields,field_description:event_crm.field_event_registration__id
 msgid "ID"
 msgstr "ID"
 
 #. module: event_crm
 #: model_terms:ir.ui.view,arch_db:event_crm.event_lead_rule_view_form
 msgid "If the Attendees meet these Conditions"
-msgstr ""
+msgstr "Ako Sudionici ispunjavaju ove uvjete"
 
 #. module: event_crm
 #: model:ir.model.fields,field_description:event_crm.field_event_lead_rule__write_uid
@@ -260,9 +302,10 @@ msgstr "Promijenio"
 #. module: event_crm
 #: model:ir.model.fields,field_description:event_crm.field_event_lead_rule__write_date
 msgid "Last Updated on"
-msgstr "Promijenjeno"
+msgstr "Vrijeme promjene"
 
 #. module: event_crm
+#: model:ir.model,name:event_crm.model_crm_lead
 #: model:ir.model.fields.selection,name:event_crm.selection__event_lead_rule__lead_type__lead
 msgid "Lead"
 msgstr "Potencijal"
@@ -270,12 +313,12 @@ msgstr "Potencijal"
 #. module: event_crm
 #: model_terms:ir.ui.view,arch_db:event_crm.event_lead_rule_view_tree
 msgid "Lead Creation Type"
-msgstr ""
+msgstr "Vrsta stvaranja potencijala"
 
 #. module: event_crm
 #: model_terms:ir.ui.view,arch_db:event_crm.event_lead_rule_view_form
 msgid "Lead Default Values"
-msgstr ""
+msgstr "Zadane vrijednosti potencijala"
 
 #. module: event_crm
 #: model:ir.ui.menu,name:event_crm.event_lead_rule_menu
@@ -294,14 +337,14 @@ msgid "Lead Generation Rules"
 msgstr "Pravila generiranja potencijala"
 
 #. module: event_crm
+#: model:ir.model.fields,field_description:event_crm.field_event_lead_request__event_lead_rule_ids
+msgid "Lead Rules"
+msgstr ""
+
+#. module: event_crm
 #: model:ir.model.fields,field_description:event_crm.field_event_lead_rule__lead_type
 msgid "Lead Type"
 msgstr "Vrsta potencijala"
-
-#. module: event_crm
-#: model:ir.model,name:event_crm.model_crm_lead
-msgid "Lead/Opportunity"
-msgstr "Potencijal/prilika"
 
 #. module: event_crm
 #: model:ir.actions.act_window,name:event_crm.crm_lead_action_from_event
@@ -338,11 +381,6 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:event_crm.event_registration_action_from_lead
 msgid "No registration found"
 msgstr "Registracije nisu pronađene"
-
-#. module: event_crm
-#: model:ir.model.fields,field_description:event_crm.field_event_event__has_lead_request
-msgid "Ongoing Generation Request"
-msgstr ""
 
 #. module: event_crm
 #. odoo-python
@@ -406,7 +444,8 @@ msgstr ""
 #. module: event_crm
 #: model:ir.model.fields,help:event_crm.field_event_lead_rule__company_id
 msgid ""
-"Restrict the trigger of this rule to events belonging to a specific company.\n"
+"Restrict the trigger of this rule to events belonging to a specific "
+"company.\n"
 "If not set, no company restriction will be applied."
 msgstr ""
 
@@ -438,12 +477,7 @@ msgstr "Prodavač"
 #. module: event_crm
 #: model_terms:ir.ui.view,arch_db:event_crm.event_lead_rule_view_search
 msgid "Search Lead Generation Rules"
-msgstr "Pretraži pravila generiranja potencijala "
-
-#. module: event_crm
-#: model:ir.model.fields,help:event_crm.field_event_event__has_lead_request
-msgid "Set to True when a Lead Generation Request is currently running."
-msgstr ""
+msgstr "Pretraži pravila generiranja potencijala"
 
 #. module: event_crm
 #: model:ir.model.fields,field_description:event_crm.field_crm_lead__event_id
@@ -471,17 +505,24 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:event_crm.event_lead_rule_action
 msgid "Those automatically create leads when attendees register."
 msgstr ""
+"Oni automatski stvaraju potencijalne klijente kada se sudionici registriraju."
 
 #. module: event_crm
 #: model_terms:ir.ui.view,arch_db:event_crm.event_lead_rule_view_search
 msgid "Trigger Type"
-msgstr ""
+msgstr "Vrsta okidača"
 
 #. module: event_crm
 #. odoo-python
 #: code:addons/event_crm/models/event_registration.py:0
 msgid "Updated registrations"
 msgstr "Ažuriranih regsitracija"
+
+#. module: event_crm
+#: model_terms:ir.ui.view,arch_db:event_crm.event_lead_rule_view_form
+#, fuzzy
+msgid "Visible to all"
+msgstr "Vidljivo svima"
 
 #. module: event_crm
 #: model:ir.model.fields,field_description:event_crm.field_event_lead_rule__lead_creation_trigger
@@ -502,4 +543,4 @@ msgstr ""
 #. module: event_crm
 #: model_terms:ir.ui.view,arch_db:event_crm.event_lead_rule_view_form
 msgid "e.g. B2B Fairs"
-msgstr ""
+msgstr "npr. B2B sajmovi"

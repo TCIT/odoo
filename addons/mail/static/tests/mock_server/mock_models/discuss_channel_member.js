@@ -2,15 +2,80 @@ import { mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
 
 import { fields, getKwArgs, makeKwArgs, models } from "@web/../tests/web_test_helpers";
 import { serializeDateTime, today } from "@web/core/l10n/dates";
+import { ensureArray } from "@web/core/utils/arrays";
+
+const { DateTime } = luxon;
 
 export class DiscussChannelMember extends models.ServerModel {
     _name = "discuss.channel.member";
 
-    fold_state = fields.Generic({ default: "closed" });
     is_pinned = fields.Generic({ compute: "_compute_is_pinned" });
+    is_self = fields.Boolean({ compute: "_compute_is_self" });
     unpin_dt = fields.Datetime({ string: "Unpin date" });
     message_unread_counter = fields.Generic({ default: 0 });
-    last_interest_dt = fields.Datetime({ default: () => serializeDateTime(today()) });
+    last_interest_dt = fields.Datetime({
+        default: () => serializeDateTime(today().minus({ seconds: 1 })),
+    });
+
+    create(values) {
+        const idOrIds = super.create(values);
+        this.env["discuss.channel"]._compute_channel_name_member_ids();
+        const channels_needing_name_update = this.env["discuss.channel"]
+            ._filter([
+                ["channel_name_member_ids", "in", ensureArray(idOrIds)],
+                ["name", "=", false],
+                [
+                    "channel_type",
+                    "in",
+                    this.env["discuss.channel"]._member_based_naming_channel_types(),
+                ],
+            ])
+            .filter((channel) => channel.channel_name_member_ids.length <= 3);
+        for (const channel of channels_needing_name_update) {
+            const store = new mailDataHelpers.Store().add(
+                this.env["discuss.channel"].browse(channel.id),
+                makeKwArgs({ fields: [mailDataHelpers.Store.many("channel_name_member_ids")] })
+            );
+            this.env["bus.bus"]._sendone(channel, "mail.record/insert", store.get_result());
+        }
+        return idOrIds;
+    }
+
+    write(ids, vals) {
+        const membersToUpdate = this.browse(ids);
+        const syncFields = this._sync_field_names();
+        const oldValsByMember = new Map();
+        for (const member of membersToUpdate) {
+            const oldVals = {};
+            for (const fieldName of syncFields) {
+                oldVals[fieldName] = member[fieldName];
+            }
+            oldValsByMember.set(member.id, oldVals);
+        }
+        const result = super.write(ids, vals);
+        for (const member of membersToUpdate) {
+            const oldVals = oldValsByMember.get(member.id);
+            const diff = [];
+            for (const fieldName of syncFields) {
+                if (member[fieldName] !== oldVals[fieldName]) {
+                    diff.push(fieldName);
+                }
+            }
+            if (diff.length > 0) {
+                const store = new mailDataHelpers.Store();
+                diff.push("channel", "persona");
+                this.browse(member.id)._to_store(store, diff);
+                const [partner, guest] = this.env["res.partner"]._get_current_persona();
+                const busChannel = guest ?? partner;
+                this.env["bus.bus"]._sendone(busChannel, "mail.record/insert", store.get_result());
+            }
+        }
+        return result;
+    }
+
+    _sync_field_names() {
+        return ["last_interest_dt", "message_unread_counter", "new_message_separator", "unpin_dt"];
+    }
 
     /**
      * @param {number[]} ids
@@ -37,7 +102,11 @@ export class DiscussChannelMember extends models.ServerModel {
                 channel,
                 "mail.record/insert",
                 new mailDataHelpers.Store(DiscussChannelMember.browse(member.id))
-                    .add("discuss.channel.member", { id: member.id, isTyping: is_typing })
+                    .add("discuss.channel.member", {
+                        id: member.id,
+                        isTyping: is_typing,
+                        is_typing_dt: serializeDateTime(DateTime.now()),
+                    })
                     .get_result(),
             ]);
         }
@@ -54,6 +123,15 @@ export class DiscussChannelMember extends models.ServerModel {
         }
     }
 
+    _compute_is_self() {
+        const [partner, guest] = this.env["res.partner"]._get_current_persona();
+        for (const member of this) {
+            member.is_self = member.partner_id
+                ? member.partner_id === partner?.id
+                : member.guest_id === guest?.id;
+        }
+    }
+
     _compute_message_unread_counter([memberId]) {
         const [member] = this.browse(memberId);
         return this.env["mail.message"].search_count([
@@ -63,144 +141,93 @@ export class DiscussChannelMember extends models.ServerModel {
         ]);
     }
 
-    /**
-     * @param {number} id
-     * @param {string} [state]
-     * @param {number} [state_count]
-     */
-    _channel_fold(id, state, state_count) {
-        const kwargs = getKwArgs(arguments, "id", "state", "state_count");
-        id = kwargs.id;
-        delete kwargs.id;
-        state = kwargs.state;
-        state_count = kwargs.state_count;
-
-        /** @type {import("mock_models").BusBus} */
-        const BusBus = this.env["bus.bus"];
-        /** @type {import("mock_models").MailGuest} */
-        const MailGuest = this.env["mail.guest"];
-        /** @type {import("mock_models").ResPartner} */
-        const ResPartner = this.env["res.partner"];
-
-        const [member] = this.search_read([["id", "=", id]]);
-        if (member.fold_state === state) {
-            return;
-        }
-        this.write([id], { fold_state: state });
-        let target;
-        if (member.partner_id) {
-            [target] = ResPartner.search_read([["id", "=", member.partner_id[0]]]);
-        } else {
-            [target] = MailGuest.search_read([["id", "=", member.guest_id[0]]]);
-        }
-        BusBus._sendone(target, "discuss.Thread/fold_state", {
-            foldStateCount: state_count,
-            id: member.channel_id[0],
-            model: "discuss.channel",
-            fold_state: state,
-        });
-    }
-
     /** @param {number[]} ids */
-    _to_store(ids, store, fields, extra_fields) {
-        const kwargs = getKwArgs(arguments, "ids", "store", "fields", "extra_fields");
-        ids = kwargs.ids;
+    _to_store(store, fields) {
+        const kwargs = getKwArgs(arguments, "store", "fields");
         fields = kwargs.fields;
-        extra_fields = kwargs.extra_fields;
-
-        if (!fields) {
-            fields = {
-                channel: [],
-                create_date: true,
-                fetched_message_id: true,
-                persona: null,
-                seen_message_id: true,
-                last_interest_dt: true,
-                last_seen_dt: true,
-                new_message_separator: true,
-            };
-        }
-        if (extra_fields) {
-            fields = { ...fields, ...extra_fields };
-        }
-
-        /** @type {import("mock_models").MailGuest} */
-        const MailGuest = this.env["mail.guest"];
-        /** @type {import("mock_models").ResPartner} */
-        const ResPartner = this.env["res.partner"];
-
-        for (const member of this.browse(ids)) {
-            const [data] = this._read_format(
-                member.id,
-                Object.keys(fields).filter(
-                    (field) =>
-                        ![
-                            "channel",
-                            "fetched_message_id",
-                            "message_unread_counter",
-                            "seen_message_id",
-                            "persona",
-                        ].includes(field)
-                ),
-                false
-            );
-            if ("channel" in fields) {
-                data.thread = mailDataHelpers.Store.one(
+        store._add_record_fields(
+            this,
+            fields.filter(
+                (field) => !["message_unread_counter", "persona", "channel"].includes(field)
+            )
+        );
+        for (const member of this) {
+            const data = {};
+            if (fields.includes("message_unread_counter")) {
+                data.message_unread_counter = this._compute_message_unread_counter([member.id]);
+                data.message_unread_counter_bus_id = this.env["bus.bus"].lastBusNotificationId;
+            }
+            if (fields.includes("channel")) {
+                data.channel_id = mailDataHelpers.Store.one(
                     this.env["discuss.channel"].browse(member.channel_id),
                     makeKwArgs({ as_thread: true, only_id: true })
                 );
             }
-            if ("persona" in fields) {
-                if (member.partner_id) {
-                    data.persona = mailDataHelpers.Store.one(
-                        ResPartner.browse(member.partner_id),
-                        makeKwArgs({
-                            fields: this._get_store_partner_fields([member.id], fields["persona"]),
-                        })
-                    );
-                }
-                if (member.guest_id) {
-                    data.persona = mailDataHelpers.Store.one(
-                        MailGuest.browse(member.guest_id),
-                        makeKwArgs({ fields: fields["persona"] })
-                    );
-                }
+            if (fields.includes("persona")) {
+                store._add_record_fields(this.browse(member.id), this._to_store_persona());
             }
-            if ("fetched_message_id" in fields) {
-                data.fetched_message_id = mailDataHelpers.Store.one(
-                    this.env["mail.message"].browse(member.fetched_message_id),
-                    makeKwArgs({ only_id: true })
-                );
+
+            if (Object.keys(data).length) {
+                store._add_record_fields(this.browse(member.id), data);
             }
-            if ("seen_message_id" in fields) {
-                data.seen_message_id = mailDataHelpers.Store.one(
-                    this.env["mail.message"].browse(member.seen_message_id),
-                    makeKwArgs({ only_id: true })
-                );
-            }
-            if ("message_unread_counter" in fields) {
-                data.message_unread_counter = this._compute_message_unread_counter([member.id]);
-                data.message_unread_counter_bus_id = this.env["bus.bus"].lastBusNotificationId;
-            }
-            store.add(this.browse(member.id), data);
         }
     }
 
-    _get_store_partner_fields(ids, fields) {
+    _to_store_persona(fields) {
+        return [
+            mailDataHelpers.Store.attr(
+                "partner_id",
+                (m) =>
+                    mailDataHelpers.Store.one(
+                        this.env["res.partner"].browse(m.partner_id),
+                        makeKwArgs({
+                            fields: this._get_store_partner_fields(fields),
+                        })
+                    ),
+                makeKwArgs({
+                    predicate: (m) =>
+                        m.partner_id !== null && m.partner_id !== undefined && m.partner_id,
+                })
+            ),
+            mailDataHelpers.Store.attr(
+                "guest_id",
+                (m) =>
+                    mailDataHelpers.Store.one(
+                        this.env["mail.guest"].browse(m.guest_id),
+                        makeKwArgs({ fields })
+                    ),
+                makeKwArgs({
+                    predicate: (m) => m.guest_id !== null && m.guest_id !== undefined && m.guest_id,
+                })
+            ),
+        ];
+    }
+
+    get _to_store_defaults() {
+        return [
+            mailDataHelpers.Store.one("channel_id", makeKwArgs({ as_thread: true, only_id: true })),
+            "create_date",
+            "fetched_message_id",
+            "seen_message_id",
+            "last_interest_dt",
+            "last_seen_dt",
+            "new_message_separator",
+        ].concat(this._to_store_persona());
+    }
+
+    _get_store_partner_fields(fields) {
         return fields;
     }
 
     /**
      * @param {number[]} ids
      * @param {number} last_message_id
-     * @param {boolean} [sync]
      */
-    _mark_as_read(ids, last_message_id, sync) {
+    _mark_as_read(ids, last_message_id) {
         const kwargs = getKwArgs(arguments, "ids", "last_message_id", "sync");
         ids = kwargs.ids;
         delete kwargs.ids;
         last_message_id = kwargs.last_message_id;
-        sync = kwargs.sync ?? false;
         const [member] = this.browse(ids);
         if (!member) {
             return;
@@ -215,8 +242,7 @@ export class DiscussChannelMember extends models.ServerModel {
         this._set_last_seen_message([member.id], last_message_id);
         this.env["discuss.channel.member"]._set_new_message_separator(
             [member.id],
-            last_message_id + 1,
-            sync
+            last_message_id + 1
         );
     }
 
@@ -244,7 +270,6 @@ export class DiscussChannelMember extends models.ServerModel {
         if (!member) {
             return;
         }
-        DiscussChannelMember._set_new_message_separator([member.id], message_id + 1);
         DiscussChannelMember.write([member.id], {
             fetched_message_id: message_id,
             seen_message_id: message_id,
@@ -264,9 +289,14 @@ export class DiscussChannelMember extends models.ServerModel {
                 "mail.record/insert",
                 new mailDataHelpers.Store(
                     DiscussChannelMember.browse(member.id),
-                    makeKwArgs({
-                        fields: { channel: [], persona: ["name"], seen_message_id: true },
-                    })
+                    [
+                        mailDataHelpers.Store.one(
+                            "channel_id",
+                            makeKwArgs({ as_thread: true, only_id: true })
+                        ),
+
+                        "seen_message_id",
+                    ].concat(this._to_store_persona())
                 ).get_result()
             );
         }
@@ -275,14 +305,12 @@ export class DiscussChannelMember extends models.ServerModel {
     /**
      * @param {number[]} ids
      * @param {number} message_id
-     * @param {boolean} sync
      */
-    _set_new_message_separator(ids, message_id, sync) {
+    _set_new_message_separator(ids, message_id) {
         const kwargs = getKwArgs(arguments, "ids", "message_id", "sync");
         ids = kwargs.ids;
         delete kwargs.ids;
         message_id = kwargs.message_id;
-        sync = kwargs.sync ?? false;
 
         /** @type {import("mock_models").DiscussChannelMember} */
         const DiscussChannelMember = this.env["discuss.channel.member"];
@@ -296,23 +324,28 @@ export class DiscussChannelMember extends models.ServerModel {
         });
         const message_unread_counter = this._compute_message_unread_counter([member.id]);
         this.env["discuss.channel.member"].write([member.id], { message_unread_counter });
+    }
+
+    set_custom_notifications(ids, custom_notifications) {
+        const kwargs = getKwArgs(arguments, "ids", "custom_notifications");
+        ids = kwargs.ids;
+        delete kwargs.ids;
+        custom_notifications = kwargs.custom_notifications;
+
+        /** @type {import("mock_models").DiscussChannelMember} */
+        const DiscussChannelMember = this.env["discuss.channel.member"];
+
+        const channelMememberId = ids[0]; // simulate ensure_one.
+        DiscussChannelMember.write([channelMememberId], { custom_notifications });
+
         const [partner, guest] = this.env["res.partner"]._get_current_persona();
         this.env["bus.bus"]._sendone(
             guest ?? partner,
             "mail.record/insert",
             new mailDataHelpers.Store(
-                DiscussChannelMember.browse(member.id),
-                makeKwArgs({
-                    fields: {
-                        channel: [],
-                        persona: ["name"],
-                        message_unread_counter: true,
-                        new_message_separator: true,
-                    },
-                })
-            )
-                .add("discuss.channel.member", { id: member.id, syncUnread: sync })
-                .get_result()
+                DiscussChannelMember.browse(channelMememberId),
+                "custom_notifications"
+            ).get_result()
         );
     }
 }

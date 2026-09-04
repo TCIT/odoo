@@ -30,13 +30,14 @@
             <field name="name">Jessica Johnson</field>
             <field name="parent_id" ref="hr.employee_al"/>
             <field name="job_id" ref="sale_timesheet.job_engineer"/>
-            <field name="job_title">Site Manager</field>
             <field name="category_ids" eval="[(6, 0, [ref('hr.employee_category_4')])]"/>
+            <field name="resource_calendar_id" ref="resource.resource_calendar_std_38h"/>
             <field name="work_location_id" ref="hr.work_location_1"/>
             <field name="work_phone">(535)-495-4164</field>
             <field name="work_contact_id" ref="sale_timesheet.work_contact_jjo"/>
             <field name="image_1920" type="base64" file="sale_timesheet/static/img/employee_jjo-image.jpg"/>
             <field name="create_date">2020-02-02 00:00:00</field>
+            <field name="sex">female</field>
         </record>
 
         <record id="work_contact_awa" model="res.partner">
@@ -49,13 +50,13 @@
             <field name="name">Amy Watson</field>
             <field name="parent_id" ref="sale_timesheet.employee_jjo"/>
             <field name="job_id" ref="sale_timesheet.job_interior_designer"/>
-            <field name="job_title">Interior Designer</field>
             <field name="category_ids" eval="[(6, 0, [ref('hr.employee_category_4')])]"/>
             <field name="work_location_id" ref="hr.work_location_1"/>
             <field name="work_phone">(535)-495-4222</field>
             <field name="work_contact_id" ref="sale_timesheet.work_contact_awa"/>
             <field name="image_1920" type="base64" file="sale_timesheet/static/img/employee_awa-image.jpg"/>
             <field name="create_date">2020-01-01 00:00:00</field>
+            <field name="sex">female</field>
         </record>
 
         <record id="work_contact_jsm" model="res.partner">
@@ -68,13 +69,13 @@
             <field name="name">Justin Smith</field>
             <field name="parent_id" ref="sale_timesheet.employee_jjo"/>
             <field name="job_id" ref="sale_timesheet.job_labour"/>
-            <field name="job_title">Handyman</field>
             <field name="category_ids" eval="[(6, 0, [ref('hr.employee_category_4')])]"/>
             <field name="work_location_id" ref="hr.work_location_1"/>
             <field name="work_phone">(535)-495-4444</field>
             <field name="work_contact_id" ref="sale_timesheet.work_contact_jsm"/>
             <field name="image_1920" type="base64" file="sale_timesheet/static/img/employee_jsm-image.jpg"/>
             <field name="create_date">2020-02-02 00:00:00</field>
+            <field name="sex">male</field>
         </record>
 
         <record id="sale_line_services" model="sale.order.line">
@@ -131,12 +132,11 @@
 
         <record id="product_service_order_timesheet" model="product.product">
             <field name="name">Customer Care (Prepaid Hours)</field>
-            <field name="categ_id" ref="product.product_category_3"/>
+            <field name="categ_id" ref="product.product_category_services"/>
             <field name="type">service</field>
             <field name="list_price">250.00</field>
             <field name="standard_price">190.00</field>
             <field name="uom_id" ref="uom.product_uom_hour"/>
-            <field name="uom_po_id" ref="uom.product_uom_hour"/>
             <field name="service_policy">ordered_prepaid</field>
             <field name="service_tracking">task_global_project</field>
             <field name="project_id" ref="project_support"/>
@@ -145,12 +145,11 @@
 
         <record id="product_service_deliver_timesheet_1" model="product.product">
             <field name="name">Senior Architect (Invoice on Timesheets)</field>
-            <field name="categ_id" ref="product.product_category_3"/>
+            <field name="categ_id" ref="product.product_category_services"/>
             <field name="list_price">200.00</field>
             <field name="standard_price">150.00</field>
             <field name="type">service</field>
             <field name="uom_id" ref="uom.product_uom_hour"/>
-            <field name="uom_po_id" ref="uom.product_uom_hour"/>
             <field name="service_policy">delivered_timesheet</field>
             <field name="service_tracking">task_in_project</field>
             <field name="project_template_id" ref="sale_project.so_template_project"/>
@@ -158,12 +157,11 @@
 
         <record id="product_service_deliver_timesheet_2" model="product.product">
             <field name="name">Junior Architect (Invoice on Timesheets)</field>
-            <field name="categ_id" ref="product.product_category_3"/>
+            <field name="categ_id" ref="product.product_category_services"/>
             <field name="list_price">100.00</field>
             <field name="standard_price">85.00</field>
             <field name="type">service</field>
             <field name="uom_id" ref="uom.product_uom_hour"/>
-            <field name="uom_po_id" ref="uom.product_uom_hour"/>
             <field name="service_policy">delivered_timesheet</field>
             <field name="service_tracking">task_in_project</field>
             <field name="project_template_id" ref="sale_project.so_template_project"/>
@@ -171,12 +169,12 @@
 
         <record id="product_service_deliver_milestones" model="product.product">
             <field name="name">Kitchen Assembly (Milestones)</field>
-            <field name="categ_id" ref="product.product_category_3"/>
+            <field name="categ_id" ref="product.product_category_services"/>
             <field name="list_price">500</field>
             <field name="standard_price">420.00</field>
             <field name="type">service</field>
+            <field name="invoice_policy">delivery</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
-            <field name="uom_po_id" ref="uom.product_uom_unit"/>
             <field name="service_type" model="product.product" eval="'milestones' if obj().env.user.has_group('project.group_project_milestone') else 'manual'" />
             <field name="service_tracking">task_in_project</field>
             <field name="project_template_id" ref="sale_project.so_template_project"/>
@@ -189,7 +187,6 @@
             <field name="standard_price">5000.00</field>
             <field name="type">service</field>
             <field name="uom_id" ref="uom.product_uom_hour"/>
-            <field name="uom_po_id" ref="uom.product_uom_hour"/>
             <field name="service_policy">ordered_prepaid</field>
             <field name="service_tracking">task_global_project</field>
             <field name="project_id" ref="project.project_home_construction"/>
@@ -202,7 +199,6 @@
             <field name="standard_price">4000.00</field>
             <field name="type">service</field>
             <field name="uom_id" ref="uom.product_uom_hour"/>
-            <field name="uom_po_id" ref="uom.product_uom_hour"/>
             <field name="service_policy">delivered_timesheet</field>
             <field name="service_tracking">task_global_project</field>
             <field name="project_id" ref="project.project_home_construction"/>
@@ -215,7 +211,6 @@
             <field name="standard_price">2000.00</field>
             <field name="type">service</field>
             <field name="uom_id" ref="uom.product_uom_hour"/>
-            <field name="uom_po_id" ref="uom.product_uom_hour"/>
             <field name="service_policy">delivered_milestones</field>
             <field name="service_tracking">task_global_project</field>
             <field name="project_id" ref="project.project_home_construction"/>
@@ -228,7 +223,6 @@
             <field name="standard_price">3500.00</field>
             <field name="type">service</field>
             <field name="uom_id" ref="uom.product_uom_hour"/>
-            <field name="uom_po_id" ref="uom.product_uom_hour"/>
             <field name="service_policy">delivered_manual</field>
             <field name="service_tracking">task_global_project</field>
             <field name="project_id" ref="project.project_home_construction"/>
@@ -236,12 +230,11 @@
 
         <record id="product_service_deliver_manual" model="product.product">
             <field name="name">Furniture Delivery (Manual)</field>
-            <field name="categ_id" ref="product.product_category_3"/>
+            <field name="categ_id" ref="product.product_category_services"/>
             <field name="list_price">200</field>
             <field name="standard_price">150.00</field>
             <field name="type">service</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
-            <field name="uom_po_id" ref="uom.product_uom_unit"/>
             <field name="service_policy">delivered_manual</field>
             <field name="service_tracking">task_in_project</field>
             <field name="project_template_id" ref="sale_project.so_template_project"/>
@@ -341,10 +334,10 @@
             <field name="product_uom_qty">4</field>
         </record>
 
-        <!-- Sale Order 'sale_order_3' (DECO) -->
+        <!-- Sale Order 'sale_order_3' (ACME) -->
         <record id="sale_order_3" model="sale.order">
             <field name="partner_id" ref="base.res_partner_2"/>
-            <field name="client_order_ref">DECO</field>
+            <field name="client_order_ref">ACME</field>
             <field name="user_id" ref="base.user_admin"/>
             <field name="tag_ids" eval="[Command.link(ref('sales_team.categ_oppor7'))]"/>
         </record>
@@ -534,7 +527,7 @@
             }"/>
         </function>
 
-        <!-- Assign DECO & to demo, clear description and set dates -->
+        <!-- Assign ACME to demo, clear description and set dates -->
         <function model="project.project" name="write">
             <value model="project.project" search="[('sale_line_id', '=', ref('sale_line_32'))]"/>
             <value eval="{

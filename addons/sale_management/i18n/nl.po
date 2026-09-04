@@ -1,45 +1,33 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* sale_management
-# 
+# * sale_management
+#
 # Translators:
-# Wil Odoo, 2024
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2025
-# Manon Rondou, 2025
-# 
+# Martin Trigaux, 2022
+# Jolien De Paepe, 2022
+# Erwin van der Ploeg <erwin@odooexperts.nl>, 2022
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# Bren Driesen <brdri@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Manon Rondou, 2025\n"
-"Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
+"POT-Creation-Date: 2026-01-25 18:35+0000\n"
+"PO-Revision-Date: 2026-08-07 01:28+0000\n"
+"Last-Translator: Bren Driesen <brdri@odoo.com>\n"
+"Language-Team: Dutch <https://translate.odoo.com/projects/odoo-19/"
+"sale_management/nl/>\n"
+"Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: nl\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
-msgid "1.5"
-msgstr "1.5"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
-msgid "<span class=\"btn btn-secondary\">Add to order</span>"
-msgstr "<span class=\"btn btn-secondary\">Aan order toevoegen</span>"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
 msgid "<span invisible=\"not require_payment\">of</span>"
 msgstr "<span invisible=\"not require_payment\">van</span>"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
-msgid "<span>Options</span>"
-msgstr "<span>Opties</span>"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__active
@@ -52,7 +40,6 @@ msgid "Add a note"
 msgstr "Voeg een notitie toe"
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
 msgid "Add a product"
 msgstr "Product toevoegen"
@@ -63,19 +50,9 @@ msgid "Add a section"
 msgstr "Sectie toevoegen"
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
+#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_optional_product_quantity
 msgid "Add one"
 msgstr "Voeg één toe"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
-msgid "Add to cart"
-msgstr "Toevoegen aan winkelmandje"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
-msgid "Add to order lines"
-msgstr "Toevoegen aan orderregels"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_digest_digest__kpi_all_sale_total
@@ -83,17 +60,15 @@ msgid "All Sales"
 msgstr "Alle verkopen"
 
 #. module: sale_management
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__allowed_uom_ids
+msgid "Allowed Uom"
+msgstr "Toegestane maateenheid"
+
+#. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_search
 msgid "Archived"
 msgstr "Gearchiveerd"
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__product_uom_category_id
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__product_uom_category_id
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__product_uom_category_id
-msgid "Category"
-msgstr "Categorie"
 
 #. module: sale_management
 #: model:ir.model,name:sale_management.model_res_company
@@ -103,7 +78,6 @@ msgstr "Bedrijven"
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__company_id
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__company_id
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__company_id
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_search
 msgid "Company"
 msgstr "Bedrijf"
@@ -119,17 +93,6 @@ msgid "Confirmation Mail"
 msgstr "Bevestiging e-mail"
 
 #. module: sale_management
-#: model:ir.model.fields,help:sale_management.field_sale_order_option__product_uom_category_id
-#: model:ir.model.fields,help:sale_management.field_sale_order_template_line__product_uom_category_id
-#: model:ir.model.fields,help:sale_management.field_sale_order_template_option__product_uom_category_id
-msgid ""
-"Conversion between Units of Measure can only occur if they belong to the "
-"same category. The conversion will be made based on the ratios."
-msgstr ""
-"Conversie tussen maateenheden kan alleen plaatsvinden als deze behoren tot "
-"dezelfde categorie. De conversie wordt gemaakt op basis van ratio's."
-
-#. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.res_config_settings_view_form
 msgid "Create standardized offers with default products"
 msgstr "Maak gestandaardiseerde offertes met standaard producten"
@@ -140,18 +103,14 @@ msgid "Create your quotation template"
 msgstr "Maak je offertesjabloon"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__create_uid
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__create_uid
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__create_uid
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__create_uid
 msgid "Created by"
 msgstr "Aangemaakt door"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__create_date
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__create_date
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__create_date
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__create_date
 msgid "Created on"
 msgstr "Aangemaakt op"
 
@@ -166,10 +125,7 @@ msgid "Default Template"
 msgstr "Standaard sjabloon"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__name
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__name
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__name
-#: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
 msgid "Description"
 msgstr "Omschrijving"
@@ -180,22 +136,13 @@ msgid "Digest"
 msgstr "Overzicht"
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
-msgid "Disc.%"
-msgstr "Kort.%"
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__discount
-msgid "Discount (%)"
-msgstr "Krt. (%)"
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__display_name
+#: model:ir.model.fields,field_description:sale_management.field_digest_digest__display_name
+#: model:ir.model.fields,field_description:sale_management.field_res_company__display_name
+#: model:ir.model.fields,field_description:sale_management.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:sale_management.field_sale_order__display_name
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_line__display_name
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__display_name
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__display_name
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__display_name
 msgid "Display Name"
 msgstr "Schermnaam"
 
@@ -213,22 +160,11 @@ msgstr ""
 "samenvattingsmail"
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
-msgid "Extra Chips"
-msgstr "Extra chips"
-
-#. module: sale_management
 #: model:ir.model.constraint,message:sale_management.constraint_sale_order_template_line_non_accountable_fields_null
 msgid "Forbidden product, quantity and UoM on non-accountable sale quote line"
 msgstr ""
 "Niet toegestaan product, aantal en maateenheid op niet verrekenbare "
 "verkoopofferteregel"
-
-#. module: sale_management
-#: model:ir.model.fields,help:sale_management.field_sale_order_option__sequence
-msgid "Gives the sequence order when displaying a list of optional products."
-msgstr ""
-"Bepaald de volgorde van weergeven van een lijst van optionele producten."
 
 #. module: sale_management
 #: model:ir.model.fields,help:sale_management.field_sale_order_template_line__sequence
@@ -238,15 +174,13 @@ msgstr ""
 "verkoopofferteregels."
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_search
-msgid "Group By"
-msgstr "Groeperen op"
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__id
+#: model:ir.model.fields,field_description:sale_management.field_digest_digest__id
+#: model:ir.model.fields,field_description:sale_management.field_res_company__id
+#: model:ir.model.fields,field_description:sale_management.field_res_config_settings__id
+#: model:ir.model.fields,field_description:sale_management.field_sale_order__id
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_line__id
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__id
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__id
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__id
 msgid "ID"
 msgstr "ID"
 
@@ -265,8 +199,8 @@ msgid ""
 "If unchecked, it will allow you to hide the quotation template without "
 "removing it."
 msgstr ""
-"Indien uitgevinkt kun je het verkoopsjabloon verbergen zonder deze te hoeven"
-" verwijderen."
+"Indien uitgevinkt kun je het verkoopsjabloon verbergen zonder deze te hoeven "
+"verwijderen."
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__journal_id
@@ -279,25 +213,16 @@ msgid "Kpi All Sale Total Value"
 msgstr "KPI alle verkopen totale waarde"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__write_uid
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__write_uid
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__write_uid
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__write_uid
 msgid "Last Updated by"
 msgstr "Laatst bijgewerkt door"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__write_date
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__write_date
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__write_date
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__write_date
 msgid "Last Updated on"
 msgstr "Laatst bijgewerkt op"
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__line_id
-msgid "Line"
-msgstr "Regel"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__sale_order_template_line_ids
@@ -310,7 +235,7 @@ msgstr "Regels"
 msgid "Missing required product and UoM on accountable sale quote line."
 msgstr ""
 "Ontbrekend verplicht product en maateenheid op verrekenbare "
-"verkoopofferteregel"
+"verkoopofferteregel."
 
 #. module: sale_management
 #: model:ir.model.fields.selection,name:sale_management.selection__sale_order_template_line__display_type__line_note
@@ -334,22 +259,21 @@ msgid "Online Signature"
 msgstr "Online handtekening"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template__sale_order_template_option_ids
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
-msgid "Optional Products"
-msgstr "Optionele producten"
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_line__is_optional
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__is_optional
+msgid "Optional Line"
+msgstr "Optionele regel"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order__sale_order_option_ids
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_line__sale_order_option_ids
-msgid "Optional Products Lines"
-msgstr "Optionele productregels"
+#. odoo-python
+#: code:addons/sale_management/models/sale_order_template.py:0
+msgid "Optional Products Section"
+msgstr "Sectie voor optionele producten"
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
-msgid "Options"
-msgstr "Opties"
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__parent_id
+msgid "Parent Section Line"
+msgstr "Bovenliggende sectieregel"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__prepayment_percent
@@ -360,33 +284,17 @@ msgstr "Percentage vooruitbetaling"
 #. odoo-python
 #: code:addons/sale_management/models/sale_order_template.py:0
 msgid "Prepayment percentage must be a valid percentage."
-msgstr ""
-"Het percentage van de vooruitbetaling moet een geldig percentage zijn."
+msgstr "Het percentage van de vooruitbetaling moet een geldig percentage zijn."
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__is_present
-msgid "Present on Quotation"
-msgstr "Aanwezig op offerte"
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__product_id
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__product_id
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__product_id
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
 msgid "Product"
 msgstr "Product"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__quantity
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__product_uom_qty
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__quantity
 msgid "Quantity"
-msgstr "Aantal"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
-msgid "Quantity:"
-msgstr "Aantal:"
+msgstr "Hoeveelheid"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__number_of_days
@@ -413,13 +321,7 @@ msgid "Quotation Template Lines"
 msgstr "Offertesjabloonregels"
 
 #. module: sale_management
-#: model:ir.model,name:sale_management.model_sale_order_template_option
-msgid "Quotation Template Option"
-msgstr "Offerte sjabloon optie"
-
-#. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__sale_order_template_id
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__sale_order_template_id
 msgid "Quotation Template Reference"
 msgstr "Offertesjabloon referentie"
 
@@ -438,12 +340,7 @@ msgid "Quotation Validity"
 msgstr "Geldigheid offerte"
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
-msgid "Remove"
-msgstr "Verwijderen"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
+#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_optional_product_quantity
 msgid "Remove one"
 msgstr "Verwijder één"
 
@@ -466,11 +363,6 @@ msgstr ""
 "bevestigen."
 
 #. module: sale_management
-#: model:ir.model,name:sale_management.model_sale_order_option
-msgid "Sale Options"
-msgstr "Verkoopopties"
-
-#. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.digest_digest_view_form
 msgid "Sales"
 msgstr "Verkoop"
@@ -484,16 +376,6 @@ msgstr "Verkooporder"
 #: model:ir.model,name:sale_management.model_sale_order_line
 msgid "Sales Order Line"
 msgstr "Verkooporderregel"
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__order_id
-msgid "Sales Order Reference"
-msgstr "Verkooporder"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
-msgid "Sales Quotation Template Lines"
-msgstr "Verkoop offertesjabloonregels"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_search
@@ -518,11 +400,17 @@ msgstr ""
 "Deze functie bestaat ook in de inkoop app."
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__sequence
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__sequence
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__sequence
 msgid "Sequence"
 msgstr "Reeks"
+
+#. module: sale_management
+#. odoo-javascript
+#: code:addons/sale_management/static/src/fields/sale_order_line_field/sale_order_line_field.xml:0
+#: code:addons/sale_management/static/src/fields/sale_order_template_line_field/sale_order_template_line_field.xml:0
+msgid "Set Optional"
+msgstr "Optionele instelling activeren"
 
 #. module: sale_management
 #: model_terms:digest.tip,tip_description:sale_management.digest_tip_sale1_management_0
@@ -531,10 +419,15 @@ msgid ""
 "to help sales configure a product with different options: colors, size, "
 "capacity, etc. Make sale orders encoding easier and error-proof."
 msgstr ""
-"Worstel je met een complexe productcatalogus? Probeer de Productconfigurator"
-" om verkopers te helpen bij het configureren van een product met "
+"Worstel je met een complexe productcatalogus? Probeer de Productconfigurator "
+"om verkopers te helpen bij het configureren van een product met "
 "verschillende opties: kleuren, grootte, capaciteit, enz. Maak het coderen "
 "van verkooporders eenvoudiger en foutbestendig."
+
+#. module: sale_management
+#: model:ir.model.fields.selection,name:sale_management.selection__sale_order_template_line__display_type__line_subsection
+msgid "Subsection"
+msgstr "Subsectie"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
@@ -573,15 +466,6 @@ msgstr ""
 "versturen."
 
 #. module: sale_management
-#: model:ir.model.fields,help:sale_management.field_sale_order_option__is_present
-msgid ""
-"This field will be checked if the option line's product is already present "
-"in the quotation."
-msgstr ""
-"Dit veld wordt aangevinkt als het product van de optieregel al in de offerte"
-" aanwezig is."
-
-#. module: sale_management
 #: model:digest.tip,name:sale_management.digest_tip_sale1_management_0
 #: model_terms:digest.tip,tip_description:sale_management.digest_tip_sale1_management_0
 msgid "Tip: Odoo supports configurable products"
@@ -594,45 +478,34 @@ msgid "Tip: Sell or buy products in bulk with matrixes"
 msgstr "Tip: verkoop of koop producten in bulk met matrices"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__price_unit
-#: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
-msgid "Unit Price"
-msgstr "Prijs"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
-msgid "Unit Price:"
-msgstr "Prijs"
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__uom_id
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__product_uom_id
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__uom_id
-msgid "Unit of Measure"
-msgstr "Maateenheid"
+msgid "Unit"
+msgstr "Eenheid"
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
-msgid "UoM"
-msgstr "Maateenheid"
+#. odoo-javascript
+#: code:addons/sale_management/static/src/fields/sale_order_line_field/sale_order_line_field.xml:0
+#: code:addons/sale_management/static/src/fields/sale_order_template_line_field/sale_order_template_line_field.xml:0
+msgid "Unset Optional"
+msgstr "Optionele instelling deactiveren"
 
 #. module: sale_management
 #: model_terms:ir.actions.act_window,help:sale_management.sale_order_template_action
 msgid ""
 "Use templates to create polished, professional quotes in minutes.\n"
-"                Send these quotes by email and let your customers sign online.\n"
+"                Send these quotes by email and let your customers sign "
+"online.\n"
 "                Use cross-selling and discounts to push and boost your sales."
 msgstr ""
-"Gebruik sjablonen om gepolijste, professionele offertes te maken in minuten.\n"
+"Gebruik sjablonen om gepolijste, professionele offertes te maken in "
+"minuten.\n"
 "Verzend deze offertes via e-mail en laat je klanten online tekenen.\n"
 "Gebruik kruisverkoop en kortingen om je verkoop te boosten."
 
 #. module: sale_management
-#. odoo-python
-#: code:addons/sale_management/models/sale_order_option.py:0
-msgid "You cannot add options to a confirmed order."
-msgstr "Je kunt geen opties toevoegen aan een bevestigd order."
+#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
+msgid "Visible to all"
+msgstr "Voor iedereen zichtbaar"
 
 #. module: sale_management
 #. odoo-python
@@ -647,30 +520,47 @@ msgstr ""
 
 #. module: sale_management
 #. odoo-python
-#: code:addons/sale_management/models/sale_order.py:0
+#: code:addons/sale_management/models/sale_order_template.py:0
 msgid ""
-"Your quotation contains products from company %(product_company)s whereas your quotation belongs to company %(quote_company)s. \n"
-" Please change the company of your quotation or remove the products from other companies (%(bad_products)s)."
+"Your template belongs to company %(template_company)s but contains products "
+"from company (%(product_company)s) that are not accessible to %"
+"(template_company)s.\n"
+"Please change the company of your template or remove the products from other "
+"companies."
 msgstr ""
-"Je offerte bevat producten van het bedrijf %(product_company)s terwijl je "
-"offerte bij het bedrijf %(quote_company)s behoort. Wijzig het bedrijf van je"
-" offerte of verwijder de producten van andere bedrijven (%(bad_products)s)."
+"Je sjabloon behoort toe aan bedrijf %(template_company)s, maar bevat "
+"producten van bedrijf (%(product_company)s) die niet toegankelijk zijn voor %"
+"(template_company)s.\n"
+"Wijzig het bedrijf van je sjabloon of verwijder de producten van andere "
+"bedrijven."
 
 #. module: sale_management
 #. odoo-python
 #: code:addons/sale_management/models/sale_order_template.py:0
-msgid "Your template cannot contain products from multiple companies."
-msgstr "Je sjabloon kan geen producten bevatten van meerdere bedrijven."
+msgid ""
+"Your template belongs to company %(template_company)s but contains products "
+"from other companies (%(product_company)s) that are not accessible to %"
+"(template_company)s.\n"
+"Please change the company of your template or remove the products from other "
+"companies."
+msgstr ""
+"Je sjabloon behoort toe aan bedrijf %(template_company)s, maar bevat "
+"producten van andere bedrijven (%(product_company)s) die niet toegankelijk "
+"zijn voor %(template_company)s.\n"
+"Wijzig het bedrijf van je sjabloon of verwijder de producten van andere "
+"bedrijven."
 
 #. module: sale_management
 #. odoo-python
 #: code:addons/sale_management/models/sale_order_template.py:0
 msgid ""
-"Your template contains products from company %(product_company)s whereas your template belongs to company %(template_company)s. \n"
-" Please change the company of your template or remove the products from other companies."
+"Your template cannot contain products from specific companies if it's shared "
+"between companies. Please restrict the template access, or remove those "
+"products."
 msgstr ""
-"Je sjabloon bevat producten van het bedrijf %(product_company)s, terwijl je sjabloon van het bedrijf is %(template_company)s. \n"
-"Wijzig het bedrijf van je template of verwijder de producten van andere bedrijven."
+"Je sjabloon mag geen producten van specifieke bedrijven bevatten als deze "
+"door meerdere bedrijven wordt gedeeld. Beperk de toegang tot de sjabloon of "
+"verwijder deze producten."
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
@@ -681,3 +571,137 @@ msgstr "dagen"
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
 msgid "e.g. Standard Consultancy Package"
 msgstr "bijv. Standaard consultancypakket"
+
+#~ msgid "Your template cannot contain products from multiple companies."
+#~ msgstr "Je sjabloon kan geen producten bevatten van meerdere bedrijven."
+
+#~ msgid ""
+#~ "Your template contains products from company %(product_company)s whereas "
+#~ "your template belongs to company %(template_company)s. \n"
+#~ " Please change the company of your template or remove the products from "
+#~ "other companies."
+#~ msgstr ""
+#~ "Je sjabloon bevat producten van het bedrijf %(product_company)s, terwijl "
+#~ "je sjabloon van het bedrijf is %(template_company)s. \n"
+#~ "Wijzig het bedrijf van je template of verwijder de producten van andere "
+#~ "bedrijven."
+
+#~ msgid "4 Person Desk"
+#~ msgstr "4 persoonstafel"
+
+#~ msgid "<span>Options</span>"
+#~ msgstr "<span>Opties</span>"
+
+#~ msgid "<span>Payment</span>"
+#~ msgstr "<span>Betaling</span>"
+
+#~ msgid "<span>Signature</span>"
+#~ msgstr "<span>Handtekening</span>"
+
+#~ msgid "Add to cart"
+#~ msgstr "Toevoegen aan winkelmandje"
+
+#~ msgid "Add to order lines"
+#~ msgstr "Toevoegen aan orderregels"
+
+#~ msgid "Category"
+#~ msgstr "Categorie"
+
+#~ msgid ""
+#~ "Conversion between Units of Measure can only occur if they belong to the "
+#~ "same category. The conversion will be made based on the ratios."
+#~ msgstr ""
+#~ "Conversie tussen maateenheden kan alleen plaatsvinden als deze behoren "
+#~ "tot dezelfde categorie. De conversie wordt gemaakt op basis van ratio's."
+
+#~ msgid "Disc.%"
+#~ msgstr "Kort.%"
+
+#~ msgid "Discount (%)"
+#~ msgstr "Krt. (%)"
+
+#~ msgid ""
+#~ "Gives the sequence order when displaying a list of optional products."
+#~ msgstr ""
+#~ "Bepaald de volgorde van weergeven van een lijst van optionele producten."
+
+#~ msgid "Group By"
+#~ msgstr "Groepeer op"
+
+#~ msgid "Line"
+#~ msgstr "Regel"
+
+#~ msgid "Office Chair"
+#~ msgstr "Kantoorstoel"
+
+#~ msgid "Online confirmation"
+#~ msgstr "Online bevestiging"
+
+#~ msgid "Optional Products"
+#~ msgstr "Optionele producten"
+
+#~ msgid "Optional Products Lines"
+#~ msgstr "Optionele productregels"
+
+#~ msgid "Options"
+#~ msgstr "Opties"
+
+#~ msgid "Present on Quotation"
+#~ msgstr "Aanwezig op offerte"
+
+#~ msgid "Quantity:"
+#~ msgstr "Hoeveelheid:"
+
+#~ msgid "Quotation Builder"
+#~ msgstr "Offertebouwer"
+
+#~ msgid "Quotation Template Option"
+#~ msgstr "Offertesjabloonoptie"
+
+#~ msgid "Quotation expires after"
+#~ msgstr "Offerte vervalt na"
+
+#~ msgid "Remove"
+#~ msgstr "Verwijderen"
+
+#~ msgid "Sale Options"
+#~ msgstr "Verkoopopties"
+
+#~ msgid "Sales Order Reference"
+#~ msgstr "Verkooporder"
+
+#~ msgid "Sales Quotation Template Lines"
+#~ msgstr "Verkoop offertesjabloonregels"
+
+#~ msgid ""
+#~ "This field will be checked if the option line's product is already "
+#~ "present in the quotation."
+#~ msgstr ""
+#~ "Dit veld wordt aangevinkt als het product van de optieregel al in de "
+#~ "offerte aanwezig is."
+
+#~ msgid "Unit Price"
+#~ msgstr "Prijs"
+
+#~ msgid "Unit Price:"
+#~ msgstr "Prijs"
+
+#~ msgid "Unit of Measure"
+#~ msgstr "Maateenheid"
+
+#~ msgid "UoM"
+#~ msgstr "Maateenheid"
+
+#~ msgid "You cannot add options to a confirmed order."
+#~ msgstr "Je kunt geen opties toevoegen aan een bevestigd order."
+
+#~ msgid ""
+#~ "Your quotation contains products from company %(product_company)s whereas "
+#~ "your quotation belongs to company %(quote_company)s. \n"
+#~ " Please change the company of your quotation or remove the products from "
+#~ "other companies (%(bad_products)s)."
+#~ msgstr ""
+#~ "Je offerte bevat producten van het bedrijf %(product_company)s terwijl je "
+#~ "offerte bij het bedrijf %(quote_company)s behoort. Wijzig het bedrijf van "
+#~ "je offerte of verwijder de producten van andere bedrijven (%"
+#~ "(bad_products)s)."

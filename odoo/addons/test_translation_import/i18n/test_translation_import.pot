@@ -93,6 +93,168 @@ msgid "ID"
 msgstr ""
 
 #. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 01 %s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 02 %(named)s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 03 %s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 04 (Nested)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 05 %(named)s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 06 (Nested Named)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 07 %s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 08 (Double Nested)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 09 %(named)s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 10 (Double Nested Named)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 11 %s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 12 (Double Nested)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 13 %(named)s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 14 (Double Nested Named)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 15 %s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 16 (Double Nested)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 17 %(named)s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 18 (Double Nested Named)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 19 (Base Nested)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 20 (Base Nested)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 21 (Base Nested)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 22 %s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 23"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 24 %s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 25"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 26"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-javascript
+#: code:addons/test_translation_import/static/src/js/js_codefile.js:0
+msgid "JS Export 27"
+msgstr ""
+
+#. module: test_translation_import
 #: model_terms:test.translation.import.model1,xml:test_translation_import.test_translation_import_model1_record1
 msgid "Knife"
 msgstr ""
@@ -140,6 +302,174 @@ msgid "Opportunities"
 msgstr ""
 
 #. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 01 %s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 02 %(named)s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 03 %s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 04 (Nested)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 05 %(named)s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 06 (Nested Named)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 07 %s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 08 (Double Nested)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 09 %(named)s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 10 (Double Nested Named)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 11 %s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 12 (Double Nested)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 13 %(named)s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 14 (Double Nested Named)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 15 %s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 16 (Double Nested)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 17 %(named)s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 18 (Double Nested Named)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 19 (Base Nested)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 20 (Base Nested)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 21 (Base Nested)"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 22 %s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 23"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 24 %s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 25"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 26 %s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 27 %s"
+msgstr ""
+
+#. module: test_translation_import
+#. odoo-python
+#: code:addons/test_translation_import/models/models.py:0
+msgid "PY Export 28"
+msgstr ""
+
+#. module: test_translation_import
 #. odoo-javascript
 #: code:addons/test_translation_import/data/files/test_spreadsheet_dashboard.json:0
 msgid "Scorecard chart"
@@ -175,6 +505,16 @@ msgstr ""
 #. module: test_translation_import
 #: model:test.translation.import.model1,name:test_translation_import.test_translation_import_model1_record1
 msgid "Tableware"
+msgstr ""
+
+#. module: test_translation_import
+#: model:test.translation.import.model1,name:test_translation_import.test_translation_import_model1_record3
+msgid "Test Translation CSV from PO"
+msgstr ""
+
+#. module: test_translation_import
+#: model:test.translation.import.model1,name:test_translation_import.test_translation_import_model1_record1_alias
+msgid "Tableware Unused"
 msgstr ""
 
 #. module: test_translation_import

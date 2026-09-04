@@ -12,8 +12,6 @@ class AccountChartTemplate(models.AbstractModel):
             'code_digits': '7',
             'property_account_receivable_id': 'account_activa_account_1122001',
             'property_account_payable_id': 'account_activa_account_2122001',
-            'property_account_expense_categ_id': 'account_activa_account_7151001',
-            'property_account_income_categ_id': 'account_activa_account_5111001',
         }
 
     @template('ve', 'res.company')
@@ -29,5 +27,17 @@ class AccountChartTemplate(models.AbstractModel):
                 'expense_currency_exchange_account_id': 'account_activa_account_9113006',
                 'account_sale_tax_id': 'tax3sale',
                 'account_purchase_tax_id': 'tax3purchase',
+                'expense_account_id': 'account_activa_account_7151001',
+                'income_account_id': 'account_activa_account_5111001',
+                'account_stock_journal_id': 'inventory_valuation',
+                'account_stock_valuation_id': 'account_activa_account_1131002',
+            },
+        }
+
+    @template('ve', 'account.account')
+    def _get_ve_account_account(self):
+        return {
+            'account_activa_account_1131002': {
+                'account_stock_variation_id': 'account_activa_account_6121000',
             },
         }

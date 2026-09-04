@@ -1,40 +1,38 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* partner_autocomplete
-# 
+# * partner_autocomplete
+#
 # Translators:
-# emre oktem, 2024
-# Levent Karakaş <levent@mektup.at>, 2024
-# Halil, 2024
-# Tugay Hatıl <tugayh@projetgrup.com>, 2024
-# Umur Akın <umura@projetgrup.com>, 2024
-# abc Def <hdogan1974@gmail.com>, 2024
-# Murat Kaplan <muratk@projetgrup.com>, 2024
-# 
+# Levent Karakaş <levent@mektup.at>, 2022
+# Umur Akın <umura@projetgrup.com>, 2022
+# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2022
+# Murat Kaplan <muratk@projetgrup.com>, 2022
+# abc Def <hdogan1974@gmail.com>, 2022
+# Tugay Hatıl <tugayh@projetgrup.com>, 2022
+# Halil, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# DeepL <noreply-mt-deepl@weblate.org>, 2025.
+# Odoo Turkish Import <dyki+tr@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Murat Kaplan <muratk@projetgrup.com>, 2024\n"
-"Language-Team: Turkish (https://app.transifex.com/odoo/teams/41243/tr/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 12:33+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-19/"
+"partner_autocomplete/tr/>\n"
+"Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: tr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-
-#. module: partner_autocomplete
-#: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner__additional_info
-#: model:ir.model.fields,field_description:partner_autocomplete.field_res_users__additional_info
-msgid "Additional info"
-msgstr "Fazladan Bilgi"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: partner_autocomplete
 #: model:iap.service,description:partner_autocomplete.iap_service_partner_autocomplete
 msgid "Automatically enrich your contact base with corporate data."
-msgstr ""
+msgstr "İletişim tabanınızı kurumsal verilerle otomatik olarak zenginleştirin."
 
 #. module: partner_autocomplete
 #. odoo-javascript
@@ -48,21 +46,6 @@ msgid "Companies"
 msgstr "Şirketler"
 
 #. module: partner_autocomplete
-#. odoo-python
-#: code:addons/partner_autocomplete/models/res_company.py:0
-msgid "Company auto-completed by Odoo Partner Autocomplete Service"
-msgstr ""
-"Şirket, Odoo İş Ortağı Otomatik Tamamlama Hizmeti tarafından otomatik olarak"
-" tamamlandı"
-
-#. module: partner_autocomplete
-#: model:ir.model.fields,field_description:partner_autocomplete.field_res_company__partner_gid
-#: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner__partner_gid
-#: model:ir.model.fields,field_description:partner_autocomplete.field_res_users__partner_gid
-msgid "Company database ID"
-msgstr "Şirket veritabanı kimliği"
-
-#. module: partner_autocomplete
 #: model:ir.model,name:partner_autocomplete.model_res_config_settings
 msgid "Config Settings"
 msgstr "Yapılandırma Ayarları"
@@ -73,17 +56,16 @@ msgid "Contact"
 msgstr "Kontak"
 
 #. module: partner_autocomplete
-#: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner_autocomplete_sync__create_uid
-msgid "Created by"
-msgstr "Tarafından oluşturuldu"
+#: model:ir.model,website_form_label:partner_autocomplete.model_res_partner
+msgid "Create a Customer"
+msgstr "Müşteri Oluştur"
 
 #. module: partner_autocomplete
-#: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner_autocomplete_sync__create_date
-msgid "Created on"
-msgstr "Oluşturuldu"
-
-#. module: partner_autocomplete
-#: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner_autocomplete_sync__display_name
+#: model:ir.model.fields,field_description:partner_autocomplete.field_iap_autocomplete_api__display_name
+#: model:ir.model.fields,field_description:partner_autocomplete.field_ir_http__display_name
+#: model:ir.model.fields,field_description:partner_autocomplete.field_res_company__display_name
+#: model:ir.model.fields,field_description:partner_autocomplete.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner__display_name
 msgid "Display Name"
 msgstr "İsim Göster"
 
@@ -95,7 +77,7 @@ msgstr "Zenginleştirme Tamamlandı"
 #. module: partner_autocomplete
 #: model:iap.service,unit_name:partner_autocomplete.iap_service_partner_autocomplete
 msgid "Enrichments"
-msgstr ""
+msgstr "Zenginleştirmeler"
 
 #. module: partner_autocomplete
 #: model:ir.model,name:partner_autocomplete.model_ir_http
@@ -114,7 +96,11 @@ msgid "IAP Partner Autocomplete API"
 msgstr "IAP İş Ortağı Otomatik Tamamlama API'sı"
 
 #. module: partner_autocomplete
-#: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner_autocomplete_sync__id
+#: model:ir.model.fields,field_description:partner_autocomplete.field_iap_autocomplete_api__id
+#: model:ir.model.fields,field_description:partner_autocomplete.field_ir_http__id
+#: model:ir.model.fields,field_description:partner_autocomplete.field_res_company__id
+#: model:ir.model.fields,field_description:partner_autocomplete.field_res_config_settings__id
+#: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner__id
 msgid "ID"
 msgstr "ID"
 
@@ -122,21 +108,6 @@ msgstr "ID"
 #: model:ir.model.fields,field_description:partner_autocomplete.field_res_config_settings__partner_autocomplete_insufficient_credit
 msgid "Insufficient credit"
 msgstr "Yetersiz kredi"
-
-#. module: partner_autocomplete
-#: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner_autocomplete_sync__synched
-msgid "Is synched"
-msgstr "Eşleştirildi"
-
-#. module: partner_autocomplete
-#: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner_autocomplete_sync__write_uid
-msgid "Last Updated by"
-msgstr "Son Güncelleyen"
-
-#. module: partner_autocomplete
-#: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner_autocomplete_sync__write_date
-msgid "Last Updated on"
-msgstr "Son Güncelleme"
 
 #. module: partner_autocomplete
 #. odoo-python
@@ -151,32 +122,10 @@ msgid "Not enough credits for Partner Autocomplete"
 msgstr "İş Ortağını Otomatik Tamamlama için krediler yetersiz"
 
 #. module: partner_autocomplete
-#: model:ir.model.fields,field_description:partner_autocomplete.field_res_partner_autocomplete_sync__partner_id
-msgid "Partner"
-msgstr "İş Ortağı"
-
-#. module: partner_autocomplete
-#: model:ir.model,name:partner_autocomplete.model_res_partner_autocomplete_sync
-msgid "Partner Autocomplete Sync"
-msgstr "İş Ortağı Otomatik Tamamlama uyumlulaştırma"
-
-#. module: partner_autocomplete
-#: model:ir.actions.server,name:partner_autocomplete.ir_cron_partner_autocomplete_ir_actions_server
-msgid "Partner Autocomplete: Sync with remote DB"
-msgstr ""
-
-#. module: partner_autocomplete
-#. odoo-python
-#: code:addons/partner_autocomplete/models/res_partner.py:0
-msgid "Partner created by Odoo Partner Autocomplete Service"
-msgstr ""
-"İş ortağı Odoo İş ortağı Otomatik Tamamlama Hizmeti tarafından oluşturuldu"
-
-#. module: partner_autocomplete
 #. odoo-javascript
 #: code:addons/partner_autocomplete/static/src/xml/partner_autocomplete.xml:0
-msgid "Placeholder"
-msgstr "Yer tutucu"
+msgid "Search Worldwide 🌎"
+msgstr "Dünya Çapında Arama 🌎"
 
 #. module: partner_autocomplete
 #. odoo-javascript
@@ -196,3 +145,48 @@ msgstr "Hesap Simgesini Ayarlayın"
 #: code:addons/partner_autocomplete/models/iap_autocomplete_api.py:0
 msgid "Test mode"
 msgstr "Test Modu"
+
+#. module: partner_autocomplete
+#. odoo-python
+#: code:addons/partner_autocomplete/models/res_partner.py:0
+msgid "Unable to enrich company (no credit was consumed)."
+msgstr "Şirket zenginleştirilemiyor (alacak tüketilmedi)."
+
+#~ msgid "Additional info"
+#~ msgstr "Fazladan Bilgi"
+
+#~ msgid "Company auto-completed by Odoo Partner Autocomplete Service"
+#~ msgstr ""
+#~ "Şirket, Odoo İş Ortağı Otomatik Tamamlama Hizmeti tarafından otomatik "
+#~ "olarak tamamlandı"
+
+#~ msgid "Company database ID"
+#~ msgstr "Şirket veritabanı kimliği"
+
+#~ msgid "Created by"
+#~ msgstr "Oluşturan"
+
+#~ msgid "Created on"
+#~ msgstr "Oluşturulma"
+
+#~ msgid "Is synched"
+#~ msgstr "Eşleştirildi"
+
+#~ msgid "Last Updated by"
+#~ msgstr "Son Güncelleyen"
+
+#~ msgid "Last Updated on"
+#~ msgstr "Son Güncelleme"
+
+#~ msgid "Partner"
+#~ msgstr "İş Ortağı"
+
+#~ msgid "Partner Autocomplete Sync"
+#~ msgstr "İş Ortağı Otomatik Tamamlama uyumlulaştırma"
+
+#~ msgid "Partner created by Odoo Partner Autocomplete Service"
+#~ msgstr ""
+#~ "İş ortağı Odoo İş ortağı Otomatik Tamamlama Hizmeti tarafından oluşturuldu"
+
+#~ msgid "Placeholder"
+#~ msgstr "Yer tutucu"

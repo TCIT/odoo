@@ -1,47 +1,36 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_project
-# 
-# Translators:
-# Lyall Kindmurr, 2024
-# Cozmin Candea <office@terrabit.ro>, 2024
-# Maria Muntean, 2024
-# Wil Odoo, 2025
-# 
+# * website_form_project
+#
+# Alin Ilie <alin.ilie@logit-solutions.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~12.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 13:04+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
-"Language-Team: Romanian (https://app.transifex.com/odoo/teams/41243/ro/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-02 16:52+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-19/"
+"website_project/ro/>\n"
+"Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ro\n"
-"Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));\n"
-
-#. module: website_project
-#: model_terms:ir.ui.view,arch_db:website_project.task_submitted
-msgid ""
-"<i class=\"fa fa-check-circle fa-1x text-success me-2\" role=\"img\" aria-"
-"label=\"Success\" title=\"Success\"/>"
-msgstr ""
-"<i class=\"fa fa-check-circle fa-1x text-success me-2\" role=\"img\" aria-"
-"label=\"Succes\" title=\"Succes\"/>"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
+"20)) ? 1 : 2;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_project
 #. odoo-javascript
 #: code:addons/website_project/static/src/js/website_project_editor.js:0
 msgid "Ask Your Question"
-msgstr ""
+msgstr "Puneți întrebarea"
 
 #. module: website_project
 #. odoo-javascript
 #: code:addons/website_project/static/src/js/website_project_editor.js:0
 msgid "Attach File"
-msgstr "Atașează fișiere"
+msgstr "Atașați fișier"
 
 #. module: website_project
 #. odoo-javascript
@@ -51,14 +40,20 @@ msgid "Company Name"
 msgstr "Numele companiei"
 
 #. module: website_project
-#: model:ir.model.fields,field_description:website_project.field_project_task__partner_phone
-msgid "Contact Number"
-msgstr ""
+#: model:ir.model,website_form_label:website_project.model_project_task
+msgid "Create a Task"
+msgstr "Creați o sarcină"
 
 #. module: website_project
 #: model:ir.model.fields,field_description:website_project.field_project_task__partner_name
 msgid "Customer Name"
-msgstr "Nume client"
+msgstr "Numele clientului"
+
+#. module: website_project
+#: model:ir.model.fields,field_description:website_project.field_project_task__display_name
+#: model:ir.model.fields,field_description:website_project.field_website_page__display_name
+msgid "Display Name"
+msgstr "Nume afișat"
 
 #. module: website_project
 #. odoo-python
@@ -70,29 +65,30 @@ msgstr "E-mail"
 #. odoo-javascript
 #: code:addons/website_project/static/src/js/website_project_editor.js:0
 msgid "Email Address"
-msgstr "Adresă de email"
-
-#. module: website_project
-#: model:ir.model.fields,field_description:website_project.field_project_task__email_from
-msgid "Email From"
-msgstr "E-mail de la"
+msgstr "Adresă de e-mail"
 
 #. module: website_project
 #. odoo-javascript
 #: code:addons/website_project/static/src/js/website_project_editor.js:0
 msgid "Full Name"
-msgstr "Numele Complet"
+msgstr "Nume complet"
 
 #. module: website_project
 #: model_terms:ir.ui.view,arch_db:website_project.task_submitted
-msgid "Go to the Homepage"
-msgstr "Mergeți la pagina de pornire"
+msgid "Go to Homepage"
+msgstr "Accesați pagina principală"
+
+#. module: website_project
+#: model:ir.model.fields,field_description:website_project.field_project_task__id
+#: model:ir.model.fields,field_description:website_project.field_website_page__id
+msgid "ID"
+msgstr "ID"
 
 #. module: website_project
 #. odoo-javascript
 #: code:addons/website_project/static/src/js/website_project_editor.js:0
 msgid "Message Subject"
-msgstr ""
+msgstr "Subiectul mesajului"
 
 #. module: website_project
 #. odoo-python
@@ -101,10 +97,20 @@ msgid "Other Information"
 msgstr "Alte informații"
 
 #. module: website_project
+#: model_terms:ir.ui.view,arch_db:website_project.task_submitted
+msgid "Our team will get right on it."
+msgstr "Echipa noastră se va ocupa imediat de asta."
+
+#. module: website_project
+#: model:ir.model,name:website_project.model_website_page
+msgid "Page"
+msgstr "Pagina"
+
+#. module: website_project
 #. odoo-javascript
 #: code:addons/website_project/static/src/js/website_project_editor.js:0
 msgid "Phone Number"
-msgstr "Număr telefon"
+msgstr "Număr de telefon"
 
 #. module: website_project
 #. odoo-javascript
@@ -115,21 +121,35 @@ msgstr "Proiect"
 #. module: website_project
 #: model:ir.model,name:website_project.model_project_task
 msgid "Task"
-msgstr "Sarcină"
+msgstr "Sarcina"
 
 #. module: website_project
 #: model_terms:ir.ui.view,arch_db:website_project.task_submitted
-msgid "Thank you for contacting us, our team will get right on it!"
+msgid "Task #"
+msgstr "Sarcina #"
+
+#. module: website_project
+#: model_terms:ir.ui.view,arch_db:website_project.task_submitted
+msgid "Thank you!"
+msgstr "Mulțumesc!"
+
+#. module: website_project
+#: model:ir.model.fields,help:website_project.field_project_task__display_name
+msgid ""
+"Use these keywords in the title to set new tasks:\n"
+"\n"
+"        30h Allocate 30 hours to the task\n"
+"        #tags Set tags on the task\n"
+"        @user Assign the task to a user\n"
+"        ! Set the task a medium priority\n"
+"        !! Set the task a high priority\n"
+"        !!! Set the task a urgent priority\n"
+"\n"
+"        Make sure to use the right format and order e.g. Improve the "
+"configuration screen 5h #feature #v16 @Mitchell !"
 msgstr ""
-"Vă mulțumim pentru că ne-ați contactat, echipa noastră se va ocupa imediat "
-"de acest lucru!"
 
 #. module: website_project
 #: model_terms:ir.ui.view,arch_db:website_project.task_submitted
-msgid "View Task"
-msgstr "Sarcină"
-
-#. module: website_project
-#: model_terms:ir.ui.view,arch_db:website_project.task_submitted
-msgid "Your Task Number is"
-msgstr ""
+msgid "Your task has been sent."
+msgstr "Sarcina dvs. a fost trimisă."

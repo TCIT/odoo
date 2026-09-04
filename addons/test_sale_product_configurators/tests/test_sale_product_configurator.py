@@ -1,13 +1,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tests.common import HttpCase, tagged
+from odoo.fields import Command
+from odoo.tests.common import tagged
 
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.sale.tests.product_configurator_common import TestProductConfiguratorCommon
 
 
 @tagged('post_install', '-at_install')
-class TestProductConfiguratorUi(HttpCase, TestProductConfiguratorCommon):
+class TestProductConfiguratorUi(TestProductConfiguratorCommon):
 
     @classmethod
     def setUpClass(cls):
@@ -22,12 +23,13 @@ class TestProductConfiguratorUi(HttpCase, TestProductConfiguratorCommon):
             password='salesman',
             groups='sales_team.group_sale_salesman',
         )
+        cls.salesman.group_ids += cls.env.ref('product.group_product_manager')
 
         # Setup partner since user salesman don't have the right to create it on the fly
         cls.env['res.partner'].create({'name': 'Tajine Saucisse'})
 
     def test_01_product_configurator(self):
-        self.env.ref('base.user_admin').write({'groups_id': [(4, self.env.ref('product.group_product_variant').id)]})
+        self.env.ref('base.user_admin').write({'group_ids': [(4, self.env.ref('product.group_product_variant').id)]})
         tax = self.env['account.tax'].create({'name': "Test tax", 'amount': 15})
         self.product_product_custo_desk.taxes_id = tax
         self.product_product_conf_chair_floor_protect.taxes_id = tax
@@ -37,7 +39,7 @@ class TestProductConfiguratorUi(HttpCase, TestProductConfiguratorCommon):
     def test_02_product_configurator_advanced(self):
         # group_delivery_invoice_address: show the shipping address (needed for a trigger)
         self.salesman.write({
-            'groups_id': [(4, self.env.ref('account.group_delivery_invoice_address').id)],
+            'group_ids': [(4, self.env.ref('account.group_delivery_invoice_address').id)],
         })
 
         # Prepare relevant test data
@@ -60,7 +62,7 @@ class TestProductConfiguratorUi(HttpCase, TestProductConfiguratorCommon):
             'create_variant': 'no_variant'
         }, {
             'name': 'PA5',
-            'display_type': 'select',
+            'display_type': 'image',
             'create_variant': 'no_variant'
         }, {
             'name': 'PA7',
@@ -81,15 +83,11 @@ class TestProductConfiguratorUi(HttpCase, TestProductConfiguratorCommon):
         product_attribute_no_variant_single_pav = self.env['product.attribute'].create({
             'name': 'PA9',
             'display_type': 'radio',
-            'create_variant': 'no_variant'
+            'create_variant': 'no_variant',
+            'value_ids': [
+                Command.create({'name': 'Single PAV'}),
+            ]
         })
-
-        self.env['product.attribute.value'].create({
-            'name': 'Single PAV',
-            'attribute_id': product_attribute_no_variant_single_pav.id
-        })
-
-        product_attributes += product_attribute_no_variant_single_pav
 
         product_template = self.product_product_custo_desk
 
@@ -97,7 +95,7 @@ class TestProductConfiguratorUi(HttpCase, TestProductConfiguratorCommon):
             'attribute_id': product_attribute.id,
             'product_tmpl_id': product_template.id,
             'value_ids': [(6, 0, product_attribute.value_ids.ids)],
-        } for product_attribute in product_attributes])
+        } for product_attribute in (product_attributes + product_attribute_no_variant_single_pav)])
 
         self.assertEqual(len(product_template.product_variant_ids), 0)
         self.assertEqual(
@@ -113,6 +111,20 @@ class TestProductConfiguratorUi(HttpCase, TestProductConfiguratorCommon):
         )
 
     def test_03_product_configurator_edition(self):
+        # Required to see `pricelist_id` in the view
+        self.env.ref('base.group_user').write({'implied_ids': [(4, self.env.ref('product.group_product_pricelist').id)]})
+        self.env['product.pricelist'].create({
+            'name': 'Custom pricelist (TEST)',
+            'sequence': 4,
+            'item_ids': [(0, 0, {
+                'base': 'list_price',
+                'applied_on': '1_product',
+                'product_tmpl_id': self.product_product_custo_desk.id,
+                'price_discount': 20,
+                'min_quantity': 2,
+                'compute_price': 'formula'
+            })]
+        })
         self.start_tour("/odoo", 'sale_product_configurator_edition_tour', login='salesman')
 
     def test_04_product_configurator_single_custom_value(self):
@@ -152,6 +164,20 @@ class TestProductConfiguratorUi(HttpCase, TestProductConfiguratorCommon):
 
         # Required to see `pricelist_id` in the view
         self.env.ref('base.group_user').write({'implied_ids': [(4, self.env.ref('product.group_product_pricelist').id)]})
+
+        self.env['product.pricelist'].create({
+            'name': 'Custom pricelist (TEST)',
+            'sequence': 4,
+            'item_ids': [(0, 0, {
+                'base': 'list_price',
+                'applied_on': '1_product',
+                'product_tmpl_id': self.product_product_custo_desk.id,
+                'price_discount': 20,
+                'min_quantity': 2,
+                'compute_price': 'formula'
+            })]
+        })
+
         self.env['res.partner'].create({
             'name': 'Azure Interior',
             'email': 'azure.Interior24@example.com',
@@ -184,7 +210,8 @@ class TestProductConfiguratorUi(HttpCase, TestProductConfiguratorCommon):
                 (6, 0, [office_chair.product_tmpl_id.id, self.product_product_conf_chair.id])
             ]
         })
-        self.product_product_conf_chair.sale_line_warn = 'warning'
+
+        self.salesman.group_ids += self.env.ref('sale.group_warning_sale')
         self.product_product_conf_chair.sale_line_warn_msg = 'sold'
         self.product_product_custo_desk.optional_product_ids = [
             (4, self.product_product_conf_chair.id)
@@ -238,19 +265,22 @@ class TestProductConfiguratorUi(HttpCase, TestProductConfiguratorCommon):
             'display_type': 'multi',
             'create_variant': 'no_variant',
             'value_ids': [
-                (0, 0, {'name': 'Cheese'}),
+                Command.create({'name': 'Cheese'}),
             ]
         })
-        attribute_topping_cheese = attribute_topping.value_ids
 
         product_template = self.env['product.template'].create({
             'name': 'Big Burger',
             'attribute_line_ids': [
-                (0, 0, {
+                Command.create({
                     'attribute_id': attribute_topping.id,
-                    'value_ids': [(6, 0, [attribute_topping_cheese.id])],
+                    'value_ids': [Command.set(attribute_topping.value_ids.ids)],
                 }),
             ],
+        })
+        self.env['res.partner'].create({
+            'name': "Azure",
+            'email': "azure@example.com",
         })
 
         self.start_tour("/odoo", 'product_attribute_multi_type', login="salesman")
@@ -263,3 +293,43 @@ class TestProductConfiguratorUi(HttpCase, TestProductConfiguratorCommon):
             sol.product_no_variant_attribute_value_ids,
             product_template.attribute_line_ids.product_template_value_ids,
         )
+
+    def test_product_configurator_uom_selection(self):
+        self.env['product.pricelist'].create({
+            'name': 'Custom pricelist (TEST)',
+            'sequence': 4,
+            'item_ids': [(0, 0, {
+                'base': 'list_price',
+                'applied_on': '1_product',
+                'product_tmpl_id': self.product_product_custo_desk.id,
+                'price_discount': 20,
+                'min_quantity': 2,
+                'compute_price': 'formula'
+            })]
+        })
+
+        self.env.ref('base.group_user').write({
+            'implied_ids': [
+                # Required to set pricelist
+                Command.link(self.env.ref('product.group_product_pricelist').id),
+                # Required to set uom in configurator
+                Command.link(self.group_uom.id),
+            ],
+        })
+
+        self.product_product_custo_desk.uom_id = self.uom_unit
+        self.assertEqual(self.product_product_custo_desk.uom_id, self.uom_unit)
+        self.product_product_custo_desk.uom_ids += self.uom_dozen
+        self.product_product_conf_chair.uom_ids = self.uom_dozen
+
+        self.assertIn(self.uom_dozen, self.product_product_custo_desk.uom_ids)
+
+        # Add a 15% tax on desk
+        tax = self.env['account.tax'].create({'name': "Test tax", 'amount': 15})
+        self.product_product_custo_desk.taxes_id = tax
+
+        # Remove tax from Conference Chair and Chair floor protection
+        self.product_product_conf_chair.taxes_id = None
+        self.product_product_conf_chair_floor_protect.taxes_id = None
+        self.assertTrue(self.salesman._has_group('product.group_product_pricelist'))
+        self.start_tour("/odoo", 'sale_product_configurator_uom_tour', login='salesman')

@@ -5,10 +5,12 @@ import { mockFetch } from "@odoo/hoot-mock";
 import {
     ConnectionAbortedError,
     ConnectionLostError,
+    RequestEntityTooLargeError,
     RPCError,
     rpc,
     rpcBus,
 } from "@web/core/network/rpc";
+import { RPCCache } from "@web/core/network/rpc_cache";
 
 const onRpcRequest = (listener) => after(on(rpcBus, "RPC:REQUEST", listener));
 const onRpcResponse = (listener) => after(on(rpcBus, "RPC:RESPONSE", listener));
@@ -130,18 +132,50 @@ test("check connection aborted", async () => {
 
 test("trigger a ConnectionLostError when response isn't json parsable", async () => {
     mockFetch(() => new Response("<h...", { status: 500 }));
-
     const error = new ConnectionLostError("/test/");
+    onRpcResponse(({ detail }) => {
+        expect(detail.error).toEqual(error);
+    });
+    await expect(rpc("/test/")).rejects.toThrow(error);
+});
+
+test("trigger a RequestEntityTooLargeError when status is 413 even if response isn't json parsable", async () => {
+    mockFetch(() => new Response("<h...", { status: 413 }));
+    const error = new RequestEntityTooLargeError();
+    onRpcResponse(({ detail }) => {
+        expect(detail.error).toEqual(error);
+    });
     await expect(rpc("/test/")).rejects.toThrow(error);
 });
 
 test("rpc can send additional headers", async () => {
     mockFetch((url, settings) => {
-        expect(settings.headers).toEqual({
-            "Content-Type": "application/json",
-            Hello: "World",
-        });
+        expect(settings.headers).toEqual(
+            new Headers([
+                ["Content-Type", "application/json"],
+                ["Hello", "World"],
+            ])
+        );
         return { result: true };
     });
     await rpc("/test/", null, { headers: { Hello: "World" } });
+});
+
+test("Cache: can cache a simple rpc", async () => {
+    rpc.setCache(
+        new RPCCache(
+            "mockRpc",
+            1,
+            "85472d41873cdb504b7c7dfecdb8993d90db142c4c03e6d94c4ae37a7771dc5b"
+        )
+    );
+    mockFetch(() => {
+        expect.step("Fetch");
+        return { result: { action_id: 123 } };
+    });
+
+    expect(await rpc("/test/", {}, { cache: true })).toEqual({ action_id: 123 });
+    expect(await rpc("/test/", {}, { cache: true })).toEqual({ action_id: 123 });
+    expect(await rpc("/test/", {}, { cache: true })).toEqual({ action_id: 123 });
+    expect.verifySteps(["Fetch"]);
 });

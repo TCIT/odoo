@@ -4,7 +4,7 @@
 from odoo import models, fields
 
 
-class ChallengeLine(models.Model):
+class GamificationChallengeLine(models.Model):
     """Gamification challenge line
 
     Predefined goal for 'gamification_challenge'
@@ -15,7 +15,7 @@ class ChallengeLine(models.Model):
     _description = 'Gamification generic goal for challenge'
     _order = "sequence, id"
 
-    challenge_id = fields.Many2one('gamification.challenge', string='Challenge', required=True, ondelete="cascade")
+    challenge_id = fields.Many2one('gamification.challenge', string='Challenge', required=True, index=True, ondelete="cascade")
     definition_id = fields.Many2one('gamification.goal.definition', string='Goal Definition', required=True, ondelete="cascade")
 
     sequence = fields.Integer('Sequence', default=1)

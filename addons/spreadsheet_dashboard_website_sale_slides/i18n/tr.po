@@ -1,35 +1,31 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* spreadsheet_dashboard_website_sale_slides
-# 
-# Translators:
-# Murat Kaplan <muratk@projetgrup.com>, 2024
-# Ediz Duman <neps1192@gmail.com>, 2024
-# emre oktem, 2024
-# Murat Durmuş <muratd@projetgrup.com>, 2024
-# Umur Akın <umura@projetgrup.com>, 2024
-# Martin Trigaux, 2024
-# Levent Karakaş <levent@mektup.at>, 2024
-# 
+# * spreadsheet_dashboard_website_sale_slides
+#
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# DeepL <noreply-mt-deepl@weblate.org>, 2025.
+# Odoo Turkish Import <dyki+tr@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:49+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Levent Karakaş <levent@mektup.at>, 2024\n"
-"Language-Team: Turkish (https://app.transifex.com/odoo/teams/41243/tr/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-04 04:20+0000\n"
+"Last-Translator: Odoo Turkish Import <dyki+tr@odoo.com>\n"
+"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-19/"
+"spreadsheet_dashboard_website_sale_slides/tr/>\n"
+"Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: tr\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_sample_dashboard.json:0
 msgid "AWS Cloud Essentials"
-msgstr ""
+msgstr "AWS Bulut Temelleri"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. odoo-javascript
@@ -49,13 +45,13 @@ msgstr "Katılımcılar"
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_sample_dashboard.json:0
 msgid "Attendees by Course"
-msgstr ""
+msgstr "Kurslara Göre Katılımcılar"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_sample_dashboard.json:0
 msgid "Attendees by course"
-msgstr ""
+msgstr "Kurslara göre katılımcılar"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. odoo-javascript
@@ -82,7 +78,7 @@ msgstr "Güncel Değer"
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_sample_dashboard.json:0
 msgid "Data Science 101"
-msgstr ""
+msgstr "Veri Bilimi 101"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. odoo-javascript
@@ -100,13 +96,13 @@ msgstr "Görsel"
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_sample_dashboard.json:0
 msgid "Introduction to AI"
-msgstr ""
+msgstr "Yapay Zekaya Giriş"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_sample_dashboard.json:0
 msgid "Machine Learning Basics"
-msgstr ""
+msgstr "Makine Öğrenimi Temelleri"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. odoo-javascript
@@ -125,7 +121,7 @@ msgstr "Önceki"
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_sample_dashboard.json:0
 msgid "Python for Beginners"
-msgstr ""
+msgstr "Yeni Başlayanlar için Python"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. odoo-javascript
@@ -165,13 +161,13 @@ msgstr "Video"
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_sample_dashboard.json:0
 msgid "Views by Course"
-msgstr ""
+msgstr "Kursa Göre Görünümler"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_sample_dashboard.json:0
 msgid "Views by course"
-msgstr ""
+msgstr "Kursa göre görünümler"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #: model:spreadsheet.dashboard,name:spreadsheet_dashboard_website_sale_slides.spreadsheet_dashboard_elearning
@@ -183,4 +179,4 @@ msgstr "e-Eğitim"
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_sample_dashboard.json:0
 msgid "since last period"
-msgstr ""
+msgstr "son dönemden bu yana"

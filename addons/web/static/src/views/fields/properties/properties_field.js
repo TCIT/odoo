@@ -7,16 +7,14 @@ import { reposition } from "@web/core/position/utils";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { useBus, useService } from "@web/core/utils/hooks";
-import { pick } from "@web/core/utils/objects";
 import { useSortable } from "@web/core/utils/sortable_owl";
-import { exprToBoolean } from "@web/core/utils/strings";
+import { exprToBoolean, uuid } from "@web/core/utils/strings";
 import { useRecordObserver } from "@web/model/relational_model/utils";
-import { uuid } from "../../utils";
 import { standardFieldProps } from "../standard_field_props";
 import { PropertyDefinition } from "./property_definition";
 import { PropertyValue } from "./property_value";
 
-import { Component, onWillStart, useEffect, useRef, useState } from "@odoo/owl";
+import { Component, onWillStart, onWillUpdateProps, useEffect, useRef, useState } from "@odoo/owl";
 
 export class PropertiesField extends Component {
     static template = "web.PropertiesField";
@@ -34,7 +32,7 @@ export class PropertiesField extends Component {
             optional: true,
             validate: (columns) => [1, 2].includes(columns),
         },
-        showAddButton: { type: Boolean, optional: true },
+        editMode: { type: Boolean, optional: true },
     };
 
     setup() {
@@ -44,10 +42,11 @@ export class PropertiesField extends Component {
         this.popover = usePopover(PropertyDefinition, {
             closeOnClickAway: this.checkPopoverClose,
             popoverClass: "o_property_field_popover",
-            position: "top",
+            position: "right",
             onClose: () => this.onCloseCurrentPopover?.(),
             fixedPosition: true,
             arrow: false,
+            setActiveElement: false, // make tag navigation work when adding a tag property
         });
         this.propertiesRef = useRef("properties");
 
@@ -63,21 +62,82 @@ export class PropertiesField extends Component {
         this.definitionRecordField = field.definition_record;
 
         this.state = useState({
-            canChangeDefinition: true,
+            canChangeDefinition: false,
+            isInEditMode: false,
             movedPropertyName: null,
-            showAddButton: this.props.showAddButton,
-            unfoldedSeparators: this._getUnfoldedSeparators(),
         });
 
-        // Properties can be added from the cogmenu of the form controller
+        // Properties can be added from the cog menu of the form controller
         if (this.env.config?.viewType === "form") {
-            useBus(this.env.model.bus, "PROPERTY_FIELD:ADD_PROPERTY_VALUE", () => {
-                this.onPropertyCreate();
+            useBus(this.env.model.bus, "PROPERTY_FIELD:EDIT", async () => {
+                if (this.props.readonly || this.state.isInEditMode) {
+                    return;
+                }
+                let canChangeDefinition = this.state.canChangeDefinition;
+                if (!canChangeDefinition) {
+                    canChangeDefinition = await this.checkDefinitionWriteAccess();
+                    if (!canChangeDefinition) {
+                        this.notification.add(this._getPropertyEditWarningText(), {
+                            type: "warning",
+                        });
+                    }
+                }
+                const isInEditMode = canChangeDefinition && !this.props.readonly;
+                this.state.canChangeDefinition = !!canChangeDefinition;
+                this.state.isInEditMode = isInEditMode;
+                if (isInEditMode && this.propertiesList.length === 0) {
+                    this.onPropertyCreate();
+                }
             });
         }
 
         onWillStart(async () => {
-            await this._checkDefinitionAccess();
+            if (this.props.readonly || !this.props.editMode) {
+                return;
+            }
+            this.checkDefinitionWriteAccess().then((canChangeDefinition) => {
+                if (canChangeDefinition) {
+                    this.state.canChangeDefinition = true;
+                    this.state.isInEditMode = !this.props.readonly;
+                }
+            });
+        });
+
+        useEffect(
+            () => {
+                // when the field has a new definition record:
+                if (this.props.readonly || (!this.state.isInEditMode && !this.props.editMode)) {
+                    return;
+                }
+                this.checkDefinitionWriteAccess().then((canChangeDefinition) => {
+                    this.state.canChangeDefinition = !!canChangeDefinition;
+                    this.state.isInEditMode =
+                        canChangeDefinition &&
+                        !this.props.readonly &&
+                        (this.state.isInEditMode || this.props.editMode);
+                });
+            },
+            () => [this.props.record.data[this.definitionRecordField]]
+        );
+
+        onWillUpdateProps(async (nextProps) => {
+            if (nextProps.readonly && !this.props.readonly) {
+                this.state.isInEditMode = false;
+            }
+            if (
+                !nextProps.readonly &&
+                (this.props.readonly || (nextProps.editMode && !this.props.editMode))
+            ) {
+                let canChangeDefinition = this.state.canChangeDefinition;
+                if (!canChangeDefinition) {
+                    canChangeDefinition = await this.checkDefinitionWriteAccess();
+                }
+                this.state.canChangeDefinition = !!canChangeDefinition;
+                this.state.isInEditMode =
+                    canChangeDefinition &&
+                    !nextProps.readonly &&
+                    (this.state.isInEditMode || nextProps.editMode);
+            }
         });
 
         useEffect(
@@ -158,7 +218,7 @@ export class PropertiesField extends Component {
             },
             onGroupEnter: ({ group }) => {
                 group.classList.add("o_property_drag_group");
-                this._unfoldSeparators([group.getAttribute("property-name")], true);
+                this._toggleSeparators([group.getAttribute("property-name")], false);
             },
             onGroupLeave: ({ group }) => {
                 group.classList.remove("o_property_drag_group");
@@ -214,8 +274,14 @@ export class PropertiesField extends Component {
      * @returns {array}
      */
     get propertiesList() {
-        const propertiesValues = this.props.record.data[this.props.name] || [];
-        return propertiesValues.filter((definition) => !definition.definition_deleted);
+        return (this.props.record.data[this.props.name] || [])
+            .filter((definition) => !definition.definition_deleted)
+            .map((definition) => ({ ...definition }));
+    }
+
+    // for overrides
+    get additionalPropertyDefinitionProps() {
+        return {};
     }
 
     /**
@@ -243,6 +309,7 @@ export class PropertiesField extends Component {
                     title: property.string,
                     name: property.name,
                     elements: [],
+                    isFolded: property.value ?? property.fold_by_default,
                 });
             } else {
                 groupedProperties.at(-1).elements.push(property);
@@ -257,10 +324,10 @@ export class PropertiesField extends Component {
             for (let col = 1; col < this.renderedColumnsCount; ++col) {
                 groupedProperties.push({
                     title: null,
-                    name: groupedProperties[0].name,
+                    name: null,
                     columnSeparator: true,
                     elements: [],
-                    invisibleLabel,
+                    invisibleLabel: true,
                 });
             }
             const properties = propertiesList.filter((property) => property.type !== "separator");
@@ -281,7 +348,7 @@ export class PropertiesField extends Component {
      * @returns {integer}
      */
     get definitionRecordId() {
-        return this.props.record.data[this.definitionRecordField][0];
+        return this.props.record.data[this.definitionRecordField].id;
     }
 
     /**
@@ -343,8 +410,12 @@ export class PropertiesField extends Component {
      *
      * @returns {string}
      */
-    generatePropertyName() {
-        return uuid();
+    generatePropertyName(propertyType) {
+        let name = uuid();
+        if (propertyType === "html") {
+            name = `${name}_html`;
+        }
+        return name;
     }
 
     /* --------------------------------------------------------
@@ -380,9 +451,9 @@ export class PropertiesField extends Component {
         propertiesValues[propertyIndex] = prop;
         propertiesValues[propertyIndex].definition_changed = true;
 
-        this._unfoldPropertyGroup(targetIndex, propertiesValues);
-
         await this.props.record.update({ [this.props.name]: propertiesValues });
+        await this._unfoldPropertyGroup(targetIndex, propertiesValues);
+
         // move the popover once the DOM is updated
         this.movePopoverToProperty = propertyName;
     }
@@ -394,7 +465,7 @@ export class PropertiesField extends Component {
      * @param {string} toPropertyName, the target property
      *  (null if we move the property to the first index)
      */
-    onPropertyMoveTo(propertyName, toPropertyName, moveBefore) {
+    async onPropertyMoveTo(propertyName, toPropertyName, moveBefore) {
         const propertiesValues = this.propertiesList || [];
 
         let fromIndex = propertiesValues.findIndex((property) => property.name === propertyName);
@@ -420,12 +491,12 @@ export class PropertiesField extends Component {
                 const newSeparator = {
                     type: "separator",
                     string: _t("Group %s", col + 1),
-                    name: this.generatePropertyName(),
+                    name: this.generatePropertyName("separator"),
                 };
                 newSeparators.push(newSeparator.name);
                 propertiesValues.splice(separatorIndex, 0, newSeparator);
             }
-            this._unfoldSeparators(newSeparators, true);
+            await this._toggleSeparators(newSeparators, false);
             toPropertyName = toPropertyName || propertiesValues.at(-1).name;
 
             // indexes might have changed
@@ -505,13 +576,7 @@ export class PropertiesField extends Component {
     async onPropertyEdit(event, propertyName) {
         event.stopPropagation();
         event.preventDefault();
-        if (!(await this.checkDefinitionWriteAccess())) {
-            this.notification.add(
-                _t("You need edit access on the parent document to update these property fields"),
-                { type: "warning" }
-            );
-            return;
-        }
+
         if (event.target.classList.contains("disabled")) {
             // remove the glitch if we click on the edit button
             // while the popover is already opened
@@ -531,13 +596,21 @@ export class PropertiesField extends Component {
         propertyDefinition["definition_changed"] = true;
         if (propertyDefinition.type === "separator") {
             // remove all other keys
-            propertyDefinition = pick(
-                propertyDefinition,
+            const separatorKeys = new Set([
+                "definition_changed",
+                "fold_by_default",
                 "name",
                 "string",
-                "definition_changed",
-                "type"
-            );
+                "type",
+                "value",
+            ]);
+            // remove all other keys in place, since propertyDefinition instance
+            // will be used as a PropertyDefinition component state value.
+            for (const key in propertyDefinition) {
+                if (!separatorKeys.has(key)) {
+                    delete propertyDefinition[key];
+                }
+            }
         }
         const propertiesValues = this.propertiesList;
         const propertyIndex = this._getPropertyIndex(propertyDefinition.name);
@@ -545,14 +618,14 @@ export class PropertiesField extends Component {
         const oldType = propertiesValues[propertyIndex].type;
         const newType = propertyDefinition.type;
 
-        this._regeneratePropertyName(propertyDefinition);
+        this._regeneratePropertyName(propertyDefinition, propertiesValues[propertyIndex]);
 
         propertiesValues[propertyIndex] = propertyDefinition;
         await this.props.record.update({ [this.props.name]: propertiesValues });
 
         if (newType === "separator" && oldType !== "separator") {
             // unfold automatically the new separator
-            this._unfoldSeparators([propertyDefinition.name], true);
+            await this._toggleSeparators([propertyDefinition.name], propertyDefinition.fold_by_default);
             // layout has been changed, move the definition popover
             this.movePopoverToProperty = propertyDefinition.name;
         } else if (oldType === "separator" && newType !== "separator") {
@@ -561,7 +634,7 @@ export class PropertiesField extends Component {
                 (property, index) => index < propertyIndex && property.type === "separator"
             );
             if (previousSeperator) {
-                this._unfoldSeparators([previousSeperator.name], true);
+                await this._toggleSeparators([previousSeperator.name], propertyDefinition.fold_by_default);
             }
             // layout has been changed, move the definition popover
             this.movePopoverToProperty = propertyDefinition.name;
@@ -574,14 +647,23 @@ export class PropertiesField extends Component {
      * @param {string} propertyName
      */
     onPropertyDelete(propertyName) {
+        let message = _t("Are you sure you want to delete this property field?") + " ";
+        if (this.definitionRecordModel !== "properties.base.definition") {
+            const parentName = this.props.record.data[this.definitionRecordField].display_name;
+            const parentFieldLabel = this.props.record.fields[this.definitionRecordField].string;
+            message += _t(
+                'It will be removed for everyone using the "%(parentName)s" %(parentFieldLabel)s.',
+                { parentName, parentFieldLabel }
+            );
+        } else {
+            message += _t("It will be removed for everyone!");
+        }
         this.popover.close();
         const dialogProps = {
             title: _t("Delete Property Field"),
-            body: _t(
-                'Are you sure you want to delete this property field? It will be removed for everyone using the "%(parentName)s" %(parentFieldLabel)s.',
-                { parentName: this.parentName, parentFieldLabel: this.parentString }
-            ),
-            confirmLabel: _t("Delete"),
+            body: message,
+            confirmLabel: _t("Delete Field"),
+            cancelLabel: _t("Discard"),
             confirm: () => {
                 const propertiesDefinitions = this.propertiesList;
                 propertiesDefinitions.find(
@@ -595,10 +677,16 @@ export class PropertiesField extends Component {
     }
 
     async onPropertyCreate() {
-        if (!this.state.canChangeDefinition || !(await this.checkDefinitionWriteAccess())) {
+        if (!this.definitionRecordId || !this.definitionRecordModel) {
             this.notification.add(
-                _t("You need edit access on the parent document to update these property fields"),
-                { type: "warning" }
+                _t(
+                    "Oops! A %(parentFieldLabel)s is needed to add property fields.",
+                    {
+                        parentFieldLabel:
+                            this.props.record.fields[this.definitionRecordField].string,
+                    },
+                    { type: "warning" }
+                )
             );
             return;
         }
@@ -618,32 +706,31 @@ export class PropertiesField extends Component {
             });
             return;
         }
-
-        this._unfoldPropertyGroup(propertiesDefinitions.length - 1, propertiesDefinitions);
+        const count = propertiesDefinitions.length;
 
         this.propertiesRef.el.closest(".o_field_properties").classList.remove("o_field_invalid");
 
-        const newName = this.generatePropertyName();
+        const newName = this.generatePropertyName("char");
         propertiesDefinitions.push({
             name: newName,
-            string: _t("Property %s", propertiesDefinitions.length + 1),
+            string: _t("Property %s", count + 1),
             type: "char",
             definition_changed: true,
         });
+        this.initialValues[newName] = { name: newName, type: "char" };
+        await this.props.record.update({ [this.props.name]: propertiesDefinitions });
+        await this._unfoldPropertyGroup(count - 1, propertiesDefinitions);
         this.openPropertyDefinition = newName;
-        this.state.showAddButton = true;
-        this.props.record.update({ [this.props.name]: propertiesDefinitions });
     }
 
     /**
      * Fold / unfold the given separator property.
      *
      * @param {string} propertyName, Name of the separator property
-     * @param {boolean} forceUnfold, Always unfold
      */
     onSeparatorClick(propertyName) {
         if (propertyName) {
-            this._unfoldSeparators([propertyName]);
+            this._toggleSeparators([propertyName]);
         }
     }
 
@@ -688,56 +775,20 @@ export class PropertiesField extends Component {
      * -------------------------------------------------------- */
 
     /**
-     * Generate the key to get the fold state from the local storage.
-     *
-     * @returns {string}
-     */
-    _getSeparatorFoldKey() {
-        const definitionRecordId = this.props.record.data[this.definitionRecordField][0];
-        const definitionRecordModel = this.props.record.fields[this.definitionRecordField].relation;
-        // store the fold / unfold information per definition record
-        // to clean the keys (to not keep information about removed separator)
-        return `properties.fold,${definitionRecordModel},${definitionRecordId}`;
-    }
-
-    /**
-     * Read the local storage and return the fold state stored in it.
-     *
-     * We clean the dictionary state because a property might have been deleted,
-     * and so there's no reason to keep the corresponding key in the dict.
-     *
-     * @returns {array} The folded state (name of the properties unfolded)
-     */
-    _getUnfoldedSeparators() {
-        const key = this._getSeparatorFoldKey();
-        const unfoldedSeparators = JSON.parse(window.localStorage.getItem(key)) || [];
-        const allPropertiesNames = this.propertiesList.map((property) => property.name);
-        // remove element that do not exist anymore (e.g. if we remove a separator)
-        return unfoldedSeparators.filter((name) => allPropertiesNames.includes(name));
-    }
-
-    /**
      * Switch the folded state of the given separators.
      *
      * @param {array} separatorNames, list of separator name to fold / unfold
-     * @param {boolean} (forceUnfold) force the separator to be unfolded
+     * @param {boolean} [forceState] force the separator to be folded or open
      */
-    _unfoldSeparators(separatorNames, forceUnfold) {
-        let unfoldedSeparators = this._getUnfoldedSeparators();
+    _toggleSeparators(separatorNames, forceState) {
+        const propertiesValues = this.propertiesList;
         for (const separatorName of separatorNames) {
-            if (unfoldedSeparators.includes(separatorName)) {
-                if (!forceUnfold) {
-                    unfoldedSeparators = unfoldedSeparators.filter(
-                        (name) => name !== separatorName
-                    );
-                }
-            } else {
-                unfoldedSeparators.push(separatorName);
+            const property = propertiesValues.find((prop) => prop.name === separatorName);
+            if (property) {
+                property.value = forceState ?? !(property.value ?? property.fold_by_default);
             }
         }
-        const key = this._getSeparatorFoldKey();
-        window.localStorage.setItem(key, JSON.stringify(unfoldedSeparators));
-        this.state.unfoldedSeparators = unfoldedSeparators;
+        return this.props.record.update({ [this.props.name]: propertiesValues });
     }
 
     /**
@@ -765,53 +816,37 @@ export class PropertiesField extends Component {
     }
 
     /**
-     * Verify that we can write on the parent record,
-     * and therefor update the properties definition.
-     */
-    async _checkDefinitionAccess() {
-        this.parentName = this.props.record.data[this.definitionRecordField][1];
-        this.parentString = this.props.record.fields[this.definitionRecordField].string;
-
-        if (!this.definitionRecordModel) {
-            this.state.canChangeDefinition = false;
-            return;
-        }
-
-        // check if we can write on the definition record
-        this.state.canChangeDefinition = await user.checkAccessRight(
-            this.definitionRecordModel,
-            "write"
-        );
-    }
-
-    /**
      * Regenerate a new name if needed or restore the original one.
      * (see @_saveInitialPropertiesValues).
      *
      * If the type / model are the same, restore the original name to not reset the
      * children otherwise, generate a new value so all value of the record are reset.
      *
-     * @param {object} propertyDefinition
+     * @param {object} newDefinition
+     * @param {object} oldDefinition
      */
-    _regeneratePropertyName(propertyDefinition) {
-        const initialValues = this.initialValues[propertyDefinition.name];
+    _regeneratePropertyName(newDefinition, oldDefinition) {
+        const initialValues = this.initialValues[newDefinition.name];
         if (
             initialValues &&
-            propertyDefinition.type === initialValues.type &&
-            propertyDefinition.comodel === initialValues.comodel
+            newDefinition.type === initialValues.type &&
+            newDefinition.comodel === initialValues.comodel
         ) {
-            // restore the original name
-            propertyDefinition.name = initialValues.name;
-        } else if (initialValues && initialValues.name === propertyDefinition.name) {
+            // restore the original name (so the value on other records are not set to false)
+            newDefinition.name = initialValues.name;
+        } else if (
+            oldDefinition.type !== newDefinition.type ||
+            oldDefinition.model !== newDefinition.model
+        ) {
             // Generate a new name to reset all values on other records.
             // because the name has been changed on the definition,
             // the old name on others record won't match the name on the definition
             // and the python field will just ignore the old value.
             // Store the new generated name to be able to restore it
             // if needed.
-            const newName = this.generatePropertyName();
+            const newName = this.generatePropertyName(newDefinition.type);
             this.initialValues[newName] = initialValues;
-            propertyDefinition.name = newName;
+            newDefinition.name = newName;
         }
     }
 
@@ -892,9 +927,9 @@ export class PropertiesField extends Component {
         };
 
         this.popover.open(target, {
+            fieldName: this.props.name,
             readonly: this.props.readonly || !this.state.canChangeDefinition,
             canChangeDefinition: this.state.canChangeDefinition,
-            checkDefinitionWriteAccess: () => this.checkDefinitionWriteAccess(),
             propertyDefinition: this.propertiesList.find(
                 (property) => property.name === currentName(propertyName)
             ),
@@ -906,6 +941,8 @@ export class PropertiesField extends Component {
             isNewlyCreated: isNewlyCreated,
             propertyIndex: propertyIndex,
             propertiesSize: propertiesList.length,
+            record: this.props.record,
+            ...this.additionalPropertyDefinitionProps,
         });
     }
 
@@ -917,7 +954,9 @@ export class PropertiesField extends Component {
     _setDefaultPropertyValue(propertyName) {
         const propertiesValues = this.propertiesList;
         const newProperty = propertiesValues.find((property) => property.name === propertyName);
-        newProperty.value = newProperty.default;
+        if (newProperty.default) {
+            newProperty.value = newProperty.default;
+        }
         // it won't update the props, it's a trick because the onClose event of the popover
         // is called not synchronously, and so if we click on "create a property", it will close
         // the popover, calling this function, but the value will be overwritten because of onPropertyCreate
@@ -936,8 +975,24 @@ export class PropertiesField extends Component {
             (property, index) => property.type === "separator" && index <= targetIndex
         );
         if (separator) {
-            this._unfoldSeparators([separator.name], true);
+            return this._toggleSeparators([separator.name], false);
         }
+    }
+
+    /**
+     * Returns the text for the warning raised in the "PROPERTY_FIELD:EDIT"
+     * bus event, if the PropertiesField component cannot enter edit mode.
+     */
+    _getPropertyEditWarningText() {
+        if (!this.definitionRecordId) {
+            return _t("Oops! A %(parentFieldLabel)s is needed to add property fields.", {
+                parentFieldLabel: this.props.record.fields[this.definitionRecordField].string,
+            });
+        }
+        return _t('Oops! You cannot edit the %(parentFieldLabel)s "%(parentName)s".', {
+            parentName: this.props.record.data[this.definitionRecordField].display_name,
+            parentFieldLabel: this.props.record.fields[this.definitionRecordField].string,
+        });
     }
 }
 
@@ -949,7 +1004,7 @@ export const propertiesField = {
         return {
             context: dynamicInfo.context,
             columns: parseInt(attrs.columns || "1"),
-            showAddButton: exprToBoolean(attrs.showAddButton),
+            editMode: exprToBoolean(attrs.editMode),
         };
     },
 };

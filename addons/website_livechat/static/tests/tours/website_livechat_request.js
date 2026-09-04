@@ -1,9 +1,8 @@
-import { queryAll } from "@odoo/hoot-dom";
 import {
     closeChat,
     okRating,
     feedback,
-    transcript,
+    downloadTranscript,
     confirmnClose,
 } from "./website_livechat_common";
 import { registry } from "@web/core/registry";
@@ -28,7 +27,7 @@ const chatRequest = [
     {
         content: "Verify there is no duplicates",
         trigger: ".o-livechat-root:shadow .o-mail-Thread",
-        run() {
+        run({ queryAll }) {
             if (
                 queryAll(
                     ".o-mail-Message:contains('Hi ! What a coincidence! I need your help indeed.')",
@@ -45,12 +44,8 @@ const chatRequest = [
     },
 ];
 
-registry.category("web_tour.tours").add("website_livechat_chat_request_part_1_no_close_tour", {
+registry.category("web_tour.tours").add("website_livechat_chat_request", {
     url: "/",
-    steps: () => [].concat(chatRequest),
-});
-
-registry.category("web_tour.tours").add("website_livechat_chat_request_part_2_end_session_tour", {
-    url: "/",
-    steps: () => [].concat(closeChat, confirmnClose, okRating, feedback, transcript),
+    steps: () =>
+        [].concat(chatRequest, closeChat, confirmnClose, okRating, feedback, downloadTranscript),
 });

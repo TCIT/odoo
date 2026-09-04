@@ -1,10 +1,9 @@
-/** @odoo-module */
-
 import { Notification } from "@mail/core/common/notification_model";
 import { patch } from "@web/core/utils/patch";
 import { _t } from "@web/core/l10n/translation";
 
-patch(Notification.prototype, {
+/** @type {import("models").Notification} */
+const notificationPatch = {
     get icon() {
         if (this.notification_type === "snail") {
             return "fa fa-paper-plane";
@@ -27,7 +26,24 @@ patch(Notification.prototype, {
         }
         return super.statusIcon;
     },
-
+    get failureMessage() {
+        switch (this.failure_type) {
+            case "sn_credit":
+                return _t("Insufficient Credits");
+            case "sn_trial":
+                return _t("No IAP Credits");
+            case "sn_price":
+                return _t("Country Not Supported");
+            case "sn_fields":
+                return _t("Missing Required Fields");
+            case "sn_format":
+                return _t("Format Error");
+            case "sn_error":
+                return _t("Unknown Error");
+            default:
+                return super.failureMessage;
+        }
+    },
     get statusTitle() {
         if (this.notification_type === "snail") {
             switch (this.notification_status) {
@@ -43,4 +59,5 @@ patch(Notification.prototype, {
         }
         return super.statusTitle;
     },
-});
+};
+patch(Notification.prototype, notificationPatch);

@@ -1,58 +1,55 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* maintenance
-# 
+# * maintenance
+#
 # Translators:
-# emre oktem, 2024
-# Tiffany Chang, 2024
-# UNIBRAVO SOFTWARE <unibravo@gmail.com>, 2024
-# gezgin biri <gezginbiri@hotmail.com>, 2024
-# İlknur Gözütok, 2024
-# Nadir Gazioglu <nadirgazioglu@gmail.com>, 2024
-# Mehmet YAYLA, 2024
-# İmat Yahya Çataklı <yahya.catakli@soluto.com.tr>, 2024
-# Kaan Özdemir, 2024
-# Buket Şeker <buket_skr@hotmail.com>, 2024
-# Ayhan Kızıltan, 2024
-# Cihad GÜNDOĞDU <cihadgundogdu@gmail.com>, 2024
-# Murat Durmuş <muratd@projetgrup.com>, 2024
-# Ahmet Altinisik <aaltinisik@altinkaya.com.tr>, 2024
-# Ozlem Cikrikci <ozlemc@eskayazilim.com.tr>, 2024
-# Gökhan Erdoğdu <gokhan.erdogdu@mechsoft.com.tr>, 2024
-# Cem Uygur <cemuygur.beb@gmail.com>, 2024
-# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2024
-# Melih Melik Sonmez, 2024
-# Halil, 2024
-# Tugay Hatıl <tugayh@projetgrup.com>, 2024
-# Umur Akın <umura@projetgrup.com>, 2024
-# Martin Trigaux, 2024
-# Murat Kaplan <muratk@projetgrup.com>, 2024
-# Ediz Duman <neps1192@gmail.com>, 2024
-# Levent Karakaş <levent@mektup.at>, 2024
-# 
+# UNIBRAVO SOFTWARE <unibravo@gmail.com>, 2022
+# gezgin biri <gezginbiri@hotmail.com>, 2022
+# Cem Uygur <cemuygur.beb@gmail.com>, 2022
+# Ayhan KIZILTAN <akiziltan76@hotmail.com>, 2022
+# Nadir Gazioglu <nadirgazioglu@gmail.com>, 2022
+# Ramiz Deniz Öner <deniz@denizoner.com>, 2022
+# Murat Durmuş <muratd@projetgrup.com>, 2022
+# İmat Yahya Çataklı <yahya.catakli@soluto.com.tr>, 2022
+# abc Def <hdogan1974@gmail.com>, 2022
+# Ahmet Altinisik <aaltinisik@altinkaya.com.tr>, 2022
+# Buket Şeker <buket_skr@hotmail.com>, 2022
+# Tugay Hatıl <tugayh@projetgrup.com>, 2022
+# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2022
+# Levent Karakaş <levent@mektup.at>, 2022
+# Ozlem Cikrikci <ozlemc@eskayazilim.com.tr>, 2022
+# Güven YILMAZ <guvenyilmaz@outlook.com.tr>, 2022
+# Ediz Duman <neps1192@gmail.com>, 2022
+# Umur Akın <umura@projetgrup.com>, 2022
+# Murat Kaplan <muratk@projetgrup.com>, 2022
+# Gökhan Erdoğdu <gokhan.erdogdu@mechsoft.com.tr>, 2022
+# Halil, 2022
+# Martin Trigaux, 2022
+# İlknur Gözütok, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# DeepL <noreply-mt-deepl@weblate.org>, 2025.
+# Odoo Turkish Import <dyki+tr@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Levent Karakaş <levent@mektup.at>, 2024\n"
-"Language-Team: Turkish (https://app.transifex.com/odoo/teams/41243/tr/)\n"
+"POT-Creation-Date: 2026-01-25 18:35+0000\n"
+"PO-Revision-Date: 2026-08-04 09:57+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-19/"
+"maintenance/tr/>\n"
+"Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: tr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_form
 msgid "<span class=\"badge text-bg-warning float-end\">Cancelled</span>"
-msgstr ""
-
-#. module: maintenance
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_form
-msgid "<span class=\"ml8\">hours</span>"
-msgstr "<span class=\"ml8\">saatler</span>"
+msgstr "<span class=\"badge text-bg-warning float-end\">İptal edildi</span>"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.maintenance_team_kanban
@@ -67,15 +64,15 @@ msgstr "<span>Requests</span>"
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.view_maintenance_equipment_category_kanban
 msgid "<strong>Equipment:</strong>"
-msgstr ""
+msgstr "<strong>Ekipman:</strong>"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.view_maintenance_equipment_category_kanban
 msgid "<strong>Maintenance: </strong>"
-msgstr ""
+msgstr "<strong>Bakım: </strong>"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_defaults
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_defaults
 msgid ""
 "A Python dictionary that will be evaluated to provide default values when "
 "creating new records for this alias."
@@ -91,8 +88,8 @@ msgstr "Acer Dizüstü Bilgisayar"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_needaction
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_needaction
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_needaction
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_needaction
 msgid "Action Needed"
 msgstr "Aksiyon Gerekiyor"
 
@@ -166,47 +163,47 @@ msgid "Add a team in the maintenance request"
 msgstr "Bakım talebine yeni bir ekip ekle"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_id
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_id
 msgid "Alias"
 msgstr "Rumuz"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_contact
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_contact
 msgid "Alias Contact Security"
 msgstr "Rumuz Kontak Güvenliği"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_domain_id
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_domain_id
 msgid "Alias Domain"
 msgstr "Alias Domain"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_domain
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_domain
 msgid "Alias Domain Name"
 msgstr "Takma Alan Adı"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_full_name
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_full_name
 msgid "Alias Email"
 msgstr "Rumuz E-Posta"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_name
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_name
 msgid "Alias Name"
 msgstr "Rumuz Adı"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_status
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_status
 msgid "Alias Status"
 msgstr "Takma Ad Durumu"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_status
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_status
 msgid "Alias status assessed on the last message received."
 msgstr "Alınan son mesajda değerlendirilen takma ad durumu."
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_model_id
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_model_id
 msgid "Aliased Model"
 msgstr "Rumuzlanan Model"
 
@@ -256,8 +253,8 @@ msgstr "Atanan"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_attachment_count
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_attachment_count
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_attachment_count
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_attachment_count
 msgid "Attachment Count"
 msgstr "Ek Sayısı"
 
@@ -393,14 +390,14 @@ msgid "Current Maintenance"
 msgstr "Mevcut Bakım"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_bounced_content
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_bounced_content
 msgid "Custom Bounced Message"
 msgstr "Özel İletilmeyen Mesajı"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_res_config_settings__module_maintenance_worksheet
 msgid "Custom Maintenance Worksheets"
-msgstr ""
+msgstr "Özel Bakım Çalışma Sayfaları"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.res_config_settings_view_form
@@ -424,12 +421,12 @@ msgid ""
 "from the Request Date. "
 msgstr ""
 "Bakım ekibinin bakımı planladığı tarih. İstek Tarihinden çok farklı "
-"olmamalıdır."
+"olmamalıdır. "
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_request__close_date
 msgid "Date the maintenance was finished. "
-msgstr "Bakımın tamamlandığı tarih."
+msgstr "Bakımın tamamlandığı tarih. "
 
 #. module: maintenance
 #: model:ir.model.fields.selection,name:maintenance.selection__maintenance_request__repeat_unit__day
@@ -437,7 +434,7 @@ msgid "Days"
 msgstr "Gün"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_defaults
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_defaults
 msgid "Default Values"
 msgstr "Öntanımlı Değerler"
 
@@ -456,9 +453,11 @@ msgstr "Açıklama"
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__display_name
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__display_name
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_mixin__display_name
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__display_name
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_stage__display_name
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_team__display_name
+#: model:ir.model.fields,field_description:maintenance.field_res_config_settings__display_name
 msgid "Display Name"
 msgstr "İsim Göster"
 
@@ -491,19 +490,15 @@ msgid "Effective Date"
 msgstr "Geçerlilik Tarihi"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_email
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_category_view_form
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_email
+#: model_terms:ir.ui.view,arch_db:maintenance.maintenance_team_view_form
 msgid "Email Alias"
 msgstr "E-Posta Rumuzu"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_id
-msgid ""
-"Email alias for this equipment category. New emails will automatically "
-"create a new equipment under this category."
-msgstr ""
-"Bu ekipman kategorisi için eposta takma adı. Yeni epostalar bu ekipman "
-"kategorisi için otomatik olarak bakım talebi oluşturacaklar."
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_id
+msgid "Email alias for this maintenance team."
+msgstr "Bu bakım ekibi için e-posta takma adı."
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__email_cc
@@ -512,15 +507,20 @@ msgid "Email cc"
 msgstr "E-posta cc"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_domain
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_domain
 msgid "Email domain e.g. 'example.com' in 'odoo@example.com'"
-msgstr ""
-"E-posta alan adı, örneğin 'odoo@example.com' adresindeki 'example.com'"
+msgstr "E-posta alan adı, örneğin 'odoo@example.com' adresindeki 'example.com'"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__repeat_until
 msgid "End Date"
 msgstr "Bitiş Tarihi"
+
+#. module: maintenance
+#. odoo-python
+#: code:addons/maintenance/models/maintenance.py:0
+msgid "End date cannot be earlier than start date."
+msgstr "Bitiş tarihi başlangıç tarihinden önce olamaz."
 
 #. module: maintenance
 #: model:ir.actions.act_window,name:maintenance.hr_equipment_action
@@ -557,7 +557,7 @@ msgstr "Ekipman Kategorisi"
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__equipment_count
 msgid "Equipment Count"
-msgstr ""
+msgstr "Ekipman Sayısı"
 
 #. module: maintenance
 #: model:res.groups,name:maintenance.group_equipment_manager
@@ -572,7 +572,7 @@ msgstr "Ekipman Adı"
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__equipment_properties_definition
 msgid "Equipment Properties"
-msgstr ""
+msgstr "Ekipman Özellikleri"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_form
@@ -599,6 +599,11 @@ msgid "Expected Mean Time Between Failure"
 msgstr "Hatalar arasındaki beklenen ortalama süre"
 
 #. module: maintenance
+#: model:ir.model.fields,help:maintenance.field_maintenance_request__schedule_end
+msgid "Expected completion date and time of the maintenance request."
+msgstr "Bakım talebinin beklenen tamamlanma tarihi ve saati."
+
+#. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__fold
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_stage__fold
 msgid "Folded in Maintenance Pipe"
@@ -617,15 +622,15 @@ msgstr "Gerekli işlemleri takip edin ve çalışanlarla iletişimde olun."
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_follower_ids
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_follower_ids
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_follower_ids
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_follower_ids
 msgid "Followers"
 msgstr "Takipçiler"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_partner_ids
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_partner_ids
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_partner_ids
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_partner_ids
 msgid "Followers (Partners)"
 msgstr "Takipçiler (İş ortakları)"
 
@@ -658,13 +663,6 @@ msgid "Google Slide Link"
 msgstr "Google Slide Bağlantısı"
 
 #. module: maintenance
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_category_view_search
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_search
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_search
-msgid "Group by..."
-msgstr "Grupla ..."
-
-#. module: maintenance
 #: model:maintenance.equipment,name:maintenance.equipment_printer1
 msgid "HP Inkjet printer"
 msgstr "HP Inkjet yazıcı"
@@ -677,8 +675,8 @@ msgstr "HP Laptop"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__has_message
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__has_message
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__has_message
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__has_message
 msgid "Has Message"
 msgstr "Mesaj Var"
 
@@ -695,19 +693,22 @@ msgstr "Yüksek öncelik"
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__id
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__id
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_mixin__id
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__id
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_stage__id
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_team__id
+#: model:ir.model.fields,field_description:maintenance.field_res_config_settings__id
 msgid "ID"
 msgstr "ID"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_parent_thread_id
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_parent_thread_id
 msgid ""
-"ID of the parent record holding the alias (example: project holding the task"
-" creation alias)"
+"ID of the parent record holding the alias (example: project holding the task "
+"creation alias)"
 msgstr ""
-"Rumuzu tutan üst kayıt ID (örnek: görev oluşturma rumuzunu tutan proje)"
+"Takma adı barındıran üst kayıt kimliği (örnek: görev oluşturma takma adını "
+"barındıran proje)"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__activity_exception_icon
@@ -723,20 +724,20 @@ msgstr "İstisnai bir etkinliği belirtmek için kullanılan simge."
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__message_needaction
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__message_needaction
 #: model:ir.model.fields,help:maintenance.field_maintenance_request__message_needaction
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__message_needaction
 msgid "If checked, new messages require your attention."
 msgstr "İşaretliyse, yeni mesajlar dikkatinize sunulacak."
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__message_has_error
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__message_has_error
 #: model:ir.model.fields,help:maintenance.field_maintenance_request__message_has_error
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__message_has_error
 msgid "If checked, some messages have a delivery error."
 msgstr "İşaretliyse, bazı mesajlar gönderi hatası içermektedir."
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_bounced_content
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_bounced_content
 msgid ""
 "If set, this content will automatically be sent out to unauthorized users "
 "instead of the default message."
@@ -773,8 +774,8 @@ msgstr "İç Notlar"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_is_follower
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_is_follower
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_is_follower
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_is_follower
 msgid "Is Follower"
 msgstr "Takipçi mi"
 
@@ -819,14 +820,9 @@ msgid "Latest Failure Date"
 msgstr "Son Hata Tarihi"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_incoming_local
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_incoming_local
 msgid "Local-part based incoming detection"
-msgstr ""
-
-#. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__location
-msgid "Location"
-msgstr "Konum"
+msgstr "Yerel bölüm bazlı gelen algılama"
 
 #. module: maintenance
 #: model:ir.ui.menu,name:maintenance.menu_m_reports_losses
@@ -856,6 +852,7 @@ msgstr "MTTR"
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_mixin__maintenance_ids
 #: model:ir.ui.menu,name:maintenance.menu_m_request
 #: model:ir.ui.menu,name:maintenance.menu_maintenance_title
+#: model:res.groups.privilege,name:maintenance.res_groups_privilege_maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_category_view_form
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_form
 #: model_terms:ir.ui.view,arch_db:maintenance.res_config_settings_view_form
@@ -887,12 +884,16 @@ msgstr "Bakım Ekipmanı Kategorisi"
 #. module: maintenance
 #: model:ir.model,name:maintenance.model_maintenance_mixin
 msgid "Maintenance Maintained Item"
-msgstr ""
+msgstr "Bakım Bakımı Yapılan Öğe"
 
 #. module: maintenance
 #: model:ir.model,name:maintenance.model_maintenance_request
 #: model:mail.activity.type,name:maintenance.mail_act_maintenance_request
+#: model:mail.activity.type,summary:maintenance.mail_act_maintenance_request
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_form
+#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_graph
+#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_pivot
+#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_tree
 #: model_terms:ir.ui.view,arch_db:maintenance.maintenance_request_view_activity
 msgid "Maintenance Request"
 msgstr "Bakım Talebi"
@@ -928,12 +929,16 @@ msgstr "Bakım Talebi oluşturuldu"
 #: model:ir.actions.act_window,name:maintenance.hr_equipment_request_action_from_equipment
 #: model:ir.actions.act_window,name:maintenance.hr_equipment_request_action_link
 #: model:ir.actions.act_window,name:maintenance.hr_equipment_todo_request_action_from_dashboard
-#: model:ir.actions.act_window,name:maintenance.maintenance_request_action_reports
-#: model:ir.ui.menu,name:maintenance.maintenance_request_reporting
 #: model:ir.ui.menu,name:maintenance.menu_m_request_form
 #: model_terms:ir.ui.view,arch_db:maintenance.maintenance_team_kanban
 msgid "Maintenance Requests"
 msgstr "Bakım Talepleri"
+
+#. module: maintenance
+#: model:ir.actions.act_window,name:maintenance.maintenance_request_action_reports
+#: model:ir.ui.menu,name:maintenance.maintenance_request_reporting
+msgid "Maintenance Requests Analysis"
+msgstr "Bakım Talepleri Analizi"
 
 #. module: maintenance
 #: model:ir.model,name:maintenance.model_maintenance_stage
@@ -966,11 +971,6 @@ msgid "Maintenance Type"
 msgstr "Bakım Tipi"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__match_serial
-msgid "Match Serial"
-msgstr ""
-
-#. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_form
 msgid "Mean Time Between Failure"
 msgstr "Hatalar Arasındaki Ortalama Zaman"
@@ -993,15 +993,15 @@ msgstr "Ortalama Tamir Süresi"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_has_error
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_has_error
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_has_error
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_has_error
 msgid "Message Delivery error"
 msgstr "Mesaj Teslim hatası"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_ids
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_ids
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_ids
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_ids
 msgid "Messages"
 msgstr "Mesajlar"
 
@@ -1026,6 +1026,12 @@ msgid "Months"
 msgstr "Aylar"
 
 #. module: maintenance
+#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_search
+#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_search
+msgid "My Activities"
+msgstr "Aktivitelerim"
+
+#. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__my_activity_date_deadline
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__my_activity_date_deadline
 msgid "My Activity Deadline"
@@ -1034,7 +1040,7 @@ msgstr "Aktivite Son Tarihim"
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_search
 msgid "My Equipment"
-msgstr ""
+msgstr "Ekipmanlarım"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_search
@@ -1094,8 +1100,8 @@ msgstr "Notlar"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_needaction_counter
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_needaction_counter
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_needaction_counter
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_needaction_counter
 msgid "Number of Actions"
 msgstr "Aksiyon Sayısı"
 
@@ -1126,35 +1132,35 @@ msgstr "Yüksek Öncelikli İhtiyaç Sayısı"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_has_error_counter
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_has_error_counter
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_has_error_counter
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_has_error_counter
 msgid "Number of errors"
 msgstr "Hata adedi"
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__message_needaction_counter
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__message_needaction_counter
 #: model:ir.model.fields,help:maintenance.field_maintenance_request__message_needaction_counter
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__message_needaction_counter
 msgid "Number of messages requiring action"
 msgstr "İşlem gerektiren mesaj sayısı"
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__message_has_error_counter
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__message_has_error_counter
 #: model:ir.model.fields,help:maintenance.field_maintenance_request__message_has_error_counter
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__message_has_error_counter
 msgid "Number of messages with delivery error"
 msgstr "Teslimat hatası olan mesaj adedi"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_force_thread_id
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_force_thread_id
 msgid ""
 "Optional ID of a thread (record) to which all incoming messages will be "
 "attached, even if they did not reply to it. If set, this will disable the "
 "creation of new records completely."
 msgstr ""
-"Yanıt vermemiş olsalar bile, gelen tüm mesajların ekleneceği bir ileti "
-"dizisinin (kayıt) isteğe bağlı kimliği. Ayarlanırsa, bu, yeni kayıtların "
-"oluşturulmasını tamamen devre dışı bırakacaktır."
+"Gelen tüm mesajların, yanıt verilmemiş olsa bile ekleneceği bir iş "
+"parçacığının (kayıt) isteğe bağlı kimliği. Ayarlandığı durumlarda yeni "
+"kayıtların oluşturulması tamamen devre dışı bırakılır."
 
 #. module: maintenance
 #: model:ir.ui.menu,name:maintenance.menu_m_reports_oee
@@ -1176,24 +1182,24 @@ msgid "PDF"
 msgstr "PDF"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_parent_model_id
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_parent_model_id
 msgid "Parent Model"
 msgstr "Üst Model"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_parent_thread_id
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_parent_thread_id
 msgid "Parent Record Thread ID"
 msgstr "Üst kayıt iş parçacığı kimliği"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_parent_model_id
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_parent_model_id
 msgid ""
-"Parent model holding the alias. The model holding the alias reference is not"
-" necessarily the model given by alias_model_id (example: project "
+"Parent model holding the alias. The model holding the alias reference is not "
+"necessarily the model given by alias_model_id (example: project "
 "(parent_model) and task (model))"
 msgstr ""
-"Rumuzun bulunduğu üst model. Rumuz referansın bulunduğu model zorunlu olarak"
-" alias_model_id tarafından verilen model değildir.  (örnek: project "
+"Rumuzun bulunduğu üst model. Rumuz referansın bulunduğu model zorunlu olarak "
+"alias_model_id tarafından verilen model değildir.  (örnek: project "
 "(parent_model) ve görev (model))"
 
 #. module: maintenance
@@ -1211,12 +1217,13 @@ msgid "Phones"
 msgstr "Telefonlar"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_contact
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_contact
 msgid ""
 "Policy to post a message on the document using the mailgateway.\n"
 "- everyone: everyone can post\n"
 "- partners: only authenticated partners\n"
-"- followers: only followers of the related document or members of following channels\n"
+"- followers: only followers of the related document or members of following "
+"channels\n"
 msgstr ""
 "Posta geçidini kullanarak gönderilecek mesajların kuralları:\n"
 "- herkes: herkes posta gönderebilir\n"
@@ -1245,6 +1252,7 @@ msgstr "Ürün Bilgisi"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__equipment_properties
+#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_search
 msgid "Properties"
 msgstr "Özellikler"
 
@@ -1264,7 +1272,7 @@ msgid "Record Colour"
 msgstr "Kayıt Rengi"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_force_thread_id
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_force_thread_id
 msgid "Record Thread ID"
 msgstr "Kayıt Başlık ID"
 
@@ -1337,7 +1345,7 @@ msgstr "Talep Eden"
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_kanban
 msgid "Requested by:"
-msgstr ""
+msgstr "Talep eden:"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_team__todo_request_ids
@@ -1375,6 +1383,11 @@ msgid "Scheduled Date"
 msgstr "Planlanan Tarih"
 
 #. module: maintenance
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_request__schedule_end
+msgid "Scheduled End"
+msgstr "Planlanan Bitiş"
+
+#. module: maintenance
 #: model:maintenance.stage,name:maintenance.stage_4
 msgid "Scrap"
 msgstr "Hurda"
@@ -1398,7 +1411,6 @@ msgstr "Sıralama"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__serial_no
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_form
 msgid "Serial Number"
 msgstr "Seri Numarası"
 
@@ -1417,8 +1429,8 @@ msgstr "Ayarlar"
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_search
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_search
-msgid "Show all records which has next action date is before today"
-msgstr "Bir sonraki eylem tarihi bugünden önce olan tüm kayıtları göster"
+msgid "Show all records whose next activity date is past"
+msgstr "Bir sonraki etkinlik tarihi geçmiş olan tüm kayıtları göster"
 
 #. module: maintenance
 #: model:maintenance.equipment.category,name:maintenance.equipment_software
@@ -1507,18 +1519,18 @@ msgid "Text"
 msgstr "Metin"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_model_id
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_model_id
 msgid ""
-"The model (Odoo Document Kind) to which this alias corresponds. Any incoming"
-" email that does not reply to an existing record will cause the creation of "
-"a new record of this model (e.g. a Project Task)"
+"The model (Odoo Document Kind) to which this alias corresponds. Any incoming "
+"email that does not reply to an existing record will cause the creation of a "
+"new record of this model (e.g. a Project Task)"
 msgstr ""
 "Bu rumuzun karşılık geldiği model (Odoo Belge Türü). Mevcut bir kayda yanıt "
 "vermeyen herhangi bir gelen e-posta, bu modelin yeni bir kaydının "
 "oluşturulmasına neden olacaktır (örneğin, bir Proje Görevi)"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_name
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_name
 msgid ""
 "The name of the email alias, e.g. 'jobs' if you want to catch emails for "
 "<jobs@example.odoo.com>"
@@ -1527,15 +1539,22 @@ msgstr ""
 "epostaları yakalamak için 'kariyer'"
 
 #. module: maintenance
+#. odoo-python
+#: code:addons/maintenance/models/maintenance.py:0
+msgid "The repeat interval cannot be less than 1."
+msgstr "Tekrar aralığı 1'den az olamaz."
+
+#. module: maintenance
 #: model:res.groups,comment:maintenance.group_equipment_manager
 msgid "The user will be able to manage equipment."
-msgstr ""
+msgstr "Kullanıcı, ekipmanı yönetebilecektir."
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__effective_date
 #: model:ir.model.fields,help:maintenance.field_maintenance_mixin__effective_date
 msgid "This date will be used to compute the Mean Time Between Failure."
 msgstr ""
+"Bu tarih Arızalar Arası Ortalama Süreyi hesaplamak için kullanılacaktır."
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_search
@@ -1559,8 +1578,12 @@ msgstr "Yüksek Öncelikli"
 #: model_terms:ir.actions.act_window,help:maintenance.hr_equipment_action_from_category_form
 msgid ""
 "Track equipment and link it to an employee or department.\n"
-"                You will be able to manage allocations, issues and maintenance of your equipment."
+"                You will be able to manage allocations, issues and "
+"maintenance of your equipment."
 msgstr ""
+"Ekipmanı takip edin ve bir çalışan veya departmanla ilişkilendirin.\n"
+"                Ekipmanınızın tahsisatlarını, sorunlarını ve bakımını "
+"yönetebileceksiniz."
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__activity_exception_decoration
@@ -1602,11 +1625,6 @@ msgid "Upload your PDF file."
 msgstr "PDF dosyanızı yükleyin."
 
 #. module: maintenance
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_form
-msgid "Used in location"
-msgstr "Kullanılan Konum"
-
-#. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__partner_id
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_search
 msgid "Vendor"
@@ -1621,6 +1639,14 @@ msgstr "Tedarikçi Referansı"
 #: model:ir.model.fields.selection,name:maintenance.selection__maintenance_request__priority__0
 msgid "Very Low"
 msgstr "Çok Düşük"
+
+#. module: maintenance
+#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_category_view_form
+#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_form
+#: model_terms:ir.ui.view,arch_db:maintenance.maintenance_team_view_form
+#: model_terms:ir.ui.view,arch_db:maintenance.maintenance_team_view_tree
+msgid "Visible to all"
+msgstr "Herkes tarafından görülebilir"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__warranty_date
@@ -1641,17 +1667,19 @@ msgstr "Yıllar"
 #. odoo-python
 #: code:addons/maintenance/models/maintenance.py:0
 msgid ""
-"You cannot delete an equipment category containing equipment or maintenance "
-"requests."
+"You can’t delete an equipment category if some equipment or maintenance "
+"requests are linked to it."
 msgstr ""
+"Bazı ekipman veya bakım talepleri bu kategoriye bağlıysa ekipman "
+"kategorisini silemezsiniz."
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_form
 msgid "Your instructions"
-msgstr ""
+msgstr "Talimatlarınız"
 
 #. module: maintenance
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_category_view_form
+#: model_terms:ir.ui.view,arch_db:maintenance.maintenance_team_view_form
 msgid "alias"
 msgstr "rumuz"
 
@@ -1681,13 +1709,100 @@ msgid "e.g. Screen not working"
 msgstr "Örneğin. Ekran çalışmıyor"
 
 #. module: maintenance
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_category_view_form
+#: model_terms:ir.ui.view,arch_db:maintenance.maintenance_team_view_form
 msgid "e.g. mycompany.com"
-msgstr ""
+msgstr "örn. sirketim.com"
 
-#. module: maintenance
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_graph
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_pivot
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_tree
-msgid "maintenance Request"
-msgstr "Bakım Talebi"
+#~ msgid "<b>Category:</b>"
+#~ msgstr "<b>Kategori:</b>"
+
+#~ msgid "<b>Model Number:</b>"
+#~ msgstr "<b>Model Numarası:</b>"
+
+#~ msgid "<b>Request to:</b>"
+#~ msgstr "<b>Talep:</b>"
+
+#~ msgid "<b>Serial Number:</b>"
+#~ msgstr "<b>Seri Numarası:</b>"
+
+#~ msgid "<span class=\"badge text-bg-warning float-end\">Canceled</span>"
+#~ msgstr "<span class=\"badge text-bg-warning float-end\">İptal edildi</span>"
+
+#~ msgid "<span class=\"ml8\">hours</span>"
+#~ msgstr "<span class=\"ml8\">saatler</span>"
+
+#~ msgid "<strong>Maintenance:</strong>"
+#~ msgstr "<strong>Bakım:</strong>"
+
+#~ msgid "Alias domain"
+#~ msgstr "Rumuz alan adı"
+
+#~ msgid ""
+#~ "Date at which the equipment became effective. This date will be used to "
+#~ "compute the Mean Time Between Failure."
+#~ msgstr ""
+#~ "Ekipmanın yürürlüğe girdiği tarih. Bu tarih, Arıza Arasındaki Ortalama "
+#~ "Süreyi hesaplamak için kullanılacaktır."
+
+#~ msgid "Date of the next preventive maintenance"
+#~ msgstr "Bir sonraki önleyici bakım tarihi"
+
+#~ msgid "Days between each preventive maintenance"
+#~ msgstr "Her bir önleyici bakımlar arasındaki gün"
+
+#~ msgid ""
+#~ "Email alias for this equipment category. New emails will automatically "
+#~ "create a new equipment under this category."
+#~ msgstr ""
+#~ "Bu ekipman kategorisi için eposta takma adı. Yeni epostalar bu ekipman "
+#~ "kategorisi için otomatik olarak bakım talebi oluşturacaklar."
+
+#~ msgid "Group by..."
+#~ msgstr "Grupla ..."
+
+#~ msgid "Location"
+#~ msgstr "Konum"
+
+#~ msgid "Maintenance Duration"
+#~ msgstr "Bakım Süresi"
+
+#~ msgid "Maintenance Duration in hours."
+#~ msgstr "Saat olarak Bakım Süresi."
+
+#~ msgid "Maintenance: generate preventive maintenance requests"
+#~ msgstr "Bakım: önleyici bakım talepleri oluşturun"
+
+#~ msgid "Next Preventive Maintenance"
+#~ msgstr "Sonraki Önleyici Bakım"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Eylem gerektiren mesaj adedi"
+
+#~ msgid "Preventive Maintenance - %s"
+#~ msgstr "Önleyici Bakım - %s"
+
+#~ msgid "Preventive Maintenance Frequency"
+#~ msgstr "Önleyici Bakım Aralığı"
+
+#~ msgid "Show all records which has next action date is before today"
+#~ msgstr "Bir sonraki eylem tarihi bugünden önce olan tüm kayıtları göster"
+
+#~ msgid ""
+#~ "The owner of records created upon receiving emails on this alias. If this "
+#~ "field is not set the system will attempt to find the right owner based on "
+#~ "the sender (From) address, or will use the Administrator account if no "
+#~ "system user is found for that address."
+#~ msgstr ""
+#~ "Kayıtların sahibi, bu rumuza epostalar alındıktan sonra oluşturulmuştur. "
+#~ "Bu alan ayarlanmamışsa, sistem gönderenin (Kimden) adresinden doğru "
+#~ "sahibini bulmaya çalışacaktır ya da o adres için hiç sistem kullanıcısı "
+#~ "bulunamazsa Administrator hesabını kullanacaktır."
+
+#~ msgid "Used in location"
+#~ msgstr "Kullanılan Konum"
+
+#~ msgid "hours"
+#~ msgstr "saat"
+
+#~ msgid "maintenance Request"
+#~ msgstr "Bakım Talebi"

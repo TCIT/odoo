@@ -3,6 +3,7 @@
 import base64
 import io
 import re
+import textwrap
 import time
 import uuid
 import zipfile
@@ -11,8 +12,9 @@ from datetime import datetime, timedelta
 import requests
 from requests import RequestException
 
-from odoo import _, api, fields, models
+from odoo import _, api, fields, models, SUPERUSER_ID
 from odoo.exceptions import UserError
+from odoo.tools import float_round, float_repr
 
 SINVOICE_API_URL = 'https://api-vinvoice.viettel.vn/services/einvoiceapplication/api/'
 SINVOICE_TIMEOUT = 60  # They recommend between 60 and 90 seconds, but 60s is already quite long.
@@ -88,33 +90,42 @@ class AccountMove(models.Model):
         comodel_name='ir.attachment',
         compute=lambda self: self._compute_linked_attachment_id('l10n_vn_edi_sinvoice_file_id', 'l10n_vn_edi_sinvoice_file'),
         depends=['l10n_vn_edi_sinvoice_file'],
+        copy=False,
+        readonly=True,
         export_string_translation=False,
     )
     l10n_vn_edi_sinvoice_file = fields.Binary(
         string='SInvoice json File',
         copy=False,
+        readonly=True,
         export_string_translation=False,
     )
     l10n_vn_edi_sinvoice_xml_file_id = fields.Many2one(
         comodel_name='ir.attachment',
         compute=lambda self: self._compute_linked_attachment_id('l10n_vn_edi_sinvoice_xml_file_id', 'l10n_vn_edi_sinvoice_xml_file'),
         depends=['l10n_vn_edi_sinvoice_xml_file'],
+        copy=False,
+        readonly=True,
         export_string_translation=False,
     )
     l10n_vn_edi_sinvoice_xml_file = fields.Binary(
         string='SInvoice xml File',
         copy=False,
+        readonly=True,
         export_string_translation=False,
     )
     l10n_vn_edi_sinvoice_pdf_file_id = fields.Many2one(
         comodel_name='ir.attachment',
         compute=lambda self: self._compute_linked_attachment_id('l10n_vn_edi_sinvoice_pdf_file_id', 'l10n_vn_edi_sinvoice_pdf_file'),
         depends=['l10n_vn_edi_sinvoice_pdf_file'],
+        copy=False,
+        readonly=True,
         export_string_translation=False,
     )
     l10n_vn_edi_sinvoice_pdf_file = fields.Binary(
         string='SInvoice pdf File',
         copy=False,
+        readonly=True,
         export_string_translation=False,
     )
     # Replacement/Adjustment fields
@@ -243,8 +254,6 @@ class AccountMove(models.Model):
                 'supplierTaxCode': self.company_id.vat,
                 'templateCode': self.l10n_vn_edi_invoice_symbol.invoice_template_id.name,
                 'invoiceNo': self.l10n_vn_edi_invoice_number,
-                'strIssueDate': self._l10n_vn_edi_format_date(self.l10n_vn_edi_issue_date),
-                'transactionUuid': self.l10n_vn_edi_invoice_transaction_id,
                 'fileType': file_format,
             },
             cookies={'access_token': access_token},
@@ -256,6 +265,18 @@ class AccountMove(models.Model):
 
         Returns a list of tuple with both file names, mimetype, content and the field it should be stored in.
         """
+
+        def _zip_to_xml_file_data(zip_file):
+            for file in zip_file.infolist():
+                if file.filename.endswith('.xml'):
+                    return {
+                        'name': file.filename,
+                        'mimetype': 'application/xml',
+                        'raw': zip_file.read(file),
+                        'res_field': 'l10n_vn_edi_sinvoice_xml_file',
+                    }
+            return None
+
         self.ensure_one()
         files_data, error_message = self._l10n_vn_edi_fetch_invoice_file_data('ZIP')
         if error_message:
@@ -263,20 +284,20 @@ class AccountMove(models.Model):
 
         file_bytes = base64.b64decode(files_data['fileToBytes'])
 
-        # For some reason, request_response['fileToBytes'] is a zip file containing the other zip file.
-        # The content of the inner zip is a xsl file as well as a xml file.
-        # In our case the xsl file is not important, so we can simply ignore it.
-        with zipfile.ZipFile(io.BytesIO(file_bytes)) as zip_file:
-            inner_zip_bytes = zip_file.read(zip_file.filelist[0])
-            with zipfile.ZipFile(io.BytesIO(inner_zip_bytes)) as inner_zip:
-                for file in inner_zip.filelist:
-                    if file.filename.endswith('.xml'):
-                        return {
-                            'name': file.filename,
-                            'mimetype': 'application/xml',
-                            'raw': inner_zip.read(file),
-                            'res_field': 'l10n_vn_edi_sinvoice_xml_file',
-                        }, ""
+        with zipfile.ZipFile(io.BytesIO(file_bytes)) as outer_zip:
+            result = _zip_to_xml_file_data(outer_zip)
+            if not result:
+                for entry in outer_zip.infolist():
+                    if entry.filename.endswith('.zip'):
+                        with outer_zip.open(entry) as inner_bytes:
+                            with zipfile.ZipFile(inner_bytes) as inner_zip:
+                                result = _zip_to_xml_file_data(inner_zip)
+                                if result:
+                                    break
+
+        if not result:
+            return {}, _("No XML file found in the zip archive.")
+        return result, ""
 
     def _l10n_vn_edi_fetch_invoice_pdf_file_data(self):
         """
@@ -297,6 +318,55 @@ class AccountMove(models.Model):
             'raw': file_bytes,
             'res_field': 'l10n_vn_edi_sinvoice_pdf_file',
         }, ""
+
+    def _l10n_vn_edi_fetch_invoice_files(self):
+        """
+        Fetches the SInvoice XML and PDF data from the SInvoice server if self is a sent invoice.
+        The files are saved in the l10n_vn_edi_sinvoice_pdf_file_id and l10n_vn_edi_sinvoice_xml_file_id.
+        """
+
+        if self.l10n_vn_edi_invoice_state != 'sent':
+            raise UserError(_("Please send the invoice to SInvoice before fetching the tax invoice files."))
+
+        xml_data, xml_error_message = self._l10n_vn_edi_fetch_invoice_xml_file_data()
+        pdf_data, pdf_error_message = self._l10n_vn_edi_fetch_invoice_pdf_file_data()
+
+        # Not using _link_invoice_documents for these because it depends on _need_invoice_document and I can't get it to work
+        # well while allowing users to download the files before sending.
+        attachments_data = []
+        for file, error in [(xml_data, xml_error_message), (pdf_data, pdf_error_message)]:
+            if error:
+                continue
+
+            attachments_data.append({
+                'name': file['name'],
+                'raw': file['raw'],
+                'mimetype': file['mimetype'],
+                'res_model': self._name,
+                'res_id': self.id,
+                'res_field': file['res_field'],  # Binary field
+            })
+
+        if attachments_data:
+            attachments = self.env['ir.attachment'].with_user(SUPERUSER_ID).create(attachments_data)
+            self.invalidate_recordset(fnames=[
+                'l10n_vn_edi_sinvoice_xml_file_id',
+                'l10n_vn_edi_sinvoice_xml_file',
+                'l10n_vn_edi_sinvoice_pdf_file_id',
+                'l10n_vn_edi_sinvoice_pdf_file',
+            ])
+
+            # Log the new attachment in the chatter for reference. Make sure to add the JSON file.
+            self.with_context(no_new_invoice=True).message_post(
+                body=_('Invoice sent to SInvoice'),
+                attachment_ids=attachments.ids + self.l10n_vn_edi_sinvoice_file_id.ids,
+            )
+
+        if xml_error_message or pdf_error_message:
+            return {
+                'error_title': _('Error when receiving SInvoice files.'),
+                'errors': [error_message for error_message in [xml_error_message, pdf_error_message] if error_message],
+            }
 
     def action_l10n_vn_edi_update_payment_status(self):
         """ Send a request to update the payment status of the invoice. """
@@ -362,7 +432,7 @@ class AccountMove(models.Model):
             invoice.l10n_vn_edi_invoice_state = 'sent'
 
             if self._can_commit():
-                self._cr.commit()
+                self.env.cr.commit()
 
     def _l10n_vn_need_cancel_request(self):
         return self._l10n_vn_edi_is_sent() and self.l10n_vn_edi_invoice_state != 'canceled'
@@ -411,8 +481,6 @@ class AccountMove(models.Model):
             errors.append(_("The invoice symbol's template must be provided."))
         if self.move_type == 'out_refund' and (not self.reversed_entry_id or not self.reversed_entry_id._l10n_vn_edi_is_sent()):
             errors.append(_('You can only send a credit note linked to a previously sent invoice.'))
-        if not self.partner_id.street or not self.partner_id.city or not self.partner_id.state_id or not self.partner_id.country_id:
-            errors.append(_('The street, city, state and country of partner %s must be provided.', self.partner_id.display_name))
         if not company.street or not company.state_id or not company.country_id:
             errors.append(_('The street, state and country of company %s must be provided.', company.display_name))
         if self.company_currency_id.name != 'VND':
@@ -472,7 +540,7 @@ class AccountMove(models.Model):
         })
 
         if self._can_commit():
-            self._cr.commit()
+            self.env.cr.commit()
 
     def _l10n_vn_edi_cancel_invoice(self, reason, agreement_document_name, agreement_document_date):
         """ Send a request to cancel the invoice. """
@@ -515,17 +583,17 @@ class AccountMove(models.Model):
 
             self.button_cancel()
 
-            self.with_context(no_new_invoice=True).message_post(
+            self.message_post(
                 body=_('The invoice has been canceled for reason: %(reason)s', reason=reason),
             )
         except UserError as e:
-            self.with_context(no_new_invoice=True).message_post(
+            self.message_post(
                 body=_('The invoice has been canceled on sinvoice for reason: %(reason)s'
                        'But the cancellation in Odoo failed with error: %(error)s', reason=reason, error=e),
             )
 
         if self._can_commit():
-            self._cr.commit()
+            self.env.cr.commit()
 
     def button_draft(self):
         # EXTEND account
@@ -583,12 +651,14 @@ class AccountMove(models.Model):
 
         # When invoicing in a foreign currency, we need to provide the rate, or it will default to 1.
         if self.currency_id.name != 'VND':
-            invoice_data['exchangeRate'] = self.env['res.currency']._get_conversion_rate(
+            # Sinvoice only allow upto 2 decimal place for exchange rate
+            exchange_rate = self.env['res.currency']._get_conversion_rate(
                 from_currency=self.currency_id,
                 to_currency=self.env.ref('base.VND'),
                 company=self.company_id,
                 date=self.invoice_date or self.date,
             )
+            invoice_data['exchangeRate'] = float_repr(float_round(exchange_rate, 2), 2)
 
         adjustment_origin_invoice = None
         if self.move_type == 'out_refund':  # Credit note are used to adjust an existing invoice
@@ -614,15 +684,16 @@ class AccountMove(models.Model):
         self.ensure_one()
 
         commercial_partner_phone = self.commercial_partner_id.phone and self._l10n_vn_edi_format_phone_number(self.commercial_partner_id.phone)
+        buyer_address = self.partner_id._display_address(without_company=True)
+        formatted_address = ', '.join(part.strip() for part in buyer_address.splitlines() if part.strip())
         buyer_information = {
             'buyerName': self.partner_id.name,
             'buyerLegalName': self.commercial_partner_id.name,
-            'buyerTaxCode': self.commercial_partner_id.vat,
-            'buyerAddressLine': self.partner_id.street,
+            'buyerTaxCode': self.commercial_partner_id.vat or '',
+            'buyerAddressLine': formatted_address,
             'buyerPhoneNumber': commercial_partner_phone or '',
             'buyerEmail': self.commercial_partner_id.email or '',
-            'buyerDistrictName': self.partner_id.state_id.name,
-            'buyerCityName': self.partner_id.city,
+            'buyerCityName': self.partner_id.city or self.partner_id.state_id.name,
             'buyerCountryCode': self.partner_id.country_id.code,
             'buyerNotGetInvoice': 0,  # Set to 1 to no send the invoice to the buyer.
         }
@@ -639,10 +710,12 @@ class AccountMove(models.Model):
         """ Create and return the seller information for the current invoice. """
         self.ensure_one()
         company_phone = self.company_id.phone and self._l10n_vn_edi_format_phone_number(self.company_id.phone)
+        seller_address = self.company_id.partner_id._display_address(without_company=True)
+        formatted_address = ', '.join(part.strip() for part in seller_address.splitlines() if part.strip())
         seller_information = {
             'sellerLegalName': self.company_id.name,
             'sellerTaxCode': self.company_id.vat,
-            'sellerAddressLine': self.company_id.street,
+            'sellerAddressLine': formatted_address,
             'sellerPhoneNumber': company_phone or '',
             'sellerEmail': self.company_id.email,
             'sellerDistrictName': self.company_id.state_id.name,
@@ -684,35 +757,50 @@ class AccountMove(models.Model):
             'line_note': 2,
             'discount': 3,
         }
-        for line in self.invoice_line_ids.filtered(lambda ln: ln.display_type == 'product'):
+        discount_lines = self.invoice_line_ids._get_discount_lines()
+        downpayment_lines = self.invoice_line_ids._get_downpayment_lines()
+        for line in self.invoice_line_ids.filtered(lambda ln: ln.display_type in code_map):
             # For credit notes amount, we send negative values (reduces the amount of the original invoice)
             sign = 1 if self.move_type == 'out_invoice' else -1
+            item_name = line.name.replace('\n', ' ')
             item_information = {
-                'itemCode': line.product_id.code,
-                'itemName': line.product_id.name,
-                'unitName': line.product_uom_id.name,
-                'unitPrice': line.price_unit * sign,
+                'itemCode': line.product_id.code or '',
+                'itemName': textwrap.shorten(item_name, width=500, placeholder='...'),
+                'unitName': line.product_uom_id.name or 'Units',
+                'unitPrice': line.currency_id.round(line.price_unit * sign),
                 'quantity': line.quantity,
                 # This amount should be without discount applied.
-                'itemTotalAmountWithoutTax': line.currency_id.round(line.price_unit * line.quantity) * sign,
+                'itemTotalAmountWithoutTax': line.currency_id.round(line.price_unit * line.quantity),
                 # In Vietnam a line will always have only one tax.
                 # Values are either: -2 (no tax), -1 (not declaring/paying taxes), 0,5,8,10 (the tax %)
                 # Most use cases will be -2 or a tax percentage, so we limit the support to these.
                 'taxPercentage': line.tax_ids and line.tax_ids[0].amount or -2,
-                'taxAmount': (line.price_total - line.price_subtotal) * sign,
+                'taxAmount': line.currency_id.round(line.price_total - line.price_subtotal),
                 'discount': line.discount,
-                'itemTotalAmountAfterDiscount': line.price_subtotal * sign,
-                'itemTotalAmountWithTax': line.price_total * sign,
+                'itemTotalAmountAfterDiscount': line.price_subtotal,
+                'itemTotalAmountWithTax': line.price_total,
+                'selection': code_map[line.display_type],
             }
-            if line.display_type in code_map:
-                item_information['selection'] = code_map[line.display_type]
-            if line.display_type == 'discount':
-                item_information['isIncreaseItem'] = False
+            if (
+                line in discount_lines
+                or line in downpayment_lines  # Downpayment lines are considered the same as discount lines
+            ):
+                item_information.update({
+                    'selection': code_map['discount'],
+                    'isIncreaseItem': False,
+                    'unitPrice': abs(item_information['unitPrice']),
+                    'quantity': abs(item_information['quantity']),
+                    'itemTotalAmountWithoutTax': abs(item_information['itemTotalAmountWithoutTax']),
+                    'itemTotalAmountAfterDiscount': abs(item_information['itemTotalAmountAfterDiscount']),
+                    'itemTotalAmountWithTax': abs(item_information['itemTotalAmountWithTax']),
+                })
             if self.move_type == 'out_refund':
                 item_information.update({
                     'adjustmentTaxAmount': item_information['taxAmount'],
                     'isIncreaseItem': False,
                 })
+            if line.display_type == 'line_note':
+                item_information = {'selection': item_information['selection'], 'itemName': item_information['itemName']}
             items_information.append(item_information)
 
         json_values['itemInfo'] = items_information
@@ -800,11 +888,11 @@ class AccountMove(models.Model):
             - We use the credentials of the parent company, if no credentials are set on the child one.
             - We store the access token on the appropriate company, based on which holds the credentials.
         """
-        if self.company_id.l10n_vn_edi_username and self.company_id.l10n_vn_edi_password:
+        if self.company_id.sudo().l10n_vn_edi_username and self.company_id.sudo().l10n_vn_edi_password:
             return self.company_id
 
-        return self.company_id.sudo().parent_ids.filtered(
-            lambda c: c.l10n_vn_edi_username and c.l10n_vn_edi_password
+        return self.company_id.parent_ids.filtered(
+            lambda c: c.sudo().l10n_vn_edi_username and c.sudo().l10n_vn_edi_password
         )[-1:]
 
     # -------------------------------------------------------------------------
@@ -835,3 +923,8 @@ class AccountMove(models.Model):
         self.ensure_one()
         sent_statuses = {'sent', 'payment_state_to_update', 'canceled', 'adjusted', 'replaced'}
         return self.l10n_vn_edi_invoice_state in sent_statuses
+
+    def _get_mail_thread_data_attachments(self):
+        res = super()._get_mail_thread_data_attachments()
+        # attachments with 'res_field' are excluded, and we want this in the chatter for audit/... purposes.
+        return res | self.l10n_vn_edi_sinvoice_file_id

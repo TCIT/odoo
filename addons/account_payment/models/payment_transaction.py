@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, SUPERUSER_ID, _
+from odoo import SUPERUSER_ID, _, api, fields, models
 
 
 class PaymentTransaction(models.Model):
@@ -66,7 +66,7 @@ class PaymentTransaction(models.Model):
     #=== BUSINESS METHODS - PAYMENT FLOW ===#
 
     @api.model
-    def _compute_reference_prefix(self, provider_code, separator, **values):
+    def _compute_reference_prefix(self, separator, **values):
         """ Compute the reference prefix from the transaction values.
 
         If the `values` parameter has an entry with 'invoice_ids' as key and a list of (4, id, O) or
@@ -75,7 +75,6 @@ class PaymentTransaction(models.Model):
 
         Note: This method should be called in sudo mode to give access to documents (INV, SO, ...).
 
-        :param str provider_code: The code of the provider handling the transaction
         :param str separator: The custom separator used to separate data references
         :param dict values: The transaction values used to compute the reference prefix. It should
                             have the structure {'invoice_ids': [(X2M command), ...], ...}.
@@ -92,7 +91,7 @@ class PaymentTransaction(models.Model):
                 if name := values.get('name_next_installment'):
                     prefix = name
                 return prefix
-        return super()._compute_reference_prefix(provider_code, separator, **values)
+        return super()._compute_reference_prefix(separator, **values)
 
     #=== BUSINESS METHODS - POST-PROCESSING ===#
 
@@ -123,9 +122,8 @@ class PaymentTransaction(models.Model):
 
             if tx.payment_id:
                 message = _(
-                    "The payment related to the transaction with reference %(ref)s has been"
-                    " posted: %(link)s",
-                    ref=tx.reference,
+                    "The payment related to transaction %(ref)s has been posted: %(link)s",
+                    ref=tx._get_html_link(),
                     link=tx.payment_id._get_html_link(),
                 )
                 tx._log_message_on_linked_documents(message)
@@ -145,10 +143,7 @@ class PaymentTransaction(models.Model):
         """
         self.ensure_one()
 
-        reference = (f'{self.reference} - '
-                     f'{self.partner_id.display_name or ""} - '
-                     f'{self.provider_reference or ""}'
-                    )
+        reference = f'{self.reference} - {self.provider_reference or ""}'
 
         payment_method_line = self.provider_id.journal_id.inbound_payment_method_line_ids\
             .filtered(lambda l: l.payment_provider_id == self.provider_id)
@@ -189,6 +184,10 @@ class PaymentTransaction(models.Model):
                         payment_values['write_off_line_vals'] += [aml_vl]
                 break
 
+        payment_term_lines = self.invoice_ids.line_ids.filtered(lambda line: line.display_type == 'payment_term')
+        if payment_term_lines:
+            payment_values['destination_account_id'] = payment_term_lines[0].account_id.id
+
         payment = self.env['account.payment'].create(payment_values)
         payment.action_post()
 
@@ -200,6 +199,7 @@ class PaymentTransaction(models.Model):
             invoices = self.source_transaction_id.invoice_ids
         else:
             invoices = self.invoice_ids
+        invoices = invoices.filtered(lambda inv: inv.state != 'cancel')
         if invoices:
             invoices.filtered(lambda inv: inv.state == 'draft').action_post()
 
@@ -224,7 +224,10 @@ class PaymentTransaction(models.Model):
         :return: None
         """
         self.ensure_one()
-        author = self.env.user.partner_id if self.env.uid == SUPERUSER_ID else self.partner_id
+        if self.env.uid == SUPERUSER_ID or self.env.context.get('payment_backend_action'):
+            author = self.env.user.partner_id
+        else:
+            author = self.partner_id
         if self.source_transaction_id:
             for invoice in self.source_transaction_id.invoice_ids:
                 invoice.message_post(body=message, author_id=author.id)

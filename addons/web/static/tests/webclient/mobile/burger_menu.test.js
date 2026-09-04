@@ -1,18 +1,18 @@
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
+import { click, queryAll } from "@odoo/hoot-dom";
+import { animationFrame } from "@odoo/hoot-mock";
 import {
     contains,
     defineActions,
-    getService,
     defineMenus,
+    getService,
     mountWithCleanup,
-    makeMockServer,
-    useTestClientAction,
     patchWithCleanup,
+    useTestClientAction,
 } from "@web/../tests/web_test_helpers";
-import { WebClient } from "@web/webclient/webclient";
-import { animationFrame } from "@odoo/hoot-mock";
-import { click, queryAll } from "@odoo/hoot-dom";
 import { config as transitionConfig } from "@web/core/transition";
+import { WebClient } from "@web/webclient/webclient";
+import { registry } from "@web/core/registry";
 
 describe.current.tags("mobile");
 
@@ -23,7 +23,10 @@ beforeEach(() => {
         { ...testAction, id: 1002, params: { description: "Info" } },
         { ...testAction, id: 1003, params: { description: "Report" } },
     ]);
-    defineMenus([{ id: 1, children: [], name: "App1", appID: 1, actionID: 1001, xmlid: "menu_1" }]);
+    defineMenus([
+        { id: 0 }, // prevents auto-loading the first action
+        { id: 1, name: "App1", actionID: 1001, xmlid: "menu_1" },
+    ]);
     patchWithCleanup(transitionConfig, { disabled: true });
 });
 
@@ -36,19 +39,22 @@ test("Burger menu can be opened and closed", async () => {
 });
 
 test("Burger Menu on an App", async () => {
-    const server = await makeMockServer();
-    server.menus
-        .find((menu) => menu.id === 1)
-        .children.push({
-            id: 99,
-            children: [],
-            name: "SubMenu",
-            appID: 1,
-            actionID: 1002,
-            xmlid: "",
-            webIconData: undefined,
-            webIcon: false,
-        });
+    defineMenus([
+        {
+            id: 1,
+            children: [
+                {
+                    id: 99,
+                    name: "SubMenu",
+                    appID: 1,
+                    actionID: 1002,
+                    xmlid: "",
+                    webIconData: undefined,
+                    webIcon: false,
+                },
+            ],
+        },
+    ]);
     await mountWithCleanup(WebClient);
     await contains("a.o_menu_toggle", { root: document.body }).click();
     await contains(".o_sidebar_topbar a.btn-primary", { root: document.body }).click();
@@ -112,20 +118,22 @@ test("Burger menu closes when an action is requested", async () => {
 });
 
 test("Burger menu closes when click on menu item", async () => {
-    defineMenus([{ id: 2, children: [], name: "App2", appID: 2, actionID: 1003, xmlid: "menu_2" }]);
-    const server = await makeMockServer();
-    server.menus
-        .find((menu) => menu.id === 1)
-        .children.push({
-            id: 99,
-            children: [],
-            name: "SubMenu",
-            appID: 1,
-            actionID: 1002,
-            xmlid: "",
-            webIconData: undefined,
-            webIcon: false,
-        });
+    defineMenus([
+        {
+            id: 1,
+            children: [
+                {
+                    id: 99,
+                    name: "SubMenu",
+                    actionID: 1002,
+                    xmlid: "",
+                    webIconData: undefined,
+                    webIcon: false,
+                },
+            ],
+        },
+        { id: 2, name: "App2", actionID: 1003, xmlid: "menu_2" },
+    ]);
     await mountWithCleanup(WebClient);
     getService("menu").setCurrentMenu(2);
 
@@ -157,4 +165,29 @@ test("Burger menu closes when click on menu item", async () => {
     await animationFrame();
     expect(queryAll(".o_burger_menu_content", { root: document.body })).toHaveCount(0);
     expect(queryAll(".test_client_action", { root: document.body })).toHaveCount(1);
+});
+
+test("Burger menu closes when click on user menu item", async () => {
+    registry.category("user_menuitems").add("ring_item", () => ({
+        type: "item",
+        id: "ring",
+        description: "Ring",
+        callback: () => {
+            expect.step("callback ring_item");
+        },
+        sequence: 5,
+    }));
+
+    await mountWithCleanup(WebClient);
+
+    expect(queryAll(".o_burger_menu", { root: document.body })).toHaveCount(0);
+
+    await click(queryAll(".o_mobile_menu_toggle", { root: document.body }));
+    await animationFrame();
+    expect(queryAll(".o_burger_menu", { root: document.body })).toHaveCount(1);
+
+    await click(queryAll(".o_burger_menu .o_user_menu_mobile a", { root: document.body }));
+    await animationFrame();
+    expect(queryAll(".o_burger_menu", { root: document.body })).toHaveCount(0);
+    expect.verifySteps(["callback ring_item"]);
 });

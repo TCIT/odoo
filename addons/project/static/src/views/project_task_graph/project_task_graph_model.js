@@ -1,13 +1,10 @@
-/** @odoo-module **/
-
 import { GraphModel } from "@web/views/graph/graph_model";
-import { _t } from "@web/core/l10n/translation";
+import { ProjectTaskModelMixin } from "../project_task_model_mixin";
 
-export class ProjectTaskGraphModel extends GraphModel {
-    _getDefaultFilterLabel(field) {
-        if (field.fieldName === "project_id") {
-            return _t("🔒 Private");
-        }
-        return super._getDefaultFilterLabel(field);
+export class ProjectTaskGraphModel extends ProjectTaskModelMixin(GraphModel) {
+    async load(searchParams) {
+        const domain = searchParams.domain || [];
+        searchParams.domain = this._processSearchDomain(domain);
+        return super.load(searchParams);
     }
 }

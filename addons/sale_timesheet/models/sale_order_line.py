@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
-from odoo.osv import expression
+from odoo.fields import Domain
 from odoo.tools import format_duration
 
 
@@ -19,7 +19,7 @@ class SaleOrderLine(models.Model):
     @api.depends_context('with_remaining_hours', 'company')
     def _compute_display_name(self):
         super()._compute_display_name()
-        with_remaining_hours = self.env.context.get('with_remaining_hours')
+        with_remaining_hours = self.env.context.get('with_remaining_hours') and not self.env.context.get('skip_remaining_hours', False)
         if with_remaining_hours and any(line.remaining_hours_available for line in self):
             company = self.env.company
             encoding_uom = company.timesheet_encode_uom_id
@@ -44,10 +44,9 @@ class SaleOrderLine(models.Model):
 
     @api.depends('product_id.service_policy')
     def _compute_remaining_hours_available(self):
-        uom_hour = self.env.ref('uom.product_uom_hour')
         for line in self:
             is_ordered_prepaid = line.product_id.service_policy == 'ordered_prepaid'
-            is_time_product = line.product_uom.category_id == uom_hour.category_id
+            is_time_product = line.product_uom_id and line.product_uom_id._has_common_reference(self.env.ref('uom.product_uom_hour'))
             line.remaining_hours_available = is_ordered_prepaid and is_time_product
 
     @api.depends('qty_delivered', 'product_uom_qty', 'analytic_line_ids')
@@ -57,7 +56,7 @@ class SaleOrderLine(models.Model):
             remaining_hours = None
             if line.remaining_hours_available:
                 qty_left = line.product_uom_qty - line.qty_delivered
-                remaining_hours = line.product_uom._compute_quantity(qty_left, uom_hour)
+                remaining_hours = line.product_uom_id._compute_quantity(qty_left, uom_hour, round=False)
             line.remaining_hours = remaining_hours
 
     @api.depends('product_id')
@@ -71,17 +70,21 @@ class SaleOrderLine(models.Model):
     @api.depends('analytic_line_ids.project_id', 'project_id.pricing_type')
     def _compute_qty_delivered(self):
         super()._compute_qty_delivered()
+
+    def _prepare_qty_delivered(self):
+        delivered_qties = super()._prepare_qty_delivered()
         lines_by_timesheet = self.filtered(lambda sol: sol.qty_delivered_method == 'timesheet')
         domain = lines_by_timesheet._timesheet_compute_delivered_quantity_domain()
         mapping = lines_by_timesheet.sudo()._get_delivered_quantity_by_analytic(domain)
         for line in lines_by_timesheet:
-            line.qty_delivered = mapping.get(line.id or line._origin.id, 0.0)
+            delivered_qties[line] = mapping.get(line.id or line._origin.id, 0.0)
+        return delivered_qties
 
     def _timesheet_compute_delivered_quantity_domain(self):
         """ Hook for validated timesheet in addionnal module """
         domain = [('project_id', '!=', False)]
-        if self._context.get('accrual_entry_date'):
-            domain += [('date', '<=', self._context['accrual_entry_date'])]
+        if self.env.context.get('accrual_entry_date'):
+            domain += [('date', '<=', self.env.context['accrual_entry_date'])]
         return domain
 
     ###########################################
@@ -91,14 +94,13 @@ class SaleOrderLine(models.Model):
     def _convert_qty_company_hours(self, dest_company):
         company_time_uom_id = dest_company.project_time_mode_id
         allocated_hours = 0.0
-        product_uom = self.product_uom
+        product_uom = self.product_uom_id
         if product_uom == self.env.ref('uom.product_uom_unit'):
             product_uom = self.env.ref('uom.product_uom_hour')
-        if product_uom.category_id == company_time_uom_id.category_id:
-            if product_uom != company_time_uom_id:
-                allocated_hours = product_uom._compute_quantity(self.product_uom_qty, company_time_uom_id)
-            else:
-                allocated_hours = self.product_uom_qty
+        if product_uom != company_time_uom_id and product_uom._has_common_reference(company_time_uom_id):
+            allocated_hours = product_uom._compute_quantity(self.product_uom_qty, company_time_uom_id, rounding_method='HALF-UP')
+        else:
+            allocated_hours = self.product_uom_qty
         return allocated_hours
 
     def _timesheet_create_project(self):
@@ -115,13 +117,12 @@ class SaleOrderLine(models.Model):
         uom_hour = self.env.ref('uom.product_uom_hour')
 
         # dict of inverse factors for each relevant UoM found in SO
-        factor_inv_per_id = {
-            uom.id: uom.factor_inv
-            for uom in self.order_id.order_line.product_uom
-            if uom.category_id == project_uom.category_id
+        factor_per_id = {
+            uom.id: uom.factor
+            for uom in self.order_id.order_line.product_uom_id
         }
         # if sold as units, assume hours for time allocation
-        factor_inv_per_id[uom_unit.id] = uom_hour.factor_inv
+        factor_per_id[uom_unit.id] = uom_hour.factor
 
         allocated_hours = 0.0
         # method only called once per project, so also allocate hours for
@@ -130,8 +131,8 @@ class SaleOrderLine(models.Model):
             if line.is_service \
                     and line.product_id.service_tracking in ['task_in_project', 'project_only'] \
                     and line.product_id.project_template_id == self.product_id.project_template_id \
-                    and line.product_uom.id in factor_inv_per_id:
-                uom_factor = project_uom.factor * factor_inv_per_id[line.product_uom.id]
+                    and line.product_uom_id.id in factor_per_id:
+                uom_factor = factor_per_id[line.product_uom_id.id] / project_uom.factor
                 allocated_hours += line.product_uom_qty * uom_factor
 
         project.write({
@@ -156,28 +157,40 @@ class SaleOrderLine(models.Model):
             :param start_date: the start date of the period
             :param end_date: the end date of the period
         """
-        lines_by_timesheet = self.filtered(lambda sol: sol.product_id and sol.product_id._is_delivered_timesheet())
-        domain = lines_by_timesheet._timesheet_compute_delivered_quantity_domain()
-        refund_account_moves = self.order_id.invoice_ids.filtered(lambda am: am.state == 'posted' and am.move_type == 'out_refund').reversed_entry_id
-        timesheet_domain = [
-            '|',
-            ('timesheet_invoice_id', '=', False),
-            ('timesheet_invoice_id.state', '=', 'cancel')]
+        lines_by_timesheet = self.filtered(
+            lambda sol:
+            sol.product_id
+            and sol.product_id._is_delivered_timesheet()
+            and sol.invoice_status == 'to invoice')
+        domain = Domain(lines_by_timesheet._timesheet_compute_delivered_quantity_domain())
+        credit_notes = self.order_id.invoice_ids.filtered(lambda am: am.state == 'posted' and am.move_type == 'out_refund' and am.reversed_entry_id)
+        refund_account_moves = credit_notes.reversed_entry_id
+        timesheet_domain = Domain('timesheet_invoice_id', '=', False) | Domain('timesheet_invoice_id.state', '=', 'cancel') & Domain('timesheet_invoice_id.payment_state', '!=', 'invoicing_legacy')
         if refund_account_moves:
-            credited_timesheet_domain = [('timesheet_invoice_id.state', '=', 'posted'), ('timesheet_invoice_id', 'in', refund_account_moves.ids)]
-            timesheet_domain = expression.OR([timesheet_domain, credited_timesheet_domain])
-        domain = expression.AND([domain, timesheet_domain])
+            credited_timesheet_domain = Domain('timesheet_invoice_id.state', '=', 'posted') & Domain('timesheet_invoice_id', 'in', refund_account_moves.ids)
+            timesheet_domain |= credited_timesheet_domain
+        domain &= timesheet_domain
         if start_date:
-            domain = expression.AND([domain, [('date', '>=', start_date)]])
+            domain &= Domain('date', '>=', start_date)
         if end_date:
-            domain = expression.AND([domain, [('date', '<=', end_date)]])
+            domain &= Domain('date', '<=', end_date)
         mapping = lines_by_timesheet.sudo()._get_delivered_quantity_by_analytic(domain)
 
         for line in lines_by_timesheet:
-            qty_to_invoice = mapping.get(line.id, 0.0)
+            if line.invoice_lines.move_id & credit_notes:
+                # `qty_delivered - qty_invoiced` to prevent over-billing
+                # when credit notes complicate the invoiced state
+                qty_to_invoice = max(0.0, min(
+                    mapping.get(line.id, 0.0),
+                    line.qty_delivered - line.qty_invoiced,
+                ))
+            else:
+                # No related credit note: invoice exactly what is
+                # calculated for this period
+                qty_to_invoice = max(0.0, mapping.get(line.id, 0.0))
             if qty_to_invoice:
                 line.qty_to_invoice = qty_to_invoice
-            else:
+            elif start_date or end_date:
                 prev_inv_status = line.invoice_status
                 line.qty_to_invoice = qty_to_invoice
                 line.invoice_status = prev_inv_status
@@ -200,3 +213,7 @@ class SaleOrderLine(models.Model):
             if sol.is_service and len(timesheet_ids) > 0:
                 action_per_sol[sol.id] = timesheet_action, timesheet_ids[0] if len(timesheet_ids) == 1 else False
         return action_per_sol
+
+    @api.model
+    def _get_product_service_policy(self):
+        return super()._get_product_service_policy() + ['delivered_timesheet']

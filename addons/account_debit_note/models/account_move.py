@@ -3,6 +3,7 @@
 
 from odoo import models, fields, api, _
 
+
 class AccountMove(models.Model):
     _inherit = "account.move"
 
@@ -48,3 +49,9 @@ class AccountMove(models.Model):
         ):
             starting_sequence = "D" + starting_sequence
         return starting_sequence
+
+    def _get_copy_message_content(self, default):
+        """Override to handle debit note specific messages."""
+        if default and default.get('debit_origin_id'):
+            return _('This debit note was created from: %s', self._get_html_link())
+        return super()._get_copy_message_content(default)

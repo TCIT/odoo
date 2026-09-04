@@ -1,17 +1,21 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import random
-
 from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 
 from odoo import SUPERUSER_ID, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
-from odoo.fields import Command
+from odoo.fields import Command, Domain
 from odoo.http import request
-from odoo.osv import expression
-from odoo.tools import float_is_zero
+from odoo.tools import float_is_zero, str2bool
+
+from odoo.addons.website_sale.models.website import (
+    FISCAL_POSITION_SESSION_CACHE_KEY,
+    PRICELIST_SELECTED_SESSION_CACHE_KEY,
+    PRICELIST_SESSION_CACHE_KEY,
+)
 
 
 class SaleOrder(models.Model):
@@ -47,8 +51,12 @@ class SaleOrder(models.Model):
 
     @api.depends('order_line')
     def _compute_website_order_line(self):
+        # group saler.order.line to prefetch all in one query
+        order_lines = self.env['sale.order.line'].search_fetch([('order_id', 'in', self.ids)])
         for order in self:
-            order.website_order_line = order.order_line.filtered(lambda sol: sol._show_in_cart())
+            order.website_order_line = order_lines.filtered(
+                lambda sol: sol.order_id == order and sol._show_in_cart(),
+            )
 
     @api.depends('order_line.price_total', 'order_line.price_subtotal')
     def _compute_amount_delivery(self):
@@ -107,41 +115,54 @@ class SaleOrder(models.Model):
                     ('company_id', '=', order.company_id.id),
                 ], limit=1)
 
+    def _compute_pricelist_id(self):
+        # Override to compute pricelists for carts using the partner's GeoIP,
+        # providing a fallback in case they don't have an address set.
+        if not (country_code := self.env['website']._get_geoip_country_code()):
+            return super()._compute_pricelist_id()
+        if website_orders := self.filtered('website_id'):
+            website_orders = website_orders.with_context(country_code=country_code)
+            super(SaleOrder, website_orders)._compute_pricelist_id()
+        return super(SaleOrder, self - website_orders)._compute_pricelist_id()
+
     def _search_abandoned_cart(self, operator, value):
+        if operator != 'in':
+            return NotImplemented
         website_ids = self.env['website'].search_read(fields=['id', 'cart_abandoned_delay', 'partner_id'])
-        deadlines = [[
-            '&', '&',
-            ('website_id', '=', website_id['id']),
-            ('date_order', '<=', fields.Datetime.to_string(datetime.utcnow() - relativedelta(hours=website_id['cart_abandoned_delay'] or 1.0))),
-            ('partner_id', '!=', website_id['partner_id'][0])
-        ] for website_id in website_ids]
-        abandoned_domain = [
-            ('state', '=', 'draft'),
-            ('order_line', '!=', False)
-        ]
-        abandoned_domain.extend(expression.OR(deadlines))
-        abandoned_domain = expression.normalize_domain(abandoned_domain)
-        # is_abandoned domain possibilities
-        if (operator not in expression.NEGATIVE_TERM_OPERATORS and value) or (operator in expression.NEGATIVE_TERM_OPERATORS and not value):
-            return abandoned_domain
-        return expression.distribute_not(['!'] + abandoned_domain)  # negative domain
+        return Domain.AND((
+            Domain('state', '=', 'draft'),
+            Domain('order_line', '!=', False),
+            Domain.OR(
+                [
+                    ('website_id', '=', website_id['id']),
+                    ('date_order', '<=', fields.Datetime.to_string(fields.Datetime.now() - relativedelta(hours=website_id['cart_abandoned_delay'] or 1.0))),
+                    ('partner_id', '!=', website_id['partner_id'][0]),
+                ]
+                for website_id in website_ids
+            ),
+        ))
 
     def _compute_user_id(self):
-        """ Do not assign self.env.user as salesman for e-commerce orders.
+        """Do not assign self.env.user as salesman for e-commerce orders.
 
         Leave salesman empty if no salesman is specified on partner or website.
-
-        c/p of the logic in Website._prepare_sale_order_values
         """
         website_orders = self.filtered('website_id')
         super(SaleOrder, self - website_orders)._compute_user_id()
         for order in website_orders:
+            if order.state == 'draft' and not order.env.context.get('force_user_recomputation'):
+                # Do not assign any salesman to draft carts to avoid useless notifications/pings/...
+                # It'll be assigned on confirmation (see action_confirm)
+                continue
             if not order.user_id:
                 order.user_id = (
                     order.website_id.salesperson_id
-                    or order.partner_id.parent_id.user_id.id
                     or order.partner_id.user_id.id
+                    or order.partner_id.parent_id.user_id.id
                 )
+
+    def _default_team_id(self):
+        return super()._default_team_id() or self.website_id.salesteam_id.id
 
     #=== CRUD METHODS ===#
 
@@ -209,30 +230,61 @@ class SaleOrder(models.Model):
 
     #=== BUSINESS METHODS ===#
 
+    def _get_non_delivery_lines(self):
+        """Exclude delivery-related lines."""
+        return self.order_line.filtered(lambda line: not line.is_delivery)
+
+    def _get_amount_total_excluding_delivery(self):
+        return sum(self._get_non_delivery_lines().mapped('price_total'))
+
+    def _get_confirmation_template(self):
+        """Override of `sale` to use the website specific order confirmation email template if set."""
+        self.ensure_one()
+
+        if self.website_id and self.website_id.confirmation_email_template_id:
+            return self.website_id.confirmation_email_template_id
+
+        return super()._get_confirmation_template()
+
+    def action_confirm(self):
+        carts = self.filtered('website_id')
+        if self.env.su:
+            carts = carts.with_user(SUPERUSER_ID)
+        # Assign the salesman to carts on confirmation, as SUPERUSER to send the
+        # 'You have been assigned to SOOOO' with OdooBot (and not public/logged in user).
+        carts.with_context(force_user_recomputation=True)._compute_user_id()
+        return super().action_confirm()
+
+    def _send_payment_succeeded_for_order_mail(self):
+        if carts := self.filtered('website_id'):
+            # Assign a salesman before sending payment confirmation mail.
+            carts.with_context(force_user_recomputation=True)._compute_user_id()
+        return super()._send_payment_succeeded_for_order_mail()
+
     @api.model
     def _get_note_url(self):
-        website_id = self._context.get('website_id')
+        website_id = self.env.context.get('website_id')
         if website_id:
             return self.env['website'].browse(website_id).get_base_url()
         return super()._get_note_url()
 
-    def _cart_update_order_line(self, product_id, quantity, order_line, **kwargs):
-        self.ensure_one()
+    def _needs_customer_address(self):
+        """Return whether we need the address details of the customer (country, street, ...).
 
-        if order_line and quantity <= 0:
-            # Remove zero or negative lines
-            order_line.unlink()
-            order_line = self.env['sale.order.line']
-        elif order_line:
-            # Update existing line
-            update_values = self._prepare_order_line_update_values(order_line, quantity, **kwargs)
-            if update_values:
-                self._update_cart_line_values(order_line, update_values)
-        elif quantity > 0:
-            # Create new line
-            order_line_values = self._prepare_order_line_values(product_id, quantity, **kwargs)
-            order_line = self.env['sale.order.line'].sudo().create(order_line_values)
-        return order_line
+        Orders with physical goods always require full customer address.
+        Orders without goods (services only) require customer address by default to correctly
+        determine fiscal position, taxes, pricelists (if based on country and geoip cannot be
+        trusted).
+
+        A dedicated system parameter can be set to False/0 to speed up the checkout process
+        and skip the address requirement for services.
+        """
+        return not self.only_services or str2bool(
+            self
+            .env["ir.config_parameter"]
+            .sudo()
+            .get_param("website_sale.require_billing_details_for_services", "True")
+        )
 
     def _update_address(self, partner_id, fnames=None):
         if not fnames:
@@ -241,20 +293,50 @@ class SaleOrder(models.Model):
         fpos_before = self.fiscal_position_id
         pricelist_before = self.pricelist_id
 
-        self.write(dict.fromkeys(fnames, partner_id))
+        address_vals = dict.fromkeys(fnames, partner_id)
+        if "partner_id" in fnames:
+            commercial_partner = self.env["res.partner"].browse(partner_id).commercial_partner_id
+            address_vals.update({
+                fname: self[fname].id
+                for fname in ("partner_invoice_id", "partner_shipping_id")
+                if fname not in fnames and self[fname].commercial_partner_id == commercial_partner
+            })
+
+        self.write(address_vals)
 
         fpos_changed = fpos_before != self.fiscal_position_id
         if fpos_changed:
             # Recompute taxes on fpos change
             self._recompute_taxes()
 
+            new_fpos = self.fiscal_position_id
+            request.session[FISCAL_POSITION_SESSION_CACHE_KEY] = new_fpos.id
+            request.fiscal_position = new_fpos
+
+        #If user explicitely selected a valid pricelist, we don't want to change it
+        if selected_pricelist_id := request.session.get(PRICELIST_SELECTED_SESSION_CACHE_KEY):
+            selected_pricelist = (
+                self.env['product.pricelist'].browse(selected_pricelist_id).exists()
+            )
+            if (
+                selected_pricelist
+                and selected_pricelist._is_available_on_website(self.website_id)
+                and selected_pricelist._is_available_in_country(
+                    self.partner_id.country_id.code
+                )
+            ):
+                self.pricelist_id = selected_pricelist
+            else:
+                request.session.pop(PRICELIST_SELECTED_SESSION_CACHE_KEY, None)
+
         if self.pricelist_id != pricelist_before or fpos_changed:
             # Pricelist may have been recomputed by the `partner_id` field update
             # we need to recompute the prices to match the new pricelist if it changed
             self._recompute_prices()
 
-            request.session['website_sale_current_pl'] = self.pricelist_id.id
-            self.website_id.invalidate_recordset(['pricelist_id'])
+            new_pricelist = self.pricelist_id
+            request.session[PRICELIST_SESSION_CACHE_KEY] = new_pricelist.id
+            request.pricelist = new_pricelist
 
         if self.carrier_id and 'partner_shipping_id' in fnames and self._has_deliverable_products():
             # Update the delivery method on shipping address change.
@@ -262,115 +344,70 @@ class SaleOrder(models.Model):
             delivery_method = self._get_preferred_delivery_method(delivery_methods)
             self._set_delivery_method(delivery_method)
 
-        if 'partner_id' in fnames:
-            # Only add the main partner as follower of the order
-            self._message_subscribe([partner_id])
+    def _cart_add(self, product_id: int, quantity: float = 1.0, *, uom_id: int | None = None, **kwargs) -> dict:
+        """Add quantity of the given product to the current sales order.
 
-    def _cart_update_pricelist(self, pricelist_id=None):
-        self.ensure_one()
-
-        if self.pricelist_id.id != pricelist_id:
-            self.pricelist_id = pricelist_id
-            self._recompute_prices()
-
-    def _cart_update(self, product_id, line_id=None, add_qty=0, set_qty=0, **kwargs):
-        """ Add or set product quantity, add_qty can be negative """
+        :param product_id: product id, as a `product.product` id.
+        :param quantity: the quantity to add to the cart.
+        :param kwargs: Additional parameters given to deeper method calls.
+        :return: values used by the cart service to give feedback to the customer.
+        """
         self.ensure_one()
         self = self.with_company(self.company_id)
 
-        if self.state != 'draft':
-            request.session.pop('sale_order_id', None)
-            request.session.pop('website_sale_cart_quantity', None)
-            raise UserError(_('It is forbidden to modify a sales order which is not in draft status.'))
+        product = self.env['product.product'].browse(product_id)
+        if not uom_id or not product.product_tmpl_id._has_multiple_uoms():
+            # Fall back on product uom if uom is not specified or if multi-uom is not
+            # allowed/supported for that product.
+            uom_id = product.uom_id.id  # type: ignore
+        elif uom_id not in product.product_tmpl_id._get_available_uoms().ids:
+            raise ValidationError(
+                _("This product is not available (anymore) in this unit of measure.")
+            )
 
-        product = self.env['product.product'].browse(product_id).exists()
-        if add_qty and (not product or not product._is_add_to_cart_allowed()):
-            raise UserError(_("The given product does not exist therefore it cannot be added to cart."))
-
-        if line_id is not False:
-            order_line = self._cart_find_product_line(product_id, line_id, **kwargs)[:1]
-        else:
-            order_line = self.env['sale.order.line']
-
-        try:
-            if add_qty:
-                add_qty = int(add_qty)
-        except ValueError:
-            add_qty = 1
-
-        try:
-            if set_qty:
-                set_qty = int(set_qty)
-        except ValueError:
-            set_qty = 0
-
-        quantity = 0
-        if set_qty:
-            quantity = set_qty
-        elif add_qty is not None:
-            if order_line:
-                quantity = order_line.product_uom_qty + (add_qty or 0)
-            else:
-                quantity = add_qty or 0
-
-        if quantity > 0:
-            quantity, warning = self._verify_updated_quantity(
-                order_line,
-                product_id,
-                quantity,
+        if existing_sol := self._cart_find_product_line(product_id, uom_id=uom_id, **kwargs)[:1]:
+            # If a matching line is found, update the existing line instead.
+            return self._cart_update_line_quantity(
+                line_id=existing_sol.id,  # type: ignore
+                quantity=existing_sol.product_uom_qty + quantity,
                 **kwargs,
             )
-        else:
-            # If the line will be removed anyway, there is no need to verify
-            # the requested quantity update.
-            warning = ''
 
-        order_line = self._cart_update_order_line(product_id, quantity, order_line, **kwargs)
+        quantity, warning = self._verify_updated_quantity(
+            self.env['sale.order.line'],
+            product_id,
+            quantity,
+            uom_id=uom_id,
+            **kwargs,
+        )
 
-        if (
-            order_line
-            and order_line.product_template_id.type != 'combo'
-            and order_line.price_unit == 0
-            and self.website_id.prevent_zero_price_sale
-            and product.service_tracking not in self.env['product.template']._get_product_types_allow_zero_price()
-        ):
-            raise UserError(_(
-                "The given product does not have a price therefore it cannot be added to cart.",
-            ))
-        if self.only_services:
-            self._remove_delivery_line()
-        elif self.carrier_id:
-            # Recompute the delivery rate.
-            rate = self.carrier_id.rate_shipment(self)
-            if rate['success']:
-                self.order_line.filtered(lambda line: line.is_delivery).price_unit = rate['price']
-            else:
-                self._remove_delivery_line()
+        order_line = self._create_new_cart_line(product_id, quantity, uom_id, **kwargs)
+
+        # NOTE: the provided product_id should not be given after `_create_new_cart_line` call as it
+        # could be different from the line's product_id (see variant generation logic in
+        # `_prepare_order_line_values`).
+
+        if warning:
+            (order_line or self).shop_warning = warning
+
+        if not self.env.context.get('skip_cart_verification'):
+            self._verify_cart_after_update()
 
         return {
+            'added_qty': quantity,
             'line_id': order_line.id,
             'quantity': quantity,
-            'option_ids': list(set(order_line.linked_line_ids.filtered(
-                lambda sol: sol.order_id == order_line.order_id).ids)
-            ),
             'warning': warning,
         }
 
     def _cart_find_product_line(
-        self,
-        product_id,
-        line_id=None,
-        linked_line_id=False,
-        no_variant_attribute_value_ids=None,
-        **kwargs
+        self, product_id, uom_id, linked_line_id=False, no_variant_attribute_value_ids=None, **kwargs
     ):
         """Find the cart line matching the given parameters.
 
         Custom attributes won't be matched (but no_variant & dynamic ones will be)
 
         :param int product_id: the product being added/removed, as a `product.product` id
-        :param int line_id: optional, the line the customer wants to edit (/shop/cart page), as a
-            `sale.order.line` id
         :param int linked_line_id: optional, the parent line (for optional products), as a
             `sale.order.line` id
         :param list optional_product_ids: optional, the optional products of the line, as a list
@@ -378,30 +415,36 @@ class SaleOrder(models.Model):
         :param list no_variant_attribute_value_ids: list of `product.template.attribute.value` ids
             whose attribute is configured as `no_variant`
         :param dict kwargs: unused parameters, maybe used in overrides or other cart update methods
+        :return: matching order lines in the cart, if any
+        :rtype: `sale.order.line` recordset
         """
         self.ensure_one()
 
         if not self.order_line:
             return self.env['sale.order.line']
 
-        if line_id:
-            # If we update a specific line, there is no need to filter anything else
-            return self.order_line.filtered(
-                lambda sol: sol.product_id.id == product_id and sol.id == line_id
-            )
+        product = self.env['product.product'].browse(product_id)
+        if product.type == 'combo':
+            return self.env['sale.order.line']
 
         domain = [
             ('product_id', '=', product_id),
+            ('product_uom_id', '=', uom_id),
             ('product_custom_attribute_value_ids', '=', False),
             ('linked_line_id', '=', linked_line_id),
+            ('combo_item_id', '=', False),
         ]
 
         filtered_sol = self.order_line.filtered_domain(domain)
         if not filtered_sol:
             return self.env['sale.order.line']
 
-        product = self.env['product.product'].browse(product_id)
-        if product.product_tmpl_id._has_no_variant_attributes():
+        has_configurable_no_variant_attributes = any(
+            len(line.value_ids) > 1 or line.attribute_id.display_type == 'multi'
+            for line in product.attribute_line_ids
+            if line.attribute_id.create_variant == 'no_variant'
+        )
+        if has_configurable_no_variant_attributes:
             filtered_sol = filtered_sol.filtered(
                 lambda sol:
                     sol.product_no_variant_attribute_value_ids.ids == no_variant_attribute_value_ids
@@ -409,13 +452,141 @@ class SaleOrder(models.Model):
 
         return filtered_sol
 
+    def _cart_update_line_quantity(self, line_id: int, quantity: float, **kwargs) -> dict:
+        """Update the quantity of a given line of the cart.
+
+        :param line_id: line id, as a `sale.order.line` id.
+        :param quantity: the updated quantity of the line.
+        :param kwargs: Additional parameters given to deeper method calls.
+        :return: values used by the cart service to give feedback to the customer.
+        """
+        if self:
+            self.ensure_one()
+
+        self = self.with_company(self.company_id)  # noqa: PLW0642
+
+        if not (order_line := self.order_line.filtered(lambda sol: sol.id == line_id)):
+            # If the line isn't found because of wrong parameters, or because the user updated
+            # the cart in other tabs, a warning will be returned.
+            # Note that if the cart is empty, the zero cart_quantity will trigger a page reload
+            # and this warning won't be shown.
+            return {
+                'warning': _(
+                    "We weren't able to update your cart. Please refresh your page before trying"
+                    " again."
+                )
+            }
+
+        if quantity > 0:
+            quantity, warning = self._verify_updated_quantity(
+                order_line,
+                order_line.product_id.id,
+                quantity,
+                uom_id=order_line.product_uom_id.id,
+                **kwargs,
+            )
+        else:
+            # If the line will be removed anyway, there is no need to verify
+            # the requested quantity update.
+            warning = ''
+
+        added_qty = quantity - order_line.product_uom_qty  # new_qty - old_qty
+        order_line = self._cart_update_order_line(order_line, quantity, **kwargs)
+        if not self.env.context.get('skip_cart_verification'):
+            self._verify_cart_after_update()
+
+        if warning:
+            (order_line or self).shop_warning = warning
+
+        return {
+            'added_qty': added_qty,
+            'line_id': order_line.id,
+            'quantity': quantity,
+            'warning': warning,
+        }
+
     # hook to be overridden
-    def _verify_updated_quantity(self, order_line, product_id, new_qty, **kwargs):
+    def _verify_updated_quantity(self, order_line, product_id, new_qty, uom_id, **kwargs):
         return new_qty, ''
 
+    def _cart_update_order_line(self, order_line, quantity, **kwargs):
+        self.ensure_one()
+        order_line.ensure_one()
+
+        if quantity <= 0:
+            # Remove zero or negative lines
+            order_line.unlink()
+            return self.env['sale.order.line']
+
+        # Update existing line
+        update_values = self._prepare_order_line_update_values(order_line, quantity, **kwargs)
+        if update_values:
+            combo_item_lines = order_line.linked_line_ids.filtered('combo_item_id')
+            if (
+                order_line.product_type == 'combo'
+                and combo_item_lines
+                and 'product_uom_qty' in update_values
+            ):
+                # A combo product and its items should have the same quantity (by design). If the
+                # requested quantity isn't available for one or more combo items, we should lower
+                # the quantity of the combo product and its items to the maximum available quantity
+                # of the combo item with the least available quantity.
+                combo_quantity = quantity
+                for item_line in combo_item_lines:
+                    if quantity != item_line.product_uom_qty:
+                        combo_item_quantity, _warning = self._verify_updated_quantity(
+                            item_line,
+                            item_line.product_id.id,
+                            quantity,
+                            uom_id=item_line.product_uom_id.id,
+                            **kwargs
+                        )
+                        combo_quantity = min(combo_quantity, combo_item_quantity)
+                for item_line in combo_item_lines:
+                    if combo_quantity != item_line.product_uom_qty:
+                        self.with_context(skip_cart_verification=True)._cart_update_line_quantity(
+                            line_id=item_line.id, quantity=combo_quantity
+                        )
+                update_values['product_uom_qty'] = combo_quantity
+
+            order_line.write(update_values)
+
+            order_line._check_validity()
+
+        return order_line
+
+    def _prepare_order_line_update_values(self, order_line, quantity, **kwargs):
+        self.ensure_one()
+        values = {}
+
+        if quantity != order_line.product_uom_qty:
+            values['product_uom_qty'] = quantity
+
+        return values
+
+    def _create_new_cart_line(self, product_id, quantity, uom_id, **kwargs):
+        if quantity <= 0.0:
+            return self.env['sale.order.line']
+
+        line = self.env['sale.order.line'].create(
+            self._prepare_order_line_values(product_id, quantity, uom_id, **kwargs)
+        )
+
+        # The validity of a combo product line can only be checked after creating all of its combo
+        # item lines.
+        if line.product_type != 'combo':
+            line._check_validity()
+        return line
+
     def _prepare_order_line_values(
-        self, product_id, quantity, linked_line_id=False,
-        no_variant_attribute_value_ids=None, product_custom_attribute_values=None,
+        self,
+        product_id,
+        quantity,
+        uom_id,
+        *,
+        linked_line_id=False,
+        no_variant_attribute_value_ids=None,
+        product_custom_attribute_values=None,
         combo_item_id=None,
         **kwargs
     ):
@@ -437,9 +608,14 @@ class SaleOrder(models.Model):
         if not product:
             raise UserError(_("The given combination does not exist therefore it cannot be added to cart."))
 
+        if linked_line_id and linked_line_id not in self.order_line.ids:
+            # Make sure the provided parent line belongs to the current order.
+            raise UserError(_("Invalid request parameters."))
+
         values = {
             'product_id': product.id,
             'product_uom_qty': quantity,
+            'product_uom_id': uom_id or product.uom_id.id,
             'order_id': self.id,
             'linked_line_id': linked_line_id,
             'combo_item_id': combo_item_id,
@@ -476,23 +652,50 @@ class SaleOrder(models.Model):
 
         return values
 
-    def _prepare_order_line_update_values(
-        self, order_line, quantity, linked_line_id=False, **kwargs
-    ):
+    def _check_combo_quantities(self, line) -> bool:
+        """Ensure all combo item lines have the same quantity.
+
+        :returns: whether the combo quantities had to be updated
+        """
+        # Ensure all combo lines have the same quantity
+        if not (combo_lines := line.linked_line_ids):
+            return False
+        available_combo_quantity = min(line.product_uom_qty for line in combo_lines)
+        if available_combo_quantity < line.product_uom_qty:
+            line._set_shop_warning_stock(
+                line.product_uom_qty,
+                available_combo_quantity,
+            )
+            (line + combo_lines).product_uom_qty = available_combo_quantity
+            return True
+
+        return False
+
+    def _verify_cart_after_update(self):
+        """Global checks on the cart after updates.
+
+        Called from controllers to ensure it's only done once by request (combos,
+        optional products, ...).
+        """
+        if self.only_services:
+            self._remove_delivery_line()
+        elif self.carrier_id:
+            # Recompute the delivery rate.
+            rate = self.carrier_id.rate_shipment(self)
+            if rate['success']:
+                self.order_line.filtered('is_delivery').price_unit = rate['price']
+            else:
+                self._remove_delivery_line()
+
+        if request:
+            request.session['website_sale_cart_quantity'] = self.cart_quantity
+
+    def _verify_cart(self):
+        """Check cart content and clear outdated/invalid lines."""
         self.ensure_one()
-        values = {}
 
-        if quantity != order_line.product_uom_qty:
-            values['product_uom_qty'] = quantity
-        if linked_line_id and linked_line_id != order_line.linked_line_id.id:
-            values['linked_line_id'] = linked_line_id
-
-        return values
-
-    # hook to be overridden
-    def _update_cart_line_values(self, order_line, update_values):
-        self.ensure_one()
-        order_line.write(update_values)
+        # Remove lines with inactive products
+        self.order_line.filtered(lambda sol: sol.product_id and not sol.product_id.active).unlink()
 
     def _cart_accessories(self):
         """ Suggest accessories based on 'Accessory Products' of products in cart """
@@ -531,8 +734,7 @@ class SaleOrder(models.Model):
         sent_orders.write({'cart_recovery_email_sent': True})
 
     def _message_mail_after_hook(self, mails):
-        """ After sending recovery cart emails, update orders to avoid sending
-        it again. """
+        # After sending recovery cart emails, update orders to avoid sending it again
         if self.env.context.get('website_sale_send_recovery_email'):
             self.filtered_domain([
                 ('cart_recovery_email_sent', '=', False),
@@ -541,15 +743,14 @@ class SaleOrder(models.Model):
         return super()._message_mail_after_hook(mails)
 
     def _message_post_after_hook(self, message, msg_vals):
-        """ After sending recovery cart emails, update orders to avoid sending
-        it again. """
+        # After sending recovery cart emails, update orders to avoid sending it again
         if self.env.context.get('website_sale_send_recovery_email'):
             self.cart_recovery_email_sent = True
         return super()._message_post_after_hook(message, msg_vals)
 
-    def _notify_get_recipients_groups(self, message, model_description, msg_vals=None):
-        """ In case of cart recovery email, update link to redirect directly
-        to the cart (like ``mail_template_sale_cart_recovery`` template). """
+    def _notify_get_recipients_groups(self, message, model_description, msg_vals=False):
+        # In case of cart recovery email, update link to redirect directly
+        # to the cart (like ``mail_template_sale_cart_recovery`` template).
         groups = super()._notify_get_recipients_groups(
             message, model_description, msg_vals=msg_vals
         )
@@ -560,14 +761,16 @@ class SaleOrder(models.Model):
         customer_portal_group = next((group for group in groups if group[0] == 'portal_customer'), None)
         if customer_portal_group:
             access_opt = customer_portal_group[2].setdefault('button_access', {})
-            if self._context.get('website_sale_send_recovery_email'):
+            if self.env.context.get('website_sale_send_recovery_email'):
                 access_opt['title'] = _('Resume Order')
-                access_opt['url'] = '%s/shop/cart?access_token=%s' % (self.get_base_url(), self.access_token)
+                access_opt['url'] = f'{self.get_base_url()}/shop/cart?id={self.id}&access_token={self.access_token}'
         return groups
 
     def _is_reorder_allowed(self):
         self.ensure_one()
-        return self.state == 'sale' and any(line._is_reorder_allowed() for line in self.order_line if not line.display_type)
+        return self.state == 'sale' and any(
+            line._is_reorder_allowed() for line in self.order_line if line.product_id
+        )
 
     def _filter_can_send_abandoned_cart_mail(self):
         self.website_id.ensure_one()
@@ -617,11 +820,12 @@ class SaleOrder(models.Model):
         :return: Whether the order has deliverable products.
         :rtype: bool
         """
-        return not self.only_services
+        return bool(self.order_line.product_id) and not self.only_services
 
     def _remove_delivery_line(self):
         super()._remove_delivery_line()
-        self.pickup_location_data = {}  # Reset the pickup location data.
+        if not self.env.context.get("keep_pickup_location"):
+            self.pickup_location_data = {}  # Reset the pickup location data.
 
     def _get_preferred_delivery_method(self, available_delivery_methods):
         """ Get the preferred delivery method based on available delivery methods for the order.
@@ -669,6 +873,7 @@ class SaleOrder(models.Model):
         # searching on website_published will also search for available website (_search method on computed field)
         return self.env['delivery.carrier'].sudo().search([
             ('website_published', '=', True),
+            *self.env['delivery.carrier']._check_company_domain(self.company_id),
         ]).filtered(lambda carrier: carrier._is_available_for_order(self))
 
     #=== TOOLING ===#
@@ -700,12 +905,34 @@ class SaleOrder(models.Model):
             self.shop_warning = ''
         return warn
 
+    def _get_zero_priced_lines(self):
+        """ Return the cart lines priced at 0 while the website forbids the sale
+        of zero-priced products.
+
+        :rtype: sale.order.line
+        """
+        self.ensure_one()
+        if not self.website_id.prevent_zero_price_sale:
+            return self.env['sale.order.line']
+        allowed_types = set(self.env['product.template']._get_product_types_allow_zero_price())
+        return self.order_line.filtered(
+            lambda line:
+                line.product_id
+                and not line.display_type
+                and not line.is_delivery
+                # Combo products are priced through their combo item lines.
+                and line.product_template_id.type != 'combo'
+                and not line.combo_item_id
+                and line.price_unit == 0
+                and line.product_id.service_tracking not in allowed_types
+        )
+
     def _is_cart_ready(self):
         """ Whether the cart is valid and can be confirmed (and paid for)
 
         :rtype: bool
         """
-        return True
+        return bool(self.order_line) and not self._get_zero_priced_lines()
 
     def _check_cart_is_ready_to_be_paid(self):
         """ Whether the cart is valid and the user can proceed to the payment
@@ -717,8 +944,20 @@ class SaleOrder(models.Model):
                 "Your cart is not ready to be paid, please verify previous steps."
             ))
 
-        if not self.only_services and not self.carrier_id:
-            raise ValidationError(_("No shipping method is selected."))
+        if not self.only_services:
+            if not self.carrier_id:
+                raise ValidationError(_("No shipping method is selected."))
+            if self.carrier_id not in self._get_delivery_methods():
+                raise ValidationError(
+                    _("The delivery method is not compatible with your delivery address.")
+                )
 
-    def _is_delivery_ready(self):
-        return not self._has_deliverable_products() or self.carrier_id
+    def _recompute_cart(self):
+        """Recompute taxes and prices for the current cart."""
+        self._recompute_taxes()
+        self._recompute_prices()
+        if self.carrier_id:
+            self.with_context(keep_pickup_location=True)._set_delivery_method(self.carrier_id)
+
+    def _allow_express_checkout(self):
+        return True

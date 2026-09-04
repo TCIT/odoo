@@ -4,8 +4,8 @@
 from odoo import fields, models
 
 
-class ApplicantRefuseReason(models.Model):
-    _name = "hr.applicant.refuse.reason"
+class HrApplicantRefuseReason(models.Model):
+    _name = 'hr.applicant.refuse.reason'
     _description = 'Refuse Reason of Applicant'
     _order = 'sequence'
 

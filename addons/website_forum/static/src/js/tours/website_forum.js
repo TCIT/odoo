@@ -1,9 +1,8 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import {
     registerBackendAndFrontendTour,
 } from '@website/js/tours/tour_utils';
+import { stepUtils } from "@web_tour/tour_utils";
 
 registerBackendAndFrontendTour("question", {
     url: '/forum/1',
@@ -12,6 +11,7 @@ registerBackendAndFrontendTour("question", {
     tooltipPosition: "left",
     content: _t("Create a new post in this forum by clicking on the button."),
     run: "click",
+    expectUnloadPage: true,
 }, {
     trigger: "input[name=post_name]",
     tooltipPosition: "top",
@@ -28,24 +28,18 @@ registerBackendAndFrontendTour("question", {
     run: "editor Test",
 },
 {
-    trigger: `.note-editable p:not(:contains(/^<br>$/))`,
+    trigger: `.note-editable p:not(:text(<br>))`,
 },
 {
     trigger: ".o_select_menu_toggler",
     content: _t("Insert tags related to your question."),
     tooltipPosition: "top",
     run: "click",
-}, 
-{
-    trigger: ".o_select_menu_sticky",
-    run: "edit Test",
 },
-{
-    trigger: `.o_popover input.o_select_menu_sticky:not(:contains(Please enter 2 or more characters))`,
-},
+...stepUtils.editSelectMenuInput(".o_select_menu_input", "Test"),
 {
     content: "Select found select menu item",
-    trigger: ".o_popover.o_select_menu_menu .o_select_menu_item span:contains('Test')",
+    trigger: ".o_popover.o_select_menu_menu .o_select_menu_item:contains('Test')",
     run: 'click',
 },
 {
@@ -58,9 +52,10 @@ registerBackendAndFrontendTour("question", {
     content: _t("Click to post your question."),
     tooltipPosition: "bottom",
     run: "click",
+    expectUnloadPage: true,
 },
 {
-    trigger: ".o_wforum_content_wrapper h3:contains(test)",
+    trigger: ".o_wforum_content_wrapper .h3:contains(test)",
 },
 {
     isActive: ["auto"],
@@ -80,16 +75,17 @@ registerBackendAndFrontendTour("question", {
     run: "editor Test",
 },
 {
-    trigger: `.note-editable p:not(:contains(/^<br>$/))`,
+    trigger: `.note-editable p:not(:text(<br>))`,
 },
 {
     trigger: "button:contains(\"Post Answer\")",
     content: _t("Click to post your answer."),
     tooltipPosition: "bottom",
     run: "click",
-}, 
+    expectUnloadPage: true,
+},
 {
-    trigger: ".o_wforum_content_wrapper h3:contains(test)",
+    trigger: ".o_wforum_content_wrapper .h3:contains(test)",
 },
 {
     isActive: ["auto"],

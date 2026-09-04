@@ -1,68 +1,69 @@
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Plugin } from "../../plugin";
-import { _t } from "@web/core/l10n/translation";
 import { ImageCrop } from "./image_crop";
-import { loadBundle } from "@web/core/assets";
-import { withSequence } from "@html_editor/utils/resource";
+import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
+
+/**
+ * @typedef { Object } ImageCropShared
+ * @property { ImageCropPlugin['openCropImage'] } openCropImage
+ */
 
 export class ImageCropPlugin extends Plugin {
     static id = "imageCrop";
-    static dependencies = ["selection", "history"];
+    static dependencies = ["selection", "history", "imagePostProcess"];
+    static shared = ["openCropImage"];
+    /** @type {import("plugins").EditorResources} */
     resources = {
         user_commands: [
             {
                 id: "cropImage",
                 run: this.openCropImage.bind(this),
-                title: _t("Crop image"),
+                description: _t("Crop image"),
                 icon: "fa-crop",
+                isAvailable: isHtmlContentSupported,
             },
         ],
-        toolbar_groups: withSequence(27, {
-            id: "image_crop",
-            namespace: "image",
-        }),
         toolbar_items: [
             {
                 id: "image_crop",
                 commandId: "cropImage",
-                groupId: "image_crop",
+                groupId: "image_modifiers",
             },
         ],
     };
 
-    setup() {
-        this.imageCropProps = {
-            media: undefined,
-            mimetype: undefined,
-        };
+    getTargetedImage() {
+        const targetedNodes = this.dependencies.selection.getTargetedNodes();
+        return targetedNodes.find((node) => node.tagName === "IMG");
     }
 
-    getSelectedImage() {
-        const selectedNodes = this.dependencies.selection.getSelectedNodes();
-        return selectedNodes.find((node) => node.tagName === "IMG");
-    }
-
-    async openCropImage() {
-        const selectedImg = this.getSelectedImage();
-        if (!selectedImg) {
+    async openCropImage(targetedImg, imageCropProps = {}) {
+        targetedImg = targetedImg || this.getTargetedImage();
+        if (!targetedImg) {
             return;
         }
-
-        this.imageCropProps.media = selectedImg;
-
-        const onClose = () => {
-            registry.category("main_components").remove("ImageCropping");
-        };
-
-        const onSave = () => {
-            this.dependencies.history.addStep();
-        };
-
-        await loadBundle("html_editor.assets_image_cropper");
-
-        registry.category("main_components").add("ImageCropping", {
+        return registry.category("main_components").add("ImageCropping", {
             Component: ImageCrop,
-            props: { ...this.imageCropProps, onClose, onSave, document: this.document },
+            props: {
+                media: targetedImg,
+                onSave: async (newDataset) => {
+                    // todo: should use the mutex if there is one?
+                    const updateImageAttributes =
+                        await this.dependencies.imagePostProcess.processImage({
+                            img: targetedImg,
+                            newDataset,
+                        });
+                    updateImageAttributes();
+                    this.dependencies.history.addStep();
+                },
+                document: this.document,
+                ...imageCropProps,
+                onClose: () => {
+                    registry.category("main_components").remove("ImageCropping");
+                    imageCropProps.onClose?.();
+                },
+            },
         });
     }
 }

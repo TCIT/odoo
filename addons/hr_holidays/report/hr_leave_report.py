@@ -1,13 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-from odoo import api, fields, models, tools, _
-from odoo.osv import expression
+from odoo import fields, models, tools
 
 
-class LeaveReport(models.Model):
-    _name = "hr.leave.report"
+class HrLeaveReport(models.Model):
+    _name = 'hr.leave.report'
     _description = 'Time Off Summary / Report'
-    _inherit = "hr.manager.department.report"
+    _inherit = ["hr.manager.department.report"]
     _auto = False
     _order = "date_from DESC, employee_id"
 
@@ -34,9 +32,9 @@ class LeaveReport(models.Model):
     company_id = fields.Many2one('res.company', string="Company", readonly=True)
 
     def init(self):
-        tools.drop_view_if_exists(self._cr, 'hr_leave_report')
+        tools.drop_view_if_exists(self.env.cr, 'hr_leave_report')
 
-        self._cr.execute("""
+        self.env.cr.execute("""
             CREATE or REPLACE view hr_leave_report as (
                 SELECT row_number() over(ORDER BY leaves.employee_id) as id,
                 leaves.leave_id as leave_id,
@@ -49,13 +47,13 @@ class LeaveReport(models.Model):
                 leaves.date_from as date_from,
                 leaves.date_to as date_to, leaves.company_id
                 from (select
-                    allocation.id as allocation_id,
                     null as leave_id,
+                    allocation.id as allocation_id,
                     allocation.employee_id as employee_id,
                     allocation.name as name,
                     allocation.number_of_days as number_of_days,
                     allocation.number_of_hours_display as number_of_hours,
-                    allocation.department_id as department_id,
+                    v.department_id as department_id,
                     allocation.holiday_status_id as holiday_status_id,
                     allocation.state as state,
                     allocation.date_from as date_from,
@@ -64,6 +62,7 @@ class LeaveReport(models.Model):
                     allocation.employee_company_id as company_id
                 from hr_leave_allocation as allocation
                 inner join hr_employee as employee on (allocation.employee_id = employee.id)
+                LEFT JOIN hr_version v ON v.id = employee.current_version_id
                 where employee.active IS True
                 union all select
                     request.id as leave_id,
@@ -72,7 +71,7 @@ class LeaveReport(models.Model):
                     request.private_name as name,
                     (request.number_of_days * -1) as number_of_days,
                     (request.number_of_hours * -1) as number_of_hours,
-                    request.department_id as department_id,
+                    v.department_id as department_id,
                     request.holiday_status_id as holiday_status_id,
                     request.state as state,
                     request.date_from as date_from,
@@ -81,6 +80,7 @@ class LeaveReport(models.Model):
                     request.employee_company_id as company_id
                 from hr_leave as request
                 inner join hr_employee as employee on (request.employee_id = employee.id)
+                LEFT JOIN hr_version v ON v.id = employee.current_version_id
                 where employee.active IS True
                 ) leaves
             );

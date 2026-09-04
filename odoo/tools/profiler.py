@@ -1,20 +1,21 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from contextlib import nullcontext, ExitStack
 from datetime import datetime
-import gc
 import json
 import logging
-import sys
-import time
-import threading
 import re
-import functools
+import sys
+import threading
+import time
 
+import psutil
 from psycopg2 import OperationalError
 
 from odoo import tools
 from odoo.tools import SQL
+
+from .gc import disabling_gc
 
 
 _logger = logging.getLogger(__name__)
@@ -22,6 +23,8 @@ _logger = logging.getLogger(__name__)
 # ensure we have a non patched time for profiling times when using freezegun
 real_datetime_now = datetime.now
 real_time = time.time.__call__
+real_cpu_time = time.thread_time.__call__
+
 
 def _format_frame(frame):
     code = frame.f_code
@@ -48,7 +51,7 @@ def _get_stack_trace(frame, limit_frame=None):
         stack.append(_format_frame(frame))
         frame = frame.f_back
     if frame is None and limit_frame:
-        _logger.error("Limit frame was not found")
+        _logger.runbot("Limit frame was not found")
     return list(reversed(stack))
 
 
@@ -89,6 +92,7 @@ class Collector:
     It defines default behaviors for creating an entry in the collector.
     """
     name = None                 # symbolic name of the collector
+    _store = name
     _registry = {}              # map collector names to their class
 
     @classmethod
@@ -115,13 +119,27 @@ class Collector:
 
     def add(self, entry=None, frame=None):
         """ Add an entry (dict) to this collector. """
-        # todo add entry count limit
-        self._entries.append({
+        sample = {
             'stack': self._get_stack_trace(frame),
             'exec_context': getattr(self.profiler.init_thread, 'exec_context', ()),
             'start': real_time(),
             **(entry or {}),
-        })
+        }
+        self._entries.append(sample)
+        return sample
+
+    def progress(self, entry=None, frame=None):
+        """ Checks if the limits were met and add to the entries"""
+        exceeded_entry_count = bool(self.profiler.entry_count_limit) \
+                                and self.profiler.counter >= self.profiler.entry_count_limit
+        exceeded_time_limit = bool(self.profiler.time_limit) \
+                              and self.profiler.time_limit < real_time() - self.profiler.start_time
+        if exceeded_entry_count \
+            or exceeded_time_limit:
+            self.profiler.end()
+
+        self.profiler.counter += 1
+        return self.add(entry=entry, frame=frame)
 
     def _get_stack_trace(self, frame=None):
         """ Return the stack trace to be included in a given entry. """
@@ -138,8 +156,10 @@ class Collector:
         """ Return the entries of the collector after postprocessing. """
         if not self._processed:
             self.post_process()
+            self.processed_entries = self._entries
+            self._entries = None  # avoid modification after processing
             self._processed = True
-        return self._entries
+        return self.processed_entries
 
     def summary(self):
         return f"{'='*10} {self.name} {'='*10} \n Entries: {len(self._entries)}"
@@ -161,12 +181,18 @@ class SQLCollector(Collector):
         self.profiler.init_thread.query_hooks.remove(self.hook)
 
     def hook(self, cr, query, params, query_start, query_time):
-        self.add({
+        entry = {
             'query': str(query),
             'full_query': str(cr._format(query, params)),
             'start': query_start,
             'time': query_time,
-        })
+        }
+        sample = self.progress(entry)
+
+        def update_sample(delay):
+            sample['time'] = delay
+
+        return update_sample
 
     def summary(self):
         total_time = sum(entry['time'] for entry in self._entries) or 1
@@ -176,26 +202,63 @@ class SQLCollector(Collector):
         return super().summary() + sql_entries
 
 
-class PeriodicCollector(Collector):
+class _BasePeriodicCollector(Collector):
     """
     Record execution frames asynchronously at most every `interval` seconds.
 
     :param interval (float): time to wait in seconds between two samples.
     """
-    name = 'traces_async'
+    _min_interval = 0.001  # minimum interval allowed
+    _max_interval = 5    # maximum interval allowed
+    _default_interval = 0.001
 
-    def __init__(self, interval=0.01):  # check duration. dynamic?
+    def __init__(self, interval=None):  # check duration. dynamic?
         super().__init__()
         self.active = False
-        self.frame_interval = interval
+        self.frame_interval = interval or self._default_interval
         self.__thread = threading.Thread(target=self.run)
         self.last_frame = None
+        self._stop_event = threading.Event()
+
+    def start(self):
+        interval = self.profiler.params.get(f'{self.name}_interval')
+        if interval:
+            self.frame_interval = min(max(float(interval), self._min_interval), self._max_interval)
+        init_thread = self.profiler.init_thread
+        if not hasattr(init_thread, 'profile_hooks'):
+            init_thread.profile_hooks = []
+        init_thread.profile_hooks.append(self.progress)
+        self.__thread.start()
 
     def run(self):
         self.active = True
-        last_time = real_time()
+        self.last_time = real_time()
         while self.active:  # maybe add a check on parent_thread state?
-            duration = real_time() - last_time
+            self.progress()
+            self._stop_event.wait(self.frame_interval)
+
+    def stop(self):
+        self.active = False
+        self._stop_event.set()
+        self._entries.append({'stack': [], 'start': real_time()})  # add final end frame
+        if self.__thread.is_alive() and self.__thread is not threading.current_thread():
+            self.__thread.join()
+        self.profiler.init_thread.profile_hooks.remove(self.progress)
+
+
+class PeriodicCollector(_BasePeriodicCollector):
+
+    name = 'traces_async'
+
+    def start(self):
+        self._memory_profile = self.profiler.memory_profile
+        self._process = self.profiler.process
+        super().start()
+
+    def add(self, entry=None, frame=None):
+        """ Add an entry (dict) to this collector. """
+        if self.last_frame:
+            duration = real_time() - self._last_time
             if duration > self.frame_interval * 10 and self.last_frame:
                 # The profiler has unexpectedly slept for more than 10 frame intervals. This may
                 # happen when calling a C library without releasing the GIL. In that case, the
@@ -203,38 +266,17 @@ class PeriodicCollector(Collector):
                 # the call itself does not appear in any of those frames: the duration of the call
                 # is incorrectly attributed to the last frame.
                 self._entries[-1]['stack'].append(('profiling', 0, '⚠ Profiler freezed for %s s' % duration, ''))
-                self.last_frame = None  # skip duplicate detection for the next frame.
-            self.add()
-            last_time = real_time()
-            time.sleep(self.frame_interval)
+            self.last_frame = None  # skip duplicate detection for the next frame.
+        self._last_time = real_time()
 
-        self._entries.append({'stack': [], 'start': real_time()})  # add final end frame
-
-    def start(self):
-        interval = self.profiler.params.get('traces_async_interval')
-        if interval:
-            self.frame_interval = min(max(float(interval), 0.001), 1)
-
-        init_thread = self.profiler.init_thread
-        if not hasattr(init_thread, 'profile_hooks'):
-            init_thread.profile_hooks = []
-        init_thread.profile_hooks.append(self.add)
-
-        self.__thread.start()
-
-    def stop(self):
-        self.active = False
-        self.__thread.join()
-        self.profiler.init_thread.profile_hooks.remove(self.add)
-
-    def add(self, entry=None, frame=None):
-        """ Add an entry (dict) to this collector. """
         frame = frame or get_current_frame(self.profiler.init_thread)
         if frame == self.last_frame:
             # don't save if the frame is exactly the same as the previous one.
             # maybe modify the last entry to add a last seen?
             return
         self.last_frame = frame
+        if self._memory_profile:
+            entry = {'memory': self._process.memory_info().rss, **(entry or {})}
         super().add(entry=entry, frame=frame)
 
 
@@ -261,7 +303,7 @@ class SyncCollector(Collector):
         if event == 'call' and _frame.f_back:
             # we need the parent frame to determine the line number of the call
             entry['parent_frame'] = _format_frame(_frame.f_back)
-        self.add(entry, frame=_frame)
+        self.progress(entry, frame=_frame)
         return self.hook
 
     def _get_stack_trace(self, frame=None):
@@ -291,57 +333,6 @@ class SyncCollector(Collector):
 
 
 class QwebTracker():
-
-    @classmethod
-    def wrap_render(cls, method_render):
-        @functools.wraps(method_render)
-        def _tracked_method_render(self, template, values=None, **options):
-            current_thread = threading.current_thread()
-            execution_context_enabled = getattr(current_thread, 'profiler_params', {}).get('execution_context_qweb')
-            qweb_hooks = getattr(current_thread, 'qweb_hooks', ())
-            if execution_context_enabled or qweb_hooks:
-                # To have the new compilation cached because the generated code will change.
-                # Therefore 'profile' is a key to the cache.
-                options['profile'] = True
-            return method_render(self, template, values, **options)
-        return _tracked_method_render
-
-    @classmethod
-    def wrap_compile(cls, method_compile):
-        @functools.wraps(method_compile)
-        def _tracked_compile(self, template):
-            if not self.env.context.get('profile'):
-                return method_compile(self, template)
-
-            template_functions, def_name = method_compile(self, template)
-            render_template = template_functions[def_name]
-
-            def profiled_method_compile(self, values):
-                options = template_functions['options']
-                ref = options.get('ref')
-                ref_xml = options.get('ref_xml')
-                qweb_tracker = QwebTracker(ref, ref_xml, self.env.cr)
-                self = self.with_context(qweb_tracker=qweb_tracker)
-                if qweb_tracker.execution_context_enabled:
-                    with ExecutionContext(template=ref):
-                        return render_template(self, values)
-                return render_template(self, values)
-            template_functions[def_name] = profiled_method_compile
-
-            return (template_functions, def_name)
-        return _tracked_compile
-
-    @classmethod
-    def wrap_compile_directive(cls, method_compile_directive):
-        @functools.wraps(method_compile_directive)
-        def _tracked_compile_directive(self, el, options, directive, level):
-            if not options.get('profile') or directive in ('inner-content', 'tag-open', 'tag-close'):
-                return method_compile_directive(self, el, options, directive, level)
-            enter = f"{' ' * 4 * level}self.env.context['qweb_tracker'].enter_directive({directive!r}, {el.attrib!r}, {options['_qweb_error_path_xml'][0]!r})"
-            leave = f"{' ' * 4 * level}self.env.context['qweb_tracker'].leave_directive({directive!r}, {el.attrib!r}, {options['_qweb_error_path_xml'][0]!r})"
-            code_directive = method_compile_directive(self, el, options, directive, level)
-            return [enter, *code_directive, leave] if code_directive else []
-        return _tracked_compile_directive
 
     def __init__(self, view_id, arch, cr):
         current_thread = threading.current_thread()  # don't store current_thread on self
@@ -533,6 +524,8 @@ class Profiler:
         """
         self.start_time = 0
         self.duration = 0
+        self.start_cpu_time = 0
+        self.cpu_duration = 0
         self.profile_session = profile_session or make_session()
         self.description = description
         self.init_frame = None
@@ -544,6 +537,13 @@ class Profiler:
         self.profile_id = None
         self.log = log
         self.sub_profilers = []
+        self.entry_count_limit = int(self.params.get("entry_count_limit", 0))
+        self.time_limit = int(self.params.get("time_limit", 0))
+        self.done = False
+        self.exit_stack = ExitStack()
+        self.process = psutil.Process()
+        self.memory_profile = self.params.get("memory_profile", False)
+        self.counter = 0
 
         if db is ...:
             # determine database from current thread
@@ -590,18 +590,26 @@ class Profiler:
             self.description = f"{frame.f_code.co_name} ({code.co_filename}:{frame.f_lineno})"
         if self.params:
             self.init_thread.profiler_params = self.params
-        if self.disable_gc and gc.isenabled():
-            gc.disable()
+        if self.disable_gc:
+            self.exit_stack.enter_context(disabling_gc())
         self.start_time = real_time()
+        self.start_cpu_time = real_cpu_time()
         for collector in self.collectors:
             collector.start()
         return self
 
     def __exit__(self, *args):
+        self.end()
+
+    def end(self):
+        if self.done:
+            return
+        self.done = True
         try:
             for collector in self.collectors:
                 collector.stop()
             self.duration = real_time() - self.start_time
+            self.cpu_duration = real_cpu_time() - self.start_cpu_time
             self._add_file_lines(self.init_stack_trace)
 
             if self.db:
@@ -614,12 +622,19 @@ class Profiler:
                         "create_date": real_datetime_now(),
                         "init_stack_trace": json.dumps(_format_stack(self.init_stack_trace)),
                         "duration": self.duration,
+                        "cpu_duration": self.cpu_duration,
                         "entry_count": self.entry_count(),
                         "sql_count": sum(len(collector.entries) for collector in self.collectors if collector.name == 'sql')
                     }
+                    others = {}
                     for collector in self.collectors:
                         if collector.entries:
-                            values[collector.name] = json.dumps(collector.entries)
+                            if collector._store == "others":
+                                others[collector.name] = json.dumps(collector.entries)
+                            else:
+                                values[collector.name] = json.dumps(collector.entries)
+                    if others:
+                        values['others'] = json.dumps(others)
                     query = SQL(
                         "INSERT INTO ir_profile(%s) VALUES %s RETURNING id",
                         SQL(",").join(map(SQL.identifier, values)),
@@ -631,12 +646,14 @@ class Profiler:
         except OperationalError:
             _logger.exception("Could not save profile in database")
         finally:
-            if self.disable_gc:
-                gc.enable()
+            self.exit_stack.close()
             if self.params:
                 del self.init_thread.profiler_params
             if self.log:
                 _logger.info(self.summary())
+
+    def _get_cm_proxy(self):
+        return Nested(self)
 
     def _add_file_lines(self, stack):
         for index, frame in enumerate(stack):
@@ -715,16 +732,16 @@ class Nested:
     be ignored, too. This is also why Nested() does not use
     contextlib.contextmanager.
     """
-    def __init__(self, profiler, context_manager):
-        self.profiler = profiler
-        self.context_manager = context_manager
+    def __init__(self, profiler, context_manager=None):
+        self._profiler__ = profiler
+        self.context_manager = context_manager or nullcontext()
 
     def __enter__(self):
-        self.profiler.__enter__()
+        self._profiler__.__enter__()
         return self.context_manager.__enter__()
 
     def __exit__(self, exc_type, exc_value, traceback):
         try:
             return self.context_manager.__exit__(exc_type, exc_value, traceback)
         finally:
-            self.profiler.__exit__(exc_type, exc_value, traceback)
+            self._profiler__.__exit__(exc_type, exc_value, traceback)

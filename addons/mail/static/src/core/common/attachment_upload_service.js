@@ -32,7 +32,7 @@ export class AttachmentUploadService {
                 const { thread, composer } = this.targetsByTmpId.get(tmpId);
                 const tmpUrl = upload.data.get("tmp_url");
                 this.abortByAttachmentId.set(tmpId, upload.xhr.abort.bind(upload.xhr));
-                const attachment = this.store.Attachment.insert(
+                const attachment = this.store["ir.attachment"].insert(
                     this._makeAttachmentData(upload, tmpId, composer ? undefined : thread, tmpUrl)
                 );
                 composer?.attachments.push(attachment);
@@ -66,9 +66,7 @@ export class AttachmentUploadService {
                     return;
                 }
                 const { thread, composer } = this.targetsByTmpId.get(tmpId);
-                // FIXME: this should be only response. HOOT tests returns wrong data {result, error}
-                const attachmentData = response?.result ?? response;
-                this._processLoaded(thread, composer, attachmentData, tmpId, def);
+                this._processLoaded(thread, composer, response, tmpId, def);
             }
         );
         this.fileUploadService.bus.addEventListener(
@@ -85,8 +83,10 @@ export class AttachmentUploadService {
     }
 
     _processLoaded(thread, composer, { data }, tmpId, def) {
-        const { Attachment } = this.store.insert(data);
-        const [attachment] = Attachment;
+        const { store_data, attachment_id } = data;
+        this.store.insert(store_data);
+        /** @type {import("models").Attachment} */
+        const attachment = this.store["ir.attachment"].get(attachment_id);
         if (composer) {
             const index = composer.attachments.findIndex(({ id }) => id === tmpId);
             if (index >= 0) {
@@ -105,7 +105,7 @@ export class AttachmentUploadService {
         this.deferredByAttachmentId.delete(tmpId);
         this.uploadingAttachmentIds.delete(tmpId);
         this.targetsByTmpId.delete(tmpId);
-        this.store.Attachment.get(tmpId)?.remove();
+        this.store["ir.attachment"].get(tmpId)?.remove();
     }
 
     getUploadURL(thread) {
@@ -175,10 +175,10 @@ export class AttachmentUploadService {
 
     _makeAttachmentData(upload, tmpId, thread, tmpUrl) {
         const attachmentData = {
-            filename: upload.title,
             id: tmpId,
             mimetype: upload.type,
             name: upload.title,
+            resModel: upload.res_model,
             thread,
             extension: upload.title.split(".").pop(),
             uploading: true,

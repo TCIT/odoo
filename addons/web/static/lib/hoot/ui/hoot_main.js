@@ -1,12 +1,12 @@
 /** @odoo-module */
 
 import { Component, useState, xml } from "@odoo/owl";
-import { createUrl } from "../core/url";
-import { useWindowListener } from "../hoot_utils";
+import { createUrl, refresh } from "../core/url";
+import { callHootKey, useHootKey, useWindowListener } from "../hoot_utils";
 import { HootButtons } from "./hoot_buttons";
-import { HootConfigDropdown } from "./hoot_config_dropdown";
+import { HootConfigMenu } from "./hoot_config_menu";
 import { HootDebugToolBar } from "./hoot_debug_toolbar";
-import { HootPresets } from "./hoot_presets";
+import { HootDropdown } from "./hoot_dropdown";
 import { HootReporting } from "./hoot_reporting";
 import { HootSearch } from "./hoot_search";
 import { HootSideBar } from "./hoot_side_bar";
@@ -24,6 +24,31 @@ import { HootStatusPanel } from "./hoot_status_panel";
 const { setTimeout } = globalThis;
 
 //-----------------------------------------------------------------------------
+// Internal
+//-----------------------------------------------------------------------------
+
+// Indenpendant from Hoot style classes since it is not loaded in headless
+const HEADLESS_CONTAINER_STYLE = [
+    "position: absolute",
+    "bottom: 0",
+    "inset-inline-start: 50%",
+    "transform: translateX(-50%)",
+    "display: flex",
+    "z-index: 4",
+    "margin-bottom: 1rem",
+    "padding-left: 1rem",
+    "padding-right: 1rem",
+    "padding-top: 0.5rem",
+    "padding-bottom: 0.5rem",
+    "gap: 0.5rem",
+    "white-space: nowrap",
+    "border-radius: 9999px",
+    "box-shadow: 2px 1px 5px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)",
+    "background-color: #e2e8f0",
+].join(";");
+const HEADLESS_LINK_STYLE = ["color: #714b67", "text-decoration: underline"].join(";");
+
+//-----------------------------------------------------------------------------
 // Exports
 //-----------------------------------------------------------------------------
 
@@ -31,9 +56,9 @@ const { setTimeout } = globalThis;
 export class HootMain extends Component {
     static components = {
         HootButtons,
-        HootConfigDropdown,
+        HootConfigMenu,
         HootDebugToolBar,
-        HootPresets,
+        HootDropdown,
         HootReporting,
         HootSearch,
         HootSideBar,
@@ -43,13 +68,10 @@ export class HootMain extends Component {
     static props = {};
 
     static template = xml`
-        <t t-if="env.runner.config.headless">
-            <div class="absolute bottom-0 start-1/2 -translate-x-1/2
-                flex z-4 mb-4 px-4 py-2 gap-2 whitespace-nowrap
-                text-xl rounded-full shadow bg-gray-200 dark:bg-gray-800"
-            >
+        <t t-if="env.runner.headless">
+            <div style="${HEADLESS_CONTAINER_STYLE}">
                 Running in headless mode
-                <a class="text-primary hoot-link" t-att-href="createUrl({ headless: null })">
+                <a style="${HEADLESS_LINK_STYLE}" t-att-href="createUrl({ headless: null })">
                     Run with UI
                 </a>
             </div>
@@ -69,10 +91,14 @@ export class HootMain extends Component {
                         </h1>
                         <HootButtons />
                         <HootSearch />
-                        <div class="flex gap-1">
-                            <HootPresets />
-                            <HootConfigDropdown />
-                        </div>
+                        <HootDropdown buttonClassName="'bg-btn'">
+                            <t t-set-slot="toggler" t-slot-scope="dropdownState">
+                                <i class="fa fa-cog transition" t-att-class="{ 'rotate-90': dropdownState.open }" />
+                            </t>
+                            <t t-set-slot="menu">
+                                <HootConfigMenu />
+                            </t>
+                        </HootDropdown>
                     </nav>
                 </header>
                 <HootStatusPanel />
@@ -110,47 +136,59 @@ export class HootMain extends Component {
             this.state.debugTest = null;
         });
 
-        useWindowListener("keydown", (ev) => this.onWindowKeyDown(ev));
         useWindowListener("resize", (ev) => this.onWindowResize(ev));
+        useWindowListener("keydown", callHootKey, { capture: true });
+        useHootKey(["Enter"], this.manualStart);
+        useHootKey(["Escape"], this.abort);
+
+        if (!runner.config.headless) {
+            useHootKey(["Alt", "d"], this.toggleDebug);
+        }
     }
 
     /**
      * @param {KeyboardEvent} ev
      */
-    onWindowKeyDown(ev) {
+    abort(ev) {
         const { runner } = this.env;
-        switch (ev.key) {
-            case "d": {
-                if (ev.altKey) {
-                    ev.preventDefault();
-                    runner.config.debugTest = !runner.config.debugTest;
-                }
-                break;
-            }
-            case "Enter": {
-                if (runner.state.status === "ready") {
-                    ev.preventDefault();
-                    runner.start();
-                }
-                break;
-            }
-            case "Escape": {
-                this.escapeKeyPresses++;
-                setTimeout(() => this.escapeKeyPresses--, 500);
+        this.escapeKeyPresses++;
+        setTimeout(() => this.escapeKeyPresses--, 500);
 
-                if (ev.ctrlKey && runner.config.debugTest) {
-                    runner.config.debugTest = false;
-                }
-                if (runner.state.status === "running" && this.escapeKeyPresses >= 2) {
-                    ev.preventDefault();
-                    runner.stop();
-                }
-                break;
-            }
+        if (runner.state.status === "running" && this.escapeKeyPresses >= 2) {
+            ev.preventDefault();
+            runner.stop();
+        }
+    }
+
+    /**
+     * @param {KeyboardEvent} ev
+     */
+    manualStart(ev) {
+        const { runner } = this.env;
+        if (runner.state.status !== "ready") {
+            return;
+        }
+
+        ev.preventDefault();
+
+        if (runner.config.manual) {
+            runner.manualStart();
+        } else {
+            refresh();
         }
     }
 
     onWindowResize() {
         this.env.runner.checkPresetForViewPort();
+    }
+
+    /**
+     * @param {KeyboardEvent} ev
+     */
+    toggleDebug(ev) {
+        ev.preventDefault();
+
+        const { runner } = this.env;
+        runner.config.debugTest = !runner.config.debugTest;
     }
 }

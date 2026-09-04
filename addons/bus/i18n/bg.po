@@ -1,28 +1,29 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* bus
-# 
+# * bus
+#
 # Translators:
-# Albena Mincheva <albena_vicheva@abv.bg>, 2024
-# Maria Boyadjieva <marabo2000@gmail.com>, 2024
-# aleksandar ivanov, 2024
-# KeyVillage, 2024
-# Petko Karamotchev, 2024
-# Milena Georgieva, 2024
-# 
+# Nikola Iliev, 2023
+# Albena Mincheva <albena_vicheva@abv.bg>, 2023
+# aleksandar ivanov, 2023
+# Maria Boyadjieva <marabo2000@gmail.com>, 2023
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 13:03+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Milena Georgieva, 2024\n"
-"Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"POT-Creation-Date: 2026-07-31 17:37+0000\n"
+"PO-Revision-Date: 2026-08-02 12:20+0000\n"
+"Last-Translator: Rosen Vladimirov <vladimirov.rosen@gmail.com>\n"
+"Language-Team: Bulgarian <https://translate.odoo.com/projects/odoo-19/bus/"
+"bg/>\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: bus
 #: model:ir.model,name:bus.model_res_groups
@@ -35,14 +36,9 @@ msgid "Attachment"
 msgstr "Прикачен файл"
 
 #. module: bus
-#: model:ir.model.fields.selection,name:bus.selection__bus_presence__status__away
-msgid "Away"
-msgstr "Извън"
-
-#. module: bus
 #: model:ir.model,name:bus.model_bus_listener_mixin
 msgid "Can send messages via bus.bus"
-msgstr ""
+msgstr "Може да изпраща съобщения чрез bus.bus"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__channel
@@ -52,7 +48,7 @@ msgstr "Канал"
 #. module: bus
 #: model:ir.model,name:bus.model_bus_bus
 msgid "Communication Bus"
-msgstr ""
+msgstr "Комуникационна шина"
 
 #. module: bus
 #: model:ir.model,name:bus.model_res_partner
@@ -60,48 +56,66 @@ msgid "Contact"
 msgstr "Контакт"
 
 #. module: bus
-#: model:ir.model.fields,field_description:bus.field_bus_bus__create_uid
-msgid "Created by"
-msgstr "Създаден от"
+#: model:ir.model.fields,field_description:bus.field_bus_bus__create_date
+msgid "Create Date"
+msgstr ""
 
 #. module: bus
-#: model:ir.model.fields,field_description:bus.field_bus_bus__create_date
-msgid "Created on"
-msgstr "Създадено на"
+#: model:ir.model,website_form_label:bus.model_res_partner
+msgid "Create a Customer"
+msgstr "Създаване на клиент"
+
+#. module: bus
+#: model:ir.model.fields,field_description:bus.field_bus_bus__create_uid
+msgid "Created by"
+msgstr "Създадено от"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__display_name
-#: model:ir.model.fields,field_description:bus.field_bus_presence__display_name
+#: model:ir.model.fields,field_description:bus.field_bus_listener_mixin__display_name
+#: model:ir.model.fields,field_description:bus.field_ir_attachment__display_name
+#: model:ir.model.fields,field_description:bus.field_ir_http__display_name
+#: model:ir.model.fields,field_description:bus.field_ir_model__display_name
+#: model:ir.model.fields,field_description:bus.field_ir_qweb__display_name
+#: model:ir.model.fields,field_description:bus.field_ir_websocket__display_name
+#: model:ir.model.fields,field_description:bus.field_res_groups__display_name
+#: model:ir.model.fields,field_description:bus.field_res_partner__display_name
+#: model:ir.model.fields,field_description:bus.field_res_users__display_name
+#: model:ir.model.fields,field_description:bus.field_res_users_settings__display_name
 msgid "Display Name"
 msgstr "Име за показване"
 
 #. module: bus
+#. odoo-javascript
+#: code:addons/bus/static/src/debug/bus_logs_menu_item.xml:0
+msgid "Download logs"
+msgstr "Изтегляне на журнали"
+
+#. module: bus
+#. odoo-javascript
+#: code:addons/bus/static/src/debug/bus_logs_menu_item.xml:0
+msgid "Enable Bus Logging"
+msgstr "Активиране на логване на шината"
+
+#. module: bus
 #: model:ir.model,name:bus.model_ir_http
 msgid "HTTP Routing"
-msgstr ""
+msgstr "HTTP Маршрутизиране"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__id
-#: model:ir.model.fields,field_description:bus.field_bus_presence__id
+#: model:ir.model.fields,field_description:bus.field_bus_listener_mixin__id
+#: model:ir.model.fields,field_description:bus.field_ir_attachment__id
+#: model:ir.model.fields,field_description:bus.field_ir_http__id
+#: model:ir.model.fields,field_description:bus.field_ir_model__id
+#: model:ir.model.fields,field_description:bus.field_ir_qweb__id
+#: model:ir.model.fields,field_description:bus.field_ir_websocket__id
+#: model:ir.model.fields,field_description:bus.field_res_groups__id
+#: model:ir.model.fields,field_description:bus.field_res_partner__id
+#: model:ir.model.fields,field_description:bus.field_res_users__id
+#: model:ir.model.fields,field_description:bus.field_res_users_settings__id
 msgid "ID"
 msgstr "ID"
-
-#. module: bus
-#: model:ir.model.fields,field_description:bus.field_bus_presence__status
-#: model:ir.model.fields,field_description:bus.field_res_partner__im_status
-#: model:ir.model.fields,field_description:bus.field_res_users__im_status
-msgid "IM Status"
-msgstr "Статус IM "
-
-#. module: bus
-#: model:ir.model.fields,field_description:bus.field_bus_presence__last_poll
-msgid "Last Poll"
-msgstr "Последна анкета"
-
-#. module: bus
-#: model:ir.model.fields,field_description:bus.field_bus_presence__last_presence
-msgid "Last Presence"
-msgstr "Последно присъствие"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__write_uid
@@ -124,14 +138,9 @@ msgid "Models"
 msgstr "Модели"
 
 #. module: bus
-#: model:ir.model.fields.selection,name:bus.selection__bus_presence__status__offline
-msgid "Offline"
-msgstr "Офлайн"
-
-#. module: bus
-#: model:ir.model.fields.selection,name:bus.selection__bus_presence__status__online
-msgid "Online"
-msgstr "Онлайн"
+#: model:ir.model,name:bus.model_ir_qweb
+msgid "Qweb"
+msgstr "Qweb"
 
 #. module: bus
 #. odoo-javascript
@@ -149,19 +158,21 @@ msgid ""
 "Save your work and refresh to get the latest updates and avoid potential "
 "issues."
 msgstr ""
+"Запазете работата си и опреснете, за да получите последните обновления и да "
+"избегнете възможни проблеми."
 
 #. module: bus
 #. odoo-javascript
 #: code:addons/bus/static/src/services/assets_watchdog_service.js:0
 msgid "The page appears to be out of date."
-msgstr ""
+msgstr "Изглежда страницата е остаряла."
 
 #. module: bus
 #. odoo-javascript
 #: code:addons/bus/static/src/outdated_page_watcher_service.js:0
 #: code:addons/bus/static/src/services/bus_service.js:0
 msgid "The page is out of date"
-msgstr ""
+msgstr "Страницата е остаряла"
 
 #. module: bus
 #: model:ir.model,name:bus.model_res_users
@@ -169,30 +180,50 @@ msgid "User"
 msgstr "Потребител"
 
 #. module: bus
-#: model:ir.model,name:bus.model_bus_presence
-msgid "User Presence"
-msgstr "Потребителско присъствие"
-
-#. module: bus
 #: model:ir.model,name:bus.model_res_users_settings
 msgid "User Settings"
 msgstr "Потребителски настройки"
 
 #. module: bus
-#: model:ir.model.fields,field_description:bus.field_bus_presence__user_id
-msgid "Users"
-msgstr "Потребители"
-
-#. module: bus
 #. odoo-python
 #: code:addons/bus/controllers/home.py:0
 msgid ""
-"Your password is the default (admin)! If this system is exposed to untrusted"
-" users it is important to change it immediately for security reasons. I will"
-" keep nagging you about it!"
+"Your password is the default (admin)! If this system is exposed to untrusted "
+"users it is important to change it immediately for security reasons. I will "
+"keep nagging you about it!"
 msgstr ""
+"Паролата ви е по подразбиране (admin)! Ако тази система е достъпна за "
+"недоверени потребители, важно е да я смените незабавно от съображения за "
+"сигурност. Ще продължа да ви напомням за това!"
 
 #. module: bus
 #: model:ir.model,name:bus.model_ir_websocket
 msgid "websocket message handling"
-msgstr ""
+msgstr "обработка на websocket съобщения"
+
+#~ msgid "Created on"
+#~ msgstr "Създадено на"
+
+#~ msgid "Away"
+#~ msgstr "Извън"
+
+#~ msgid "IM Status"
+#~ msgstr "Статус IM "
+
+#~ msgid "Last Poll"
+#~ msgstr "Последна анкета"
+
+#~ msgid "Last Presence"
+#~ msgstr "Последно присъствие"
+
+#~ msgid "Offline"
+#~ msgstr "Офлайн"
+
+#~ msgid "Online"
+#~ msgstr "Онлайн"
+
+#~ msgid "User Presence"
+#~ msgstr "Потребителско присъствие"
+
+#~ msgid "Users"
+#~ msgstr "Потребители"

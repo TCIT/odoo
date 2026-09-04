@@ -1,26 +1,24 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import json
+import logging
+from importlib import metadata
 from io import StringIO
 from socket import gethostbyname
 from unittest.mock import patch
 
 import odoo
-from odoo.http import root, content_disposition
-from odoo.tests import tagged
-from odoo.tests.common import HOST, new_test_user, get_db_name, BaseCase
-from odoo.tools import config, file_path, parse_version
-from odoo.addons.test_http.controllers import CT_JSON
+from odoo.http import content_disposition, root
+from odoo.tests import Like, tagged
+from odoo.tests.common import HOST, BaseCase, get_db_name, new_test_user
+from odoo.tools import config, file_path, mute_logger, parse_version
 
-from odoo.addons.test_http.utils import TEST_IP
 from .test_common import TestHttpBase
+from odoo.addons import test_http
+from odoo.addons.test_http.controllers import CT_JSON
+from odoo.addons.test_http.utils import TEST_IP
 
-try:
-    from importlib import metadata
-    werkzeug_version = metadata.version('werkzeug')
-except ImportError:
-    import werkzeug
-    werkzeug_version = werkzeug.__version__
+werkzeug_version = metadata.version('werkzeug')
 
 
 @tagged('post_install', '-at_install')
@@ -99,7 +97,8 @@ class TestHttpMisc(TestHttpBase):
 
         for method in (self.db_url_open, self.nodb_url_open):
             with self.subTest(method=method.__name__):
-                res = method('/jsonrpc', data=payload, headers=CT_JSON)
+                with mute_logger('odoo.addons.rpc.controllers.jsonrpc'):
+                    res = method('/jsonrpc', data=payload, headers=CT_JSON)
                 res.raise_for_status()
 
                 res_rpc = res.json()
@@ -140,25 +139,39 @@ class TestHttpMisc(TestHttpBase):
             })
 
     def test_misc6_upload_file_retry(self):
-        from odoo.addons.test_http import controllers  # pylint: disable=C0415
-
-        with patch.object(controllers, "should_fail", True), StringIO("Hello world!") as file:
-            res = self.url_open("/test_http/upload_file", files={"ufile": file}, timeout=None)
-            self.assertEqual(res.status_code, 200)
+        file = StringIO("Hello world!")
+        with patch.object(test_http.controllers, 'should_fail', True):
+            res = self.url_open('/test_http/upload_file', files={'ufile': file})
+            res.raise_for_status()
             self.assertEqual(res.text, file.getvalue())
 
     def test_misc7_robotstxt(self):
         self.nodb_url_open('/robots.txt').raise_for_status()
 
+    def test_misc8_concurrency_error(self):
+        with (
+            self.assertLogs('odoo.service.model') as log_catcher,
+            patch.object(test_http.controllers, 'should_fail', True),
+        ):
+            self.url_open('/test_http/concurrency_error').raise_for_status()
+        self.assertIn("A dummy concurrency error occurred", log_catcher.output[0])
+
+    def test_misc9_webversion(self):
+        res = self.nodb_url_open('/web/version')
+        res.raise_for_status()
+        self.assertEqual(res.headers.get('Content-Type'), 'application/json; charset=utf-8')
+        self.assertEqual(set(res.json()), {'version', 'version_info'})
+
+
 @tagged('post_install', '-at_install')
 class TestHttpCors(TestHttpBase):
     def test_cors0_http_default(self):
-        res_opt = self.opener.options(f'{self.base_url()}/test_http/cors_http_default', timeout=10, allow_redirects=False)
+        res_opt = self.url_open(f'{self.base_url()}/test_http/cors_http_default', timeout=10, method='OPTIONS')
         self.assertIn(res_opt.status_code, (200, 204))
         self.assertEqual(res_opt.headers.get('Access-Control-Allow-Origin'), '*')
         self.assertEqual(res_opt.headers.get('Access-Control-Allow-Methods'), 'GET, POST')
         self.assertEqual(res_opt.headers.get('Access-Control-Max-Age'), '86400')  # one day
-        self.assertEqual(res_opt.headers.get('Access-Control-Allow-Headers'), 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
+        self.assertEqual(res_opt.headers.get('Access-Control-Allow-Headers'), 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Range')
 
         res_get = self.url_open('/test_http/cors_http_default')
         self.assertEqual(res_get.status_code, 200)
@@ -166,12 +179,12 @@ class TestHttpCors(TestHttpBase):
         self.assertEqual(res_get.headers.get('Access-Control-Allow-Methods'), 'GET, POST')
 
     def test_cors1_http_methods(self):
-        res_opt = self.opener.options(f'{self.base_url()}/test_http/cors_http_methods', timeout=10, allow_redirects=False)
+        res_opt = self.url_open(f'{self.base_url()}/test_http/cors_http_methods', timeout=10, method='OPTIONS')
         self.assertIn(res_opt.status_code, (200, 204))
         self.assertEqual(res_opt.headers.get('Access-Control-Allow-Origin'), '*')
         self.assertEqual(res_opt.headers.get('Access-Control-Allow-Methods'), 'GET, PUT')
         self.assertEqual(res_opt.headers.get('Access-Control-Max-Age'), '86400')  # one day
-        self.assertEqual(res_opt.headers.get('Access-Control-Allow-Headers'), 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
+        self.assertEqual(res_opt.headers.get('Access-Control-Allow-Headers'), 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Range')
 
         res_post = self.url_open('/test_http/cors_http_methods')
         self.assertEqual(res_post.status_code, 200)
@@ -179,12 +192,12 @@ class TestHttpCors(TestHttpBase):
         self.assertEqual(res_post.headers.get('Access-Control-Allow-Methods'), 'GET, PUT')
 
     def test_cors2_json(self):
-        res_opt = self.opener.options(f'{self.base_url()}/test_http/cors_json', timeout=10, allow_redirects=False)
+        res_opt = self.url_open(f'{self.base_url()}/test_http/cors_json', timeout=10, method='OPTIONS')
         self.assertIn(res_opt.status_code, (200, 204), res_opt.text)
         self.assertEqual(res_opt.headers.get('Access-Control-Allow-Origin'), '*')
         self.assertEqual(res_opt.headers.get('Access-Control-Allow-Methods'), 'POST')
         self.assertEqual(res_opt.headers.get('Access-Control-Max-Age'), '86400')  # one day
-        self.assertEqual(res_opt.headers.get('Access-Control-Allow-Headers'), 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
+        self.assertEqual(res_opt.headers.get('Access-Control-Allow-Headers'), 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Range')
 
         res_post = self.url_open('/test_http/cors_json', data=json.dumps({'params': {}}), headers=CT_JSON)
         self.assertEqual(res_post.status_code, 200)
@@ -245,7 +258,7 @@ class TestHttpEnsureDb(TestHttpBase):
         self.assertEqual(new_session.uid, None)
 
         # follow redirection
-        self.opener.cookies['session_id'] = new_session.sid
+        self.opener.cookies.set("session_id", new_session.sid, domain=HOST)
         res = self.multidb_url_open('/test_http/ensure_db')
         res.raise_for_status()
         self.assertEqual(res.status_code, 200)
@@ -296,3 +309,32 @@ class TestContentDisposition(BaseCase):
         ]
         for filename, pct_encoded, hint in assertions:
             self.assertEqual(content_disposition(filename), f"attachment; filename*=UTF-8''{pct_encoded}", f'{hint} should be percent encoded')
+
+
+@tagged('-at_install', 'post_install')
+class TestFragmentToQueryString(TestHttpBase):
+    def test_fragment_to_query_string(self):
+        # This tests several behavior of `fragment_to_query_string`.
+        # To avoid starting a chrome headless client for each test,
+        # we plug the controllers into each other via
+        # `request.redirect`.
+        # The real tests happens in the controllers.
+        fake_success = "console.log('test successful')"
+        test_start = '/test_http/f2qs/step1/no-operation-to-perform?race=Asgard'
+        with self.assertLogs(
+            'odoo.addons.test_http.controllers.test_fragment_to_query_string',
+            logging.INFO,
+        ) as capture:
+            self.browser_js(test_start, fake_success)
+
+        # Ensure all controllers ran
+        self.assertEqual(
+            [
+                Like('...step 1: passed...'),
+                Like('...step 2: passed...'),
+                Like('...step 3: passed...'),
+                Like('...step 4: passed...'),
+            ],
+            capture.output,
+            "It seems all the controller testing fragment_to_query_string weren't run.",
+        )

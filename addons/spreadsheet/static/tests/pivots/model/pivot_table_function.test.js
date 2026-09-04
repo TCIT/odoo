@@ -35,7 +35,7 @@ test("full PIVOT() values", async function () {
     setCellContent(model, "A1", `=PIVOT("1")`, "42");
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A1:D7", "42")).toEqual([
-        ["(#1) Partner Pivot",    "xphone",       "xpad",         "Total"],
+        ["Partner Pivot",         "xphone",       "xpad",         "Total"],
         ["",            "Probability",  "Probability",  "Probability"],
         [1,             "",             11,             11],
         [2,             "",             15,             15],
@@ -63,7 +63,7 @@ test("PIVOT(row_count=1)", async function () {
     setCellContent(model, "A1", `=PIVOT("1", 1)`, "42");
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A1:D4", "42")).toEqual([
-        ["(#1) Partner Pivot",  "xphone",       "xpad",         "Total"],
+        ["Partner Pivot",       "xphone",       "xpad",         "Total"],
         ["",                    "Probability",  "Probability",  "Probability"],
         [1,                     "",             11,             11],
         [null,                  null,           null,           null],
@@ -74,7 +74,7 @@ test("PIVOT(row_count=0)", async function () {
     setCellContent(model, "A1", `=PIVOT("1", 0)`, "42");
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A1:D3", "42")).toEqual([
-        ["(#1) Partner Pivot",  "xphone",       "xpad",         "Total"],
+        ["Partner Pivot",       "xphone",       "xpad",         "Total"],
         ["",                    "Probability",  "Probability",  "Probability"],
         [null,                  null,           null,           null],
     ]);
@@ -89,7 +89,7 @@ test("PIVOT(negative row_count)", async function () {
 });
 
 test("PIVOT(include_column_titles=FALSE)", async function () {
-    setCellContent(model, "A1", `=PIVOT("1",,,FALSE)`, "42");
+    setCellContent(model, "A1", `=PIVOT("1",,,FALSE,,FALSE)`, "42");
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A1:D5", "42")).toEqual([
         [1,         "",             11,             11],
@@ -111,7 +111,7 @@ test("PIVOT(include_total=FALSE) with no groupbys applied", async function () {
     setCellContent(model, "A1", `=PIVOT("1",,FALSE)`, "42");
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A1:B3", "42")).toEqual([
-            ["(#1) Partner Pivot",  "Total"],
+            ["Partner Pivot",       "Total"],
             ["",                    "Probability"],
             ["Total",               131],
         ]);
@@ -129,7 +129,7 @@ test("PIVOT(include_total=FALSE) with multiple measures and no groupbys applied"
     setCellContent(model, "A1", `=PIVOT("1",,FALSE)`, "42");
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A1:C3", "42")).toEqual([
-            ["(#1) Partner Pivot",  "Total",        ""],
+            ["Partner Pivot",       "Total",        ""],
             ["",                    "Probability",  "Foo"],
             ["Total",               131,            32],
         ]);
@@ -147,7 +147,7 @@ test("PIVOT(include_total=FALSE) with only row groupby applied", async function 
     setCellContent(model, "A1", `=PIVOT("1",,FALSE)`, "42");
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A1:C7", "42")).toEqual([
-            ["(#1) Partner Pivot",  "Total",        null],
+            ["Partner Pivot",       "Total",        null],
             ["",                    "Probability",  null],
             [1,                     11,             null],
             [2,                     15,             null],
@@ -155,6 +155,36 @@ test("PIVOT(include_total=FALSE) with only row groupby applied", async function 
             [17,                    95,             null],
             [null,                  null,           null],
         ]);
+});
+
+test("sorted PIVOT(include_total=FALSE) with only row groupby applied", async function () {
+    const { model } = await createSpreadsheetWithPivot({
+        arch: /* xml */ `
+        <pivot>
+            <field name="foo" type="row"/>
+            <field name="probability" type="measure"/>
+        </pivot>`,
+    });
+    const [pivotId] = model.getters.getPivotIds();
+    updatePivot(model, pivotId, {
+        sortedColumn: {
+            domain: [],
+            order: "desc",
+            measure: "probability:avg",
+        },
+    });
+    model.dispatch("CREATE_SHEET", { sheetId: "42" });
+    setCellContent(model, "A1", `=PIVOT("1",,FALSE)`, "42");
+    // prettier-ignore
+    expect(getEvaluatedGrid(model, "A1:C7", "42")).toEqual([
+        ["Partner Pivot",       "Total",        null],
+        ["",                    "Probability",  null],
+        [17,                    95,             null],
+        [2,                     15,             null],
+        [1,                     11,             null],
+        [12,                    10,             null],
+        [null,                  null,           null],
+    ]);
 });
 
 test("PIVOT(include_total=FALSE) with multiple measures and only row groupby applied", async function () {
@@ -170,7 +200,7 @@ test("PIVOT(include_total=FALSE) with multiple measures and only row groupby app
     setCellContent(model, "A1", `=PIVOT("1",,FALSE)`, "42");
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A1:D5", "42")).toEqual([
-            ["(#1) Partner Pivot",      "Total",            "",        null],
+            ["Partner Pivot",           "Total",            "",        null],
             ["",                        "Probability",      "Foo",     null],
             ["xphone",                  10,                 12,        null],
             ["xpad",                    121,                20,        null],
@@ -190,7 +220,7 @@ test("PIVOT(include_total=FALSE) with only col groupby applied", async function 
     setCellContent(model, "A1", `=PIVOT("1",,FALSE)`, "42");
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A1:D4", "42")).toEqual([
-            ["(#1) Partner Pivot",     "xphone",          "xpad",            null],
+            ["Partner Pivot",          "xphone",          "xpad",            null],
             ["",                       "Probability",     "Probability",     null],
             ["Total",                  10,                121,               null],
             [null,                     null,              null,              null],
@@ -198,7 +228,7 @@ test("PIVOT(include_total=FALSE) with only col groupby applied", async function 
 });
 
 test("PIVOT(include_total=FALSE, include_column_titles=FALSE)", async function () {
-    setCellContent(model, "A1", `=PIVOT("1",,FALSE,FALSE)`, "42");
+    setCellContent(model, "A1", `=PIVOT("1",,FALSE,FALSE,,FALSE)`, "42");
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A1:D5", "42")).toEqual([
             [1,         "",             11,             null],
@@ -210,7 +240,7 @@ test("PIVOT(include_total=FALSE, include_column_titles=FALSE)", async function (
 });
 
 test("PIVOT(row_count=1, include_total=FALSE, include_column_titles=FALSE)", async function () {
-    setCellContent(model, "A1", `=PIVOT("1",1,FALSE,FALSE)`, "42");
+    setCellContent(model, "A1", `=PIVOT("1",1,FALSE,FALSE,,FALSE)`, "42");
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A1:D2", "42")).toEqual([
             [1,         "",             11,             null],
@@ -219,18 +249,18 @@ test("PIVOT(row_count=1, include_total=FALSE, include_column_titles=FALSE)", asy
 });
 
 test("PIVOT(row_count=0, include_total=FALSE, include_column_titles=FALSE)", async function () {
-    setCellContent(model, "A1", `=PIVOT("1",0,FALSE,FALSE)`, "42");
+    setCellContent(model, "A1", `=PIVOT("1",0,FALSE,FALSE,,FALSE)`, "42");
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A1:D1", "42")).toEqual([
-            ["(#1) Partner Pivot", null, null, null],
+            ["Partner Pivot",      null, null, null],
         ]);
 });
 
 test("PIVOT(row_count=0, include_total=TRUE, include_column_titles=FALSE)", async function () {
-    setCellContent(model, "A1", `=PIVOT("1",0,TRUE,FALSE)`, "42");
+    setCellContent(model, "A1", `=PIVOT("1",0,TRUE,FALSE,,FALSE)`, "42");
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A1:D1", "42")).toEqual([
-            ["(#1) Partner Pivot", null, null, null],
+            ["Partner Pivot",      null, null, null],
         ]);
 });
 
@@ -248,49 +278,49 @@ test("PIVOT with multiple row groups", async function () {
     // values in the first sheet from the individual pivot functions
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A1:D11", firstSheetId)).toEqual([
-        [null,          "xphone",       "xpad",         "Total"],
-        [null,         "Probability",  "Probability",  "Probability"],
-        [1,             "",             11,             11],
-        [2,             "",             11,             11],
-        [2,             "",             15,             15],
-        [4,             "",             15,             15],
-        [12,            10,             "",             10],
-        [1,             10,             "",             10],
-        [17,            "",             95,             95],
-        [3,             "",             95,             95],
-        ["Total",       10,             121,              131],
+        ["Partner Pivot",      "xphone",       "xpad",         "Total"],
+        ["",                   "Probability",  "Probability",  "Probability"],
+        [1,                     "",             11,             11],
+        ["Steven",              "",             11,             11],
+        [2,                     "",             15,             15],
+        ["Zara",                "",             15,             15],
+        [12,                    10,             "",             10],
+        ["Raoul",               10,             "",             10],
+        [17,                    "",             95,             95],
+        ["Taylor",              "",             95,             95],
+        ["Total",               10,             121,            131],
     ]);
     model.dispatch("CREATE_SHEET", { sheetId: "42" });
     setCellContent(model, "A1", `=PIVOT("1")`, "42");
     // values from the PIVOT function
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A1:D11", "42")).toEqual([
-        ["(#1) Partner Pivot",  "xphone",       "xpad",         "Total"],
+        ["Partner Pivot",       "xphone",       "xpad",         "Total"],
         ["",                    "Probability",  "Probability",  "Probability"],
         [1,                     "",             11,             11],
-        [2,                     "",             11,             11],
+        ["Steven",              "",             11,             11],
         [2,                     "",             15,             15],
-        [4,                     "",             15,             15],
+        ["Zara",                "",             15,             15],
         [12,                    10,             "",             10],
-        [1,                     10,             "",             10],
+        ["Raoul",               10,             "",             10],
         [17,                    "",             95,             95],
-        [3,                     "",             95,             95],
-        ["Total",               10,             121,              131],
+        ["Taylor",              "",             95,             95],
+        ["Total",               10,             121,            131],
     ]);
     setCellContent(model, "A1", `=PIVOT("1",,FALSE)`, "42");
     // values from the PIVOT function without any group totals
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A1:D11", "42")).toEqual([
-        ["(#1) Partner Pivot", "xphone",       "xpad",         null],
+        ["Partner Pivot",      "xphone",       "xpad",         null],
         ["",                   "Probability",  "Probability",  null],
         [1,                    "",             "",             null], // group header but without total values
-        [2,                    "",             11,             null],
+        ["Steven",             "",             11,             null],
         [2,                    "",             "",             null], // group header but without total values
-        [4,                    "",             15,             null],
+        ["Zara",               "",             15,             null],
         [12,                   "",             "",             null], // group header but without total values
-        [1,                    10,             "",             null],
+        ["Raoul",              10,             "",             null],
         [17,                   "",             "",             null], // group header but without total values
-        [3,                    "",             95,             null],
+        ["Taylor",             "",             95,             null],
         [null,                 null,           null,           null],
     ]);
 });
@@ -300,7 +330,7 @@ test("edit pivot groups", async function () {
     const originalGrid = getEvaluatedGrid(model, "A1:D7", "42");
     // prettier-ignore
     expect(originalGrid).toEqual([
-        ["(#1) Partner Pivot",    "xphone",       "xpad",         "Total"],
+        ["Partner Pivot",         "xphone",       "xpad",         "Total"],
         ["",            "Probability",  "Probability",  "Probability"],
         [1,             "",             11,             11],
         [2,             "",             15,             15],
@@ -320,7 +350,7 @@ test("edit pivot groups", async function () {
     await animationFrame();
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A1:B3", "42")).toEqual([
-        ["(#1) Partner Pivot",  "Total"],
+        ["Partner Pivot",       "Total"],
         ["",                    "Probability"],
         ["Total",               131],
     ]);
@@ -332,12 +362,12 @@ test("edit pivot groups", async function () {
 test("Renaming the pivot reevaluates the PIVOT function", async function () {
     const pivotId = model.getters.getPivotIds()[0];
     setCellContent(model, "A1", `=PIVOT("1")`, "42");
-    expect(getEvaluatedCell(model, "A1", "42").value).toBe("(#1) Partner Pivot");
+    expect(getEvaluatedCell(model, "A1", "42").value).toBe("Partner Pivot");
     model.dispatch("RENAME_PIVOT", {
         pivotId,
         name: "New Name",
     });
-    expect(getEvaluatedCell(model, "A1", "42").value).toBe("(#1) New Name");
+    expect(getEvaluatedCell(model, "A1", "42").value).toBe("New Name");
 });
 
 test("can hide a measure", async function () {
@@ -351,7 +381,7 @@ test("can hide a measure", async function () {
     setCellContent(model, "A10", '=PIVOT("1")');
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A10:C12")).toEqual([
-        ["(#1) Partner Pivot",      "Total",            "",],
+        ["Partner Pivot",           "Total",            "",],
         ["",                        "Probability",      "Foo"],
         ["Total",                   131,                32],
     ]);
@@ -363,8 +393,25 @@ test("can hide a measure", async function () {
     await animationFrame();
     // prettier-ignore
     expect(getEvaluatedGrid(model, "A10:C12")).toEqual([
-        ["(#1) Partner Pivot",      "Total",    null],
+        ["Partner Pivot",           "Total",    null],
         ["",                        "Foo",      null],
         ["Total",                   32,         null],
+    ]);
+});
+
+test("can have a dimension with a field of a relational field", async function () {
+    const { model, pivotId } = await createSpreadsheetWithPivot();
+    updatePivot(model, pivotId, {
+        rows: [{ fieldName: "product_id.display_name", order: "asc" }],
+        columns: [],
+    });
+    await animationFrame();
+    // prettier-ignore
+    expect(getEvaluatedGrid(model, "A1:B5")).toEqual([
+        ["Partner Pivot", "Total"],
+        ["",              "Probability"],
+        ["xpad",          121],
+        ["xphone",        10],
+        ["Total",         131],
     ]);
 });

@@ -1,30 +1,23 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* spreadsheet_dashboard_pos_hr
-# 
-# Translators:
-# Maria Boyadjieva <marabo2000@gmail.com>, 2024
-# KeyVillage, 2024
-# Ivan Ivanov, 2024
-# aleksandar ivanov, 2024
-# Martin Trigaux, 2024
-# Albena Mincheva <albena_vicheva@abv.bg>, 2024
-# Rumena Georgieva <rumena.georgieva@gmail.com>, 2024
-# Petko Karamotchev, 2024
-# 
+# * spreadsheet_dashboard_pos_hr
+#
+# Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:49+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Petko Karamotchev, 2024\n"
-"Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-05 04:42+0000\n"
+"Last-Translator: Rosen Vladimirov <vladimirov.rosen@gmail.com>\n"
+"Language-Team: Bulgarian <https://translate.odoo.com/projects/odoo-19/"
+"spreadsheet_dashboard_pos_hr/bg/>\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
@@ -42,14 +35,12 @@ msgstr "Настоящ"
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Customer"
 msgstr "Клиент"
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Date"
 msgstr "Дата"
@@ -115,7 +106,7 @@ msgstr "Продукт"
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Responsible"
-msgstr "Отговорен"
+msgstr "Отговорно лице"
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
@@ -147,10 +138,9 @@ msgstr "Топ поръчки"
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Top Points of Sale"
-msgstr ""
+msgstr "Топ центрове за продажби"
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
@@ -164,7 +154,7 @@ msgstr "Топ продукти"
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Top Responsibles"
-msgstr ""
+msgstr "Топ отговорни лица"
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
@@ -175,10 +165,9 @@ msgstr "Топ сесии"
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Total"
-msgstr "Обща стойност"
+msgstr "Общо"
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript

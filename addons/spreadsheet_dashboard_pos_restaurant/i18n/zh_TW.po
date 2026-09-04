@@ -1,25 +1,26 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* spreadsheet_dashboard_pos_restaurant
-# 
+# * spreadsheet_dashboard_pos_restaurant
+#
 # Translators:
-# Tiffany Chang, 2024
-# Wil Odoo, 2024
-# Tony Ng, 2024
-# 
+# Wil Odoo, 2025
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:49+0000\n"
-"PO-Revision-Date: 2024-09-29 00:00+0000\n"
-"Last-Translator: Tony Ng, 2024\n"
-"Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-06 11:33+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
+"projects/odoo-19/spreadsheet_dashboard_pos_restaurant/zh_Hant/>\n"
+"Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
@@ -57,7 +58,7 @@ msgstr "平均折扣"
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Average net revenue / sitting "
-msgstr "平均每次用餐淨收入"
+msgstr "平均每次用餐淨收入 "
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
@@ -95,8 +96,21 @@ msgstr "平均每張訂單稅前收入"
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
+msgid "Avg revenue per guest"
+msgstr ""
+
+#. module: spreadsheet_dashboard_pos_restaurant
+#. odoo-javascript
+#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
+#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
+msgid "Avg revenue per order"
+msgstr ""
+
+#. module: spreadsheet_dashboard_pos_restaurant
+#. odoo-javascript
+#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Category "
-msgstr "類別"
+msgstr "類別 "
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
@@ -134,7 +148,6 @@ msgstr "每小時總收入"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Margin"
 msgstr "毛利"
@@ -153,7 +166,6 @@ msgstr "淨收入"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Orders"
 msgstr "訂單"
@@ -171,10 +183,9 @@ msgstr "產品"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Product "
-msgstr "產品"
+msgstr "產品 "
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
@@ -184,21 +195,18 @@ msgstr "產品分類"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Quantity"
 msgstr "數量"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Quantity Sold"
 msgstr "已售數量"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Responsible"
 msgstr "負責人"
@@ -212,10 +220,9 @@ msgstr "收入"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Revenue "
-msgstr "收入"
+msgstr "收入 "
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
@@ -233,7 +240,6 @@ msgstr "按小時收入"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Table"
 msgstr "餐桌"
@@ -247,14 +253,12 @@ msgstr "時間"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Tip"
 msgstr "小費"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Top 15 Products per Category"
 msgstr "15 大最暢銷產品，按類別劃分"
@@ -291,20 +295,6 @@ msgstr "總收入"
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
-msgid "Total revenue per guest"
-msgstr "每位客人的總收入"
-
-#. module: spreadsheet_dashboard_pos_restaurant
-#. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
-msgid "Total revenue per order"
-msgstr "訂單總收入"
-
-#. module: spreadsheet_dashboard_pos_restaurant
-#. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Untaxed revenue"
 msgstr "稅前收入"
 
@@ -327,3 +317,9 @@ msgstr "每張訂單的稅前收入"
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 msgid "Waiter"
 msgstr "侍應"
+
+#~ msgid "Total revenue per guest"
+#~ msgstr "每位客人的總收入"
+
+#~ msgid "Total revenue per order"
+#~ msgstr "訂單總收入"

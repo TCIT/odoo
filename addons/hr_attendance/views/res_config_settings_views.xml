@@ -12,21 +12,24 @@
                         <setting string="Kiosk Mode" company_dependent="1" help="Define the way the user will be identified by the application.">
                             <field name="attendance_kiosk_mode" required="1" class="w-75"/>
                             <div>
-                                <a href="https://www.odoo.com/documentation/master/applications/hr/attendances/hardware.html"
+                                <a href="https://www.odoo.com/documentation/latest/applications/hr/attendances/hardware.html"
                                     target="_blank"><i class="fa fa-fw fa-arrow-right"/>Installation Manual</a>
                             </div>
                         </setting>
                         <setting string="Attendances from Backend" company_dependent="1" help="Allow Users to Check in/out from Odoo.">
                             <field name="attendance_from_systray" required="1"/>
                         </setting>
-                        <setting string="Automatic Check-Out" company_dependent="1" help="Automatically Check-Out Employees based on their working schedule with an additional tolerance.">
+                        <setting string="Automatic Check-Out" company_dependent="1" help="Automatically Check-Out Employees based on their working schedule with an additional tolerance. Does not apply to employees with a flexible working schedule.">
                             <field name="auto_check_out"/>
                             <div invisible="not auto_check_out">
                                 <span class="me-2">Tolerance</span><field name="auto_check_out_tolerance" class="text-center" style="width: 5ch;"/><span class="ms-2">Hours</span>
                             </div>
                         </setting>
-                        <setting string="Absence Management" company_dependent="1" help="If checked, days not covered by an attendance will be visible in the Report.">
+                        <setting string="Absence Management" company_dependent="1" help="If checked, days not covered by an attendance will be visible in the Report. Does not apply to employees with a flexible working schedule.">
                             <field name="absence_management"/>
+                        </setting>
+                        <setting string="Device &amp; Location Tracking" company_dependent="1" help="Allow the collection of GPS location, IP address, and browser/device details used to track employee access and attendance">
+                            <field name="attendance_device_tracking"/>
                         </setting>
                     </block>
                     <block title="Kiosk Settings">
@@ -45,7 +48,8 @@
                         </setting>
                     </block>
                     <block title="Extra Hours" name="overtime_settings">
-                        <setting company_dependent="1">
+                        <!-- TODO: Remove the tolerance settings in master -->
+                        <setting company_dependent="1" invisible="1">
                             <div class="mt16">
                                 <label for="overtime_company_threshold" class="o_form_label">
                                     Tolerance Time In Favor Of Company
@@ -81,10 +85,8 @@
         <field name="name">Settings</field>
         <field name="res_model">res.config.settings</field>
         <field name="view_mode">form</field>
-        <field name="target">inline</field>
         <field name="context">{'module' : 'hr_attendance', 'bin_size': False}</field>
     </record>
 
-    <menuitem id="hr_attendance.menu_hr_attendance_settings" name="Configuration" parent="menu_hr_attendance_root"
-        sequence="99" action="action_hr_attendance_settings" groups="hr_attendance.group_hr_attendance_manager"/>
+    <menuitem id="menu_hr_attendance_settings" name="Settings" parent="menu_hr_attendance_configuration" sequence="10" action="action_hr_attendance_settings" groups="hr_attendance.group_hr_attendance_manager"/>
 </odoo>

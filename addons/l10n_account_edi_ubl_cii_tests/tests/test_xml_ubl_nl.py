@@ -23,7 +23,7 @@ class TestUBLNL(TestUBLCommon):
             'phone': '+31 180 6 225789',
             'email': 'info@outlook.nl',
             'country_id': cls.env.ref('base.nl').id,
-            'bank_ids': [(0, 0, {'acc_number': 'NL000099998B57'})],
+            'bank_ids': [(0, 0, {'acc_number': 'NL000099998B57', 'allow_out_payment': True})],
             'peppol_eas': '0106',
             'peppol_endpoint': '77777677',
             'ref': 'ref_partner_1',
@@ -37,9 +37,10 @@ class TestUBLNL(TestUBLCommon):
             'city': "Rotterdam",
             'vat': 'NL41452B11',
             'country_id': cls.env.ref('base.nl').id,
-            'bank_ids': [(0, 0, {'acc_number': 'NL93999574162167'})],
-            'peppol_eas': '0106',
-            'peppol_endpoint': '1234567',
+            'bank_ids': [(0, 0, {'acc_number': 'NL93999574162167', 'allow_out_payment': True})],
+            'peppol_eas': '9944',
+            'peppol_endpoint': 'NL41452B11',
+            'company_registry': '123456789',
             'ref': 'ref_partner_2',
             'invoice_edi_format': 'nlcius',
         })
@@ -91,6 +92,10 @@ class TestUBLNL(TestUBLCommon):
     ####################################################
 
     def test_export_import_invoice(self):
+        company = self.company_data['company']
+        if "predict_bill_product" in company._fields:
+            company.predict_bill_product = True
+
         invoice = self._generate_move(
             self.partner_1,
             self.partner_2,
@@ -124,19 +129,19 @@ class TestUBLNL(TestUBLCommon):
             invoice.ubl_cii_xml_id,
             xpaths=f'''
                 <xpath expr="./*[local-name()='ID']" position="replace">
-                    <ID>___ignore___</ID>
+                    <cbc:ID xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">___ignore___</cbc:ID>
                 </xpath>
                 <xpath expr=".//*[local-name()='InvoiceLine'][1]/*[local-name()='ID']" position="replace">
-                    <ID>___ignore___</ID>
+                    <cbc:ID xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">___ignore___</cbc:ID>
                 </xpath>
                 <xpath expr=".//*[local-name()='InvoiceLine'][2]/*[local-name()='ID']" position="replace">
-                    <ID>___ignore___</ID>
+                    <cbc:ID xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">___ignore___</cbc:ID>
                 </xpath>
                 <xpath expr=".//*[local-name()='InvoiceLine'][3]/*[local-name()='ID']" position="replace">
-                    <ID>___ignore___</ID>
+                    <cbc:ID xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">___ignore___</cbc:ID>
                 </xpath>
                 <xpath expr=".//*[local-name()='PaymentMeans']/*[local-name()='PaymentID']" position="replace">
-                    <PaymentID>___ignore___</PaymentID>
+                    <cbc:PaymentID xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">___ignore___</cbc:PaymentID>
                 </xpath>
                 <xpath expr=".//*[local-name()='AdditionalDocumentReference']/*[local-name()='Attachment']/*[local-name()='EmbeddedDocumentBinaryObject']" position="attributes">
                     <attribute name="mimeCode">application/pdf</attribute>
@@ -149,6 +154,10 @@ class TestUBLNL(TestUBLCommon):
         self._assert_imported_invoice_from_etree(invoice, attachment)
 
     def test_export_import_refund(self):
+        company = self.company_data['company']
+        if "predict_bill_product" in company._fields:
+            company.predict_bill_product = True
+
         refund = self._generate_move(
             self.partner_1,
             self.partner_2,
@@ -182,19 +191,19 @@ class TestUBLNL(TestUBLCommon):
             refund.ubl_cii_xml_id,
             xpaths=f'''
                 <xpath expr="./*[local-name()='ID']" position="replace">
-                    <ID>___ignore___</ID>
+                    <cbc:ID xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">___ignore___</cbc:ID>
                 </xpath>
                 <xpath expr=".//*[local-name()='CreditNoteLine'][1]/*[local-name()='ID']" position="replace">
-                    <ID>___ignore___</ID>
+                    <cbc:ID xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">___ignore___</cbc:ID>
                 </xpath>
                 <xpath expr=".//*[local-name()='CreditNoteLine'][2]/*[local-name()='ID']" position="replace">
-                    <ID>___ignore___</ID>
+                    <cbc:ID xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">___ignore___</cbc:ID>
                 </xpath>
                 <xpath expr=".//*[local-name()='CreditNoteLine'][3]/*[local-name()='ID']" position="replace">
-                    <ID>___ignore___</ID>
+                    <cbc:ID xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">___ignore___</cbc:ID>
                 </xpath>
                 <xpath expr=".//*[local-name()='PaymentMeans']/*[local-name()='PaymentID']" position="replace">
-                    <PaymentID>___ignore___</PaymentID>
+                    <cbc:PaymentID xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">___ignore___</cbc:PaymentID>
                 </xpath>
                 <xpath expr=".//*[local-name()='AdditionalDocumentReference']/*[local-name()='Attachment']/*[local-name()='EmbeddedDocumentBinaryObject']" position="attributes">
                     <attribute name="mimeCode">application/pdf</attribute>

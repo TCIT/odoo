@@ -1,39 +1,35 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_customer
-# 
-# Translators:
-# Wil Odoo, 2024
-# Fernanda Alvarez, 2024
-# Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2024
-# 
+# * website_customer
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Fernanda Alvarez (mfar)" <mfar@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2024\n"
-"Language-Team: Spanish (Latin America) (https://app.transifex.com/odoo/teams/41243/es_419/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-06 22:31+0000\n"
+"Last-Translator: \"Fernanda Alvarez (mfar)\" <mfar@odoo.com>\n"
+"Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
+"odoo-19/website_customer/es_419/>\n"
+"Language: es_419\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: es_419\n"
-"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
-
-#. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.details
-msgid "<i class=\"fa fa-chevron-left me-2\"/>Back to references"
-msgstr "<i class=\"fa fa-chevron-left me-2\"/>Volver a las referencias"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
 msgid ""
 "<i class=\"fa fa-info-circle me-2\"/>\n"
-"                        There are no matching customers found for the selected country. Displaying results across all countries instead."
+"                        There are no matching customers found for the "
+"selected country. Displaying results across all countries instead."
 msgstr ""
 "<i class=\"fa fa-info-circle me-2\"/>\n"
-"                No hay clientes que coincidan con el país seleccionado. Le mostramos los resultados de todos los países."
+"                No hay clientes que coincidan con el país seleccionado. Le "
+"mostramos los resultados de todos los países."
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.opt_country
@@ -43,6 +39,11 @@ msgid ""
 msgstr ""
 "<i class=\"fa fa-map-marker\" role=\"img\" aria-label=\"Abrir mapa\" "
 "title=\"Abrir mapa\"/>"
+
+#. module: website_customer
+#: model_terms:ir.ui.view,arch_db:website_customer.details
+msgid "<i class=\"oi oi-chevron-left me-2\"/>Back to references"
+msgstr "<i class=\"oi oi-chevron-left me-2\"/>Regresar a las referencias"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
@@ -70,7 +71,7 @@ msgstr "Todos los países"
 #. odoo-python
 #: code:addons/website_customer/controllers/main.py:0
 msgid "All Industries"
-msgstr "Todos los sectores"
+msgstr "Todas las industrias"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.res_partner_tag_view_search
@@ -95,7 +96,7 @@ msgstr "Puede publicar"
 #. module: website_customer
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__name
 msgid "Category Name"
-msgstr "Nombre de categoría"
+msgstr "Nombre de la categoría"
 
 #. module: website_customer
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__classname
@@ -114,9 +115,15 @@ msgid "Contact"
 msgstr "Contacto"
 
 #. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.snippet_options
+#. odoo-javascript
+#: code:addons/website_customer/static/src/website_builder/customer_filter_option.xml:0
 msgid "Countries Filter"
 msgstr "Filtro de países"
+
+#. module: website_customer
+#: model:ir.model,website_form_label:website_customer.model_res_partner
+msgid "Create a Customer"
+msgstr "Crear un cliente"
 
 #. module: website_customer
 #: model_terms:ir.actions.act_window,help:website_customer.action_partner_tag_form
@@ -134,6 +141,18 @@ msgid "Created on"
 msgstr "Creado el"
 
 #. module: website_customer
+#. odoo-python
+#: code:addons/website_customer/controllers/main.py:0
+msgid "Customers"
+msgstr "Clientes"
+
+#. module: website_customer
+#. odoo-javascript
+#: code:addons/website_customer/static/src/website_builder/customer_filter_option.js:0
+msgid "Customers Page"
+msgstr "Página de clientes"
+
+#. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.details
 msgid "DROP BUILDING BLOCKS HERE TO MAKE THEM AVAILABLE ACROSS ALL CUSTOMERS"
 msgstr ""
@@ -141,7 +160,9 @@ msgstr ""
 "LOS CLIENTES"
 
 #. module: website_customer
+#: model:ir.model.fields,field_description:website_customer.field_res_partner__display_name
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__display_name
+#: model:ir.model.fields,field_description:website_customer.field_website__display_name
 msgid "Display Name"
 msgstr "Nombre en pantalla"
 
@@ -158,7 +179,7 @@ msgstr "Filtrar por país"
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
 msgid "Filter by Industry"
-msgstr "Filtrar por sector"
+msgstr "Filtrar por industria"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
@@ -166,11 +187,20 @@ msgid "Filter by Tags"
 msgstr "Filtrar por etiquetas"
 
 #. module: website_customer
+#: model_terms:ir.ui.view,arch_db:website_customer.opt_country_list
+msgid "Filter by country"
+msgstr "Filtrar por país"
+
+#. module: website_customer
+#: model_terms:ir.ui.view,arch_db:website_customer.opt_industry_list
+msgid "Filter by industry"
+msgstr "Filtrar por industria"
+
+#. module: website_customer
 #: model:ir.model.fields,help:website_customer.field_res_partner__website_tag_ids
 #: model:ir.model.fields,help:website_customer.field_res_users__website_tag_ids
 msgid "Filter published customers on the .../customers website page"
-msgstr ""
-"Filtra los clientes publicados en la página .../clientes del sitio web"
+msgstr "Filtra los clientes publicados en la página .../clientes del sitio web"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
@@ -183,14 +213,17 @@ msgid "Go to customer"
 msgstr "Vaya a clientes"
 
 #. module: website_customer
+#: model:ir.model.fields,field_description:website_customer.field_res_partner__id
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__id
+#: model:ir.model.fields,field_description:website_customer.field_website__id
 msgid "ID"
 msgstr "ID"
 
 #. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.snippet_options
+#. odoo-javascript
+#: code:addons/website_customer/static/src/website_builder/customer_filter_option.xml:0
 msgid "Industry Filter"
-msgstr "Filtro del sector"
+msgstr "Filtro de industria"
 
 #. module: website_customer
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__is_published
@@ -220,16 +253,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_customer.index
 msgid "No results found for \""
 msgstr "No se encontraron resultados para \""
-
-#. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.opt_country_list
-msgid "Open countries dropdown"
-msgstr "Abrir lista desplegable de países "
-
-#. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.opt_industry_list
-msgid "Open industries dropdown"
-msgstr "Abrir la lista desplegable de los sectores"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
@@ -263,11 +286,6 @@ msgid "References"
 msgstr "Referencias"
 
 #. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.snippet_options
-msgid "References Page"
-msgstr "Página de referencias"
-
-#. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
 msgid "Search"
 msgstr "Búsqueda"
@@ -285,27 +303,36 @@ msgstr "Ver todos los clientes"
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
 msgid "See countries filters"
-msgstr "Ver filtros de países "
+msgstr "Ver filtros de países"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
 msgid "See industries filters"
-msgstr "Ver filtros de los sectores"
+msgstr "Ver filtros de las industrias"
 
 #. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.snippet_options
+#. odoo-javascript
+#: code:addons/website_customer/static/src/website_builder/customer_filter_option.xml:0
 msgid "Show Map"
 msgstr "Mostrar mapa"
 
 #. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.snippet_options
+#. odoo-javascript
+#: code:addons/website_customer/static/src/website_builder/customer_filter_option.xml:0
 msgid "Tags Filter"
 msgstr "Filtro de etiquetas"
 
 #. module: website_customer
+#: model:ir.model.fields,help:website_customer.field_res_partner_tag__website_absolute_url
+msgid "The full absolute URL to access the document through the website."
+msgstr ""
+"La URL absoluta completa para acceder al documento a través del sitio web."
+
+#. module: website_customer
 #: model:ir.model.fields,help:website_customer.field_res_partner_tag__website_url
-msgid "The full URL to access the document through the website."
-msgstr "La URL completa para acceder al documento a través del sitio web."
+msgid "The full relative URL to access the document through the website."
+msgstr ""
+"La URL relativa completa para acceder al documento a través del sitio web."
 
 #. module: website_customer
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__website_published
@@ -316,6 +343,11 @@ msgstr "Visible desde este sitio web"
 #: model:ir.model,name:website_customer.model_website
 msgid "Website"
 msgstr "Sitio web"
+
+#. module: website_customer
+#: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__website_absolute_url
+msgid "Website Absolute URL"
+msgstr "URL absoluta del sitio web"
 
 #. module: website_customer
 #: model:ir.actions.act_window,name:website_customer.action_partner_tag_form

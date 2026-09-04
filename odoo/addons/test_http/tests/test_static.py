@@ -5,12 +5,14 @@ from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from os.path import basename, join as opj
 from unittest.mock import patch
-from freezegun import freeze_time
-from urllib3.util import parse_url
+from urllib.parse import urlsplit
 
-import odoo
+from freezegun import freeze_time
+
+from odoo import api, http
 from odoo.tests import new_test_user, tagged, RecordCapturer
-from odoo.tools import config, file_open, image_process
+from odoo.tools import config, file_open
+from odoo.tools.image import image_process
 from odoo.tools.misc import submap
 
 from .test_common import TestHttpBase, HTTP_DATETIME_FORMAT
@@ -230,6 +232,13 @@ class TestHttpStatic(TestHttpStaticCommon):
                 assert_filename='pyramid.of.gizeh.png',
             )
 
+        with self.subTest("long name"):
+            res = self.assertDownloadGizeh(
+                f'/web/content/test_http.gizeh_png?filename={"a" * 4000}.png',
+                assert_filename=f'{"a" * 100}.png',
+            )
+            self.assertEqual(res.headers['Content-Disposition'], f'inline; filename={"a" * 100}.png')
+
     def test_static12_not_found_to_placeholder(self):
         with self.subTest(x_sendfile=False):
             self.assertDownloadPlaceholder('/web/image/idontexist')
@@ -277,10 +286,10 @@ class TestHttpStatic(TestHttpStaticCommon):
 
     def test_static16_public_access_rights(self):
         self.authenticate(None, None)
-        default_user = self.env.ref('base.default_user')
+        user_template = self.env.ref('base.template_portal_user_id')
 
         with self.subTest('model access rights'):
-            res = self.url_open(f'/web/content/res.users/{default_user.id}/image_128')
+            res = self.url_open(f'/web/content/res.users/{user_template.id}/image_128')
             self.assertEqual(res.status_code, 404)
 
         with self.subTest('attachment + field access rights'):
@@ -334,7 +343,7 @@ class TestHttpStatic(TestHttpStaticCommon):
         })
 
         res = self.url_open(bad_path, allow_redirects=False)
-        location = parse_url(res.headers.get('Location', ''))
+        location = urlsplit(res.headers.get('Location', ''))
         self.assertNotEqual(location.path, bad_path, "loop detected")
         self.assertEqual(res.status_code, 404)
 
@@ -422,6 +431,7 @@ class TestHttpStatic(TestHttpStaticCommon):
         for field in ('glyph_attach', 'glyph_inline', 'glyph_related', 'glyph_compute'):
             earth[field] = data
             res = self.url_open(f'/web/image/test_http.stargate/{earth.id}/{field}')
+            res.raise_for_status()
             self.assertEqual(res.headers['Content-Type'], 'application/octet-stream')  # Shouldn't be text/html
             self.assertEqual(res.headers['Content-Security-Policy'], "default-src 'none'")
 
@@ -429,7 +439,7 @@ class TestHttpStatic(TestHttpStaticCommon):
         session = self.authenticate(None, None)
         for debug in ('', 'assets'):
             session.debug = debug
-            odoo.http.root.session_store.save(self.session)
+            http.root.session_store.save(self.session)
             with self.subTest(debug=debug):
                 res = self.db_url_open('/test_http/static/src/img/gizeh.png', headers={
                     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) '
@@ -448,6 +458,33 @@ class TestHttpStatic(TestHttpStaticCommon):
                     e = "wkhtmltopdf only works if it is allowed to cache everything"
                     raise AssertionError(e) from exc
                 self.assertEqual(res.content, self.gizeh_data)
+
+    def test_static24_only_one_date_header(self):
+        res = self.assertDownloadPlaceholder('/web/image')
+        # requests merge multiple headers with a same key together, it
+        # concatenates the values, hence .count(' GMT')
+        self.assertEqual(res.headers['Date'].count(' GMT'), 1,
+            "There must be only 1 Date header, not 2")
+
+    def test_static25_binary_non_base64(self):
+        self.authenticate('admin', 'admin')
+
+        # need a Binary(attachment=False) field
+        # TODO: master, add such a field on test_http.stargate
+        record = self.env['ir.mail_server'].create({
+            'name': 'dummy test_http test_static server',
+            'smtp_host': 'localhost',
+        })
+
+        record.smtp_ssl_certificate = b'non base64 value'
+        self.assertDownload(
+            f'/web/content/ir.mail_server/{record.id}/smtp_ssl_certificate',
+            headers={},
+            assert_status_code=200,
+            assert_headers={},
+            assert_content=b'non base64 value',
+        )
+
 
 @tagged('post_install', '-at_install')
 class TestHttpStaticLogo(TestHttpStaticCommon):
@@ -479,7 +516,7 @@ class TestHttpStaticLogo(TestHttpStaticCommon):
             'Content-Type': 'image/png',
             'Content-Disposition': 'inline; filename=nologo.png'
         }
-        super_user = cls.env['res.users'].browse([odoo.SUPERUSER_ID])
+        super_user = cls.env['res.users'].browse([api.SUPERUSER_ID])
         companies = ResCompany.browse([super_user.company_id.id]) | ResCompany.create(
             {
                 'name': 'Company 2',
@@ -660,16 +697,16 @@ class TestHttpStaticUpload(TestHttpStaticCommon):
         new_test_user(self.env, 'jackoneill')
         self.authenticate('jackoneill', 'jackoneill')
 
-        with RecordCapturer(self.env['ir.attachment'], []) as capture, \
+        with RecordCapturer(self.env['ir.attachment']) as capture, \
              file_open('test_http/static/src/img/gizeh.png', 'rb') as file:
             file_content = file.read()
             file_size = len(file_content)
             file.seek(0)
-            res = self.opener.post(
+            res = self.url_open(
                 f'{self.base_url()}/web/binary/upload_attachment',
                 files={'ufile': file},
                 data={
-                    'csrf_token': odoo.http.Request.csrf_token(self),
+                    'csrf_token': http.Request.csrf_token(self),
                     'model': 'test_http.stargate',
                     'id': self.env.ref('test_http.earth').id,
                 },
@@ -704,18 +741,18 @@ class TestHttpStaticUpload(TestHttpStaticCommon):
         new_test_user(self.env, 'jackoneill')
         self.authenticate('jackoneill', 'jackoneill')
 
-        with RecordCapturer(self.env['ir.attachment'], []) as capture, \
+        with RecordCapturer(self.env['ir.attachment']) as capture, \
              file_open('test_http/static/src/img/gizeh.png', 'rb') as file:
             file_size = file.seek(0, 2)
             file.seek(0)
             self.env['ir.config_parameter'].sudo().set_param(
                 'web.max_file_upload_size', file_size - 1,
             )
-            res = self.opener.post(
+            res = self.url_open(
                 f'{self.base_url()}/web/binary/upload_attachment',
                 files={'ufile': file},
                 data={
-                    'csrf_token': odoo.http.Request.csrf_token(self),
+                    'csrf_token': http.Request.csrf_token(self),
                     'model': 'test_http.stargate',
                     'id': self.env.ref('test_http.earth').id,
                     'callback': 'callmemaybe',

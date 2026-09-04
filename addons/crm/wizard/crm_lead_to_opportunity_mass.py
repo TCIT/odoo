@@ -4,10 +4,10 @@
 from odoo import api, fields, models
 
 
-class Lead2OpportunityMassConvert(models.TransientModel):
+class CrmLead2opportunityPartnerMass(models.TransientModel):
     _name = 'crm.lead2opportunity.partner.mass'
     _description = 'Convert Lead to Opportunity (in mass)'
-    _inherit = 'crm.lead2opportunity.partner'
+    _inherit = ['crm.lead2opportunity.partner']
 
     lead_id = fields.Many2one(required=False)
     lead_tomerge_ids = fields.Many2many(
@@ -38,6 +38,10 @@ class Lead2OpportunityMassConvert(models.TransientModel):
     def _compute_partner_id(self):
         for convert in self:
             convert.partner_id = False
+
+    def _compute_commercial_partner_id(self):
+        """Setting a company for each lead in mass mode is not supported."""
+        self.commercial_partner_id = False
 
     @api.depends('user_ids')
     def _compute_team_id(self):
@@ -75,17 +79,17 @@ class Lead2OpportunityMassConvert(models.TransientModel):
         salesmen_ids = []
         if self.user_ids:
             salesmen_ids = self.user_ids.ids
-        return super(Lead2OpportunityMassConvert, self)._convert_and_allocate(leads, salesmen_ids, team_id=team_id)
+        return super()._convert_and_allocate(leads, salesmen_ids, team_id=team_id)
 
     def action_mass_convert(self):
         self.ensure_one()
         if self.name == 'convert' and self.deduplicate:
             # TDE CLEANME: still using active_ids from context
-            active_ids = self._context.get('active_ids', [])
+            active_ids = self.env.context.get('active_ids', [])
             merged_lead_ids = set()
             remaining_lead_ids = set()
             for lead in self.lead_tomerge_ids:
-                if lead not in merged_lead_ids:
+                if lead.id not in merged_lead_ids:
                     duplicated_leads = self.env['crm.lead']._get_lead_duplicates(
                         partner=lead.partner_id,
                         email=lead.partner_id.email or lead.email_from,
@@ -104,6 +108,6 @@ class Lead2OpportunityMassConvert(models.TransientModel):
 
     def _convert_handle_partner(self, lead, action, partner_id):
         if self.action == 'each_exist_or_create':
-            partner_id = lead._find_matching_partner(email_only=True).id
+            partner_id = lead._find_matching_partner().id
             action = 'create'
-        return super(Lead2OpportunityMassConvert, self)._convert_handle_partner(lead, action, partner_id)
+        return super()._convert_handle_partner(lead, action, partner_id)

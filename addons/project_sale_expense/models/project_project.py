@@ -1,18 +1,17 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import json
 
-from odoo import models, fields
+from odoo import models
 from collections import defaultdict
 
 
-class Project(models.Model):
+class ProjectProject(models.Model):
     _inherit = 'project.project'
 
     def _get_expenses_profitability_items(self, with_action=True):
         expenses_read_group = self.env['hr.expense']._read_group(
-            [('sheet_id.state', 'in', ['post', 'done']), ('analytic_distribution', 'in', self.account_id.ids)],
+            [('state', 'in', ['posted', 'in_payment', 'paid']), ('analytic_distribution', 'in', self.account_id.ids)],
             groupby=['sale_order_id', 'product_id', 'currency_id'],
             aggregates=['id:array_agg', 'untaxed_amount_currency:sum'],
         )
@@ -91,7 +90,7 @@ class Project(models.Model):
     def _get_already_included_profitability_invoice_line_ids(self):
         move_line_ids = super()._get_already_included_profitability_invoice_line_ids()
         expenses_read_group = self.env['hr.expense']._read_group(
-            [('sheet_id.state', 'in', ['post', 'done']), ('analytic_distribution', 'in', self.account_id.ids)],
+            [('state', 'in', ['posted', 'in_payment', 'paid']), ('analytic_distribution', 'in', self.account_id.ids)],
             groupby=['sale_order_id'],
             aggregates=['__count'],
         )

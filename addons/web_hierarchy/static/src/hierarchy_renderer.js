@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { Component, useRef, onPatched } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
@@ -17,7 +15,6 @@ export class HierarchyRenderer extends Component {
         model: Object,
         openRecord: Function,
         archInfo: Object,
-        templates: Object,
     };
     static template = "web_hierarchy.HierarchyRenderer";
 
@@ -70,17 +67,21 @@ export class HierarchyRenderer extends Component {
     }
 
     onPatched() {
-        if (this.scrollTarget === "none") {
-            return;
+        let row;
+        switch (this.scrollTarget) {
+            case "none":
+                return;
+            case "bottom":
+                row = this.rendererRef.el.querySelector(":scope .o_hierarchy_row:last-child");
+                break;
+            case "up":
+                row = this.rendererRef.el.querySelector(":scope .o_hierarchy_row:first-child");
+                break;
+            default:
+                row = this.rendererRef.el
+                    .querySelector(`:scope .o_hierarchy_node[data-node-id="${this.scrollTarget}"]`)
+                    ?.closest(".o_hierarchy_row");
         }
-        const row =
-            this.scrollTarget === "bottom"
-                ? this.rendererRef.el.querySelector(":scope .o_hierarchy_row:last-child")
-                : this.rendererRef.el
-                      .querySelector(
-                          `:scope .o_hierarchy_node[data-node-id="${this.scrollTarget}"]`
-                      )
-                      ?.closest(".o_hierarchy_row");
         this.scrollTarget = "none";
         if (!row) {
             return;
@@ -97,20 +98,20 @@ export class HierarchyRenderer extends Component {
     }
 
     get rows() {
-        const rootNodes = this.props.model.root.rootNodes.filter((n) => !n.hidden);
+        const rootNodes = this.props.model.root.rootNodes;
         const rows = [{ nodes: rootNodes }];
-        const processNode = (node) => {
-            if (!node.isLeaf) {
-                const subNodes = node.nodes.filter((n) => !n.hidden);
+        const processNode = (node, rootNode) => {
+            const subNodes = node.nodes;
+            if (subNodes.length && !subNodes.includes(rootNode)) {
                 rows.push({ parentNode: node, nodes: subNodes });
                 for (const subNode of subNodes) {
-                    processNode(subNode);
+                    processNode(subNode, rootNode);
                 }
             }
         };
 
-        for (const node of this.props.model.root.rootNodes) {
-            processNode(node);
+        for (const node of rootNodes) {
+            processNode(node, node);
         }
 
         return rows;

@@ -1,6 +1,70 @@
 import { queryAll, queryAllTexts, queryOne, queryText, queryValue } from "@odoo/hoot-dom";
 import { contains, fields, models } from "@web/../tests/web_test_helpers";
 
+import { Domain } from "@web/core/domain";
+import { formatAST, parseExpr } from "@web/core/py_js/py";
+
+export function label(operator, fieldType) {
+    switch (operator) {
+        case "=":
+            if (["many2one", "many2many", "one2many"].includes(fieldType)) {
+                return "=";
+            }
+            return "is equal to";
+        case "!=":
+            if (["many2one", "many2many", "one2many"].includes(fieldType)) {
+                return "!=";
+            }
+            return "is not equal to";
+        case "in":
+            if (["many2one", "many2many", "one2many"].includes(fieldType)) {
+                return "is equal to";
+            }
+            return "is in";
+        case "not in":
+            if (["many2one", "many2many", "one2many"].includes(fieldType)) {
+                return "is not equal to";
+            }
+            return "is not in";
+        case ">":
+            if (["date", "datetime"].includes(fieldType)) {
+                return "after";
+            }
+            return "greater than";
+        case "<":
+            if (["date", "datetime"].includes(fieldType)) {
+                return "before";
+            }
+            return "lower than";
+        case "ilike":
+            return "contains";
+        case "not ilike":
+            return "does not contain";
+        case "<=":
+            return "lower or equal to";
+        case ">=":
+            return "greater or equal to";
+        case "set":
+            return "is set";
+        case "not set":
+            return "is not set";
+        case "in range":
+            return "is in";
+        case "between":
+            return "between";
+        case "starts with":
+            return "starts with";
+    }
+}
+
+export function formatDomain(str) {
+    return new Domain(str).toString();
+}
+
+export function formatExpr(str) {
+    return formatAST(parseExpr(str));
+}
+
 /**
  * @typedef {import("@odoo/hoot-dom").FillOptions} FillOptions
  * @typedef {import("@odoo/hoot-dom").Target} Target
@@ -102,11 +166,13 @@ export const SELECTORS = {
     row: ".o_tree_editor_row",
     tree: ".o_tree_editor > .o_tree_editor_node",
     connector: ".o_tree_editor_connector",
+    connectorValue: ".o_tree_editor_connector .o_tree_editor_connector_value",
+    connectorToggler: ".o_tree_editor_connector .o_tree_editor_connector_value button.o-dropdown",
     condition: ".o_tree_editor_condition",
     addNewRule: ".o_tree_editor_row > a",
-    buttonAddNewRule: ".o_tree_editor_node_control_panel > button:nth-child(1)",
-    buttonAddBranch: ".o_tree_editor_node_control_panel > button:nth-child(2)",
-    buttonDeleteNode: ".o_tree_editor_node_control_panel > button:nth-child(3)",
+    buttonAddNewRule: ".o_tree_editor_node_control_panel > button[data-tooltip='Add rule']",
+    buttonAddBranch: ".o_tree_editor_node_control_panel > button[data-tooltip='Add nested rule']",
+    buttonDeleteNode: ".o_tree_editor_node_control_panel > button[data-tooltip='Delete rule']",
     pathEditor: ".o_tree_editor_condition > .o_tree_editor_editor:nth-child(1)",
     operatorEditor: ".o_tree_editor_condition > .o_tree_editor_editor:nth-child(2)",
     valueEditor: ".o_tree_editor_condition > .o_tree_editor_editor:nth-child(3)",
@@ -122,7 +188,7 @@ const CHILD_SELECTOR = ["connector", "condition", "complexCondition"]
     .map((k) => SELECTORS[k])
     .join(",");
 
-export function getTreeEditorContent(options = {}) {
+export function getTreeEditorContent() {
     const content = [];
     const nodes = queryAll(SELECTORS.node);
     const mapping = new Map();
@@ -139,9 +205,6 @@ export function getTreeEditorContent(options = {}) {
             nodeValue.value = getCurrentComplexCondition(0, node);
         } else {
             nodeValue.value = getCurrentCondition(0, node);
-        }
-        if (options.node) {
-            nodeValue.node = node;
         }
         content.push(nodeValue);
     }
@@ -249,7 +312,7 @@ function getCurrentCondition(index, target) {
  */
 function getCurrentConnector(index, target) {
     const connectorText = queryAllTexts(
-        `${SELECTORS.connector} .dropdown-toggle, ${SELECTORS.connector} > span:nth-child(2), ${SELECTORS.connector} > span > strong`,
+        `${SELECTORS.connector} > div > span > strong, ${SELECTORS.connectorValue}`,
         { root: target }
     ).at(index);
     return connectorText.includes("all") ? "all" : connectorText;
@@ -285,6 +348,14 @@ export function isNotSupportedValue(index, target) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @param {number} [index=0]
+ * @param {Target} [target]
+ */
+export async function toggleConnector(index, target) {
+    await contains(queryAt(SELECTORS.connectorToggler, index, target)).click();
+}
 
 /**
  * @param {any} operator
@@ -325,7 +396,7 @@ export async function editValue(value, options, index, target) {
  * @param {number} [index=0]
  * @param {Target} [target]
  */
-export async function clickOnButtonAddNewRule(index, target) {
+export async function clickOnButtonAddRule(index, target) {
     await contains(queryAt(SELECTORS.buttonAddNewRule, index, target)).click();
 }
 
@@ -353,8 +424,8 @@ export async function clearNotSupported(index, target) {
     await contains(queryAt(SELECTORS.clearNotSupported, index, target)).click();
 }
 
-export async function addNewRule() {
-    await contains(SELECTORS.addNewRule).click();
+export async function addNewRule(index, target) {
+    await contains(queryAt(SELECTORS.addNewRule, index, target)).click();
 }
 
 export async function toggleArchive() {
@@ -388,9 +459,10 @@ export async function clickPrev() {
 
 /**
  * @param {number} [index=0]
+ * @param {Target} [target]
  */
-export async function followRelation(index = 0) {
-    await contains(`.o_model_field_selector_popover_item_relation:eq(${index})`).click();
+export async function followRelation(index, target) {
+    await contains(queryAt(".o_model_field_selector_popover_item_relation", index, target)).click();
 }
 
 export function getFocusedFieldName() {

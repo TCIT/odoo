@@ -1,25 +1,21 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import re
-import logging
 
 from collections import OrderedDict
-from urllib3.util import parse_url
 
 from odoo import models
 from odoo.http import request
 from odoo.tools import lazy
-from odoo.addons.base.models.assetsbundle import AssetsBundle
-from odoo.osv import expression
 from odoo.addons.website.models import ir_http
+from odoo.addons.website.tools import add_form_signature
 from odoo.exceptions import AccessError
 
 
-_logger = logging.getLogger(__name__)
 re_background_image = re.compile(r"(background-image\s*:\s*url\(\s*['\"]?\s*)([^)'\"]+)")
 
 
-class IrQWeb(models.AbstractModel):
-    """ IrQWeb object for rendering stuff in the website context """
+class IrQweb(models.AbstractModel):
+    """ IrQweb object for rendering stuff in the website context """
 
     _inherit = 'ir.qweb'
 
@@ -30,6 +26,12 @@ class IrQWeb(models.AbstractModel):
         'script': 'src',
         'img': 'src',
     }
+
+    def _get_template(self, template):
+        element, document, ref = super()._get_template(template)
+        if self.env.context.get('website_id'):
+            add_form_signature(element, self.sudo().env)
+        return element, document, ref
 
     # assume cache will be invalidated by third party on write to ir.ui.view
     def _get_template_cache_keys(self):
@@ -124,50 +126,13 @@ class IrQWeb(models.AbstractModel):
         if not website:
             return atts
 
-        if (
-            website.cookies_bar
-            and website.block_third_party_domains
-            and not self.env.context.get('cookies_allowed')
-            and not request.env.user.has_group('website.group_website_restricted_editor')
-        ):
-            # If the cookie banner is activated, 3rd-party embedded iframes and
-            # scripts should be controlled. As such:
-            # - 'domains' is a watchlist on the iframe/script's src itself,
-            # - 'classes' is a watchlist on container elements in which iframes
-            # are/could be built on the fly client-side for some reason.
-            cookies_watchlist = {
-                'domains': website.blocked_third_party_domains.split('\n'),
-                'classes': website._get_blocked_iframe_containers_classes(),
-            }
-            remove_src = False
-            if tagName in ('iframe', 'script'):
-                src_host = parse_url((atts.get('src') or '').lower()).host
-                if src_host:
-                    remove_src = any(
-                        # "www.example.com" and "example.com" should block both.
-                        src_host == domain.removeprefix('www.')
-                        # "domain.com" should block "subdomain.domain.com", but
-                        # not "(subdomain.)mydomain.com".
-                        or src_host.endswith('.' + domain.removeprefix('www.'))
-                        for domain in cookies_watchlist['domains']
-                    )
-            if (
-                remove_src
-                or cookies_watchlist['classes'].intersection((atts.get('class') or '').split(' '))
-            ):
-                atts['data-need-cookies-approval'] = 'true'
-                # Case class in watchlist: we stop here. The element could
-                # contain an iframe created on the fly client-side. It is marked
-                # now so that the iframe can be marked later when created.
-                # Case iframe/script's src in watchlist: we adapt the src.
-                if 'src' in atts:
-                    atts['data-nocookie-src'] = atts['src']
-                    atts['src'] = 'about:blank'
+        if website._should_remove_third_party_trackers():
+            website._remove_third_party_trackers(tagName, atts, ['domains', 'classes'])
 
         name = self.URL_ATTRS.get(tagName)
         if request:
             value = atts.get(name) if name else None
-            if value is not None and value is not False:
+            if value not in (None, False, ()):
                 atts[name] = self.env['ir.http']._url_for(str(value))
 
             # Adapt background-image URL in the same way as image src.
@@ -179,9 +144,9 @@ class IrQWeb(models.AbstractModel):
         data_name = f'data-{name}'
         if name and (name in atts or data_name in atts):
             atts = OrderedDict(atts)
-            if name in atts:
+            if name in atts and atts[name] not in (False, None, ()):
                 atts[name] = website.get_cdn_url(atts[name])
-            if data_name in atts:
+            if data_name in atts and atts[data_name] not in (False, None, ()):
                 atts[data_name] = website.get_cdn_url(atts[data_name])
         atts = self._adapt_style_background_image(atts, website.get_cdn_url)
 
@@ -193,9 +158,8 @@ class IrQWeb(models.AbstractModel):
         return atts
 
     def _get_bundles_to_pregenarate(self):
-        js_assets, css_assets = super(IrQWeb, self)._get_bundles_to_pregenarate()
+        js_assets, css_assets = super()._get_bundles_to_pregenarate()
         assets = {
-            'website.backend_assets_all_wysiwyg',
             'website.assets_all_wysiwyg',
         }
         return (js_assets | assets, css_assets | assets)

@@ -3,13 +3,13 @@
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 
-from odoo import api, fields, models
-from odoo.osv import expression
+from odoo import fields, models
+from odoo.fields import Domain
+
 import ast
 
 
-class Department(models.Model):
-
+class HrDepartment(models.Model):
     _inherit = 'hr.department'
 
     absence_of_today = fields.Integer(
@@ -62,8 +62,7 @@ class Department(models.Model):
         action['context'] = {
             **self._get_action_context(),
             'search_default_active_time_off': 3,
-            'hide_employee_name': 1,
-            'holiday_status_display_name': False
+            'hide_employee_name': 1
         }
         return action
 
@@ -71,5 +70,5 @@ class Department(models.Model):
         action = self.env["ir.actions.actions"]._for_xml_id("hr_holidays.hr_leave_allocation_action_approve_department")
         action['context'] = self._get_action_context()
         action['context']['search_default_second_approval'] = 3
-        action['domain'] = expression.AND([ast.literal_eval(action['domain']), [('state', '=', 'confirm')]])
+        action['domain'] = Domain.AND([ast.literal_eval(action['domain']), [('state', '=', 'confirm')]])
         return action

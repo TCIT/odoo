@@ -4,7 +4,7 @@
 from odoo import api, fields, models
 
 
-class Company(models.Model):
+class ResCompany(models.Model):
     _inherit = "res.company"
 
     social_twitter = fields.Char('X Account')
@@ -14,3 +14,4 @@ class Company(models.Model):
     social_youtube = fields.Char('Youtube Account')
     social_instagram = fields.Char('Instagram Account')
     social_tiktok = fields.Char('TikTok Account')
+    social_discord = fields.Char("Discord Account")

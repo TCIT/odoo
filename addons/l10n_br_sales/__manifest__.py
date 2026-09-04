@@ -4,7 +4,7 @@
     'name': 'Brazil - Sale',
     'version': '1.0',
     'description': 'Sale modifications for Brazil',
-    'category': 'Localization',
+    'category': 'Sales/Sales',
     'depends': [
         'l10n_br',
         'sale',
@@ -16,5 +16,6 @@
     ],
     'installable': True,
     'auto_install': True,
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

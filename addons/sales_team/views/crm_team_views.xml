@@ -10,7 +10,7 @@
                 <field name="name"/>
                 <field name="user_id"/>
                 <field name="member_ids"/>
-                <group expand="0" string="Group By...">
+                <group>
                     <filter string="Company" name="company" domain="[]" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                     <filter string="Team Leader" name="team_leader" domain="[]" context="{'group_by': 'user_id'}"/>
                 </group>
@@ -22,10 +22,14 @@
         <field name="name">crm.team.form</field>
         <field name="model">crm.team</field>
         <field name="arch" type="xml">
-            <form string="Sales Team" class="o_crm_team_form_view">
-                <div class="alert alert-info text-center" role="alert"
+            <form string="Sales Team" js_class="crm_team_form" class="o_crm_team_form_view">
+                <div class="alert alert-info text-center d-flex flex-wrap justify-content-center gap-1" role="alert"
                     invisible="is_membership_multi or not member_warning">
-                    <field name="member_warning"/>
+                    <field name="member_warning" class="w-auto"/>
+                    Working in multiple teams?
+                    <button name="crm_team_activate_multi_membership" type="button" class="btn btn-link p-0 lh-1">
+                        Activate "Multi-team"
+                    </button>
                 </div>
                 <sheet>
                     <div class="oe_button_box" name="button_box"/>
@@ -43,7 +47,7 @@
                             <field name="sequence" invisible="1"/>
                             <field name="is_membership_multi" invisible="1"/>
                             <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
-                            <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                            <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company" placeholder="Visible to all"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="member_company_ids" invisible="1"/>
                         </group>
@@ -125,7 +129,7 @@
         <field name="model">crm.team</field>
         <field name="priority">10</field>
         <field name="arch" type="xml">
-            <kanban class="o_crm_team_kanban" highlight_color="color" create="0" can_open="0" sample="1">
+            <kanban class="o_crm_team_kanban" highlight_color="color" create="0" can_open="0" action="action_primary_channel_button" type="object" sample="1">
                 <templates>
                     <t t-name="menu">
                         <div class="container">
@@ -158,26 +162,14 @@
                             </div>
                         </div>
                     </t>
-                    <t t-name="card">
-                        <field name="name" class="fw-bold text-truncate fs-4 ms-2"/>
-                        <div class="row mt-3 px-2">
-                            <div class="col-4" name="to_replace_in_sale_crm">
-                                <button type="object" class="btn text-wrap btn-primary" name="action_primary_channel_button"><field name="dashboard_button_name"/></button>
-                            </div>
-                            <div class="col-8 mb-2 text-truncate">
-                                <t name="first_options"/>
-                                <t name="second_options"/>
-                                <t name="third_options"/>
-                            </div>
+                    <t t-name="card" class="flex-column justify-content-between">
+                        <div class="ms-2 me-3">
+                            <field name="name" class="fw-bold fs-2"/>
                         </div>
-                        <div class="row px-2 mt-auto mb-n2">
-                            <div name="o_kanban_primary_bottom" class="col-12">
-                                <t t-call="SalesTeamDashboardGraph"/>
-                            </div>
+                        <div class="crm_team_kanban_bottom d-flex align-items-center mt-5">
+                            <field name="company_id" invisible="1"/>
+                            <field name="user_id" widget="many2one_avatar_user" class="ms-auto"/>
                         </div>
-                    </t>
-                    <t t-name="SalesTeamDashboardGraph">
-                        <field t-if="record.dashboard_graph_data.raw_value" name="dashboard_graph_data" widget="dashboard_graph" t-att-graph_type="'bar'"/>
                     </t>
                 </templates>
             </kanban>

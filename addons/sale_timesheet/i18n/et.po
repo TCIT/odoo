@@ -1,38 +1,38 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* sale_timesheet
-# 
+# * sale_timesheet
+#
 # Translators:
-# Rivo Zängov <eraser@eraser.ee>, 2024
-# Arma Gedonsky <armagedonsky@hot.ee>, 2024
-# Helen Sulaoja <helen@avalah.ee>, 2024
-# Siim Raasuke, 2024
-# Katrin Kampura, 2024
-# Martin Trigaux, 2024
-# Birgit Vijar, 2024
-# Piia Paurson <piia@avalah.ee>, 2024
-# Martin Aavastik <martin@avalah.ee>, 2024
-# Eneli Õigus <enelioigus@gmail.com>, 2024
-# Leaanika Randmets, 2024
-# Algo Kärp <algokarp@gmail.com>, 2024
-# Triine Aavik <triine@avalah.ee>, 2024
-# Anna, 2024
-# Stevin Lilla, 2024
-# JanaAvalah, 2024
-# 
+# Andre Roomet <andreroomet@gmail.com>, 2022
+# Helen Sulaoja <helen@avalah.ee>, 2022
+# Rivo Zängov <eraser@eraser.ee>, 2022
+# Triine Aavik <triine@avalah.ee>, 2022
+# Piia Paurson <piia@avalah.ee>, 2022
+# Eneli Õigus <enelioigus@gmail.com>, 2022
+# Martin Aavastik <martin@avalah.ee>, 2022
+# Arma Gedonsky <armagedonsky@hot.ee>, 2022
+# Martin Trigaux, 2022
+# Algo Kärp <algokarp@gmail.com>, 2023
+# Anna, 2023
+# JanaAvalah, 2023
+# Leaanika Randmets, 2023
+# Kristina Pešehodko <kristina@avalah.ee>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 13:04+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: JanaAvalah, 2024\n"
-"Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-02 14:19+0000\n"
+"Last-Translator: Kristina Pešehodko <kristina@avalah.ee>\n"
+"Language-Team: Estonian <https://translate.odoo.com/projects/odoo-19/"
+"sale_timesheet/et/>\n"
+"Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: et\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: sale_timesheet
 #. odoo-python
@@ -42,7 +42,8 @@ msgid ""
 "                <p class=\"o_view_nocontent_smiling_face\">\n"
 "                    No activities found. Let's start a new one!\n"
 "                </p><p>\n"
-"                    Track your working hours by projects every day and invoice this time to your customers.\n"
+"                    Track your working hours by projects every day and "
+"invoice this time to your customers.\n"
 "                </p>\n"
 "            "
 msgstr ""
@@ -50,7 +51,8 @@ msgstr ""
 "                <p class=\"o_view_nocontent_smiling_face\">\n"
 "                   Tegevusi ei leitud. Loome ühe!\n"
 "                </p><p>\n"
-"                    Jälgi oma logitud aega igapäevaselt, logitud read lähevad kliendi arvele!\n"
+"                    Jälgi oma logitud aega igapäevaselt, logitud read "
+"lähevad kliendi arvele!\n"
 "                </p>\n"
 "            "
 
@@ -63,8 +65,10 @@ msgid ""
 "                <p class=\"o_view_nocontent_smiling_face\">\n"
 "                    Record timesheets\n"
 "                </p><p>\n"
-"                    You can register and track your workings hours by project every\n"
-"                    day. Every time spent on a project will become a cost and can be re-invoiced to\n"
+"                    You can register and track your workings hours by "
+"project every\n"
+"                    day. Every time spent on a project will become a cost "
+"and can be re-invoiced to\n"
 "                    customers if required.\n"
 "                </p>\n"
 "            "
@@ -73,8 +77,10 @@ msgstr ""
 "                <p class=\"o_view_nocontent_smiling_face\">\n"
 "                    Registreeri tööaja arvestusleht\n"
 "                </p><p>\n"
-"                    Saate registreerida ja jälgida oma töötunde projektipõhiselt\n"
-"                    iga päev. Iga projektile kulutatud aeg muutub kuluks ja seda saab klientidele vajadusel\n"
+"                    Saate registreerida ja jälgida oma töötunde "
+"projektipõhiselt\n"
+"                    iga päev. Iga projektile kulutatud aeg muutub kuluks ja "
+"seda saab klientidele vajadusel\n"
 "                    uuesti arveldada.\n"
 "                </p>\n"
 "            "
@@ -129,6 +135,15 @@ msgid "4 Days after Interview"
 msgstr "4 päeva pärast invervjuud"
 
 #. module: sale_timesheet
+#: model_terms:hr.job,website_description:sale_timesheet.job_engineer
+#: model_terms:hr.job,website_description:sale_timesheet.job_interior_designer
+#: model_terms:hr.job,website_description:sale_timesheet.job_labour
+msgid ""
+"<a href=\"/\" class=\"btn btn-primary o_translate_inline\" "
+"target=\"_blank\"><small><b>READ</b></small></a>"
+msgstr ""
+
+#. module: sale_timesheet
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.project_project_view_form
 msgid "<b>Daily Cost: </b>"
 msgstr "<b>Päevakulu: </b>"
@@ -143,17 +158,12 @@ msgstr "<b>Ühiku hind: </b>"
 msgid ""
 "<i class=\"fa fa-lightbulb-o\"/>\n"
 "                        <span>\n"
-"                            Define the rate at which an employee's time is billed based on their expertise, skills, or experience.\n"
-"                            To bill the same service at a different rate, create separate sales order items.\n"
+"                            Define the rate at which an employee's time is "
+"billed based on their expertise, skills, or experience.\n"
+"                            To bill the same service at a different rate, "
+"create separate sales order items.\n"
 "                        </span>"
 msgstr ""
-
-#. module: sale_timesheet
-#: model_terms:hr.job,website_description:sale_timesheet.job_engineer
-#: model_terms:hr.job,website_description:sale_timesheet.job_interior_designer
-#: model_terms:hr.job,website_description:sale_timesheet.job_labour
-msgid "<small><b>READ</b></small>"
-msgstr "<small><b>LOE</b></small>"
 
 #. module: sale_timesheet
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.hr_timesheet_line_form_inherit
@@ -204,6 +214,41 @@ msgid "<span class=\"text-muted small\">Time to Answer</span>"
 msgstr "<span class=\"text-muted small\">Aega vastamiseks</span>"
 
 #. module: sale_timesheet
+#: model_terms:hr.job,website_description:sale_timesheet.job_engineer
+#: model_terms:hr.job,website_description:sale_timesheet.job_interior_designer
+#: model_terms:hr.job,website_description:sale_timesheet.job_labour
+msgid "<strong class=\"s_rating_title\">Administrative Work</strong>"
+msgstr ""
+
+#. module: sale_timesheet
+#: model_terms:hr.job,website_description:sale_timesheet.job_engineer
+#: model_terms:hr.job,website_description:sale_timesheet.job_interior_designer
+#: model_terms:hr.job,website_description:sale_timesheet.job_labour
+msgid "<strong class=\"s_rating_title\">Autonomy</strong>"
+msgstr ""
+
+#. module: sale_timesheet
+#: model_terms:hr.job,website_description:sale_timesheet.job_engineer
+#: model_terms:hr.job,website_description:sale_timesheet.job_interior_designer
+#: model_terms:hr.job,website_description:sale_timesheet.job_labour
+msgid "<strong class=\"s_rating_title\">Customer Relationship</strong>"
+msgstr "<strong class=\"s_rating_title\">Kliendisuhted</strong>"
+
+#. module: sale_timesheet
+#: model_terms:hr.job,website_description:sale_timesheet.job_engineer
+#: model_terms:hr.job,website_description:sale_timesheet.job_interior_designer
+#: model_terms:hr.job,website_description:sale_timesheet.job_labour
+msgid "<strong class=\"s_rating_title\">Personal Evolution</strong>"
+msgstr ""
+
+#. module: sale_timesheet
+#: model_terms:hr.job,website_description:sale_timesheet.job_engineer
+#: model_terms:hr.job,website_description:sale_timesheet.job_interior_designer
+#: model_terms:hr.job,website_description:sale_timesheet.job_labour
+msgid "<strong class=\"s_rating_title\">Technical Expertise</strong>"
+msgstr ""
+
+#. module: sale_timesheet
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.portal_my_task_inherit
 msgid "<strong>Amount Due:</strong>"
 msgstr "<strong>Kuulub tasumisele:</strong>"
@@ -229,11 +274,6 @@ msgid "<strong>Time Remaining on SO: </strong>"
 msgstr ""
 
 #. module: sale_timesheet
-#: model_terms:ir.ui.view,arch_db:sale_timesheet.project_update_default_description
-msgid "<u>Profitability</u>"
-msgstr "<u>Kasumlikkus</u>"
-
-#. module: sale_timesheet
 #: model_terms:hr.job,website_description:sale_timesheet.job_engineer
 #: model_terms:hr.job,website_description:sale_timesheet.job_interior_designer
 #: model_terms:hr.job,website_description:sale_timesheet.job_labour
@@ -243,17 +283,27 @@ msgstr "Täiskohaga töökoht <br>Atraktiivne palgapakett."
 #. module: sale_timesheet
 #: model:ir.model.fields,help:sale_timesheet.field_sale_order_line__qty_delivered_method
 msgid ""
-"According to product configuration, the delivered quantity can be automatically computed by mechanism:\n"
+"According to product configuration, the delivered quantity can be "
+"automatically computed by mechanism:\n"
 "  - Manual: the quantity is set manually on the line\n"
-"  - Analytic From expenses: the quantity is the quantity sum from posted expenses\n"
-"  - Timesheet: the quantity is the sum of hours recorded on tasks linked to this sale line\n"
+"  - Analytic From expenses: the quantity is the quantity sum from posted "
+"expenses\n"
+"  - Timesheet: the quantity is the sum of hours recorded on tasks linked to "
+"this sale line\n"
 "  - Stock Moves: the quantity comes from confirmed pickings\n"
 msgstr ""
-"Vastavalt toote konfiguratsioonile saab tarnitud koguse automaatselt arvutada mehhanismi abil:\n"
-"- Käsitsi: kogus määratakse reale käsitsi\n"
-"- Analüütiliste kulude alusel: kogus on postitatud kuludest tulenevate koguste summa\n"
-"- Ajaarvestus: kogus on müügireaga seotud ülesannetele logitud tundide summa.\n"
-"- Laoliikumised: kogus tuleb kinnitatud korjetest\n"
+"Vastavalt toote konfiguratsioonile saab tarnitud koguse automaatselt "
+"arvutada mehhanismi abil:\n"
+"  - Käsitsi: kogus määratakse reale käsitsi\n"
+"  - Analüütiliste kulude alusel: kogus on summa postitatud kuludest\n"
+"  - Ajaarvestus: kogus on müügireaga seotud ülesannetele logitud tundide "
+"alusel.\n"
+"  - Laoliikumised: kogus tuleb kinnitatud korjetest\n"
+
+#. module: sale_timesheet
+#: model:ir.model,name:sale_timesheet.model_account_move_reversal
+msgid "Account Move Reversal"
+msgstr ""
 
 #. module: sale_timesheet
 #: model_terms:hr.job,website_description:sale_timesheet.job_engineer
@@ -270,13 +320,6 @@ msgid "Additional languages"
 msgstr "Keeled"
 
 #. module: sale_timesheet
-#: model_terms:hr.job,website_description:sale_timesheet.job_engineer
-#: model_terms:hr.job,website_description:sale_timesheet.job_interior_designer
-#: model_terms:hr.job,website_description:sale_timesheet.job_labour
-msgid "Administrative Work"
-msgstr "Administratiivne töö"
-
-#. module: sale_timesheet
 #: model:account.analytic.account,name:sale_timesheet.account_analytic_account_project_support
 #: model:project.project,name:sale_timesheet.project_support
 msgid "After-Sales Services"
@@ -286,11 +329,6 @@ msgstr "Müügijärgsed teenused"
 #: model:ir.model.fields,field_description:sale_timesheet.field_project_project__allocated_hours
 msgid "Allocated Time"
 msgstr "Jaotatud aeg"
-
-#. module: sale_timesheet
-#: model:ir.model.fields,field_description:sale_timesheet.field_project_create_invoice__amount_to_invoice
-msgid "Amount to invoice"
-msgstr "Arve summa"
 
 #. module: sale_timesheet
 #: model:ir.model.constraint,message:sale_timesheet.constraint_project_sale_line_employee_map_uniqueness_employee
@@ -309,7 +347,7 @@ msgstr "Analüütiline rida"
 #. module: sale_timesheet
 #: model:ir.model.fields,field_description:sale_timesheet.field_sale_order_line__analytic_line_ids
 msgid "Analytic lines"
-msgstr "Analüütilised read"
+msgstr "Analüütiline rida"
 
 #. module: sale_timesheet
 #: model_terms:hr.job,website_description:sale_timesheet.job_engineer
@@ -317,31 +355,36 @@ msgstr "Analüütilised read"
 #: model_terms:hr.job,website_description:sale_timesheet.job_labour
 msgid ""
 "As an employee of our company, you will <b>collaborate with each department\n"
-"                        to create and deploy disruptive products.</b> Come work at a growing company\n"
-"                        that offers great benefits with opportunities to moving forward and learn\n"
-"                        alongside accomplished leaders. We're seeking an experienced and outstanding\n"
+"                        to create and deploy disruptive products.</b> Come "
+"work at a growing company\n"
+"                        that offers great benefits with opportunities to "
+"moving forward and learn\n"
+"                        alongside accomplished leaders. We're seeking an "
+"experienced and outstanding\n"
 "                        member of staff.\n"
 "                        <br><br>\n"
-"                        This position is both <b>creative and rigorous</b> by nature you need to think\n"
-"                        outside the box. We expect the candidate to be proactive and have a \"get it done\"\n"
-"                        spirit. To be successful, you will have solid solving problem skills."
+"                        This position is both <b>creative and rigorous</b> "
+"by nature you need to think\n"
+"                        outside the box. We expect the candidate to be "
+"proactive and have a \"get it done\"\n"
+"                        spirit. To be successful, you will have solid "
+"solving problem skills."
 msgstr ""
 "Meie ettevõtte töötajana teete <b>koostööd iga osakonnaga\n"
-"                         toodete loomiseks ja juurutamiseks.</b> Tulge tööle kasvavasse ettevõttesse\n"
-"                         mis pakub suuri eeliseid koos võimalusega edasi liikuda ja õppida\n"
-"                         kõrvuti edukate juhtidega. Otsime kogenud ja silmapaistvat inimest\n"
+"                         toodete loomiseks ja juurutamiseks.</b> Tulge tööle "
+"kasvavasse ettevõttesse\n"
+"                         mis pakub suuri eeliseid koos võimalusega edasi "
+"liikuda ja õppida\n"
+"                         kõrvuti edukate juhtidega. Otsime kogenud ja "
+"silmapaistvat inimest\n"
 "                         meeskonnaliiget.\\\n"
 "                         <br><br>\n"
-"                         See ametikoht on oma olemuselt nii <b>loov kui ka range</b>, peate mõtlema\n"
-"                         väljaspool kasti. Ootame kandidaadilt proaktiivset suhtumist ja \"teen ära\"\n"
-"                         suhtumist. Edu saavutamiseks tulevad kasuks head probleemide lahendamise oskused."
-
-#. module: sale_timesheet
-#: model_terms:hr.job,website_description:sale_timesheet.job_engineer
-#: model_terms:hr.job,website_description:sale_timesheet.job_interior_designer
-#: model_terms:hr.job,website_description:sale_timesheet.job_labour
-msgid "Autonomy"
-msgstr "Autonoomia"
+"                         See ametikoht on oma olemuselt nii <b>loov kui ka "
+"range</b>, peate mõtlema\n"
+"                         väljaspool kasti. Ootame kandidaadilt proaktiivset "
+"suhtumist ja \"teen ära\"\n"
+"                         suhtumist. Edu saavutamiseks tulevad kasuks head "
+"probleemide lahendamise oskused."
 
 #. module: sale_timesheet
 #: model_terms:hr.job,website_description:sale_timesheet.job_engineer
@@ -371,11 +414,6 @@ msgstr "Arveldatav aeg"
 #: model:ir.model.fields,field_description:sale_timesheet.field_timesheets_analysis_report__timesheet_invoice_type
 msgid "Billable Type"
 msgstr "Arvelduse tüüp"
-
-#. module: sale_timesheet
-#: model_terms:ir.ui.view,arch_db:sale_timesheet.project_update_default_description
-msgid "Billed"
-msgstr "Arveldatud"
 
 #. module: sale_timesheet
 #: model:ir.model.fields.selection,name:sale_timesheet.selection__account_analytic_line__timesheet_invoice_type__billable_manual
@@ -412,7 +450,7 @@ msgstr "Arveldatakse ajaarvestuslehelt"
 #. module: sale_timesheet
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.res_config_settings_view_form
 msgid "Billing"
-msgstr "Arveldus"
+msgstr "RMP arved"
 
 #. module: sale_timesheet
 #: model:ir.model.fields,field_description:sale_timesheet.field_project_project__billing_type
@@ -424,11 +462,6 @@ msgstr "Arvelduse tüüp"
 #: model:ir.ui.menu,name:sale_timesheet.menu_timesheet_billing_analysis
 msgid "By Billing Type"
 msgstr "Arveldustüübi järgi"
-
-#. module: sale_timesheet
-#: model:ir.model.fields,field_description:sale_timesheet.field_project_create_invoice__sale_order_id
-msgid "Choose the Sales Order to invoice"
-msgstr "Valige arveldamiseks müügitellimus"
 
 #. module: sale_timesheet
 #: model:ir.model.fields,field_description:sale_timesheet.field_account_analytic_line__commercial_partner_id
@@ -451,25 +484,9 @@ msgid "Cost"
 msgstr "Kulu"
 
 #. module: sale_timesheet
-#: model_terms:ir.ui.view,arch_db:sale_timesheet.project_update_default_description
-msgid "Costs"
-msgstr "Kulud"
-
-#. module: sale_timesheet
-#: model:ir.actions.act_window,name:sale_timesheet.project_project_action_multi_create_invoice
-#: model_terms:ir.ui.view,arch_db:sale_timesheet.project_create_invoice_view_form
-msgid "Create Invoice"
-msgstr "Loo arve"
-
-#. module: sale_timesheet
-#: model:ir.model,name:sale_timesheet.model_project_create_invoice
-msgid "Create Invoice from project"
-msgstr "Loo projektist arve"
-
-#. module: sale_timesheet
-#: model_terms:ir.ui.view,arch_db:sale_timesheet.project_create_invoice_view_form
-msgid "Create Sales Order from Project"
-msgstr "Looge projektist müügitellimus"
+#: model:ir.model,website_form_label:sale_timesheet.model_project_task
+msgid "Create a Task"
+msgstr "Loo ülesanne"
 
 #. module: sale_timesheet
 #: model_terms:hr.job,website_description:sale_timesheet.job_engineer
@@ -479,16 +496,14 @@ msgid "Create content that will help our users on a daily basis"
 msgstr "Looge sisu, mis aitab meie kasutajaid igapäevaselt"
 
 #. module: sale_timesheet
-#: model:ir.model.fields,field_description:sale_timesheet.field_project_create_invoice__create_uid
 #: model:ir.model.fields,field_description:sale_timesheet.field_project_sale_line_employee_map__create_uid
 msgid "Created by"
 msgstr "Loonud"
 
 #. module: sale_timesheet
-#: model:ir.model.fields,field_description:sale_timesheet.field_project_create_invoice__create_date
 #: model:ir.model.fields,field_description:sale_timesheet.field_project_sale_line_employee_map__create_date
 msgid "Created on"
-msgstr "Loodud"
+msgstr "Loomise kuupäev"
 
 #. module: sale_timesheet
 #: model:ir.model.fields,field_description:sale_timesheet.field_project_sale_line_employee_map__currency_id
@@ -511,13 +526,6 @@ msgid "Customer Ratings"
 msgstr "Kliendi hinnangud"
 
 #. module: sale_timesheet
-#: model_terms:hr.job,website_description:sale_timesheet.job_engineer
-#: model_terms:hr.job,website_description:sale_timesheet.job_interior_designer
-#: model_terms:hr.job,website_description:sale_timesheet.job_labour
-msgid "Customer Relationship"
-msgstr "Kliendisuhted"
-
-#. module: sale_timesheet
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.portal_my_timesheets_inherit
 msgid "Days Ordered,"
 msgstr "Tellitud päevad,"
@@ -528,11 +536,6 @@ msgid "Days Remaining)"
 msgstr "päevi järele)"
 
 #. module: sale_timesheet
-#: model_terms:ir.ui.view,arch_db:sale_timesheet.project_create_invoice_view_form
-msgid "Discard"
-msgstr "Loobu"
-
-#. module: sale_timesheet
 #: model_terms:hr.job,website_description:sale_timesheet.job_engineer
 #: model_terms:hr.job,website_description:sale_timesheet.job_interior_designer
 #: model_terms:hr.job,website_description:sale_timesheet.job_labour
@@ -540,10 +543,29 @@ msgid "Discover our products."
 msgstr "Tutvu meie toodetega."
 
 #. module: sale_timesheet
-#: model:ir.model.fields,field_description:sale_timesheet.field_project_create_invoice__display_name
+#: model:ir.model.fields,field_description:sale_timesheet.field_account_analytic_line__display_name
+#: model:ir.model.fields,field_description:sale_timesheet.field_account_move__display_name
+#: model:ir.model.fields,field_description:sale_timesheet.field_account_move_line__display_name
+#: model:ir.model.fields,field_description:sale_timesheet.field_account_move_reversal__display_name
+#: model:ir.model.fields,field_description:sale_timesheet.field_hr_employee__display_name
+#: model:ir.model.fields,field_description:sale_timesheet.field_product_product__display_name
+#: model:ir.model.fields,field_description:sale_timesheet.field_product_template__display_name
+#: model:ir.model.fields,field_description:sale_timesheet.field_project_project__display_name
 #: model:ir.model.fields,field_description:sale_timesheet.field_project_sale_line_employee_map__display_name
+#: model:ir.model.fields,field_description:sale_timesheet.field_project_task__display_name
+#: model:ir.model.fields,field_description:sale_timesheet.field_report_project_task_user__display_name
+#: model:ir.model.fields,field_description:sale_timesheet.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:sale_timesheet.field_sale_advance_payment_inv__display_name
+#: model:ir.model.fields,field_description:sale_timesheet.field_sale_order__display_name
+#: model:ir.model.fields,field_description:sale_timesheet.field_sale_order_line__display_name
+#: model:ir.model.fields,field_description:sale_timesheet.field_timesheets_analysis_report__display_name
 msgid "Display Name"
-msgstr "Kuvatav nimi"
+msgstr "Näidatav nimi"
+
+#. module: sale_timesheet
+#: model_terms:ir.ui.view,arch_db:sale_timesheet.timesheet_sale_page
+msgid "Draft"
+msgstr "Mustand"
 
 #. module: sale_timesheet
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.portal_my_task_inherit
@@ -556,15 +578,19 @@ msgstr "Arve mustand"
 #: model_terms:hr.job,website_description:sale_timesheet.job_labour
 msgid ""
 "Each employee has a chance to see the impact of his work.\n"
-"                    You can make a real contribution to the success of the company.\n"
+"                    You can make a real contribution to the success of the "
+"company.\n"
 "                    <br>\n"
-"                    Several activities are often organized all over the year, such as weekly\n"
-"                    sports sessions, team building events, monthly drink, and much more"
+"                    Several activities are often organized all over the "
+"year, such as weekly\n"
+"                    sports sessions, team building events, monthly drink, "
+"and much more"
 msgstr ""
 "Igal töötajal on võimalus näha oma töö mõju.\n"
 "                         Saate anda tõelise panuse ettevõtte edusse.\n"
 "                         <br>\n"
-"                         Sageli korraldatakse aastaringselt mitmeid tegevusi, näiteks kord nädalas\n"
+"                         Sageli korraldatakse aastaringselt mitmeid "
+"tegevusi, näiteks kord nädalas\n"
 "                         sporditunnid, meeskonnaüritused ja palju muud"
 
 #. module: sale_timesheet
@@ -601,11 +627,6 @@ msgstr "Lõppkuupäev"
 #: model_terms:hr.job,website_description:sale_timesheet.job_labour
 msgid "Expand your knowledge of various business industries"
 msgstr "Laienda oma teadmisi erinevates ärivaldkondades"
-
-#. module: sale_timesheet
-#: model_terms:ir.ui.view,arch_db:sale_timesheet.project_update_default_description
-msgid "Expected"
-msgstr "Eeldatav"
 
 #. module: sale_timesheet
 #: model_terms:hr.job,website_description:sale_timesheet.job_engineer
@@ -678,8 +699,22 @@ msgid "Hours Remaining)"
 msgstr "tunde järele)"
 
 #. module: sale_timesheet
-#: model:ir.model.fields,field_description:sale_timesheet.field_project_create_invoice__id
+#: model:ir.model.fields,field_description:sale_timesheet.field_account_analytic_line__id
+#: model:ir.model.fields,field_description:sale_timesheet.field_account_move__id
+#: model:ir.model.fields,field_description:sale_timesheet.field_account_move_line__id
+#: model:ir.model.fields,field_description:sale_timesheet.field_account_move_reversal__id
+#: model:ir.model.fields,field_description:sale_timesheet.field_hr_employee__id
+#: model:ir.model.fields,field_description:sale_timesheet.field_product_product__id
+#: model:ir.model.fields,field_description:sale_timesheet.field_product_template__id
+#: model:ir.model.fields,field_description:sale_timesheet.field_project_project__id
 #: model:ir.model.fields,field_description:sale_timesheet.field_project_sale_line_employee_map__id
+#: model:ir.model.fields,field_description:sale_timesheet.field_project_task__id
+#: model:ir.model.fields,field_description:sale_timesheet.field_report_project_task_user__id
+#: model:ir.model.fields,field_description:sale_timesheet.field_res_config_settings__id
+#: model:ir.model.fields,field_description:sale_timesheet.field_sale_advance_payment_inv__id
+#: model:ir.model.fields,field_description:sale_timesheet.field_sale_order__id
+#: model:ir.model.fields,field_description:sale_timesheet.field_sale_order_line__id
+#: model:ir.model.fields,field_description:sale_timesheet.field_timesheets_analysis_report__id
 msgid "ID"
 msgstr "ID"
 
@@ -714,18 +749,13 @@ msgstr "Arvelduse meetod"
 #. odoo-python
 #: code:addons/sale_timesheet/models/product_template.py:0
 msgid "Invoice based on timesheets (delivered quantity)."
-msgstr "Arve põhineb tööaja arvestuslehtedelt (tarnitud kogused). "
+msgstr "Arve põhineb tööaja arvestuslehtedelt (tarnitud kogused)."
 
 #. module: sale_timesheet
 #: model:ir.model.fields,help:sale_timesheet.field_account_analytic_line__timesheet_invoice_id
 #: model:ir.model.fields,help:sale_timesheet.field_timesheets_analysis_report__timesheet_invoice_id
 msgid "Invoice created from the timesheet"
 msgstr "Arve on loodud ajaarvestuse põhjal"
-
-#. module: sale_timesheet
-#: model_terms:ir.ui.view,arch_db:sale_timesheet.project_update_default_description
-msgid "Invoiced"
-msgstr "Arveldatud"
 
 #. module: sale_timesheet
 #. odoo-python
@@ -769,13 +799,16 @@ msgid "Kitchen Assembly (Milestones)"
 msgstr "Köögimööbli paigaldus (eesmärgid)"
 
 #. module: sale_timesheet
-#: model:ir.model.fields,field_description:sale_timesheet.field_project_create_invoice__write_uid
-#: model:ir.model.fields,field_description:sale_timesheet.field_project_sale_line_employee_map__write_uid
-msgid "Last Updated by"
-msgstr "Viimati uuendatud"
+#: model:ir.model.fields,field_description:sale_timesheet.field_project_task__last_sol_of_customer
+msgid "Last Sol Of Customer"
+msgstr ""
 
 #. module: sale_timesheet
-#: model:ir.model.fields,field_description:sale_timesheet.field_project_create_invoice__write_date
+#: model:ir.model.fields,field_description:sale_timesheet.field_project_sale_line_employee_map__write_uid
+msgid "Last Updated by"
+msgstr "Viimati uuendas"
+
+#. module: sale_timesheet
 #: model:ir.model.fields,field_description:sale_timesheet.field_project_sale_line_employee_map__write_date
 msgid "Last Updated on"
 msgstr "Viimati uuendatud"
@@ -791,17 +824,22 @@ msgstr "Juhi kogu müügitsüklit"
 #: model:ir.model.fields,help:sale_timesheet.field_product_product__service_type
 #: model:ir.model.fields,help:sale_timesheet.field_product_template__service_type
 msgid ""
-"Manually set quantities on order: Invoice based on the manually entered quantity, without creating an analytic account.\n"
-"Timesheets on contract: Invoice based on the tracked hours on the related timesheet.\n"
-"Create a task and track hours: Create a task on the sales order validation and track the work hours."
+"Manually set quantities on order: Invoice based on the manually entered "
+"quantity, without creating an analytic account.\n"
+"Timesheets on contract: Invoice based on the tracked hours on the related "
+"timesheet.\n"
+"Create a task and track hours: Create a task on the sales order validation "
+"and track the work hours."
 msgstr ""
-"Manuaalselt määratud kogused tellimusel: Arve esitatakse manuaalselt sisestatud koguse põhjal, ilma analüütilist kontot loomata.\n"
-"Tööajatabelid lepingul: Arve esitatakse seotud tööajatabelis jälgitud tundide põhjal.\n"
-"Loo ülesanne ja jälgi töötunde: Loo ülesanne müügitellimuse kinnitamisel ja jälgi töötunde."
+"Manually set quantities on order: Invoice based on the manually entered "
+"quantity, without creating an analytic account.\n"
+"Timesheets on contract: Invoice based on the tracked hours on the related "
+"timesheet.\n"
+"Create a task and track hours: Create a task on the sales order validation "
+"and track the work hours."
 
 #. module: sale_timesheet
 #: model:ir.model.fields,field_description:sale_timesheet.field_timesheets_analysis_report__margin
-#: model_terms:ir.ui.view,arch_db:sale_timesheet.project_update_default_description
 msgid "Margin"
 msgstr "Marginaal"
 
@@ -894,9 +932,12 @@ msgstr "Pole arveldatav"
 #. module: sale_timesheet
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.hr_timesheet_line_form_inherit
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.hr_timesheet_line_tree_inherit
+#: model_terms:ir.ui.view,arch_db:sale_timesheet.portal_my_timesheets_inherit
+#: model_terms:ir.ui.view,arch_db:sale_timesheet.portal_timesheet_table_inherit
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.project_task_view_form_inherit_sale_timesheet
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.timesheete_analysis_report_form
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.timesheets_analysis_report_list_inherited
+#: model_terms:ir.ui.view,arch_db:sale_timesheet.view_calendar_account_analytic_line_multi_create
 msgid "Non-billable"
 msgstr "Mittearveldatav"
 
@@ -939,12 +980,6 @@ msgstr ""
 "esitatud (ja vajaduse korral kinnitatud). Kui ajavahemikku ei ole märgitud, "
 "esitatakse kõik veel arvele võtmata (ja vajaduse korral kinnitamata) "
 "tööajatabelid, ilma et neid eristataks."
-
-#. module: sale_timesheet
-#. odoo-python
-#: code:addons/sale_timesheet/models/project_project.py:0
-msgid "Operation not supported"
-msgstr "Toiming pole toetatud"
 
 #. module: sale_timesheet
 #: model:ir.model.fields,field_description:sale_timesheet.field_account_analytic_line__order_id
@@ -1005,22 +1040,14 @@ msgstr "Hüved"
 #: model_terms:hr.job,website_description:sale_timesheet.job_engineer
 #: model_terms:hr.job,website_description:sale_timesheet.job_interior_designer
 #: model_terms:hr.job,website_description:sale_timesheet.job_labour
-msgid "Personal Evolution"
-msgstr "Isiklik areng:"
-
-#. module: sale_timesheet
-#: model_terms:hr.job,website_description:sale_timesheet.job_engineer
-#: model_terms:hr.job,website_description:sale_timesheet.job_interior_designer
-#: model_terms:hr.job,website_description:sale_timesheet.job_labour
 msgid "Play any sport with colleagues, <br>the bill is covered."
-msgstr ""
-"Tegelege kolleegidega mis tahes spordialaga, sest kulud on juba kaetud."
+msgstr "Tegelege kolleegidega mis tahes spordialaga, sest kulud on juba kaetud."
 
 #. module: sale_timesheet
 #: model:ir.model.fields,field_description:sale_timesheet.field_project_project__pricing_type
 #: model:ir.model.fields,field_description:sale_timesheet.field_project_task__pricing_type
 msgid "Pricing"
-msgstr "Hinnastamine"
+msgstr "Hinnakujundus"
 
 #. module: sale_timesheet
 #: model:ir.model,name:sale_timesheet.model_product_template
@@ -1036,7 +1063,6 @@ msgstr "Toote variatsioon"
 #: model:ir.model,name:sale_timesheet.model_project_project
 #: model:ir.model.fields,field_description:sale_timesheet.field_product_product__project_id
 #: model:ir.model.fields,field_description:sale_timesheet.field_product_template__project_id
-#: model:ir.model.fields,field_description:sale_timesheet.field_project_create_invoice__project_id
 #: model:ir.model.fields,field_description:sale_timesheet.field_project_sale_line_employee_map__project_id
 msgid "Project"
 msgstr "Projekt"
@@ -1050,22 +1076,12 @@ msgstr "Projekti müügivoog, töötajate kaardistamine"
 #: model:ir.model.fields,field_description:sale_timesheet.field_product_product__project_template_id
 #: model:ir.model.fields,field_description:sale_timesheet.field_product_template__project_template_id
 msgid "Project Template"
-msgstr "Projekti mall"
-
-#. module: sale_timesheet
-#: model:ir.model,name:sale_timesheet.model_project_update
-msgid "Project Update"
-msgstr "Projekti värskendus"
+msgstr "Projektimall"
 
 #. module: sale_timesheet
 #: model:ir.model.fields.selection,name:sale_timesheet.selection__project_project__pricing_type__fixed_rate
 msgid "Project rate"
 msgstr "Projekti määr"
-
-#. module: sale_timesheet
-#: model:ir.model.fields,help:sale_timesheet.field_project_create_invoice__project_id
-msgid "Project to make billable"
-msgstr "Projekt arveldamiseks"
 
 #. module: sale_timesheet
 #: model_terms:hr.job,website_description:sale_timesheet.job_engineer
@@ -1099,11 +1115,6 @@ msgstr "Alles jäänud saadaval tunde"
 #: model_terms:hr.job,website_description:sale_timesheet.job_labour
 msgid "Responsibilities"
 msgstr "Kohustused"
-
-#. module: sale_timesheet
-#: model_terms:ir.ui.view,arch_db:sale_timesheet.project_update_default_description
-msgid "Revenues"
-msgstr "Käibed"
 
 #. module: sale_timesheet
 #: model_terms:ir.actions.act_window,help:sale_timesheet.timesheet_action_billing_report
@@ -1151,7 +1162,7 @@ msgstr "Müügitellimus"
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.report_timesheet_sale_order
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.timesheet_view_search
 msgid "Sales Order Item"
-msgstr "Müügiartikkel"
+msgstr "Müügitellimuse rida"
 
 #. module: sale_timesheet
 #: model:ir.model,name:sale_timesheet.model_sale_order_line
@@ -1166,13 +1177,29 @@ msgstr "Müügitellimused"
 #. module: sale_timesheet
 #: model:ir.model.fields,help:sale_timesheet.field_project_project__sale_line_employee_ids
 msgid ""
-"Sales order item that will be selected by default on the timesheets of the corresponding employee. It bypasses the sales order item defined on the project and the task, and can be modified on each timesheet entry if necessary. In other words, it defines the rate at which an employee's time is billed based on their expertise, skills or experience, for instance.\n"
-"If you would like to bill the same service at a different rate, you need to create two separate sales order items as each sales order item can only have a single unit price at a time.\n"
-"You can also define the hourly company cost of your employees for their timesheets on this project specifically. It will bypass the timesheet cost set on the employee."
+"Sales order item that will be selected by default on the timesheets of the "
+"corresponding employee. It bypasses the sales order item defined on the "
+"project and the task, and can be modified on each timesheet entry if "
+"necessary. In other words, it defines the rate at which an employee's time "
+"is billed based on their expertise, skills or experience, for instance.\n"
+"If you would like to bill the same service at a different rate, you need to "
+"create two separate sales order items as each sales order item can only have "
+"a single unit price at a time.\n"
+"You can also define the hourly company cost of your employees for their "
+"timesheets on this project specifically. It will bypass the timesheet cost "
+"set on the employee."
 msgstr ""
-"Sales order item that will be selected by default on the timesheets of the corresponding employee. It bypasses the sales order item defined on the project and the task, and can be modified on each timesheet entry if necessary. In other words, it defines the rate at which an employee's time is billed based on their expertise, skills or experience, for instance.\n"
-"If you would like to bill the same service at a different rate, you need to create two separate sales order items as each sales order item can only have a single unit price at a time.\n"
-"You can also define the hourly company cost of your employees for their timesheets on this project specifically. It will bypass the timesheet cost set on the employee."
+"Sales order item that will be selected by default on the timesheets of the "
+"corresponding employee. It bypasses the sales order item defined on the "
+"project and the task, and can be modified on each timesheet entry if "
+"necessary. In other words, it defines the rate at which an employee's time "
+"is billed based on their expertise, skills or experience, for instance.\n"
+"If you would like to bill the same service at a different rate, you need to "
+"create two separate sales order items as each sales order item can only have "
+"a single unit price at a time.\n"
+"You can also define the hourly company cost of your employees for their "
+"timesheets on this project specifically. It will bypass the timesheet cost "
+"set on the employee."
 
 #. module: sale_timesheet
 #: model:ir.model.fields,help:sale_timesheet.field_account_analytic_line__so_line
@@ -1193,13 +1220,15 @@ msgstr "Müügitellimus, millega ülesanne on seotud."
 #. odoo-python
 #: code:addons/sale_timesheet/controllers/portal.py:0
 msgid "Search in Invoice"
-msgstr "Otsi arvelt"
+msgstr ""
+"Valige arveldatav projekt, mille kohta saab ülesandeid luua. See seadistus "
+"tuleb määrata igale ettevõttele."
 
 #. module: sale_timesheet
 #. odoo-python
 #: code:addons/sale_timesheet/controllers/portal.py:0
-msgid "Search in Sales Order"
-msgstr "Otsi müügitellimusest"
+msgid "Search in Sales Order Item"
+msgstr "Otsi müügitellimuse artiklist"
 
 #. module: sale_timesheet
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.res_config_settings_view_form
@@ -1290,36 +1319,19 @@ msgid "Tasks Analysis"
 msgstr "Ülesannete analüüs"
 
 #. module: sale_timesheet
-#: model_terms:hr.job,website_description:sale_timesheet.job_engineer
-#: model_terms:hr.job,website_description:sale_timesheet.job_interior_designer
-#: model_terms:hr.job,website_description:sale_timesheet.job_labour
-msgid "Technical Expertise"
-msgstr "Tehniline kogemus"
-
-#. module: sale_timesheet
 #. odoo-python
 #: code:addons/sale_timesheet/models/product_product.py:0
 #: code:addons/sale_timesheet/models/product_template.py:0
 msgid ""
-"The %s product is required by the Timesheets app and cannot be archived nor "
-"deleted."
-msgstr ""
-"Rakendus Timesheets vajab toodet %s ja seda ei saa arhiveerida ega "
-"kustutada."
-
-#. module: sale_timesheet
-#. odoo-python
-#: code:addons/sale_timesheet/models/product_template.py:0
-msgid ""
-"The %s product is required by the Timesheets app and cannot be linked to a "
-"company."
+"The %s product is required by the Timesheets app and cannot be archived, "
+"deleted nor linked to a company."
 msgstr ""
 
 #. module: sale_timesheet
 #. odoo-python
-#: code:addons/sale_timesheet/wizard/project_create_invoice.py:0
-msgid "The selected Sales Order should contain something to invoice."
-msgstr "Valitud müügitellimus peaks sisaldama midagi arveldamiseks."
+#: code:addons/sale_timesheet/models/sale_order.py:0
+msgid "The Sales Order must contain at least one service product."
+msgstr ""
 
 #. module: sale_timesheet
 #: model:ir.model.fields,help:sale_timesheet.field_project_project__pricing_type
@@ -1328,8 +1340,8 @@ msgid ""
 "The task rate is perfect if you would like to bill different services to "
 "different customers at different rates. The fixed rate is perfect if you "
 "bill a service at a fixed rate per hour or day worked regardless of the "
-"employee who performed it. The employee rate is preferable if your employees"
-" deliver the same service at a different rate. For instance, junior and "
+"employee who performed it. The employee rate is preferable if your employees "
+"deliver the same service at a different rate. For instance, junior and "
 "senior consultants would deliver the same service (= consultancy), but at a "
 "different rate because of their level of seniority."
 msgstr ""
@@ -1337,8 +1349,8 @@ msgstr ""
 "teenuseid erinevate määradega arvele võtta. Fikseeritud määr sobib "
 "ideaalselt, kui Te arvete teenuse eest kindla hinnaga töötatud tunni või "
 "päeva kohta, olenemata sellest, milline töötaja seda tegi. Töötaja määr on "
-"eelistatav, kui Teie töötajad osutavad sama teenust erineva hinnaga. Näiteks"
-" nooremad ja vanemad konsultandid osutavad sama teenust (= konsultatsioon), "
+"eelistatav, kui Teie töötajad osutavad sama teenust erineva hinnaga. Näiteks "
+"nooremad ja vanemad konsultandid osutavad sama teenust (= konsultatsioon), "
 "kuid nende staažist tulenevalt erineva tariifiga."
 
 #. module: sale_timesheet
@@ -1348,6 +1360,12 @@ msgid ""
 "employee's HR Settings"
 msgstr ""
 "See kulu tühistab töötaja vaikimisi määratud tunnitasu töötaja HR seadetes."
+
+#. module: sale_timesheet
+#. odoo-python
+#: code:addons/sale_timesheet/models/project_project.py:0
+msgid "This project is current linked to timesheet."
+msgstr ""
 
 #. module: sale_timesheet
 #: model:ir.model.fields,field_description:sale_timesheet.field_product_product__service_upsell_threshold
@@ -1526,32 +1544,12 @@ msgstr "Timesheets taken when invoicing time spent"
 #. module: sale_timesheet
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.project_project_view_form
 msgid "Timesheets without a sales order item are reported as"
-msgstr "Tööaja arvestuslehed ilma müügitellimuse artiklita märgitakse kui "
+msgstr "Tööaja arvestuslehed ilma müügitellimuse artiklita märgitakse kui"
 
 #. module: sale_timesheet
-#: model_terms:ir.ui.view,arch_db:sale_timesheet.project_update_default_description
-msgid "To Bill"
-msgstr "Arveldada"
-
-#. module: sale_timesheet
-#: model_terms:ir.ui.view,arch_db:sale_timesheet.project_update_default_description
-msgid "To Invoice"
-msgstr "Arveks teha"
-
-#. module: sale_timesheet
-#: model_terms:ir.ui.view,arch_db:sale_timesheet.project_update_default_description
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.timesheets_analysis_report_list_inherited
 msgid "Total"
 msgstr "Kokku"
-
-#. module: sale_timesheet
-#: model:ir.model.fields,help:sale_timesheet.field_project_create_invoice__amount_to_invoice
-msgid ""
-"Total amount to invoice on the sales order, including all items (services, "
-"storables, expenses, ...)"
-msgstr ""
-"Müügitellimusel esitatava arve kogusumma, sealhulgas kõik kirjed (teenused, "
-"laovarud, kulud, ...)."
 
 #. module: sale_timesheet
 #: model:ir.model.fields,help:sale_timesheet.field_account_bank_statement_line__timesheet_total_duration
@@ -1574,8 +1572,8 @@ msgstr "Jälgimisteenus"
 #: model_terms:ir.actions.act_window,help:sale_timesheet.action_timesheet_from_invoice
 #: model_terms:ir.actions.act_window,help:sale_timesheet.timesheet_action_from_sales_order_item
 msgid ""
-"Track your working hours by projects every day and invoice this time to your"
-" customers."
+"Track your working hours by projects every day and invoice this time to your "
+"customers."
 msgstr ""
 "Jälgige igapäevaselt oma projektipõhist tööaega ning arveldage see aeg "
 "kliendile edasi."
@@ -1590,7 +1588,34 @@ msgstr "Koolitused"
 #. module: sale_timesheet
 #: model:ir.model.fields,field_description:sale_timesheet.field_project_sale_line_employee_map__price_unit
 msgid "Unit Price"
-msgstr "Ühikhind"
+msgstr "Ühiku hind"
+
+#. module: sale_timesheet
+#: model:ir.model.fields,help:sale_timesheet.field_project_task__display_name
+msgid ""
+"Use these keywords in the title to set new tasks:\n"
+"\n"
+"        30h Allocate 30 hours to the task\n"
+"        #tags Set tags on the task\n"
+"        @user Assign the task to a user\n"
+"        ! Set the task a medium priority\n"
+"        !! Set the task a high priority\n"
+"        !!! Set the task a urgent priority\n"
+"\n"
+"        Make sure to use the right format and order e.g. Improve the "
+"configuration screen 5h #feature #v16 @Mitchell !"
+msgstr ""
+"Kasuta pealkirjas uute ülesannete määramiseks neid märksõnu:\n"
+"\n"
+"        30h Määra 30 tundi ülesandele\n"
+"        #tags Lisa silte ülesandele\n"
+"        @kasutaja Määra ülesandele vastutav/kasutaja\n"
+"        ! Määra ülesandele keskmine prioriteet\n"
+"        !! Määra ülesandele kõrge prioriteet\n"
+"        !!! Määra ülesandele kiireloomuline prioriteet\n"
+"\n"
+"        Jälgi kindlasti, et kasutad õiget formaati ja järjekorda nt. Paranda "
+"konfigureerimise ekraani 5h #feature #v16 @Mitchell !"
 
 #. module: sale_timesheet
 #: model_terms:hr.job,website_description:sale_timesheet.job_engineer
@@ -1598,12 +1623,6 @@ msgstr "Ühikhind"
 #: model_terms:hr.job,website_description:sale_timesheet.job_labour
 msgid "Valid work permit for Belgium"
 msgstr "Kehtiv tööluba Belgias"
-
-#. module: sale_timesheet
-#. odoo-python
-#: code:addons/sale_timesheet/models/project_project.py:0
-msgid "Value does not exist in the pricing type"
-msgstr "Väärtus ei ole hinnakujundustüübis olemas"
 
 #. module: sale_timesheet
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.portal_invoice_page_inherit
@@ -1637,12 +1656,6 @@ msgstr "Mis on töös head?"
 
 #. module: sale_timesheet
 #. odoo-python
-#: code:addons/sale_timesheet/wizard/project_create_invoice.py:0
-msgid "You can only apply this action from a project."
-msgstr "Seda toimingut saate rakendada ainult projektist."
-
-#. module: sale_timesheet
-#. odoo-python
 #: code:addons/sale_timesheet/models/project_project.py:0
 msgid ""
 "You cannot link a billable project to a sales order item that comes from an "
@@ -1666,8 +1679,7 @@ msgstr ""
 #: code:addons/sale_timesheet/models/hr_timesheet.py:0
 msgid "You cannot modify timesheets that are already invoiced."
 msgstr ""
-"Te ei saa muuta tööaja arvestustabeleid, mille kohta on juba arveid "
-"esitatud."
+"Te ei saa muuta tööaja arvestustabeleid, mille kohta on juba arveid esitatud."
 
 #. module: sale_timesheet
 #. odoo-python
@@ -1698,6 +1710,409 @@ msgstr "müüdud tundidest."
 
 #. module: sale_timesheet
 #. odoo-python
+#: code:addons/sale_timesheet/models/account_move.py:0
+msgid "project_id"
+msgstr "project_id"
+
+#. module: sale_timesheet
+#. odoo-python
 #: code:addons/sale_timesheet/models/sale_order_line.py:0
 msgid "remaining"
 msgstr "alles jäänud"
+
+#~ msgid " Candidate Orders"
+#~ msgstr " Kandidaatide tellimused"
+
+#~ msgid ""
+#~ "% of timesheets that are billable compared to the total number of "
+#~ "timesheets linked to the AA of the project, rounded to the unit."
+#~ msgstr ""
+#~ "Arveid esitavate töölehtede % võrreldes projekti AA-ga seotud töölehtede "
+#~ "koguarvuga, ümardatud ühiku täpsusega."
+
+#~ msgid "%(amount)s %(label)s will be added to the new Sales Order."
+#~ msgstr "%(amount)s %(label)s lisatakse uuele müügitellimusele."
+
+#~ msgid ", for a revenue of"
+#~ msgstr ", mille tulu on"
+
+#~ msgid ", leading to a"
+#~ msgstr ", mis viib"
+
+#~ msgid "<strong>To invoice:</strong>"
+#~ msgstr "<strong>Arveks teha:</strong>"
+
+#~ msgid "<u>Profitability</u>"
+#~ msgstr "<u>Kasumlikkus</u>"
+
+#~ msgid "About us"
+#~ msgstr "Meist"
+
+#~ msgid "Allocated Hours"
+#~ msgstr "Jaotatud tunnid"
+
+#~ msgid "Amount to invoice"
+#~ msgstr "Arve summa"
+
+#~ msgid ""
+#~ "As a leading professional services firm,\n"
+#~ "                                we know that success is all about the\n"
+#~ "                                commitment we put on strong services."
+#~ msgstr ""
+#~ "Juhtiva professionaalse teenindusettevõttena\n"
+#~ "                                 me teame, et edu sõltub pühendumusest\n"
+#~ "                                 heale teenindusele."
+
+#~ msgid "At least one line should be filled."
+#~ msgstr "Vähemalt üks rida tuleks täita."
+
+#~ msgid "Billable Hours"
+#~ msgstr "Arveldatavad tunnid"
+
+#~ msgid "Billable Percentage"
+#~ msgstr "Arveldatav protsent"
+
+#~ msgid "Choose the Sales Order to invoice"
+#~ msgstr "Valige arveldamiseks müügitellimus"
+
+#~ msgid "Commercial Entity"
+#~ msgstr "Äriline üksus"
+
+#~ msgid "Company"
+#~ msgstr "Ettevõte"
+
+#~ msgid "Cost Currency"
+#~ msgstr "Kulu valuuta"
+
+#~ msgid "Create Invoice"
+#~ msgstr "Loo arve"
+
+#~ msgid "Create Invoice from project"
+#~ msgstr "Loo projektist arve"
+
+#~ msgid "Create SO Line from project"
+#~ msgstr "Looge projektist müügitellimuse rida"
+
+#~ msgid "Create SO from project"
+#~ msgstr "Looge projektist müügitellimus"
+
+#~ msgid "Create Sales Order"
+#~ msgstr "Looge müügitellimus"
+
+#~ msgid "Create Sales Order from Project"
+#~ msgstr "Looge projektist müügitellimus"
+
+#~ msgid "Create a Sales Order"
+#~ msgstr "Looge müügitellimus"
+
+#~ msgid "Customer of the sales order"
+#~ msgstr "Müügitellimuse klient"
+
+#~ msgid "Display Create Order"
+#~ msgstr "Kuva Loo tellimus"
+
+#~ msgid "Employee that has timesheets on the project."
+#~ msgstr "Töötaja, kellel on projektis ajalogimise read."
+
+#~ msgid ""
+#~ "Great quotation templates will significantly\n"
+#~ "                                <strong>boost your success rate</strong>. "
+#~ "The\n"
+#~ "                                first section is usually about your "
+#~ "company,\n"
+#~ "                                your references, your methodology or\n"
+#~ "                                guarantees, your team, SLA, terms and "
+#~ "conditions, etc."
+#~ msgstr ""
+#~ "Head pakkumise mallid aitavad oluliselt kaasa\n"
+#~ "                                 <strong>edukuse kasvatamisele</strong>. "
+#~ "Esimeses\n"
+#~ "                                 jaotises on tavaliselt info Teie "
+#~ "ettevõtte kohta,\n"
+#~ "                                 Teie viited, metoodika või\n"
+#~ "                                 garantiid, meeskond, SLA, tingimused jne."
+
+#~ msgid "Has Displayed Warning Upsell"
+#~ msgstr "On kuvatud hoiatus Upsell"
+
+#~ msgid ""
+#~ "If you edit a quotation from the 'Preview' of a quotation, you will\n"
+#~ "                        update that quotation only. If you edit the "
+#~ "quotation\n"
+#~ "                        template (from the Configuration menu), all "
+#~ "future quotations will\n"
+#~ "                        use this modified template."
+#~ msgstr ""
+#~ "Kui muudate pakkumist pakkumise \"Eelvaatest#, värskendate\n"
+#~ "                         ainult seda pakkumist. Kui muudate pakkumise\n"
+#~ "                         malli (menüüst Seadistus), on kõik tulevased "
+#~ "hinnapakkumised\n"
+#~ "                         koostatud selle muudetud malliga."
+
+#~ msgid "Info Invoice"
+#~ msgstr "Infoarve"
+
+#~ msgid ""
+#~ "Invoice based on timesheets (delivered quantity) on projects or tasks "
+#~ "you'll create later on."
+#~ msgstr ""
+#~ "Esitage arveid tööajatabelite alusel (delivered quantity) projektide või "
+#~ "ülesannete kohta, mille loote hiljem."
+
+#~ msgid ""
+#~ "Invoice based on timesheets (delivered quantity), and create a project "
+#~ "for the order with a task for each sales order line to track the time "
+#~ "spent."
+#~ msgstr ""
+#~ "Esitage arveid tööajatabelite alusel (delivered quantity) ja looge "
+#~ "tellimuse jaoks projekt koos ülesandega iga müügitellimuse rea jaoks, et "
+#~ "jälgida kulutatud aega."
+
+#~ msgid ""
+#~ "Invoice based on timesheets (delivered quantity), and create a task in an "
+#~ "existing project to track the time spent."
+#~ msgstr ""
+#~ "Esitage arveid tööajatabelite alusel (delivered quantity) ja looge "
+#~ "olemasolevasse projekti ülesanne, et jälgida kulutatud aega."
+
+#~ msgid ""
+#~ "Invoice based on timesheets (delivered quantity), and create an empty "
+#~ "project for the order to track the time spent."
+#~ msgstr ""
+#~ "Esitage arveid tööajatabelite alusel (delivered quantity) ja looge "
+#~ "tellimuse jaoks tühi projekt, et jälgida kulutatud aega."
+
+#~ msgid "Invoice your time and material to customers"
+#~ msgstr "Arveldage klientidele edasi kulunud aega ja materjale."
+
+#~ msgid "Invoiced"
+#~ msgstr "Arveldatud"
+
+#~ msgid "Invoicing Timesheet Enabled"
+#~ msgstr "Ajalogimise arveldamine lubatud"
+
+#~ msgid "Is Cost Manually Changed"
+#~ msgstr "Hind on käsitsi muudetav"
+
+#~ msgid "Lines"
+#~ msgstr "Read"
+
+#~ msgid "No Sales Order"
+#~ msgstr "Müügitellimus puudub"
+
+#~ msgid "No Sales Order Item"
+#~ msgstr "Müügitellimuse artikkel puudub"
+
+#~ msgid "Non Billable Tasks"
+#~ msgstr "MItte arveldatavad ülesanded"
+
+#~ msgid "Non-billable Hours"
+#~ msgstr "Mittearveldatavad tunnid"
+
+#~ msgid "Number of timesheets"
+#~ msgstr "Ajaarvestuslehtede arv"
+
+#~ msgid "Operation not supported"
+#~ msgstr "Toiming pole toetatud"
+
+#~ msgid "Ordered,"
+#~ msgstr "Tellitud,"
+
+#~ msgid "Our Offer"
+#~ msgstr "Meie pakkumine"
+
+#~ msgid "Our Quality"
+#~ msgstr "Meie kvaliteet"
+
+#~ msgid "Our Service"
+#~ msgstr "Meie teenus"
+
+#~ msgid "Price"
+#~ msgstr "Hind"
+
+#~ msgid ""
+#~ "Product of the sales order item. Must be a service invoiced based on "
+#~ "timesheets on tasks."
+#~ msgstr ""
+#~ "Müügitellimuse kirje toode. Peab olema teenus, mille kohta esitatakse "
+#~ "arve tööülesannete ajatabeli alusel."
+
+#~ msgid ""
+#~ "Product quality is the foundation we\n"
+#~ "                                stand on; we build it with a relentless\n"
+#~ "                                focus on fabric, performance and "
+#~ "craftsmanship."
+#~ msgstr ""
+#~ "Product quality is the foundation we\n"
+#~ "                                stand on; we build it with a relentless\n"
+#~ "                                focus on fabric, performance and "
+#~ "craftsmanship."
+
+#~ msgid "Project Update"
+#~ msgstr "Projekti värskendus"
+
+#~ msgid "Project for which we are creating a sales order"
+#~ msgstr "Projekt, mille jaoks koostame müügitellimust"
+
+#~ msgid "Project to make billable"
+#~ msgstr "Projekt arveldamiseks"
+
+#~ msgid "Remaining"
+#~ msgstr "Allesjäänud"
+
+#~ msgid "Remaining Days on SO"
+#~ msgstr "Alles jäänud päevi müügitellimusel"
+
+#~ msgid "Remaining Hours on SO"
+#~ msgstr "Alles jäänud tunde müügitellimusel"
+
+#~ msgid "Remaining)"
+#~ msgstr "Ülejäänud)"
+
+#~ msgid "Sale Order"
+#~ msgstr "Müügitellimus"
+
+#~ msgid "Sale Order Analytic Account"
+#~ msgstr "Müügitellimuse analüütiline konto"
+
+#~ msgid "Sale line/Employee map"
+#~ msgstr "Müügirida / töötaja kaart"
+
+#~ msgid "Search in Sales Order"
+#~ msgstr "Otsi müügitellimusest"
+
+#~ msgid "Select a non billable project on which tasks can be created."
+#~ msgstr "Valige mitte arveldatav projekt, millesse luuakse ülesanne."
+
+#~ msgid "Service"
+#~ msgstr "Teenus"
+
+#~ msgid "Service Upsell Threshold Ratio"
+#~ msgstr "Service Upsell Threshold Ratio"
+
+#~ msgid "Sold"
+#~ msgstr "Müüdud"
+
+#~ msgid "Task Recurrence"
+#~ msgstr "Ülesande kordumine"
+
+#~ msgid "Tasks"
+#~ msgstr "Ülesanded"
+
+#~ msgid ""
+#~ "The %s product is required by the Timesheets app and cannot be archived "
+#~ "nor deleted."
+#~ msgstr ""
+#~ "Rakendus Timesheets vajab toodet %s ja seda ei saa arhiveerida ega "
+#~ "kustutada."
+
+#~ msgid ""
+#~ "The Sales Order cannot be created because you did not enter some "
+#~ "employees that entered timesheets on this project. Please list all the "
+#~ "relevant employees before creating the Sales Order.\n"
+#~ "Missing employee(s): %s"
+#~ msgstr ""
+#~ "Müügitellimust ei saa luua, sest Te ei ole sisestanud mõnda töötajat, kes "
+#~ "sisestasid selle projekti tööajatabelid. Palun lisage kõik seotud "
+#~ "töötajad enne müügitellimuse loomist.\n"
+#~ "Puuduv(ad) töötaja(d): %s"
+
+#~ msgid "The cost of the project is now at"
+#~ msgstr "Projekti maksumus on hetkel"
+
+#~ msgid "The project has already a sale order."
+#~ msgstr "Projektil on juba müügitellimus."
+
+#~ msgid "The project is already linked to a sales order item."
+#~ msgstr "Projekt on juba seotud müügitellimuse artikliga."
+
+#~ msgid ""
+#~ "The sales order cannot be created because some timesheets of this project "
+#~ "are already linked to another sales order."
+#~ msgstr ""
+#~ "Müügitellimust ei saa luua, sest mõned selle projekti tööajatabelid on "
+#~ "juba seotud teise müügitellimusega."
+
+#~ msgid "The selected Sales Order should contain something to invoice."
+#~ msgstr "Valitud müügitellimus peaks sisaldama midagi arveldamiseks."
+
+#~ msgid ""
+#~ "This is a <strong>sample quotation template</strong>. You should\n"
+#~ "                                customize it to fit your own needs from "
+#~ "the <i>Sales</i>\n"
+#~ "                                application, using the menu: "
+#~ "Configuration /\n"
+#~ "                                Quotation Templates."
+#~ msgstr ""
+#~ "See on <strong>pakkumise näidismall</strong>. Te peaksite\n"
+#~ "                                 kohandama seda vastavalt oma vajadustele "
+#~ "<i>müügi</i>\n"
+#~ "                                 moodulist, kasutades menüüd: "
+#~ "Hinnapakkumise /\n"
+#~ "                                 mallide seadistus."
+
+#~ msgid "Timesheet Encoding Unit"
+#~ msgstr "Ajaarvestuse kodeerimise üksus"
+
+#~ msgid "Timesheet activities"
+#~ msgstr "Ajaarvestuse tegevused"
+
+#~ msgid "Timesheets (Non Billable)"
+#~ msgstr "Tööaja arvestuslehed (Mittearveldatav)"
+
+#~ msgid ""
+#~ "Total amount to invoice on the sales order, including all items "
+#~ "(services, storables, expenses, ...)"
+#~ msgstr ""
+#~ "Müügitellimusel esitatava arve kogusumma, sealhulgas kõik kirjed "
+#~ "(teenused, laovarud, kulud, ...)."
+
+#~ msgid "Total:"
+#~ msgstr "Kokku:"
+
+#~ msgid "Unit price of the sales order item."
+#~ msgstr "Müügitellimuse üksuse hind."
+
+#~ msgid "Value does not exist in the pricing type"
+#~ msgstr "Väärtus ei ole hinnakujundustüübis olemas"
+
+#~ msgid "Warning Employee Rate"
+#~ msgstr "Hoiatav töötaja määr"
+
+#~ msgid ""
+#~ "We always ensure that our products are\n"
+#~ "                                set at a fair price so that you will be\n"
+#~ "                                happy to buy them."
+#~ msgstr ""
+#~ "Garanteerime, et meie tooted on\n"
+#~ "                                 määratud õiglase hinnaga, ning ostate\n"
+#~ "                                 neid hea meelega."
+
+#~ msgid "Wizard"
+#~ msgstr "Nõustaja"
+
+#~ msgid ""
+#~ "You can <strong>set a description per product</strong>. Odoo will\n"
+#~ "                        automatically create a quotation using the "
+#~ "descriptions\n"
+#~ "                        of all products in the proposal. The table of "
+#~ "content\n"
+#~ "                        on the left is generated automatically using the "
+#~ "styles you\n"
+#~ "                        used in your description (heading 1, heading "
+#~ "2, ...)"
+#~ msgstr ""
+#~ "Arveldatud ajaarvestuslehte ei saa muuta (see on seotud müügitellimuse "
+#~ "arveldatud ridadega)."
+
+#~ msgid "You can only apply this action from a project."
+#~ msgstr "Seda toimingut saate rakendada ainult projektist."
+
+#~ msgid "days"
+#~ msgstr "päeva pärast"
+
+#~ msgid "hours"
+#~ msgstr "tundi"
+
+#~ msgid "margin ("
+#~ msgstr "marginaal ("

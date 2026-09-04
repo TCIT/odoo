@@ -1,49 +1,61 @@
-/** @odoo-module */
-
 import {
     insertSnippet,
     registerWebsitePreviewTour,
-} from '@website/js/tours/tour_utils';
+    clickToolbarButton,
+} from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour("text_animations", {
-    url: "/",
-    edition: true,
-}, () => [
-    ...insertSnippet({
-        id: "s_cover",
-        name: "Cover",
-        groupName: "Intro",
-    }),
+function setTextAnimation(trigger, value) {
+    return [
+        ...clickToolbarButton("snippet title", ".s_cover h1", "Animate Text", true),
+        {
+            content: "Open Effect options in the popover",
+            trigger: ".o_popover [data-label='Effect'] button.dropdown-toggle",
+            run: "click",
+        },
+        {
+            content: "Select the text animation",
+            trigger: `.o_popover [data-action-value="${value}"]`,
+            run: "click",
+        },
+        {
+            content: "Click away to close the popover",
+            trigger: `${trigger}:not(.o_popover)`,
+            run: "click",
+        },
+    ];
+}
+
+registerWebsitePreviewTour(
+    "text_animations",
     {
-        content: "Click on the snippet title",
-        trigger: ":iframe .s_cover h1",
-        run: "dblclick", // Make sure the title is selected.
+        url: "/",
+        edition: true,
     },
-    {
-        content: "Click on the 'Animate Text' button to activate the option",
-        trigger: "div.o_we_animate_text",
-        run: "click",
-    },
-    {
-        content: "Check that the animation was applied",
-        trigger: ":iframe .s_cover h1 span.o_animated_text",
-    },
-    {
-        content: "Click on the 'Animate Text' button",
-        trigger: "div.o_we_animate_text",
-        run: "click",
-    },
-    {
-        content: "Check that the animation was disabled for the title",
-        trigger: ":iframe .s_cover:not(:has(.o_animated_text))",
-    },
-    {
-        content: "Try to apply the text animation again",
-        trigger: "div.o_we_animate_text",
-        run: "click",
-    },
-    {
-        content: "Check that the animation was applied",
-        trigger: ":iframe .s_cover:has(span.o_animated_text)",
-    },
-]);
+    () => [
+        ...insertSnippet({
+            id: "s_cover",
+            name: "Cover",
+            groupName: "Intro",
+        }),
+        ...setTextAnimation(":iframe .s_cover h1", "o_anim_slide_in"),
+        {
+            content: "Check that the animation was applied",
+            trigger: ":iframe .s_cover .o_animated_text",
+        },
+        ...clickToolbarButton("snippet title", ".s_cover h1", "Animate Text", true),
+        {
+            content: "Reset the text animation",
+            trigger: ".o_popover button[title='Reset']",
+            run: "click",
+        },
+        {
+            content: "Check that the animation was disabled for the title",
+            trigger: ":iframe .s_cover:not(:has(.o_animated_text))",
+        },
+        ...setTextAnimation(":iframe .s_cover h1", "o_anim_slide_in"),
+        {
+            content: "Check that the animation was applied",
+            trigger: ":iframe .s_cover:has(span.o_animated_text)",
+        },
+    ]
+);

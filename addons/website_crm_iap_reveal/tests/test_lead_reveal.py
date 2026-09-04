@@ -12,7 +12,7 @@ class TestLeadMine(TestCrmCommon, MockIAPReveal):
     @classmethod
     def setUpClass(cls):
         super(TestLeadMine, cls).setUpClass()
-        cls.registry.enter_test_mode(cls.cr)
+        cls.registry_enter_test_mode_cls()
 
         cls.test_industry_tags = cls.env.ref('crm_iap_mine.crm_iap_mine_industry_33') + cls.env.ref('crm_iap_mine.crm_iap_mine_industry_148')
         cls.test_roles = cls.env.ref('crm_iap_mine.crm_iap_mine_role_11') + cls.env.ref('crm_iap_mine.crm_iap_mine_role_19')
@@ -71,11 +71,6 @@ class TestLeadMine(TestCrmCommon, MockIAPReveal):
             {'ip': '90.80.70.61', 'rules': cls.test_request_1},
             {'ip': '90.80.70.70', 'rules': cls.test_request_2},
         ]
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.registry.leave_test_mode()
-        super().tearDownClass()
 
     @users('user_sales_manager')
     def test_reveal_error_credit(self):
@@ -187,9 +182,9 @@ class TestLeadMine(TestCrmCommon, MockIAPReveal):
             else:
                 self.assertFalse(lead.function)
             self.assertFalse(lead.partner_id)
-            self.assertEqual(lead.partner_name, '%s GmbH legal_name' % base_name)
+            self.assertEqual(lead.partner_name, '%s GmbH' % base_name)
             self.assertEqual(lead.phone, '+4930499193937')
             self.assertEqual(lead.state_id, state_de)
             self.assertEqual(lead.street, 'Mennrather Str. 123456')
-            self.assertEqual(lead.website, 'https://www.%s.de' % base_name)
+            self.assertEqual(lead.website, 'https://%s.de' % base_name)
             self.assertEqual(lead.zip, '41179')

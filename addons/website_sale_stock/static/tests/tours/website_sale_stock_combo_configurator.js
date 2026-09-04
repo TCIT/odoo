@@ -8,7 +8,7 @@ registry
     .add('website_sale_stock_combo_configurator', {
         url: '/shop?search=Combo product',
         steps: () => [
-            ...wsTourUtils.addToCart({ productName: "Combo product", search: false }),
+            ...wsTourUtils.addToCart({ productName: "Combo product", search: false, expectUnloadPage: true }),
             configuratorTourUtils.assertQuantity(1),
             // Assert that it's impossible to add less than 1 product.
             configuratorTourUtils.setQuantity(0),
@@ -39,3 +39,36 @@ registry
             },
         ],
    });
+
+registry.category("web_tour.tours").add("test_website_sale_stock_max_combo", {
+    steps: () => [
+        {
+            content: "Select ComboProduct",
+            trigger: ".oe_product_cart:first a:contains('ComboProduct')",
+            run: "click",
+            expectUnloadPage: true,
+        },
+        {
+            content: "VariantMixin has set the maximum",
+            trigger: "input[name=add_qty][data-max='2']",
+        },
+        {
+            content: "Add one quantity",
+            trigger: ".css_quantity_plus",
+            run: "click",
+        },
+        {
+            content: "One quantity should be added",
+            trigger: "input[name=add_qty]:value(2)",
+        },
+        {
+            content: "Try to add one quantity",
+            trigger: ".css_quantity_plus",
+            run: "click",
+        },
+        {
+            content: "No quantity should be added",
+            trigger: "input[name=add_qty]:value(2)",
+        },
+    ],
+});

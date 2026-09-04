@@ -24,7 +24,7 @@ class TestWebsiteAssets(odoo.tests.HttpCase):
         Website.browse(1).domain = domain_1
 
         self.authenticate('admin', 'admin')
-        self.env['web_editor.assets'].with_context(website_id=1).make_scss_customization(
+        self.env['website.assets'].with_context(website_id=1).make_scss_customization(
             '/website/static/src/scss/options/colors/user_color_palette.scss',
             {"o-cc1-bg": "'400'"},
         )
@@ -99,7 +99,7 @@ class TestWebsiteAssets(odoo.tests.HttpCase):
         page = self.url_open('/').text
 
         new_public_assets_links = re.findall(r'(/web/assets/\d+/\w{7}/web.assets_frontend\..+)"/>', page)
-        self.assertEqual(new_admin_assets_links, new_public_assets_links, "t-cache should have been invalidated for public user too")
+        self.assertEqual(new_admin_assets_links, new_public_assets_links, "caches should have been invalidated for public user too")
 
     def test_invalid_unlink(self):
         self.env['ir.attachment'].search([('url', '=like', '/web/assets/%')]).unlink()

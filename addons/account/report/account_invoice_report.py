@@ -2,13 +2,14 @@
 
 from odoo import models, fields, api
 from odoo.tools import SQL
+from odoo.tools.query import Query
 from odoo.addons.account.models.account_move import PAYMENT_STATE_SELECTION
 
 from functools import lru_cache
 
 
 class AccountInvoiceReport(models.Model):
-    _name = "account.invoice.report"
+    _name = 'account.invoice.report'
     _description = "Invoices Statistics"
     _auto = False
     _rec_name = 'invoice_date'
@@ -41,13 +42,14 @@ class AccountInvoiceReport(models.Model):
     # ==== Invoice line fields ====
     quantity = fields.Float(string='Product Quantity', readonly=True)
     product_id = fields.Many2one('product.product', string='Product', readonly=True)
-    product_uom_id = fields.Many2one('uom.uom', string='Unit of Measure', readonly=True)
+    product_uom_id = fields.Many2one('uom.uom', string='Unit', readonly=True)
     product_categ_id = fields.Many2one('product.category', string='Product Category', readonly=True)
     invoice_date_due = fields.Date(string='Due Date', readonly=True)
-    account_id = fields.Many2one('account.account', string='Revenue/Expense Account', readonly=True, domain=[('deprecated', '=', False)])
+    account_id = fields.Many2one('account.account', string='Revenue/Expense Account', readonly=True)
     price_subtotal_currency = fields.Float(string='Untaxed Amount in Currency', readonly=True)
     price_subtotal = fields.Float(string='Untaxed Amount', readonly=True)
-    price_total = fields.Float(string='Total in Currency', readonly=True)
+    price_total = fields.Float(string='Total', readonly=True)
+    price_total_currency = fields.Float(string='Total in Currency', readonly=True)
     price_average = fields.Float(string='Average Price', readonly=True, aggregator="avg")
     price_margin = fields.Float(string='Margin', readonly=True)
     inventory_value = fields.Float(string='Inventory Value', readonly=True)
@@ -56,7 +58,7 @@ class AccountInvoiceReport(models.Model):
     _depends = {
         'account.move': [
             'name', 'state', 'move_type', 'partner_id', 'invoice_user_id', 'fiscal_position_id',
-            'invoice_date', 'invoice_date_due', 'invoice_payment_term_id', 'partner_bank_id',
+            'invoice_date', 'invoice_date_due', 'invoice_payment_term_id', 'partner_bank_id', 'invoice_currency_rate',
         ],
         'account.move.line': [
             'quantity', 'price_subtotal', 'price_total', 'amount_residual', 'balance', 'amount_currency',
@@ -65,7 +67,7 @@ class AccountInvoiceReport(models.Model):
         ],
         'product.product': ['product_tmpl_id', 'standard_price'],
         'product.template': ['categ_id'],
-        'uom.uom': ['category_id', 'factor', 'name', 'uom_type'],
+        'uom.uom': ['factor', 'name'],
         'res.currency.rate': ['currency_id', 'name'],
         'res.partner': ['country_id'],
     }
@@ -98,26 +100,29 @@ class AccountInvoiceReport(models.Model):
                 move.invoice_date_due,
                 uom_template.id                                             AS product_uom_id,
                 template.categ_id                                           AS product_categ_id,
-                line.quantity / NULLIF(COALESCE(uom_line.factor, 1) / COALESCE(uom_template.factor, 1), 0.0) * (CASE WHEN move.move_type IN ('in_invoice','out_refund','in_receipt') THEN -1 ELSE 1 END)
+                line.quantity * COALESCE(uom_line.factor, 1) / NULLIF(COALESCE(uom_template.factor, 1), 0.0) * (CASE WHEN move.move_type IN ('in_invoice','out_refund','in_receipt') THEN -1 ELSE 1 END)
                                                                             AS quantity,
                 line.price_subtotal * (CASE WHEN move.move_type IN ('in_invoice','out_refund','in_receipt') THEN -1 ELSE 1 END)
                                                                             AS price_subtotal_currency,
                 -line.balance * account_currency_table.rate                         AS price_subtotal,
                 line.price_total * (CASE WHEN move.move_type IN ('in_invoice','out_refund','in_receipt') THEN -1 ELSE 1 END)
+                / move.invoice_currency_rate
                                                                             AS price_total,
+                line.price_total * (CASE WHEN move.move_type IN ('in_invoice','out_refund','in_receipt') THEN -1 ELSE 1 END)
+                                                                            AS price_total_currency,
                 -COALESCE(
                    -- Average line price
                    (line.balance / NULLIF(line.quantity, 0.0)) * (CASE WHEN move.move_type IN ('in_invoice','out_refund','in_receipt') THEN -1 ELSE 1 END)
                    -- convert to template uom
-                   * (NULLIF(COALESCE(uom_line.factor, 1), 0.0) / NULLIF(COALESCE(uom_template.factor, 1), 0.0)),
+                   / NULLIF(COALESCE(uom_line.factor, 1), 0.0) * COALESCE(uom_template.factor, 1),
                    0.0) * account_currency_table.rate                               AS price_average,
                 CASE
                     WHEN move.move_type NOT IN ('out_invoice', 'out_receipt', 'out_refund') THEN 0.0
-                    WHEN move.move_type = 'out_refund' THEN -line.balance * account_currency_table.rate + (line.quantity / NULLIF(COALESCE(uom_line.factor, 1) / COALESCE(uom_template.factor, 1), 0.0)) * COALESCE(product.standard_price -> line.company_id::text, to_jsonb(0.0))::float
-                    ELSE -line.balance * account_currency_table.rate - (line.quantity / NULLIF(COALESCE(uom_line.factor, 1) / COALESCE(uom_template.factor, 1), 0.0)) * COALESCE(product.standard_price -> line.company_id::text, to_jsonb(0.0))::float
+                    WHEN move.move_type = 'out_refund' THEN account_currency_table.rate * (-line.balance + (line.quantity * COALESCE(uom_line.factor, 1) / NULLIF(COALESCE(uom_template.factor, 1), 0.0)) * COALESCE(product.standard_price -> line.company_id::text, to_jsonb(0.0))::float)
+                    ELSE account_currency_table.rate * (-line.balance - (line.quantity * COALESCE(uom_line.factor, 1) / NULLIF(COALESCE(uom_template.factor, 1), 0.0)) * COALESCE(product.standard_price -> line.company_id::text, to_jsonb(0.0))::float)
                 END
                                                                             AS price_margin,
-                line.quantity / NULLIF(COALESCE(uom_line.factor, 1) / COALESCE(uom_template.factor, 1), 0.0) * (CASE WHEN move.move_type IN ('out_invoice','in_refund','out_receipt') THEN -1 ELSE 1 END)
+                account_currency_table.rate * line.quantity * COALESCE(uom_line.factor, 1) / NULLIF(COALESCE(uom_template.factor, 1), 0.0) * (CASE WHEN move.move_type IN ('out_invoice','in_refund','out_receipt') THEN -1 ELSE 1 END)
                     * COALESCE(product.standard_price -> line.company_id::text, to_jsonb(0.0))::float                    AS inventory_value,
                 COALESCE(partner.country_id, commercial_partner.country_id) AS country_id,
                 line.currency_id                                            AS currency_id
@@ -152,8 +157,18 @@ class AccountInvoiceReport(models.Model):
             ''',
         )
 
+    def _read_group_select(self, aggregate_spec: str, query: Query) -> SQL:
+        """ This override allows us to correctly calculate the average price of products. """
+        if aggregate_spec != 'price_average:avg':
+            return super()._read_group_select(aggregate_spec, query)
+        return SQL(
+            'COALESCE(SUM(%(f_price)s) / NULLIF(SUM(%(f_qty)s), 0.0), 0)',
+            f_qty=self._field_to_sql(self._table, 'quantity', query),
+            f_price=self._field_to_sql(self._table, 'price_subtotal', query),
+        )
 
-class ReportInvoiceWithoutPayment(models.AbstractModel):
+
+class ReportAccountReport_Invoice(models.AbstractModel):
     _name = 'report.account.report_invoice'
     _description = 'Account report without payment lines'
 
@@ -175,10 +190,11 @@ class ReportInvoiceWithoutPayment(models.AbstractModel):
             'qr_code_urls': qr_code_urls,
         }
 
-class ReportInvoiceWithPayment(models.AbstractModel):
+
+class ReportAccountReport_Invoice_With_Payments(models.AbstractModel):
     _name = 'report.account.report_invoice_with_payments'
     _description = 'Account report with payment lines'
-    _inherit = 'report.account.report_invoice'
+    _inherit = ['report.account.report_invoice']
 
     @api.model
     def _get_report_values(self, docids, data=None):

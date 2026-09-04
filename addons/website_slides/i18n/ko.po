@@ -1,25 +1,30 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_slides
-# 
+# * website_slides
+#
 # Translators:
-# Wil Odoo, 2024
-# Daye Jeong, 2025
-# Sarah Park, 2025
-# 
+# Linkup <link-up@naver.com>, 2022
+# Martin Trigaux, 2022
+# JH CHOI <hwangtog@gmail.com>, 2022
+# Sarah Park, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Kwanghee Park (kwpa)" <kwpa@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:23+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Sarah Park, 2025\n"
-"Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
+"POT-Creation-Date: 2026-06-19 17:35+0000\n"
+"PO-Revision-Date: 2026-08-07 18:15+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Korean <https://translate.odoo.com/projects/odoo-19/"
+"website_slides/ko/>\n"
+"Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ko\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__members_engaged_count
@@ -114,32 +119,79 @@ msgid "% Completed Contents"
 msgstr "% 완료한 콘텐츠"
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 #: model_terms:ir.ui.view,arch_db:website_slides.mail_notification_channel_invite
 msgid "&amp;nbsp;"
 msgstr "&amp;nbsp;"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_results
 msgid "'. Showing results for '"
 msgstr "'. 다음에 대한 결과 표시 중 '"
 
 #. module: website_slides
 #. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "(e.g., https://drive.google.com/file/d/ABC/view)."
+msgstr "(e.g., https://drive.google.com/file/d/ABC/view)."
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "(e.g., https://drive.google.com/file/d/ABC/view?usp=sharing)."
+msgstr "(e.g., https://drive.google.com/file/d/ABC/view?usp=sharing)."
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "(e.g., https://vimeo.com/ABC)."
+msgstr "(e.g., https://vimeo.com/ABC)."
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "(e.g., https://youtube/ABC)."
+msgstr "(e.g., https://youtube/ABC)."
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/interactions/slide_archive.js:0
 #: code:addons/website_slides/static/src/js/slides_course_slides_list.js:0
-#: code:addons/website_slides/static/src/js/slides_slide_archive.js:0
 msgid "(empty)"
 msgstr "(공백)"
 
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid ". This way, they will be secured."
-msgstr ". 이렇게 하면 보안을 유지할 수 있습니다."
+msgid "(which means only accessible via link, not searchable)."
+msgstr "(링크를 통해서만 액세스 가능, 검색 불가)."
 
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_slide_demo_1_5
 msgid "3 Main Methodologies"
 msgstr "3가지 주요 방법론"
+
+#. module: website_slides
+#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_1_4
+#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_2_1
+#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_4_0
+msgid ""
+"<a href=\"#\" class=\"btn btn-outline-primary o_translate_inline\">Discover "
+"more</a>"
+msgstr ""
+"<a href=\"#\" class=\"btn btn-outline-primary o_translate_inline\">자세히 "
+"알아보기</a>"
+
+#. module: website_slides
+#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_1_4
+#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_2_1
+#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_4_0
+msgid ""
+"<a href=\"/contactus\" class=\"btn btn-primary rounded-circle "
+"o_translate_inline\">Contact us</a>"
+msgstr ""
+"<a href=\"/contactus\" class=\"btn btn-primary rounded-circle "
+"o_translate_inline\">문의하기</a>"
 
 #. module: website_slides
 #. odoo-python
@@ -181,7 +233,8 @@ msgid ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        Hello<br/><br/>\n"
-"        You have been enrolled to a new course: <t t-out=\"object.channel_id.name or ''\">Basics of Gardening</t>.\n"
+"        You have been enrolled to a new course: <t t-"
+"out=\"object.channel_id.name or ''\">Basics of Gardening</t>.\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -189,7 +242,8 @@ msgstr ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        안녕하세요,<br/><br/>\n"
-"        새 강좌에 등록되었습니다: <t t-out=\"object.channel_id.name or ''\">원예의 기초</t>.\n"
+"        새 강좌에 등록되었습니다: <t t-out=\"object.channel_id.name or ''\">"
+"원예의 기초</t>.\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -200,7 +254,8 @@ msgid ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        Hello<br/><br/>\n"
-"        You have been invited to check out this course: <t t-out=\"object.channel_id.name or ''\">Basics of Gardening</t>.\n"
+"        You have been invited to check out this course: <t t-"
+"out=\"object.channel_id.name or ''\">Basics of Gardening</t>.\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -208,7 +263,8 @@ msgstr ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        안녕하세요,<br/><br/>\n"
-"        다음 강좌에 초대되셨습니다: <t t-out=\"object.channel_id.name or ''\">원예의 기초</t>.\n"
+"        다음 강좌에 초대되셨습니다: <t t-out=\"object.channel_id.name or "
+"''\">원예의 기초</t>.\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -217,42 +273,64 @@ msgstr ""
 #: model:mail.template,body_html:website_slides.mail_template_channel_completed
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"                        <p style=\"margin: 0px;\">Hello <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>,</p><br/>\n"
+"                    <div style=\"margin: 0px; padding: 0px; font-size: 13px;"
+"\">\n"
+"                        <p style=\"margin: 0px;\">Hello <t t-"
+"out=\"object.partner_id.name or ''\">Brandon Freeman</t>,</p><br/>\n"
 "                        <p><b>Congratulations!</b></p>\n"
-"                        <p>You've completed the course <b t-out=\"object.channel_id.name or ''\">Basics of Gardening</b></p>\n"
+"                        <p>You've completed the course <b t-"
+"out=\"object.channel_id.name or ''\">Basics of Gardening</b></p>\n"
 "                        <p>Check out the other available courses.</p><br/>\n"
 "\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a href=\"/slides/all\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a href=\"/slides\" t-attf-style=\"background-"
+"color: {{object.channel_id.user_id.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
+"{{object.channel_id.user_id.company_id.email_primary_color or '#FFFFFF'}}; "
+"border-radius: 5px;\">\n"
 "                                Explore courses\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        Enjoy this exclusive content!\n"
-"                        <t t-if=\"object.channel_id.user_id.signature\" data-o-mail-quote-container=\"1\">\n"
+"                        <t t-if=\"object.channel_id.user_id.signature\" data-"
+"o-mail-quote-container=\"1\">\n"
 "                            <br/>\n"
-"                            <t t-out=\"object.channel_id.user_id.signature or ''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"object.channel_id.user_id.signature or ''\" data-o-"
+"mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    </div>\n"
 "                </div>\n"
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"                        <p style=\"margin: 0px;\">안녕하세요, <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>님.</p><br/>\n"
+"                    <div style=\"margin: 0px; padding: 0px; font-size: "
+"13px;\">\n"
+"                        <p style=\"margin: 0px;\">안녕하세요 <t t-"
+"out=\"object.partner_id.name or ''\">Brandon Freeman</t>님,</p><br/>\n"
 "                        <p><b>축하합니다!</b></p>\n"
-"                        <p><b t-out=\"object.channel_id.name or ''\">원예의 기초</b> 과정을 완료하셨습니다.</p>\n"
-"                        <p>다른 교육 과정을 확인해 보세요.</p><br/>\n"
+"                        <p> <b t-out=\"object.channel_id.name or ''\">Basics "
+"of Gardening</b>과정을 완료하셨습니다.</p>\n"
+"                        <p>다른 교육 과정도 확인해 보세요.</p><br/>\n"
 "\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a href=\"/slides/all\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a href=\"/slides\" t-attf-style=\"background-"
+"color: {{object.channel_id.user_id.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {"
+"{object.channel_id.user_id.company_id.email_primary_color or '#FFFFFF'}}; "
+"border-radius: 5px;\">\n"
 "                                강좌 확인하기\n"
 "                            </a>\n"
 "                        </div>\n"
-"                        독점적으로 제공되는 콘텐츠를 즐겨보세요!\n"
-"                        <t t-if=\"object.channel_id.user_id.signature\" data-o-mail-quote-container=\"1\">\n"
+"                        전용 콘텐츠를 마음껏 즐겨 보세요!\n"
+"                        <t t-if=\"object.channel_id.user_id.signature\" data-"
+"o-mail-quote-container=\"1\">\n"
 "                            <br/>\n"
-"                            <t t-out=\"object.channel_id.user_id.signature or ''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"object.channel_id.user_id.signature or ''\" data-o-"
+"mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    </div>\n"
 "                </div>\n"
@@ -262,42 +340,70 @@ msgstr ""
 #: model:mail.template,body_html:website_slides.mail_template_channel_shared
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
+"\">\n"
 "                        Hello<br/><br/>\n"
-"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> shared the <strong t-out=\"object.name or ''\">document</strong> with you!\n"
-"                        </p><div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"object.website_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/image_256\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> "
+"shared the <strong t-out=\"object.name or ''\">document</strong> with you!\n"
+"                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
+"align: center;\">\n"
+"                            <a t-att-href=\"object.website_absolute_url\">\n"
+"                                <img t-att-alt=\"object.name\" t-attf-"
+"src=\"{{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/"
+"image_256\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"object.website_url\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px;                                 text-decoration: none; color: #fff; border-radius: 5px;\">\n"
-"                                View <strong t-out=\"object.name or ''\">Document</strong></a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a t-att-href=\"object.website_absolute_url\" t-"
+"attf-style=\"background-color: {{user.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px;                                 "
+"text-decoration: none; color: {{user.company_id.email_primary_color or "
+"'#FFFFFF'}}; border-radius: 5px;\">\n"
+"                                View <strong t-out=\"object.name or "
+"''\">Document</strong></a>\n"
 "                        </div>\n"
-"                        <t t-if=\"user.signature\" data-o-mail-quote-container=\"1\">\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
 "                            <br/>\n"
-"                            <t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-"
+"quote=\"1\">Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">"
+"\n"
 "                        안녕하세요,<br/><br/>\n"
-"                        <t t-out=\"user.name or ''\">Mitchell Admin</t>님이 귀하에게 <strong t-out=\"object.name or ''\">문서</strong>를 공유했습니다!\n"
-"                        </p><div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"object.website_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/image_256\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                        <t t-out=\"user.name or ''\">Mitchell Admin</t>님이 "
+"귀하에게 <strong t-out=\"object.name or ''\">문서</strong>를 공유했습니다!\n"
+"                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
+"align: center;\">\n"
+"                            <a t-att-href=\"object.website_absolute_url\">\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{"
+"{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/image_256\" "
+"style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"object.website_url\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px;                                 text-decoration: none; color: #fff; border-radius: 5px;\">\n"
-"                                <strong t-out=\"object.name or ''\">문서</strong> 보기</a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a t-att-href=\"object.website_absolute_url\" t-"
+"attf-style=\"background-color: {{user.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px;                                 "
+"text-decoration: none; color: {{user.company_id.email_primary_color or "
+"'#FFFFFF'}}; border-radius: 5px;\">\n"
+"                                <strong t-out=\"object.name or ''\">문서</"
+"strong> 보기</a>\n"
 "                        </div>\n"
-"                        <t t-if=\"user.signature\" data-o-mail-quote-container=\"1\">\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
 "                            <br/>\n"
-"                            <t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">"
+"Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
@@ -307,40 +413,72 @@ msgstr ""
 #: model:mail.template,body_html:website_slides.slide_template_shared
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
+"\">\n"
 "                        Hello<br/><br/>\n"
-"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> shared the <t t-out=\"object.slide_category or ''\">document</t> <strong t-out=\"object.name or ''\">Trees</strong> with you!\n"
-"                        </p><div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> "
+"shared the <t t-out=\"object.slide_category or ''\">document</t> <strong t-"
+"out=\"object.name or ''\">Trees</strong> with you!\n"
+"                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
+"align: center;\">\n"
+"                            <a t-att-href=\"(object.website_share_url + '?"
+"fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
+"                                <img t-att-alt=\"object.name\" t-attf-"
+"src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/"
+"image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">View <strong t-out=\"object.name or ''\">Trees</strong></a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a t-att-href=\"(object.website_share_url + '?"
+"fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" t-"
+"attf-style=\"background-color: {{user.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
+"{{user.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px;"
+"\">View <strong t-out=\"object.name or ''\">Trees</strong></a>\n"
 "                        </div>\n"
-"                        <t t-if=\"user.signature\" data-o-mail-quote-container=\"1\">\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
 "                            <br/>\n"
-"                            <t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-"
+"quote=\"1\">Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">"
+"\n"
 "                        안녕하세요,<br/><br/>\n"
-"                        <t t-out=\"user.name or ''\">Mitchell Admin</t>님이 귀하에게 <t t-out=\"object.slide_category or ''\">문서</t> <strong t-out=\"object.name or ''\">나무</strong>를 공유했습니다.\n"
-"                        </p><div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> 님이 "
+"귀하에게 <t t-out=\"object.slide_category or ''\">문서</t> <strong t-"
+"out=\"object.name or ''\">Trees</strong> 를 공유했습니다!\n"
+"                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
+"align: center;\">\n"
+"                            <a t-att-href=\"(object.website_share_url + "
+"'?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{"
+"{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" "
+"style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">문서 보기:<strong t-out=\"object.name or ''\">나무</strong></a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a t-att-href=\"(object.website_share_url + "
+"'?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" t-"
+"attf-style=\"background-color: {{user.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {"
+"{user.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px;\">"
+"문서 보기:<strong t-out=\"object.name or ''\">Trees</strong></a>\n"
 "                        </div>\n"
-"                        <t t-if=\"user.signature\" data-o-mail-quote-container=\"1\">\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
 "                            <br/>\n"
-"                            <t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">"
+"Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
@@ -350,48 +488,80 @@ msgstr ""
 #: model:mail.template,body_html:website_slides.slide_template_published
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
+"\">\n"
 "                        Hello<br/><br/>\n"
-"                        There is something new in the course <strong t-out=\"object.channel_id.name or ''\">Trees, Wood and Gardens</strong> you are following:<br/><br/>\n"
-"                        </p><center><strong t-out=\"object.name or ''\">Trees</strong></center>\n"
+"                        There is something new in the course <strong t-"
+"out=\"object.channel_id.name or ''\">Trees, Wood and Gardens</strong> you "
+"are following:<br/><br/>\n"
+"                        </p><center><strong t-out=\"object.name or "
+"''\">Trees</strong></center>\n"
 "                        <t t-if=\"object.image_1024\">\n"
-"                            <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <div style=\"padding: 16px 8px 16px 8px; text-"
+"align: center;\">\n"
 "                                <a t-att-href=\"object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                                <img t-att-alt=\"object.name\" t-attf-"
+"src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/"
+"image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        </t>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"object.website_share_url\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">View content</a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a t-att-href=\"object.website_share_url\" t-"
+"attf-style=\"background-color: "
+"{{object.user_id.company_id.email_secondary_color or '#875A7B'}}; padding: "
+"8px 16px 8px 16px; text-decoration: none; color: "
+"{{object.user_id.company_id.email_primary_color or '#FFFFFF'}}; border-"
+"radius: 5px;\">View content</a>\n"
 "                        </div>\n"
 "                        Enjoy this exclusive content!\n"
-"                        <t t-if=\"user.signature\" data-o-mail-quote-container=\"1\">\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
 "                            <br/>\n"
-"                            <t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-"
+"quote=\"1\">Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">"
+"\n"
 "                        안녕하세요,<br/><br/>\n"
-"                        현재 귀하께서 팔로우 중인 <strong t-out=\"object.channel_id.name or ''\">나무, 숲 그리고 정원</strong> 강좌에 새로운 강의가 추가되어 안내드립니다:<br/><br/>\n"
-"                        </p><center><strong t-out=\"object.name or ''\">나무</strong></center>\n"
+"                        현재 팔로우 중인 <strong t-"
+"out=\"object.channel_id.name or ''\">Trees, Wood and Gardens</strong> 코스에 "
+"새로운 강의가 추가되어 안내드립니다:<br/><br/>\n"
+"                        </p><center><strong t-out=\"object.name or ''\">"
+"Trees</strong></center>\n"
 "                        <t t-if=\"object.image_1024\">\n"
-"                            <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <div style=\"padding: 16px 8px 16px 8px; text-"
+"align: center;\">\n"
 "                                <a t-att-href=\"object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{"
+"{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" "
+"style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        </t>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"object.website_share_url\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">콘텐츠 보기</a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a t-att-href=\"object.website_share_url\" t-"
+"attf-style=\"background-color: {"
+"{object.user_id.company_id.email_secondary_color or '#875A7B'}}; padding: "
+"8px 16px 8px 16px; text-decoration: none; color: {"
+"{object.user_id.company_id.email_primary_color or '#FFFFFF'}}; border-"
+"radius: 5px;\">콘텐츠 보기</a>\n"
 "                        </div>\n"
-"                        독점적으로 제공되는 콘텐츠를 즐겨보세요!\n"
-"                        <t t-if=\"user.signature\" data-o-mail-quote-container=\"1\">\n"
+"                        독점 제공되는 콘텐츠를 즐겨보세요!\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
 "                            <br/>\n"
-"                            <t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">"
+"Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
@@ -413,8 +583,8 @@ msgid ""
 "<i class=\"fa fa-bars\"/><span class=\"d-none d-md-inline-block "
 "ms-1\">Lessons</span>"
 msgstr ""
-"<i class=\"fa fa-bars\"/><span class=\"d-none d-md-inline-block "
-"ms-1\">강의</span>"
+"<i class=\"fa fa-bars\"/><span class=\"d-none d-md-inline-block ms-1\">강의</"
+"span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.lesson_card
@@ -422,7 +592,13 @@ msgid "<i class=\"fa fa-check me-1\"/>Completed"
 msgstr "<i class=\"fa fa-check me-1\"/>완료"
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.course_card
+msgid "<i class=\"fa fa-check\" aria-hidden=\"true\"/> Completed"
+msgstr "<i class=\"fa fa-check\" aria-hidden=\"true\"/> 완료"
+
+#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
 msgid "<i class=\"fa fa-check\"/> Completed"
 msgstr "<i class=\"fa fa-check\"/> 완료"
@@ -447,7 +623,9 @@ msgstr "<i class=\"fa fa-clipboard\"/> 링크 복사"
 msgid ""
 "<i class=\"fa fa-clock-o me-2\" aria-label=\"Duration\" role=\"img\" "
 "title=\"Duration\"/>"
-msgstr "<i class=\"fa fa-clock-o me-2\" aria-label=\"지속 시간\" role=\"img\" title=\"지속 시간\"/>"
+msgstr ""
+"<i class=\"fa fa-clock-o me-2\" aria-label=\"지속 시간\" role=\"img\" "
+"title=\"지속 시간\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
@@ -456,8 +634,8 @@ msgstr "<i class=\"fa fa-cloud-upload me-1\"/>콘텐츠 추가"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
-msgid "<i class=\"fa fa-comments\"/> Comments ("
-msgstr "<i class=\"fa fa-comments\"/> 의견 ("
+msgid "<i class=\"fa fa-comments\"/> Comments"
+msgstr "<i class=\"fa fa-comments\"/> 댓글"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
@@ -479,11 +657,6 @@ msgid "<i class=\"fa fa-eraser me-1\"/>Clear filters"
 msgstr "<i class=\"fa fa-eraser me-1\"/>필터 제거"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
-msgid "<i class=\"fa fa-eraser\"/> Clear filters"
-msgstr "<i class=\"fa fa-eraser\"/> 필터 제거"
-
-#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide_forbidden
 msgid ""
 "<i class=\"fa fa-exclamation-triangle\" role=\"img\" aria-"
@@ -494,8 +667,12 @@ msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
-msgid "<i class=\"fa fa-eye me-2\" aria-label=\"Views\" role=\"img\" title=\"Views\"/>"
-msgstr "<i class=\"fa fa-eye me-2\" aria-label=\"조회수\" role=\"img\" title=\"조회수\"/>"
+msgid ""
+"<i class=\"fa fa-eye me-2\" aria-label=\"Views\" role=\"img\" "
+"title=\"Views\"/>"
+msgstr ""
+"<i class=\"fa fa-eye me-2\" aria-label=\"조회수\" role=\"img\" "
+"title=\"조회수\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
@@ -509,30 +686,38 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
 msgid ""
-"<i class=\"fa fa-file-image-o me-2\" aria-label=\"Infographic\" role=\"img\""
-" title=\"Infographic\"/>"
+"<i class=\"fa fa-file-image-o me-2\" aria-label=\"Infographic\" role=\"img\" "
+"title=\"Infographic\"/>"
 msgstr ""
-"<i class=\"fa fa-file-image-o me-2\" aria-label=\"Infographic\" role=\"img\""
-" title=\"Infographic\"/>"
+"<i class=\"fa fa-file-image-o me-2\" aria-label=\"Infographic\" role=\"img\" "
+"title=\"Infographic\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
 msgid ""
 "<i class=\"fa fa-file-pdf-o me-2\" aria-label=\"Document\" role=\"img\" "
 "title=\"Document\"/>"
-msgstr "<i class=\"fa fa-file-pdf-o me-2\" aria-label=\"문서\" role=\"img\" title=\"문서\"/>"
+msgstr ""
+"<i class=\"fa fa-file-pdf-o me-2\" aria-label=\"문서\" role=\"img\" "
+"title=\"문서\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
 msgid ""
 "<i class=\"fa fa-file-video-o me-2\" aria-label=\"Video\" role=\"img\" "
 "title=\"Video\"/>"
-msgstr "<i class=\"fa fa-file-video-o me-2\" aria-label=\"동영상\" role=\"img\" title=\"동영상\"/>"
+msgstr ""
+"<i class=\"fa fa-file-video-o me-2\" aria-label=\"동영상\" role=\"img\" "
+"title=\"동영상\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
-msgid "<i class=\"fa fa-flag me-2\" aria-label=\"Quiz\" role=\"img\" title=\"Quiz\"/>"
-msgstr "<i class=\"fa fa-flag me-2\" aria-label=\"퀴즈\" role=\"img\" title=\"퀴즈\"/>"
+msgid ""
+"<i class=\"fa fa-flag me-2\" aria-label=\"Quiz\" role=\"img\" title=\"Quiz\"/"
+">"
+msgstr ""
+"<i class=\"fa fa-flag me-2\" aria-label=\"퀴즈\" role=\"img\" "
+"title=\"퀴즈\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_aside_training_category
@@ -560,11 +745,6 @@ msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
 msgstr "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
-msgid "<i class=\"fa fa-graduation-cap me-1\"/>All courses"
-msgstr "<i class=\"fa fa-graduation-cap me-1\"/>전체 과정"
-
-#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 msgid "<i class=\"fa fa-home\"/> About"
 msgstr "<i class=\"fa fa-home\"/> 소개"
@@ -580,8 +760,8 @@ msgid ""
 "<i class=\"fa fa-home\"/><span class=\"d-none d-md-inline-block ms-1\">Back "
 "to course</span>"
 msgstr ""
-"<i class=\"fa fa-home\"/><span class=\"d-none d-md-inline-block ms-1\">강좌로 "
-"돌아가기</span>"
+"<i class=\"fa fa-home\"/><span class=\"d-none d-md-inline-block ms-1\">"
+"강좌로 돌아가기</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
@@ -598,8 +778,8 @@ msgid ""
 "<i class=\"fa fa-plus me-1\"/> <span class=\"d-none d-md-inline-block\">Add "
 "Content</span>"
 msgstr ""
-"<i class=\"fa fa-plus me-1\"/> <span class=\"d-none d-md-inline-block\">콘텐츠 "
-"추가</span>"
+"<i class=\"fa fa-plus me-1\"/> <span class=\"d-none d-md-inline-block\">"
+"콘텐츠 추가</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list
@@ -629,7 +809,9 @@ msgstr ""
 msgid ""
 "<i class=\"fa fa-question me-2\" aria-label=\"Number of Questions\" "
 "role=\"img\" title=\"Number of Questions\"/>"
-msgstr "<i class=\"fa fa-question me-2\" aria-label=\"질문 수\" role=\"img\" title=\"질문 수\"/>"
+msgstr ""
+"<i class=\"fa fa-question me-2\" aria-label=\"질문 수\" role=\"img\" "
+"title=\"질문 수\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
@@ -653,10 +835,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
 msgid ""
 "<i class=\"fa fa-share-alt\"/>\n"
-"                        <span class=\"d-none d-md-inline-block ms-2\">Share</span>"
+"                        <span class=\"d-none d-md-inline-block ms-2\">Share</"
+"span>"
 msgstr ""
 "<i class=\"fa fa-share-alt\"/>\n"
-"                        <span class=\"d-none d-md-inline-block ms-2\">공유</span>"
+"                        <span class=\"d-none d-md-inline-block ms-2\">공유</"
+"span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_sidebar
@@ -669,17 +853,15 @@ msgid ""
 "<i class=\"fa fa-sign-out\"/><span class=\"d-none d-md-inline-block "
 "ms-1\">Exit Fullscreen</span>"
 msgstr ""
-"<i class=\"fa fa-sign-out\"/><span class=\"d-none d-md-inline-block "
-"ms-1\">전체화면 나가기</span>"
+"<i class=\"fa fa-sign-out\"/><span class=\"d-none d-md-inline-block ms-1\">"
+"전체화면 나가기</span>"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_tags
 msgid ""
 "<i class=\"fa fa-tag me-2 text-muted\"/>\n"
-"                      My Courses"
+"          My Courses"
 msgstr ""
-"<i class=\"fa fa-tag me-2 text-muted\"/>\n"
-"                      내 강좌"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.user_profile_content
@@ -694,6 +876,13 @@ msgid ""
 msgstr ""
 "<i class=\"oi oi-chevron-left me-2\"/> <span class=\"d-none d-sm-inline-"
 "block\">이전</span>"
+
+#. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
+msgid ""
+"<small class=\"text-muted d-none d-md-inline\"><i class=\"fa fa-check me-1\" "
+"role=\"img\"/>You are enrolled</small>"
+msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
@@ -729,26 +918,28 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_sample
 msgid ""
-"<span class=\"badge text-bg-info badge-arrow-right fw-normal "
-"m-1\">New</span>"
+"<span class=\"badge text-bg-info badge-arrow-right fw-normal m-1\">New</span>"
 msgstr ""
-"<span class=\"badge text-bg-info badge-arrow-right fw-normal m-1\">신규</span>"
+"<span class=\"badge text-bg-info badge-arrow-right fw-normal m-1\">신규</"
+"span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
 msgid ""
-"<span class=\"badge text-bg-primary badge-hide fw-normal m-1\">Add "
-"Quiz</span>"
+"<span class=\"badge text-bg-primary badge-hide fw-normal m-1\">Add Quiz</"
+"span>"
 msgstr ""
-"<span class=\"badge text-bg-primary badge-hide fw-normal m-1\">퀴즈 추가</span>"
+"<span class=\"badge text-bg-primary badge-hide fw-normal m-1\">퀴즈 추가</"
+"span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
 msgid ""
-"<span class=\"badge text-bg-success fw-normal "
-"m-1\"><span>Preview</span></span>"
+"<span class=\"badge text-bg-success fw-normal m-1\"><span>Preview</span></"
+"span>"
 msgstr ""
-"<span class=\"badge text-bg-success fw-normal m-1\"><span>미리보기</span></span>"
+"<span class=\"badge text-bg-success fw-normal m-1\"><span>미리보기</span></"
+"span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_sample
@@ -756,13 +947,11 @@ msgid "<span class=\"badge text-bg-success fw-normal m-1\">Preview</span>"
 msgstr "<span class=\"badge text-bg-success fw-normal m-1\">미리보기</span>"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.course_card
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 msgid ""
-"<span class=\"badge text-bg-success pull-right\"><i class=\"fa fa-check\"/> "
-"Completed</span>"
+"<span class=\"d-none d-md-inline me-2 me-md-0\">Start now</span><i "
+"class=\"oi oi-arrow-right d-md-none\" aria-hidden=\"true\"/>"
 msgstr ""
-"<span class=\"badge text-bg-success pull-right\"><i class=\"fa fa-check\"/> "
-"완료</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
@@ -770,13 +959,8 @@ msgid ""
 "<span class=\"d-none d-sm-inline-block\">Next</span> <i class=\"oi oi-"
 "chevron-right ms-2\"/>"
 msgstr ""
-"<span class=\"d-none d-sm-inline-block\">다음</span> <i class=\"oi oi-chevron-"
-"right ms-2\"/>"
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.slides_home_user_profile_small
-msgid "<span class=\"fw-bold text-muted me-2\">Current rank:</span>"
-msgstr "<span class=\"fw-bold text-muted me-2\">현재 순위:</span>"
+"<span class=\"d-none d-sm-inline-block\">다음</span> <i class=\"oi oi-"
+"chevron-right ms-2\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_main
@@ -789,6 +973,13 @@ msgid "<span class=\"input-group-text\">Start at Page</span>"
 msgstr "<span class=\"input-group-text\">페이지부터 시작</span>"
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
+msgid ""
+"<span class=\"me-2 d-none d-md-inline\">Continue</span><i class=\"oi oi-"
+"arrow-right\" aria-hidden=\"true\"/>"
+msgstr ""
+
+#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list
 msgid ""
 "<span class=\"ms-1\">Lessons</span>\n"
@@ -796,15 +987,6 @@ msgid ""
 msgstr ""
 "<span class=\"ms-1\">강의</span>\n"
 "                                <span class=\"ms-1\">·</span>"
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
-msgid ""
-"<span class=\"o_form_label\">Slides</span>\n"
-"                    <span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-specific.\" groups=\"website.group_multi_website\"/>"
-msgstr ""
-"<span class=\"o_form_label\">슬라이드</span>\n"
-"                    <span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-specific.\" groups=\"website.group_multi_website\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
@@ -822,18 +1004,11 @@ msgid "<span class=\"o_stat_text\">Embed Views</span>"
 msgstr "<span class=\"o_stat_text\">조회수 삽입</span>"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.course_card_information_arrow
-msgid "<span class=\"o_wslides_arrow\">New Content</span>"
-msgstr "<span class=\"o_wslides_arrow\">신규 콘텐츠</span>"
-
-#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
 msgid ""
 "<span class=\"oi oi-arrow-right\"/>\n"
-"                                Create a Google Project and Get a Key"
+"                                        Create a Google Project and Get a Key"
 msgstr ""
-"<span class=\"oi oi-arrow-right\"/>\n"
-"                                Google 프로젝트 생성 및 키 얻기"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_aside_training
@@ -841,9 +1016,11 @@ msgid "<span class=\"p-2\">Course content</span>"
 msgstr "<span class=\"p-2\">강좌 내용</span>"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.user_quickkarma_card
-msgid "<span class=\"text-500 mx-2\">•</span>"
-msgstr "<span class=\"text-500 mx-2\">•</span>"
+#: model_terms:ir.ui.view,arch_db:website_slides.course_card_information_badge
+msgid ""
+"<span class=\"position-absolute top-0 badge bg-secondary mt-2 ms-2\">New "
+"Content</span>"
+msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
@@ -858,7 +1035,8 @@ msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
-msgid "<span class=\"text-muted fw-bold col-4 col-md-3\">External sources</span>"
+msgid ""
+"<span class=\"text-muted fw-bold col-4 col-md-3\">External sources</span>"
 msgstr "<span class=\"text-muted fw-bold col-4 col-md-3\">외부 소스</span>"
 
 #. module: website_slides
@@ -869,20 +1047,25 @@ msgstr "<span class=\"text-muted fw-bold me-3\">등급</span>"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
 msgid ""
-"<span class=\"text-muted text-truncate mw-100\" "
-"title=\"Invited\">Invited</span>"
-msgstr "<span class=\"text-muted text-truncate mw-100\" title=\"초대됨\">초대됨</span>"
+"<span class=\"text-muted text-truncate mw-100\" title=\"Invited\">Invited</"
+"span>"
+msgstr ""
+"<span class=\"text-muted text-truncate mw-100\" title=\"초대됨\">초대됨</"
+"span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
 msgid ""
-"<span class=\"text-muted text-truncate mw-100\" "
-"title=\"Ongoing\">Ongoing</span>"
-msgstr "<span class=\"text-muted text-truncate mw-100\" title=\"진행 중\">진행 중</span>"
+"<span class=\"text-muted text-truncate mw-100\" title=\"Ongoing\">Ongoing</"
+"span>"
+msgstr ""
+"<span class=\"text-muted text-truncate mw-100\" title=\"진행 중\">진행 중</"
+"span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
-msgid "<span class=\"text-muted text-truncate mw-100\" title=\"Total\">Total</span>"
+msgid ""
+"<span class=\"text-muted text-truncate mw-100\" title=\"Total\">Total</span>"
 msgstr "<span class=\"text-muted text-truncate mw-100\" title=\"합계\">합계</span>"
 
 #. module: website_slides
@@ -898,42 +1081,68 @@ msgstr "<span class=\"text-muted\">컴퓨터 과학의 일부</span>"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
 msgid ""
-"<span id=\"first\" class=\"me-1 me-sm-2\" title=\"First slide\" aria-label=\"First slide\" role=\"button\"><i class=\"fa fa-step-backward\"/></span>\n"
-"                                        <span id=\"previous\" class=\"mx-1 mx-sm-2\" title=\"Previous slide\" aria-label=\"Previous slide\" role=\"button\"><i class=\"fa fa-arrow-circle-left\"/></span>\n"
-"                                        <span id=\"next\" class=\"mx-1 mx-sm-2\" title=\"Next slide\" aria-label=\"Next slide\" role=\"button\"><i class=\"fa fa-arrow-circle-right\"/></span>\n"
-"                                        <span id=\"last\" class=\"mx-1 mx-sm-2\" title=\"Last slide\" aria-label=\"Last slide\" role=\"button\"><i class=\"fa fa-step-forward\"/></span>"
+"<span id=\"first\" class=\"me-1 me-sm-2\" title=\"First slide\" aria-"
+"label=\"First slide\" role=\"button\"><i class=\"fa fa-step-backward\"/></"
+"span>\n"
+"                                        <span id=\"previous\" class=\"mx-1 "
+"mx-sm-2\" title=\"Previous slide\" aria-label=\"Previous slide\" "
+"role=\"button\"><i class=\"fa fa-arrow-circle-left\"/></span>\n"
+"                                        <span id=\"next\" class=\"mx-1 mx-"
+"sm-2\" title=\"Next slide\" aria-label=\"Next slide\" role=\"button\"><i "
+"class=\"fa fa-arrow-circle-right\"/></span>\n"
+"                                        <span id=\"last\" class=\"mx-1 mx-"
+"sm-2\" title=\"Last slide\" aria-label=\"Last slide\" role=\"button\"><i "
+"class=\"fa fa-step-forward\"/></span>"
 msgstr ""
-"<span id=\"first\" class=\"me-1 me-sm-2\" title=\"첫 슬라이드\" aria-label=\"첫 슬라이드\" role=\"button\"><i class=\"fa fa-step-backward\"/></span>\n"
-"                                        <span id=\"previous\" class=\"mx-1 mx-sm-2\" title=\"이전 슬라이드\" aria-label=\"이전 슬라이드\" role=\"button\"><i class=\"fa fa-arrow-circle-left\"/></span>\n"
-"                                        <span id=\"next\" class=\"mx-1 mx-sm-2\" title=\"다음 슬라이드\" aria-label=\"다음 슬라이드\" role=\"button\"><i class=\"fa fa-arrow-circle-right\"/></span>\n"
-"                                        <span id=\"last\" class=\"mx-1 mx-sm-2\" title=\"마지막 슬라이드\" aria-label=\"마지막 슬라이드\" role=\"button\"><i class=\"fa fa-step-forward\"/></span>"
+"<span id=\"first\" class=\"me-1 me-sm-2\" title=\"첫 슬라이드\" aria-"
+"label=\"첫 슬라이드\" role=\"button\"><i class=\"fa fa-step-backward\"/></"
+"span>\n"
+"                                        <span id=\"previous\" class=\"mx-1 "
+"mx-sm-2\" title=\"이전 슬라이드\" aria-label=\"이전 슬라이드\" "
+"role=\"button\"><i class=\"fa fa-arrow-circle-left\"/></span>\n"
+"                                        <span id=\"next\" class=\"mx-1 mx-sm-"
+"2\" title=\"다음 슬라이드\" aria-label=\"다음 슬라이드\" role=\"button\"><i "
+"class=\"fa fa-arrow-circle-right\"/></span>\n"
+"                                        <span id=\"last\" class=\"mx-1 mx-sm-"
+"2\" title=\"마지막 슬라이드\" aria-label=\"마지막 슬라이드\" role=\"button\">"
+"<i class=\"fa fa-step-forward\"/></span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
 msgid ""
-"<span id=\"fullscreen\" class=\"ms-1 ms-sm-2\" title=\"View fullscreen\" aria-label=\"Fullscreen\" role=\"button\">\n"
+"<span id=\"fullscreen\" class=\"ms-1 ms-sm-2\" title=\"View fullscreen\" "
+"aria-label=\"Fullscreen\" role=\"button\">\n"
 "                                            <i class=\"fa fa-arrows-alt\"/>\n"
 "                                        </span>"
 msgstr ""
-"<span id=\"fullscreen\" class=\"ms-1 ms-sm-2\" title=\"전체화면 보기\" aria-label=\"전체화면\" role=\"button\">\n"
+"<span id=\"fullscreen\" class=\"ms-1 ms-sm-2\" title=\"전체화면 보기\" aria-"
+"label=\"전체화면\" role=\"button\">\n"
 "                                            <i class=\"fa fa-arrows-alt\"/>\n"
 "                                        </span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
 msgid ""
-"<span id=\"zoomout\" class=\"d-inline ms-2 me-2\" title=\"Zoom out\" aria-label=\"Zoom out\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-minus\"/>\n"
+"<span id=\"zoomout\" class=\"d-inline ms-2 me-2\" title=\"Zoom out\" aria-"
+"label=\"Zoom out\" role=\"button\">\n"
+"                                            <i class=\"fa fa-search-minus\"/"
+">\n"
 "                                        </span>\n"
-"                                        <span id=\"zoomin\" class=\"d-inline\" title=\"Zoom in\" aria-label=\"Zoom in\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-plus\"/>\n"
+"                                        <span id=\"zoomin\" class=\"d-"
+"inline\" title=\"Zoom in\" aria-label=\"Zoom in\" role=\"button\">\n"
+"                                            <i class=\"fa fa-search-plus\"/"
+">\n"
 "                                        </span>"
 msgstr ""
-"<span id=\"zoomout\" class=\"d-inline ms-2 me-2\" title=\"Zoom out\" aria-label=\"Zoom out\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-minus\"/>\n"
+"<span id=\"zoomout\" class=\"d-inline ms-2 me-2\" title=\"Zoom out\" aria-"
+"label=\"Zoom out\" role=\"button\">\n"
+"                                            <i class=\"fa fa-search-minus\"/>"
+"\n"
 "                                        </span>\n"
-"                                        <span id=\"zoomin\" class=\"d-inline\" title=\"Zoom in\" aria-label=\"Zoom in\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-plus\"/>\n"
+"                                        <span id=\"zoomin\" class=\"d-"
+"inline\" title=\"Zoom in\" aria-label=\"Zoom in\" role=\"button\">\n"
+"                                            <i class=\"fa fa-search-plus\"/>"
+"\n"
 "                                        </span>"
 
 #. module: website_slides
@@ -942,15 +1151,17 @@ msgid ""
 "<span name=\"done_members_count_label\" class=\"text-muted text-truncate "
 "mw-100\" title=\"Finished\">Finished</span>"
 msgstr ""
-"<span name=\"done_members_count_label\" class=\"text-muted text-truncate "
-"mw-100\" title=\"완료\">완료</span>"
+"<span name=\"done_members_count_label\" class=\"text-muted text-truncate mw-"
+"100\" title=\"완료\">완료</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
 msgid ""
-"<span name=\"members_completed_count_label\" "
-"class=\"o_stat_text\">Finished</span>"
-msgstr "<span name=\"members_completed_count_label\" class=\"o_stat_text\">끝마침</span>"
+"<span name=\"members_completed_count_label\" class=\"o_stat_text\">Finished</"
+"span>"
+msgstr ""
+"<span name=\"members_completed_count_label\" class=\"o_stat_text\">끝마침</"
+"span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
@@ -1032,8 +1243,8 @@ msgstr "<strong>참석자가 아직 없습니다!</strong>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_social_email
-msgid "<strong>Sharing is caring!</strong> Email(s) sent."
-msgstr "<strong>나눔은 배려입니다!</strong> 이메일 전송됨."
+msgid "<strong>Sharing is caring!</strong> Your email(s) will arrive shortly."
+msgstr "<strong>나눔은 배려입니다!</strong> 이메일이 곧 도착할 예정입니다."
 
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_slide_demo_2_1
@@ -1050,7 +1261,9 @@ msgstr "과일"
 #: code:addons/website_slides/static/src/js/tours/slides_tour.js:0
 msgid ""
 "A good course has a structure. Pick a name for your first <b>Section</b>."
-msgstr "좋은 강의는 구성이 잘 짜여져 있습니다. 첫 번째 <b>섹션</b>의 이름을 선택하세요."
+msgstr ""
+"좋은 강의는 구성이 잘 짜여져 있습니다. 첫 번째 <b>섹션</b>의 이름을 "
+"선택하세요."
 
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_slide_demo_1_4
@@ -1157,7 +1370,8 @@ msgid "Access Refused"
 msgstr "액세스 거부됨"
 
 #. module: website_slides
-#: model:mail.activity.type,name:website_slides.mail_activity_data_access_request
+#. odoo-python
+#: code:addons/website_slides/models/slide_channel.py:0
 msgid "Access Request"
 msgstr "액세스 요청"
 
@@ -1177,7 +1391,8 @@ msgid "Accessed on"
 msgstr "액세스한 날짜"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.snippet_options
+#. odoo-javascript
+#: code:addons/website_slides/static/src/website_builder/courses_list_page_option.xml:0
 msgid "Achievements"
 msgstr "달성"
 
@@ -1202,6 +1417,11 @@ msgstr "활동적인 참석자에는 '가입' 및 '진행 중'인 참석자가 �
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__activity_ids
 msgid "Activities"
+msgstr "활동"
+
+#. module: website_slides
+#: model:ir.model,name:website_slides.model_mail_activity
+msgid "Activity"
 msgstr "활동"
 
 #. module: website_slides
@@ -1266,7 +1486,7 @@ msgstr "태그 추가"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_category_add.js:0
+#: code:addons/website_slides/static/src/interactions/category_add.js:0
 msgid "Add a section"
 msgstr "영역 추가"
 
@@ -1335,7 +1555,7 @@ msgstr "모든 참석자 정보"
 
 #. module: website_slides
 #: model:ir.actions.act_window,name:website_slides.slide_channel_action_overview
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_results
 msgid "All Courses"
 msgstr "전체 강좌"
 
@@ -1355,7 +1575,8 @@ msgstr "모든 질문에 다 답변해야 합니다!"
 #. odoo-python
 #: code:addons/website_slides/models/slide_question.py:0
 msgid ""
-"All questions must have at least one correct answer and one incorrect answer: \n"
+"All questions must have at least one correct answer and one incorrect "
+"answer: \n"
 "%s\n"
 msgstr ""
 "모든 문제에는 정답과 오답이 하나 이상 있어야 합니다:\n"
@@ -1363,8 +1584,18 @@ msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.user_profile_content
-msgid "All the courses you attend will appear here. <br/>"
-msgstr "수강하는 모든 강좌가 여기에 표시됩니다. <br/>"
+msgid ""
+"All the courses you attend will appear here. <br/>\n"
+"                        <a href=\"/slides/\" class=\"btn-link "
+"o_translate_inline\">\n"
+"                            <i class=\"fa fa-arrow-right\"/> Start Learning\n"
+"                        </a>"
+msgstr ""
+"모든 수강 내역이 여기에 표시됩니다. <br/>\n"
+"                        <a href=\"/slides/\" class=\"btn-link "
+"o_translate_inline\">\n"
+"                            <i class=\"fa fa-arrow-right\"/> 학습 시작\n"
+"                        </a>"
 
 #. module: website_slides
 #: model_terms:slide.channel,description:website_slides.slide_channel_demo_5_furn2
@@ -1378,7 +1609,9 @@ msgstr "가구 제작에 대해 알아야 할 모든 것."
 msgid ""
 "Allow Attendees to like and comment your content and to submit reviews on "
 "your course."
-msgstr "참석자가 콘텐츠에 좋아요를 누르거나 댓글을 달고 강의에 대한 리뷰를 남길 수 있도록 허용"
+msgstr ""
+"참석자가 콘텐츠에 좋아요를 누르거나 댓글을 달고 강의에 대한 리뷰를 남길 수 "
+"있도록 허용"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__slide_resource_downloadable
@@ -1450,20 +1683,31 @@ msgid "Answers"
 msgstr "답변"
 
 #. module: website_slides
+#: model:ir.model.fields.selection,name:website_slides.selection__slide_channel__visibility__link
+msgid "Anyone with the link"
+msgstr "링크가 있는 사람 누구나"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Anyone with the link."
+msgstr "링크가 있는 모든 사용자"
+
+#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_gamification_challenge__challenge_category
 msgid "Appears in"
 msgstr "다음에 표시"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_archive.js:0
+#: code:addons/website_slides/static/src/interactions/slide_archive.js:0
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_partner_view_tree
 msgid "Archive"
 msgstr "보관"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_archive.js:0
+#: code:addons/website_slides/static/src/interactions/slide_archive.js:0
 msgid "Archive Content"
 msgstr "콘텐츠 보관"
 
@@ -1479,14 +1723,14 @@ msgstr "보관됨"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_archive.js:0
+#: code:addons/website_slides/static/src/interactions/slide_archive.js:0
 #: code:addons/website_slides/static/src/xml/slide_management.xml:0
 msgid "Are you sure you want to archive this content?"
 msgstr "이 콘텐츠를 보관하시겠습니까?"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_category_delete.js:0
+#: code:addons/website_slides/static/src/interactions/category_delete.js:0
 #: code:addons/website_slides/static/src/xml/slide_management.xml:0
 msgid "Are you sure you want to delete this category?"
 msgstr "이 카테고리를 삭제하시겠습니까?"
@@ -1494,8 +1738,8 @@ msgstr "이 카테고리를 삭제하시겠습니까?"
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/slides_course_quiz.js:0
-msgid "Are you sure you want to delete this question \"<strong>%s</strong>\"?"
-msgstr "이 질문을 정말로 삭제하시겠습니까? \"<strong>%s</strong>\"?"
+msgid "Are you sure you want to delete this question \"%(title)s\"?"
+msgstr ""
 
 #. module: website_slides
 #. odoo-javascript
@@ -1587,7 +1831,6 @@ msgstr "여기에 드롭된 빌딩 블록은 모든 강좌에 표시됩니다."
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/course_tag_add_dialog/course_tag_add_dialog.xml:0
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-#: code:addons/website_slides/static/src/js/slides_category_add.js:0
 msgid "Back"
 msgstr "뒤로"
 
@@ -1604,7 +1847,7 @@ msgstr "배경 이미지 URL"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slides_home_user_achievements_small
 msgid "Badges"
-msgstr "뱃지"
+msgstr "배지 받기"
 
 #. module: website_slides
 #: model:slide.channel.tag,name:website_slides.slide_channel_tag_level_basic
@@ -1690,6 +1933,9 @@ msgstr "미완료로 표시할 수 없음"
 
 #. module: website_slides
 #. odoo-javascript
+#: code:addons/website_slides/static/src/interactions/category_add.js:0
+#: code:addons/website_slides/static/src/interactions/category_delete.js:0
+#: code:addons/website_slides/static/src/interactions/enroll_email.js:0
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
 #: code:addons/website_slides/static/src/xml/slide_quiz_create.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_invite_view_form
@@ -1720,13 +1966,7 @@ msgid "Category"
 msgstr "카테고리"
 
 #. module: website_slides
-#: model:slide.channel.tag,name:website_slides.slide_channel_tag_other_1
-msgid "Certification"
-msgstr "인증서"
-
-#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_res_config_settings__module_website_slides_survey
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
 msgid "Certifications"
 msgstr "인증"
 
@@ -1735,12 +1975,6 @@ msgstr "인증"
 #: model:gamification.goal.definition,name:website_slides.badge_data_certification_goal
 msgid "Certified Knowledge"
 msgstr "지식 인증"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "Change video privacy settings"
-msgstr "동영상 개인정보 보호 설정 변경"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_partner__channel_id
@@ -1840,9 +2074,9 @@ msgid "Choose your wood!"
 msgstr "목재를 선택하세요!"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
-msgid "Clear filters"
-msgstr "필터 제거"
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+msgid "Clear Filters"
+msgstr "필터 해제"
 
 #. module: website_slides
 #. odoo-javascript
@@ -1861,8 +2095,8 @@ msgid "Click here to start the course"
 msgstr "강좌를 시작하려면 여기를 클릭하세요."
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_results
 msgid "Click on \"New\" in the top-right corner to write your first course."
 msgstr "첫 번째 강좌를 제작하려면 가장 오른쪽 상단에 있는 \"새 강좌\"를 클릭하십시오."
 
@@ -1890,6 +2124,7 @@ msgstr "목차로 돌아가려면 <b>강좌</b> 를 클릭하십시오."
 #: code:addons/website_slides/static/src/js/public/components/slide_quiz_finish_dialog/slide_quiz_finish_dialog.xml:0
 #: code:addons/website_slides/static/src/js/public/components/slide_share_dialog/slide_share_dialog.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.course_main
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_invite_view_form
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_share_modal_header
 msgid "Close"
@@ -1943,15 +2178,18 @@ msgid ""
 "answering questions. In this course, you'll study those topics with "
 "activities about mathematics, science and logic."
 msgstr ""
-"컴퓨터 과학자는 적절한 질문을 제시하고 그 질문에 맞는 답을 찾는 업무를 합니다. 이 강좌에서는 수학, 과학 및 논리에 관한 다양한 "
-"활동을 통해 이러한 주제를 학습합니다."
+"컴퓨터 과학자는 적절한 질문을 제시하고 그 질문에 맞는 답을 찾는 업무를 "
+"합니다. 이 강좌에서는 수학, 과학 및 논리에 관한 다양한 활동을 통해 이러한 "
+"주제를 학습합니다."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_form_add
 msgid ""
 "Common tasks for a computer scientist is asking the right questions and "
 "answering questions..."
-msgstr "컴퓨터 과학자는 적절한 질문을 제시하고 그 질문에 맞는 답을 찾는 일을 합니다..."
+msgstr ""
+"컴퓨터 과학자는 적절한 질문을 제시하고 그 질문에 맞는 답을 찾는 일을 "
+"합니다..."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
@@ -1997,7 +2235,7 @@ msgstr "완료됨"
 
 #. module: website_slides
 #. odoo-python
-#: code:addons/website_slides/models/slide_channel.py:0
+#: code:addons/website_slides/models/slide_channel_partner.py:0
 msgid "Completed Course"
 msgstr "완료된 강좌"
 
@@ -2051,8 +2289,9 @@ msgid ""
 "available here. The tag \"<b>New</b>\" indicates that this lesson was "
 "created less than 7 days ago."
 msgstr ""
-"축하합니다! 첫 번째 강의에 참석하실 수 있습니다. 여기에서 사용 가능한 옵션을 살펴보세요. \"<b>신규</b>\" 태그는 강의가 "
-"올라온 지 7일이 지나지 않았음을 의미합니다."
+"축하합니다! 첫 번째 강의에 참석하실 수 있습니다. 여기에서 사용 가능한 옵션을 "
+"살펴보세요. \"<b>신규</b>\" 태그는 강의가 올라온 지 7일이 지나지 않았음을 "
+"의미합니다."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slides_home_user_profile_small
@@ -2063,9 +2302,11 @@ msgstr "축하합니다, 당신은 최고 순위에 도달했습니다!"
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/tours/slides_tour.js:0
 msgid ""
-"Congratulations, you've created your first course.<br/>Click on the title of"
-" this content to see it in fullscreen mode."
-msgstr "축하합니다, 첫 번째 강좌를 만드셨습니다.<br/>이 콘텐츠의 제목을 클릭하면 전체 화면으로 볼 수 있습니다."
+"Congratulations, you've created your first course.<br/>Click on the title of "
+"this content to see it in fullscreen mode."
+msgstr ""
+"축하합니다, 첫 번째 강좌를 만드셨습니다.<br/>이 콘텐츠의 제목을 클릭하면 "
+"전체 화면으로 볼 수 있습니다."
 
 #. module: website_slides
 #. odoo-javascript
@@ -2074,8 +2315,8 @@ msgid ""
 "Congratulations, your course has been created, but there isn't any content "
 "yet. First, let's add a <b>Section</b> to give your course a structure."
 msgstr ""
-"축하합니다, 강좌를 성공적으로 만드셨습니다. 아직 콘텐츠가 추가되지 않았으니, <b>섹션</b> 을 추가하여 강좌에 잘 맞는 구성을 "
-"짜보세요."
+"축하합니다, 강좌를 성공적으로 만드셨습니다. 아직 콘텐츠가 추가되지 않았으니, "
+"<b>섹션</b> 을 추가하여 강좌에 잘 맞는 구성을 짜보세요."
 
 #. module: website_slides
 #: model:ir.model,name:website_slides.model_res_partner
@@ -2100,13 +2341,6 @@ msgstr "담당자에게 문의"
 #: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
 msgid "Contact the responsible to enroll."
 msgstr "등록하려면 담당자에게 문의하세요."
-
-#. module: website_slides
-#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_1_4
-#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_2_1
-#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_4_0
-msgid "Contact us"
-msgstr "문의하기"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__slide_content_ids
@@ -2151,10 +2385,12 @@ msgstr "내용 유형"
 #: model_terms:ir.actions.act_window,help:website_slides.slide_slide_action
 msgid ""
 "Content are the lessons that compose a course\n"
-"                    <br>and can be of different types (presentations, documents, videos, ...)."
+"                    <br>and can be of different types (presentations, "
+"documents, videos, ...)."
 msgstr ""
 "콘텐츠는 강좌를 구성하는 강의를 의미합니다.\n"
-"                    <br> 프레젠테이션, 문서, 동영상 등 다양한 유형을 사용할 수 있습니다...)."
+"                    <br> 프레젠테이션, 문서, 동영상 등 다양한 유형을 사용할 "
+"수 있습니다...)."
 
 #. module: website_slides
 #: model:ir.actions.act_window,name:website_slides.slide_slide_action
@@ -2172,6 +2408,7 @@ msgstr "콘텐츠"
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
+#: model_terms:ir.ui.view,arch_db:website_slides.course_card
 msgid "Continue"
 msgstr "계속"
 
@@ -2192,6 +2429,12 @@ msgstr "임베드 코드 복사"
 #: code:addons/website_slides/static/src/js/public/components/slide_share_dialog/slide_share_dialog.js:0
 msgid "Copy Link"
 msgstr "링크 복사"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Copy the shareable link"
+msgstr "공유 링크 복사"
 
 #. module: website_slides
 #: model:slide.answer,comment:website_slides.slide_slide_demo_1_4_question_0_0
@@ -2226,7 +2469,9 @@ msgstr "정답입니다! 해내셨습니다!"
 msgid ""
 "Could not find your video. Please check if your link is correct and if the "
 "video can be accessed."
-msgstr "동영상을 찾을 수 없습니다. 링크가 올바른지 또는 동영상에 접근 권한이 있는지 확인해주세요."
+msgstr ""
+"동영상을 찾을 수 없습니다. 링크가 올바른지 또는 동영상에 접근 권한이 있는지 "
+"확인해주세요."
 
 #. module: website_slides
 #: model:ir.model,name:website_slides.model_slide_channel
@@ -2257,7 +2502,7 @@ msgstr "강좌 수"
 
 #. module: website_slides
 #. odoo-python
-#: code:addons/website_slides/models/slide_channel.py:0
+#: code:addons/website_slides/models/slide_channel_partner.py:0
 msgid "Course Finished"
 msgstr "강좌 종료"
 
@@ -2306,7 +2551,7 @@ msgstr "강좌 순위"
 
 #. module: website_slides
 #. odoo-python
-#: code:addons/website_slides/models/slide_channel.py:0
+#: code:addons/website_slides/models/slide_channel_partner.py:0
 msgid "Course Set Uncompleted"
 msgstr "미완료된 강좌 세트"
 
@@ -2373,9 +2618,11 @@ msgid "Course: %s"
 msgstr "강좌: %s"
 
 #. module: website_slides
+#. odoo-javascript
 #. odoo-python
 #: code:addons/website_slides/models/res_partner.py:0
 #: code:addons/website_slides/models/website.py:0
+#: code:addons/website_slides/static/src/website_builder/slides_searchbar_option.xml:0
 #: model:ir.actions.act_window,name:website_slides.slide_channel_action_report
 #: model:ir.ui.menu,name:website_slides.menu_slide_channel_pages
 #: model:ir.ui.menu,name:website_slides.website_slides_menu_courses
@@ -2383,16 +2630,17 @@ msgstr "강좌: %s"
 #: model:ir.ui.menu,name:website_slides.website_slides_menu_report_courses
 #: model:website.menu,name:website_slides.website_menu_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_nav
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_bar
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_graph
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_search
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_tree
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_tree_report
-#: model_terms:ir.ui.view,arch_db:website_slides.slide_searchbar_input_snippet_options
 msgid "Courses"
 msgstr "강좌"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.snippet_options
+#. odoo-javascript
+#: code:addons/website_slides/static/src/website_builder/courses_list_page_option_plugin.js:0
 msgid "Courses Page"
 msgstr "강좌 페이지"
 
@@ -2427,6 +2675,11 @@ msgstr "콘텐츠 태그 만들기"
 #: model_terms:ir.actions.act_window,help:website_slides.slide_channel_tag_group_action
 msgid "Create a Course Group"
 msgstr "강좌 그룹 만들기"
+
+#. module: website_slides
+#: model:ir.model,website_form_label:website_slides.model_res_partner
+msgid "Create a Customer"
+msgstr "고객 만들기"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
@@ -2493,12 +2746,14 @@ msgid "DIY Furniture"
 msgstr "가구 DIY"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.slide_searchbar_input_snippet_options
+#. odoo-javascript
+#: code:addons/website_slides/static/src/website_builder/slides_searchbar_option_plugin.js:0
 msgid "Date (new to old)"
 msgstr "날짜 (최근 날짜 순)"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.slide_searchbar_input_snippet_options
+#. odoo-javascript
+#: code:addons/website_slides/static/src/website_builder/slides_searchbar_option_plugin.js:0
 msgid "Date (old to new)"
 msgstr "날짜 (오래된 날짜 순)"
 
@@ -2524,6 +2779,15 @@ msgid "Defines the content that will be promoted on the course home page"
 msgstr "강좌 페이지에서 홍보할 콘텐츠를 정의합니다."
 
 #. module: website_slides
+#: model:ir.model.fields,help:website_slides.field_slide_channel__channel_type
+#: model:ir.model.fields,help:website_slides.field_slide_channel_partner__channel_type
+#: model:ir.model.fields,help:website_slides.field_slide_slide__channel_type
+msgid ""
+"Defines the course type (e.g., \"Training\" for interactive learning, or "
+"\"Documentation\" for resources and guides)."
+msgstr ""
+
+#. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__publish_template_id
 msgid ""
 "Defines the email your Attendees will receive each time you upload new "
@@ -2546,7 +2810,7 @@ msgstr "강좌 및 해당 콘텐츠에 접근할 수 있는 사용자를 정의�
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_category_delete.js:0
+#: code:addons/website_slides/static/src/interactions/category_delete.js:0
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
 msgid "Delete"
@@ -2554,7 +2818,7 @@ msgstr "삭제"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_category_delete.js:0
+#: code:addons/website_slides/static/src/interactions/category_delete.js:0
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list
 msgid "Delete Category"
 msgstr "카테고리 삭제"
@@ -2566,9 +2830,10 @@ msgid "Delete Question"
 msgstr "질문 삭제"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/website_builder/slides_searchbar_option_plugin.js:0
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__description
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__description
-#: model_terms:ir.ui.view,arch_db:website_slides.slide_searchbar_input_snippet_options
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
 msgid "Description"
@@ -2591,13 +2856,6 @@ msgid "Discard"
 msgstr "취소"
 
 #. module: website_slides
-#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_1_4
-#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_2_1
-#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_4_0
-msgid "Discover more"
-msgstr "더 알아보기"
-
-#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.lesson_card
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 msgid "Dislike"
@@ -2617,6 +2875,15 @@ msgid "Display"
 msgstr "표시"
 
 #. module: website_slides
+#: model:ir.model.fields,field_description:website_slides.field_base_partner_merge_automatic_wizard__display_name
+#: model:ir.model.fields,field_description:website_slides.field_gamification_challenge__display_name
+#: model:ir.model.fields,field_description:website_slides.field_gamification_karma_tracking__display_name
+#: model:ir.model.fields,field_description:website_slides.field_mail_activity__display_name
+#: model:ir.model.fields,field_description:website_slides.field_mail_message__display_name
+#: model:ir.model.fields,field_description:website_slides.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:website_slides.field_res_groups__display_name
+#: model:ir.model.fields,field_description:website_slides.field_res_partner__display_name
+#: model:ir.model.fields,field_description:website_slides.field_res_users__display_name
 #: model:ir.model.fields,field_description:website_slides.field_slide_answer__display_name
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__display_name
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_invite__display_name
@@ -2629,6 +2896,7 @@ msgstr "표시"
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_partner__display_name
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_resource__display_name
 #: model:ir.model.fields,field_description:website_slides.field_slide_tag__display_name
+#: model:ir.model.fields,field_description:website_slides.field_website__display_name
 msgid "Display Name"
 msgstr "표시명"
 
@@ -2666,13 +2934,11 @@ msgstr "올바르게 답변하시겠습니까?"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_course_enroll_email.js:0
+#: code:addons/website_slides/static/src/interactions/enroll_email.js:0
 msgid "Do you want to request access to this course?"
 msgstr "이 강좌에 대한 액세스 권한을 요청하시겠습니까?"
 
 #. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.js:0
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_slide__slide_category__document
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
 msgid "Document"
@@ -2708,7 +2974,7 @@ msgid "Documents"
 msgstr "문서"
 
 #. module: website_slides
-#: model:slide.channel.tag,name:website_slides.slide_channel_tag_other_2
+#: model:slide.channel.tag,name:website_slides.slide_channel_tag_dog_friendly
 msgid "Dog Friendly"
 msgstr "친절한 개"
 
@@ -2716,7 +2982,7 @@ msgstr "친절한 개"
 #. odoo-javascript
 #: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
 msgid "Don't have an account?"
-msgstr "아직 계정이 없으십니까?"
+msgstr "사용자 계정 만들기"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__completed
@@ -2824,12 +3090,6 @@ msgstr "채널을 공유할 때 사용되는 이메일 서식"
 #: model:ir.model.fields,help:website_slides.field_slide_channel__share_slide_template_id
 msgid "Email template used when sharing a slide"
 msgstr "슬라이드를 공유할 때 사용되는 이메일 서식"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_share_dialog/email_sharing_input.xml:0
-msgid "Email(s) sent."
-msgstr "이메일 전송."
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__embed_code
@@ -3007,6 +3267,11 @@ msgid "Filter &amp; order"
 msgstr "필터 &amp; 주문"
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+msgid "Filters"
+msgstr "필터"
+
+#. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/tours/slides_tour.js:0
 msgid "Finally you can click here to enjoy your content in fullscreen"
@@ -3038,31 +3303,15 @@ msgstr "첫 번째 시도"
 msgid ""
 "First, create your lesson, then edit it with the website builder. You'll be "
 "able to drop building blocks on your page and edit them."
-msgstr "먼저 강의을 작성한 다음 웹사이트 빌더를 사용하여 수정하세요. 페이지에 빌딩 블록을 드래그하고 편집할 수 있습니다."
+msgstr ""
+"먼저 강의을 작성한 다음 웹사이트 빌더를 사용하여 수정하세요. 페이지에 빌딩 "
+"블록을 드래그하고 편집할 수 있습니다."
 
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/tours/slides_tour.js:0
 msgid "First, let's add a <b>Document</b>. It has to be a .pdf file."
 msgstr "먼저 <b>문서</b>를 추가해봅시다. 확장자가 .pdf인 파일이어야 합니다."
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "First, upload the file on your Google Drive account."
-msgstr "먼저 구글 드라이브 계정에 파일을 업로드하세요."
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "First, upload your videos on Vimeo and mark them as"
-msgstr "먼저, 비메오에 동영상을 업로드하고 다음과 같이 표시합니다."
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "First, upload your videos on YouTube and mark them as"
-msgstr "먼저, 유튜브에 동영상을 업로드하고 다음과 같이 표시합니다."
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__message_follower_ids
@@ -3211,6 +3460,12 @@ msgstr "구글 드라이브 동영상"
 
 #. module: website_slides
 #. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Google Drive:"
+msgstr "구글 드라이브:"
+
+#. module: website_slides
+#. odoo-javascript
 #: code:addons/website_slides/static/src/activity/activity_patch.xml:0
 msgid "Grant Access"
 msgstr "액세스 권한 부여"
@@ -3224,13 +3479,6 @@ msgstr "목차"
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_tag__group_id
 msgid "Group"
 msgstr "그룹"
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_partner_view_search
-#: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_partner_view_search
-#: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_search
-msgid "Group By"
-msgstr "그룹별"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_tag_group__name
@@ -3298,7 +3546,13 @@ msgstr "제한된 도구만을 사용해 고품질의 식탁을 만드는 방법
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
 msgid "How do I add new content?"
-msgstr "새 콘텐츠를 추가하려면 어떻게 해야 하나요? "
+msgstr "새 콘텐츠를 추가하려면 어떻게 해야 하나요?"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "How to Add New Content:"
+msgstr "새 콘텐츠 추가 방법:"
 
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_slide_demo_0_3
@@ -3330,20 +3584,8 @@ msgstr "화분 심는 방법"
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "How to upload your PowerPoint Presentations or Word Documents?"
-msgstr "파워포인트 프레젠테이션이나 워드 문서는 어떻게 업로드하나요?"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "How to upload your videos?"
-msgstr "동영상을 업로드 하는 방법은 무엇입니까?"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "How to use Google Drive?"
-msgstr "구글 드라이브를 사용하는 방법은 무엇입니까?"
+msgid "How to upload Videos:"
+msgstr "동영상 업로드 방법:"
 
 #. module: website_slides
 #: model_terms:slide.slide,description:website_slides.slide_slide_demo_2_2
@@ -3356,6 +3598,15 @@ msgid "HowTo"
 msgstr "방법"
 
 #. module: website_slides
+#: model:ir.model.fields,field_description:website_slides.field_base_partner_merge_automatic_wizard__id
+#: model:ir.model.fields,field_description:website_slides.field_gamification_challenge__id
+#: model:ir.model.fields,field_description:website_slides.field_gamification_karma_tracking__id
+#: model:ir.model.fields,field_description:website_slides.field_mail_activity__id
+#: model:ir.model.fields,field_description:website_slides.field_mail_message__id
+#: model:ir.model.fields,field_description:website_slides.field_res_config_settings__id
+#: model:ir.model.fields,field_description:website_slides.field_res_groups__id
+#: model:ir.model.fields,field_description:website_slides.field_res_partner__id
+#: model:ir.model.fields,field_description:website_slides.field_res_users__id
 #: model:ir.model.fields,field_description:website_slides.field_slide_answer__id
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__id
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_invite__id
@@ -3368,6 +3619,7 @@ msgstr "방법"
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_partner__id
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_resource__id
 #: model:ir.model.fields,field_description:website_slides.field_slide_tag__id
+#: model:ir.model.fields,field_description:website_slides.field_website__id
 msgid "ID"
 msgstr "ID"
 
@@ -3410,15 +3662,8 @@ msgid ""
 "If you want to be sure that attendees have understood and memorized the "
 "content, you can add a Quiz on the lesson. Click on <b>Add Quiz</b>."
 msgstr ""
-"참석자가 내용을 제대로 이해하고 암기했는지 확인하려면 강의에 퀴즈를 추가할 수 있습니다. <b>퀴즈 추가</b>를 클릭하세요."
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid ""
-"If you want to use other types of files, you may want to use an external "
-"source (Google Drive) instead."
-msgstr "다른 유형의 파일을 사용하려면 외부 소스(구글 드라이브)를 사용할 수 있습니다."
+"참석자가 내용을 제대로 이해하고 암기했는지 확인하려면 강의에 퀴즈를 추가할 "
+"수 있습니다. <b>퀴즈 추가</b>를 클릭하세요."
 
 #. module: website_slides
 #. odoo-javascript
@@ -3476,17 +3721,21 @@ msgstr "이미지 소스"
 #. odoo-python
 #: code:addons/website_slides/models/slide_channel.py:0
 msgid ""
-"Impossible to send emails. Select a \"Channel Share Template\" for courses "
-"%(course_names)s first"
-msgstr "이메일을 전송할 수 없습니다. %(course_names)s 강좌에 대한 \"채널 공유 양식\"을 먼저 선택하세요"
+"Impossible to send emails. Select a \"Channel Share Template\" for courses %"
+"(course_names)s first"
+msgstr ""
+"이메일을 전송할 수 없습니다. %(course_names)s 강좌에 대한 \"채널 공유 "
+"양식\"을 먼저 선택하세요"
 
 #. module: website_slides
 #. odoo-python
 #: code:addons/website_slides/models/slide_slide.py:0
 msgid ""
-"Impossible to send emails. Select a \"Share Template\" for courses "
-"%(course_names)s first"
-msgstr "이메일을 전송할 수 없습니다. %(course_names)s 강좌에 대한 \"공유 양식\"을 먼저 선택하세요"
+"Impossible to send emails. Select a \"Share Template\" for courses %"
+"(course_names)s first"
+msgstr ""
+"이메일을 전송할 수 없습니다. %(course_names)s 강좌에 대한 \"공유 양식\"을 "
+"먼저 선택하세요"
 
 #. module: website_slides
 #: model:slide.answer,comment:website_slides.slide_slide_demo_1_4_question_0_1
@@ -3620,7 +3869,7 @@ msgstr "카테고리 완료됨"
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_invite__is_mail_template_editor
 msgid "Is Editor"
-msgstr "편집자입니다 "
+msgstr "편집자입니다"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__is_member
@@ -3657,6 +3906,11 @@ msgid "Is Published"
 msgstr "게시 여부"
 
 #. module: website_slides
+#: model:ir.model.fields,field_description:website_slides.field_slide_channel__is_visible
+msgid "Is Visible On Website"
+msgstr "웹사이트에서 확인 가능"
+
+#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__is_category
 msgid "Is a category"
 msgstr "분류 여부"
@@ -3687,7 +3941,9 @@ msgstr "다음과 유사하게 표시됩니다."
 msgid ""
 "Jim and Todd plant a potted tree for a customer of Knecht's Nurseries and "
 "Landscaping. Narrated by Leif Knecht, owner."
-msgstr "짐과 토드는 크네히트 종묘장과 조경 고객을 위해 화분에 나무를 심습니다. Leif Knecht, 나레이션"
+msgstr ""
+"짐과 토드는 크네히트 종묘장과 조경 고객을 위해 화분에 나무를 심습니다. Leif "
+"Knecht, 나레이션"
 
 #. module: website_slides
 #. odoo-javascript
@@ -3766,7 +4022,8 @@ msgstr "자신을 알기"
 #: model_terms:slide.channel,description:website_slides.slide_channel_demo_3_furn0
 #: model_terms:slide.channel,description_short:website_slides.slide_channel_demo_3_furn0
 msgid ""
-"Knowing which kind of wood to use depending on your application is important. In this course you\n"
+"Knowing which kind of wood to use depending on your application is "
+"important. In this course you\n"
 "will learn the basics of wood characteristics."
 msgstr ""
 "용도에 따라 사용할 나무 종류를 아는 것이 중요합니다. \n"
@@ -3775,9 +4032,11 @@ msgstr ""
 #. module: website_slides
 #: model_terms:slide.slide,description:website_slides.slide_slide_demo_2_3
 msgid ""
-"Knowing wood characteristics is a requirement in order to know which kind of"
-" wood to use in a given situation."
-msgstr "주어진 상황에서 어떤 종류의 나무를 사용해야하는지 알기 위해서는 목재 특성을 알아야합니다."
+"Knowing wood characteristics is a requirement in order to know which kind of "
+"wood to use in a given situation."
+msgstr ""
+"주어진 상황에서 어떤 종류의 나무를 사용해야하는지 알기 위해서는 목재 특성을 "
+"알아야합니다."
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_invite__lang
@@ -3848,7 +4107,8 @@ msgid "Latest achievements"
 msgstr "최근 달성"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.snippet_options
+#. odoo-javascript
+#: code:addons/website_slides/static/src/website_builder/courses_list_page_option.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.toggle_leaderboard
 msgid "Leaderboard"
 msgstr "점수획득판"
@@ -3859,7 +4119,9 @@ msgstr "점수획득판"
 msgid ""
 "Learn how to take care of your favorite trees. Learn when to plant, how to "
 "manage potted trees, ..."
-msgstr "좋아하는 나무를 돌보는 방법을 배우십시오. 심는시기, 화분에 심은 나무를 관리하는 방법 등에 대해 알아보십시오 ..."
+msgstr ""
+"좋아하는 나무를 돌보는 방법을 배우십시오. 심는시기, 화분에 심은 나무를 "
+"관리하는 방법 등에 대해 알아보십시오 ..."
 
 #. module: website_slides
 #: model_terms:slide.channel,description:website_slides.slide_channel_demo_0_gard_0
@@ -3895,6 +4157,11 @@ msgid "Lessons"
 msgstr "강의"
 
 #. module: website_slides
+#: model:slide.channel.tag.group,name:website_slides.slide_channel_tag_group_level
+msgid "Level"
+msgstr "레벨"
+
+#. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_quiz_finish_dialog/slide_quiz_finish_dialog.js:0
 msgid "Level up!"
@@ -3923,8 +4190,7 @@ msgstr "링크"
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_slide__document_google_url
-msgid ""
-"Link of the document (we currently only support Google Drive as source)"
+msgid "Link of the document (we currently only support Google Drive as source)"
 msgstr "문서 링크(현재 구글 드라이브만 소스로 지원)"
 
 #. module: website_slides
@@ -4034,6 +4300,16 @@ msgid "Menu Entry"
 msgstr "메뉴 항목"
 
 #. module: website_slides
+#: model:ir.model,name:website_slides.model_base_partner_merge_automatic_wizard
+msgid "Merge Partner Wizard"
+msgstr ""
+
+#. module: website_slides
+#: model:ir.model,name:website_slides.model_mail_message
+msgid "Message"
+msgstr ""
+
+#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__message_has_error
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__message_has_error
 msgid "Message Delivery error"
@@ -4065,7 +4341,9 @@ msgstr "당근"
 msgid ""
 "Mighty forest just don't appear in a few weeks. Learn how time made our "
 "forests mighty and mysterious."
-msgstr "거대한 숲은 몇 주 안에 나타나지 않습니다. 시간이 어떻게 우리의 숲을 강력하고 신비롭게 만들었는지 알아보십시오."
+msgstr ""
+"거대한 숲은 몇 주 안에 나타나지 않습니다. 시간이 어떻게 우리의 숲을 강력하고 "
+"신비롭게 만들었는지 알아보십시오."
 
 #. module: website_slides
 #. odoo-javascript
@@ -4086,7 +4364,6 @@ msgstr "모바일 하위 탐색"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_sidebar
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
 msgid "More info"
 msgstr "추가 정보"
 
@@ -4104,9 +4381,10 @@ msgid "Most Voted"
 msgstr "최고 득표"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
-msgid "Most popular courses"
-msgstr "가장 인기있는 강좌"
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Most formats via Google Drive (Docs, Sheets, PowerPoints, etc)."
+msgstr "Google 드라이브를 통한 대부분의 형식(문서, 스프레드시트, 파워포인트 등)"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__my_activity_date_deadline
@@ -4119,12 +4397,7 @@ msgid "My Content"
 msgstr "나의 콘텐츠"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
-msgid "My Courses"
-msgstr "내 강좌"
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 msgid "My courses"
 msgstr "내 강좌"
 
@@ -4155,14 +4428,15 @@ msgid "New"
 msgstr "신규"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/website_builder/courses_list_page_option.xml:0
+msgid "New Content Badge"
+msgstr "신규 콘텐츠 배지"
+
+#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__publish_template_id
 msgid "New Content Notification"
 msgstr "새로운 콘텐츠 알림"
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.snippet_options
-msgid "New Content Ribbon"
-msgstr "신규 콘텐츠 리본"
 
 #. module: website_slides
 #: model:ir.actions.act_window,name:website_slides.slide_channel_action_add
@@ -4179,11 +4453,6 @@ msgstr "{{ object.channel_id.name }}에 게시된 새로운 {{ object.slide_cate
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
 msgid "Newest"
 msgstr "최신"
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
-msgid "Newest courses"
-msgstr "최신 강좌"
 
 #. module: website_slides
 #. odoo-javascript
@@ -4218,11 +4487,6 @@ msgid "Next Lesson"
 msgstr "다음 강의"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.slides_home_user_profile_small
-msgid "Next rank:"
-msgstr "다음 등급 :"
-
-#. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/slides_course_quiz.js:0
 #: model:slide.answer,text_value:website_slides.slide_slide_demo_1_4_question_0_1
@@ -4246,8 +4510,8 @@ msgid "No Attendees Yet!"
 msgstr "아직 참석자가 없습니다!"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_results
 msgid "No Course created yet."
 msgstr "개설된 강좌가 없습니다."
 
@@ -4277,12 +4541,12 @@ msgid "No content was found using your search"
 msgstr "검색한 내용이 없습니다."
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_results
 msgid "No course was found matching your search"
 msgstr "검색어와 일치하는 강좌가 없습니다."
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_results
 msgid "No course was found matching your search."
 msgstr "검색어와 일치하는 강좌가 없습니다."
 
@@ -4312,7 +4576,7 @@ msgid "No presentation available."
 msgstr "사용가능한 프리젠테이션이 없습니다."
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_results
 msgid "No results found for '"
 msgstr "' 에 대한 결과를 찾을 수 없습니다."
 
@@ -4396,7 +4660,7 @@ msgstr "오류 횟수"
 #: model:ir.model.fields,help:website_slides.field_slide_channel__message_needaction_counter
 #: model:ir.model.fields,help:website_slides.field_slide_slide__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr "조치가 필요한 메시지 수"
+msgstr "조치할 메시지 수"
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__message_has_error_counter
@@ -4427,27 +4691,9 @@ msgid "Officer"
 msgstr "부서장"
 
 #. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "On Google Drive"
-msgstr "구글 드라이브"
-
-#. module: website_slides
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_channel__enroll__invite
 msgid "On Invitation"
 msgstr "초대한 사람만"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "On Vimeo"
-msgstr "비메오"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "On YouTube"
-msgstr "유튜브"
 
 #. module: website_slides
 #. odoo-javascript
@@ -4478,26 +4724,27 @@ msgid "Open"
 msgstr "열기"
 
 #. module: website_slides
-#. odoo-python
-#: code:addons/website_slides/models/slide_channel.py:0
-msgid "Operation not supported"
-msgstr "지원되지 않는 작업"
-
-#. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel_invite__lang
 msgid ""
 "Optional translation language (ISO code) to select when sending out an "
-"email. If not set, the english version will be used. This should usually be "
-"a placeholder expression that provides the appropriate language, e.g. {{ "
-"object.partner_id.lang }}."
+"email. If not set, the main partner's language will be used. This should "
+"usually be a placeholder expression that provides the appropriate language, "
+"e.g. {{ object.partner_id.lang }}."
 msgstr ""
-"이메일 전송 시 번역할 언어 (ISO code)를 선택할 수 있습니다. 설정하지 않을 경우, 영어가 기본 언어로 사용됩니다. 적절한 "
-"언어를 선택할 수 있도록 다음과 같은 예시용 메시지를 사용합니다. {{ object.partner_id.lang }}."
+"이메일 전송 시 번역할 언어 (ISO 코드)를 선택할 수 있습니다. 선택하지 않을 "
+"경우, 기본 파트너의 사용 언어가 기본 언어로 적용됩니다. 알맞은 언어로 "
+"표시되는 자리표지자가 나타나며, 예를 들어 {{ object.partner_id.lang }} 와 "
+"같이 표시됩니다."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
 msgid "Options"
 msgstr "옵션"
+
+#. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+msgid "Overview"
+msgstr "전체보기"
 
 #. module: website_slides
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_slide__slide_type__pdf
@@ -4508,6 +4755,12 @@ msgstr "PDF"
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__document_binary_content
 msgid "PDF Content"
 msgstr "PDF 콘텐츠"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "PDFs (local uploads)."
+msgstr "PDF (로컬 업데이트)"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
@@ -4542,22 +4795,17 @@ msgstr "제발"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_like.js:0
+#: code:addons/website_slides/static/src/interactions/slide_like.js:0
 msgid ""
-"Please <a href=\"/web/login?redirect=%(url)s\">login</a> or <a "
-"href=\"/web/signup?redirect=%(url)s\">create an account</a> to vote for this"
-" lesson"
+"Please %(a_login_open)slogin%(a_login_close)s or %(a_signup_open)screate an "
+"account%(a_signup_close)s to vote for this lesson"
 msgstr ""
-"이 강의에 투표하려면 <a href=\"/web/login?redirect=%(url)s\">로그인</a>하거나 <a "
-"href=\"/web/signup?redirect=%(url)s\">계정 만들기</a>를 해주세요."
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_like.js:0
-msgid ""
-"Please <a href=\"/web/login?redirect=%(url)s\">login</a> to vote for this "
-"lesson"
-msgstr "이 강의에 투표하려면 <a href=\"/web/login?redirect=%(url)s\">로그인</a>해 주세요. "
+#: code:addons/website_slides/static/src/interactions/slide_like.js:0
+msgid "Please %(a_login_open)slogin%(a_login_close)s to vote for this lesson"
+msgstr ""
 
 #. module: website_slides
 #. odoo-python
@@ -4628,6 +4876,12 @@ msgid "Presentation"
 msgstr "프리젠테이션"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.js:0
+msgid "Presentation / Doc"
+msgstr "프레젠테이션 / 문서"
+
+#. module: website_slides
 #: model:mail.message.subtype,description:website_slides.mt_channel_slide_published
 #: model:mail.message.subtype,name:website_slides.mt_channel_slide_published
 msgid "Presentation Published"
@@ -4666,6 +4920,7 @@ msgstr "진행"
 #: code:addons/website_slides/static/src/js/public/components/slide_quiz_finish_dialog/slide_xp_progress_bar.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.course_card
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_main
 msgid "Progress bar"
@@ -4682,7 +4937,8 @@ msgid "Public Views"
 msgstr "공개 조회수"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.slide_searchbar_input_snippet_options
+#. odoo-javascript
+#: code:addons/website_slides/static/src/website_builder/slides_searchbar_option_plugin.js:0
 msgid "Publication Date"
 msgstr "게시 날짜"
 
@@ -4699,7 +4955,7 @@ msgstr "게시일"
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_search
 msgid "Published"
-msgstr "게시 됨"
+msgstr "게시 완료"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
@@ -4743,7 +4999,7 @@ msgstr "질문"
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.js:0
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_slide__slide_category__quiz
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_slide__slide_type__quiz
-#: model:slide.channel.tag,name:website_slides.slide_channel_tag_other_0
+#: model:slide.channel.tag,name:website_slides.slide_channel_tag_quiz
 #: model_terms:ir.ui.view,arch_db:website_slides.gamification_karma_tracking_view_search
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_question_view_form
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
@@ -4820,7 +5076,7 @@ msgstr "평가 텍스트"
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__rating_count
 msgid "Rating count"
-msgstr "평가 수 "
+msgstr "평가 수"
 
 #. module: website_slides
 #. odoo-python
@@ -4840,11 +5096,6 @@ msgstr "평가"
 #: model_terms:gamification.badge,description:website_slides.badge_data_karma
 msgid "Reach 2000 XP"
 msgstr "2000 XP 도달"
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
-msgid "Reach new heights"
-msgstr "새로운 목표를 달성해보세요"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_invite__partner_ids
@@ -4892,15 +5143,20 @@ msgstr "보고"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_course_enroll_email.js:0
+#: code:addons/website_slides/static/src/interactions/enroll_email.js:0
 msgid "Request Access."
 msgstr "액세스 권한 요청."
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_course_enroll_email.js:0
+#: code:addons/website_slides/static/src/interactions/enroll_email.js:0
 msgid "Request sent!"
 msgstr "요청 전송!"
+
+#. module: website_slides
+#: model:ir.model.fields,field_description:website_slides.field_mail_activity__request_partner_id
+msgid "Requesting Partner"
+msgstr "요청 협력사"
 
 #. module: website_slides
 #. odoo-javascript
@@ -4918,9 +5174,10 @@ msgstr "리소스"
 #. module: website_slides
 #. odoo-python
 #: code:addons/website_slides/models/slide_slide_resource.py:0
-msgid ""
-"Resource %(resource_name)s is a link and should not contain a data file"
-msgstr "리소스 %(resource_name)s 는 링크 형식이여야하며 데이터 파일을 포함하지 않아야 합니다."
+msgid "Resource %(resource_name)s is a link and should not contain a data file"
+msgstr ""
+"리소스 %(resource_name)s 는 링크 형식이여야하며 데이터 파일을 포함하지 "
+"않아야 합니다."
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_resource__resource_type
@@ -4983,6 +5240,8 @@ msgid "Review Date"
 msgstr "리뷰 날짜"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/interactions/portal_rating_composer.js:0
 #: model:ir.actions.act_window,name:website_slides.rating_rating_action_slide_channel
 #: model:ir.ui.menu,name:website_slides.website_slides_menu_report_reviews
 #: model_terms:ir.ui.view,arch_db:website_slides.course_main
@@ -4992,6 +5251,12 @@ msgstr "리뷰 날짜"
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
 msgid "Reviews"
 msgstr "소감"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/interactions/portal_rating_composer.js:0
+msgid "Reviews (%s)"
+msgstr "리뷰 (%s)"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__quiz_fourth_attempt_reward
@@ -5019,6 +5284,11 @@ msgid "Rewards"
 msgstr "보상"
 
 #. module: website_slides
+#: model:slide.channel.tag.group,name:website_slides.slide_channel_tag_group_role
+msgid "Role"
+msgstr "역할"
+
+#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__is_seo_optimized
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__is_seo_optimized
 msgid "SEO optimized"
@@ -5043,9 +5313,9 @@ msgstr "견본"
 
 #. module: website_slides
 #. odoo-javascript
+#: code:addons/website_slides/static/src/interactions/category_add.js:0
 #: code:addons/website_slides/static/src/js/public/components/slide_unsubscribe_dialog/slide_unsubscribe_dialog.xml:0
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_category.xml:0
-#: code:addons/website_slides/static/src/js/slides_category_add.js:0
 #: code:addons/website_slides/static/src/xml/slide_quiz_create.xml:0
 msgid "Save"
 msgstr "저장"
@@ -5055,12 +5325,6 @@ msgstr "저장"
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_category.xml:0
 msgid "Save and Publish"
 msgstr "저장 & 게시"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "Save your presentations or documents as PDF files and upload them."
-msgstr "프레젠테이션이나 문서를 PDF 파일로 저장하고 업로드하세요."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.rating_rating_view_tree_slide_channel
@@ -5079,9 +5343,14 @@ msgid "Search Contents"
 msgstr "내용 검색"
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_bar
+msgid "Search Courses"
+msgstr "강좌 검색"
+
+#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_nav
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_bar
 msgid "Search courses"
 msgstr "강좌 검색"
 
@@ -5139,7 +5408,7 @@ msgstr "수동으로 선택"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_category.js:0
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_category.xml:0
 msgid "Select or create a category"
 msgstr "카테고리 선택 또는 만들기"
 
@@ -5157,7 +5426,7 @@ msgstr "태그 그룹 선택 또는 만들기"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_select_tags.xml:0
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_category.xml:0
 msgid "Select or create tags"
 msgstr "태그 선택 또는 만들기"
 
@@ -5232,12 +5501,26 @@ msgid "Sequence"
 msgstr "순서"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Set file permissions to"
+msgstr "파일 권한 설정:"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Set permissions to"
+msgstr "권한 설정:"
+
+#. module: website_slides
 #: model:ir.actions.act_window,name:website_slides.website_slides_action_settings
 #: model:ir.ui.menu,name:website_slides.website_slides_menu_config_settings
 msgid "Settings"
 msgstr "설정"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
 msgid "Share"
@@ -5382,13 +5665,6 @@ msgid "Signed In"
 msgstr "로그인함"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
-msgid ""
-"Skill up and have an impact! Your business career starts here.<br/>Time to "
-"start a course."
-msgstr "자기계발을 통해 도약할 수 있습니다! 여러분의 경력이 바로 여기에서 시작됩니다.<br/>이제 과정을 시작할 시간입니다."
-
-#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_resource__slide_id
 msgid "Slide"
 msgstr "슬라이드"
@@ -5434,14 +5710,14 @@ msgstr "슬라이드 이미지"
 #. odoo-python
 #: code:addons/website_slides/controllers/main.py:0
 msgid ""
-"Slide with questions must be marked as done when submitting all good answers"
-" "
-msgstr "정답을 모두 제출하면 질문이 있는 슬라이드는 완료로 표시해야 합니다."
+"Slide with questions must be marked as done when submitting all good answers "
+msgstr "정답을 모두 제출하면 질문이 있는 슬라이드는 완료로 표시해야 합니다. "
 
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/xml/website_slides_fullscreen.xml:0
 #: model:ir.model,name:website_slides.model_slide_slide
+#: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
 msgid "Slides"
 msgstr "슬라이드"
 
@@ -5483,6 +5759,11 @@ msgid "Start at Page"
 msgstr "페이지에서 시작"
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.course_card
+msgid "Start now"
+msgstr "지금 시작하기"
+
+#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
 msgid "Start this Course"
 msgstr "이 강좌 시작하기"
@@ -5492,12 +5773,9 @@ msgstr "이 강좌 시작하기"
 #: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_2_1
 #: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_4_0
 msgid "Start with the customer – find out what they want and give it to them."
-msgstr "고객과 함께 시작하세요. – 고객이 원하는 것이 무엇인지 알아보고 고객에게 제공하십시오."
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
-msgid "Start your online course today!"
-msgstr "온라인 과정을 오늘 시작해보세요!"
+msgstr ""
+"고객과 함께 시작하세요. – 고객이 원하는 것이 무엇인지 알아보고 고객에게 "
+"제공하십시오."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_partner_view_search
@@ -5557,15 +5835,23 @@ msgstr "구독자 정보"
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_slide__slide_type
 msgid ""
-"Subtype of the slide category, allows more precision on the actual file type"
-" / source type."
-msgstr "슬라이드 카테고리의 하위 유형으로, 실제 파일 / 소스 유형을 보다 정확하게 파악할 수 있습니다."
+"Subtype of the slide category, allows more precision on the actual file "
+"type / source type."
+msgstr ""
+"슬라이드 카테고리의 하위 유형으로, 실제 파일 / 소스 유형을 보다 정확하게 "
+"파악할 수 있습니다."
 
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
 msgid "Succeed and gain karma"
 msgstr "성공과 명성 얻기"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Supported Files:"
+msgstr "지원되는 파일:"
 
 #. module: website_slides
 #. odoo-javascript
@@ -5589,11 +5875,12 @@ msgstr "태그 이름"
 #: model:ir.model.fields,help:website_slides.field_slide_channel_tag__color
 msgid ""
 "Tag color used in both backend and website. No color means no display in "
-"kanban or front-end, to distinguish internal tags from public categorization"
-" tags"
+"kanban or front-end, to distinguish internal tags from public categorization "
+"tags"
 msgstr ""
-"백엔드와 웹사이트에서 모두 사용되는 태그 색상입니다. 색상을 설정하지 않으면 칸반과 프론트엔드에 내부 태그와 공개 분류 태그를 구분하기 "
-"위한 색상이 표시되지 않습니다."
+"백엔드와 웹사이트에서 모두 사용되는 태그 색상입니다. 색상을 설정하지 않으면 "
+"칸반과 프론트엔드에 내부 태그와 공개 분류 태그를 구분하기 위한 색상이 "
+"표시되지 않습니다."
 
 #. module: website_slides
 #. odoo-javascript
@@ -5665,8 +5952,9 @@ msgid ""
 "document. You can change this number if your attendees will need more time "
 "to assimilate the content."
 msgstr ""
-"강의의 <b>소요 시간</b>은 문서의 페이지 수를 기준으로 합니다. 참석자가 강의 내용을 모두 이해하는 데 시간이 더 필요한 경우 "
-"시간을 임의로 변경할 수 있습니다."
+"강의의 <b>소요 시간</b>은 문서의 페이지 수를 기준으로 합니다. 참석자가 강의 "
+"내용을 모두 이해하는 데 시간이 더 필요한 경우 시간을 임의로 변경할 수 "
+"있습니다."
 
 #. module: website_slides
 #. odoo-javascript
@@ -5676,15 +5964,18 @@ msgid ""
 "you want.</br>A <b>Preview</b> of your file is available on the right side "
 "of the screen."
 msgstr ""
-"강의의 <b>제목</b>은 자동으로 완성되며, 필요에 따라 수정할 수 있습니다.</br> 화면 오른쪽에 위치한 <b>미리보기</b>를 "
-"통해 해당 파일을 빠르게 미리 확인할 수도 있습니다."
+"강의의 <b>제목</b>은 자동으로 완성되며, 필요에 따라 수정할 수 있습니다.</br> "
+"화면 오른쪽에 위치한 <b>미리보기</b>를 통해 해당 파일을 빠르게 미리 확인할 "
+"수도 있습니다."
 
 #. module: website_slides
 #: model:ir.model.constraint,message:website_slides.constraint_slide_channel_check_enroll
 msgid ""
-"The Enroll Policy should be set to 'On Invitation' when visibility is set to"
-" 'Course Attendees'"
-msgstr "공개 범위가 '코스 참석자'로 제한되어 있는 경우 등록 정책은 '초대 시'로 설정되어야 합니다."
+"The Enroll Policy should be set to 'On Invitation' when visibility is set to "
+"'Course Attendees'"
+msgstr ""
+"공개 범위가 '코스 참석자'로 제한되어 있는 경우 등록 정책은 '초대 시'로 "
+"설정되어야 합니다."
 
 #. module: website_slides
 #. odoo-javascript
@@ -5692,22 +5983,15 @@ msgstr "공개 범위가 '코스 참석자'로 제한되어 있는 경우 등록
 msgid ""
 "The Google Drive link can be obtained by using the 'share' button in the "
 "Google interface."
-msgstr "구글 드라이브 링크는 구글 인터페이스의 '공유' 버튼을 사용하여 얻을 수 있습니다."
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid ""
-"The Google Drive link to use here can be obtained by clicking the \"Share\" "
-"button in the Google interface."
-msgstr "여기서 사용할 구글 드라이브 링크는 구글 인터페이스에서 '공유' 버튼을 클릭하여 얻을 수 있습니다."
+msgstr ""
+"구글 드라이브 링크는 구글 인터페이스의 '공유' 버튼을 사용하여 얻을 수 "
+"있습니다."
 
 #. module: website_slides
 #: model:ir.model.constraint,message:website_slides.constraint_slide_channel_partner_check_completion
 msgid ""
-"The completion of a channel is a percentage and should be between 0% and "
-"100."
-msgstr "채널의 완성도는 0%에서 100% 사이 값의 백분율로 표시됩니다. "
+"The completion of a channel is a percentage and should be between 0% and 100."
+msgstr "채널의 완성도는 0%에서 100% 사이 값의 백분율로 표시됩니다."
 
 #. module: website_slides
 #. odoo-python
@@ -5720,7 +6004,9 @@ msgstr "이 초대를 받을 연락처가 유효하지 않습니다."
 msgid ""
 "The course is accessible by anyone : the users don't need to join the "
 "channel to access the content of the course."
-msgstr "이 강좌는 누구나 접근할 수 있습니다. 사용자는 강좌 내용에 접근하기 위해 채널에 참여할 필요가 없습니다."
+msgstr ""
+"이 강좌는 누구나 접근할 수 있습니다. 사용자는 강좌 내용에 접근하기 위해 "
+"채널에 참여할 필요가 없습니다."
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__description_short
@@ -5735,11 +6021,18 @@ msgid ""
 msgstr "강좌 페이지 상단의 제목 아래에 표시되는 설명"
 
 #. module: website_slides
+#: model:ir.model.fields,help:website_slides.field_slide_channel__website_absolute_url
+#: model:ir.model.fields,help:website_slides.field_slide_channel_tag_group__website_absolute_url
+#: model:ir.model.fields,help:website_slides.field_slide_slide__website_absolute_url
+msgid "The full absolute URL to access the document through the website."
+msgstr "웹사이트를 통해 문서에 접근할 수 있는 전체 URL 전문입니다."
+
+#. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__website_url
 #: model:ir.model.fields,help:website_slides.field_slide_channel_tag_group__website_url
 #: model:ir.model.fields,help:website_slides.field_slide_slide__website_url
-msgid "The full URL to access the document through the website."
-msgstr "웹사이트를 통해 문서에 접근 하는 전체 URL입니다."
+msgid "The full relative URL to access the document through the website."
+msgstr "웹사이트를 통해 문서에 접근할 수 있는 상대 URL 전문입니다."
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_slide__can_self_mark_completed
@@ -5752,23 +6045,9 @@ msgid "The slide can be marked as not completed and the progression"
 msgstr "슬라이드를 미완료로 표시하고 진행률을 표시 할 수 있습니다"
 
 #. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid ""
-"The video link to input here can be obtained by using the 'share' button in "
-"the Vimeo interface."
-msgstr "동영상 링크는 비메오 인터페이스의 '공유' 버튼을 사용하여 얻을 수 있습니다."
-
-#. module: website_slides
 #: model:ir.model.constraint,message:website_slides.constraint_slide_slide_partner_check_vote
 msgid "The vote must be 1, 0 or -1."
 msgstr "투표는 1, 0 또는 -1이어야 합니다."
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "Then, go into the file permissions and set it as \"Anyone with the link\"."
-msgstr "파일 권한으로 이동하여 '링크가 있는 사람 누구나'로 설정합니다."
 
 #. module: website_slides
 #: model:slide.tag,name:website_slides.slide_tag_demo_theory
@@ -5819,7 +6098,9 @@ msgstr "해당 강좌는 존재하지 않습니다."
 msgid ""
 "This course is not published. Attendees may not be able to access its "
 "contents."
-msgstr "이 코스는 비공개로 설정되어 있습니다. 참석자는 해당 콘텐츠에 접근하지 못할 수 있습니다."
+msgstr ""
+"이 코스는 비공개로 설정되어 있습니다. 참석자는 해당 콘텐츠에 접근하지 못할 "
+"수 있습니다."
 
 #. module: website_slides
 #. odoo-javascript
@@ -5867,8 +6148,7 @@ msgstr "축하합니다, 정답입니다"
 #. odoo-python
 #: code:addons/website_slides/models/slide_question.py:0
 msgid ""
-"This question must have at least one correct answer and one incorrect "
-"answer."
+"This question must have at least one correct answer and one incorrect answer."
 msgstr "이 문제에는 정답과 오답이 하나 이상 있어야 합니다."
 
 #. module: website_slides
@@ -5897,16 +6177,6 @@ msgstr "해당 채널의 다음 콘텐츠에 이미 존재하는 동영상입니
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid ""
-"Through Google Drive, we support most common types of documents.\n"
-"            Including regular documents (Google Doc, .docx), Sheets (Google Sheet, .xlsx), PowerPoints, ..."
-msgstr ""
-"Google 드라이브에서는 일반 문서(Google 문서, .docx), 스프레드시트(Google 스프레드시트, .xlsx),\n"
-"            파워포인트 등 대부분의 일반적인 문서 유형을 지원합니다."
-
-#. module: website_slides
-#. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_category.xml:0
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__name
 msgid "Title"
@@ -5914,8 +6184,6 @@ msgstr "제목"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
 msgid "Toggle navigation"
 msgstr "탐색 전환"
 
@@ -6044,20 +6312,27 @@ msgstr "알 수 없는 웹사이트"
 
 #. module: website_slides
 #. odoo-javascript
+#: code:addons/website_slides/static/src/interactions/slide_like.js:0
 #: code:addons/website_slides/static/src/js/slides_course_join.js:0
-#: code:addons/website_slides/static/src/js/slides_slide_like.js:0
 msgid "Unknown error"
 msgstr "알 수 없는 오류"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_course_enroll_email.js:0
+#: code:addons/website_slides/static/src/interactions/enroll_email.js:0
 msgid "Unknown error, try again."
 msgstr "알 수 없는 오류가 발생했습니다. 다시 시도해주세요."
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Unlisted"
+msgstr "비공개"
+
+#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_card
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 #: model_terms:ir.ui.view,arch_db:website_slides.lesson_card
 msgid "Unpublished"
 msgstr "게시 안 함"
@@ -6085,10 +6360,34 @@ msgstr "그룹 업로드"
 
 #. module: website_slides
 #. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Upload a PDF file from your computer or share a Google Drive link."
+msgstr "컴퓨터에서 PDF 파일을 업로드하거나 Google 드라이브 링크를 공유합니다."
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Upload as"
+msgstr "다음으로 업로드:"
+
+#. module: website_slides
+#. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_source_types.xml:0
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_slide__source_type__local_file
 msgid "Upload from Device"
 msgstr "기기로부터 업로드"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Upload the file to Drive."
+msgstr "파일을 드라이브로 업로드합니다."
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Upload the file to Google Drive."
+msgstr "파일을 구글 드라이브로 업로드합니다."
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__user_id
@@ -6117,6 +6416,12 @@ msgid "Use template"
 msgstr "서식 사용"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Use the"
+msgstr "다음 내용을 사용"
+
+#. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__tag_ids
 msgid "Used to categorize and filter displayed channels/courses"
 msgstr "표시된 채널/강좌를 분류하고 필터링하는 데 사용"
@@ -6135,6 +6440,12 @@ msgstr "사용자"
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__user_vote
 msgid "User vote"
 msgstr "사용자 투표"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Using Google Drive:"
+msgstr "구글 드라이브 사용:"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_question_view_form
@@ -6176,13 +6487,13 @@ msgid "Videos"
 msgstr "동영상"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+#: model_terms:ir.ui.view,arch_db:website_slides.slides_home_user_profile_small
 msgid "View"
 msgstr "화면"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 #: model_terms:ir.ui.view,arch_db:website_slides.slides_home_user_achievements_small
 #: model_terms:ir.ui.view,arch_db:website_slides.toggle_leaderboard
 msgid "View all"
@@ -6217,6 +6528,12 @@ msgid "Vimeo Video"
 msgstr "비메오 동영상"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Vimeo:"
+msgstr "Vimeo:"
+
+#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__website_published
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_tag_group__website_published
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__website_published
@@ -6242,7 +6559,7 @@ msgstr "투표"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_like.js:0
+#: code:addons/website_slides/static/src/interactions/slide_like.js:0
 msgid "Votes and comments are disabled for this course"
 msgstr "투표와 의견은 이 강좌에서는 사용할 수 없습니다"
 
@@ -6267,7 +6584,9 @@ msgstr "직장에서 주인을 지켜보는 것"
 msgid ""
 "We had a little chat with Harry Potted, sure he had interesting things to "
 "say!"
-msgstr "Harry Potted와 짧은 대화를 나눠보았는데요, 흥미로운 이야기를 많이 해주셨습니다!"
+msgstr ""
+"Harry Potted와 짧은 대화를 나눠보았는데요, 흥미로운 이야기를 많이 "
+"해주셨습니다!"
 
 #. module: website_slides
 #: model:ir.model,name:website_slides.model_website
@@ -6282,6 +6601,13 @@ msgstr "웹사이트"
 #: model:ir.model.fields.selection,name:website_slides.selection__gamification_challenge__challenge_category__slides
 msgid "Website / Slides"
 msgstr "웹사이트 / 슬라이드"
+
+#. module: website_slides
+#: model:ir.model.fields,field_description:website_slides.field_slide_channel__website_absolute_url
+#: model:ir.model.fields,field_description:website_slides.field_slide_channel_tag_group__website_absolute_url
+#: model:ir.model.fields,field_description:website_slides.field_slide_slide__website_absolute_url
+msgid "Website Absolute URL"
+msgstr "웹사이트 절대 URL"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__website_message_ids
@@ -6333,14 +6659,8 @@ msgid ""
 "Welcome on your course's home page. It's still empty for now. Click on "
 "\"<b>New</b>\" to write your first course."
 msgstr ""
-"강좌 페이지에 오신 것을 환영합니다. 아직 내용이 채워져 있지 않습니다. 첫 번째 강좌를 등록하시려면  \"<b>신규</b>\" 를 "
-"클릭해 주세요."
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "What does"
-msgstr "무엇이"
+"강좌 페이지에 오신 것을 환영합니다. 아직 내용이 채워져 있지 않습니다. 첫 "
+"번째 강좌를 등록하시려면  \"<b>신규</b>\" 를 클릭해 주세요."
 
 #. module: website_slides
 #: model:slide.question,question:website_slides.slide_slide_demo_0_4_question_0
@@ -6353,35 +6673,27 @@ msgid "What is the best tool to dig a hole for your plants?"
 msgstr "식물을 심는 데 사용할 수 있는 가장 적절한 도구는 무엇입니까?"
 
 #. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "What types of documents do we support?"
-msgstr "지원되는 문서 유형은 무엇입니까?"
-
-#. module: website_slides
 #: model:slide.answer,text_value:website_slides.slide_slide_demo_1_4_question_1_2
 msgid "What was the question again?"
 msgstr "질문이 뭐였나요?"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "When using local files, we only support PDF files."
-msgstr "로컬 파일 사용 시에는 PDF 파일만 지원됩니다."
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel_invite__enroll_mode
 msgid ""
 "Whether invited partners will be added as enrolled. Otherwise, they will be "
 "added as invited."
-msgstr "초대된 협력사를 등록된 협력사로 추가할지 여부를 선택합니다. 선택하지 않으면 초대된 협력사로 추가됩니다."
+msgstr ""
+"초대된 협력사를 등록된 협력사로 추가할지 여부를 선택합니다. 선택하지 않으면 "
+"초대된 협력사로 추가됩니다."
 
 #. module: website_slides
 #: model_terms:slide.slide,description:website_slides.slide_slide_demo_4_1
 msgid ""
 "Which wood type is best for my solid wood furniture? That's the question we "
 "help you answer in this video!"
-msgstr "원목 가구를 제작하는 데 가장 적합한 목재 종류는 무엇인가요? 이 동영상을 시청하고 질문에 대한 답을 찾아보세요!"
+msgstr ""
+"원목 가구를 제작하는 데 가장 적합한 목재 종류는 무엇인가요? 이 동영상을 "
+"시청하고 질문에 대한 답을 찾아보세요!"
 
 #. module: website_slides
 #. odoo-javascript
@@ -6389,7 +6701,9 @@ msgstr "원목 가구를 제작하는 데 가장 적합한 목재 종류는 무�
 msgid ""
 "With Quizzes you can keep your students focused and motivated by answering "
 "some questions and gaining some karma points"
-msgstr "퀴즈를 통해 몇 가지 질문에 답하고 카르마 포인트를 획득함으로써 학생의 집중력을 끌어올리고 동기를 부여할 수 있습니다."
+msgstr ""
+"퀴즈를 통해 몇 가지 질문에 답하고 카르마 포인트를 획득함으로써 학생의 "
+"집중력을 끌어올리고 동기를 부여할 수 있습니다."
 
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_category_demo_2_1
@@ -6424,8 +6738,8 @@ msgid ""
 "Write one or two paragraphs describing your product or services. <br>To be "
 "successful your content needs to be useful to your readers."
 msgstr ""
-"제품, 서비스 또는 특정 기능을 설명하는 글을 한두 개의 단락으로 작성해 주세요. <br>방문자에게 유용한 콘텐츠일수록 성공 확률은 "
-"높아집니다."
+"제품, 서비스 또는 특정 기능을 설명하는 글을 한두 개의 단락으로 작성해 "
+"주세요. <br>방문자에게 유용한 콘텐츠일수록 성공 확률은 높아집니다."
 
 #. module: website_slides
 #: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_1_4
@@ -6436,19 +6750,20 @@ msgid ""
 "feature.<br> To be successful your content needs to be useful to your "
 "readers."
 msgstr ""
-"제품, 서비스 또는 특정 기능을 설명하는 글을 한두 개의 단락으로 작성해 주세요. <br>방문자에게 유용한 콘텐츠일수록 성공 확률은 "
-"높아집니다."
+"제품, 서비스 또는 특정 기능을 설명하는 글을 한두 개의 단락으로 작성해 "
+"주세요. <br>방문자에게 유용한 콘텐츠일수록 성공 확률은 높아집니다."
 
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_quiz_finish_dialog/slide_quiz_finish_dialog.xml:0
 #: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
+#: model_terms:ir.ui.view,arch_db:website_slides.slides_home_user_profile_small
 msgid "XP"
 msgstr "XP"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_course_enroll_email.js:0
+#: code:addons/website_slides/static/src/interactions/enroll_email.js:0
 #: code:addons/website_slides/static/src/js/slides_course_quiz.js:0
 #: model:slide.answer,text_value:website_slides.slide_slide_demo_1_4_question_0_0
 #: model:slide.answer,text_value:website_slides.slide_slide_demo_1_4_question_1_0
@@ -6462,9 +6777,11 @@ msgstr "예"
 #. odoo-python
 #: code:addons/website_slides/models/slide_channel.py:0
 msgid ""
-"You are not allowed to add members to this course. Please contact the course"
-" responsible or an administrator."
-msgstr "이 강좌에 멤버를 추가할 수 없습니다. 강좌 담당자 또는 관리자에게 문의하십시오."
+"You are not allowed to add members to this course. Please contact the course "
+"responsible or an administrator."
+msgstr ""
+"이 강좌에 멤버를 추가할 수 없습니다. 강좌 담당자 또는 관리자에게 "
+"문의하십시오."
 
 #. module: website_slides
 #. odoo-javascript
@@ -6472,7 +6789,9 @@ msgstr "이 강좌에 멤버를 추가할 수 없습니다. 강좌 담당자 또
 msgid ""
 "You can add <b>comments</b> on answers. This will be visible with the "
 "results if the user select this answer."
-msgstr "답변에 <b>댓글</b>을 추가할 수 있습니다. 사용자가 답변을 선택하면 결과와 함께 보여집니다."
+msgstr ""
+"답변에 <b>댓글</b>을 추가할 수 있습니다. 사용자가 답변을 선택하면 결과와 "
+"함께 보여집니다."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
@@ -6532,7 +6851,17 @@ msgstr "회원이 아니거나 게시되지 않은 슬라이드 퀴즈는 완료
 msgid ""
 "You cannot mark a slide quiz as not completed if you are not among its "
 "members or it is unpublished."
-msgstr "슬라이드 퀴즈의 멤버가 아니거나 비공개로 설정되어 있는 경우 해당 슬라이드 퀴즈를 완료되지 않은 것으로 표시할 수 없습니다."
+msgstr ""
+"슬라이드 퀴즈의 멤버가 아니거나 비공개로 설정되어 있는 경우 해당 슬라이드 "
+"퀴즈를 완료되지 않은 것으로 표시할 수 없습니다."
+
+#. module: website_slides
+#. odoo-python
+#: code:addons/website_slides/models/base_partner_merge.py:0
+msgid ""
+"You cannot merge these contacts because multiple contacts are enrolled in "
+"the same courses: %s"
+msgstr ""
 
 #. module: website_slides
 #. odoo-python
@@ -6554,13 +6883,13 @@ msgstr "이 강좌에 접근할 수 있는 권한이 없습니다."
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_like.js:0
+#: code:addons/website_slides/static/src/interactions/slide_like.js:0
 msgid "You don't have access to this lesson"
 msgstr "귀하는 이 강의를 볼 수 있는 권한이 없습니다."
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_like.js:0
+#: code:addons/website_slides/static/src/interactions/slide_like.js:0
 msgid "You don't have enough karma to vote"
 msgstr "귀하는 투표하기에는 명성이 모자랍니다."
 
@@ -6598,7 +6927,6 @@ msgid "You have to sign in before"
 msgstr "먼저 로그인해야 합니다"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_home
 msgid "You may now participate in our eLearning."
 msgstr "이제 이러닝 참여가 가능합니다."
@@ -6611,7 +6939,7 @@ msgstr "문제를 풀려면 로그인해야 합니다."
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_like.js:0
+#: code:addons/website_slides/static/src/interactions/slide_like.js:0
 msgid "You must be member of this course to vote"
 msgstr "투표하려면 이 강좌의 회원이 되어야 합니다."
 
@@ -6643,19 +6971,15 @@ msgid "YouTube Video"
 msgstr "유튜브 동영상"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "YouTube:"
+msgstr "YouTube:"
+
+#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.mail_notification_channel_invite
 msgid "Your"
 msgstr "귀하"
-
-#. module: website_slides
-#: model:slide.channel.tag.group,name:website_slides.slide_channel_tag_group_level
-msgid "Your Level"
-msgstr "귀하의 단계"
-
-#. module: website_slides
-#: model:slide.channel.tag.group,name:website_slides.slide_channel_tag_group_role
-msgid "Your Role"
-msgstr "귀하의 역할"
 
 #. module: website_slides
 #: model_terms:ir.actions.act_window,help:website_slides.slide_channel_action_overview
@@ -6668,12 +6992,20 @@ msgstr ""
 "                    콘텐츠 업로드, 리워드 설정, 참석자 관리 등 ..."
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_share_dialog/email_sharing_input.xml:0
+msgid "Your email(s) will arrive shortly."
+msgstr "이메일을 곧 확인해 보세요."
+
+#. module: website_slides
 #. odoo-python
 #: code:addons/website_slides/models/slide_slide.py:0
 msgid ""
 "Your file could not be found on Google Drive, please check the link and/or "
 "privacy settings"
-msgstr "구글 드라이브에서 파일을 찾을 수 없습니다. 링크 및/또는 개인정보 설정을 확인해주세요."
+msgstr ""
+"구글 드라이브에서 파일을 찾을 수 없습니다. 링크 및/또는 개인정보 설정을 "
+"확인해주세요."
 
 #. module: website_slides
 #. odoo-javascript
@@ -6683,16 +7015,19 @@ msgid ""
 "Click on <b>Add Content</b> to upload a document, create an article or link "
 "a video."
 msgstr ""
-"첫 번째 섹션이 생성되었으므로 이제 강좌에 강의를 추가할 수 있습니다. <b>콘텐츠 추가하기</b> 버튼을 눌러 문서를 업로드하거나 "
-"기사를 새로 작성 또는 동영상 링크를 첨부할 수 있습니다."
+"첫 번째 섹션이 생성되었으므로 이제 강좌에 강의를 추가할 수 있습니다. <b>"
+"콘텐츠 추가하기</b> 버튼을 눌러 문서를 업로드하거나 기사를 새로 작성 또는 "
+"동영상 링크를 첨부할 수 있습니다."
 
 #. module: website_slides
 #. odoo-python
 #: code:addons/website_slides/models/slide_slide.py:0
 msgid ""
-"Your video could not be found on Vimeo, please check the link and/or privacy"
-" settings"
-msgstr "비메오에서 동영상을 찾을 수 없습니다. 링크 및/또는 개인정보 설정을 확인해주세요."
+"Your video could not be found on Vimeo, please check the link and/or privacy "
+"settings"
+msgstr ""
+"비메오에서 동영상을 찾을 수 없습니다. 링크 및/또는 개인정보 설정을 "
+"확인해주세요."
 
 #. module: website_slides
 #. odoo-python
@@ -6700,7 +7035,9 @@ msgstr "비메오에서 동영상을 찾을 수 없습니다. 링크 및/또는 
 msgid ""
 "Your video could not be found on YouTube, please check the link and/or "
 "privacy settings"
-msgstr "유튜브에서 동영상을 찾을 수 없습니다. 링크 및/또는 개인정보 설정을 확인해주세요."
+msgstr ""
+"유튜브에서 동영상을 찾을 수 없습니다. 링크 및/또는 개인정보 설정을 "
+"확인해주세요."
 
 #. module: website_slides
 #. odoo-python
@@ -6709,12 +7046,6 @@ msgid "a course"
 msgstr "강좌"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.achievement_card
-msgid "achieved"
-msgstr "달성함"
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_home
 msgid "and join this Community"
 msgstr "또한 이 커뮤니티에 참여합니다."
@@ -6737,10 +7068,22 @@ msgstr "사이트 이동 경로"
 
 #. module: website_slides
 #. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "button to get a link"
+msgstr "링크 받기 버튼"
+
+#. module: website_slides
+#. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_share_dialog/email_sharing_input.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_social_email
 msgid "by email."
 msgstr "이메일로."
+
+#. module: website_slides
+#. odoo-python
+#: code:addons/website_slides/models/slide_channel.py:0
+msgid "copy"
+msgstr "사본"
 
 #. module: website_slides
 #. odoo-javascript
@@ -6811,12 +7154,6 @@ msgid "e.g. \"Which animal cannot fly?\""
 msgstr "예. \"날 수 없는 동물은 무엇인가요?\""
 
 #. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/xml/slide_quiz_create.xml:0
-msgid "e.g. \"{{placeholder || \"another animal\"}}\""
-msgstr "예: \"{{placeholder || \"another animal\"}}\""
-
-#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_form_add
 msgid "e.g. Computer Science for kids"
 msgstr "예. 어린이를 위한 컴퓨터 과학"
@@ -6824,11 +7161,11 @@ msgstr "예. 어린이를 위한 컴퓨터 과학"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
 msgid ""
-"e.g. In this video, we'll give you the keys on how Odoo can help you to grow"
-" your business. At the end, we'll propose you a quiz to test your knowledge."
+"e.g. In this video, we'll give you the keys on how Odoo can help you to grow "
+"your business. At the end, we'll propose you a quiz to test your knowledge."
 msgstr ""
-"예를 들어 이 비디오에서는 Odoo가 비즈니스 성장에 어떤 도움을 줄 수 있는지에 대한 열쇠를 제공합니다. 마지막으로 지식을 테스트하는 "
-"문제를 제안합니다."
+"예를 들어 이 비디오에서는 Odoo가 비즈니스 성장에 어떤 도움을 줄 수 있는지에 "
+"대한 열쇠를 제공합니다. 마지막으로 지식을 테스트하는 문제를 제안합니다."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
@@ -6846,7 +7183,10 @@ msgid "e.g. Your Level"
 msgstr "예. 나의 레벨"
 
 #. module: website_slides
+#. odoo-python
+#: code:addons/website_slides/controllers/main.py:0
 #: model:ir.ui.menu,name:website_slides.website_slides_menu_root
+#: model:res.groups.privilege,name:website_slides.res_groups_privilege_elearning
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
 msgid "eLearning"
 msgstr "온라인 학습 관리"
@@ -6864,39 +7204,20 @@ msgstr "온라인 학습 개요"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "for 'Private' videos and similar to"
-msgstr "'비공개' 동영상 및 이와 유사한"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "for public ones."
-msgstr "공개용."
-
-#. module: website_slides
-#. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_share_dialog/email_sharing_input.xml:0
 msgid "friend1@email.com, friend2@email.com"
 msgstr "friend1@email.com, friend2@email.com"
+
+#. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
+msgid "hours"
+msgstr "시간"
 
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
 msgid "https://drive.google.com/file/d/ABC/view?usp=sharing"
 msgstr "https://drive.google.com/file/d/ABC/view?usp=sharing"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "https://vimeo.com/558907333/30da9ff3d8"
-msgstr "https://vimeo.com/558907333/30da9ff3d8"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "https://vimeo.com/558907555"
-msgstr "https://vimeo.com/558907555"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
@@ -6910,27 +7231,6 @@ msgstr "가입"
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_social_email
 msgid "login"
 msgstr "로그인"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid ""
-"mean? The Vimeo \"Private\" privacy setting means it is a video which can be viewed only by the users with the link to it.\n"
-"                Your video will never come up in the search results nor on your channel."
-msgstr ""
-"'비공개' 설정은 해당 Vimeo 동영상의 링크가 있는 사용자만 볼 수 있음을 의미합니다.\n"
-"                 이 경우 내 동영상은 검색 결과나 채널에 표시되지 않습니다."
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid ""
-"means? The YouTube \"unlisted\" means it is a video which can be viewed only"
-" by the users with the link to it. Your video will never come up in the "
-"search results nor on your channel."
-msgstr ""
-"무엇을 의미하나요? '비공개' 설정은 해당 유튜브 동영상 링크를 받은 사용자만 볼 수 있음을 의미합니다. 이 경우 내 동영상은 검색 "
-"결과나 채널에 표시되지 않습니다."
 
 #. module: website_slides
 #. odoo-javascript
@@ -6956,6 +7256,12 @@ msgstr "요청"
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
 msgid "sign in"
 msgstr "로그인"
+
+#. module: website_slides
+#. odoo-python
+#: code:addons/website_slides/models/gamification_karma_tracking.py:0
+msgid "slide.channel"
+msgstr "slide.channel"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
@@ -7017,12 +7323,6 @@ msgid "to unlock"
 msgstr "잠금 해제하려면"
 
 #. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "unlisted"
-msgstr "비상장"
-
-#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_aside_training_category
 #: model_terms:ir.ui.view,arch_db:website_slides.user_quickkarma_card
@@ -7048,3 +7348,175 @@ msgstr "{{ user.name }}님이 {{ object.slide_category }}를 공유했습니다!
 #: model_terms:ir.ui.view,arch_db:website_slides.course_nav
 msgid "└<span class=\"ms-1\">Uncategorized</span>"
 msgstr "└<span class=\"ms-1\">미분류</span>"
+
+#~ msgid ""
+#~ "<a t-attf-href=\"/slides/course-#{request.params.get('channel_id')}\" "
+#~ "class=\"o_translate_inline\">Return to the course.</a>"
+#~ msgstr ""
+#~ "<a t-attf-href=\"/slides/course-#{request.params.get('channel_id')}\" "
+#~ "class=\"o_translate_inline\">강좌로 돌아가기</a>"
+
+#~ msgid ""
+#~ "Please <a t-attf-href=\"/odoo?redirect=#{request.httprequest.url}\" "
+#~ "class=\"fw-bold o_translate_inline\"> login </a> to share this"
+#~ msgstr ""
+#~ "다음 항목을 공유하려면 <a t-attf-href=\"/odoo?"
+#~ "redirect=#{request.httprequest.url}\" class=\"fw-bold "
+#~ "o_translate_inline\">로그인</a>하세요:"
+
+#~ msgid "<i class=\"fa fa-comments\"/> Comments ("
+#~ msgstr "<i class=\"fa fa-comments\"/> 의견 ("
+
+#~ msgid "<i class=\"fa fa-eraser\"/> Clear filters"
+#~ msgstr "<i class=\"fa fa-eraser\"/> 필터 제거"
+
+#~ msgid "<i class=\"fa fa-graduation-cap me-1\"/>All courses"
+#~ msgstr "<i class=\"fa fa-graduation-cap me-1\"/>전체 과정"
+
+#~ msgid ""
+#~ "<i class=\"fa fa-tag me-2 text-muted\"/>\n"
+#~ "                      My Courses"
+#~ msgstr ""
+#~ "<i class=\"fa fa-tag me-2 text-muted\"/>\n"
+#~ "                      내 강좌"
+
+#~ msgid "<span class=\"fw-bold text-muted me-2\">Current rank:</span>"
+#~ msgstr "<span class=\"fw-bold text-muted me-2\">현재 순위:</span>"
+
+#~ msgid ""
+#~ "<span class=\"o_form_label\">Slides</span>\n"
+#~ "                    <span class=\"fa fa-lg fa-globe\" title=\"Values set "
+#~ "here are website-specific.\" groups=\"website.group_multi_website\"/>"
+#~ msgstr ""
+#~ "<span class=\"o_form_label\">슬라이드</span>\n"
+#~ "                    <span class=\"fa fa-lg fa-globe\" title=\"Values set "
+#~ "here are website-specific.\" groups=\"website.group_multi_website\"/>"
+
+#~ msgid ""
+#~ "<span class=\"oi oi-arrow-right\"/>\n"
+#~ "                                Create a Google Project and Get a Key"
+#~ msgstr ""
+#~ "<span class=\"oi oi-arrow-right\"/>\n"
+#~ "                                Google 프로젝트 생성 및 키 얻기"
+
+#~ msgid "<span class=\"text-500 mx-2\">•</span>"
+#~ msgstr "<span class=\"text-500 mx-2\">•</span>"
+
+#~ msgid ""
+#~ "<span name=\"done_members_count_label\" class=\"text-muted\">Finished</"
+#~ "span>"
+#~ msgstr ""
+#~ "<span name=\"done_members_count_label\" class=\"text-muted\">끝마침</span>"
+
+#~ msgid "Already installing \"%s\"."
+#~ msgstr "다음이 이미 설치되었습니다 : \"%s\"."
+
+#~ msgid "Certification"
+#~ msgstr "인증서"
+
+#~ msgid "Clear filters"
+#~ msgstr "필터 제거"
+
+#~ msgid "Contact us"
+#~ msgstr "문의하기"
+
+#~ msgid "Create new %s '%s'"
+#~ msgstr "%s '%s' 새로 작성"
+
+#~ msgid "Creation Date"
+#~ msgstr "작성일자"
+
+#~ msgid "Discover more"
+#~ msgstr "더 알아보기"
+
+#~ msgid "Do you want to install the \"%s\" app?"
+#~ msgstr "\"%s\" 앱을 설치할까요?"
+
+#~ msgid "Failed to install \"%s\"."
+#~ msgstr "다음을 설치하지 못했습니다 : \"%s\""
+
+#~ msgid "Group By"
+#~ msgstr "그룹별"
+
+#~ msgid "How to plant a potted tree"
+#~ msgstr "화분에 나무를 심는 법"
+
+#~ msgid "Installing \"%s\"."
+#~ msgstr "\"%s\" 설치중."
+
+#~ msgid "Interesting Tree Facts"
+#~ msgstr "나무에 대한 재미있는 사실"
+
+#~ msgid "Most popular courses"
+#~ msgstr "가장 인기있는 강좌"
+
+#~ msgid "My Courses"
+#~ msgstr "내 강좌"
+
+#~ msgid "New Certification"
+#~ msgstr "새로운 수료증"
+
+#~ msgid "New Content Ribbon"
+#~ msgstr "신규 콘텐츠 리본"
+
+#~ msgid "Newest courses"
+#~ msgstr "최신 강좌"
+
+#~ msgid "Next rank:"
+#~ msgstr "다음 등급 :"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "조치가 필요한 메시지 수"
+
+#~ msgid ""
+#~ "Optional translation language (ISO code) to select when sending out an "
+#~ "email. If not set, the english version will be used. This should usually "
+#~ "be a placeholder expression that provides the appropriate language, e.g. "
+#~ "{{ object.partner_id.lang }}."
+#~ msgstr ""
+#~ "이메일 전송 시 번역할 언어 (ISO code)를 선택할 수 있습니다. 설정하지 않을 "
+#~ "경우, 영어가 기본 언어로 사용됩니다. 적절한 언어를 선택할 수 있도록 다음"
+#~ "과 같은 예시용 메시지를 사용합니다. {{ object.partner_id.lang }}."
+
+#~ msgid "Reach new heights"
+#~ msgstr "새로운 목표를 달성해보세요"
+
+#~ msgid "Restrict publishing to this website."
+#~ msgstr "이 웹 사이트로의 게시를 제한합니다."
+
+#~ msgid "Share on Twitter"
+#~ msgstr "트위터에서 공유하기"
+
+#~ msgid ""
+#~ "Skill up and have an impact! Your business career starts here.<br/>Time "
+#~ "to start a course."
+#~ msgstr ""
+#~ "자기계발을 통해 도약할 수 있습니다! 여러분의 경력이 바로 여기에서 시작됩니"
+#~ "다.<br/>이제 과정을 시작할 시간입니다."
+
+#~ msgid "Start your online course today!"
+#~ msgstr "온라인 과정을 오늘 시작해보세요!"
+
+#~ msgid "The full URL to access the document through the website."
+#~ msgstr "웹사이트를 통해 문서에 접근 하는 전체 URL입니다."
+
+#~ msgid "Tree Infographic"
+#~ msgstr "나무 인포그래픽"
+
+#~ msgid "Tree planting in hanging bottles on wall"
+#~ msgstr "벽에 있는 병에 나무 심기"
+
+#~ msgid "Your Level"
+#~ msgstr "귀하의 단계"
+
+#~ msgid "Your Role"
+#~ msgstr "귀하의 역할"
+
+#~ msgid "achieved"
+#~ msgstr "달성함"
+
+#~ msgid "https://vimeo.com/558907333/30da9ff3d8"
+#~ msgstr "https://vimeo.com/558907333/30da9ff3d8"
+
+#~ msgid "https://vimeo.com/558907555"
+#~ msgstr "https://vimeo.com/558907555"

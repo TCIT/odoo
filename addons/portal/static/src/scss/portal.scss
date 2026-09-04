@@ -127,9 +127,13 @@ li > p {
 [class^="col-lg-"] {
     min-height: 24px;
 }
-.input-group {
+// TODO this was added a compatibility layer for old layouts when we switched
+// to Bootstrap 4. It should be removed at some point, to not have to support
+// invalid-feedback with that awful :where selector.
+.input-group:where(:not(:has(.was-validated :invalid ~ .invalid-feedback, .is-invalid ~ .invalid-feedback))) {
     flex-flow: row nowrap;
 }
+
 .list-group-item:not([class*="list-group-item-"]):not(.active) {
     color: color-contrast($list-group-bg);
 }
@@ -264,6 +268,19 @@ img, .media_iframe_video, .o_image {
         text-decoration: none;
     }
 
+    #portal_alert_category .alert div.mb-1.fw-normal {
+        margin-bottom: 0 !important;
+    }
+
+    .o_portal_my_home .o_portal_docs > .o_portal_index_card {
+        padding-right: var(--gutter-x);
+
+        & + .o_portal_index_card {
+            padding-left: 0; //padding-right - g-2
+            padding-right: calc(var(--gutter-x) + var(--gutter-x) * .5); //padding-right + g-2
+        }
+    }
+
     .o_portal_navbar {
         .breadcrumb {
             padding-left: 0;
@@ -316,7 +333,9 @@ img, .media_iframe_video, .o_image {
 
 .o_portal_address {
     span[itemprop="name"] {
-        margin-bottom: 0.3em;
+        display: inline-block;
+        margin-bottom: map-get($spacers, 1);
+        font-weight: $font-weight-bold;
     }
 
     div[itemprop="address"] > div {
@@ -335,6 +354,19 @@ img, .media_iframe_video, .o_image {
                 display: block;
             }
         }
+    }
+}
+
+.o_address_card {
+    .o_portal_address {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: map-get($spacers, 2);
+    }
+
+    span[itemprop="streetAddress"] {
+        color: var(--#{$prefix}secondary-color);
     }
 }
 
@@ -449,6 +481,25 @@ img, .media_iframe_video, .o_image {
         label {
             white-space: normal!important;
         }
+    }
+}
+
+// Address
+.o_portal .o_portal_addresses {
+    max-width: map-get($grid-breakpoints, xxl) / 2;
+}
+
+.o_customer_address_fill {
+    .col-form-label:not(.label-optional)::after {
+        content: " *";
+        font-weight: normal;
+    }
+}
+
+.oe_clear_stucture {
+
+    > .oe_structure {
+        clear: both;
     }
 }
 

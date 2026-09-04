@@ -9,9 +9,9 @@ from odoo.tools import SQL
 from odoo.tools.convert import convert_file
 
 
-class Job(models.Model):
-    _name = "hr.job"
-    _inherit = ["mail.alias.mixin", "hr.job"]
+class HrJob(models.Model):
+    _name = 'hr.job'
+    _inherit = ["mail.alias.mixin", "hr.job", "mail.activity.mixin"]
     _order = "sequence, name asc"
 
     @api.model
@@ -30,49 +30,60 @@ class Job(models.Model):
     def _get_default_favorite_user_ids(self):
         return [(6, 0, [self.env.uid])]
 
+    expected_employees = fields.Integer(groups="hr_recruitment.group_hr_recruitment_interviewer,hr.group_hr_user")
+    no_of_employee = fields.Integer(groups="hr_recruitment.group_hr_recruitment_interviewer,hr.group_hr_user")
+    requirements = fields.Text(groups="hr_recruitment.group_hr_recruitment_interviewer,hr.group_hr_user")
+    user_id = fields.Many2one(groups="hr_recruitment.group_hr_recruitment_interviewer,hr.group_hr_user")
+
     address_id = fields.Many2one(
         'res.partner', "Job Location", default=_default_address_id,
-        domain=lambda self: self._address_id_domain(),
+        domain=lambda self: self._address_id_domain(), tracking=True,
         help="Select the location where the applicant will work. Addresses listed here are defined on the company's contact information.")
-    application_ids = fields.One2many('hr.applicant', 'job_id', "Job Applications")
-    application_count = fields.Integer(compute='_compute_application_count', string="Application Count")
-    all_application_count = fields.Integer(compute='_compute_all_application_count', string="All Application Count")
+    application_ids = fields.One2many('hr.applicant', 'job_id', "Job Applications", groups="hr_recruitment.group_hr_recruitment_interviewer")
+    application_count = fields.Integer(compute='_compute_application_count', string="Application Count", groups="hr_recruitment.group_hr_recruitment_interviewer")
+    open_application_count = fields.Integer(compute='_compute_open_application_count', string="Open Application Count",
+        groups="hr_recruitment.group_hr_recruitment_interviewer", help="Number of applications that are still ongoing (not hired or refused)")
+    all_application_count = fields.Integer(compute='_compute_all_application_count', string="All Application Count",
+        groups="hr_recruitment.group_hr_recruitment_interviewer")
     new_application_count = fields.Integer(
-        compute='_compute_new_application_count', string="New Application",
+        compute='_compute_new_application_count', string="New Application", groups="hr_recruitment.group_hr_recruitment_interviewer",
         help="Number of applications that are new in the flow (typically at first step of the flow)")
     old_application_count = fields.Integer(
-        compute='_compute_old_application_count', string="Old Application")
-    applicant_hired = fields.Integer(compute='_compute_applicant_hired', string="Applicants Hired")
+        compute='_compute_old_application_count', string="Old Application", groups="hr_recruitment.group_hr_recruitment_interviewer")
+    applicant_hired = fields.Integer(compute='_compute_applicant_hired', string="Applicants Hired", groups="hr_recruitment.group_hr_recruitment_interviewer")
     manager_id = fields.Many2one(
         'hr.employee', related='department_id.manager_id', string="Department Manager",
-        readonly=True, store=True)
-    user_id = fields.Many2one('res.users', "Recruiter",
-        domain="[('share', '=', False), ('company_ids', 'in', company_id)]", default=lambda self: self.env.user,
-        tracking=True, help="The Recruiter will be the default value for all Applicants in this job \
-            position. The Recruiter is automatically added to all meetings with the Applicant.")
-    document_ids = fields.One2many('ir.attachment', compute='_compute_document_ids', string="Documents", readonly=True)
-    documents_count = fields.Integer(compute='_compute_document_ids', string="Document Count")
-    alias_id = fields.Many2one(help="Email alias for this job position. New emails will automatically create new applicants for this job position.")
+        readonly=True, store=True, groups="hr_recruitment.group_hr_recruitment_interviewer,hr.group_hr_user")
+    document_ids = fields.One2many('ir.attachment', compute='_compute_document_ids', string="Documents", readonly=True, groups="hr_recruitment.group_hr_recruitment_interviewer")
+    documents_count = fields.Integer(compute='_compute_document_ids', string="Document Count", groups="hr_recruitment.group_hr_recruitment_interviewer")
+    employee_count = fields.Integer(compute='_compute_employee_count')
+    alias_id = fields.Many2one(help="Email alias for this job position. New emails will automatically create new applicants for this job position.", groups="hr_recruitment.group_hr_recruitment_interviewer")
     color = fields.Integer("Color Index")
     is_favorite = fields.Boolean(compute='_compute_is_favorite', inverse='_inverse_is_favorite')
     favorite_user_ids = fields.Many2many('res.users', 'job_favorite_user_rel', 'job_id', 'user_id', default=_get_default_favorite_user_ids)
-    interviewer_ids = fields.Many2many('res.users', string='Interviewers', domain="[('share', '=', False), ('company_ids', 'in', company_id)]", help="The Interviewers set on the job position can see all Applicants in it. They have access to the information, the attachments, the meeting management and they can refuse him. You don't need to have Recruitment rights to be set as an interviewer.")
-    extended_interviewer_ids = fields.Many2many('res.users', 'hr_job_extended_interviewer_res_users', compute='_compute_extended_interviewer_ids', store=True)
-    industry_id = fields.Many2one('res.partner.industry', 'Industry')
-    date_from = fields.Date(help="Is set, update candidates availability once hired for that specific mission.")
-    date_to = fields.Date()
+    interviewer_ids = fields.Many2many(
+        "res.users",
+        domain="[('share', '=', False), ('company_ids', '=?', company_id)]",
+        string="Interviewers",
+        groups="hr_recruitment.group_hr_recruitment_interviewer",
+        help="The Interviewers set on the job position can see all Applicants in it. They have access to the information, the attachments, the meeting management and they can refuse him. You don't need to have Recruitment rights to be set as an interviewer.",
+    )
+    extended_interviewer_ids = fields.Many2many('res.users', 'hr_job_extended_interviewer_res_users', compute='_compute_extended_interviewer_ids', store=True, groups="hr_recruitment.group_hr_recruitment_interviewer")
+    industry_id = fields.Many2one('res.partner.industry', 'Industry', tracking=True, groups="hr_recruitment.group_hr_recruitment_interviewer")
+    expected_degree = fields.Many2one("hr.recruitment.degree", groups="hr_recruitment.group_hr_recruitment_interviewer")
 
-    activities_overdue = fields.Integer(compute='_compute_activities')
-    activities_today = fields.Integer(compute='_compute_activities')
+    activity_count = fields.Integer(compute='_compute_activities', groups="hr_recruitment.group_hr_recruitment_interviewer")
 
-    job_properties = fields.Properties('Properties', definition='company_id.job_properties_definition')
+    job_properties = fields.Properties('Properties', definition='company_id.job_properties_definition', groups="hr_recruitment.group_hr_recruitment_interviewer")
 
-    applicant_properties_definition = fields.PropertiesDefinition('Applicant Properties')
+    applicant_properties_definition = fields.PropertiesDefinition('Applicant Properties', groups="hr_recruitment.group_hr_recruitment_interviewer")
     no_of_hired_employee = fields.Integer(
         compute='_compute_no_of_hired_employee',
-        string='Hired', copy=False,
+        string='Hired', copy=False, groups="hr_recruitment.group_hr_recruitment_interviewer",
         help='Number of hired employees for this job position during recruitment phase.',
         store=True)
+
+    job_source_ids = fields.One2many('hr.recruitment.source', 'job_id', groups="hr_recruitment.group_hr_recruitment_interviewer")
 
     @api.depends('application_ids.date_closed')
     def _compute_no_of_hired_employee(self):
@@ -94,30 +105,27 @@ class Job(models.Model):
         self.env.cr.execute("""
             SELECT
                 app.job_id,
-                COUNT(*) AS act_count,
-                CASE
-                    WHEN %(today)s::date - act.date_deadline::date = 0 THEN 'today'
-                    WHEN %(today)s::date - act.date_deadline::date > 0 THEN 'overdue'
-                END AS act_state
+                COUNT(*) AS act_count
              FROM mail_activity act
              JOIN hr_applicant app ON app.id = act.res_id
              JOIN hr_recruitment_stage sta ON app.stage_id = sta.id
             WHERE act.user_id = %(user_id)s AND act.res_model = 'hr.applicant'
-              AND act.date_deadline <= %(today)s::date AND app.active
+              AND app.active
               AND app.job_id IN %(job_ids)s
               AND sta.hired_stage IS NOT TRUE
-            GROUP BY app.job_id, act_state
+              AND COALESCE(act.active, TRUE) = TRUE
+            GROUP BY app.job_id
         """, {
             'today': fields.Date.context_today(self),
             'user_id': self.env.uid,
-            'job_ids': tuple(self.ids),
+            'job_ids': tuple(self.ids or [0]),
+            # or [0] is used in case we only have newIds (web studio)
         })
         job_activities = defaultdict(dict)
         for activity in self.env.cr.dictfetchall():
-            job_activities[activity['job_id']][activity['act_state']] = activity['act_count']
+            job_activities[activity['job_id']] = activity['act_count']
         for job in self:
-            job.activities_overdue = job_activities[job.id].get('overdue', 0)
-            job.activities_today = job_activities[job.id].get('today', 0)
+            job.activity_count = job_activities[job.id]
 
     @api.depends('application_ids.interviewer_ids')
     def _compute_extended_interviewer_ids(self):
@@ -182,6 +190,30 @@ class Job(models.Model):
         for job in self:
             job.application_count = result.get(job.id, 0)
 
+    def _compute_open_application_count(self):
+        hired_stages = self.env['hr.recruitment.stage'].search([('hired_stage', '=', True)])
+        result = dict(self.env['hr.applicant']._read_group([
+            ('job_id', 'in', self.ids),
+            ('stage_id', 'not in', hired_stages.ids),
+        ], ['job_id'], ['__count']))
+        for job in self:
+            job.open_application_count = result.get(job, 0)
+
+    def _compute_employee_count(self):
+        res = {
+            job.id: count
+            for job, count in self.env['hr.employee'].sudo()._read_group(
+                domain=[
+                    ('job_id', 'in', self.ids),
+                    ('company_id', 'in', self.env.companies.ids),
+                ],
+                groupby=['job_id'],
+                aggregates=['__count'],
+            )
+        }
+        for job in self:
+            job.employee_count = res.get(job.id, 0)
+
     def _get_first_stage(self):
         self.ensure_one()
         return self.env['hr.recruitment.stage'].search([
@@ -216,7 +248,8 @@ class Job(models.Model):
                  WHERE a.company_id in %s
                     OR a.company_id is NULL
               GROUP BY s.job_id
-            """, [tuple(self.ids), tuple(self.env.companies.ids)]
+            """, [tuple(self.ids or [0]), tuple(self.env.companies.ids)]
+            # or [0] is used in case we only have newIds (web studio)
         )
 
         new_applicant_count = dict(self.env.cr.fetchall())
@@ -246,7 +279,7 @@ class Job(models.Model):
             defaults.update({
                 'job_id': self.id,
                 'department_id': self.department_id.id,
-                'company_id': self.department_id.company_id.id if self.department_id else self.company_id.id,
+                'company_id': self.department_id.company_id.id or self.company_id.id,
                 'user_id': self.user_id.id,
             })
         return values
@@ -256,20 +289,7 @@ class Job(models.Model):
         for vals in vals_list:
             vals["favorite_user_ids"] = vals.get("favorite_user_ids", [])
         jobs = super().create(vals_list)
-        utm_linkedin = self.env.ref("utm.utm_source_linkedin", raise_if_not_found=False)
-        if utm_linkedin:
-            source_vals = [{
-                'source_id': utm_linkedin.id,
-                'job_id': job.id,
-            } for job in jobs]
-            self.env['hr.recruitment.source'].create(source_vals)
         jobs.sudo().interviewer_ids._create_recruitment_interviewers()
-        # Automatically subscribe the department manager and the recruiter to a job position.
-        for job in jobs:
-            job.message_subscribe(
-                job.manager_id._get_related_partners().ids + job.user_id.partner_id.ids
-            )
-
         return jobs
 
     def write(self, vals):
@@ -287,17 +307,6 @@ class Job(models.Model):
             interviewers_to_clean._remove_recruitment_interviewers()
             self.sudo().interviewer_ids._create_recruitment_interviewers()
 
-        # Subscribe the department manager if the department has changed
-        if "department_id" in vals:
-            for job in self:
-                to_unsubscribe = [
-                    partner
-                    for partner in old_managers[job]._get_related_partners().ids
-                    if partner not in job.user_id.partner_id.ids
-                ]
-                job.message_unsubscribe(to_unsubscribe)
-                job.message_subscribe(job.manager_id._get_related_partners().ids)
-
         # Subscribe the recruiter if it has changed.
         if "user_id" in vals:
             for job in self:
@@ -307,14 +316,14 @@ class Job(models.Model):
                     if partner not in job.manager_id._get_related_partners().ids
                 ]
                 job.message_unsubscribe(to_unsubscribe)
-                job.message_subscribe(job.user_id.partner_id.ids)
-
-        # Update the availability on all hired candidates if the mission end date is changed
-        if "date_to" in vals:
-            for job in self:
-                hired_candidates = job.application_ids.filtered(lambda a: a.application_status == 'hired')
-                for candidate in hired_candidates:
-                    candidate.availability = job.date_to + relativedelta(days=1)
+                application_ids = job.application_ids.filtered(
+                    lambda x:
+                        x.user_id == old_recruiters[job] and
+                        x.application_status == 'ongoing'
+                )
+                if application_ids:
+                    application_ids.message_unsubscribe(to_unsubscribe)
+                    application_ids.with_context(mail_auto_subscribe_no_notify=True).user_id = job.user_id
 
         # Since the alias is created upon record creation, the default values do not reflect the current values unless
         # specifically rewritten
@@ -365,40 +374,12 @@ class Job(models.Model):
         views = ['activity'] + [view for view in action['view_mode'].split(',') if view != 'activity']
         action['view_mode'] = ','.join(views)
         action['views'] = [(False, view) for view in views]
-        return action
-
-    def action_open_late_activities(self):
-        action = self.action_open_activities()
         action['context'] = {
             'default_job_id': self.id,
             'search_default_job_id': self.id,
-            'search_default_activities_overdue': True,
             'search_default_running_applicant_activities': True,
         }
         return action
-
-    def action_open_today_activities(self):
-        action = self.action_open_activities()
-        action['context'] = {
-            'default_job_id': self.id,
-            'search_default_job_id': self.id,
-            'search_default_activities_today': True,
-        }
-        return action
-
-    def close_dialog(self):
-        return {'type': 'ir.actions.act_window_close'}
-
-    def edit_dialog(self):
-        form_view = self.env.ref('hr.view_hr_job_form')
-        return {
-            'name': _('Job'),
-            'res_model': 'hr.job',
-            'res_id': self.id,
-            'views': [(form_view.id, 'form')],
-            'type': 'ir.actions.act_window',
-            'target': 'inline'
-        }
 
     @api.model
     def _action_load_recruitment_scenario(self):
@@ -409,10 +390,31 @@ class Job(models.Model):
             "data/scenarios/hr_recruitment_scenario.xml",
             None,
             mode="init",
-            kind="data",
         )
 
         return {
             "type": "ir.actions.client",
             "tag": "reload",
+        }
+
+    def action_open_employees(self):
+        self.ensure_one()
+        if self.env['hr.employee'].has_access('read'):
+            res_model = "hr.employee"
+        else:
+            res_model = "hr.employee.public"
+
+        return {
+            'name': _("Related Employees"),
+            'type': 'ir.actions.act_window',
+            'res_model': res_model,
+            'view_mode': 'list,kanban,form',
+            'views': [(False, 'list'), (False, 'kanban'), (False, 'form')],
+            'domain': [('company_id', 'in', self.env.companies.ids)],
+            'context': {
+                'default_job_id': self.id,
+                'search_default_group_job': 1,
+                'search_default_job_id': self.id,
+                'expand': 1
+            },
         }

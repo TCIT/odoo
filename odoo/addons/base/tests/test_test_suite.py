@@ -11,20 +11,23 @@ from unittest import SkipTest, skip
 from unittest.mock import patch
 
 from odoo.tests.case import TestCase
-from odoo.tests.common import BaseCase, TransactionCase, users, warmup
+from odoo.tests.common import BaseCase, TransactionCase, users, warmup, RegistryRLock
 from odoo.tests.result import OdooTestResult
 
 _logger = logging.getLogger(__name__)
 
-from odoo.tests import MetaCase
-
 
 # this is mainly to ensure that simple tests will continue to work even if BaseCase should be used
 # this only works if doClassCleanup is available on testCase because of the vendoring of suite.py.
-class TestTestSuite(TestCase, metaclass=MetaCase):
+class TestTestSuite(TestCase):
+    test_tags = {'standard', 'at_install'}
+    test_module = 'base'
 
     def test_test_suite(self):
         """ Check that OdooSuite handles unittest.TestCase correctly. """
+
+        def get_method_additional_tags(self, method):
+            return []
 
 
 class TestRunnerLoggingCommon(TransactionCase):
@@ -90,6 +93,11 @@ class TestRunnerLoggingCommon(TransactionCase):
             expected_first_frame_method = self._testMethodName
         else:
             expected_first_frame_method = self.expected_first_frame_methods.pop(0)
+        if expected_first_frame_method.endswith('_with_decorators'):
+            # For decorators, we don't need to have the first frame in line with
+            # the test name because it already appears in the stack trace.
+            # See odoo/odoo#108202.
+            return
         first_frame_method = tb.tb_frame.f_code.co_name
         if first_frame_method != expected_first_frame_method:
             self._log_error(f"Checking first tb frame: {first_frame_method} is not equal to {expected_first_frame_method}")
@@ -131,7 +139,7 @@ class TestRunnerLoggingCommon(TransactionCase):
         message = re.sub(r'line \d+', 'line $line', message)
         message = re.sub(r'py:\d+', 'py:$line', message)
         message = re.sub(r'decorator-gen-\d+', 'decorator-gen-xxx', message)
-        message = re.sub(r'^\s*\^+\s*\n', '', message, flags=re.MULTILINE)
+        message = re.sub(r'^\s*~*\^+~*\s*\n', '', message, flags=re.MULTILINE)
         message = message.replace(f'"{root_path}', '"/root_path/odoo')
         message = message.replace(f'"{python_path}', '"/usr/lib/python')
         message = message.replace('\\', '/')
@@ -185,17 +193,13 @@ Exception: {message}
     @users('__system__')
     @warmup
     def test_with_decorators(self):
-        # note, this test may be broken with a decorator in decorator=5.0.5 since the behaviour changed
-        # but decoratorx was not introduced yet.
         message = (
 '''ERROR: Subtest TestRunnerLogging.test_with_decorators (login='__system__')
 Traceback (most recent call last):
-  File "<decorator-gen-xxx>", line $line, in test_with_decorators
-  File "/root_path/odoo/odoo/tests/common.py", line $line, in _users
-    func(*args, **kwargs)
-  File "<decorator-gen-xxx>", line $line, in test_with_decorators
+  File "/root_path/odoo/odoo/tests/common.py", line $line, in with_users
+    func(self, *args, **kwargs)
   File "/root_path/odoo/odoo/tests/common.py", line $line, in warmup
-    func(*args, **kwargs)
+    func(self, *args, **kwargs)
   File "/root_path/odoo/odoo/addons/base/tests/test_test_suite.py", line $line, in test_with_decorators
     raise Exception('This is an error')
 Exception: This is an error
@@ -530,3 +534,15 @@ class TestSkipMethof(BaseCase):
     @skip
     def test_skip_method(self):
         raise Exception('This should be skipped')
+
+
+class TestRegistryRLock(BaseCase):
+
+    def test_registry_rlock_count(self):
+        lock = RegistryRLock()
+        for i in range(5):
+            self.assertEqual(lock.count, i)
+            lock.acquire()
+        for i in range(5):
+            self.assertEqual(lock.count, 5 - i)
+            lock.release()

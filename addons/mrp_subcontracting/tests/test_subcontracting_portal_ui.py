@@ -18,7 +18,7 @@ class TestSubcontractingPortalUi(HttpCase):
             'email': 'georges@project.portal',
             'signature': 'SignGeorges',
             'notification_type': 'email',
-            'groups_id': [Command.set([cls.env.ref('base.group_portal').id])],
+            'group_ids': [Command.set([cls.env.ref('base.group_portal').id])],
         })
 
         cls.partner_portal = cls.env['res.partner'].with_context({'mail_create_nolog': True}).create({
@@ -39,7 +39,6 @@ class TestSubcontractingPortalUi(HttpCase):
         })
         bom_form = Form(cls.env['mrp.bom'])
         bom_form.type = 'subcontract'
-        bom_form.consumption = 'warning'
         bom_form.subcontractor_ids.add(cls.partner_portal)
         bom_form.product_tmpl_id = cls.finished_product.product_tmpl_id
         with bom_form.bom_line_ids.new() as bom_line:
@@ -52,11 +51,9 @@ class TestSubcontractingPortalUi(HttpCase):
         picking_form = Form(self.env['stock.picking'])
         picking_form.picking_type_id = self.env.ref('stock.picking_type_in')
         picking_form.partner_id = self.partner_portal
-        with picking_form.move_ids_without_package.new() as move:
+        with picking_form.move_ids.new() as move:
             move.product_id = self.finished_product
             move.product_uom_qty = 2
-            move.quantity = 2
-            move.picked = True
         picking_receipt = picking_form.save()
         picking_receipt.action_confirm()
 

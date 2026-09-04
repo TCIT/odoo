@@ -5,10 +5,13 @@ export const FileModelMixin = (T) =>
         access_token;
         checksum;
         extension;
-        filename;
         id;
         mimetype;
         name;
+        /** @type {string} */
+        ownership_token;
+        /** @type {string} */
+        raw_access_token;
         /** @type {"binary"|"url"} */
         type;
         /** @type {string} */
@@ -42,10 +45,6 @@ export const FileModelMixin = (T) =>
                 return `https://www.youtube.com/embed/${token}`;
             }
             return route;
-        }
-
-        get displayName() {
-            return this.name || this.filename;
         }
 
         get downloadUrl() {
@@ -109,7 +108,7 @@ export const FileModelMixin = (T) =>
                 return {};
             }
             const params = {
-                access_token: this.access_token,
+                access_token: this.raw_access_token || this.access_token,
                 filename: this.name,
                 unique: this.checksum,
             };

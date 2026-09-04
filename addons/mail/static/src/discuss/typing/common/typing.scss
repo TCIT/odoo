@@ -1,14 +1,19 @@
 .o-discuss-Typing-dot {
     animation: o_mail_Typing_animation 1.5s linear infinite;
+    background-color: $gray-500;
+
+    .o-mail-ImStatus &, .o-mail-ThreadIcon & {
+        background-color: #fff;
+    }
 
     &.o-sizeMedium {
-        width: $o-discuss-Typing-medium;
-        height: $o-discuss-Typing-medium;
+        width: 5px;
+        height: 5px;
     }
 
     &.o-sizeSmall {
-        width: $o-discuss-Typing-small;
-        height: $o-discuss-Typing-small;
+        width: 4px;
+        height: 4px;
     }
 
     &.o-discuss-Typing-dot2 {
@@ -20,6 +25,10 @@
     }
 }
 
+.o-discuss-Typing-icon {
+    gap: 1px;
+}
+
 @keyframes o_mail_Typing_animation {
     0%, 40%, 100% {
         opacity: initial;
@@ -29,7 +38,7 @@
     }
 }
 
-.o-discuss-Typing:before {
-    // invisible character so that typing status bar has constant height, regardless of text content.
-    content: "\200b"; /* unicode zero width space character */
+.o-mail-DiscussContent .o-discuss-Typing {
+    transform: translateY(-85%);
+    padding-left: calc(#{$o-mail-Message-sidebarWidth} + #{map-get($spacers, 2)});
 }

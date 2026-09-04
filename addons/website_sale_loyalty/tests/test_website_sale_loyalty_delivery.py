@@ -1,11 +1,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import Command
+from odoo.fields import Command
 from odoo.tests import HttpCase, tagged
+from odoo.exceptions import ValidationError
 
 from odoo.addons.base.tests.common import DISABLED_MAIL_CONTEXT
-from odoo.addons.website.tools import MockRequest
-from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
+from odoo.addons.website_sale.tests.common import MockRequest, WebsiteSaleCommon
+from odoo.addons.payment import utils as payment_utils
+from odoo.addons.website_sale_loyalty.controllers.cart import Cart
 from odoo.addons.website_sale_loyalty.controllers.delivery import WebsiteSaleLoyaltyDelivery
 
 
@@ -26,21 +28,24 @@ class TestWebsiteSaleDelivery(HttpCase, WebsiteSaleCommon):
         # Remove taxes completely during the following tests.
         cls.env.companies.account_sale_tax_id = False
 
-        cls.partner_admin = cls.env.ref('base.partner_admin')
+        cls.user_admin = cls.env.ref('base.user_admin')
+        cls.partner_admin = cls.user_admin.partner_id
         cls.partner_admin.write(cls.dummy_partner_address_values)
 
-        cls.env['product.product'].create({
+        cls.website2 = cls.env['website'].create({'name': 'website 2'})
+
+        cls.product_plumbus = cls.env['product.product'].create({
             'name': "Plumbus",
             'list_price': 100.0,
+            'type': 'consu',
             'website_published': True,
         })
 
-        product_gift_card = cls.env['product.product'].create({
+        cls.product_gift_card = cls.env['product.product'].create({
             'name': 'TEST - Gift Card',
             'list_price': 50,
             'type': 'service',
             'is_published': True,
-            'sale_ok': True,
         })
 
         gift_card_program = cls.env['loyalty.program'].create({
@@ -52,7 +57,7 @@ class TestWebsiteSaleDelivery(HttpCase, WebsiteSaleCommon):
                 'reward_point_amount': 1,
                 'reward_point_mode': 'money',
                 'reward_point_split': True,
-                'product_ids': product_gift_card.ids,
+                'product_ids': cls.product_gift_card.ids,
             })],
             'reward_ids': [Command.create({
                 'reward_type': 'discount',
@@ -65,14 +70,14 @@ class TestWebsiteSaleDelivery(HttpCase, WebsiteSaleCommon):
         })
 
         # Create a gift card to be used
-        cls.env['loyalty.card'].create({
+        cls.gift_card = cls.env['loyalty.card'].create({
             'program_id': gift_card_program.id,
             'points': 50000,
             'code': '123456',
         })
 
         # Create a 50% discount on order code
-        cls.env['loyalty.program'].create({
+        cls.promo_discount_code = cls.env['loyalty.program'].create({
             'name': "50% discount code",
             'program_type': 'promo_code',
             'trigger': 'with_code',
@@ -101,18 +106,18 @@ class TestWebsiteSaleDelivery(HttpCase, WebsiteSaleCommon):
             })],
         })
 
-        cls.env['loyalty.card'].create({
+        cls.ewallet = cls.env['loyalty.card'].create({
             'program_id': ewallet_program.id,
             'partner_id': cls.partner_admin.id,
             'points': 1000000,
         })
 
         delivery_product1, delivery_product2 = cls.env['product.product'].create([{
-            'name': 'Normal Delivery Charges',
+            'name': "Delivery 1",
             'invoice_policy': 'order',
             'type': 'service',
         }, {
-            'name': 'Normal Delivery Charges',
+            'name': "Delivery 2",
             'invoice_policy': 'order',
             'type': 'service',
         }])
@@ -130,6 +135,17 @@ class TestWebsiteSaleDelivery(HttpCase, WebsiteSaleCommon):
             'website_published': True,
             'product_id': delivery_product2.id,
         }])
+
+    def create_program_with_code(self, code, website_id):
+        return self.env['loyalty.program'].create({
+            'name': "Discount delivery",
+            'program_type': 'promo_code',
+            'website_id': website_id.id,
+            'rule_ids': [Command.create({
+                'code': code,
+                'minimum_amount': 0,
+            })],
+        })
 
     def test_shop_sale_gift_card_keep_delivery(self):
         # Get admin user and set his preferred shipping method to normal delivery
@@ -161,8 +177,9 @@ class TestWebsiteSaleDelivery(HttpCase, WebsiteSaleCommon):
         """
         Verify that after applying a discount code, any `free_over` shipping gets recalculated.
         """
+        self.free_delivery.action_archive()
         self.normal_delivery.write({'free_over': True, 'amount': 75.0})
-        self.start_tour("/shop", 'update_shipping_after_discount', login="admin")
+        self.start_tour("/shop", 'update_shipping_after_discount', login=self.user_admin.login)
 
     def test_express_checkout_shipping_discount(self):
         """
@@ -194,3 +211,59 @@ class TestWebsiteSaleDelivery(HttpCase, WebsiteSaleCommon):
         with MockRequest(self.env, sale_order_id=self.cart.id, website=self.website):
             result = self.Controller.shop_set_delivery_method(self.normal_delivery2.id)
         self.assertEqual(result['delivery_discount_minor_amount'], -600)
+
+    def test_express_checkout_does_not_count_delivery_discount_in_payment_values(self):
+        """Test that the amount to pay does not include the free delivery amount in express
+        checkout."""
+        program = self.env['loyalty.program'].sudo().create({
+            'name': 'Discount delivery',
+            'program_type': 'promo_code',
+            'rule_ids': [Command.create({
+                'code': "FREE",
+                'minimum_amount': 0,
+            })],
+            'reward_ids': [Command.create({
+                'reward_type': 'shipping',
+                'discount_max_amount': 2.0,
+            })]
+        })
+        amount_without_delivery = payment_utils.to_minor_currency_units(
+            self.cart.amount_total, self.cart.currency_id
+        )
+        self.cart.set_delivery_line(self.normal_delivery, self.normal_delivery.fixed_price)
+        self.cart._try_apply_code("FREE")
+        self.cart._apply_program_reward(program.reward_ids, program.coupon_ids)
+        with MockRequest(self.env, sale_order_id=self.cart.id, website=self.website):
+            payment_values = Cart()._get_express_shop_payment_values(self.cart)
+
+        self.assertEqual(payment_values['minor_amount'], amount_without_delivery)
+
+    def test_prevent_unarchive_when_conflicting_active_program_exists_on_same_website(self):
+        """Unarchiving a program should fail if another active program already has the same
+           rule code on the same website."""
+        program = self.create_program_with_code("FREE", self.website)
+        program.action_archive()
+        self.create_program_with_code("FREE", self.website)
+
+        with self.assertRaises(ValidationError):
+            program.action_unarchive()
+
+    def test_unarchive_when_conflicting_active_program_exists_on_different_website(self):
+        """Unarchiving a program should succeed when another active program already has the
+           same rule code on a different website."""
+        program = self.create_program_with_code("FREE", self.website)
+        program.action_archive()
+
+        self.create_program_with_code("FREE", self.website2)
+        program.action_unarchive()
+
+    def test_prevent_unarchive_when_batch_contains_duplicate_codes_on_same_website(self):
+        """Unarchiving multiple programs at once should fail if they share the same rule code
+           on the same website."""
+        program1 = self.create_program_with_code("FREE", self.website)
+        program1.action_archive()
+        program2 = self.create_program_with_code("FREE", self.website)
+        program2.action_archive()
+
+        with self.assertRaises(ValidationError):
+            (program1 + program2).action_unarchive()

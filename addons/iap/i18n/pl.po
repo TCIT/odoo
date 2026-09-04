@@ -1,24 +1,36 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* iap
-# 
+# * iap
+#
 # Translators:
-# Wil Odoo, 2024
-# Marta Wacławek, 2025
-# 
+# Tomasz Leppich <t.leppich@gmail.com>, 2022
+# Piotr Cierkosz <piotr.w.cierkosz@gmail.com>, 2022
+# Maksym <ms@myodoo.pl>, 2022
+# Piotr Szlązak <szlazakpiotr@gmail.com>, 2022
+# Marcin Młynarczyk <mlynarczyk@gmail.com>, 2022
+# Andrzej Wiśniewski <a.wisniewski@hadron.eu.com>, 2022
+# Maja Stawicka <mjstwck@wp.pl>, 2022
+# Piotr Strębski <strebski@gmail.com>, 2022
+# Wojciech Warczakowski <w.warczakowski@gmail.com>, 2022
+# Tadeusz Karpiński <tadeuszkarpinski@gmail.com>, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Marta (wacm)" <wacm@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~15.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Marta Wacławek, 2025\n"
-"Language-Team: Polish (https://app.transifex.com/odoo/teams/41243/pl/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-04 04:40+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Polish <https://translate.odoo.com/projects/odoo-19/iap/pl/>\n"
+"Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: pl\n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
+"(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
+"n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: iap
 #: model_terms:ir.ui.view,arch_db:iap.iap_account_view_form
@@ -26,6 +38,8 @@ msgid ""
 "<i class=\"oi oi-arrow-right\"/>\n"
 "                                    Buy Credit"
 msgstr ""
+"<i class=\"oi oi-arrow-right\"/>\n"
+"                                    Kup kredyty"
 
 #. module: iap
 #: model_terms:ir.ui.view,arch_db:iap.iap_account_view_form
@@ -42,6 +56,8 @@ msgstr "Token konta"
 msgid ""
 "Account token is your authentication key for this service. Do not share it."
 msgstr ""
+"Token konta jest kluczem uwierzytelniającym dla tej usługi. Nie należy go "
+"udostępniać."
 
 #. module: iap
 #. odoo-python
@@ -50,6 +66,8 @@ msgid ""
 "An error occurred while reaching %s. Please contact Odoo support if this "
 "error persists."
 msgstr ""
+"Wystąpił błąd podczas łączenia się z %s. Skontaktuj się z pomocą techniczną "
+"Odoo, jeśli ten błąd będzie się powtarzał."
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__balance
@@ -60,18 +78,6 @@ msgstr "Saldo"
 #: model:ir.model.fields.selection,name:iap.selection__iap_account__state__banned
 msgid "Banned"
 msgstr "Zablokowany"
-
-#. module: iap
-#. odoo-javascript
-#: code:addons/iap/static/src/js/insufficient_credit_error_handler.js:0
-msgid "Buy credits"
-msgstr "Kup kredyty"
-
-#. module: iap
-#. odoo-javascript
-#: code:addons/iap/static/src/xml/iap_templates.xml:0
-msgid "Cancel"
-msgstr "Anuluj"
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__company_ids
@@ -93,7 +99,7 @@ msgstr "Data utworzenia"
 #. module: iap
 #: model:iap.service,unit_name:iap.iap_service_reveal
 msgid "Credits"
-msgstr ""
+msgstr "Kredyty"
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__description
@@ -103,6 +109,7 @@ msgstr "Opis"
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__display_name
+#: model:ir.model.fields,field_description:iap.field_iap_enrich_api__display_name
 #: model:ir.model.fields,field_description:iap.field_iap_service__display_name
 msgid "Display Name"
 msgstr "Nazwa wyświetlana"
@@ -110,20 +117,23 @@ msgstr "Nazwa wyświetlana"
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__warning_user_ids
 msgid "Email Alert Recipients"
-msgstr ""
+msgstr "Odbiorcy powiadomień e-mail"
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__warning_threshold
 msgid "Email Alert Threshold"
-msgstr ""
+msgstr "Próg powiadomienia email"
 
 #. module: iap
 #: model:iap.service,description:iap.iap_service_reveal
 msgid ""
 "Get quality leads and opportunities: convert your website visitors into "
-"leads, generate leads based on a set of criteria and enrich the company data"
-" of your opportunities."
+"leads, generate leads based on a set of criteria and enrich the company data "
+"of your opportunities."
 msgstr ""
+"Pozyskuj wysokiej jakości leady i okazje: przekształcaj odwiedzających "
+"witrynę w potencjalnych klientów, generuj potencjalnych klientów na "
+"podstawie zestawu kryteriów i wzbogacaj dane firmowe swoich prospektów."
 
 #. module: iap
 #: model:ir.ui.menu,name:iap.iap_root_menu
@@ -151,24 +161,19 @@ msgstr "IAP API wzbogacania Leadów"
 #. module: iap
 #: model:ir.model,name:iap.model_iap_service
 msgid "IAP Service"
-msgstr ""
+msgstr "Usługa IAP"
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__id
+#: model:ir.model.fields,field_description:iap.field_iap_enrich_api__id
 #: model:ir.model.fields,field_description:iap.field_iap_service__id
 msgid "ID"
 msgstr "ID"
 
 #. module: iap
-#. odoo-javascript
-#: code:addons/iap/static/src/xml/iap_templates.xml:0
-msgid "Insufficient credit to perform this service."
-msgstr "Niewystarczające środki na wykonanie tej usługi."
-
-#. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_service__integer_balance
 msgid "Integer Balance"
-msgstr ""
+msgstr "Saldo liczba całkowita"
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__write_uid
@@ -186,13 +191,19 @@ msgstr "Data ostatniej aktualizacji"
 #. odoo-javascript
 #: code:addons/iap/static/src/action_buttons_widget/action_buttons_widget.xml:0
 msgid "Manage Service & Buy Credits"
-msgstr ""
+msgstr "Zarządzanie usługami i kupowanie kredytów"
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__name
 #: model:ir.model.fields,field_description:iap.field_iap_service__name
 msgid "Name"
 msgstr "Nazwa"
+
+#. module: iap
+#. odoo-python
+#: code:addons/iap/models/iap_account.py:0
+msgid "No service exists with the provided technical name"
+msgstr "Nie istnieje usługa o podanej nazwie technicznej"
 
 #. module: iap
 #: model_terms:ir.ui.view,arch_db:iap.res_config_settings_view_form
@@ -206,17 +217,19 @@ msgid ""
 "One of the email alert recipients doesn't have an email address set. Users: "
 "%s"
 msgstr ""
+"Jeden z odbiorców powiadomień e-mail nie ma ustawionego adresu e-mail. "
+"Użytkownicy: %s"
 
 #. module: iap
 #: model:ir.model.constraint,message:iap.constraint_iap_service_unique_technical_name
 msgid "Only one service can exist with a specific technical_name"
-msgstr ""
+msgstr "Może istnieć tylko jedna usługa o określonej nazwie technical_name"
 
 #. module: iap
 #. odoo-python
 #: code:addons/iap/models/iap_account.py:0
 msgid "Please set a positive email alert threshold."
-msgstr ""
+msgstr "Ustaw pozytywny próg powiadomień e-mail."
 
 #. module: iap
 #: model:ir.model.fields.selection,name:iap.selection__iap_account__state__registered
@@ -231,13 +244,7 @@ msgstr "Usługa"
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__service_locked
 msgid "Service Locked"
-msgstr ""
-
-#. module: iap
-#. odoo-javascript
-#: code:addons/iap/static/src/js/insufficient_credit_error_handler.js:0
-msgid "Start a Trial at Odoo"
-msgstr "Zacznij trial Odoo"
+msgstr "Usługa zablokowana"
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__state
@@ -252,16 +259,24 @@ msgstr "Nazwa techniczna"
 
 #. module: iap
 #. odoo-python
+#: code:addons/iap/models/iap_account.py:0
+msgid "The IAP token provided is invalid or empty."
+msgstr "Podany token IAP jest nieprawidłowy lub pusty."
+
+#. module: iap
+#. odoo-python
 #: code:addons/iap/tools/iap_tools.py:0
 msgid ""
 "The request to the service timed out. Please contact the author of the app. "
 "The URL it tried to contact was %s"
 msgstr ""
+"Żądanie do usługi przekroczyło limit czasu. Prosimy o kontakt z autorem "
+"aplikacji. Adres URL, z którym próbowano się skontaktować to %s"
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_service__unit_name
 msgid "Unit Name"
-msgstr "Nazwa jednostk"
+msgstr "Nazwa jednostki"
 
 #. module: iap
 #: model:ir.model.fields.selection,name:iap.selection__iap_account__state__unregistered
@@ -279,3 +294,31 @@ msgstr "Zobacz moje usługi"
 #: model_terms:ir.ui.view,arch_db:iap.res_config_settings_view_form
 msgid "View your IAP Services and recharge your credits"
 msgstr "Zobacz swoje usługi IAP i doładuj swoje kredyty"
+
+#~ msgid "Buy credits"
+#~ msgstr "Kup kredyty"
+
+#~ msgid "Cancel"
+#~ msgstr "Anuluj"
+
+#~ msgid "Config Settings"
+#~ msgstr "Ustawienia konfiguracji"
+
+#~ msgid "Insufficient credit to perform this service."
+#~ msgstr "Niewystarczające środki na wykonanie tej usługi."
+
+#~ msgid "Open IAP Account"
+#~ msgstr "Konto Open IAP"
+
+#~ msgid "Service Name"
+#~ msgstr "Nazwa usługi"
+
+#~ msgid "Start a Trial at Odoo"
+#~ msgstr "Zacznij trial Odoo"
+
+#~ msgid ""
+#~ "The url that this service requested returned an error. Please contact the "
+#~ "author of the app. The url it tried to contact was %s"
+#~ msgstr ""
+#~ "Adres url, którego zażądała ta usługa, zwrócił błąd. Prosimy o kontakt z "
+#~ "autorem aplikacji. Adres url, z którym próbowano się skontaktować, to %s"

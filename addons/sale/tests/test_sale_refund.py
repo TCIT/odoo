@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.fields import Command
@@ -19,27 +18,26 @@ class TestSaleRefund(TestSaleCommon):
             'partner_id': cls.partner_a.id,
             'partner_invoice_id': cls.partner_a.id,
             'partner_shipping_id': cls.partner_a.id,
-            'pricelist_id': cls.company_data['default_pricelist'].id,
             'order_line': [
                 Command.create({
                     'product_id': cls.company_data['product_order_no'].id,
                     'product_uom_qty': 5,
-                    'tax_id': False,
+                    'tax_ids': False,
                 }),
                 Command.create({
                     'product_id': cls.company_data['product_service_delivery'].id,
                     'product_uom_qty': 4,
-                    'tax_id': False,
+                    'tax_ids': False,
                 }),
                 Command.create({
                     'product_id': cls.company_data['product_service_order'].id,
                     'product_uom_qty': 3,
-                    'tax_id': False,
+                    'tax_ids': False,
                 }),
                 Command.create({
                     'product_id': cls.company_data['product_delivery_no'].id,
                     'product_uom_qty': 2,
-                    'tax_id': False,
+                    'tax_ids': False,
                 }),
             ]
         })
@@ -257,13 +255,12 @@ class TestSaleRefund(TestSaleCommon):
             'partner_id': self.partner_a.id,
             'partner_invoice_id': self.partner_a.id,
             'partner_shipping_id': self.partner_a.id,
-            'pricelist_id': self.company_data['default_pricelist'].id,
         })
         sol_product = self.env['sale.order.line'].create({
             'product_id': self.company_data['product_order_no'].id,
             'product_uom_qty': 5,
             'order_id': sale_order_refund.id,
-            'tax_id': False,
+            'tax_ids': False,
         })
 
         self.assertRecordValues(sol_product, [{

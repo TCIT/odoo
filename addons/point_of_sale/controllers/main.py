@@ -1,11 +1,14 @@
-# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 import logging
+import json
 
 from odoo import http, _
+from odoo.fields import Domain
 from odoo.http import request
-from odoo.osv.expression import AND
-from odoo.tools import format_amount
+from odoo.tools import format_amount, file_open
 from odoo.addons.account.controllers.portal import PortalAccount
+from odoo.exceptions import UserError
 from datetime import timedelta, datetime
 
 _logger = logging.getLogger(__name__)
@@ -13,8 +16,29 @@ _logger = logging.getLogger(__name__)
 
 class PosController(PortalAccount):
 
+    @http.route('/pos/service-worker.js', type='http', auth='user')
+    def pos_web_service_worker(self):
+        response = request.make_response(
+            self._get_pos_service_worker(),
+            [
+                ('Content-Type', 'text/javascript'),
+                ('Service-Worker-Allowed', '/pos'),
+            ],
+        )
+        return response
+
+    def _get_pos_service_worker(self):
+        with file_open('point_of_sale/static/src/app/service_worker.js') as f:
+            body = f.read()
+            return body
+
+    # Support old routes for backward compatibility
     @http.route(['/pos/web', '/pos/ui'], type='http', auth='user')
-    def pos_web(self, config_id=False, from_backend=False, **k):
+    def old_pos_web(self, config_id=False, from_backend=False, **k):
+        return self.pos_web(config_id, from_backend, **k)
+
+    @http.route(["/pos/ui/<config_id>", "/pos/ui/<config_id>/<path:subpath>"], auth="user", type='http')
+    def pos_web(self, config_id=False, from_backend=False, subpath=None, **k):
         """Open a pos session for the given config.
 
         The right pos session will be selected to open, if non is open yet a new session will be created.
@@ -38,7 +62,7 @@ class PosController(PortalAccount):
                 ('rescue', '=', False)
                 ]
         if config_id and request.env['pos.config'].sudo().browse(int(config_id)).exists():
-            domain = AND([domain,[('config_id', '=', int(config_id))]])
+            domain = Domain.AND([domain, [('config_id', '=', int(config_id))]])
             pos_config = request.env['pos.config'].sudo().browse(int(config_id))
         pos_session = request.env['pos.session'].sudo().search(domain, limit=1)
 
@@ -57,23 +81,41 @@ class PosController(PortalAccount):
             return request.redirect('/odoo/action-point_of_sale.action_client_pos_menu')
 
         if not pos_config.has_active_session:
+            # Acquire an row-level lock on the pos_config record to prevent race conditions
+            # This prevents multiple concurrent processes from creating duplicate POS sessions
+            request.env.cr.execute(
+                "SELECT id FROM pos_config WHERE id = %s FOR UPDATE NOWAIT",
+                (pos_config.id,)
+            )
             pos_config.open_ui()
             pos_session = request.env['pos.session'].sudo().search(domain, limit=1)
 
         # The POS only works in one company, so we enforce the one of the session in the context
-        session_info = pos_session._update_session_info(request.env['ir.http'].session_info())
+        company = pos_session.company_id
+        session_info = request.env['ir.http'].session_info()
+        session_info['user_context']['allowed_company_ids'] = company.ids
+        session_info['user_companies'] = {'current_company': company.id, 'allowed_companies': {company.id: session_info['user_companies']['allowed_companies'][company.id]}}
+        session_info['nomenclature_id'] = pos_session.company_id.nomenclature_id.id
+        session_info['fallback_nomenclature_id'] = pos_session.config_id.fallback_nomenclature_id.id
+        use_lna = bool(pos_session.env["ir.config_parameter"].get_param("point_of_sale.use_lna"))
         context = {
             'from_backend': 1 if from_backend else 0,
             'use_pos_fake_tours': True if k.get('tours', False) else False,
             'session_info': session_info,
-            'login_number': pos_session.with_company(pos_session.company_id).login(),
             'pos_session_id': pos_session.id,
             'pos_config_id': pos_session.config_id.id,
             'access_token': pos_session.config_id.access_token,
+            'last_data_change': pos_session.config_id.last_data_change.strftime("%Y-%m-%d %H:%M:%S"),
+            'urls_to_cache': json.dumps(pos_config._get_url_to_cache(request.session.debug)),
+            'use_lna': use_lna,
         }
         response = request.render('point_of_sale.index', context)
         response.headers['Cache-Control'] = 'no-store'
         return response
+
+    @http.route(['/pos/ping'], type='jsonrpc', auth='user')
+    def pos_ping(self):
+        return {'response': 'pong'}
 
     @http.route('/pos/sale_details_report', type='http', auth='user')
     def print_sale_details(self, date_start=False, date_stop=False, **kw):
@@ -95,8 +137,8 @@ class PosController(PortalAccount):
 
             if errors:
                 errors['generic'] = _("Please fill all the required fields.")
-            elif len(form_values['pos_reference']) < 14:
-                errors['pos_reference'] = _("The Ticket Number should be at least 14 characters long.")
+            elif len(form_values['pos_reference']) < 12:
+                errors['pos_reference'] = _("The Ticket Number should be at least 12 characters long.")
             else:
                 date_order = datetime(*[int(i) for i in form_values['date_order'].split('-')])
                 order = request.env['pos.order'].sudo().search([
@@ -109,6 +151,12 @@ class PosController(PortalAccount):
                     return request.redirect('/pos/ticket/validate?access_token=%s' % (order.access_token))
                 else:
                     errors['generic'] = _("No sale order found.")
+
+        elif request.httprequest.method == 'GET':
+            if kwargs.get('order_uuid'):
+                order = self.env['pos.order'].sudo().search([('uuid', '=', kwargs['order_uuid'])], limit=1)
+                if order:
+                    return request.redirect('/pos/ticket/validate?access_token=%s' % (order.access_token))
 
         return request.render("point_of_sale.ticket_request_with_code", {
             'errors': errors,
@@ -142,11 +190,14 @@ class PosController(PortalAccount):
 
         # Set the proper context in case of unauthenticated user accessing
         # from the main company website
-        pos_order = pos_order.with_company(pos_order.company_id)
+        pos_order = pos_order.with_company(pos_order.company_id).with_context(allowed_company_ids=pos_order.company_id.ids)
 
         # If the order was already invoiced, return the invoice directly by forcing the access token so that the non-connected user can see it.
         if pos_order.account_move and pos_order.account_move.is_sale_document():
             return request.redirect('/my/invoices/%s?access_token=%s' % (pos_order.account_move.id, pos_order.account_move._portal_ensure_token()))
+
+        if not request.env['res.company']._with_locked_records(pos_order, allow_raising=False):
+            return
 
         # Get the optional extra fields that could be required for a localisation.
         pos_order_country = pos_order.company_id.account_fiscal_country_id
@@ -156,7 +207,8 @@ class PosController(PortalAccount):
         user_is_connected = not request.env.user._is_public()
 
         # Validate the form by ensuring required fields are filled and the VAT is correct.
-        form_values = {'error': {}, 'error_message': {}, 'extra_field_values': {}}
+        form_values = {'extra_field_values': {}}
+        partner = (user_is_connected and request.env.user.partner_id) or pos_order.partner_id
         if kwargs and request.httprequest.method == 'POST':
             form_values.update(kwargs)
             # Extract the additional fields values from the kwargs now as they can't be there when validating the 'regular' partner form.
@@ -166,34 +218,28 @@ class PosController(PortalAccount):
             invoice_values, prefixed_invoice_values = _parse_additional_values(additional_invoice_fields, 'invoice_', kwargs)
             form_values['extra_field_values'].update(prefixed_invoice_values)
             # Check the basic form fields if the user is not connected as we will need these information to create the new user.
-            if not user_is_connected:
-                error, error_message = self.details_form_validate(kwargs, partner_creation=True)
-            else:
-                # Check that the billing information of the user are filled.
-                error, error_message = {}, []
-                partner = request.env.user.partner_id
-                for field in self._get_mandatory_fields():
-                    if not partner[field]:
-                        error[field] = 'error'
-                        error_message.append(_('The %s must be filled in your details.', request.env['ir.model.fields']._get('res.partner', field).field_description))
-            # Check that the "optional" additional fields are filled.
-            error, error_message = self.extra_details_form_validate(partner_values, additional_partner_fields, error, error_message)
-            error, error_message = self.extra_details_form_validate(invoice_values, additional_invoice_fields, error, error_message)
-            if not error:
-                return self._get_invoice(partner_values, invoice_values, pos_order, additional_invoice_fields, kwargs)
-            else:
-                form_values.update({'error': error, 'error_message': error_message})
+            partner, feedback_dict = self._create_or_update_address(partner, **(kwargs | partner_values))
+            form_values.update(feedback_dict)
+            missing_fields, error_messages = self._validate_extra_form_details(
+                partner_values | invoice_values,
+                additional_partner_fields + additional_invoice_fields
+            )
+            form_values.update({
+                'invalid_field': form_values.get('invalid_fields', []) + list(missing_fields),
+                'messages': form_values.get('messages', []) + error_messages
+            })
+            if not form_values.get('invalid_fields'):
+                return self._get_invoice(partner, invoice_values, pos_order, additional_invoice_fields, kwargs)
+            raise UserError(_(
+                "Message: %(messages)s\nPlease update the %(invalid_fields)s",
+                messages=form_values.get('messages'),
+                invalid_fields=form_values.get('invalid_fields'),
+            ))
 
         elif user_is_connected:
-            return self._get_invoice({}, {}, pos_order, additional_invoice_fields, kwargs)
+            return self._get_invoice(partner, {}, pos_order, additional_invoice_fields, kwargs)
 
-        # Most of the time, the country of the customer will be the same as the order. We can prefill it by default with the country of the company.
-        if 'country_id' not in form_values:
-            form_values['country_id'] = pos_order_country.id
-
-        partner = request.env['res.partner']
         # Prefill the customer extra values if there is any and an user is connected
-        partner = (user_is_connected and request.env.user.partner_id) or pos_order.partner_id
         if partner:
             if additional_partner_fields:
                 form_values['extra_field_values'] = {'partner_' + field.name: partner[field.name] for field in additional_partner_fields if field.name not in form_values['extra_field_values']}
@@ -205,40 +251,41 @@ class PosController(PortalAccount):
             else:
                 form_values['partner_address'] = partner._display_address()
 
+        address_form_vals = self._prepare_address_form_values(partner, **kwargs)
+        # Most of the time, the country of the customer will be the same as the order. We can prefill it by default with the country of the company.
+        if not address_form_vals.get('country'):
+            address_form_vals['country'] = pos_order_country
+
+        # In POS most of the time user isn't logged in & the customer will be the same as the partner
+        if not address_form_vals.get('current_partner'):
+            address_form_vals['current_partner'] = partner
+
         return request.render("point_of_sale.ticket_validation_screen", {
+            **address_form_vals,
             'partner': partner,
             'address_url': f'/my/account?redirect=/pos/ticket/validate?access_token={access_token}',
             'user_is_connected': user_is_connected,
             'format_amount': format_amount,
             'env': request.env,
-            'countries': request.env['res.country'].sudo().search([]),
-            'states': request.env['res.country.state'].sudo().search([]),
-            'partner_can_edit_vat': True,
             'pos_order': pos_order,
             'invoice_required_fields': additional_invoice_fields,
             'partner_required_fields': additional_partner_fields,
             'access_token': access_token,
-            'invoice_sending_methods': {'email': _('by Email')},
+            'invoice_sending_methods': {'email': _("by Email")},
             **form_values,
         })
 
-    def _get_invoice(self, partner_values, invoice_values, pos_order, additional_invoice_fields, kwargs):
-        # If the user is not connected, then we will simply create a new partner with the form values.
-        # Matching with existing partner was tried, but we then can't update the values, and it would force the user to use the ones from the first invoicing.
-        if request.env.user._is_public() and not pos_order.partner_id.id:
-            partner_values.update({key: kwargs[key] for key in self._get_mandatory_fields()})
-            partner_values.update({key: kwargs[key] for key in self._get_optional_fields() if key in kwargs})
-            for field in {'country_id', 'state_id'} & set(partner_values.keys()):
-                try:
-                    partner_values[field] = int(partner_values[field])
-                except Exception:
-                    partner_values[field] = False
-            partner_values.update({'zip': partner_values.pop('zipcode', '')})
-            partner = request.env['res.partner'].sudo().create(partner_values)  # In this case, partner_values contains the whole partner info form.
-        # If the user is connected, then we can update if needed its fields with the additional localized fields if any, then proceed.
-        else:
-            partner = pos_order.partner_id or (not request.env.user._is_public() and request.env.user.partner_id)
-            partner.write(partner_values)  # In this case, partner_values only contains the additional fields that can be updated.
+    def _validate_extra_form_details(self, addtional_form_values, additional_required_fields):
+        """ Ensure that all additional required fields have a value in the data. """
+        missing_fields = set()
+        error_messages = []
+        for field in additional_required_fields:
+            if field.name not in addtional_form_values or not addtional_form_values[field.name]:
+                missing_fields.add(field.name)
+                error_messages.append(_("The field %s must be filled.", field.field_description.lower()))
+        return missing_fields, error_messages
+
+    def _get_invoice(self, partner, invoice_values, pos_order, additional_invoice_fields, kwargs):
 
         pos_order.partner_id = partner
         # Get the required fields for the invoice and add them to the context as default values.

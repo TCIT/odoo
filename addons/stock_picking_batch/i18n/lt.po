@@ -1,42 +1,46 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* stock_picking_batch
-# 
+# * stock_picking_batch
+#
 # Translators:
-# Arunas Vaitekunas <vaitekunas@gmail.com>, 2024
-# Audrius Palenskis <audrius.palenskis@gmail.com>, 2024
-# Donatas <donatasvaliulis16@gmail.com>, 2024
-# Edgaras Kriukonis <edgaras@focusate.eu>, 2024
-# grupoda2 <dmitrijus.ivanovas@gmail.com>, 2024
-# Jonas Zinkevicius <jozi@odoo.com>, 2024
-# Arminas Grigonis <arminas@versada.lt>, 2024
-# Rolandas <info@paninfo.lt>, 2024
-# Gailius Kazlauskas <gailius@vialaurea.lt>, 2024
-# Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2024
-# Martin Trigaux, 2024
-# UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2024
-# Silvija Butko <silvija.butko@gmail.com>, 2024
-# digitouch UAB <digitouchagencyeur@gmail.com>, 2024
-# Arunas V. <arunas@devoro.com>, 2024
-# Linas Versada <linaskrisiukenas@gmail.com>, 2024
-# 
+# Edgaras Kriukonis <edgaras@focusate.eu>, 2022
+# Arminas Grigonis <arminas@versada.lt>, 2022
+# Rolandas <info@paninfo.lt>, 2022
+# Arunas Vaitekunas <vaitekunas@gmail.com>, 2022
+# grupoda2 <dmitrijus.ivanovas@gmail.com>, 2022
+# Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2022
+# Audrius Palenskis <audrius.palenskis@gmail.com>, 2022
+# UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2022
+# Silvija Butko <silvija.butko@gmail.com>, 2022
+# digitouch UAB <digitouchagencyeur@gmail.com>, 2022
+# Jonas Zinkevicius <jozi@odoo.com>, 2022
+# Martin Trigaux, 2022
+# Linas Versada <linaskrisiukenas@gmail.com>, 2022
+# Donatas <donatasvaliulis16@gmail.com>, 2022
+# Arunas V. <arunas@devoro.com>, 2023
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:24+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Linas Versada <linaskrisiukenas@gmail.com>, 2024\n"
-"Language-Team: Lithuanian (https://app.transifex.com/odoo/teams/41243/lt/)\n"
+"POT-Creation-Date: 2026-07-17 17:39+0000\n"
+"PO-Revision-Date: 2026-08-03 01:17+0000\n"
+"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"Language-Team: Lithuanian <https://translate.odoo.com/projects/odoo-19/"
+"stock_picking_batch/lt/>\n"
+"Language: lt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: lt\n"
-"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);\n"
+"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < "
+"11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 "
+": n % 1 != 0 ? 2: 3);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "2023-08-20"
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "%s was removed from the batch, no quantity processed"
 msgstr ""
 
 #. module: stock_picking_batch
@@ -56,6 +60,16 @@ msgstr ""
 msgid ""
 "<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">Batch "
 "Grouping</span>"
+msgstr ""
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+msgid "<span class=\"o_stat_text\">Moves</span>"
+msgstr ""
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+msgid "<span class=\"o_stat_text\">Packages</span>"
 msgstr ""
 
 #. module: stock_picking_batch
@@ -96,14 +110,16 @@ msgstr ""
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_lines
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this number of lines if the transfer is added to it.\n"
+"A transfer will not be automatically added to batches that will exceed this "
+"number of lines if the transfer is added to it.\n"
 "Leave this value as '0' if no line limit."
 msgstr ""
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_pickings
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this number of transfers.\n"
+"A transfer will not be automatically added to batches that will exceed this "
+"number of transfers.\n"
 "Leave this value as '0' if no transfer limit."
 msgstr ""
 
@@ -254,7 +270,6 @@ msgstr ""
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
-#: code:addons/stock_picking_batch/wizard/stock_picking_to_batch.py:0
 #: model:ir.actions.report,name:stock_picking_batch.action_report_picking_batch
 #: model:ir.model,name:stock_picking_batch.model_stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move_line__batch_id
@@ -293,6 +308,30 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
 msgid "Batch transfers"
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "Batch transfers cannot be merged with wave transfers and vice versa."
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "Batch/Wave transfers have been merged into the following transfer"
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "Batch/Wave transfers with different operation types cannot be merged."
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "Batch/Wave transfers with different states cannot be merged."
 msgstr ""
 
 #. module: stock_picking_batch
@@ -410,14 +449,25 @@ msgid "Destination Location"
 msgstr "Siunčiama į"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 msgid "Detailed Operations"
 msgstr "Detalios operacijos"
 
 #. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_picking_move_tree_inherited
+msgid "Details"
+msgstr "Papildoma informacija"
+
+#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__display_name
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move__display_name
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move_line__display_name
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking__display_name
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__display_name
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_to_batch__display_name
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__display_name
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_warehouse__display_name
 msgid "Display Name"
 msgstr "Rodomas pavadinimas"
 
@@ -455,11 +505,6 @@ msgid "Future Activities"
 msgstr "Būsimos veiklos"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
-msgid "Group By"
-msgstr "Grupuoti pagal"
-
-#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_group_by_dest_loc
 msgid "Group by Destination Location"
 msgstr ""
@@ -481,8 +526,13 @@ msgstr "Turi žinutę"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__id
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move__id
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move_line__id
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking__id
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__id
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_to_batch__id
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__id
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_warehouse__id
 msgid "ID"
 msgstr "ID"
 
@@ -578,6 +628,11 @@ msgid "List of transfers associated to this batch"
 msgstr "Sąrašas judėjimų susietų su grup.perkėlimų"
 
 #. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+msgid "List view of detailed operations"
+msgstr ""
+
+#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__wave_group_by_location
 msgid "Location"
 msgstr "Vieta"
@@ -603,6 +658,11 @@ msgid "Lot Number"
 msgstr ""
 
 #. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_move_line_tree
+msgid "Lot/Serial Number"
+msgstr "Partijos/serijinis numeris"
+
+#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_max_lines
 msgid "Maximum lines"
 msgstr ""
@@ -611,6 +671,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_max_pickings
 msgid "Maximum transfers"
 msgstr ""
+
+#. module: stock_picking_batch
+#: model:ir.actions.server,name:stock_picking_batch.action_merge_batch_picking
+msgid "Merge"
+msgstr "Sujungti"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_has_error
@@ -634,6 +699,11 @@ msgid "Move Lines"
 msgstr "Perkėlimo eilutės"
 
 #. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
+msgid "My Activities"
+msgstr "Mano veiklos"
+
+#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__my_activity_date_deadline
 msgid "My Activity Deadline"
 msgstr "Veiklos paskutinis terminas"
@@ -641,6 +711,12 @@ msgstr "Veiklos paskutinis terminas"
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
 msgid "My Transfers"
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "New"
 msgstr ""
 
 #. module: stock_picking_batch
@@ -699,6 +775,13 @@ msgid "Package ID"
 msgstr ""
 
 #. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+msgid "Packages"
+msgstr ""
+
+#. module: stock_picking_batch
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
 msgid ""
@@ -719,8 +802,7 @@ msgstr "Paėmimo būdas"
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
-msgid ""
-"Please add 'Done' quantities to the batch picking to create a new pack."
+msgid "Please select at least two batch/wave transfers to merge."
 msgstr ""
 
 #. module: stock_picking_batch
@@ -780,6 +862,7 @@ msgstr "Savybės"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_move_line_tree
 msgid "Put in Pack"
 msgstr "Dėti į pakuotę"
 
@@ -802,8 +885,7 @@ msgstr "Įvertinimai"
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
 msgid ""
-"Regroup multiple orders into one picking and consolidate at the packing "
-"zone."
+"Regroup multiple orders into one picking and consolidate at the packing zone."
 msgstr ""
 
 #. module: stock_picking_batch
@@ -839,9 +921,12 @@ msgstr "Suplanuota data"
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__scheduled_date
 msgid ""
 "Scheduled date for the transfers to be processed.\n"
-"              - If manually set then scheduled date for all transfers in batch will automatically update to this date.\n"
-"              - If not manually changed and transfers are added/removed/updated then this will be their earliest scheduled date\n"
-"                but this scheduled date will not be set for all transfers in batch."
+"              - If manually set then scheduled date for all transfers in "
+"batch will automatically update to this date.\n"
+"              - If not manually changed and transfers are added/removed/"
+"updated then this will be their earliest scheduled date\n"
+"                but this scheduled date will not be set for all transfers in "
+"batch."
 msgstr ""
 
 #. module: stock_picking_batch
@@ -881,9 +966,8 @@ msgstr "Rodyti partijų tekstą"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
-msgid "Show all records which has next action date is before today"
+msgid "Show all records whose next activity date is past"
 msgstr ""
-"Rodyti visus įrašus, kurių sekančio veiksmo data yra ankstesnė nei šiandiena"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_picking_type_form_inherit
@@ -900,8 +984,8 @@ msgstr ""
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__wave_group_by_category
 msgid ""
-"Split transfers by product category, then group transfers that have the same"
-" product category."
+"Split transfers by product category, then group transfers that have the same "
+"product category."
 msgstr ""
 
 #. module: stock_picking_batch
@@ -952,11 +1036,6 @@ msgid "Stock Move"
 msgstr "Atsargų perkėlimas"
 
 #. module: stock_picking_batch
-#: model:ir.model,name:stock_picking_batch.model_stock_package_destination
-msgid "Stock Package Destination"
-msgstr "Atsargų pakuotės tikslas"
-
-#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__move_line_ids
 msgid "Stock move lines"
 msgstr ""
@@ -973,11 +1052,36 @@ msgstr "Santrauka:"
 
 #. module: stock_picking_batch
 #. odoo-python
+#: code:addons/stock_picking_batch/wizard/stock_picking_to_batch.py:0
+msgid "The following batch transfer has been created"
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/wizard/stock_picking_to_batch.py:0
+msgid "The following batch transfer has been updated"
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 msgid ""
-"The following transfers cannot be added to batch transfer %(batch)s. Please check their states and operation types.\n"
+"The following transfers cannot be added to batch transfer %(batch)s. Please "
+"check their states and operation types.\n"
 "\n"
 "Incompatibilities: %(incompatible_transfers)s"
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_move_line.py:0
+msgid "The following wave transfer has been created"
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_move_line.py:0
+msgid "The following wave transfer has been updated"
 msgstr ""
 
 #. module: stock_picking_batch
@@ -1002,6 +1106,14 @@ msgstr ""
 #. odoo-python
 #: code:addons/stock_picking_batch/wizard/stock_add_to_wave.py:0
 msgid "The selected transfers should belong to the same operation type"
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid ""
+"The sequence '%(sequence)s' is misconfigured. Its prefix should end with a "
+"'/' separator."
 msgstr ""
 
 #. module: stock_picking_batch
@@ -1062,11 +1174,6 @@ msgstr "Įrašytos išimties veiklos tipas."
 #: code:addons/stock_picking_batch/models/stock_picking.py:0
 msgid "Unassigned responsible from %s"
 msgstr ""
-
-#. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "Unit of Measure"
-msgstr "Mato vienetas"
 
 #. module: stock_picking_batch
 #: model:ir.actions.server,name:stock_picking_batch.action_unreserve_batch_picking
@@ -1140,6 +1247,12 @@ msgstr ""
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "You cannot merge done or cancelled batch/wave transfers."
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 msgid "You have to set some pickings to batch."
 msgstr ""
 
@@ -1172,3 +1285,23 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__estimated_shipping_weight
 msgid "shipping_weight"
 msgstr ""
+
+#~ msgid "Create a new batch transfer"
+#~ msgstr "Sukurti naują grup.perkėlimą"
+
+#~ msgid "Group By"
+#~ msgstr "Grupuoti pagal"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Žinučių, kurioms reikia jūsų veiksmo, skaičius"
+
+#~ msgid "Set quantities"
+#~ msgstr "Nustatyti kiekius"
+
+#~ msgid "Show all records which has next action date is before today"
+#~ msgstr ""
+#~ "Rodyti visus įrašus, kurių sekančio veiksmo data yra ankstesnė nei "
+#~ "šiandiena"
+
+#~ msgid "Stock Package Destination"
+#~ msgstr "Atsargų pakuotės tikslas"

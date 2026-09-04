@@ -1,35 +1,35 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* sale_loyalty
-# 
-# Translators:
-# Lyall Kindmurr, 2024
-# Wil Odoo, 2024
-# 
+# * sale_loyalty
+#
+# Alin Ilie <alin.ilie@logit-solutions.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Romanian (https://app.transifex.com/odoo/teams/41243/ro/)\n"
+"POT-Creation-Date: 2026-06-12 17:37+0000\n"
+"PO-Revision-Date: 2026-08-05 23:10+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-19/"
+"sale_loyalty/ro/>\n"
+"Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ro\n"
-"Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
+"20)) ? 1 : 2;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: sale_loyalty
 #. odoo-python
 #: code:addons/sale_loyalty/models/sale_order.py:0
 msgid " - On products with the following taxes: %(taxes)s"
-msgstr ""
+msgstr " - Pentru produsele cu următoarele taxe: %(taxes)s"
 
 #. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_purchased_gift_card
 msgid "<span class=\"fa fa-clipboard\"/> Copy"
-msgstr "<span class=\"fa fa-clipboard\"/> Copiază"
+msgstr ""
 
 #. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_order_portal_loyalty_content
@@ -40,22 +40,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/sale_loyalty/models/sale_order.py:0
 msgid "A better global discount is already applied."
-msgstr "Un discount global mai bun este deja aplicat."
-
-#. module: sale_loyalty
-#. odoo-python
-#: code:addons/sale_loyalty/models/sale_order.py:0
-msgid ""
-"A minimum of %(amount)s %(currency)s should be purchased to get the reward"
-msgstr ""
-"Pentru a obține recompensa trebuie achiziționat minimum "
-"%(amount)s%(currency)s"
+msgstr "O reducere globală mai avantajoasă este deja aplicată."
 
 #. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_loyalty_coupon_wizard_view_form
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_loyalty_reward_wizard_view_form
 msgid "Apply"
-msgstr "Aplică"
+msgstr "Aplicați"
 
 #. module: sale_loyalty
 #: model:ir.actions.act_window,name:sale_loyalty.sale_loyalty_reward_wizard_action
@@ -65,12 +56,12 @@ msgstr "Recompense disponibile"
 #. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_loyalty_reward_wizard_view_form
 msgid "Choose a product:"
-msgstr "Alege un produs:"
+msgstr "Alegeți un produs:"
 
 #. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_loyalty_reward_wizard_view_form
 msgid "Choose your reward:"
-msgstr "Alege-ți recompensa:"
+msgstr "Alegeți recompensa:"
 
 #. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.used_gift_card
@@ -81,7 +72,7 @@ msgstr "Cod:"
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_order_coupon_points__coupon_id
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_order_line__coupon_id
 msgid "Coupon"
-msgstr "Cupon"
+msgstr "Cupoane"
 
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_loyalty_coupon_wizard__coupon_code
@@ -92,20 +83,20 @@ msgstr "Cod cupon"
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_order__coupon_point_ids
 msgid "Coupon Point"
-msgstr "Cupon punct"
+msgstr "Puncte cupon"
 
 #. module: sale_loyalty
 #. odoo-python
 #: code:addons/sale_loyalty/wizard/sale_loyalty_reward_wizard.py:0
 msgid "Coupon not found while trying to add the following reward: %s"
 msgstr ""
-"Cuponul nu a fost găsit în timp ce se încerca adăugarea următoarei "
-"recompense: %s"
+"Cuponul nu a fost găsit în timpul încercării de a adăuga următoarea "
+"recompensă: %s"
 
 #. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_loyalty_reward_wizard_view_form
 msgid "Coupons & Loyalty"
-msgstr "Cupoane și Fidelizare"
+msgstr "Cupoane și loialitate"
 
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_loyalty_coupon_wizard__create_uid
@@ -119,36 +110,43 @@ msgstr "Creat de"
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_loyalty_reward_wizard__create_date
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_order_coupon_points__create_date
 msgid "Created on"
-msgstr "Creat pe"
+msgstr "Creat la"
 
 #. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_loyalty_coupon_wizard_view_form
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_loyalty_reward_wizard_view_form
 msgid "Discard"
-msgstr "Abandonează"
+msgstr "Eliminare"
 
 #. module: sale_loyalty
 #. odoo-python
 #: code:addons/sale_loyalty/models/sale_order.py:0
 msgid "Discount %(desc)s%(tax_str)s"
-msgstr ""
+msgstr "Reducere %(desc)s%(tax_str)s"
 
 #. module: sale_loyalty
 #: model:ir.ui.menu,name:sale_loyalty.menu_discount_loyalty_type_config
 msgid "Discount & Loyalty"
-msgstr "Discount și loialitate"
+msgstr "Reducere și loialitate"
 
 #. module: sale_loyalty
+#: model:ir.model.fields,field_description:sale_loyalty.field_account_move_line__display_name
+#: model:ir.model.fields,field_description:sale_loyalty.field_loyalty_card__display_name
+#: model:ir.model.fields,field_description:sale_loyalty.field_loyalty_history__display_name
+#: model:ir.model.fields,field_description:sale_loyalty.field_loyalty_program__display_name
+#: model:ir.model.fields,field_description:sale_loyalty.field_loyalty_reward__display_name
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_loyalty_coupon_wizard__display_name
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_loyalty_reward_wizard__display_name
+#: model:ir.model.fields,field_description:sale_loyalty.field_sale_order__display_name
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_order_coupon_points__display_name
+#: model:ir.model.fields,field_description:sale_loyalty.field_sale_order_line__display_name
 msgid "Display Name"
 msgstr "Nume afișat"
 
 #. module: sale_loyalty
 #: model:ir.actions.act_window,name:sale_loyalty.sale_loyalty_coupon_wizard_action
 msgid "Enter Promotion or Coupon Code"
-msgstr "Introduceți codul promoțional sau codul de cupon"
+msgstr "Introduceți codul promoțional sau codul cuponului"
 
 #. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.used_gift_card
@@ -156,20 +154,26 @@ msgid "Expired Date:"
 msgstr "Data expirării:"
 
 #. module: sale_loyalty
-#. odoo-python
-#: code:addons/sale_loyalty/models/sale_order.py:0
-msgid "Free Product - %(product)s"
-msgstr "Produs gratuit - %(product)s"
-
-#. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_purchased_gift_card
 msgid "Gift #"
-msgstr "Cadou #"
+msgstr "Cadou nr."
 
 #. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_purchased_gift_card
 msgid "Gift Card Code"
-msgstr "Cod card cadou"
+msgstr "Codul cardului cadou"
+
+#. module: sale_loyalty
+#: model:ir.model.fields,field_description:sale_loyalty.field_sale_order__gift_card_count
+msgid "Gift Card Count"
+msgstr "Număr card cadou"
+
+#. module: sale_loyalty
+#. odoo-python
+#: code:addons/sale_loyalty/models/sale_order.py:0
+#: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_order_view_form_inherit_sale_loyalty
+msgid "Gift Cards"
+msgstr "Carduri cadou"
 
 #. module: sale_loyalty
 #: model:ir.ui.menu,name:sale_loyalty.menu_gift_ewallet_type_config
@@ -179,7 +183,7 @@ msgstr "Carduri cadou și portofel electronic"
 #. module: sale_loyalty
 #: model:ir.model,name:sale_loyalty.model_loyalty_history
 msgid "History for Loyalty cards and Ewallets"
-msgstr ""
+msgstr "Istoric pentru carduri de fidelitate și portofele electronice"
 
 #. module: sale_loyalty
 #: model:ir.model.fields,help:sale_loyalty.field_sale_order_line__points_cost
@@ -187,9 +191,16 @@ msgid "How much point this reward costs on the loyalty card."
 msgstr "Câte puncte costă această recompensă pe cardul de fidelitate."
 
 #. module: sale_loyalty
+#: model:ir.model.fields,field_description:sale_loyalty.field_account_move_line__id
+#: model:ir.model.fields,field_description:sale_loyalty.field_loyalty_card__id
+#: model:ir.model.fields,field_description:sale_loyalty.field_loyalty_history__id
+#: model:ir.model.fields,field_description:sale_loyalty.field_loyalty_program__id
+#: model:ir.model.fields,field_description:sale_loyalty.field_loyalty_reward__id
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_loyalty_coupon_wizard__id
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_loyalty_reward_wizard__id
+#: model:ir.model.fields,field_description:sale_loyalty.field_sale_order__id
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_order_coupon_points__id
+#: model:ir.model.fields,field_description:sale_loyalty.field_sale_order_line__id
 msgid "ID"
 msgstr "ID"
 
@@ -197,7 +208,7 @@ msgstr "ID"
 #. odoo-python
 #: code:addons/sale_loyalty/models/sale_order.py:0
 msgid "Invalid product to claim."
-msgstr "Produs nevalid pentru revendicare."
+msgstr "Produs invalid pentru revendicare."
 
 #. module: sale_loyalty
 #. odoo-python
@@ -208,17 +219,22 @@ msgstr "Comandă de vânzare nevalidă."
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_order_line__is_reward_line
 msgid "Is a program reward line"
-msgstr "Este o linie a programului de recompensă "
+msgstr "Este o linie de recompensă a programului"
 
 #. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_order_portal_loyalty_content
 msgid "Issued"
-msgstr ""
+msgstr "Emitere"
 
 #. module: sale_loyalty
 #. odoo-javascript
 #: code:addons/sale_loyalty/static/src/views/fields/loyalty_total/loyalty_data_field.xml:0
 msgid "Issued :"
+msgstr "Emitent:"
+
+#. module: sale_loyalty
+#: model:ir.model,name:sale_loyalty.model_account_move_line
+msgid "Journal Item"
 msgstr ""
 
 #. module: sale_loyalty
@@ -226,35 +242,35 @@ msgstr ""
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_loyalty_reward_wizard__write_uid
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_order_coupon_points__write_uid
 msgid "Last Updated by"
-msgstr "Ultima actualizare făcută de"
+msgstr "Ultima actualizare de către"
 
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_loyalty_coupon_wizard__write_date
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_loyalty_reward_wizard__write_date
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_order_coupon_points__write_date
 msgid "Last Updated on"
-msgstr "Ultima actualizare pe"
+msgstr "Ultima actualizare"
 
 #. module: sale_loyalty
 #. odoo-javascript
 #: code:addons/sale_loyalty/static/src/views/fields/loyalty_total/loyalty_data_field.xml:0
 msgid "Loyalty Card :"
-msgstr ""
+msgstr "Card de fidelitate:"
 
 #. module: sale_loyalty
 #: model:ir.model,name:sale_loyalty.model_loyalty_card
 msgid "Loyalty Coupon"
-msgstr "Cupon de loialitate"
+msgstr "Cupoane de fidelitate"
 
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_order__loyalty_data
 msgid "Loyalty Data"
-msgstr ""
+msgstr "Date de fidelitate"
 
 #. module: sale_loyalty
 #: model:ir.model,name:sale_loyalty.model_loyalty_program
 msgid "Loyalty Program"
-msgstr "Program de loialitate"
+msgstr "Program de fidelitate"
 
 #. module: sale_loyalty
 #: model:ir.model,name:sale_loyalty.model_loyalty_reward
@@ -274,42 +290,36 @@ msgstr "Reguli declanșate manual"
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_loyalty_reward_wizard__multi_product_reward
 msgid "Multi Product"
-msgstr "Produs multiplu"
+msgstr "Produse multiple"
 
 #. module: sale_loyalty
 #. odoo-python
 #: code:addons/sale_loyalty/models/sale_order.py:0
 msgid ""
-"No card found for this loyalty program and no points will be given with this"
-" order."
+"No card found for this loyalty program and no points will be given with this "
+"order."
 msgstr ""
-"Nu s-a găsit niciun card pentru acest program de loialitate și nu se vor "
-"acorda puncte cu această comandă."
-
-#. module: sale_loyalty
-#. odoo-python
-#: code:addons/sale_loyalty/models/sale_order.py:0
-msgid "No product is compatible with this promotion."
-msgstr ""
+"Nu s-a găsit nicio carte pentru acest program de loialitate și nu se vor "
+"acorda puncte pentru această comandă."
 
 #. module: sale_loyalty
 #. odoo-python
 #: code:addons/sale_loyalty/wizard/sale_loyalty_reward_wizard.py:0
 msgid "No reward selected."
-msgstr "Nicio recompensă selectată."
+msgstr "Nu a fost selectată nicio recompensă."
 
 #. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_loyalty_reward_wizard_view_form
 msgid "No rewards available for this customer!"
-msgstr "Nu există recompense pentru acest client!"
+msgstr "Nu sunt disponibile recompense pentru acest client!"
 
 #. module: sale_loyalty
 #. odoo-python
 #: code:addons/sale_loyalty/models/sale_order.py:0
 msgid "One or more rewards on the sale order is invalid. Please check them."
 msgstr ""
-"Una sau mai multe recompense de pe comanda de vânzare nu sunt valide. Vă "
-"rugăm să le verificați."
+"Una sau mai multe recompense din comanda de vânzare sunt nevalide. Vă rugăm "
+"să le verificați."
 
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_loyalty_coupon_wizard__order_id
@@ -322,12 +332,12 @@ msgstr "Comandă"
 #. odoo-python
 #: code:addons/sale_loyalty/models/sale_order.py:0
 msgid "Order %s"
-msgstr "Comandă %s"
+msgstr "Comanda %s"
 
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_loyalty_program__order_count
 msgid "Order Count"
-msgstr "Numărul de Comenzi"
+msgstr "Număr comenzi"
 
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_loyalty_card__order_id
@@ -344,7 +354,7 @@ msgstr "Puncte"
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_order_line__points_cost
 msgid "Points Cost"
-msgstr "Costul în puncte"
+msgstr "Cost în puncte"
 
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_loyalty_reward_wizard__reward_ids
@@ -356,12 +366,12 @@ msgstr "Recompensă"
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_order__reward_amount
 msgid "Reward Amount"
-msgstr "Valoarea recompenselor"
+msgstr "Valoarea recompensei"
 
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_order_line__reward_identifier_code
 msgid "Reward Identifier Code"
-msgstr "Cod identificare recompensă"
+msgstr "Codul de identificare al recompensei"
 
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_loyalty_reward_wizard__reward_product_ids
@@ -369,22 +379,33 @@ msgid "Reward Products"
 msgstr "Produse recompensă"
 
 #. module: sale_loyalty
+#. odoo-python
+#: code:addons/sale_loyalty/models/sale_order.py:0
+msgid "Rewards Available"
+msgstr "Recompense disponibile"
+
+#. module: sale_loyalty
 #: model:ir.model,name:sale_loyalty.model_sale_loyalty_coupon_wizard
 msgid "Sale Loyalty - Apply Coupon Wizard"
-msgstr "Loialitate vânzări - Aplică asistentul de cupoane"
+msgstr "Vânzare loialitate - Aplicați asistentul pentru cupoane"
 
 #. module: sale_loyalty
 #: model:ir.model,name:sale_loyalty.model_sale_loyalty_reward_wizard
 msgid "Sale Loyalty - Reward Selection Wizard"
-msgstr "Loialitate vânzări - Asistent selecție recompensă"
+msgstr "Loialitate la vânzare - Asistent pentru selectarea recompenselor"
 
 #. module: sale_loyalty
 #: model:ir.model,name:sale_loyalty.model_sale_order_coupon_points
 msgid ""
 "Sale Order Coupon Points - Keeps track of how a sale order impacts a coupon"
 msgstr ""
-"Puncte de cupon pentru comanda de vânzare - ține evidența modului în care o "
-"comandă de vânzare afectează un cupon"
+"Puncte cupon comandă de vânzare - Urmărește impactul unei comenzi de vânzare "
+"asupra unui cupon"
+
+#. module: sale_loyalty
+#: model:ir.model.fields,field_description:sale_loyalty.field_loyalty_card__order_id_partner_id
+msgid "Sale Order Customer"
+msgstr "Client comenzi de vânzare"
 
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_loyalty_program__sale_ok
@@ -399,7 +420,7 @@ msgstr "Comandă de vânzare"
 #. module: sale_loyalty
 #: model:ir.model,name:sale_loyalty.model_sale_order_line
 msgid "Sales Order Line"
-msgstr "Linie comandă de vânzare"
+msgstr "Linie de comandă de vânzare"
 
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_loyalty_reward_wizard__selected_product_id
@@ -415,7 +436,7 @@ msgstr "Recompensă selectată"
 #. odoo-python
 #: code:addons/sale_loyalty/models/sale_order.py:0
 msgid "TEMPORARY DISCOUNT LINE"
-msgstr "LINIE DE DISCOUNT TEMPORAR"
+msgstr "LINIE DE REDUCERE TEMPORARĂ"
 
 #. module: sale_loyalty
 #: model:ir.model.fields,help:sale_loyalty.field_sale_order_line__reward_identifier_code
@@ -423,25 +444,25 @@ msgid ""
 "Technical field used to link multiple reward lines from the same reward "
 "together."
 msgstr ""
-"Domeniu tehnic utilizat pentru a lega mai multe linii de recompensă de la "
-"aceeași recompensă."
+"Câmp tehnic utilizat pentru a lega mai multe linii de recompense din aceeași "
+"recompensă."
 
 #. module: sale_loyalty
 #. odoo-python
 #: code:addons/sale_loyalty/models/sale_order.py:0
 msgid "The coupon can only be claimed on future orders."
-msgstr "Cuponul poate fi revendicat doar pe comenzi viitoare."
+msgstr "Cupoanele pot fi revendicate numai pentru comenzi viitoare."
 
 #. module: sale_loyalty
 #. odoo-python
 #: code:addons/sale_loyalty/models/sale_order.py:0
 msgid "The coupon does not have enough points for the selected reward."
-msgstr "Cuponul nu are suficiente puncte pentru recompensa selectată."
+msgstr "Cupoanul nu are suficiente puncte pentru recompensa selectată."
 
 #. module: sale_loyalty
 #: model:ir.model.constraint,message:sale_loyalty.constraint_sale_order_coupon_points_order_coupon_unique
 msgid "The coupon points entry already exists."
-msgstr "Înregistrarea punctelor de cupon există deja."
+msgstr "Intrarea punctelor cuponului există deja."
 
 #. module: sale_loyalty
 #. odoo-python
@@ -457,8 +478,15 @@ msgstr "Comanda de vânzare din care este generat cuponul"
 #. module: sale_loyalty
 #. odoo-python
 #: code:addons/sale_loyalty/models/sale_order.py:0
+msgid "There are available rewards not added to this order."
+msgstr ""
+"Există recompense disponibile care nu au fost adăugate la această comandă."
+
+#. module: sale_loyalty
+#. odoo-python
+#: code:addons/sale_loyalty/models/sale_order.py:0
 msgid "There is nothing to discount"
-msgstr "Nu există nimic de discountat"
+msgstr "Nu există nimic de redus"
 
 #. module: sale_loyalty
 #: model:ir.model.fields,help:sale_loyalty.field_sale_loyalty_reward_wizard__reward_product_ids
@@ -481,7 +509,7 @@ msgstr "Acest cod este invalid (%s)."
 #. odoo-python
 #: code:addons/sale_loyalty/models/sale_order.py:0
 msgid "This coupon has already been used."
-msgstr "Acest cupon a fost deja folosit."
+msgstr "Acest cupon a fost deja utilizat."
 
 #. module: sale_loyalty
 #. odoo-python
@@ -496,12 +524,14 @@ msgid ""
 "This discount (%(discount)s) is not compatible with \"%(other_discount)s\". "
 "Please remove it in order to apply this one."
 msgstr ""
+"Această reducere (%(discount)s) nu este compatibilă cu „%(other_discount)s”. "
+"Vă rugăm să o eliminați pentru a o putea aplica pe aceasta."
 
 #. module: sale_loyalty
 #. odoo-python
 #: code:addons/sale_loyalty/models/sale_order.py:0
 msgid "This program cannot be applied with code."
-msgstr ""
+msgstr "Acest program nu poate fi aplicat cu cod."
 
 #. module: sale_loyalty
 #. odoo-python
@@ -519,7 +549,7 @@ msgstr "Acest program nu este disponibil pentru utilizatorii publici."
 #. odoo-python
 #: code:addons/sale_loyalty/models/sale_order.py:0
 msgid "This program requires a code to be applied."
-msgstr "Acest program necesită un cod pentru a fi aplicat."
+msgstr "Acest program necesită aplicarea unui cod."
 
 #. module: sale_loyalty
 #. odoo-python
@@ -528,28 +558,36 @@ msgid "This promo code is already applied."
 msgstr "Acest cod promoțional este deja aplicat."
 
 #. module: sale_loyalty
+#. odoo-python
+#: code:addons/sale_loyalty/models/sale_order.py:0
+msgid ""
+"To take advantage of this offer, your order must include at least %(amount)s "
+"%(currency)s of the eligible products."
+msgstr ""
+
+#. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_order_view_form_inherit_sale_loyalty
 msgid "Update current promotional lines and select new rewards if applicable."
 msgstr ""
-"Actualizează liniile promoționale curente și selectează noi recompense, dacă"
-" este cazul."
+"Actualizați liniile promoționale actuale și selectați noi recompense, dacă "
+"este cazul."
 
 #. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_order_portal_loyalty_content
 msgid "Used"
-msgstr "Folosit"
+msgstr "Utilizat"
 
 #. module: sale_loyalty
 #. odoo-javascript
 #: code:addons/sale_loyalty/static/src/views/fields/loyalty_total/loyalty_data_field.xml:0
 msgid "Used :"
-msgstr ""
+msgstr "Utilizat :"
 
 #. module: sale_loyalty
 #. odoo-python
 #: code:addons/sale_loyalty/models/sale_order.py:0
 msgid "You don't have the required product quantities on your sales order."
-msgstr "Nu aveți cantitățile de produs necesare în comanda dvs. de vânzare."
+msgstr "Nu aveți cantitățile necesare de produse în comanda dvs. de vânzare."
 
 #. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_purchased_gift_card
@@ -557,5 +595,17 @@ msgid ""
 "You will find below your gift cards code. An email has been sent with it. "
 "You can use it starting right now."
 msgstr ""
-"Veți găsi mai jos codurile cardurilor cadou. A fost trimis un e-mail cu ele."
-" Le puteți folosi începând chiar acum."
+"Mai jos veți găsi codul cardurilor cadou. Acesta v-a fost trimis prin e-"
+"mail. Îl puteți utiliza începând chiar de acum."
+
+#. module: sale_loyalty
+#. odoo-python
+#: code:addons/sale_loyalty/models/sale_order.py:0
+msgid "order_id"
+msgstr "id_comandă"
+
+#~ msgid ""
+#~ "A minimum of %(amount)s %(currency)s should be purchased to get the reward"
+#~ msgstr ""
+#~ "Pentru a obține recompensa, trebuie achiziționată o sumă minimă de %"
+#~ "(sumă)s %(monedă)s."

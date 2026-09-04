@@ -5,18 +5,16 @@ import uuid
 import werkzeug
 
 from odoo import api, fields, models
-from odoo import tools
-from odoo.addons.website.tools import add_form_signature
-from odoo.exceptions import AccessError
-from odoo.osv import expression
+from odoo.exceptions import AccessError, MissingError
+from odoo.fields import Domain
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 
 
-class View(models.Model):
+class IrUiView(models.Model):
+    _name = 'ir.ui.view'
 
-    _name = "ir.ui.view"
     _inherit = ["ir.ui.view", "website.seo.metadata"]
 
     website_id = fields.Many2one('website', ondelete='cascade', string="Website")
@@ -50,7 +48,7 @@ class View(models.Model):
 
     def _compute_first_page_id(self):
         for view in self:
-            view.first_page_id = self.env['website.page'].search([('view_id', '=', view.id)], limit=1)
+            view.first_page_id = self.env['website.page'].search([('view_id', 'in', view.ids)], limit=1)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -81,14 +79,14 @@ class View(models.Model):
     @api.depends('website_id', 'key')
     @api.depends_context('display_key', 'display_website')
     def _compute_display_name(self):
-        if not (self._context.get('display_key') or self._context.get('display_website')):
+        if not (self.env.context.get('display_key') or self.env.context.get('display_website')):
             return super()._compute_display_name()
 
         for view in self:
             view_name = view.name
-            if self._context.get('display_key'):
+            if self.env.context.get('display_key'):
                 view_name += ' <%s>' % view.key
-            if self._context.get('display_website') and view.website_id:
+            if self.env.context.get('display_website') and view.website_id:
                 view_name += ' [%s]' % view.website_id.name
             view.display_name = view_name
 
@@ -99,7 +97,7 @@ class View(models.Model):
         '''
         current_website_id = self.env.context.get('website_id')
         if not current_website_id or self.env.context.get('no_cow'):
-            return super(View, self).write(vals)
+            return super().write(vals)
 
         # We need to consider inactive views when handling multi-website cow
         # feature (to copy inactive children views, to search for specific
@@ -107,7 +105,7 @@ class View(models.Model):
         # Website-specific views need to be updated first because they might
         # be relocated to new ids by the cow if they are involved in the
         # inheritance tree.
-        for view in self.with_context(active_test=False).sorted(key='website_id', reverse=True):
+        for view in self.with_context(active_test=False).sorted('website_id.id'):
             # Make sure views which are written in a website context receive
             # a value for their 'key' field
             if not view.key and not vals.get('key'):
@@ -117,7 +115,7 @@ class View(models.Model):
 
             # No need of COW if the view is already specific
             if view.website_id:
-                super(View, view).write(vals)
+                super(IrUiView, view).write(vals)
                 continue
 
             # Ensure the cache of the pages stay consistent when doing COW.
@@ -135,7 +133,7 @@ class View(models.Model):
                 ('website_id', '=', current_website_id)
             ], limit=1)
             if website_specific_view:
-                super(View, website_specific_view).write(vals)
+                super(IrUiView, website_specific_view).write(vals)
                 continue
 
             # Set key to avoid copy() to generate an unique key as we want the
@@ -165,7 +163,7 @@ class View(models.Model):
                     # Trigger COW on inheriting views
                     inherit_child.write({'inherit_id': website_specific_view.id})
 
-            super(View, website_specific_view).write(vals)
+            super(IrUiView, website_specific_view).write(vals)
 
         return True
 
@@ -210,16 +208,16 @@ class View(models.Model):
                 record.with_context(website_id=website_id).write({
                     'inherit_id': specific_parent_view_id,
                 })
-        super(View, self)._create_all_specific_views(processed_modules)
+        super()._create_all_specific_views(processed_modules)
 
     def unlink(self):
         '''This implements COU (copy-on-unlink). When deleting a generic page
         website-specific pages will be created so only the current
         website is affected.
         '''
-        current_website_id = self._context.get('website_id')
+        current_website_id = self.env.context.get('website_id')
 
-        if current_website_id and not self._context.get('no_cow'):
+        if current_website_id and not self.env.context.get('no_cow'):
             for view in self.filtered(lambda view: not view.website_id):
                 for w in self.env['website'].search([('id', '!=', current_website_id)]):
                     # reuse the COW mechanism to create
@@ -232,7 +230,7 @@ class View(models.Model):
             for view in self.filtered(lambda view: not view.website_id):
                 specific_views += view._get_specific_views()
 
-        result = super(View, self + specific_views).unlink()
+        result = super(IrUiView, self + specific_views).unlink()
         self.env.registry.clear_cache('templates')
         return result
 
@@ -275,74 +273,65 @@ class View(models.Model):
     def get_related_views(self, key, bundles=False):
         '''Make this only return most specific views for website.'''
         # get_related_views can be called through website=False routes
-        # (e.g. /web_editor/get_assets_editor_resources), so website
+        # (e.g. /website/get_assets_editor_resources), so website
         # dispatch_parameters may not be added. Manually set
-        # website_id. (It will then always fallback on a website, this
-        # method should never be called in a generic context, even for
-        # tests)
-        self = self.with_context(website_id=self.env['website'].get_current_website().id)
-        return super(View, self).get_related_views(key, bundles=bundles)
+        # website_id. (In the website environment, this method should
+        # never be called in a generic context, even for tests)
+        is_customization_code = self.env.context.get('is_customization_code', True)
+        current_website = self.env['website'].get_current_website(fallback=is_customization_code)
+        return super(IrUiView, self.with_context(
+            website_id=current_website.id
+        )).get_related_views(key, bundles=bundles).with_context(
+            lang=current_website.default_lang_id.code,
+        )
 
     def filter_duplicate(self):
         """ Filter current recordset only keeping the most suitable view per distinct key.
             Every non-accessible view will be removed from the set:
+
               * In non website context, every view with a website will be removed
               * In a website context, every view from another website
         """
-        current_website_id = self._context.get('website_id')
-        most_specific_views = self.env['ir.ui.view']
+        current_website_id = self.env.context.get('website_id')
         if not current_website_id:
             return self.filtered(lambda view: not view.website_id)
 
+        specific_views_keys = {view.key for view in self if view.website_id.id == current_website_id and view.key}
+        most_specific_views = []
         for view in self:
             # specific view: add it if it's for the current website and ignore
             # it if it's for another website
             if view.website_id and view.website_id.id == current_website_id:
-                most_specific_views |= view
+                most_specific_views.append(view)
             # generic view: add it only if, for the current website, there is no
             # specific view for this view (based on the same `key` attribute)
-            elif not view.website_id and not any(view.key == view2.key and view2.website_id and view2.website_id.id == current_website_id for view2 in self):
-                most_specific_views |= view
+            elif not view.website_id and view.key not in specific_views_keys:
+                most_specific_views.append(view)
 
-        return most_specific_views
+        return self.browse().union(*most_specific_views)
 
     @api.model
     def _view_get_inherited_children(self, view):
-        extensions = super(View, self)._view_get_inherited_children(view)
+        extensions = super()._view_get_inherited_children(view)
         return extensions.filter_duplicate()
 
     @api.model
-    def _view_obj(self, view_id):
-        ''' Given an xml_id or a view_id, return the corresponding view record.
-            In case of website context, return the most specific one.
-            :param view_id: either a string xml_id or an integer view_id
-            :return: The view record or empty recordset
-        '''
-        if isinstance(view_id, str) or isinstance(view_id, int):
-            return self.env['website'].viewref(view_id)
-        else:
-            # It can already be a view object when called by '_views_get()' that is calling '_view_obj'
-            # for it's inherit_children_ids, passing them directly as object record. (Note that it might
-            # be a view_id from another website but it will be filtered in 'get_related_views()')
-            return view_id if view_id._name == 'ir.ui.view' else self.env['ir.ui.view']
-
-    @api.model
     def _get_inheriting_views_domain(self):
-        domain = super(View, self)._get_inheriting_views_domain()
-        current_website = self.env['website'].browse(self._context.get('website_id'))
+        domain = super()._get_inheriting_views_domain()
+        current_website = self.env['website'].browse(self.env.context.get('website_id'))
         website_views_domain = current_website.website_domain()
         # when rendering for the website we have to include inactive views
         # we will prefer inactive website-specific views over active generic ones
         if current_website:
-            domain = [leaf for leaf in domain if 'active' not in leaf]
-        return expression.AND([website_views_domain, domain])
+            domain = domain.map_conditions(lambda cond: cond if cond.field_expr != 'active' else Domain.TRUE)
+        return website_views_domain & domain
 
     @api.model
     def _get_inheriting_views(self):
-        if not self._context.get('website_id'):
-            return super(View, self)._get_inheriting_views()
+        if not self.env.context.get('website_id'):
+            return super()._get_inheriting_views()
 
-        views = super(View, self.with_context(active_test=False))._get_inheriting_views()
+        views = super(IrUiView, self.with_context(active_test=False))._get_inheriting_views()
         # prefer inactive website-specific views over active generic ones
         return views.filter_duplicate().filtered('active')
 
@@ -350,7 +339,7 @@ class View(models.Model):
     def _get_filter_xmlid_query(self):
         """This method add some specific view that do not have XML ID
         """
-        if not self._context.get('website_id'):
+        if not self.env.context.get('website_id'):
             return super()._get_filter_xmlid_query()
         else:
             return """SELECT res_id
@@ -372,34 +361,44 @@ class View(models.Model):
                     """
 
     @api.model
-    @tools.ormcache('self.env.uid', 'self.env.su', 'xml_id', 'self._context.get("website_id")', cache='templates')
-    def _get_view_id(self, xml_id):
-        """If a website_id is in the context and the given xml_id is not an int
-        then try to get the id of the specific view for that website, but
-        fallback to the id of the generic view if there is no specific.
+    def _get_cached_template_prefetched_keys(self):
+        return super()._get_cached_template_prefetched_keys() + ['active', 'visibility', 'track']
 
-        If no website_id is in the context, it might randomly return the generic
-        or the specific view, so it's probably not recommanded to use this
-        method. `viewref` is probably more suitable.
+    @api.model
+    def _get_template_minimal_cache_keys(self):
+        return super()._get_template_minimal_cache_keys() + (self.env.context.get('website_id'),)
 
-        Archived views are ignored (unless the active_test context is set, but
-        then the ormcache will not work as expected).
+    @api.model
+    def _get_template_domain(self, xmlids):
+        """ If a website_id is in the context and the given xml_id then try
+            to get the id of the specific view for that website, but fallback
+            to the id of the generic view if there is no specific.
+            If no website_id is in the context, every view with a website will
+            be filtered out.
+
+            Archived views are ignored (unless the active_test context is set, but
+            then the ormcache will not work as expected).
         """
-        website_id = self._context.get('website_id')
-        if website_id and not isinstance(xml_id, int):
-            current_website = self.env['website'].browse(int(website_id))
-            domain = ['&', ('key', '=', xml_id)] + current_website.website_domain()
+        domain = super()._get_template_domain(xmlids)
+        return domain & Domain('website_id', 'in', (False, self.env.context.get('website_id', False)))
 
-            view = self.sudo().search(domain, order='website_id', limit=1)
-            if not view:
-                _logger.warning("Could not find view object with xml_id '%s'", xml_id)
-                raise ValueError('View %r in website %r not found' % (xml_id, self._context['website_id']))
-            return view.id
-        return super(View, self.sudo())._get_view_id(xml_id)
+    @api.model
+    def _fetch_template_views(self, ids_or_xmlids):
+        data = super()._fetch_template_views(ids_or_xmlids)
+        for key in list(data):
+            if isinstance(data[key], MissingError):
+                data[key] = MissingError(self.env._("%(error)s (website: %(website_id)s)", error=data[key], website_id=self.env.context.get('website_id')))
+        return data
 
-    @tools.ormcache('self.id', cache='templates')
+    @api.model
+    def _get_template_order(self):
+        return f"website_id asc, {super()._get_template_order()}"
+
     def _get_cached_visibility(self):
-        return self.visibility
+        info = self._get_cached_template_info(self.id, _view=self)
+        if info['error']:
+            raise info['error']
+        return info['visibility']
 
     def _handle_visibility(self, do_raise=True):
         """ Check the visibility set on the main view and raise 403 if you should not have access.
@@ -438,9 +437,17 @@ class View(models.Model):
                 return False
         return True
 
+    @api.readonly
+    @api.model
+    def render_public_asset(self, template, values=None):
+        # to get the specific asset for access checking
+        if request and hasattr(request, 'website'):
+            return super(IrUiView, self.with_context(website_id=request.website.id)).render_public_asset(template, values=values)
+        return super().render_public_asset(template, values=values)
+
     def _render_template(self, template, values=None):
         """ Render the template. If website is enabled on request, then extend rendering context with website values. """
-        view = self._get(template).sudo()
+        view = self._get_template_view(template).sudo()
         view._handle_visibility(do_raise=True)
         if values is None:
             values = {}
@@ -455,14 +462,14 @@ class View(models.Model):
             lang_code = self.env['website'].browse(website_id).default_lang_id.code
             return lang_code
         else:
-            return super(View, self).get_default_lang_code()
+            return super().get_default_lang_code()
 
     def _read_template_keys(self):
-        return super(View, self)._read_template_keys() + ['website_id']
+        return super()._read_template_keys() + ['website_id']
 
     @api.model
     def _save_oe_structure_hook(self):
-        res = super(View, self)._save_oe_structure_hook()
+        res = super()._save_oe_structure_hook()
         res['website_id'] = self.env['website'].get_current_website().id
         return res
 
@@ -472,8 +479,8 @@ class View(models.Model):
         actually write on the specific view (or create it if not exist yet).
         In that case, we don't want to flag the generic view as noupdate.
         '''
-        if not self._context.get('website_id'):
-            super(View, self)._set_noupdate()
+        if not self.env.context.get('website_id'):
+            super()._set_noupdate()
 
     def save(self, value, xpath=None):
         self.ensure_one()
@@ -491,20 +498,25 @@ class View(models.Model):
             ], limit=1)
             if website_specific_view:
                 self = website_specific_view
-        super(View, self).save(value, xpath=xpath)
+        if self.env.context.get('delay_translations'):
+            disable_delay_translations = self.env['ir.config_parameter'].sudo().get_param(
+                'website.disable_delay_translations'
+            ) not in ('False', '0', '', False)
+            self.env = self.with_context(delay_translations=not disable_delay_translations).env
+        super().save(value, xpath=xpath)
 
     @api.model
     def _get_allowed_root_attrs(self):
         # Related to these options:
-        # background-video, background-shapes, parallax
+        # background-video, background-shapes, parallax, visibility
         return super()._get_allowed_root_attrs() + [
             'data-bg-video-src', 'data-shape', 'data-scroll-background-ratio',
+            'data-visibility', 'data-visibility-id', 'data-visibility-selectors',
+        ] + [
+            'data-visibility-value-' + param + suffix
+            for param in ('country', 'lang', 'logged', 'utm-campaign', 'utm-medium', 'utm-source')
+            for suffix in ('', '-rule')
         ]
-
-    def _get_combined_arch(self):
-        root = super()._get_combined_arch()
-        add_form_signature(root, self.sudo().env)
-        return root
 
     # --------------------------------------------------------------------------
     # Snippet saving
@@ -518,8 +530,8 @@ class View(models.Model):
             res['website_id'] = website_id
         return res
 
-    def _update_field_translations(self, fname, translations, digest=None, source_lang=None):
-        return super(View, self.with_context(no_cow=True))._update_field_translations(fname, translations, digest=digest, source_lang=source_lang)
+    def _update_field_translations(self, field_name, translations, digest=None, source_lang=''):
+        return super(IrUiView, self.with_context(no_cow=True))._update_field_translations(field_name, translations, digest=digest, source_lang=source_lang)
 
     def _get_base_lang(self):
         """ Returns the default language of the website as the base language if the record is bound to it """

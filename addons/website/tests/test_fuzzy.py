@@ -1,14 +1,17 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
-from lxml import etree
 import re
+
+from lxml import etree
 from markupsafe import Markup
 
-from odoo.addons.website.controllers.main import Website
-from odoo.addons.website.tools import distance, MockRequest
 import odoo.tests
 from odoo.tests.common import TransactionCase
+
+from odoo.addons.website.controllers.main import Website
+from odoo.addons.http_routing.tests.common import MockRequest
+from odoo.addons.website.tools import distance
 
 _logger = logging.getLogger(__name__)
 
@@ -162,7 +165,7 @@ class TestAutoComplete(TransactionCase):
 
     def _check_highlight(self, term, value):
         """ Verifies if a term is highlighted in a value """
-        self.assertTrue(f'<span class="text-primary text-primary-emphasis">{term}</span>' in value.lower(),
+        self.assertTrue(f'<span class="text-primary-emphasis">{term}</span>' in value.lower(),
                         "Term must be highlighted")
 
     def test_01_few_results(self):

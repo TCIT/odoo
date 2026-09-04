@@ -1,12 +1,12 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
 import os
+import pytz
 
 from odoo import _, api, fields, models, SUPERUSER_ID
-from odoo.addons.event.tools.esc_label_tools import print_event_attendees, setup_printer, layout_96x82, layout_96x134
-from odoo.tools import email_normalize, email_normalize_all
-from odoo.exceptions import AccessError, ValidationError
+from odoo.fields import Domain
+from odoo.tools import email_normalize, format_date, formataddr
+from odoo.exceptions import ValidationError
 _logger = logging.getLogger(__name__)
 
 
@@ -15,6 +15,7 @@ class EventRegistration(models.Model):
     _description = 'Event Registration'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'id desc'
+    _mail_defaults_to_email = True
 
     @api.model
     def _get_random_barcode(self):
@@ -31,9 +32,13 @@ class EventRegistration(models.Model):
 
     # event
     event_id = fields.Many2one(
-        'event.event', string='Event', required=True)
+        'event.event', string='Event', required=True, tracking=True, index=True)
+    is_multi_slots = fields.Boolean(string="Is Event Multi Slots", related="event_id.is_multi_slots")
+    event_slot_id = fields.Many2one(
+        "event.slot", string="Slot", ondelete='restrict', tracking=True, index="btree_not_null",
+        domain="[('event_id', '=', event_id)]")
     event_ticket_id = fields.Many2one(
-        'event.event.ticket', string='Ticket Type', ondelete='restrict')
+        'event.event.ticket', string='Ticket Type', ondelete='restrict', tracking=True, index='btree_not_null')
     active = fields.Boolean(default=True)
     barcode = fields.Char(string='Barcode', default=lambda self: self._get_random_barcode(), readonly=True, copy=False)
     # utm informations
@@ -41,7 +46,7 @@ class EventRegistration(models.Model):
     utm_source_id = fields.Many2one('utm.source', 'Source', index=True, ondelete='set null')
     utm_medium_id = fields.Many2one('utm.medium', 'Medium', index=True, ondelete='set null')
     # attendee
-    partner_id = fields.Many2one('res.partner', string='Booked by', tracking=1)
+    partner_id = fields.Many2one('res.partner', string='Booked by', tracking=1, index='btree_not_null')
     name = fields.Char(
         string='Attendee Name', index='trigram',
         compute='_compute_name', readonly=False, store=True, tracking=2)
@@ -53,8 +58,8 @@ class EventRegistration(models.Model):
     date_closed = fields.Datetime(
         string='Attended Date', compute='_compute_date_closed',
         readonly=False, store=True)
-    event_begin_date = fields.Datetime(string="Event Start Date", related='event_id.date_begin', readonly=True)
-    event_end_date = fields.Datetime(string="Event End Date", related='event_id.date_end', readonly=True)
+    event_begin_date = fields.Datetime("Event Start Date", compute="_compute_event_begin_date", search="_search_event_begin_date")
+    event_end_date = fields.Datetime("Event End Date", compute="_compute_event_end_date", search="_search_event_end_date")
     event_date_range = fields.Char("Date Range", compute="_compute_date_range")
     event_organizer_id = fields.Many2one(string='Event Organizer', related='event_id.organizer_id', readonly=True)
     event_user_id = fields.Many2one(string='Event Responsible', related='event_id.user_id', readonly=True)
@@ -84,16 +89,24 @@ class EventRegistration(models.Model):
     registration_properties = fields.Properties(
         'Properties', definition='event_id.registration_properties_definition', copy=True)
 
-    _sql_constraints = [
-        ('barcode_event_uniq', 'unique(barcode)', "Barcode should be unique")
-    ]
+    _barcode_event_uniq = models.Constraint(
+        'unique(barcode)',
+        'Barcode should be unique',
+    )
 
-    @api.constrains('state', 'event_id', 'event_ticket_id')
+    @api.constrains('active', 'state', 'event_id', 'event_slot_id', 'event_ticket_id')
     def _check_seats_availability(self):
-        registrations_confirmed = self.filtered(lambda registration: registration.state in ('open', 'done'))
-        registrations_confirmed.event_id._check_seats_availability()
-        registrations_confirmed.event_ticket_id._check_seats_availability()
+        tocheck = self.filtered(lambda registration: registration.state in ('open', 'done') and registration.active)
+        for event, registrations in tocheck.grouped('event_id').items():
+            event._verify_seats_availability([
+                (slot, ticket, 0)
+                for slot, ticket in self.env['event.registration']._read_group(
+                    [('id', 'in', registrations.ids)],
+                    ['event_slot_id', 'event_ticket_id']
+                )
+            ])
 
+    @api.model
     def default_get(self, fields):
         ret_vals = super().default_get(fields)
         utm_mixin_fields = ("campaign_id", "medium_id", "source_id")
@@ -130,9 +143,9 @@ class EventRegistration(models.Model):
             if not registration.phone and registration.partner_id:
                 partner_values = registration._synchronize_partner_values(
                     registration.partner_id,
-                    fnames={'phone', 'mobile'},
+                    fnames={'phone'},
                 )
-                registration.phone = partner_values.get('phone') or partner_values.get('mobile') or False
+                registration.phone = partner_values.get('phone') or False
 
     @api.depends('partner_id')
     def _compute_company_name(self):
@@ -152,10 +165,44 @@ class EventRegistration(models.Model):
                 else:
                     registration.date_closed = False
 
-    @api.depends("event_id", "partner_id")
+    @api.depends("event_id", "event_slot_id", "partner_id")
     def _compute_date_range(self):
         for registration in self:
-            registration.event_date_range = registration.event_id._get_date_range_str(registration.partner_id.lang)
+            registration.event_date_range = registration.event_id._get_date_range_str(
+                start_datetime=registration.event_slot_id.start_datetime,
+                lang_code=registration.partner_id.lang,
+            )
+
+    @api.depends("event_id", "event_slot_id")
+    def _compute_event_begin_date(self):
+        for registration in self:
+            registration.event_begin_date = registration.event_slot_id.start_datetime or registration.event_id.date_begin
+
+    @api.model
+    def _search_event_begin_date(self, operator, value):
+        return Domain.OR([
+            ["&", ("event_slot_id", "!=", False), ("event_slot_id.start_datetime", operator, value)],
+            ["&", ("event_slot_id", "=", False), ("event_id.date_begin", operator, value)],
+        ])
+
+    @api.depends("event_id", "event_slot_id")
+    def _compute_event_end_date(self):
+        for registration in self:
+            registration.event_end_date = registration.event_slot_id.end_datetime or registration.event_id.date_end
+
+    @api.model
+    def _search_event_end_date(self, operator, value):
+        return Domain.OR([
+            ["&", ("event_slot_id", "!=", False), ("event_slot_id.end_datetime", operator, value)],
+            ["&", ("event_slot_id", "=", False), ("event_id.date_end", operator, value)],
+        ])
+
+    @api.constrains('event_id', 'event_slot_id')
+    def _check_event_slot(self):
+        if any(registration.event_id != registration.event_slot_id.event_id for registration in self if registration.event_slot_id):
+            raise ValidationError(_('Invalid event / slot choice'))
+        if any(not registration.event_slot_id for registration in self if registration.is_multi_slots):
+            raise ValidationError(_('Slot choice is mandatory on multi-slots events.'))
 
     @api.constrains('event_id', 'event_ticket_id')
     def _check_event_ticket(self):
@@ -164,13 +211,20 @@ class EventRegistration(models.Model):
 
     def _synchronize_partner_values(self, partner, fnames=None):
         if fnames is None:
-            fnames = {'name', 'email', 'phone', 'mobile'}
+            fnames = {'name', 'email', 'phone'}
         if partner:
             contact_id = partner.address_get().get('contact', False)
             if contact_id:
                 contact = self.env['res.partner'].browse(contact_id)
                 return dict((fname, contact[fname]) for fname in fnames if contact[fname])
         return {}
+
+    @api.onchange('event_id')
+    def _onchange_event(self):
+        if self.event_slot_id and self.event_id != self.event_slot_id.event_id:
+            self.event_slot_id = False
+        if self.event_ticket_id and self.event_id != self.event_ticket_id.event_id:
+            self.event_ticket_id = False
 
     @api.onchange('phone', 'event_id', 'partner_id')
     def _onchange_phone_validation(self):
@@ -223,7 +277,7 @@ class EventRegistration(models.Model):
                 related_country = self.env.company.country_id
             values['phone'] = self._phone_format(number=values['phone'], country=related_country) or values['phone']
 
-        registrations = super(EventRegistration, self).create(vals_list)
+        registrations = super().create(vals_list)
         registrations._update_mail_schedulers()
         return registrations
 
@@ -231,9 +285,13 @@ class EventRegistration(models.Model):
         confirming = vals.get('state') in {'open', 'done'}
         to_confirm = (self.filtered(lambda registration: registration.state in {'draft', 'cancel'})
                       if confirming else None)
-        ret = super(EventRegistration, self).write(vals)
+        ret = super().write(vals)
         if confirming:
             to_confirm._update_mail_schedulers()
+
+        if vals.get('state') == 'done':
+            message = _("Attended on %(attended_date)s", attended_date=format_date(env=self.env, value=fields.Datetime.now(), date_format='short'))
+            self._message_log_batch(bodies={registration.id: message for registration in self})
 
         return ret
 
@@ -242,15 +300,6 @@ class EventRegistration(models.Model):
         """
         for registration in self:
             registration.display_name = registration.name or f"#{registration.id}"
-
-    def toggle_active(self):
-        pre_inactive = self - self.filtered(self._active_name)
-        super().toggle_active()
-        # Necessary triggers as changing registration states cannot be used as triggers for the
-        # Event(Ticket) models constraints.
-        if pre_inactive:
-            pre_inactive.event_id._check_seats_availability()
-            pre_inactive.event_ticket_id._check_seats_availability()
 
     # ------------------------------------------------------------
     # ACTIONS / BUSINESS
@@ -281,7 +330,6 @@ class EventRegistration(models.Model):
             default_res_ids=self.ids,
             default_template_id=template.id if template else False,
             default_composition_mode='comment',
-            default_email_layout_xmlid="mail.mail_notification_light",
         )
         return {
             'name': _('Compose Email'),
@@ -317,7 +365,7 @@ class EventRegistration(models.Model):
 
         # either trigger the cron, either run schedulers immediately (scaling choice)
         async_scheduler = self.env['ir.config_parameter'].sudo().get_param('event.event_mail_async')
-        if async_scheduler:
+        if async_scheduler or self.env.context.get('import_file'):
             self.env.ref('event.event_mail_scheduler')._trigger()
             self.env.ref('mail.ir_cron_mail_scheduler_action')._trigger()
         else:
@@ -331,11 +379,19 @@ class EventRegistration(models.Model):
                     ).with_user(SUPERUSER_ID).execute()
                 except Exception as e:
                     _logger.exception("Failed to run scheduler %s", scheduler.id)
-                    self.env["event.mail"]._warn_template_error(scheduler, e)
+                    scheduler._warn_error(e)
 
     # ------------------------------------------------------------
     # MAILING / GATEWAY
     # ------------------------------------------------------------
+
+    @api.model
+    def _mail_template_default_values(self):
+        return {
+            "email_from": "{{ (object.event_id.organizer_id.email_formatted or object.event_id.company_id.email_formatted or user.email_formatted or '') }}",
+            "lang": "{{ object.event_id.lang or object.partner_id.lang }}",
+            "use_default_to": True,
+        }
 
     def _message_compute_subject(self):
         if self.name:
@@ -350,32 +406,17 @@ class EventRegistration(models.Model):
             registration_id=self.id,
         )
 
-    def _message_get_suggested_recipients(self):
-        recipients = super()._message_get_suggested_recipients()
-        public_users = self.env['res.users'].sudo()
-        public_groups = self.env.ref("base.group_public", raise_if_not_found=False)
-        if public_groups:
-            public_users = public_groups.sudo().with_context(active_test=False).mapped("users")
-        try:
-            is_public = self.sudo().with_context(active_test=False).partner_id.user_ids in public_users if public_users else False
-            if self.partner_id and not is_public:
-                self._message_add_suggested_recipient(recipients, partner=self.partner_id, reason=_('Customer'))
-            elif self.email:
-                self._message_add_suggested_recipient(recipients, email=self.email, reason=_('Customer Email'))
-        except AccessError:     # no read access rights -> ignore suggested recipients
-            pass
-        return recipients
-
-    def _message_get_default_recipients(self):
+    def _message_add_default_recipients(self):
         # Prioritize registration email over partner_id, which may be shared when a single
         # partner booked multiple seats
-        return {r.id:
-            {
-                'partner_ids': [],
-                'email_to': ','.join(email_normalize_all(r.email)) or r.email,
-                'email_cc': False,
-            } for r in self
-        }
+        results = super()._message_add_default_recipients()
+        for record in self:
+            email_to_lst = results[record.id]['email_to_lst']
+            if len(email_to_lst) == 1:
+                email_normalized = email_normalize(email_to_lst[0])
+                if email_normalized and email_normalized == email_normalize(record.email):
+                    results[record.id]['email_to_lst'] = [formataddr((record.name or "", email_normalized))]
+        return results
 
     def _message_post_after_hook(self, message, msg_vals):
         if self.email and not self.partner_id:
@@ -402,48 +443,25 @@ class EventRegistration(models.Model):
 
     def _get_registration_summary(self):
         self.ensure_one()
-        if self.event_id.badge_format in ["96x82", "96x134"] and self.env.get("iot.device") is not None:
-            badge_printers = self.env["iot.device"].search([("subtype", "=", "label_printer")])
-            iot_printers = badge_printers.mapped(lambda printer: {
-                "id": printer.id,
-                "name": printer.name,
-                "identifier": printer.identifier,
-                "iotIdentifier": printer.iot_id.identifier,
-                "ip": printer.iot_id.ip,
-                "ipUrl": printer.iot_id.ip_url
-            })
-        else:
-            iot_printers = []
+
+        is_date_closed_today = False
+        if self.date_closed:
+            event_tz = pytz.timezone(self.event_id.date_tz)
+            now = fields.Datetime.now(pytz.UTC).astimezone(event_tz)
+            closed_date = self.date_closed.astimezone(event_tz)
+            is_date_closed_today = now.date() == closed_date.date()
+
         return {
             'id': self.id,
             'name': self.name,
             'partner_id': self.partner_id.id,
+            'slot_name': self.event_slot_id.display_name,
             'ticket_name': self.event_ticket_id.name,
             'event_id': self.event_id.id,
             'event_display_name': self.event_id.display_name,
             'registration_answers': self.registration_answer_ids.filtered('value_answer_id').mapped('display_name'),
             'company_name': self.company_name,
-            'iot_printers': iot_printers,
-            'badge_format': self.event_id.badge_format
+            'badge_format': self.event_id.badge_format,
+            'date_closed_formatted': format_date(env=self.env, value=self.date_closed, date_format='short') if self.date_closed else False,
+            'is_date_closed_today': is_date_closed_today,
         }
-
-    def _get_registration_print_details(self):
-        return {
-            'name': self.name,
-            'ticket_name': self.event_ticket_id.name if self.event_ticket_id else None,
-            'ticket_color': self.event_ticket_id.color if self.event_ticket_id else None,
-            'ticket_text_color': self.event_ticket_id._get_ticket_printing_color() if self.event_ticket_id else None,
-            'registration_answers': self.registration_answer_choice_ids.mapped('display_name'),
-            'company_name': self.company_name
-        }
-
-    def _generate_esc_label_badges(self, is_small_badge: bool):
-        badge_layout = layout_96x82 if is_small_badge else layout_96x134
-        command = setup_printer(badge_layout)
-
-        attendees_per_event = self.grouped("event_id").items()
-        for (event, attendees) in attendees_per_event:
-            attendees_details = attendees.mapped(lambda attendee: attendee._get_registration_print_details())
-            command.concat(print_event_attendees(event._get_event_print_details(), attendees_details, badge_layout))
-
-        return command.to_string()

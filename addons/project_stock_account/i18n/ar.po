@@ -1,37 +1,40 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* project_stock_account
-# 
-# Translators:
-# Malaz Abuidris <msea@odoo.com>, 2024
-# Wil Odoo, 2024
-# 
+# * project_stock_account
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-29 00:00+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-07 00:25+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-19/"
+"project_stock_account/ar/>\n"
+"Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ar\n"
-"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: project_stock_account
 #. odoo-python
 #: code:addons/project_stock_account/models/stock_move.py:0
 msgid ""
-"'%(missing_plan_names)s' analytic plan(s) required on the project "
-"'%(project_name)s' linked to the stock picking."
+"'%(missing_plan_names)s' analytic plan(s) required on the project '%"
+"(project_name)s' linked to the stock picking."
 msgstr ""
+"الخطط التحليلية '%(missing_plan_names)s' المطلوبة في المشروع '%(project_name)"
+"s' المرتبطة بعمليات انتقاء المخزون."
 
 #. module: project_stock_account
 #: model:ir.model.fields,field_description:project_stock_account.field_stock_picking_type__analytic_costs
 msgid "Analytic Costs"
-msgstr "التكاليف التحليلية "
+msgstr "التكاليف التحليلية"
 
 #. module: project_stock_account
 #: model:ir.model,name:project_stock_account.model_account_analytic_line
@@ -41,12 +44,21 @@ msgstr "البند التحليلي"
 #. module: project_stock_account
 #: model:ir.model,name:project_stock_account.model_account_analytic_applicability
 msgid "Analytic Plan's Applicabilities"
-msgstr "إمكانية تطبيق الخطة التحليلية "
+msgstr "إمكانية تطبيق الخطة التحليلية"
 
 #. module: project_stock_account
 #: model:ir.model.fields,field_description:project_stock_account.field_account_analytic_line__category
 msgid "Category"
-msgstr "الفئة "
+msgstr "الفئة"
+
+#. module: project_stock_account
+#: model:ir.model.fields,field_description:project_stock_account.field_account_analytic_applicability__display_name
+#: model:ir.model.fields,field_description:project_stock_account.field_account_analytic_line__display_name
+#: model:ir.model.fields,field_description:project_stock_account.field_project_project__display_name
+#: model:ir.model.fields,field_description:project_stock_account.field_stock_move__display_name
+#: model:ir.model.fields,field_description:project_stock_account.field_stock_picking_type__display_name
+msgid "Display Name"
+msgstr "اسم العرض"
 
 #. module: project_stock_account
 #: model:ir.model.fields,field_description:project_stock_account.field_account_analytic_applicability__business_domain
@@ -54,9 +66,18 @@ msgid "Domain"
 msgstr "النطاق"
 
 #. module: project_stock_account
+#: model:ir.model.fields,field_description:project_stock_account.field_account_analytic_applicability__id
+#: model:ir.model.fields,field_description:project_stock_account.field_account_analytic_line__id
+#: model:ir.model.fields,field_description:project_stock_account.field_project_project__id
+#: model:ir.model.fields,field_description:project_stock_account.field_stock_move__id
+#: model:ir.model.fields,field_description:project_stock_account.field_stock_picking_type__id
+msgid "ID"
+msgstr "المُعرف"
+
+#. module: project_stock_account
 #: model:ir.model.fields.selection,name:project_stock_account.selection__account_analytic_line__category__picking_entry
 msgid "Inventory Transfer"
-msgstr ""
+msgstr "عملية نقل المخزون"
 
 #. module: project_stock_account
 #. odoo-python
@@ -67,7 +88,7 @@ msgstr "المواد"
 #. module: project_stock_account
 #: model:ir.model,name:project_stock_account.model_stock_picking_type
 msgid "Picking Type"
-msgstr "نوع الانتقاء "
+msgstr "نوع الانتقاء"
 
 #. module: project_stock_account
 #: model:ir.model,name:project_stock_account.model_project_project
@@ -82,7 +103,7 @@ msgstr "حركة المخزون"
 #. module: project_stock_account
 #: model:ir.model.fields.selection,name:project_stock_account.selection__account_analytic_applicability__business_domain__stock_picking
 msgid "Stock Picking"
-msgstr "انتقاء المخزون "
+msgstr "انتقاء المخزون"
 
 #. module: project_stock_account
 #: model:ir.model.fields,help:project_stock_account.field_stock_picking_type__analytic_costs
@@ -90,3 +111,5 @@ msgid ""
 "Validating stock pickings will generate analytic entries for the selected "
 "project. Products set for re-invoicing will also be billed to the customer."
 msgstr ""
+"سيؤدي التصديق على عمليات انتقاء المخزون إلى إنشاء قيود تحليلية للمشروع "
+"المحدد. كما سيتم إصدار فواتير للمنتجات المحددة لإعادة فوترتها للعميل."

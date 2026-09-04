@@ -8,7 +8,7 @@
     'website': 'https://www.odoo.com/app/blog',
     'summary': 'Publish blog posts, announces, news',
     'version': '1.1',
-    'depends': ['website_mail', 'website_partner'],
+    'depends': ['website_mail', 'website_partner', 'html_builder'],
     'data': [
         'data/mail_message_subtype_data.xml',
         'data/mail_templates.xml',
@@ -32,25 +32,32 @@
     ],
     'installable': True,
     'assets': {
-        'website.assets_wysiwyg': [
-            'website_blog/static/src/js/options.js',
-            'website_blog/static/src/snippets/s_blog_posts/options.js',
-        ],
-        'website.assets_editor': [
-            'website_blog/static/src/js/tours/website_blog.js',
-            'website_blog/static/src/js/systray_items/*.js',
-        ],
-        'website.backend_assets_all_wysiwyg': [
-            'website_blog/static/src/js/wysiwyg_adapter.js',
+        'web.assets_backend': [
+            'website_blog/static/src/tours/website_blog.js',
         ],
         'web.assets_tests': [
-            'website_blog/static/tests/**/*',
+            'website_blog/static/tests/tours/**/*',
+        ],
+        'web.assets_unit_tests': [
+            'website_blog/static/tests/interactions/**/*',
+            'website_blog/static/tests/website_builder/**/*',
+        ],
+        'web.assets_unit_tests_setup': [
+            'website_blog/static/src/interactions/**/*.js',
+            'website_blog/static/src/snippets/**/*.js',
         ],
         'web.assets_frontend': [
+            'website_blog/static/src/interactions/**/*',
             'website_blog/static/src/scss/website_blog.scss',
-            'website_blog/static/src/js/contentshare.js',
-            'website_blog/static/src/js/website_blog.js',
+            'website_blog/static/src/snippets/**/*.js',
+        ],
+        'website.assets_editor': [
+            'website_blog/static/src/js/systray_items/*.js',
+        ],
+        'website.website_builder_assets': [
+            'website_blog/static/src/website_builder/**/*',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

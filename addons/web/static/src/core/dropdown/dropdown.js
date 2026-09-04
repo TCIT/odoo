@@ -18,8 +18,10 @@ import { mergeClasses } from "@web/core/utils/classname";
 import { useChildRef, useService } from "@web/core/utils/hooks";
 import { deepMerge } from "@web/core/utils/objects";
 import { effect } from "@web/core/utils/reactive";
+import { utils } from "@web/core/ui/ui_service";
+import { hasTouch } from "@web/core/browser/feature_detection";
 
-function getFirstElementOfNode(node) {
+export function getFirstElementOfNode(node) {
     if (!node) {
         return null;
     }
@@ -52,7 +54,6 @@ export class Dropdown extends Component {
     static template = xml`<t t-slot="default"/>`;
     static components = {};
     static props = {
-        arrow: { optional: true },
         menuClass: { optional: true },
         position: { type: String, optional: true },
         slots: {
@@ -80,6 +81,7 @@ export class Dropdown extends Component {
         menuRef: { type: Function, optional: true }, // to be used with useChildRef
         disabled: { type: Boolean, optional: true },
         holdOnHover: { type: Boolean, optional: true },
+        focusToggleOnClosed: { type: Boolean, optional: true },
 
         beforeOpen: { type: Function, optional: true },
         onOpened: { type: Function, optional: true },
@@ -98,19 +100,25 @@ export class Dropdown extends Component {
         },
         manual: { type: Boolean, optional: true },
 
+        /** When true, do not add optional styling css classes on the target*/
+        noClasses: { type: Boolean, optional: true },
+
         /**
          * Override the internal navigation hook options
          * @type {import("@web/core/navigation/navigation").NavigationOptions}
          */
         navigationOptions: { type: Object, optional: true },
+        bottomSheet: { type: Boolean, optional: true },
     };
     static defaultProps = {
-        arrow: false,
         disabled: false,
         holdOnHover: false,
+        focusToggleOnClosed: true,
         menuClass: "",
         state: undefined,
+        noClasses: false,
         navigationOptions: {},
+        bottomSheet: true,
     };
 
     setup() {
@@ -119,31 +127,30 @@ export class Dropdown extends Component {
         this.state = this.props.state || useDropdownState();
         this.nesting = useDropdownNesting(this.state);
         this.group = useDropdownGroup();
+
         this.navigation = useNavigation(this.menuRef, {
-            focusInitialElementOnDisabled: () => !this.group.isInGroup,
-            itemsSelector: ":scope .o-navigable, :scope .o-dropdown",
+            shouldRegisterHotkeys: false,
+            isNavigationAvailable: () => this.state.isOpen,
+            getItems: () => {
+                if (this.state.isOpen && this.menuRef.el) {
+                    return this.menuRef.el.querySelectorAll(
+                        ":scope .o-navigable, :scope .o-dropdown"
+                    );
+                } else {
+                    return [];
+                }
+            },
             // Using deepMerge allows to keep entries of both option.hotkeys
             ...deepMerge(this.nesting.navigationOptions, this.props.navigationOptions),
         });
 
-        // Set up UI active element related behavior ---------------------------
-        let activeEl;
         this.uiService = useService("ui");
-        useEffect(
-            () => {
-                Promise.resolve().then(() => {
-                    activeEl = this.uiService.activeElement;
-                });
-            },
-            () => []
-        );
 
-        this.popover = usePopover(DropdownPopover, {
+        const getPosition = () => this.position;
+        const options = {
             animation: false,
-            arrow: this.props.arrow,
-            closeOnClickAway: (target) => {
-                return this.popoverCloseOnClickAway(target, activeEl);
-            },
+            arrow: false,
+            closeOnClickAway: (target) => this.popoverCloseOnClickAway(target),
             closeOnEscape: false, // Handled via navigation and prevents closing root of nested dropdown
             env: this.__owl__.childEnv,
             holdOnHover: this.props.holdOnHover,
@@ -154,11 +161,20 @@ export class Dropdown extends Component {
                 { "o-dropdown--menu-submenu": this.hasParent },
                 this.props.menuClass
             ),
-            popoverRole: "menu",
-            position: this.position,
+            role: "menu",
+            get position() {
+                return getPosition();
+            },
             ref: this.menuRef,
             setActiveElement: false,
-        });
+        };
+        if (this.isBottomSheet) {
+            Object.assign(options, {
+                useBottomSheet: true,
+                class: mergeClasses("o-dropdown--menu dropdown-menu show", this.props.menuClass),
+            });
+        }
+        this.popover = usePopover(DropdownPopover, options);
 
         // As the popover is in another context we need to force
         // its re-rendering when the dropdown re-renders
@@ -177,6 +193,10 @@ export class Dropdown extends Component {
                 this.closePopover();
             }
         });
+    }
+
+    get isBottomSheet() {
+        return utils.isSmall() && hasTouch() && this.props.bottomSheet;
     }
 
     /** @type {string} */
@@ -231,8 +251,12 @@ export class Dropdown extends Component {
         }
     }
 
-    popoverCloseOnClickAway(target, activeEl) {
-        return this.uiService.getActiveElementOf(target) === activeEl;
+    popoverCloseOnClickAway(target) {
+        const rootNode = target.getRootNode();
+        if (rootNode instanceof ShadowRoot) {
+            target = rootNode.host;
+        }
+        return this.uiService.getActiveElementOf(target) === this.activeEl;
     }
 
     setTargetElement(target) {
@@ -241,22 +265,30 @@ export class Dropdown extends Component {
         }
 
         target.ariaExpanded = false;
-        target.classList.add("o-dropdown");
+        const optionalClasses = [];
+        const requiredClasses = [];
+        optionalClasses.push("o-dropdown");
 
         if (this.hasParent) {
-            target.classList.add("o-dropdown--has-parent");
+            requiredClasses.push("o-dropdown--has-parent");
         }
 
         const tagName = target.tagName.toLowerCase();
         if (!["input", "textarea", "table", "thead", "tbody", "tr", "th", "td"].includes(tagName)) {
-            target.classList.add("dropdown-toggle");
+            optionalClasses.push("dropdown-toggle");
             if (this.hasParent) {
-                target.classList.add("o-dropdown-item", "o-navigable", "dropdown-item");
+                optionalClasses.push("o-dropdown-item", "dropdown-item");
+                requiredClasses.push("o-navigable");
 
                 if (!target.classList.contains("o-dropdown--no-caret")) {
-                    target.classList.add("o-dropdown-caret");
+                    requiredClasses.push("o-dropdown-caret");
                 }
             }
+        }
+
+        target.classList.add(...requiredClasses);
+        if (!this.props.noClasses) {
+            target.classList.add(...optionalClasses);
         }
 
         this.defaultDirection = this.position.split("-")[0];
@@ -274,7 +306,7 @@ export class Dropdown extends Component {
     }
 
     setTargetDirectionClass(direction) {
-        if (!this.target) {
+        if (!this.target || this.props.noClasses) {
             return;
         }
         const directionClasses = {
@@ -310,11 +342,17 @@ export class Dropdown extends Component {
 
     closePopover() {
         this.popover.close();
-        this.navigation.disable();
+        if (this.props.focusToggleOnClosed && !this.group.isInGroup) {
+            this._focusedElBeforeOpen?.focus();
+            this._focusedElBeforeOpen = undefined;
+        }
     }
 
     onOpened() {
-        this.navigation.enable();
+        this._focusedElBeforeOpen = document.activeElement;
+        this.activeEl = this.uiService.activeElement;
+        this.navigation.registerHotkeys();
+        this.navigation.update();
         this.props.onOpened?.();
         this.props.onStateChanged?.(true);
 
@@ -322,15 +360,32 @@ export class Dropdown extends Component {
             this.target.ariaExpanded = true;
             this.target.classList.add("show");
         }
+
+        const menuEl = this.menuRef.el;
+        if (menuEl) {
+            this.observer = new MutationObserver(() => this.navigation.update());
+            this.observer.observe(menuEl, {
+                childList: true,
+                subtree: true,
+            });
+        }
     }
 
     onClosed() {
+        this.navigation.unregisterHotkeys();
+        this.navigation.update();
         this.props.onStateChanged?.(false);
+        delete this.activeEl;
 
         if (this.target) {
             this.target.ariaExpanded = false;
             this.target.classList.remove("show");
             this.setTargetDirectionClass(this.defaultDirection);
+        }
+
+        if (this.observer) {
+            this.observer.disconnect();
+            this.observer = null;
         }
     }
 }

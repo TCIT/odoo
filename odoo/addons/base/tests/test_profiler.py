@@ -3,8 +3,10 @@
 import sys
 import time
 
+from unittest.mock import patch
+
 from odoo.exceptions import AccessError
-from odoo.tests.common import BaseCase, TransactionCase, tagged, new_test_user
+from odoo.tests.common import BaseCase, TransactionCase, tagged, new_test_user, HttpCase
 from odoo.tools import profiler
 from odoo.tools.profiler import Profiler, ExecutionContext
 from odoo.tools.speedscope import Speedscope
@@ -113,7 +115,6 @@ class TestSpeedscope(BaseCase):
     def test_converts_profile_no_end(self):
         profile = self.example_profile()
         profile['result'].pop()
-
         sp = Speedscope(init_stack_trace=profile['init_stack_trace'])
         sp.add('profile', profile['result'])
         sp.add_output(['profile'], complete=False)
@@ -206,6 +207,49 @@ class TestSpeedscope(BaseCase):
                 (10.35, 'C', 'do_stuff1'),
             (10.35, 'C', 'main'),
         ])
+
+    def test_following_queries_dont_merge(self):
+        sql_profile = self.example_profile()['result']
+        stack = sql_profile[1]['stack']
+        # make sql_profile two frames, separataed by some time
+        sql_profile = [
+            {
+                'start': 0.0,
+                'time': 1,
+                'query': 'SELECT 1',
+                'full_query': 'SELECT 1',
+                'stack': stack[:]
+            },
+            {
+                'start': 10.0,
+                'time': 1,
+                'query': 'SELECT 1',
+                'full_query': 'SELECT 1',
+                'stack': stack[:]
+            }
+        ]
+        sp = Speedscope(init_stack_trace=[])
+        sp.add('sql', sql_profile)
+        sp.add_output(['sql'], complete=False, hide_gaps=True)
+        res = sp.make()
+        sql_output = res['profiles'][0]
+        events = [
+            (e['at'], e['type'], res['shared']['frames'][e['frame']]['name'])
+            for e in sql_output['events']
+        ]
+        self.assertEqual(events, [
+            # pylint: disable=bad-continuation
+            (0.0, 'O', 'main'),
+                (0.0, 'O', 'do_stuff1'),
+                    (0.0, 'O', 'execute'),
+                        (0.0, 'O', "sql('SELECT 1')"),
+                        (2.0, 'C', "sql('SELECT 1')"),
+                    (2.0, 'C', 'execute'),
+                (2.0, 'C', 'do_stuff1'),
+            (2.0, 'C', 'main'),
+        ])
+
+
 
     def test_converts_context(self):
         stack = [
@@ -528,6 +572,17 @@ class TestProfiling(TransactionCase):
         self.assertEqual(first_query['stack'][-1][2], 'execute')
         self.assertEqual(first_query['stack'][-1][0].split('/')[-1], 'sql_db.py')
 
+    def test_profiler_return(self):
+        # Enter test mode to avoid the profiler to commit the result
+        self.registry_enter_test_mode()
+        # Trick: patch db_connect() to make it return the registry with the current test cursor
+        # See `ProfilingHttpCase`
+        self.startClassPatcher(patch('odoo.sql_db.db_connect', return_value=self.registry))
+        with self.profile(collectors=["sql"]) as p:
+            self.env.cr.execute("SELECT 1")
+        p.json()  # check we can call it
+        self.assertEqual(p.collectors[0].entries[0]['query'], 'SELECT 1')
+
 
 def deep_call(func, depth):
     """ Call the given function at the given call depth. """
@@ -649,3 +704,29 @@ class TestSyncRecorder(BaseCase):
         stacks_lines = [[frame[1] for frame in stack] for stack in stacks]
         self.assertEqual(stacks_lines[1][0] + 1, stacks_lines[3][0],
                          "Call of b() in a() should be one line before call of c()")
+
+
+@tagged('-standard', 'profiling_memory')
+class TestMemoryProfiler(HttpCase):
+    def test_memory_profiler(self):
+        """Memory measurements are now embedded in each traces_async entry."""
+        with Profiler(collectors=['traces_async'], db=None) as p:
+            self.env['base.module.update'].create({}).update_module()
+
+        entries = p.collectors[0].entries
+        self.assertTrue(entries, "Expected profiling entries")
+        # Each entry should carry a 'memory' key with a non-negative integer
+        for entry in entries:
+            if entry.get('stack'):  # skip the empty closing entry
+                self.assertIn('memory', entry)
+                self.assertIsInstance(entry['memory'], int)
+                self.assertGreaterEqual(entry['memory'], 0)
+
+        # Verify the speedscope memory output can be constructed from these entries
+        sp = Speedscope(init_stack_trace=[])
+        sp.add('frames', entries)
+        sp.add_memory_output(['frames'], display_name='Memory')
+        result = sp.make()
+        # If any positive memory diffs were found, a sampled memory profile is present
+        memory_profiles = [prof for prof in result['profiles'] if prof.get('type') == 'sampled']
+        self.assertTrue(memory_profiles, "Expected at least one sampled memory profile")

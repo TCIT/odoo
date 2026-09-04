@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.mail.tests.common import mail_new_test_user, MailCommon
+from odoo.addons.mail.tests.common import mail_new_test_user, MailCase
 
 
-class SlidesCase(MailCommon):
+class SlidesCase(MailCase):
 
     @classmethod
     def setUpClass(cls):
         super(SlidesCase, cls).setUpClass()
+
+        cls.env.ref('base.user_admin').write({
+            'email': 'mitchell.admin@example.com',
+        })
 
         cls.user_officer = mail_new_test_user(
             cls.env,
@@ -58,7 +62,7 @@ class SlidesCase(MailCommon):
         cls.customer = cls.env['res.partner'].create({
             'country_id': cls.env.ref('base.be').id,
             'email': 'customer@customer.example.com',
-            'mobile': '0456001122',
+            'phone': '0456001122',
             'name': 'Caroline Customer',
         })
 

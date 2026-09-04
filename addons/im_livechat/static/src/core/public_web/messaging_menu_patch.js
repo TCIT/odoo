@@ -7,16 +7,23 @@ patch(MessagingMenu.prototype, {
     /**
      * @override
      */
-    get tabs() {
-        const items = super.tabs;
+    get _tabs() {
+        const items = super._tabs;
         const hasLivechats = Object.values(this.store.Thread.records).some(
             ({ channel_type }) => channel_type === "livechat"
         );
         if (hasLivechats) {
             items.push({
+                counter: this.store.discuss.livechats.reduce(
+                    (acc, channel) =>
+                        channel.self_member_id?.message_unread_counter > 0 ? acc + 1 : acc,
+                    0
+                ),
                 id: "livechat",
-                icon: "fa fa-comments",
-                label: _t("Livechat"),
+                icon: "fa fa-commenting-o",
+                activeIcon: "fa fa-commenting",
+                label: _t("Live Chats"),
+                sequence: 60,
             });
         }
         return items;

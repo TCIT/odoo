@@ -12,11 +12,7 @@ class AccountChartTemplate(models.AbstractModel):
             'code_digits': '6',
             'property_account_receivable_id': 'l10n_kr_111301',
             'property_account_payable_id': 'l10n_kr_212001',
-            'property_account_expense_categ_id': 'l10n_kr_510001',
-            'property_account_income_categ_id': 'l10n_kr_410001',
             'property_stock_valuation_account_id': 'l10n_kr_112101',
-            'property_stock_account_input_categ_id': 'l10n_kr_112702',
-            'property_stock_account_output_categ_id': 'l10n_kr_112703',
             'property_stock_account_production_cost_id': 'l10n_kr_112704',
         }
 
@@ -43,5 +39,8 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_production_wip_overhead_account_id': 'l10n_kr_610013',
                 'default_cash_difference_income_account_id': 'l10n_kr_420013',
                 'default_cash_difference_expense_account_id': 'l10n_kr_620014',
+                'expense_account_id': 'l10n_kr_510001',
+                'income_account_id': 'l10n_kr_410001',
+                'tax_calculation_rounding_method': 'round_per_line',
             },
         }

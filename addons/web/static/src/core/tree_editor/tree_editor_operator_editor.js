@@ -1,21 +1,50 @@
 import { _t } from "@web/core/l10n/translation";
-import {
-    formatValue,
-    TERM_OPERATORS_NEGATION,
-    toValue,
-} from "@web/core/tree_editor/condition_tree";
-import { sprintf } from "@web/core/utils/strings";
 import { parseExpr } from "@web/core/py_js/py";
+import { formatValue, toValue } from "@web/core/tree_editor/condition_tree";
 import { Select } from "@web/core/tree_editor/tree_editor_components";
 
 const OPERATOR_DESCRIPTIONS = {
     // valid operators (see TERM_OPERATORS in expression.py)
-    "=": "=",
-    "!=": "!=",
-    "<=": "<=",
-    "<": "<",
-    ">": ">",
-    ">=": ">=",
+    "=": (fieldDefType) => {
+        switch (fieldDefType) {
+            case "many2one":
+            case "many2many":
+            case "one2many":
+                return _t("=");
+            default:
+                return _t("is equal to");
+        }
+    },
+    "!=": (fieldDefType) => {
+        switch (fieldDefType) {
+            case "many2one":
+            case "many2many":
+            case "one2many":
+                return _t("!=");
+            default:
+                return _t("is not equal to");
+        }
+    },
+    "<=": _t("lower or equal to"),
+    "<": (fieldDefType) => {
+        switch (fieldDefType) {
+            case "date":
+            case "datetime":
+                return _t("before");
+            default:
+                return _t("lower than");
+        }
+    },
+    ">": (fieldDefType) => {
+        switch (fieldDefType) {
+            case "date":
+            case "datetime":
+                return _t("after");
+            default:
+                return _t("greater than");
+        }
+    },
+    ">=": _t("greater or equal to"),
     "=?": "=?",
     "=like": _t("=like"),
     "=ilike": _t("=ilike"),
@@ -23,24 +52,28 @@ const OPERATOR_DESCRIPTIONS = {
     "not like": _t("not like"),
     ilike: _t("contains"),
     "not ilike": _t("does not contain"),
-    in: _t("is in"),
-    "not in": _t("is not in"),
+    in: (fieldDefType) => {
+        switch (fieldDefType) {
+            case "many2one":
+            case "many2many":
+            case "one2many":
+                return _t("is equal to");
+            default:
+                return _t("is in");
+        }
+    },
+    "not in": (fieldDefType) => {
+        switch (fieldDefType) {
+            case "many2one":
+            case "many2many":
+            case "one2many":
+                return _t("is not equal to");
+            default:
+                return _t("is not in");
+        }
+    },
     child_of: _t("child of"),
     parent_of: _t("parent of"),
-
-    // virtual operators (replace = and != in some cases)
-    is: _t("is"),
-    is_not: _t("is not"),
-    set: _t("is set"),
-    not_set: _t("is not set"),
-
-    starts_with: _t("starts with"),
-    ends_with: _t("ends with"),
-
-    // virtual operator (equivalent to a couple (>=,<=))
-    between: _t("is between"),
-    within: _t("is within"),
-
     any: (fieldDefType) => {
         switch (fieldDefType) {
             case "many2one":
@@ -57,6 +90,15 @@ const OPERATOR_DESCRIPTIONS = {
                 return _t("match none of");
         }
     },
+
+    // virtual operators
+    set: _t("is set"),
+    "not set": _t("is not set"),
+
+    "starts with": _t("starts with"),
+
+    between: _t("between"),
+    "in range": _t("is in"),
 };
 
 function toKey(operator, negate = false) {
@@ -86,18 +128,20 @@ function getOperatorDescription(operator, fieldDefType) {
     return description;
 }
 
-export function getOperatorLabel(operator, fieldDefType, negate = false) {
+export function getOperatorLabel(
+    operator,
+    fieldDefType,
+    negate = false,
+    getDescr = (operator, fieldDefType) => null
+) {
     let label;
     if (typeof operator === "string" && operator in OPERATOR_DESCRIPTIONS) {
-        if (negate && operator in TERM_OPERATORS_NEGATION) {
-            return getOperatorDescription(TERM_OPERATORS_NEGATION[operator], fieldDefType);
-        }
-        label = getOperatorDescription(operator, fieldDefType);
+        label = getDescr(operator, fieldDefType) || getOperatorDescription(operator, fieldDefType);
     } else {
         label = formatValue(operator);
     }
     if (negate) {
-        return sprintf(`not %s`, label);
+        return _t(`not %(operator_label)s`, { operator_label: label });
     }
     return label;
 }
@@ -129,6 +173,6 @@ export function getOperatorEditorInfo(operators, fieldDef) {
         isSupported: ([operator]) =>
             typeof operator === "string" && operator in OPERATOR_DESCRIPTIONS, // should depend on fieldDef too... (e.g. parent_id does not always make sense)
         message: _t("Operator not supported"),
-        stringify: ([operator, negate]) => getOperatorLabel(operator, negate),
+        stringify: ([operator, negate]) => getOperatorLabel(operator, fieldDef?.type, negate),
     };
 }

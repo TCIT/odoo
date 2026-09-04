@@ -1,7 +1,5 @@
-/** @odoo-module **/
-
-import { registry } from "@web/core/registry";
 import configuratorTourUtils from "@sale/js/tours/product_configurator_tour_utils";
+import { registry } from "@web/core/registry";
 import * as tourUtils from '@website_sale/js/tours/tour_utils';
 
 let optionVariantImage;
@@ -12,8 +10,9 @@ registry.category("web_tour.tours").add("a_shop_custom_attribute_value", {
         content: "click on Customizable Desk",
         trigger: '.oe_product_cart a:contains("Customizable Desk (TEST)")',
         run: "click",
+        expectUnloadPage: true,
 }, {
-    trigger: 'a.js_add_cart_json:has(i.fa-plus)',
+    trigger: 'a.js_add_cart_json:has(i.oi-plus)',
     run: 'click',
 }, {
     trigger: 'span.oe_currency_value:contains(750)',
@@ -23,17 +22,17 @@ registry.category("web_tour.tours").add("a_shop_custom_attribute_value", {
     run: 'click',
 }, {
     trigger: configuratorTourUtils.optionalProductSelector("Conference Chair (TEST) (Steel)"),
-    run: function () {
+    run({ queryOne }) {
         optionVariantImage =
-            configuratorTourUtils.optionalProductImageSrc("Conference Chair (TEST) (Steel)")
+            configuratorTourUtils.optionalProductImageSrc(queryOne, "Conference Chair (TEST) (Steel)")
     }
 },
 configuratorTourUtils.selectAttribute("Conference Chair", "Legs", "Aluminium"),
 {
     trigger: configuratorTourUtils.optionalProductSelector("Conference Chair (TEST) (Aluminium)"),
-    run: function () {
+    run({ queryOne }) {
         const newOptionVariantImage =
-            configuratorTourUtils.optionalProductImageSrc("Conference Chair (TEST) (Aluminium)")
+            configuratorTourUtils.optionalProductImageSrc(queryOne, "Conference Chair (TEST) (Aluminium)")
         if (newOptionVariantImage === optionVariantImage) {
             console.error("The variant image wasn't updated");
         }
@@ -43,12 +42,13 @@ configuratorTourUtils.assertOptionalProductPrice("Conference Chair", "22.90"),
 configuratorTourUtils.selectAttribute("Conference Chair", "Legs", "Steel"),
 configuratorTourUtils.addOptionalProduct("Conference Chair"),
 configuratorTourUtils.addOptionalProduct("Chair floor protection"),
-configuratorTourUtils.assertPriceTotal("1,528.50"),
+configuratorTourUtils.assertPriceTotal("1,228.50"),
 {
-    trigger: 'button:contains(Proceed to Checkout)',
+    trigger: 'button:contains(Go to Checkout)',
     run: 'click',
+    expectUnloadPage: true,
 },
-tourUtils.assertCartContains({
+...tourUtils.assertCartContains({
     productName: "Customizable Desk (TEST)",
     backend: false,
 }),

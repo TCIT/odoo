@@ -1,34 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* sale_pdf_quote_builder
-# 
-# Translators:
-# Jussi Lehto <jussi@gulfeo.com>, 2024
-# Eino Mäkitalo <eino.makitalo@netitbe.fi>, 2024
-# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2024
-# Tiffany Chang, 2024
-# Svante <svante@svante.fi>, 2024
-# Konsta Aavaranta, 2024
-# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2024
-# Martin Trigaux, 2024
-# Joakim Weckman, 2024
-# Kari Lindgren <kari.lindgren@emsystems.fi>, 2024
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2025
-# 
+# * sale_pdf_quote_builder
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Saara Hakanen <sahak@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:40+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2025\n"
-"Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-12 07:03+0000\n"
+"Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-19/"
+"sale_pdf_quote_builder/fi/>\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fi\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: sale_pdf_quote_builder
 #: model:ir.actions.report,print_report_name:sale_pdf_quote_builder.action_report_saleorder_raw
@@ -38,6 +28,11 @@ msgid ""
 msgstr ""
 "(object.state in ('draft', 'sent') and 'Tarjous - %s' % (object.name)) or "
 "'Tilaus - %s' % (object.name)"
+
+#. module: sale_pdf_quote_builder
+#: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.sale_order_template_form
+msgid "<i class=\"fa fa-arrow-right\"/> Link to the demo video"
+msgstr "<i class=\"fa fa-arrow-right\"/> Linkki demovideoon"
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
@@ -53,20 +48,20 @@ msgstr "<span>Asiakirjan tyyppi:</span>"
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_pdf_form_field.py:0
 msgid ""
-"A form field set as used in product documents can't be linked to a quotation"
-" document."
+"A form field set as used in product documents can't be linked to a quotation "
+"document."
 msgstr ""
-"Lomakekenttää, jota käytetään tuoteasiakirjoissa, ei voi linkittää "
+"Lomakkeen kenttää, jota käytetään tuoteasiakirjoissa, ei voi linkittää "
 "tarjousasiakirjaan."
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_pdf_form_field.py:0
 msgid ""
-"A form field set as used in quotation documents can't be linked to a product"
-" document."
+"A form field set as used in quotation documents can't be linked to a product "
+"document."
 msgstr ""
-"Lomakekenttää, jota käytetään tarjousasiakirjoissa, ei voi yhdistää "
+"Lomakkeen kenttää, jota käytetään tarjousasiakirjoissa, ei voi yhdistää "
 "tuoteasiakirjaan."
 
 #. module: sale_pdf_quote_builder
@@ -78,6 +73,12 @@ msgstr "Pääsytunniste"
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__active
 msgid "Active"
 msgstr "Aktiivinen"
+
+#. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__add_by_default
+#: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
+msgid "Add By Default"
+msgstr "Lisää oletuksena"
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
@@ -94,20 +95,30 @@ msgstr "Kaikki tiedostot lähetetty"
 #: model:ir.model.fields,help:sale_pdf_quote_builder.field_product_document__attached_on_sale
 msgid ""
 "Allows you to share the document with your customers within a sale.\n"
-"Leave it empty if you don't want to share this document with sales customer.\n"
-"On quote: the document will be sent to and accessible by customers at any time.\n"
+"Leave it empty if you don't want to share this document with sales "
+"customer.\n"
+"On quote: the document will be sent to and accessible by customers at any "
+"time.\n"
 "e.g. this option can be useful to share Product description files.\n"
-"On order confirmation: the document will be sent to and accessible by customers.\n"
-"e.g. this option can be useful to share User Manual or digital content bought on ecommerce. \n"
-"Inside quote: The document will be included in the pdf of the quotation and sale order between the header pages and the quote table. "
+"On order confirmation: the document will be sent to and accessible by "
+"customers.\n"
+"e.g. this option can be useful to share User Manual or digital content "
+"bought on ecommerce. \n"
+"Inside quote: The document will be included in the pdf of the quotation and "
+"sale order between the header pages and the quote table. "
 msgstr ""
 "Voit jakaa asiakirjan asiakkaillesi myynnin yhteydessä.\n"
 "Jätä se tyhjäksi, jos et halua jakaa asiakirjaa myyntiasiakkaan kanssa.\n"
-"Tarjouspyynnössä: Asiakirja lähetetään asiakkaalle ja se on asiakkaan saatavilla milloin tahansa.\n"
-"tämä vaihtoehto voi olla hyödyllinen esimerkiksi tuotekuvaustiedostojen jakamisessa.\n"
-"Tilauksen vahvistuksen yhteydessä: Asiakirja lähetetään asiakkaalle, joka voi tutustua siihen.\n"
-"tämä vaihtoehto voi olla hyödyllinen esimerkiksi käyttöohjeiden tai verkkokaupasta ostetun digitaalisen sisällön jakamisessa.\n"
-"Tarjouksen sisällä: Asiakirja sisällytetään tarjouksen ja myyntitilauksen pdf-tiedostoon otsikkosivujen ja tarjoustaulukon väliin. "
+"Tarjouspyynnössä: Asiakirja lähetetään asiakkaalle ja se on asiakkaan "
+"saatavilla milloin tahansa.\n"
+"Tämä vaihtoehto voi olla hyödyllinen esimerkiksi tuotekuvaustiedostojen "
+"jakamisessa.\n"
+"Tilauksen vahvistuksen yhteydessä: Asiakirja lähetetään asiakkaalle, joka "
+"voi tutustua siihen.\n"
+"Tämä vaihtoehto voi olla hyödyllinen esimerkiksi käyttöohjeiden tai "
+"verkkokaupasta ostetun digitaalisen sisällön jakamisessa.\n"
+"Tarjouksen sisällä: Asiakirja sisällytetään tarjouksen ja myyntitilauksen "
+"pdf-tiedostoon ylätunnisteen sivujen ja tarjoustaulukon väliin. "
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
@@ -126,15 +137,19 @@ msgid "Attachment URL"
 msgstr "Liitteen URL"
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order__available_product_document_ids
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order_line__available_product_document_ids
 msgid "Available Product Documents"
 msgstr "Saatavilla olevat tuoteasiakirjat"
 
 #. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order__available_quotation_document_ids
+msgid "Available Quotation Documents"
+msgstr "Saatavilla olevat tarjousasiakirjat"
+
+#. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__checksum
 msgid "Checksum/SHA1"
-msgstr "Checksum/SHA1"
+msgstr "Tarkistussumma/SHA1"
 
 #. module: sale_pdf_quote_builder
 #. odoo-javascript
@@ -201,7 +216,12 @@ msgid "Description"
 msgstr "Kuvaus"
 
 #. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_ir_actions_report__display_name
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__display_name
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__display_name
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order__display_name
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order_line__display_name
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order_template__display_name
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__display_name
 msgid "Display Name"
 msgstr "Näyttönimi"
@@ -210,12 +230,12 @@ msgstr "Näyttönimi"
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__document_type
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__document_type
 msgid "Document Type"
-msgstr "Dokumenttityyppi"
+msgstr "Asiakirjatyyppi"
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
 msgid "Document type"
-msgstr "Asiakirjan tyyppi"
+msgstr "Asiakirjatyyppi"
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
@@ -283,9 +303,9 @@ msgid "Form fields of inside quotation documents."
 msgstr "Lomakekentät tarjousasiakirjojen sisällä."
 
 #. module: sale_pdf_quote_builder
-#: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
-msgid "Group By"
-msgstr "Ryhmittely"
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__has_thumbnail
+msgid "Has Thumbnail"
+msgstr "Sisältää näytekuvan"
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
@@ -318,10 +338,23 @@ msgid "History"
 msgstr "Historia"
 
 #. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_ir_actions_report__id
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__id
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__id
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order__id
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order_line__id
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order_template__id
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__id
 msgid "ID"
 msgstr "ID"
+
+#. module: sale_pdf_quote_builder
+#: model:ir.model.fields,help:sale_pdf_quote_builder.field_quotation_document__add_by_default
+msgid ""
+"If checked, this header or footer will be added by default on new quotes."
+msgstr ""
+"Jos valittuna, tämä ylä- tai alatunniste lisätään oletuksena uusiin "
+"tarjouksiin."
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,help:sale_pdf_quote_builder.field_quotation_document__active
@@ -329,8 +362,8 @@ msgid ""
 "If unchecked, it will allow you to hide the header or footer without "
 "removing it."
 msgstr ""
-"Jos valintamerkki poistetaan, voit piilottaa ylätunnisteen tai alatunnisteen"
-" poistamatta sitä."
+"Jos valintamerkki poistetaan, voit piilottaa ylätunnisteen tai alatunnisteen "
+"poistamatta sitä."
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__image_height
@@ -455,8 +488,7 @@ msgstr "Vain PDF-dokumentteja voidaan liittää tarjouksen sisälle."
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/quotation_document.py:0
 msgid "Only PDF documents can be used as header or footer."
-msgstr ""
-"Vain PDF-asiakirjoja voidaan käyttää ylätunnisteena tai alatunnisteena."
+msgstr "Vain PDF-asiakirjoja voidaan käyttää ylätunnisteena tai alatunnisteena."
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__original_id
@@ -506,17 +538,26 @@ msgstr "Tuoteasiakirjat"
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.sale_order_template_form
 msgid ""
-"Provide header pages and footer pages to compose an attractive quotation with more information\n"
-"                        about your company, your products and you services. <br/>\n"
-"                        The pdf of your quotes will be built by putting together header pages, product descriptions,\n"
-"                        details of the quote and then the footer pages. <br/>\n"
-"                        If empty, it will use those define in the company settings. <br/>"
+"Provide header pages and footer pages to compose an attractive quotation "
+"with more information\n"
+"                        about your company, your products and you services. "
+"<br/>\n"
+"                        The pdf of your quotes will be built by putting "
+"together header pages, product descriptions,\n"
+"                        details of the quote and then the footer pages. <br/"
+">\n"
+"                        If empty, it will use those define in the company "
+"settings. <br/>"
 msgstr ""
-"Tarjoa ylätunnisteen sivuja ja alatunnisteen sivuja, jotta voit laatia houkuttelevan tarjouksen, jossa on enemmän tietoa\n"
+"Tarjoa ylätunnisteen sivuja ja alatunnisteen sivuja, jotta voit laatia "
+"houkuttelevan tarjouksen, jossa on enemmän tietoa\n"
 "                        yrityksestäsi, tuotteistasi ja palveluistasi. <br/>\n"
-"                        Tarjouksien PDF-tiedosto rakennetaan kokoamalla yhteen ylätunnistesivut, tuotekuvaukset,\n"
-"                        tarjouksen yksityiskohdat ja sitten alatunnisteen sivut. <br/>\n"
-"                        Jos dokumentti tyhjä, Odoo käyttää yrityksen asetuksissa määriteltyjä sivuja. <br/>"
+"                        Tarjouksien PDF-tiedosto rakennetaan kokoamalla "
+"yhteen ylätunnistesivut, tuotekuvaukset,\n"
+"                        tarjouksen yksityiskohdat ja sitten alatunnisteen "
+"sivut. <br/>\n"
+"                        Jos asiakirja tyhjä, Odoo käyttää yrityksen "
+"asetuksissa määriteltyjä sivuja. <br/>"
 
 #. module: sale_pdf_quote_builder
 #: model:ir.actions.report,name:sale_pdf_quote_builder.action_report_saleorder_raw
@@ -553,7 +594,12 @@ msgstr "Tarjouksen ylätunnisteet ja alatunnisteet"
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.sale_order_form_inherit_sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.sale_order_template_form
 msgid "Quote Builder"
-msgstr "Tarjouksen rakentaja"
+msgstr "Tarjouslaskuri"
+
+#. module: sale_pdf_quote_builder
+#: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.sale_order_template_form
+msgid "Quote Builder Demo Video"
+msgstr "Tarjouslaskurin esittelyvideo"
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__ir_attachment_id
@@ -563,7 +609,7 @@ msgstr "Liittyvä liite"
 #. module: sale_pdf_quote_builder
 #: model:ir.model,name:sale_pdf_quote_builder.model_ir_actions_report
 msgid "Report Action"
-msgstr "Raporttin"
+msgstr "Raporttitoiminto"
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__res_field
@@ -594,8 +640,8 @@ msgstr "Myynti : Näkyy osoitteessa"
 #: model:ir.actions.server,name:sale_pdf_quote_builder.cron_post_upgrade_assign_missing_form_fields_ir_actions_server
 msgid "Sale Pdf Quote Builder: assign form fields to documents post upgrade"
 msgstr ""
-"Myyntitarjousten PDF-tarjouksen rakentaja: määritä lomakekentät "
-"asiakirjoihin päivityksen jälkeen"
+"Myyntitarjousten PDF-kokoaminen: määritä lomakekentät asiakirjoihin "
+"versionkorotuksen jälkeen"
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model,name:sale_pdf_quote_builder.model_sale_order
@@ -610,7 +656,7 @@ msgstr "Myyntitilausrivi"
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__sequence
 msgid "Sequence"
-msgstr "Järjestys"
+msgstr "Sekvenssi"
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__store_fname
@@ -653,6 +699,11 @@ msgstr "Teeman pohja"
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search
 msgid "This document"
 msgstr "Tämä asiakirja"
+
+#. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__thumbnail
+msgid "Thumbnail"
+msgstr "Näytekuva"
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__type
@@ -711,3 +762,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
 msgid "on"
 msgstr "on"
+
+#~ msgid "Group By"
+#~ msgstr "Ryhmittely"

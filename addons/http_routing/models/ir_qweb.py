@@ -30,6 +30,7 @@ inside of #99667 is to use the request.borrow_request context manager to
 temporary hide the incoming http request.
 """
 
+
 class IrQweb(models.AbstractModel):
     _inherit = "ir.qweb"
 

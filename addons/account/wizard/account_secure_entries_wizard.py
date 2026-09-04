@@ -1,12 +1,11 @@
 from datetime import timedelta
 
-from odoo import Command, api, fields, models, _
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.osv import expression
-from odoo.tools import format_list
+from odoo.fields import Command, Domain
 
 
-class AccountSecureEntries(models.TransientModel):
+class AccountSecureEntriesWizard(models.TransientModel):
     """
     This wizard is used to secure journal entries (with a hash)
     """
@@ -67,13 +66,18 @@ class AccountSecureEntries(models.TransientModel):
     def _compute_max_hash_date(self):
         today = fields.Date.context_today(self)
         for wizard in self:
-            chains_to_hash = wizard._get_chains_to_hash(wizard.company_id, today)
+            chains_to_hash = wizard.with_context(chain_info_warnings=False)._get_chains_to_hash(wizard.company_id, today)
             moves = self.env['account.move'].concat(
                 *[chain['moves'] for chain in chains_to_hash],
                 *[chain['not_hashable_unlocked_moves'] for chain in chains_to_hash],
             )
             if moves:
-                wizard.max_hash_date = min(move.date for move in moves) - timedelta(days=1)
+                min_date = self.env.execute_query(
+                    self.env['account.move']
+                    ._search([('id', 'in', moves.ids)])
+                    .select('MIN(date)')
+                )[0][0]
+                wizard.max_hash_date = min_date - timedelta(days=1)
             else:
                 wizard.max_hash_date = False
 
@@ -81,30 +85,30 @@ class AccountSecureEntries(models.TransientModel):
     def _get_chains_to_hash(self, company_id, hash_date):
         self.ensure_one()
         res = []
-        moves = self.env['account.move'].sudo().search(
-            self._get_unhashed_moves_in_hashed_period_domain(company_id, hash_date, [('state', '=', 'posted')])
-        )
-        for journal, journal_moves in moves.grouped('journal_id').items():
-            for chain_moves in journal_moves.grouped('sequence_prefix').values():
-                chain_info = chain_moves._get_chain_info(force_hash=True)
-                if not chain_info:
-                    continue
+        for *__, chain_moves in self.env['account.move'].sudo()._read_group(
+            domain=self._get_unhashed_moves_in_hashed_period_domain(company_id, hash_date, [('state', '=', 'posted')]),
+            groupby=['journal_id', 'sequence_prefix'],
+            aggregates=['id:recordset']
+        ):
+            chain_info = chain_moves._get_chain_info(force_hash=True)
+            if not chain_info:
+                continue
 
-                last_move_hashed = chain_info['last_move_hashed']
-                # It is possible that some moves cannot be hashed (i.e. after upgrade).
-                # We show a warning ('account_not_hashable_unlocked_moves') if that is the case.
-                # These moves are ignored for the warning and max_hash_date in case they are protected by the Hard Lock Date
-                if last_move_hashed:
-                    # remaining_moves either have a hash already or have a higher sequence_number than the last_move_hashed
-                    not_hashable_unlocked_moves = chain_info['remaining_moves'].filtered(
-                        lambda move: (not move.inalterable_hash
-                                      and move.sequence_number < last_move_hashed.sequence_number
-                                      and move.date > self.company_id.user_hard_lock_date)
-                    )
-                else:
-                    not_hashable_unlocked_moves = self.env['account.move']
-                chain_info['not_hashable_unlocked_moves'] = not_hashable_unlocked_moves
-                res.append(chain_info)
+            last_move_hashed = chain_info['last_move_hashed']
+            # It is possible that some moves cannot be hashed (i.e. after upgrade).
+            # We show a warning ('account_not_hashable_unlocked_moves') if that is the case.
+            # These moves are ignored for the warning and max_hash_date in case they are protected by the Hard Lock Date
+            if last_move_hashed:
+                # remaining_moves either have a hash already or have a higher sequence_number than the last_move_hashed
+                not_hashable_unlocked_moves = chain_info['remaining_moves'].filtered(
+                    lambda move: (not move.inalterable_hash
+                                  and move.sequence_number < last_move_hashed.sequence_number
+                                  and move.date > self.company_id.user_hard_lock_date)
+                )
+            else:
+                not_hashable_unlocked_moves = self.env['account.move']
+            chain_info['not_hashable_unlocked_moves'] = not_hashable_unlocked_moves
+            res.append(chain_info)
         return res
 
     @api.depends('company_id', 'company_id.user_hard_lock_date', 'hash_date')
@@ -150,9 +154,9 @@ class AccountSecureEntries(models.TransientModel):
                 warnings['account_unreconciled_bank_statement_line_ids'] = {
                     'message': _("There are still unreconciled bank statement lines before the selected date. "
                                  "The entries from journal prefixes containing them will not be secured: %(prefix_info)s",
-                                 prefix_info=format_list(self.env, ignored_sequence_prefixes)),
+                                 prefix_info=ignored_sequence_prefixes),
                     'level': 'danger',
-                    'action_text': _("Review"),
+                    'action_text': _("Review Statements"),
                     'action': wizard.company_id._get_unreconciled_statement_lines_redirect_action(wizard.unreconciled_bank_statement_line_ids),
                 }
 
@@ -163,7 +167,7 @@ class AccountSecureEntries(models.TransientModel):
             if draft_entries:
                 warnings['account_unhashed_draft_entries'] = {
                     'message': _("There are still draft entries before the selected date."),
-                    'action_text': _("Review"),
+                    'action_text': _("Review Entries"),
                     'action': wizard.action_show_draft_moves_in_hashed_period(),
                 }
 
@@ -171,7 +175,7 @@ class AccountSecureEntries(models.TransientModel):
             if not_hashable_unlocked_moves:
                 warnings['account_not_hashable_unlocked_moves'] = {
                     'message': _("There are entries that cannot be hashed. They can be protected by the Hard Lock Date."),
-                    'action_text': _("Review"),
+                    'action_text': _("Review Entries"),
                     'action': wizard.action_show_moves(not_hashable_unlocked_moves),
                 }
 
@@ -187,12 +191,12 @@ class AccountSecureEntries(models.TransientModel):
                         ('sequence_number', '<=', last_move.sequence_number),
                         ('sequence_number', '>=', first_move.sequence_number),
                     ])
-                domain = expression.OR(OR_domains)
+                domain = Domain.OR(OR_domains)
                 warnings['account_sequence_gap'] = {
                     'message': _("Securing these entries will create at least one gap in the sequence."),
-                    'action_text': _("Review"),
+                    'action_text': _("Review Entries"),
                     'action': {
-                        **self.env['account.journal']._show_sequence_holes(domain),
+                        **self.env['account.journal']._show_sequence_holes(list(domain)),
                         'views': [[self.env.ref('account.view_move_tree_multi_edit').id, 'list'], [self.env.ref('account.view_move_form').id, 'form']],
                     }
                 }
@@ -201,7 +205,7 @@ class AccountSecureEntries(models.TransientModel):
             if moves_to_hash_after_selected_date:
                 warnings['account_move_to_secure_after_selected_date'] = {
                     'message': _("Securing these entries will also secure entries after the selected date."),
-                    'action_text': _("Review"),
+                    'action_text': _("Review Entries"),
                     'action': wizard.action_show_moves(moves_to_hash_after_selected_date),
                 }
 
@@ -215,14 +219,14 @@ class AccountSecureEntries(models.TransientModel):
         :return a search domain
         """
         if not (company_id and hash_date):
-            return [(0, '=', 1)]
-        return expression.AND([
+            return Domain.FALSE
+        return Domain.AND([
             [
                 ('date', '<=', fields.Date.to_string(hash_date)),
                 ('company_id', 'child_of', company_id.id),
                 ('inalterable_hash', '=', False),
             ],
-            domain or [],
+            domain or Domain.TRUE,
         ])
 
     def _get_draft_moves_in_hashed_period_domain(self):
@@ -248,7 +252,7 @@ class AccountSecureEntries(models.TransientModel):
             'name': _('Draft Entries'),
             'res_model': 'account.move',
             'type': 'ir.actions.act_window',
-            'domain': self._get_draft_moves_in_hashed_period_domain(),
+            'domain': list(self._get_draft_moves_in_hashed_period_domain()),
             'search_view_id': [self.env.ref('account.view_account_move_filter').id, 'search'],
             'views': [[self.env.ref('account.view_move_tree_multi_edit').id, 'list'], [self.env.ref('account.view_move_form').id, 'form']],
         }

@@ -2,7 +2,8 @@
 
 from odoo.exceptions import ValidationError
 from odoo.tests.common import TransactionCase
-from odoo.tests import Form
+from odoo.tests import Form, tagged
+from odoo import Command
 
 
 class TestMrpAnalyticAccount(TransactionCase):
@@ -12,7 +13,7 @@ class TestMrpAnalyticAccount(TransactionCase):
         # The group 'mrp.group_mrp_routings' is required to make the field
         # 'workorder_ids' visible in the view of 'mrp.production'. The subviews
         #  of `workorder_ids` must be present in many tests to create records.
-        cls.env.user.groups_id += (
+        cls.env.user.group_ids += (
             cls.env.ref('analytic.group_analytic_accounting')
             + cls.env.ref('mrp.group_mrp_routings')
         )
@@ -30,7 +31,6 @@ class TestMrpAnalyticAccount(TransactionCase):
         })
         cls.workcenter = cls.env['mrp.workcenter'].create({
             'name': 'Workcenter',
-            'default_capacity': 1,
             'time_efficiency': 100,
             'costs_hour': 10,
         })
@@ -129,7 +129,7 @@ class TestAnalyticAccount(TestMrpAnalyticAccount):
         duplicated lines will be post.
         """
         # Required for `workorder_ids` to be visible in the view
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_routings')
+        self.env.user.group_ids += self.env.ref('mrp.group_mrp_routings')
         # set wc analytic account to be different from the one on the bom
         analytic_plan = self.env['account.analytic.plan'].create({'name': 'Plan Test'})
         wc_analytic_account = self.env['account.analytic.account'].create({'name': 'wc_analytic_account', 'plan_id': analytic_plan.id})
@@ -146,27 +146,23 @@ class TestAnalyticAccount(TestMrpAnalyticAccount):
         self.assertEqual(len(mo.workorder_ids.wc_analytic_account_line_ids), 0)
 
         # change duration to 60
-        mo_form = Form(mo)
-        with mo_form.workorder_ids.edit(0) as line_edit:
-            line_edit.duration = 60.0
-        mo_form.save()
+        mo.workorder_ids[0].duration = 60.0
         self.assertEqual(mo.workorder_ids.mo_analytic_account_line_ids.amount, -10.0)
         self.assertEqual(mo.workorder_ids.mo_analytic_account_line_ids[self.analytic_plan._column_name()], self.analytic_account)
         self.assertEqual(mo.workorder_ids.wc_analytic_account_line_ids.amount, -10.0)
         self.assertEqual(mo.workorder_ids.wc_analytic_account_line_ids[analytic_plan._column_name()], wc_analytic_account)
 
         # change duration to 120
-        with mo_form.workorder_ids.edit(0) as line_edit:
-            line_edit.duration = 120.0
-        mo_form.save()
+        mo.workorder_ids[0].duration = 120.0
         self.assertEqual(mo.workorder_ids.mo_analytic_account_line_ids.amount, -20.0)
         self.assertEqual(mo.workorder_ids.mo_analytic_account_line_ids[self.analytic_plan._column_name()], self.analytic_account)
         self.assertEqual(mo.workorder_ids.wc_analytic_account_line_ids.amount, -20.0)
         self.assertEqual(mo.workorder_ids.wc_analytic_account_line_ids[analytic_plan._column_name()], wc_analytic_account)
 
         # mark as done
-        mo_form.qty_producing = 10.0
-        mo_form.save()
+
+        mo.qty_producing = 10.0
+        mo.set_qty_producing()
         mo.button_mark_done()
         self.assertEqual(mo.state, 'done')
         self.assertEqual(mo.workorder_ids.mo_analytic_account_line_ids.amount, -20.0)
@@ -179,7 +175,7 @@ class TestAnalyticAccount(TestMrpAnalyticAccount):
             after the change of the MO account analytic (ie. we change the project linked to the MO).
         """
         # Required for `workorder_ids` to be visible in the view
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_routings')
+        self.env.user.group_ids += self.env.ref('mrp.group_mrp_routings')
         # create a mo
         mo_form = Form(self.env['mrp.production'])
         mo_form.product_id = self.product
@@ -193,10 +189,7 @@ class TestAnalyticAccount(TestMrpAnalyticAccount):
         self.assertEqual(len(mo.workorder_ids.mo_analytic_account_line_ids), 0)
 
         # Change duration to 60
-        mo_form = Form(mo)
-        with mo_form.workorder_ids.edit(0) as line_edit:
-            line_edit.duration = 60.0
-        mo_form.save()
+        mo.workorder_ids[0].duration = 60.0
         self.assertEqual(mo.workorder_ids.mo_analytic_account_line_ids[self.analytic_plan._column_name()], self.analytic_account)
 
         # Mark as done
@@ -435,11 +428,11 @@ class TestAnalyticAccount(TestMrpAnalyticAccount):
 
     def test_mandatory_analytic_plan_production(self):
         """
-        Tests that the MO can only generate AALs if it is supposed to.
-        ie. The MO is producing the product and there is a project linked to the MO that has at least one analytic plan set,
-        and all its mandatory plans set (the ones that are constrained by the 'Manufacturing Order' domain).
+        Tests that the MO cannot be confirmed if the linked project does not
+        have an analytic account set on all plans mandatory for the
+        'Manufacturing Order' business domain.
         """
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_routings')
+        self.env.user.group_ids += self.env.ref('mrp.group_mrp_routings')
         self.applicability.business_domain = 'manufacturing_order'
         self.project[f'{self.analytic_plan._column_name()}'] = False  # Remove the AA from the mandatory plan of the project
         new_analytic_plan = self.env['account.analytic.plan'].create({
@@ -457,20 +450,19 @@ class TestAnalyticAccount(TestMrpAnalyticAccount):
         mo_form.product_qty = 1
         mo_form.project_id = self.project
         mo = mo_form.save()
-        mo.action_confirm()
-        self.assertTrue(mo)
 
-        with self.assertRaises(ValidationError):
-            mo.button_mark_done()
+        with self.assertRaisesRegex(ValidationError, "The Project linked to the Manufacturing Order is missing a mandatory distribution"):
+            mo.action_confirm()
 
     def test_bom_aal_generation(self):
         """ This test ensure that when a project is set on a BOM, the aal are correctly generated when the workorder of
         the MO is marked as done. New aal should NOT be generated when the MO is later on marked as done too. """
 
         # Required for `workorder_ids` to be visible in the view
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_routings')
+        self.env.user.group_ids += self.env.ref('mrp.group_mrp_routings')
 
         self.bom.project_id = self.project
+        self.bom.bom_line_ids.operation_id = self.bom.operation_ids
         mo_form = Form(self.env['mrp.production'])
         mo_form.product_id = self.product
         mo_form.bom_id = self.bom
@@ -498,3 +490,46 @@ class TestAnalyticAccount(TestMrpAnalyticAccount):
         mo.action_confirm()
         mo.button_mark_done()
         self.assertEqual(mo.move_raw_ids.analytic_account_line_ids.category, 'manufacturing_order')
+
+
+@tagged('post_install', '-at_install')
+class TestAnalyticAccountTimesheet(TestMrpAnalyticAccount):
+    def test_analytic_account_access(self):
+        """ This test make sure that a user can scrap an order even without accounting rights """
+        if not self.env['ir.module.module'].search([('name', '=', 'timesheet_grid'), ('state', '=', 'installed')]):
+            self.skipTest("timesheet_grid is not installed, the access error won't trigger")
+
+        test_user = self.env['res.users'].create({
+            'name': 'Test MRP User',
+            'login': 'test_mrp_user',
+            'group_ids': [Command.set([
+                self.ref('mrp.group_mrp_user'),
+                self.ref('project.group_project_user'),
+                self.ref('hr_timesheet.group_hr_timesheet_approver')
+            ])],
+        })
+
+        quant = self.env['stock.quant'].with_context(inventory_mode=True).create({
+                'product_id': self.component.id,
+                'inventory_quantity': 10,
+                'location_id': self.env.ref("stock.warehouse0").lot_stock_id.id,
+            })
+        quant.action_apply_inventory()
+
+        def _create_confirmed_mo():
+            mo_form = Form(self.env['mrp.production'])
+            mo_form.product_id = self.product
+            mo_form.bom_id = self.bom
+            mo_form.product_qty = 1.0
+            mo_form.project_id = self.project
+            mo = mo_form.save()
+            mo.action_confirm()
+            return mo
+
+        _create_confirmed_mo().button_mark_done()
+        mo2 = _create_confirmed_mo()
+        self.env['stock.scrap'].with_user(test_user).create({
+            'product_id': self.component.id,
+            'scrap_qty': 1.0,
+            'production_id': mo2.id,
+        }).action_validate()

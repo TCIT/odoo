@@ -5,7 +5,7 @@
     'name': "Stock - SMS",
     'summary': 'Send text messages when final stock move',
     'description': "Send text messages when final stock move",
-    'category': 'Hidden',
+    'category': 'Supply Chain/Inventory',
     'version': '1.0',
     'depends': ['stock', 'sms'],
     'data': [
@@ -17,5 +17,7 @@
     ],
     'auto_install': True,
     'post_init_hook': '_assign_default_sms_template_picking_id',
+    'author': 'Odoo S.A.',
+    'uninstall_hook': '_reset_sms_text_confirmation',
     'license': 'LGPL-3',
 }

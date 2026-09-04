@@ -1,5 +1,6 @@
 import base64
-from datetime import datetime
+from datetime import datetime, date, timedelta
+from xml.etree import ElementTree as et
 
 from odoo import fields
 from odoo.tests import tagged
@@ -11,12 +12,18 @@ from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 @tagged('post_install', '-at_install')
 class TestAutoPostBills(AccountTestInvoicingCommon):
 
-    def import_facturx(self, filename='facturx_out_invoice.xml'):
+    def import_facturx(self, filename='facturx_out_invoice.xml', ref=None, date=None):
         self.env.cr._now = datetime.now()  # reset transaction's NOW, otherwise all move will have the same create_date
-        with file_open(f"account_edi_ubl_cii/tests/test_files/{filename}", 'rb', filter_ext=('.xml',)) as file:
+        with (file_open(f"account_edi_ubl_cii/tests/test_files/{filename}", 'rb', filter_ext=('.xml',)) as file):
+            file_read = file.read()
+            tree = et.ElementTree(et.fromstring(file_read.decode()))
+            if ref:
+                tree.find('./{*}ExchangedDocument/{*}ID').text = ref
+            if date:
+                tree.find('./{*}ExchangedDocument/{*}IssueDateTime/{*}DateTimeString').text = date
             attachment = self.env['ir.attachment'].create({
                 'name': 'test_file.xml',
-                'datas': base64.encodebytes(file.read()),
+                'datas': base64.encodebytes(et.tostring(tree.getroot())),
             })
             return self.company_data['default_journal_purchase'].with_context(disable_abnormal_invoice_detection=False)._create_document_from_attachment(attachment.id)
 
@@ -61,7 +68,7 @@ class TestAutoPostBills(AccountTestInvoicingCommon):
         wizard.action_ask_later()  # Nothing changes, we should still show the popup
 
         # Create 5th bill with changes, should NOT show popup on posting
-        move = self.import_facturx()
+        move = self.import_facturx().with_context(skip_is_manually_modified=False)
         move.invoice_date_due = fields.Date.today()
         autopost_bills_wizard = move.action_post()
         self.assertFalse(autopost_bills_wizard)
@@ -75,7 +82,7 @@ class TestAutoPostBills(AccountTestInvoicingCommon):
         wizard.action_automate_partner()
 
         # Create 4th bill without changes with automation enabled => should automatically post, no popup
-        move = self.import_facturx()
+        move = self.import_facturx(ref="refbill4", date='20170102')  # new ref and date to avoid duplicates
         self.assertEqual(move.state, 'posted')
 
         # Reset
@@ -115,9 +122,14 @@ class TestAutoPostBills(AccountTestInvoicingCommon):
         move.company_id.autopost_bills = True
         move.partner_id.autopost_bills = 'always'
 
+        # If the bill has a duplicate, don't autopost it
+        move = self.import_facturx(ref="refbill4")  # same ref as previous
+        self.assertEqual(move.state, "draft")
+
         # If there is a significant difference (see abnormal_amount), don't autopost even if 'always' is set
-        for _ in range(10):  # See test_unexpected_invoice
-            move = self.import_facturx()  # automatically posted
+        base_date = date(2018, 1, 1)
+        for i in range(10):  # See test_unexpected_invoice
+            move = self.import_facturx(ref=f"ref{i}", date=(base_date + timedelta(days=i)).strftime('%Y%m%d'))  # automatically posted
             self.assertEqual(move.state, "posted")
 
         move = self.import_facturx(filename='facturx_out_invoice_abnormal.xml')  # amounts * 100 here, a bit abnormal...

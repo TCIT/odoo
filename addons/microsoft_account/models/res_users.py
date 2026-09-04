@@ -7,7 +7,7 @@ from datetime import timedelta
 from odoo import api, fields, models, _
 
 
-class User(models.Model):
+class ResUsers(models.Model):
     _inherit = 'res.users'
 
     microsoft_calendar_rtoken = fields.Char('Microsoft Refresh Token', copy=False, groups="base.group_system")

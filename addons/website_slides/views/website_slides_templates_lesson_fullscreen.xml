@@ -4,7 +4,7 @@
 <!-- Slide template for the fullscreen mode -->
 <template id="slide_fullscreen" name="Fullscreen">
     <t t-set="head">
-        <link rel="canonical" t-att-href="slide.website_url" />
+        <link rel="canonical" t-att-href="slide.website_absolute_url" />
     </t>
     <t t-call="website.layout">
         <div class="o_wslides_fs_main d-flex flex-column"
@@ -30,7 +30,7 @@
                             <t t-set="default_message_id" t-value="last_message_id"/>
                             <t t-set="default_rating_value" t-value="last_rating_value"/>
                             <t t-set="default_attachment_ids" t-value="last_message_attachment_ids"/>
-                            <t t-set="force_submit_url" t-value="'/slides/mail/update_comment' if last_message_id else False"/>
+                            <t t-set="force_submit_url" t-value="'/mail/message/update_content' if last_message_id else False"/>
                             <t t-set="disable_composer" t-value="not channel.can_review"/>
                             <t t-set="_link_btn_classes" t-value="'d-inline-block text-white fw-light shadow-none'"/>
                             <t t-set="icon" t-value="'fa fa-pencil'"/>
@@ -60,8 +60,8 @@
                 <div class="o_wslides_fs_sidebar o_wslides_fs_sidebar_hidden text-white flex-shrink-0 order-1">
                     <div class="o_wslides_fs_sidebar_content d-flex flex-column px-3 pt-3 h-100">
                         <div class="o_wslides_fs_sidebar_header mb-3">
-                            <a class="h5 d-block mb-1" t-attf-href="/slides/#{slug(slide.channel_id)}">
-                                <span t-field="slide.channel_id.name"/>
+                            <a class="d-block mb-1" t-attf-href="/slides/#{slug(slide.channel_id)}">
+                                <h1 class="h5" t-field="slide.channel_id.name"/>
                             </a>
                             <div t-if="not is_public_user">
                                 <span t-attf-class="o_wslides_channel_completion_completed badge text-bg-success #{'d-none' if not slide.channel_id.completed else ''}">
@@ -72,7 +72,7 @@
                                         <div class="progress-bar" role="progressbar" t-attf-style="width: #{slide.channel_id.completion}%" t-att-aria-valuenow="slide.channel_id.completion" aria-valuemin="0" aria-valuemax="100" aria-label="Progress bar"></div>
                                     </div>
                                     <div class="ms-3 small">
-                                        <span class="o_wslides_progress_percentage" t-esc="slide.channel_id.completion"/> %
+                                        <span class="o_wslides_progress_percentage" t-out="slide.channel_id.completion"/> %
                                     </div>
                                 </div>
                             </div>
@@ -141,24 +141,24 @@
                             <div class="d-flex">
                                 <t t-if="is_member" t-call="website_slides.slide_sidebar_done_button"/>
                                 <i t-else="" t-attf-class="fa #{slide.slide_icon_class} me-2"/>
-                                <div class="o_wslides_fs_slide_name text-truncate" t-esc="slide.name"/>
+                                <div class="o_wslides_fs_slide_name text-truncate" t-out="slide.name"/>
                             </div>
                         </a>
                         <span t-else="" class="d-block" href="#">
                             <div class="d-flex">
                                 <t t-if="is_member" t-call="website_slides.slide_sidebar_done_button"/>
                                 <i t-else="" t-attf-class="fa #{slide.slide_icon_class} me-2 text-600"/>
-                                <div class="o_wslides_fs_slide_name text-600 text-truncate" t-esc="slide.name"/>
+                                <div class="o_wslides_fs_slide_name text-600 text-truncate" t-out="slide.name"/>
                             </div>
                         </span>
                         <ul class="list-unstyled w-100 small fw-light" t-if="slide.sudo().slide_resource_ids or (slide.question_ids and not slide.slide_category =='quiz')" >
                             <t t-if="can_access_channel" t-foreach="slide.slide_resource_ids" t-as="resource">
                                 <li class="ps-1 mb-1">
                                     <a t-if="resource.resource_type == 'url'" class="o_wslides_fs_slide_link" t-att-href="resource.link" target="_blank">
-                                        <i class="fa fa-link me-2"/><span t-esc="resource.name"/>
+                                        <i class="fa fa-link me-2"/><span t-out="resource.name"/>
                                     </a>
                                     <a t-else="" class="o_wslides_fs_slide_link ps-0" t-att-href="resource.download_url">
-                                        <i class="fa fa-download me-2"/><span t-esc="resource.name"/>
+                                        <i class="fa fa-download me-2"/><span t-out="resource.name"/>
                                     </a>
                                 </li>
                             </t>

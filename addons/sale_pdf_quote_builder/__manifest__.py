@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 {
     'name': "Sales PDF Quotation Builder",
     'category': 'Sales/Sales',
@@ -34,5 +35,6 @@
             'sale_pdf_quote_builder/static/tests/tours/**/*',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

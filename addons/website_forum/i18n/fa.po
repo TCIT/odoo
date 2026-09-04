@@ -1,36 +1,47 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_forum
-# 
+# * website_forum
+#
 # Translators:
-# zakariya moradi, 2025
-# Tiffany Chang, 2025
-# 
+# Hamid Darabi, 2023
+# Farid Hariri <fhari1234@gmail.com>, 2023
+# Faraz Sadri Alamdari <ifarazir@gmail.com>, 2023
+# Hamed Mohammadi <hamed@dehongi.com>, 2023
+# M.Hossein S.Farvashani <Farvashani@gmail.com>, 2023
+# Mohsen Mohammadi <iammohsen.123@gmail.com>, 2023
+# Hanna Kheradroosta, 2023
+# Mostafa Barmshory <mostafa.barmshory@gmail.com>, 2023
+# Martin Trigaux, 2023
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Aliraza Habibitanha <alireza.habibitanha@gmail.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Tiffany Chang, 2025\n"
-"Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
+"POT-Creation-Date: 2026-02-20 18:37+0000\n"
+"PO-Revision-Date: 2026-08-09 11:17+0000\n"
+"Last-Translator: Aliraza Habibitanha <alireza.habibitanha@gmail.com>\n"
+"Language-Team: Persian <https://translate.odoo.com/projects/odoo-19/"
+"website_forum/fa/>\n"
+"Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fa\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid " Flag"
-msgstr "پرچم"
+msgstr " پرچم"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid " Flagged"
-msgstr "پرچم‌گذاری شده"
+msgstr " پرچم‌گذاری شده"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__total_answers
@@ -53,6 +64,21 @@ msgstr "# پست‌ها"
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_tree
 msgid "# Views"
 msgstr "# بازدید"
+
+#. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
+msgid ""
+"%(link_start)sRead the guidelines to know how to gain karma.%(link_end)s"
+msgstr ""
+"%(link_start)sبرای اطلاع از نحوه کسب امتیاز، دستورالعمل‌ها را بخوانید.%"
+"(link_end)s"
+
+#. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
+msgid "%(score)s karma is required to perform this action."
+msgstr "برای انجام این کار %(score)s امتیاز نیاز است."
 
 #. module: website_forum
 #. odoo-python
@@ -187,18 +213,6 @@ msgid "&amp;nbsp;"
 msgstr "&amp;nbsp;"
 
 #. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
-msgid "'Please enter 2 or more characters'"
-msgstr ""
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
-msgid "'Tags'"
-msgstr ""
-
-#. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid "(The above section was adapted from Stackoverflow’s FAQ.)"
@@ -231,22 +245,33 @@ msgstr ""
 "        پاسخ"
 
 #. module: website_forum
+#: model_terms:forum.forum,welcome_message:website_forum.forum_help
+msgid ""
+"<a class=\"btn btn-primary forum_register_url o_translate_inline\" href=\"/"
+"web/login\">Sign up</a>"
+msgstr ""
+
+#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
 "<b class=\"d-block \">This answer has been flagged</b>\n"
-"                            As a moderator, you can either validate or reject this answer."
+"                            As a moderator, you can either validate or "
+"reject this answer."
 msgstr ""
 "<b class=\"d-block \">این پاسخ علامت گذاری شده است</b>\n"
-"                            به عنوان یک مدیر، شما می‌توانید این پاسخ را تأیید یا رد کنید."
+"                            به عنوان یک مدیر، شما می‌توانید این پاسخ را تأیید "
+"یا رد کنید."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "<b class=\"d-block\">You have a pending post</b>\n"
-"                        Please wait for a moderator to validate your previous post to be allowed replying questions."
+"                        Please wait for a moderator to validate your "
+"previous post to be allowed replying questions."
 msgstr ""
 "<b class=\"d-block\">شما یک پست معلق دارید</b>\n"
-"                        لطفاً منتظر بمانید تا مدیر پست قبلی شما را تأیید کند تا به سؤالات پاسخ دهد."
+"                        لطفاً منتظر بمانید تا مدیر پست قبلی شما را تأیید کند "
+"تا به سؤالات پاسخ دهد."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -265,8 +290,8 @@ msgid ""
 "<b>Answers should not add or expand questions</b>. Instead, either edit the "
 "question or add a comment."
 msgstr ""
-"<b>پاسخ‌ها نباید اضافه شوند و سوالات نیز نباید گسترده‌تر شوند<b>. در عوض، یا"
-" سوالات را ویرایش کنید و یا توضیحاتی را اضافه کنید."
+"<b>پاسخ‌ها نباید اضافه شوند و سوالات نیز نباید گسترده‌تر شوند<b>. در عوض، یا "
+"سوالات را ویرایش کنید و یا توضیحاتی را اضافه کنید."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -275,8 +300,8 @@ msgid ""
 "<b>Answers should not comment other answers</b>. Instead add a comment on "
 "the other answers."
 msgstr ""
-"<b>پاسخ ها نباید در رابطه با پاسخ‌های دیگر اظهار نظر کنند</b>. در عوض یک نظر"
-" در مورد پاسخ های دیگر اضافه کنید."
+"<b>پاسخ ها نباید در رابطه با پاسخ‌های دیگر اظهار نظر کنند</b>. در عوض یک نظر "
+"در مورد پاسخ های دیگر اضافه کنید."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -284,13 +309,13 @@ msgstr ""
 msgid ""
 "<b>Answers should not start debates</b> This community Q&amp;A is not a "
 "discussion group. Please avoid holding debates in your answers as they tend "
-"to dilute the essence of questions and answers. For brief discussions please"
-" use commenting facility."
+"to dilute the essence of questions and answers. For brief discussions please "
+"use commenting facility."
 msgstr ""
 "<b>پاسخ ها نباید شروع کننده بحث یا گفتویی باشند</b> این  انجمن پرسش و پاسخ، "
 "یک گروه بحث نیست. لطفاً از برگزاری مناظره در پاسخ‌های خود اجتناب کنید، زیرا "
-"آنها ماهیت سؤال و پاسخ‌ها را کمرنگ می‌کنند. برای بحث های مختصر لطفا از اظهار"
-" نظر استفاده کنید."
+"آنها ماهیت سؤال و پاسخ‌ها را کمرنگ می‌کنند. برای بحث های مختصر لطفا از اظهار "
+"نظر استفاده کنید."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -298,40 +323,40 @@ msgstr ""
 msgid ""
 "<b>Answers shouldn't just point to other Questions</b>. Instead add a "
 "question comment indication \"Possible duplicate of...\". However, it's ok "
-"to include links to other questions or answers providing relevant additional"
-" information."
+"to include links to other questions or answers providing relevant additional "
+"information."
 msgstr ""
-"<b>یک پاسخ نمی‌تواند صرفا یک اشاره به پرسش‌های دیگر باشد</b>. به‌جای آن یک "
-"نظر به سؤال با علامت «تکراری احتمالی...» اضافه کنید. با این وجود، اضافه کردن"
-" پیوندهایی به سؤالات یا پاسخ های دیگر که اطلاعات اضافی مربوطه را ارائه "
-"می‌دهد، مشکلی ندارد."
+"<b>یک پاسخ نمی‌تواند صرفا یک اشاره به پرسش‌های دیگر باشد</b>. به‌جای آن یک نظر "
+"به سؤال با علامت «تکراری احتمالی...» اضافه کنید. با این وجود، اضافه کردن "
+"پیوندهایی به سؤالات یا پاسخ های دیگر که اطلاعات اضافی مربوطه را ارائه می‌دهد، "
+"مشکلی ندارد."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just point to other questions</b>.Instead add a comment"
-" indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
+"<b>Answers shouldn't just point to other questions</b>.Instead add a comment "
+"indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
 "include links to other questions or answers providing relevant additional "
 "information."
 msgstr ""
-"<b>پاسخ ها نباید فقط به سوالات دیگر اشاره کنند</b>.در عوض یک نظر اضافه کنید "
-"که  <i>\"احتمالا تکراری ...\"</i> را نشان می دهد. با این حال، خوب است که "
-"پیوندهایی به سؤالات یا پاسخ های دیگر اضافه کنید کنید که اطلاعات اضافی مرتبط "
-"را نشان می‌دهد."
+"<b>پاسخ ها نباید فقط به سوالات دیگر اشاره کنند</b>.در عوض یک نظر اضافه کنید که"
+"  <i>\"احتمالا تکراری ...\"</i> را نشان می دهد. با این حال، خوب است که "
+"پیوندهایی به سؤالات یا پاسخ های دیگر اضافه کنید کنید که اطلاعات اضافی مرتبط را "
+"نشان می‌دهد."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the"
-" solution description text in your answer, even if it's just a copy/paste. "
+"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the "
+"solution description text in your answer, even if it's just a copy/paste. "
 "Links are welcome, but should be complementary to answer, referring sources "
 "or additional reading."
 msgstr ""
 "<b>پاسخ ها نباید فقط یک لینک به یک راه حل ارائه دهند</b>. در عوض، متن "
-"توضیحات راه حل را در پاسخ خود اضافه کنید، حتی اگر فقط یک کپی/پیست ساده باشد."
-" از پیوندها استقبال می‌شود، اما باید مکمل پاسخ، ارجاع منابع یا خواندنی‌های "
+"توضیحات راه حل را در پاسخ خود اضافه کنید، حتی اگر فقط یک کپی/پیست ساده باشد. "
+"از پیوندها استقبال می‌شود، اما باید مکمل پاسخ، ارجاع منابع یا خواندنی‌های "
 "اضافی باشند."
 
 #. module: website_forum
@@ -339,8 +364,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "<b>Before you ask - please make sure to search for a similar question.</b> "
-"You can search questions by their title or tags. It’s also OK to answer your"
-" own question."
+"You can search questions by their title or tags. It’s also OK to answer your "
+"own question."
 msgstr ""
 "<b>قبل از اینکه بپرسید - لطفاً یک سؤال مشابه را جستجو کنید.</b> می‌توانید "
 "سوالات را بر اساس عنوان یا برچسب آنها جستجو کنید. پاسخ دادن به سوالی که "
@@ -350,23 +375,29 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Please avoid asking questions that are too subjective and "
-"argumentative</b> or not relevant to this community."
+"<b>Please avoid asking questions that are too subjective and argumentative</"
+"b> or not relevant to this community."
 msgstr ""
-"<b>لطفا از پرسیدن سوالاتی که بیش از حد ذهنی هستند خودداری کنید</b> یا "
-"سوالاتی که مربوط به این انجمن نیست."
+"<b>لطفا از پرسیدن سوالاتی که بیش از حد ذهنی هستند خودداری کنید</b> یا سوالاتی "
+"که مربوط به این انجمن نیست."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answer
 msgid ""
-"<b>Please try to give a substantial answer.</b> If you wanted to comment on the question or answer, just\n"
-"            <b>use the commenting tool.</b> Please remember that you can always <b>revise your answers</b>\n"
-"            - no need to answer the same question twice. Also, please <b>don't forget to vote</b>\n"
+"<b>Please try to give a substantial answer.</b> If you wanted to comment on "
+"the question or answer, just\n"
+"            <b>use the commenting tool.</b> Please remember that you can "
+"always <b>revise your answers</b>\n"
+"            - no need to answer the same question twice. Also, please "
+"<b>don't forget to vote</b>\n"
 "            - it really helps to select the best questions and answers!"
 msgstr ""
-"<b>لطفا سعی کنید یک پاسخ اساسی بدهید.</b> اگر می خواهید در مورد سؤال یا پاسخ نظر دهید، فقط\n"
-"            <b>از ابزار نظر دادن استفاده کنید</b> لطفا به یاد داشته باشید که همیشه می توانید <b>پاسخ های خود را اصلاح کنید</b>\n"
-"            - نیازی نیست به یک سوال دو بار پاسخ دهید. همچنین، لطفا <b>رای دادن را فراموش نکنید</b>\n"
+"<b>لطفا سعی کنید یک پاسخ اساسی بدهید.</b> اگر می خواهید در مورد سؤال یا پاسخ "
+"نظر دهید، فقط\n"
+"            <b>از ابزار نظر دادن استفاده کنید</b> لطفا به یاد داشته باشید که "
+"همیشه می توانید <b>پاسخ های خود را اصلاح کنید</b>\n"
+"            - نیازی نیست به یک سوال دو بار پاسخ دهید. همچنین، لطفا <b>رای "
+"دادن را فراموش نکنید</b>\n"
 "            - این واقعا کمک می کند تا بهترین پرسش و پاسخ را انتخاب کنید!"
 
 #. module: website_forum
@@ -383,10 +414,12 @@ msgstr "<b>شما قبلاً یک پست معلق دارید.</b><br/>"
 #: model_terms:ir.ui.view,arch_db:website_forum.contact
 msgid ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-trophy o-text-gold ms-2\" role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
+"                    <span class=\"fa fa-trophy o-text-gold ms-2\" "
+"role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
 msgstr ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-trophy o-text-gold ms-2\" role=\"img\" aria-label=\"نشان طلایی\" title=\"نشان طلایی\"/>"
+"                    <span class=\"fa fa-trophy o-text-gold ms-2\" "
+"role=\"img\" aria-label=\"نشان طلایی\" title=\"نشان طلایی\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -444,12 +477,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
 msgid "<i class=\"fa fa-check fa-fw me-1\"/>Check your spelling and try again."
 msgstr ""
-"<i class=\"fa fa-check fa-fw me-1\"/>املای خود را بررسی کنید و دوباره امتحان"
-" کنید."
+"<i class=\"fa fa-check fa-fw me-1\"/>املای خود را بررسی کنید و دوباره امتحان "
+"کنید."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
-msgid "<i class=\"fa fa-check fa-fw me-1\"/>Try searching for one or two words."
+msgid ""
+"<i class=\"fa fa-check fa-fw me-1\"/>Try searching for one or two words."
 msgstr ""
 "<i class=\"fa fa-check fa-fw me-1\"/>سعی کنید یک یا دو کلمه را جستجو کنید."
 
@@ -466,7 +500,8 @@ msgstr "<i class=\"fa fa-check\"/> قبول"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
-msgid "<i class=\"fa fa-check\"/> How to configure TPS and TVQ's canadian taxes?"
+msgid ""
+"<i class=\"fa fa-check\"/> How to configure TPS and TVQ's canadian taxes?"
 msgstr ""
 "<i class=\"fa fa-check\"/> چگونه مالیات کانادایی TPS و TVQ را پیکربندی کنیم؟"
 
@@ -479,15 +514,6 @@ msgstr "<i class=\"fa fa-check\"/><span class=\"ms-2\">قبول</span>"
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
 msgid "<i class=\"fa fa-comments-o me-1\" title=\"Forum\"/>"
 msgstr "<i class=\"fa fa-comments-o me-1\" title=\"انجمن\"/>"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
-msgid ""
-"<i class=\"fa fa-ellipsis-h\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"More\"/>"
-msgstr ""
-"<i class=\"fa fa-ellipsis-h\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"بیشتر\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
@@ -512,7 +538,7 @@ msgstr "<i class=\"fa fa-fw fa-check me-1\"/>دنبال کردن"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
 msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
-msgstr "<i class=\"fa fa-globe me-1\" title=\"وب‌سایت\"/>"
+msgstr "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar
@@ -524,10 +550,12 @@ msgstr "<i class=\"fa fa-info-circle fa-fw\"/> درباره این انجمن"
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
 "<i class=\"fa fa-pencil\"/>\n"
-"                                Edit<span class=\"d-none d-lg-inline\"> your answer</span>"
+"                                Edit<span class=\"d-none d-lg-inline\"> your "
+"answer</span>"
 msgstr ""
 "<i class=\"fa fa-pencil\"/>\n"
-"                                <span class=\"d-none d-lg-inline\"> پاسخ خودت را</span> ویرایش کن"
+"                                <span class=\"d-none d-lg-inline\"> پاسخ "
+"خودت را</span> ویرایش کن"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post
@@ -540,7 +568,7 @@ msgstr "<i class=\"fa fa-reply me-1 d-lg-none\"/> ۰"
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid "<i class=\"fa fa-reply me-1\"/>Reply"
-msgstr ""
+msgstr "<i class=\"fa fa-reply me-1\"/>پاسخ"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
@@ -568,11 +596,11 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid ""
-"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive"
-" votes\" title=\"Positive votes\"/>"
+"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive "
+"votes\" title=\"Positive votes\"/>"
 msgstr ""
-"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive"
-" votes\" title=\"Positive votes\"/>"
+"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive "
+"votes\" title=\"Positive votes\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -625,12 +653,16 @@ msgid ""
 "<i class=\"oi oi-arrow-right display-inline-block\"/> Return to questions "
 "list"
 msgstr ""
-"<i class=\"oi oi-arrow-right display-inline-block\"/> بازگشت به لیست سوالات"
+"<i class=\"oi oi-arrow-right display-inline-block\"/> برگشت به لیست سؤالات"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_sub_nav
-msgid "<i class=\"oi oi-chevron-left small\"/> Back"
-msgstr "<i class=\"oi oi-chevron-left small\"/> بازگشت"
+#: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
+msgid ""
+"<i class=\"oi oi-ellipsis-h\" data-bs-toggle=\"tooltip\" data-bs-"
+"placement=\"top\" title=\"More\"/>"
+msgstr ""
+"<i class=\"oi oi-ellipsis-h\" data-bs-toggle=\"tooltip\" data-bs-"
+"placement=\"top\" title=\"بیشتر\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
@@ -640,7 +672,7 @@ msgstr "<small class=\"fw-bold\">آرا</small>"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_body
 msgid "<small>(View all)</small>"
-msgstr ""
+msgstr "<small>(مشاهده همه)</small>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_all_all_entries
@@ -668,28 +700,33 @@ msgstr ""
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
-msgid "<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
-msgstr ""
+msgid ""
+"<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
+msgstr "<span class=\"flex-grow-1\">چه نوع سؤالاتی می توانم اینجا بپرسم؟</span>"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid "<span class=\"flex-grow-1\">What should I avoid in my answers?</span>"
 msgstr ""
+"<span class=\"flex-grow-1\">از چه چیزی باید در پاسخ هایم اجتناب کنم؟</span>"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid "<span class=\"flex-grow-1\">What should I avoid in my questions?</span>"
 msgstr ""
+"<span class=\"flex-grow-1\">در سؤالاتم از چه چیزهایی باید اجتناب کنم؟</span>"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<span class=\"flex-grow-1\">Why can other people edit my "
-"questions/answers?</span>"
+"<span class=\"flex-grow-1\">Why can other people edit my questions/answers?</"
+"span>"
 msgstr ""
+"<span class=\"flex-grow-1\">چرا افراد دیگر می توانند سوالات/پاسخ های من را "
+"ویرایش کنند؟</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
@@ -698,30 +735,38 @@ msgid ""
 "<span class=\"form-text small text-muted d-block\">consider adding an "
 "example.</span>"
 msgstr ""
+"<span class=\"form-text small text-muted d-block\">اضافه کردن یک مثال را در "
+"نظر بگیرید.</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">select text to format "
-"it.</span>"
+"<span class=\"form-text small text-muted d-block\">select text to format it."
+"</span>"
 msgstr ""
+"<span class=\"form-text small text-muted d-block\">متن را برای قالب بندی "
+"انتخاب کنید.</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">use '/' to insert "
-"images.</span>"
+"<span class=\"form-text small text-muted d-block\">use '/' to insert images."
+"</span>"
 msgstr ""
+"<span class=\"form-text small text-muted d-block\">از '/' برای وارد کردن "
+"تصویر استفاده کنید.</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-"
-"lightbulb-o\"/> Tip:</span>"
+"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-lightbulb-"
+"o\"/> Tip:</span>"
 msgstr ""
+"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-lightbulb-"
+"o\"/> نکته:</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_forum_view_form
@@ -747,7 +792,7 @@ msgstr "<span class=\"text-muted\">هنوز فعالیتی وجود ندارد.<
 #. module: website_forum
 #: model_terms:web_tour.tour,rainbow_man_message:website_forum.question
 msgid "<span><b>Good job!</b> You went through all steps of this tour.</span>"
-msgstr ""
+msgstr "<span><b>کارت عالی بود!</b> شما تمام مراحل این تور را طی کردید.</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -772,8 +817,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_header
 msgid "<span>You need to be registered to interact with the community.</span>"
 msgstr ""
-"<span>شما نیاز به ثبت‌نام دارید تا بتوانید با جامعه تعامل داشته "
-"باشید.</span>"
+"<span>شما نیاز به ثبت‌نام دارید تا بتوانید با جامعه تعامل داشته باشید.</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_template_new_answer
@@ -814,7 +858,7 @@ msgstr "پذیرش پاسخ"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Access Denied"
 msgstr "امکان دسترسی وجود ندارد"
 
@@ -868,7 +912,7 @@ msgstr "همه"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_body
 msgid "All Posts"
-msgstr ""
+msgstr "همه نوشته ها"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
@@ -1003,9 +1047,9 @@ msgstr "بایگانی شده"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Are you sure you want to delete this comment?"
-msgstr ""
+msgstr "آیا مطمئن هستید که می خواهید این نظر را حذف کنید؟"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -1270,7 +1314,7 @@ msgstr "برای ارسال سوال خود کلیک کنید"
 #. odoo-javascript
 #: code:addons/website_forum/static/src/js/tours/website_forum.js:0
 msgid "Click to reply."
-msgstr ""
+msgstr "کلیک برای پاسخ."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
@@ -1392,7 +1436,7 @@ msgstr "محتوا"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_comment_convert_all
 msgid "Convert all comments to answers"
-msgstr ""
+msgstr "تبدیل همه نظرات به پاسخ ها"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__karma_accept
@@ -1402,12 +1446,12 @@ msgstr "تبدیل یک نظر به پاسخ"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_comment_convert_own
 msgid "Convert own comments to answers"
-msgstr ""
+msgstr "تبدیل نظرات تان به پاسخ"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
 msgid "Convert to Comment"
-msgstr ""
+msgstr "تبدیل به نظر"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_comment
@@ -1452,6 +1496,8 @@ msgid ""
 "Create an account today to enjoy exclusive features and engage with our "
 "awesome community!"
 msgstr ""
+"همین امروز یک حساب کاربری ایجاد کنید تا از ویژگی های انحصاری لذت ببرید و با "
+"جامعه عالی ما تعامل داشته باشید!"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_tag_create
@@ -1462,7 +1508,7 @@ msgstr "ایجاد برچسب‌های جدید"
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
 msgid "Create option \""
-msgstr ""
+msgstr "ایجاد گزینه \""
 
 #. module: website_forum
 #: model_terms:gamification.badge,description:website_forum.badge_32
@@ -1500,19 +1546,22 @@ msgid "Critic"
 msgstr "منتقد"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option_plugin.js:0
 msgid "Date"
 msgstr "تاریخ"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
-msgid "Date (high to low)"
-msgstr "تاریخ (بالا به پایین)"
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option_plugin.js:0
+msgid "Date (new to old)"
+msgstr "تاریخ (جدید تا قدیمی)"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
-msgid "Date (low to high)"
-msgstr "تاریخ (کم به زیاد)"
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option_plugin.js:0
+msgid "Date (old to new)"
+msgstr "تاریخ (جدید تا قدیمی)"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__default_order
@@ -1531,7 +1580,7 @@ msgstr "قابلیت مشاهده چالش را از طریق منوها تعر�
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 #: model_terms:ir.ui.view,arch_db:website_forum.post_comment
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
@@ -1541,7 +1590,7 @@ msgstr "حذف"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_comment_unlink_all
 msgid "Delete all comments"
-msgstr ""
+msgstr "حذف همه نظرها"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_unlink_all
@@ -1551,7 +1600,7 @@ msgstr "تمام پست ها را حذف کنید"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_comment_unlink_own
 msgid "Delete own comments"
-msgstr ""
+msgstr "حذف نظرهایتان"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_unlink_own
@@ -1580,9 +1629,10 @@ msgid "Deleted own post with 3 or more upvotes"
 msgstr "پست شخصی با ۳ یا بیشتر رای موافق حذف شد"
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option_plugin.js:0
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__description
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid "Description"
 msgstr "توصیف"
@@ -1631,8 +1681,13 @@ msgstr "پیام را نادیده بگیرید"
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_reason__display_name
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__display_name
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__display_name
+#: model:ir.model.fields,field_description:website_forum.field_gamification_challenge__display_name
+#: model:ir.model.fields,field_description:website_forum.field_gamification_karma_tracking__display_name
+#: model:ir.model.fields,field_description:website_forum.field_ir_attachment__display_name
+#: model:ir.model.fields,field_description:website_forum.field_res_users__display_name
+#: model:ir.model.fields,field_description:website_forum.field_website__display_name
 msgid "Display Name"
-msgstr "نام نمایش داده شده"
+msgstr "نام نمایشی"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_user_bio
@@ -1716,7 +1771,7 @@ msgstr "جعبه خالی"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_sign_up_cta
 msgid "Enjoying the discussion? Don't just read, join in!"
-msgstr ""
+msgstr "از بحث لذت می برید؟ فقط مطالعه نکنید، بپیوندید!"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_a_5
@@ -1887,14 +1942,15 @@ msgid ""
 "accumulated for a question or answer per day. The table given at the end "
 "explains reputation point requirements for each type of moderation task."
 msgstr ""
-"به طورمثال، اگر سوال جالبی بپرسید و یا پاسخ مفیدی دهید، اطلاعات ورودی شما "
-"رای بالایی می‌آورند. از طرف دیگر اگر پاسخ گمراه‌کننده باشد، رای نمی‌آورد. هر"
-" رای موافق 10 امتیاز برای شما ایجاد کرده و هر رای مخالف 2 امتیاز از شما کم "
-"می‌کند. محدودیت امتیازی که در یک روز برای یک پرسش یا پاسخ قابل جمع‌آوری است،"
-" 200 امتیاز است."
+"به طورمثال، اگر سوال جالبی بپرسید و یا پاسخ مفیدی دهید، اطلاعات ورودی شما رای "
+"بالایی می‌آورند. از طرف دیگر اگر پاسخ گمراه‌کننده باشد، رای نمی‌آورد. هر رای "
+"موافق 10 امتیاز برای شما ایجاد کرده و هر رای مخالف 2 امتیاز از شما کم می‌کند. "
+"محدودیت امتیازی که در یک روز برای یک پرسش یا پاسخ قابل جمع‌آوری است، 200 "
+"امتیاز است."
 
 #. module: website_forum
 #. odoo-python
+#: code:addons/website_forum/controllers/website_forum.py:0
 #: code:addons/website_forum/models/website.py:0
 #: model:ir.actions.act_url,name:website_forum.action_open_forum
 #: model:ir.model,name:website_forum.model_forum_forum
@@ -1927,7 +1983,8 @@ msgid "Forum Name"
 msgstr "نام انجمن"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option_plugin.js:0
 msgid "Forum Page"
 msgstr "صفحه پرسش و پاسخ"
 
@@ -1955,13 +2012,14 @@ msgstr "برچسب‌های انجمن"
 #. module: website_forum
 #: model:ir.actions.act_window,name:website_forum.forum_tag_action
 msgid "Forum Tags"
-msgstr ""
+msgstr "برچسب‌های انجمن"
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option.xml:0
 #: model:ir.actions.act_window,name:website_forum.forum_forum_action
 #: model:ir.ui.menu,name:website_forum.menu_forum_global
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_forum_view_tree
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
 msgid "Forums"
 msgstr "انجمن‌ها"
 
@@ -2036,14 +2094,10 @@ msgid "Great Question"
 msgstr "پرسش عالی"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 msgid "Grid"
 msgstr "شبکه"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_search
-msgid "Group By"
-msgstr "گروه‌بندی برمبنای"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__faq
@@ -2101,6 +2155,11 @@ msgstr "در اینجا جدولی با امتیازات و سطح کارما و
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_reason__id
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__id
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__id
+#: model:ir.model.fields,field_description:website_forum.field_gamification_challenge__id
+#: model:ir.model.fields,field_description:website_forum.field_gamification_karma_tracking__id
+#: model:ir.model.fields,field_description:website_forum.field_ir_attachment__id
+#: model:ir.model.fields,field_description:website_forum.field_res_users__id
+#: model:ir.model.fields,field_description:website_forum.field_website__id
 msgid "ID"
 msgstr "شناسه"
 
@@ -2145,23 +2204,24 @@ msgid ""
 "            them."
 msgstr ""
 "اگر این پست را ببندید برای اکثر کاربران مخفی می شود. تنها\n"
-"            کاربرانی که کارما بالایی دارند می‌توانند پست‌های بسته را تا تعدیل کنند."
+"            کاربرانی که کارما بالایی دارند می‌توانند پست‌های بسته را تا تعدیل "
+"کنند."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "If you fit in one of these example or if your motivation for asking the "
-"question is “I would like to participate in a discussion about ______”, then"
-" you should not be asking here but on our mailing lists. However, if your "
+"question is “I would like to participate in a discussion about ______”, then "
+"you should not be asking here but on our mailing lists. However, if your "
 "motivation is “I would like others to explain ______ to me”, then you are "
 "probably OK."
 msgstr ""
 "اگر شما در یکی از این مثال‌ها قرار می‌گیرید یا اگر انگیزه شما برای پرسیدن "
-"سوالی ماشبه \"من می‌خواهم در بحثی درباره ______ شرکت کنم\"، نباید اینجا "
-"بپرسید، بلکه باید در لیست‌های ایمیل‌ها بپرسید. با این حال، اگر انگیزه شما "
-"پرسیدن سوالی مشابه \"دوست دارم دیگران ______ را برای من توضیح دهند\"، "
-"احتمالاً این پرسش برای انجمن مناسب هست."
+"سوالی ماشبه \"من می‌خواهم در بحثی درباره ______ شرکت کنم\"، نباید اینجا بپرسید"
+"، بلکه باید در لیست‌های ایمیل‌ها بپرسید. با این حال، اگر انگیزه شما پرسیدن "
+"سوالی مشابه \"دوست دارم دیگران ______ را برای من توضیح دهند\"، احتمالاً این "
+"پرسش برای انجمن مناسب هست."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.mark_as_offensive
@@ -2170,8 +2230,10 @@ msgid ""
 "            users having a high karma can see offensive posts to moderate\n"
 "            them."
 msgstr ""
-"اگر این پست را به عنوان توهین آمیز علامت گذاری کنید، برای اکثر کاربران پنهان می شود. تنها\n"
-"            کاربران با کارمای بالا می‌توانند پست‌های توهین آمیز را برای نظم بخشیدن\n"
+"اگر این پست را به عنوان توهین آمیز علامت گذاری کنید، برای اکثر کاربران پنهان "
+"می شود. تنها\n"
+"            کاربران با کارمای بالا می‌توانند پست‌های توهین آمیز را برای نظم "
+"بخشیدن\n"
 "            مشاهده کنند."
 
 #. module: website_forum
@@ -2218,7 +2280,7 @@ msgstr "زبان توهین آمیز و بی ادبانه"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__user_favourite
 msgid "Is Favourite"
-msgstr "مورد علاقه است "
+msgstr "مورد علاقه است"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__message_is_follower
@@ -2256,7 +2318,7 @@ msgstr "تغییر رای دیگران ممنوع است."
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Karma Error"
 msgstr "خطای کارما"
 
@@ -2301,8 +2363,9 @@ msgid "Last Activity"
 msgstr "آخرین فعالیت"
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__last_post_id
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
 msgid "Last Post"
 msgstr "آخرین پست"
 
@@ -2317,7 +2380,7 @@ msgstr "اخرین به روز رسانی"
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__write_uid
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__write_uid
 msgid "Last Updated by"
-msgstr "آخرین بروز رسانی توسط"
+msgstr "آخرین تغییر توسط"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__write_date
@@ -2333,7 +2396,8 @@ msgid "Last activity on"
 msgstr "آخرین فعالیت در"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 msgid "Layout"
 msgstr "طرح بندی"
 
@@ -2355,7 +2419,8 @@ msgid "LinkedIn"
 msgstr "لینکدین"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 msgid "List"
 msgstr "فهرست"
 
@@ -2383,7 +2448,7 @@ msgstr "علامت گذاری به عنوان هرزنامه"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_all_oe_structure_forum_all_top
 msgid "Meet our community members"
-msgstr "<br>با اعضای انجمن ما آشنا شوید</br>"
+msgstr "با اعضای جامعه ما آشنا شوید"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__message_has_error
@@ -2533,6 +2598,11 @@ msgid "No posts yet"
 msgstr "هنوز پستی وجود ندارد"
 
 #. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "No results."
+msgstr "نتیجه‌ای یافت نشد."
+
+#. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_dofollow
 msgid "Nofollow links"
 msgstr "لینکهای دنبال نشده"
@@ -2582,7 +2652,7 @@ msgstr "تعداد پست های پرچم گذاری شده"
 #: model:ir.model.fields,help:website_forum.field_forum_post__message_needaction_counter
 #: model:ir.model.fields,help:website_forum.field_forum_tag__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr "تعداد پیام هایی که نیاز به اقدام دارند"
+msgstr "تعداد پیام‌های نیازمند اقدام"
 
 #. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_forum_forum__message_has_error_counter
@@ -2612,7 +2682,7 @@ msgstr "توهین آمیز"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Offensive Post"
 msgstr "پست توهین آمیز"
 
@@ -2620,12 +2690,6 @@ msgstr "پست توهین آمیز"
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 msgid "Offensive Posts"
 msgstr "پست‌های توهین‌آمیز"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
-msgid "Oh no! Please <a href=\"%s\">sign in</a> to perform this action"
-msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
@@ -2661,11 +2725,16 @@ msgid "Plain Content"
 msgstr "محتوای ساده"
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
+msgid "Please enter 2 or more characters"
+msgstr "لطفاً ۲ یا چند کاراکتر وارد کنید"
+
+#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"Please wait for a moderator to validate your previous post before "
-"continuing."
+"Please wait for a moderator to validate your previous post before continuing."
 msgstr "لطفاً قبل از ادامه، منتظر بمانید تا ناظم پست قبلی شما را تأیید کند."
 
 #. module: website_forum
@@ -2721,7 +2790,8 @@ msgid "Post Closing Reason"
 msgstr "دلیل بسته شدن پست"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 msgid "Post Count"
 msgstr "تعداد پست"
 
@@ -2791,7 +2861,8 @@ msgstr "همگانی"
 msgid ""
 "Public: Forum is public\n"
 "Signed In: Forum is visible for signed in users\n"
-"Some users: Forum and their content are hidden for non members of selected group"
+"Some users: Forum and their content are hidden for non members of selected "
+"group"
 msgstr ""
 "عمومی: انجمن عمومی است\n"
 "ورود به سیستم: انجمن برای کاربرانی که وارد سیستم شده اند قابل مشاهده است\n"
@@ -2937,8 +3008,8 @@ msgstr "پاسخ: %s"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "Read: #{question.name}"
-msgstr "بخوانید: #{question.name}"
+msgid "Read: {{0}}"
+msgstr "خوانده شده: {{0}}"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__closed_reason_id
@@ -2973,7 +3044,7 @@ msgstr "ردکردن"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_related_posts
 msgid "Related Posts"
-msgstr ""
+msgstr "نوشته های مرتبط"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__relevancy
@@ -3032,7 +3103,7 @@ msgstr "به سوال خود پاسخ دهید"
 #: model:ir.model.fields,help:website_forum.field_forum_forum__website_id
 #: model:ir.model.fields,help:website_forum.field_forum_post__website_id
 msgid "Restrict to a specific website."
-msgstr ""
+msgstr "محدود به یک وب سایت خاص."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.profile_access_denied
@@ -3069,6 +3140,21 @@ msgstr "ذخیره تغییرات"
 #: model:gamification.goal.definition,name:website_forum.definition_scholar
 msgid "Scholar"
 msgstr "محقق"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "Search"
+msgstr "جستجو"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "Search Answers..."
+msgstr "جستجوی پاسخ‌ها..."
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "Search Questions..."
+msgstr "جستجوی سؤالات..."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_search
@@ -3140,8 +3226,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid ""
-"Share this content to increase your chances to be featured on the front page"
-" and attract more visitors."
+"Share this content to increase your chances to be featured on the front page "
+"and attract more visitors."
 msgstr ""
 "این محتوا را به اشتراک بگذارید تا شانس خود را برای برجسته شدن در صفحه اول "
 "افزایش دهید و بازدیدکنندگان بیشتری را جذب کنید."
@@ -3164,7 +3250,6 @@ msgstr "نمایش نتایج برای"
 #. module: website_forum
 #. odoo-python
 #: code:addons/website_forum/models/forum_forum.py:0
-#: model_terms:forum.forum,welcome_message:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_sign_up_cta
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_header
 msgid "Sign up"
@@ -3213,14 +3298,14 @@ msgstr "متأسفیم، نتوانستیم هیچ نتیجه‌ای پیدا ک
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Sorry, you cannot select your own posts as best answer"
 msgstr ""
 "متاسفیم، شما نمی‌توانید پست‌های خودتان را به عنوان بهترین پاسخ انتخاب کنید"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Sorry, you cannot vote for your own posts"
 msgstr "با عرض پوزش، شما نمی توانید به پست های خود رای دهید"
 
@@ -3280,6 +3365,8 @@ msgid "Tag name already exists!"
 msgstr "نام برچسب از قبل وجود دارد!"
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__tag_ids
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__tag_ids
 #: model:ir.ui.menu,name:website_forum.menu_forum_tag_global
@@ -3315,11 +3402,6 @@ msgid "Teacher"
 msgstr "آموزگار"
 
 #. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_forum_forum__teaser
-msgid "Teaser"
-msgstr "تیزر"
-
-#. module: website_forum
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid "Thanks for posting!"
@@ -3339,8 +3421,8 @@ msgid ""
 "The goal of this site is create a relevant knowledge base that would answer "
 "questions related to Odoo."
 msgstr ""
-"هدف این سایت ایجاد یک پایگاه دانش مرتبط است که به سوالات مربوط به اودوو پاسخ"
-" دهد."
+"هدف این سایت ایجاد یک پایگاه دانش مرتبط است که به سوالات مربوط به اودوو پاسخ "
+"دهد."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -3372,13 +3454,13 @@ msgstr "هیچ برچسبی با جستجوی انتخاب‌شده مطابقت
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 #: model_terms:ir.ui.view,arch_db:website_forum.faq_karma
 msgid ""
-"Therefore questions and answers can be edited like wiki pages by experienced"
-" users of this site in order to improve the overall quality of the knowledge"
-" base content. Such privileges are granted based on user karma level: you "
+"Therefore questions and answers can be edited like wiki pages by experienced "
+"users of this site in order to improve the overall quality of the knowledge "
+"base content. Such privileges are granted based on user karma level: you "
 "will be able to do the same once your karma gets high enough."
 msgstr ""
-"بنابراین، پرسش‌ها و پاسخ‌ها را می‌توان مانند صفحات ویکی توسط کاربران با "
-"تجربه این سایت ویرایش کرد تا کیفیت کلی محتوای پایگاه دانش بهبود یابد. چنین "
+"بنابراین، پرسش‌ها و پاسخ‌ها را می‌توان مانند صفحات ویکی توسط کاربران با تجربه "
+"این سایت ویرایش کرد تا کیفیت کلی محتوای پایگاه دانش بهبود یابد. چنین "
 "امتیازاتی بر اساس سطح کارمای کاربر اعطا می شود: زمانی که کارمای شما به "
 "اندازه کافی بالا رفت، می توانید همین کار را انجام دهید."
 
@@ -3400,8 +3482,8 @@ msgid ""
 "your professional profile and become a better marketer together."
 msgstr ""
 "این انجمن برای حرفه ای ها و علاقه مندان به محصولات و خدمات ما است. بهترین "
-"محتوا و ایده های بازاریابی جدید را به اشتراک بگذارید و در مورد آنها بحث "
-"کنید، پروفایل حرفه ای خود را بسازید و با هم به یک بازاریاب بهتر تبدیل شوید."
+"محتوا و ایده های بازاریابی جدید را به اشتراک بگذارید و در مورد آنها بحث کنید"
+"، پروفایل حرفه ای خود را بسازید و با هم به یک بازاریاب بهتر تبدیل شوید."
 
 #. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_forum_forum__relevancy_post_vote
@@ -3421,13 +3503,13 @@ msgstr "این انجمن آرشیو شده است."
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "This post can not be flagged"
 msgstr "این پست قابل پرچم گذاری نیست"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "This post is already flagged"
 msgstr "این پست قبلاً علامت گذاری شده است"
 
@@ -3440,10 +3522,12 @@ msgstr "این پست منتظر اعتبارسنجی است"
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "This post is currently awaiting moderation and is not published yet.<br/>\n"
-"                    As a moderator you can either <b>Accept</b> or <b>Reject</b> this post."
+"                    As a moderator you can either <b>Accept</b> or "
+"<b>Reject</b> this post."
 msgstr ""
 "این پست در حال حاضر در انتظار بررسی است و هنوز منتشر نشده است.<br/>\n"
-"                    به‌عنوان یک مدیر می‌توانید این پست را <b>پذیرفتن</b> یا <b>رد کردن</b> کنید."
+"                    به‌عنوان یک مدیر می‌توانید این پست را <b>پذیرفتن</b> یا <b>"
+"رد کردن</b> کنید."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -3452,13 +3536,13 @@ msgstr "این سوال علامت‌گذاری شده است"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "This user hasn't answered any questions yet. <br/>"
-msgstr "هنوز این کاربر به هیچ سوالی پاسخ نداده است. <br/>"
+msgid "This user hasn't answered any questions yet."
+msgstr "این کاربر هنوز به سؤالی پاسخ نداده است."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "This user hasn't posted any questions yet.<br/>"
-msgstr "این کاربر هنوز هیچ سؤالی ارسال نکرده است.<br/>"
+msgid "This user hasn't posted any questions yet."
+msgstr "این کاربر هنوز سؤالی ارسال نکرده است."
 
 #. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_14
@@ -3502,8 +3586,8 @@ msgid ""
 "To prevent your question from being flagged and possibly removed, avoid "
 "asking subjective questions where …"
 msgstr ""
-"برای جلوگیری از پرچم گذاری و احتمالاً حذف شدن سؤال خود، از پرسیدن سؤالات "
-"ذهنی در جایی که …"
+"برای جلوگیری از پرچم گذاری و احتمالاً حذف شدن سؤال خود، از پرسیدن سؤالات ذهنی "
+"در جایی که …"
 
 #. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_9
@@ -3788,9 +3872,9 @@ msgid ""
 "rough measure of the community trust to him/her. Various moderation tasks "
 "are gradually assigned to the users based on those points."
 msgstr ""
-"هنگامی که یک سوال یا پاسخ رای مثبت داده می شود، کاربری که آنها را ارسال کرده"
-" است امتیازاتی را کسب می کند که به آنها \"نقاط کارما\" می گویند. این نکات به"
-" عنوان معیار تقریبی از اعتماد جامعه به او عمل می کند. وظایف تعدیل مختلفی بر "
+"هنگامی که یک سوال یا پاسخ رای مثبت داده می شود، کاربری که آنها را ارسال کرده "
+"است امتیازاتی را کسب می کند که به آنها \"نقاط کارما\" می گویند. این نکات به "
+"عنوان معیار تقریبی از اعتماد جامعه به او عمل می کند. وظایف تعدیل مختلفی بر "
 "اساس آن نکات به تدریج به کاربران محول می شود."
 
 #. module: website_forum
@@ -3842,13 +3926,13 @@ msgstr "شما یک پست معلق دارید"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "You have not answered any questions yet. <br/>"
-msgstr "شما هنوز به هیچ سؤالی پاسخ نداده‌اید. <br/>"
+msgid "You have not answered any questions yet."
+msgstr "شما هنوز به سؤالی پاسخ نداده‌اید."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "You have not posted any questions yet. <br/>"
-msgstr "شما هنوز هیچ سوالی ارسال نکرده‌اید. <br/>"
+msgid "You have not posted any questions yet."
+msgstr "شما هنوز سؤالی ارسال نکرده‌اید."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_votes
@@ -3869,13 +3953,13 @@ msgstr "برای ویرایش برچسب ها باید کارما کافی دا�
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"You should only ask practical, answerable questions based on actual problems"
-" that you face. Chatty, open-ended questions diminish the usefulness of this"
-" site and push other questions off the front page."
+"You should only ask practical, answerable questions based on actual problems "
+"that you face. Chatty, open-ended questions diminish the usefulness of this "
+"site and push other questions off the front page."
 msgstr ""
 "شما فقط باید بر اساس مشکلات واقعی که با آن مواجه هستید، سوالات عملی و قابل "
-"پاسخ بپرسید. سوالات پرحرف و باز از مفید بودن این سایت می کاهد و سوالات دیگر "
-"را از صفحه اول خارج می کند."
+"پاسخ بپرسید. سوالات پرحرف و باز از مفید بودن این سایت می کاهد و سوالات دیگر را "
+"از صفحه اول خارج می کند."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
@@ -4045,7 +4129,8 @@ msgid ""
 "        answer is selected as the right one. See what you can do with karma"
 msgstr ""
 "اگر پاسخ‌های شما\n"
-"        به عنوان پاسخ درست انتخاب شود. مشاهده کنید که با کارما چه کار می‌توانید انجام دهید"
+"        به عنوان پاسخ درست انتخاب شود. مشاهده کنید که با کارما چه کار "
+"می‌توانید انجام دهید"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
@@ -4074,12 +4159,6 @@ msgid "it is a rant disguised as a question: “______ sucks, am I right?”"
 msgstr ""
 "این یک فحاشی است که در قالب یک سوال پنهان شده است: \"______ بد است، درست می "
 "گویم؟\""
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
-msgid "karma is required to perform this action. "
-msgstr "کارما برای انجام این عمل مورد نیاز است."
 
 #. module: website_forum
 #. odoo-javascript
@@ -4188,8 +4267,8 @@ msgid ""
 "we are being asked an open-ended, hypothetical question: “What if ______ "
 "happened?”"
 msgstr ""
-"از ما یک سوال فرضی و باز پرسیده می شود: \"اگر ______ اتفاق می افتاد چه می "
-"شد؟\""
+"از ما یک سوال فرضی و باز پرسیده می شود: \"اگر ______ اتفاق می افتاد چه می شد"
+"؟\""
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -4221,3 +4300,440 @@ msgstr "بیوگرافی شما را می توان به عنوان راهنما�
 #: model_terms:ir.ui.view,arch_db:website_forum.follow
 msgid "your email..."
 msgstr "ایمیل شما..."
+
+#~ msgid "%d karma required to unlink a comment."
+#~ msgstr "%d کارما برای دادن رای منفی به نظر مورد نیاز است."
+
+#~ msgid "&amp;nbsp;and&amp;nbsp;"
+#~ msgstr "&amp;nbsp;and&amp;nbsp;"
+
+#~ msgid ", by"
+#~ msgstr ", به وسیله"
+
+#~ msgid ", consider <b>adding an example</b>."
+#~ msgstr ", <b>اضافه کردن نمونه</b>  در نظر گرفته شده."
+
+#~ msgid "0 Answers"
+#~ msgstr "صفر پاسخ"
+
+#~ msgid "<b> [Offensive]</b>"
+#~ msgstr "<b> [توهین آمیز]</b>"
+
+#~ msgid "<b>Tags</b> I Follow"
+#~ msgstr "<b>برچسب‌هایی</b> که من دنبال می‌کنم"
+
+#~ msgid ""
+#~ "<b>This forum is empty.</b><br/>\n"
+#~ "                    Be the first one asking a question"
+#~ msgstr ""
+#~ "<b>این انجمن خالی است</b><br/>\n"
+#~ "                    اولین نفری باشید که سوال می پرسد"
+
+#~ msgid "<b>What kinds of questions can I ask here?</b>"
+#~ msgstr "<b>چه نوع سوالاتی می توانم در اینجا بپرسم؟</b>"
+
+#~ msgid "<b>What should I avoid in my answers?</b>"
+#~ msgstr "<b>از چه چیزی باید در پاسخ هایم اجتناب کنم؟</b>"
+
+#~ msgid "<b>What should I avoid in my questions?</b>"
+#~ msgstr "<b>در سؤالاتم از چه چیزهایی باید اجتناب کنم؟</b>"
+
+#~ msgid "<b>[Answer]</b>"
+#~ msgstr "<b>[پاسخ]</b>"
+
+#~ msgid "<em class=\"d-block mb-2\">or</em>"
+#~ msgstr "<em class=\"d-block mb-2\">یا</em>"
+
+#~ msgid "<i class=\"fa fa-bell fa-fw\"/> Followed Posts"
+#~ msgstr "<i class=\"fa fa-bell fa-fw\"/> پست‌های دنبال شده"
+
+#~ msgid "<i class=\"fa fa-bug\"/> Filter Tool"
+#~ msgstr "<i class=\"fa fa-bug\"/> ابزار فیلتر"
+
+#~ msgid ""
+#~ "<i class=\"fa fa-check text-success d-block display-2\"/>\n"
+#~ "            <b>You've Completely Caught Up!</b><br/>"
+#~ msgstr ""
+#~ "<i class=\"fa fa-check text-success d-block display-2\"/>\n"
+#~ "            <b>شما به طور کامل گرفتار شده اید!</b><br/>"
+
+#~ msgid "<i class=\"fa fa-check-square-o fa-fw\"/> To Validate"
+#~ msgstr "<i class=\"fa fa-check-square-o fa-fw\"/> برای اعتبار سنجی"
+
+#~ msgid "<i class=\"fa fa-flag fa-fw\"/> Flagged"
+#~ msgstr "<i class=\"fa fa-flag fa-fw\"/> پرچم‌دار"
+
+#~ msgid "<i class=\"fa fa-question-circle-o fa-fw\"/> My Posts"
+#~ msgstr "<i class=\"fa fa-question-circle-o fa-fw\"/> پست‌های من"
+
+#~ msgid ""
+#~ "<i class=\"fa fa-share-alt text-muted\"/>\n"
+#~ "                                Share"
+#~ msgstr ""
+#~ "<i class=\"fa fa-share-alt text-muted\"/>\n"
+#~ "                                به اشتراک گذاشتن"
+
+#~ msgid "<i class=\"fa fa-star fa-fw\"/> Favourites"
+#~ msgstr "<i class=\"fa fa-star fa-fw\"/> علاقه‌مندی‌ها"
+
+#~ msgid "<i class=\"fa fa-tags fa-fw\"/> Followed Tags"
+#~ msgstr "<i class=\"fa fa-tags fa-fw\"/> برچسب‌های دنبال شده"
+
+#~ msgid ""
+#~ "<small class=\"text-muted\">\n"
+#~ "                    Flagged\n"
+#~ "                </small>"
+#~ msgstr ""
+#~ "<small class=\"text-muted\">\n"
+#~ "                    برچسب خورده ها\n"
+#~ "                </small>"
+
+#~ msgid "<span class=\"mx-1 d-none d-sm-inline\">&amp;nbsp;|</span>"
+#~ msgstr "<span class=\"mx-1 d-none d-sm-inline\">&amp;nbsp;|</span>"
+
+#~ msgid "<span class=\"mx-1 text-400 d-none d-lg-block\">|</span>"
+#~ msgstr "<span class=\"mx-1 text-400 d-none d-lg-block\">|</span>"
+
+#~ msgid "<span class=\"mx-1\">|</span>"
+#~ msgstr "<span class=\"mx-1\">|</span>"
+
+#~ msgid ""
+#~ "<span class=\"mx-1\">|</span>\n"
+#~ "                    <i class=\"fa fa-star\"/>"
+#~ msgstr ""
+#~ "<span class=\"mx-1\">|</span>\n"
+#~ "                    <i class=\"fa fa-star\"/>"
+
+#~ msgid "<span class=\"mx-3  mx-lg-2 text-400 d-none d-md-inline\">|</span>"
+#~ msgstr "<span class=\"mx-3  mx-lg-2 text-400 d-none d-md-inline\">|</span>"
+
+#~ msgid "<span>By </span>"
+#~ msgstr "<span>توسط </span>"
+
+#~ msgid "A clear, explicit and concise title"
+#~ msgstr "عنوانی واضح، صریح و مختصر"
+
+#~ msgid "About"
+#~ msgstr "درباره"
+
+#~ msgid "All Forums"
+#~ msgstr "همه انجمن ها"
+
+#~ msgid "All Tags"
+#~ msgstr "همه برچسب ها"
+
+#~ msgid "Allow Bump"
+#~ msgstr "اجازه دست انداز"
+
+#~ msgid "Amazing! There are no unanswered questions left!"
+#~ msgstr "شگفت انگیزاست! هیچ سوال بی پاسخی باقی نمانده است!"
+
+#~ msgid "Answer"
+#~ msgstr "پاسخ"
+
+#~ msgid "Back"
+#~ msgstr "بازگشت"
+
+#~ msgid "Be less specific in your wording for a wider search result"
+#~ msgstr "برای نتیجه جستجوی عمومی‌تر، عبارت خاص کمتری وارد کنید"
+
+#~ msgid "Browse All"
+#~ msgstr "مرور همه"
+
+#~ msgid "Bumped on"
+#~ msgstr "برخورد کرد"
+
+#~ msgid ""
+#~ "Check this box to display a popup for posts older than 10 days without "
+#~ "any given answer. The popup will offer to share it on social networks. "
+#~ "When shared, a question is bumped at the top of the forum."
+#~ msgstr ""
+#~ "این کادر را علامت بزنید تا یک پنجره بازشو برای پست‌های قدیمی تر از ۱۰ روز "
+#~ "بدون پاسخ داده شده نمایش داده شود. پنجره دریچه بازشو پیشنهاد می کند آن را "
+#~ "در شبکه های اجتماعی به اشتراک بگذارید. هنگامی که به اشتراک گذاشته می‌شود، "
+#~ "یک سوال در بالای انجمن نمایش داده می‌شود."
+
+#~ msgid "Check your spelling and try again"
+#~ msgstr "املای خود را بررسی کنید و دوباره امتحان کنید"
+
+#~ msgid "Click to answer."
+#~ msgstr "برای پاسخ کلیک کنید."
+
+#~ msgid "Close Post"
+#~ msgstr "پست را ببند"
+
+#~ msgid "Comment this post..."
+#~ msgstr "این پست را کامنت کن ..."
+
+#~ msgid "Comments"
+#~ msgstr "نظرها"
+
+#~ msgid "Convert all answers to comments and vice versa"
+#~ msgstr "تمام پاسخ ها را به نظرات و بالعکس تبدیل کنید"
+
+#~ msgid "Convert as a answer"
+#~ msgstr "تبدیل به پاسخ"
+
+#~ msgid "Convert as a comment"
+#~ msgstr "تبدیل به نظر"
+
+#~ msgid "Convert own answers to comments and vice versa"
+#~ msgstr "پاسخ های خود را به نظرات و بالعکس تبدیل کنید"
+
+#~ msgid "Date (high to low)"
+#~ msgstr "تاریخ (بالا به پایین)"
+
+#~ msgid "Date (low to high)"
+#~ msgstr "تاریخ (کم به زیاد)"
+
+#~ msgid "Edit Forum in Backend"
+#~ msgstr "ویرایش فروم در داشبودر"
+
+#~ msgid ""
+#~ "Example\n"
+#~ "                        <i class=\"fa fa-question-circle\"/>"
+#~ msgstr ""
+#~ "نمونه\n"
+#~ "                        <i class=\"fa fa-question-circle\"/>"
+
+#~ msgid "Following"
+#~ msgstr "دنبال می کنید"
+
+#~ msgid "Group By"
+#~ msgstr "گروه‌بندی برمبنای"
+
+#~ msgid "Hide Intro"
+#~ msgstr "پنهان کردن معرفی"
+
+#~ msgid "I'm <b>Following</b>"
+#~ msgstr "<b>دنبال می‌کنم</b>"
+
+#~ msgid "I'm Following"
+#~ msgstr "دنبال می‌کنم"
+
+#~ msgid "Karma"
+#~ msgstr "کارما"
+
+#~ msgid "Last Post:"
+#~ msgstr "آخرین پست:"
+
+#~ msgid "Last activity date"
+#~ msgstr "آخرین تاریخ فعالیت"
+
+#~ msgid "Menu"
+#~ msgstr "منو"
+
+#~ msgid "Moderation"
+#~ msgstr "نظارت"
+
+#~ msgid "More"
+#~ msgstr "بیشتر"
+
+#~ msgid "Most answered"
+#~ msgstr "بیشترین پاسخ داده شده"
+
+#~ msgid "Most voted"
+#~ msgstr "بیشترین رای داده شده"
+
+#~ msgid ""
+#~ "Move this question to the top of the list by sharing it on social "
+#~ "networks."
+#~ msgstr ""
+#~ "این سوال را با اشتراک گذاری در شبکه های اجتماعی به بالای لیست منتقل کنید."
+
+#~ msgid "My <b>Favourites</b>"
+#~ msgstr "<b>علاقهمندی‌های</b> من"
+
+#~ msgid "My <b>Posts</b>"
+#~ msgstr "<b>پست‌های</b> من"
+
+#~ msgid "My Favourites"
+#~ msgstr "علاقهمندی‌های من"
+
+#~ msgid "No activities yet!"
+#~ msgstr "هنوز فعال نشده!"
+
+#~ msgid "No favourite questions in this forum (yet).<br/>"
+#~ msgstr "سوال مورد علاقه در این انجمن (هنوز) وجود ندارد.<br/>"
+
+#~ msgid "No flagged posts"
+#~ msgstr "پست علامت گذاری شده‌ای نیست"
+
+#~ msgid "No post to be validated"
+#~ msgstr "هیچ پستی برای تأیید اعتبار وجود ندارد"
+
+#~ msgid "No tags"
+#~ msgstr "بدون برچسب"
+
+#~ msgid "No vote given by you yet!"
+#~ msgstr "هنوز رای شما داده نشده است!"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "تعداد پیام ها که نیاز به عمل"
+
+#~ msgid "Only one answer per question is allowed"
+#~ msgstr "برای هر سوال فقط یک پاسخ مجاز است"
+
+#~ msgid "Order by"
+#~ msgstr "سفارش توسط"
+
+#~ msgid "Our forums"
+#~ msgstr "انجمن های ما"
+
+#~ msgid "People"
+#~ msgstr "افراد"
+
+#~ msgid "Post Comment"
+#~ msgstr "ارسال نظر"
+
+#~ msgid "Posts:"
+#~ msgstr "پست‌ها:"
+
+#~ msgid "Question by"
+#~ msgstr "سوال توسط"
+
+#~ msgid "Read the guidelines to know how to gain karma."
+#~ msgstr "دستورالعمل ها را بخوانید تا بدانید چگونه کارما را به دست آورید."
+
+#~ msgid "Read: #{question.name}"
+#~ msgstr "بخوانید: #{question.name}"
+
+#~ msgid "Register"
+#~ msgstr "ثبت نام"
+
+#~ msgid "Restrict publishing to this website."
+#~ msgstr "محدود کردن انتشار به این وبسایت."
+
+#~ msgid "Return to the forum."
+#~ msgstr "بازگشت به انجمن."
+
+#~ msgid "Return to the question list."
+#~ msgstr "به لیست سوالات برگردید."
+
+#~ msgid "Search Tips"
+#~ msgstr "نکات جستجو"
+
+#~ msgid "See"
+#~ msgstr "دیدن"
+
+#~ msgid "Show"
+#~ msgstr "نمایش"
+
+#~ msgid "Show Tags Starting By"
+#~ msgstr "نمایش برچسب ها شروع شده توسط"
+
+#~ msgid "Sign in"
+#~ msgstr "ورود به سیستم"
+
+#~ msgid "Sorry you must be logged in to perform this action"
+#~ msgstr "با عرض پوزش شما باید برای انجام این عمل وارد سیستم شوید"
+
+#~ msgid "Sorry you must be logged to flag a post"
+#~ msgstr "با عرض پوزش شما باید برای پرچم گذاری یک پست وارد سیستم شوید"
+
+#~ msgid "Sorry you must be logged to vote"
+#~ msgstr "با عرض پوزش شما باید برای رای دادن وارد سیستم شوید"
+
+#~ msgid "Sorry, anonymous users cannot choose correct answer."
+#~ msgstr "با عرض پوزش، کاربران ناشناس نمی توانند پاسخ صحیح را انتخاب کنند."
+
+#~ msgid "Sorry, we could not find any <b>%s</b> result <b>%s</b> %s%s%s."
+#~ msgstr "با عرض پوزش، هیچ نتیجه‌ای  <b>%s</b> یافت نشد <b>%s</b> %s%s%s."
+
+#~ msgid "Tags I Follow"
+#~ msgstr "برچسب هایی که دنبال می کنم"
+
+#~ msgid "Teaser"
+#~ msgstr "تیزر"
+
+#~ msgid ""
+#~ "Technical field allowing to bump a question. Writing on this field will "
+#~ "trigger a write on write_date and therefore bump the post. Directly "
+#~ "writing on write_date is currently not supported and this field is a "
+#~ "workaround."
+#~ msgstr ""
+#~ "زمینه فنی که به شما امکان می دهد یک سوال را مطرح کنید. نوشتن در این فیلد "
+#~ "باعث ایجاد نوشتن در write_date می شود و در نتیجه پست را به هم می زند. "
+#~ "نوشتن مستقیم در write_date در حال حاضر پشتیبانی نمی شود و این فیلد یک راه "
+#~ "حل است."
+
+#~ msgid ""
+#~ "This community is for professional and enthusiast users, partners and "
+#~ "programmers."
+#~ msgstr ""
+#~ "این انجمن برای کاربران، شرکا و برنامه نویسان حرفه ای و علاقه مند است."
+
+#~ msgid "Toggle favorite status"
+#~ msgstr "وضعیت دلخواه را تغییر دهید"
+
+#~ msgid "Topics"
+#~ msgstr "عنوانها"
+
+#~ msgid "Trending"
+#~ msgstr "پرطرفدار"
+
+#~ msgid "Try searching for one or two words"
+#~ msgstr "سعی کنید یک یا دو کلمه را جستجو کنید"
+
+#~ msgid "Unlink all comments"
+#~ msgstr "تمام نظرات را حذف کنید"
+
+#~ msgid "Unlink own comments"
+#~ msgstr "نظرات خود را حذف کنید"
+
+#~ msgid "Waiting for validation"
+#~ msgstr "منتظر تایید اعتبار"
+
+#~ msgid "Waiting post"
+#~ msgstr "در انتظار پست"
+
+#~ msgid "You have no posts in this forum (yet)."
+#~ msgstr "شما هیچ پستی در این انجمن ندارید (هنوز)."
+
+#~ msgid "You're not following any topic in this forum (yet).<br/>"
+#~ msgstr "شما هیچ موضوعی را در این انجمن دنبال نمی کنید (هنوز).<br/>"
+
+#~ msgid "[Closed]"
+#~ msgstr "[بسته شده]"
+
+#~ msgid "[Deleted]"
+#~ msgstr "[حذف شده]"
+
+#~ msgid "[Offensive]"
+#~ msgstr "[توهین آمیز]"
+
+#~ msgid "activity date"
+#~ msgstr "تاریخ فعالیت"
+
+#~ msgid "in your followed list"
+#~ msgstr "در لیست دنبال شده شما"
+
+#~ msgid "most answered"
+#~ msgstr "اکثرا جواب دادند"
+
+#~ msgid "most voted"
+#~ msgstr "بیشترین رای داده شده"
+
+#~ msgid "newest"
+#~ msgstr "جدیدترین"
+
+#~ msgid "solved"
+#~ msgstr "حل شده"
+
+#~ msgid "to partecipate"
+#~ msgstr "به شرکت"
+
+#~ msgid "trending"
+#~ msgstr "جریان"
+
+#~ msgid "unanswered"
+#~ msgstr "بی پاسخ"
+
+#~ msgid "unsolved"
+#~ msgstr "حل نشده"
+
+#~ msgid "| Flagged"
+#~ msgstr "علامت گذاری کردم"
+
+#~ msgid "圾 Text"
+#~ msgstr "圾 متن"

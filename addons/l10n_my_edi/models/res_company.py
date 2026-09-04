@@ -1,17 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 from odoo import api, fields, models
 
 
 class ResCompany(models.Model):
     _inherit = 'res.company'
-
-    # ---------------
-    # Default methods
-    # ---------------
-
-    def _default_l10n_my_edi_industrial_classification(self):
-        return self.env.ref('l10n_my_edi.class_00000', raise_if_not_found=False)
 
     # ------------------
     # Fields declaration
@@ -24,11 +16,7 @@ class ResCompany(models.Model):
     l10n_my_identification_type = fields.Selection(related='partner_id.l10n_my_identification_type', readonly=False)
     l10n_my_identification_number = fields.Char(related='partner_id.l10n_my_identification_number', readonly=False)
     l10n_my_identification_number_placeholder = fields.Char(compute="_compute_l10n_my_identification_number_placeholder")
-    l10n_my_edi_industrial_classification = fields.Many2one(
-        comodel_name='l10n_my_edi.industry_classification',
-        string="Ind. Classification",
-        default=_default_l10n_my_edi_industrial_classification,
-    )
+    l10n_my_edi_industrial_classification = fields.Many2one(related='partner_id.l10n_my_edi_industrial_classification', readonly=False)
     l10n_my_edi_mode = fields.Selection(
         selection=[
             ('test', 'Pre-Production'),
@@ -67,13 +55,13 @@ class ResCompany(models.Model):
         for company in self:
             placeholder = 'N/A'
             if company.l10n_my_identification_type == 'NRIC':
-                placeholder = '830503-11-4923'
+                placeholder = '830503114923'
             elif company.l10n_my_identification_type == 'BRN':
                 placeholder = '202201234565'
             elif company.l10n_my_identification_type == 'PASSPORT':
                 placeholder = 'A00000000'
             elif company.l10n_my_identification_type == 'ARMY':
-                placeholder = '830805-13-4983'
+                placeholder = '830805134983'
             company.l10n_my_identification_number_placeholder = placeholder
 
     # ----------------
@@ -85,3 +73,7 @@ class ResCompany(models.Model):
         self.ensure_one()
         if not self.l10n_my_edi_proxy_user_id:
             self.env['account_edi_proxy_client.user']._register_proxy_user(self, 'l10n_my_edi', self.l10n_my_edi_mode)
+
+    def _l10n_my_edi_enabled(self):
+        self.ensure_one()
+        return bool(self.sudo().l10n_my_edi_proxy_user_id)

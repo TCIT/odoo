@@ -13,6 +13,7 @@ class TestProjectCommon(TransactionCase):
         super(TestProjectCommon, cls).setUpClass()
         cls.env.company.resource_calendar_id.tz = "Europe/Brussels"
 
+        user_group_partner_manager = cls.env.ref('base.group_partner_manager')
         user_group_employee = cls.env.ref('base.group_user')
         user_group_project_user = cls.env.ref('project.group_project_user')
         user_group_project_manager = cls.env.ref('project.group_project_manager')
@@ -35,26 +36,26 @@ class TestProjectCommon(TransactionCase):
             'email': 'b.t@example.com',
             'signature': 'SignBert',
             'notification_type': 'email',
-            'groups_id': [(6, 0, [cls.env.ref('base.group_public').id])]})
+            'group_ids': [(6, 0, [cls.env.ref('base.group_public').id])]})
         cls.user_portal = Users.create({
             'name': 'Chell Gladys',
             'login': 'chell',
             'email': 'chell@gladys.portal',
             'signature': 'SignChell',
             'notification_type': 'email',
-            'groups_id': [(6, 0, [cls.env.ref('base.group_portal').id])]})
+            'group_ids': [(6, 0, [cls.env.ref('base.group_portal').id])]})
         cls.user_projectuser = Users.create({
             'name': 'Armande ProjectUser',
             'login': 'armandel',
             'password': 'armandel',
             'email': 'armande.projectuser@example.com',
-            'groups_id': [(6, 0, [user_group_employee.id, user_group_project_user.id])]
+            'group_ids': [(6, 0, [user_group_employee.id, user_group_project_user.id, user_group_partner_manager.id])]
         })
         cls.user_projectmanager = Users.create({
             'name': 'Bastien ProjectManager',
             'login': 'bastien',
             'email': 'bastien.projectmanager@example.com',
-            'groups_id': [(6, 0, [user_group_employee.id, user_group_project_manager.id])]})
+            'group_ids': [(6, 0, [user_group_employee.id, user_group_project_manager.id, user_group_partner_manager.id])]})
 
         # Test 'Pigs' project
         cls.project_pigs = cls.env['project.project'].with_context({'mail_create_nolog': True}).create({
@@ -88,15 +89,6 @@ class TestProjectCommon(TransactionCase):
                     'sequence': 10,
                 })]
             })
-
-    def format_and_process(self, template, to='groups@example.com, other@gmail.com', subject='Frogs',
-                           extra='', email_from='Sylvie Lelitre <test.sylvie.lelitre@agrolait.com>',
-                           cc='', msg_id='<1198923581.41972151344608186760.JavaMail@agrolait.com>',
-                           model=None, target_model='project.task', target_field='name'):
-        self.assertFalse(self.env[target_model].search([(target_field, '=', subject)]))
-        mail = template.format(to=to, subject=subject, cc=cc, extra=extra, email_from=email_from, msg_id=msg_id)
-        self.env['mail.thread'].message_process(model, mail)
-        return self.env[target_model].search([(target_field, '=', subject)])
 
 
 class TestProjectBase(TestProjectCommon):
@@ -252,9 +244,6 @@ class TestProjectBase(TestProjectCommon):
             # Cannot change the company of a project if both the project and its partner have a company
             self.project_pigs.company_id = company_2
         with self.assertRaises(UserError):
-            # Cannot unset the project's company if its associated partner has a company
-            self.project_pigs.company_id = False
-        with self.assertRaises(UserError):
             # Cannot change the company of a partner if both the project and its partner have a company
             partner.company_id = company_2
         partner.company_id = False
@@ -293,7 +282,7 @@ class TestProjectBase(TestProjectCommon):
 
         self.task_1.rating_apply(rating, token=rate.access_token)
 
-        self.project_pigs.rating_ids.invalidate_recordset()
+        self.project_pigs.invalidate_recordset(['rating_ids'])
         self.assertEqual(len(self.project_pigs.rating_ids), 1, "There should be 1 rating linked to the project")
 
     def test_planned_dates_consistency_for_project(self):
@@ -488,21 +477,18 @@ class TestProjectBase(TestProjectCommon):
                 Command.create({'name': 'subtask1', 'project_id': project1.id}),
                 Command.create({'name': 'subtask2', 'project_id': project1.id, 'state': '1_canceled'}),
                 Command.create({'name': 'subtask3', 'project_id': project2.id}),
-                Command.create({'name': 'subtask4', 'project_id': project1.id, 'display_in_project': True}),
-                Command.create({'name': 'subtask5', 'project_id': project1.id, 'state': '1_canceled', 'display_in_project': True}),
-                Command.create({'name': 'subtask6', 'project_id': project1.id, 'child_ids': [
-                    Command.create({'name': 'subsubtask1', 'project_id': project2.id}),
-                    Command.create({'name': 'subsubtask1', 'project_id': project1.id, 'display_in_project': True})
+                Command.create({'name': 'subtask4', 'project_id': project1.id, 'child_ids': [
+                    Command.create({'name': 'subsubtask41', 'project_id': project2.id}),
+                    Command.create({'name': 'subsubtask42', 'project_id': project1.id})
                 ]}),
-                Command.create({'name': 'subtask7', 'state': '1_done', 'project_id': project1.id, 'child_ids': [
-                    Command.create({'name': 'subsubtask1', 'project_id': project1.id, 'state': '1_done'}),
-                    Command.create({'name': 'subsubtask1', 'project_id': project1.id, 'display_in_project': True, 'state': '1_done'}),
+                Command.create({'name': 'subtask5', 'state': '1_done', 'project_id': project1.id, 'child_ids': [
+                    Command.create({'name': 'subsubtask51', 'project_id': project1.id, 'state': '1_done'}),
                 ]}),
             ]}
         ])
-        self.assertEqual(project1.task_count, 7)
-        self.assertEqual(project1.open_task_count, 4)
-        self.assertEqual(project1.closed_task_count, 3)
+        self.assertEqual(project1.task_count, 9)
+        self.assertEqual(project1.open_task_count, 5)
+        self.assertEqual(project1.closed_task_count, 4)
         self.assertEqual(project2.task_count, 2)
         self.assertEqual(project2.open_task_count, 2)
         self.assertEqual(project2.closed_task_count, 0)
@@ -523,3 +509,41 @@ class TestProjectBase(TestProjectCommon):
         task.active = False
         copy_task2 = task.copy()
         self.assertTrue(copy_task2.active, "Archived task should be active when duplicating an archived task")
+
+    def test_duplicate_doesnt_copy_date(self):
+        project = self.env['project.project'].create({
+            'name': 'Project',
+            'date_start': '2021-09-20',
+            'date': '2021-09-28',
+        })
+        task = self.env['project.task'].create({
+            'name': 'Task',
+            'project_id': project.id,
+            'date_deadline': '2021-09-26',
+        })
+        project_copy = project.copy()
+        self.assertFalse(project_copy.date_start, "The project's date fields shouldn't be copied on project duplication")
+        self.assertFalse(project_copy.date, "The project's date fields shouldn't be copied on project duplication")
+        self.assertFalse(project_copy.task_ids.date_deadline, "The task's date fields shouldn't be copied on project duplication")
+        self.assertFalse(task.copy().date_deadline, "The task's date fields shouldn't be copied on task duplication")
+
+    def test_archived_subtask_not_copied_during_parent_task_duplication(self):
+        """Test that archived subtasks are not copied when duplicating a parent task."""
+        parent_task = self.env['project.task'].create({
+            'name': 'Parent Task',
+            'project_id': self.project_pigs.id,
+            'child_ids': [
+                Command.create({
+                    'name': 'child task',
+                    'project_id': self.project_pigs.id,
+                }),
+            ],
+        })
+        parent_task.child_ids.active = False
+        self.assertFalse(parent_task.copy().child_ids, "Archived subtask should not be copied")
+
+    def test_rename_multiple_projects_updates_analytic_account_names(self):
+        projects = self.project_pigs + self.project_goats
+        projects._create_analytic_account()
+        projects.write({'name': 'sheeps'})
+        self.assertEqual(projects.account_id.mapped('name'), ['sheeps', 'sheeps'])

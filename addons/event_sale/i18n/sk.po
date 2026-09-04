@@ -1,34 +1,36 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* event_sale
-# 
+# * event_sale
+#
 # Translators:
-# Tomáš Píšek, 2024
-# Larissa Manderfeld, 2024
-# Wil Odoo, 2024
-# 
+# Damian Brencic <brencicdamian12313@gmail.com>, 2022
+# Rastislav Brencic <rastislav.brencic@azet.sk>, 2022
+# Filip Hanes <filip.hanes@protonmail.com>, 2022
+# SAKodoo <sak@odoo.com>, 2022
+# Matus Krnac <matus.krnac@gmail.com>, 2022
+# Jaroslav Bosansky <jaro.bosansky@ekoenergo.sk>, 2022
+# Martin Trigaux, 2022
+# Jan Prokop, 2023
+# Tomáš Píšek <Tomas.Pisek@seznam.cz>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:49+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Slovak (https://app.transifex.com/odoo/teams/41243/sk/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 11:53+0000\n"
+"Last-Translator: Tomáš Píšek <Tomas.Pisek@seznam.cz>\n"
+"Language-Team: Slovak <https://translate.odoo.com/projects/odoo-19/"
+"event_sale/sk/>\n"
+"Language: sk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: sk\n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && "
+"n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: event_sale
-#. odoo-python
-#: code:addons/event_sale/models/sale_order.py:0
-msgid "%(event_name)s - Tickets"
-msgstr ""
-
-#. module: event_sale
-#: model_terms:ir.ui.view,arch_db:event_sale.event_ticket_id_change_exception
+#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_change_exception
 msgid ""
 ".\n"
 "            <span>Manual actions may be needed.</span>"
@@ -50,18 +52,34 @@ msgid "<span class=\"o_stat_text\">Sales</span>"
 msgstr ""
 
 #. module: event_sale
-#: model_terms:ir.ui.view,arch_db:event_sale.event_ticket_id_change_exception
+#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_change_exception
 msgid "<span>Registration modification for attendee:</span>"
 msgstr ""
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_configurator_view_form
 msgid "Add"
-msgstr "Pridať"
+msgstr ""
+
+#. module: event_sale
+#: model_terms:ir.ui.view,arch_db:event_sale.event_configurator_view_form
+#: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_form
+#: model_terms:ir.ui.view,arch_db:event_sale.sale_order_view_form
+msgid "All Events"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event__sale_order_lines_ids
 msgid "All sale order lines pointing to this event"
+msgstr ""
+
+#. module: event_sale
+#: model:ir.model.fields,help:event_sale.field_event_event_configurator__is_multi_slots
+#: model:ir.model.fields,help:event_sale.field_sale_order_line__is_multi_slots
+msgid ""
+"Allow multiple time slots. The communications, the maximum number of "
+"attendees and the maximum number of tickets registrations are defined for "
+"each time slot instead of the whole event."
 msgstr ""
 
 #. module: event_sale
@@ -110,8 +128,14 @@ msgstr "Zrušené"
 msgid ""
 "Choose an event and it will automatically create a registration for this "
 "event."
+msgstr "Vyberte udalosť a to automaticky vytvorí registrácie pre túto udalosť."
+
+#. module: event_sale
+#: model:ir.model.fields,help:event_sale.field_sale_order_line__event_slot_id
+msgid ""
+"Choose an event slot and it will automatically create a registration for "
+"this event slot."
 msgstr ""
-"Vyberte udalosť a to automaticky vytvorí registrácie pre túto udalosť."
 
 #. module: event_sale
 #: model:ir.model.fields,help:event_sale.field_sale_order_line__event_ticket_id
@@ -125,7 +149,7 @@ msgstr ""
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_configurator_view_form
 msgid "Close"
-msgstr "Zatvoriť"
+msgstr ""
 
 #. module: event_sale
 #: model_terms:ir.actions.act_window,help:event_sale.event_sale_report_action
@@ -141,7 +165,7 @@ msgstr "Spoločnosť"
 #. module: event_sale
 #: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__event_registration_state__open
 msgid "Confirmed"
-msgstr "Potvrdený"
+msgstr "Potvrdené"
 
 #. module: event_sale
 #. odoo-python
@@ -177,13 +201,19 @@ msgstr "Zákazník"
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_configurator_view_form
 msgid "Discard"
-msgstr "Zrušiť"
+msgstr ""
 
 #. module: event_sale
+#: model:ir.model.fields,field_description:event_sale.field_event_event__display_name
 #: model:ir.model.fields,field_description:event_sale.field_event_event_configurator__display_name
+#: model:ir.model.fields,field_description:event_sale.field_event_event_ticket__display_name
+#: model:ir.model.fields,field_description:event_sale.field_event_registration__display_name
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__display_name
+#: model:ir.model.fields,field_description:event_sale.field_product_template__display_name
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor__display_name
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor_line__display_name
+#: model:ir.model.fields,field_description:event_sale.field_sale_order__display_name
+#: model:ir.model.fields,field_description:event_sale.field_sale_order_line__display_name
 msgid "Display Name"
 msgstr "Zobrazovaný názov"
 
@@ -251,6 +281,12 @@ msgid "Event Sales Report"
 msgstr ""
 
 #. module: event_sale
+#: model:ir.model.fields,field_description:event_sale.field_event_sale_report__event_slot_id
+#: model:ir.model.fields,field_description:event_sale.field_registration_editor_line__event_slot_id
+msgid "Event Slot"
+msgstr ""
+
+#. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__event_date_begin
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
 msgid "Event Start Date"
@@ -275,27 +311,15 @@ msgid "Events that have ended"
 msgstr ""
 
 #. module: event_sale
-#: model_terms:ir.ui.view,arch_db:event_sale.event_ticket_id_change_exception
+#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_change_exception
 msgid "Exception:"
 msgstr ""
 
 #. module: event_sale
-#: model:ir.model.fields.selection,name:event_sale.selection__event_registration__sale_status__free
 #: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__sale_status__free
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
 msgid "Free"
-msgstr "Zdarma"
-
-#. module: event_sale
-#. odoo-python
-#: code:addons/event_sale/models/sale_order.py:0
-msgid "Get Your Tickets"
-msgstr ""
-
-#. module: event_sale
-#: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
-msgid "Group By"
-msgstr "Zoskupiť podľa"
+msgstr "Voľný"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_configurator__has_available_tickets
@@ -303,12 +327,24 @@ msgid "Has Available Tickets"
 msgstr ""
 
 #. module: event_sale
+#: model:ir.model.fields,field_description:event_sale.field_event_event__id
 #: model:ir.model.fields,field_description:event_sale.field_event_event_configurator__id
+#: model:ir.model.fields,field_description:event_sale.field_event_event_ticket__id
+#: model:ir.model.fields,field_description:event_sale.field_event_registration__id
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__id
+#: model:ir.model.fields,field_description:event_sale.field_product_template__id
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor__id
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor_line__id
+#: model:ir.model.fields,field_description:event_sale.field_sale_order__id
+#: model:ir.model.fields,field_description:event_sale.field_sale_order_line__id
 msgid "ID"
 msgstr "ID"
+
+#. module: event_sale
+#. odoo-python
+#: code:addons/event_sale/wizard/event_configurator.py:0
+msgid "Invalid slot choice \"%(slot_name)s\" for event \"%(event_name)s\"."
+msgstr ""
 
 #. module: event_sale
 #. odoo-python
@@ -320,6 +356,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__invoice_partner_id
 msgid "Invoice Address"
 msgstr "Fakturačná adresa"
+
+#. module: event_sale
+#: model:ir.model.fields,field_description:event_sale.field_event_event_configurator__is_multi_slots
+#: model:ir.model.fields,field_description:event_sale.field_sale_order_line__is_multi_slots
+msgid "Is Multi Slots"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__active
@@ -361,9 +403,7 @@ msgid "Non-free tickets"
 msgstr ""
 
 #. module: event_sale
-#: model:ir.model.fields.selection,name:event_sale.selection__event_registration__sale_status__to_pay
 #: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__sale_status__to_pay
-#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
 msgid "Not Sold"
 msgstr ""
 
@@ -454,7 +494,7 @@ msgstr ""
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_sale_order_line__registration_ids
 msgid "Registrations"
-msgstr "Registrácie"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor__event_registration_ids
@@ -490,18 +530,13 @@ msgid "Sale Order Status"
 msgstr ""
 
 #. module: event_sale
-#: model:ir.model.fields,field_description:event_sale.field_event_registration__sale_status
-msgid "Sale Status"
-msgstr ""
-
-#. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.view_event_form_inherit_ticket
 msgid "Sales"
 msgstr "Predaj"
 
 #. module: event_sale
-#: model:ir.model.fields,field_description:event_sale.field_event_event__sale_price_subtotal
-msgid "Sales (Tax Excluded)"
+#: model:ir.model.fields,field_description:event_sale.field_event_event__sale_price_total
+msgid "Sales (Tax Included)"
 msgstr ""
 
 #. module: event_sale
@@ -510,7 +545,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor__sale_order_id
 #: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__sale_order_state__sale
 msgid "Sales Order"
-msgstr "Objednávka "
+msgstr "Predajná objednávka"
 
 #. module: event_sale
 #: model:ir.model,name:event_sale.model_sale_order_line
@@ -530,12 +565,19 @@ msgid "Select an Event"
 msgstr ""
 
 #. module: event_sale
-#: model:ir.model.fields.selection,name:event_sale.selection__event_registration__sale_status__sold
+#. odoo-python
+#: code:addons/event_sale/models/event_registration.py:0
+#: model:ir.model.fields,field_description:event_sale.field_event_event_configurator__event_slot_id
+#: model:ir.model.fields,field_description:event_sale.field_sale_order_line__event_slot_id
+#: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
+msgid "Slot"
+msgstr ""
+
+#. module: event_sale
 #: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__sale_status__sold
-#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
 msgid "Sold"
-msgstr "Predané"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_registration__utm_source_id
@@ -545,17 +587,19 @@ msgstr "Zdroj"
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_registration__state
 msgid "Status"
-msgstr "Stav"
+msgstr ""
 
 #. module: event_sale
 #. odoo-python
 #: code:addons/event_sale/models/sale_order_line.py:0
 msgid ""
-"The sale order line with the product %(product_name)s needs an event and a "
-"ticket."
+"The sale order line with the product %(product_name)s needs an event, a "
+"ticket and a slot in case the event has multiple time slots."
 msgstr ""
 
 #. module: event_sale
+#. odoo-python
+#: code:addons/event_sale/models/event_registration.py:0
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
 msgid "Ticket"
 msgstr "Požiadavka"
@@ -564,11 +608,6 @@ msgstr "Požiadavka"
 #: model:ir.model.fields,field_description:event_sale.field_event_event_configurator__event_ticket_id
 #: model:ir.model.fields,field_description:event_sale.field_sale_order_line__event_ticket_id
 msgid "Ticket Type"
-msgstr "Typ požiadavky"
-
-#. module: event_sale
-#: model_terms:ir.ui.view,arch_db:event_sale.event_ticket_id_change_exception
-msgid "Ticket changed from"
 msgstr ""
 
 #. module: event_sale
@@ -582,11 +621,6 @@ msgid "Total sales for this event"
 msgstr ""
 
 #. module: event_sale
-#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
-msgid "Transaction"
-msgstr "Transakcia"
-
-#. module: event_sale
 #: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__event_registration_state__draft
 msgid "Unconfirmed"
 msgstr "Nepotvrdené"
@@ -594,7 +628,8 @@ msgstr "Nepotvrdené"
 #. module: event_sale
 #: model:ir.model.fields,help:event_sale.field_event_registration__state
 msgid ""
-"Unconfirmed: registrations in a pending state waiting for an action (specific case, notably with sale status)\n"
+"Unconfirmed: registrations in a pending state waiting for an action "
+"(specific case, notably with sale status)\n"
 "Registered: registrations considered taken by a client\n"
 "Attended: registrations for which the attendee attended the event\n"
 "Cancelled: registrations cancelled manually"
@@ -621,11 +656,107 @@ msgid "We could not find a matching event ticket for this product. <br/>"
 msgstr ""
 
 #. module: event_sale
+#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_change_exception
+msgid "changed from"
+msgstr ""
+
+#. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.view_event_registration_editor_form
 msgid "please provide attendee details."
 msgstr ""
 
 #. module: event_sale
-#: model_terms:ir.ui.view,arch_db:event_sale.event_ticket_id_change_exception
+#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_change_exception
 msgid "to"
 msgstr "na"
+
+#~ msgid ""
+#~ "A description of the ticket that you want to communicate to your "
+#~ "customers."
+#~ msgstr "Popis lístka, ktorý chcete oznámiť svojim zákazníkom."
+
+#~ msgid ""
+#~ "A storable product is a product for which you manage stock. The Inventory "
+#~ "app has to be installed.\n"
+#~ "A consumable product is a product for which stock is not managed.\n"
+#~ "A service is a non-material product you provide."
+#~ msgstr ""
+#~ "Skladovateľný produkt je produkt, ktorý je evidovaný v sklade. Musí byť "
+#~ "nainštalovaná aplikácia Sklad.\n"
+#~ "Spotrebný materiál nie je evidovaný v sklade.\n"
+#~ "Služba je nemateriálny produkt ktorý poskytujete."
+
+#~ msgid "Cancel"
+#~ msgstr "Zrušené"
+
+#~ msgid "Configure an event"
+#~ msgstr "Nakonfigurujte udalosť"
+
+#~ msgid "Currency"
+#~ msgstr "Mena"
+
+#~ msgid "Description"
+#~ msgstr "Popis"
+
+#~ msgid "Event Template Ticket"
+#~ msgstr "Šablóna vstupenky udalosti"
+
+#~ msgid "Event Tickets"
+#~ msgstr "Vstupenky udalosti"
+
+#~ msgid "Group By"
+#~ msgstr "Zoskupiť podľa"
+
+#~ msgid "Is Paid"
+#~ msgstr "Je zaplatené"
+
+#~ msgid "Journal Entry"
+#~ msgstr "Účtovný záznam"
+
+#~ msgid "Locked"
+#~ msgstr "Uzamknuté"
+
+#~ msgid "Mobile"
+#~ msgstr "Mobilný telefón"
+
+#~ msgid "Not Paid"
+#~ msgstr "Nezaplatené"
+
+#~ msgid "Ok"
+#~ msgstr "Ok"
+
+#~ msgid "Order Ref"
+#~ msgstr "Odkaz objednávky"
+
+#~ msgid "Paid"
+#~ msgstr "Zaplatené"
+
+#~ msgid "Price"
+#~ msgstr "Cena"
+
+#~ msgid "Price Reduce"
+#~ msgstr "Cenové zníženie"
+
+#~ msgid "Price Reduce Tax inc"
+#~ msgstr "Cenové zníženie vč. dane"
+
+#~ msgid "Product Type"
+#~ msgstr "Typ produktu"
+
+#~ msgid "Product Variant"
+#~ msgstr "Varianta produktu"
+
+#~ msgid "Quotation Template Line"
+#~ msgstr "Riadok šablóny cenovej ponuky"
+
+#~ msgid "Quotation Template Option"
+#~ msgstr "Možnosti šablóny cenovej ponuky"
+
+#~ msgid "Sales End"
+#~ msgstr "Ukončenie predaja"
+
+#~ msgid "Skip"
+#~ msgstr "Preskočiť"
+
+#~ msgid "Transaction"
+#~ msgstr "Transakcia"

@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 import logging
-from lxml import etree
 from freezegun import freeze_time
 from odoo import tools
 from odoo.tests import Form, tagged
@@ -43,7 +39,6 @@ class TestItEdiDDT(TestItEdi):
                 'list_price': 180.0,
                 'type': 'service',
                 'uom_id': uom_unit.id,
-                'uom_po_id': uom_unit.id,
                 'default_code': 'SERV_DEL',
                 'invoice_policy': 'delivery',
                 'taxes_id': [(6, 0, [])],
@@ -55,7 +50,6 @@ class TestItEdiDDT(TestItEdi):
                 'list_price': 90.0,
                 'type': 'service',
                 'uom_id': uom_hour.id,
-                'uom_po_id': uom_hour.id,
                 'description': 'Example of product to invoice on order',
                 'default_code': 'PRE-PAID',
                 'invoice_policy': 'order',
@@ -69,7 +63,6 @@ class TestItEdiDDT(TestItEdi):
                 'type': 'consu',
                 'weight': 0.01,
                 'uom_id': uom_unit.id,
-                'uom_po_id': uom_unit.id,
                 'default_code': 'FURN_9999',
                 'invoice_policy': 'order',
                 'expense_policy': 'no',
@@ -83,7 +76,6 @@ class TestItEdiDDT(TestItEdi):
                 'type': 'consu',
                 'weight': 0.01,
                 'uom_id': uom_unit.id,
-                'uom_po_id': uom_unit.id,
                 'default_code': 'FURN_7777',
                 'invoice_policy': 'delivery',
                 'expense_policy': 'no',
@@ -96,6 +88,7 @@ class TestItEdiDDT(TestItEdi):
         """ Create a sale order with multiple DDTs, and create an invoice with a later date.
             The export has to have the TipoDocumento TD24 for Deferred Invoice.
         """
+        self.env.user.group_ids |= self.env.ref("sales_team.group_sale_salesman")
         # Create sale order
         with freeze_time('2020-02-02 18:00'):
             self.sale_order = self.env['sale.order'].with_company(self.company).create({
@@ -107,18 +100,18 @@ class TestItEdiDDT(TestItEdi):
                         'name': product.name,
                         'product_id': product.id,
                         'product_uom_qty': 5,
-                        'product_uom': product.uom_id.id,
                         'price_unit': product.list_price,
-                        'tax_id': self.tax_22
+                        'tax_ids': self.tax_22
                     }) for product in self.products
                 ],
                 'pricelist_id': self.default_pricelist.id,
                 'picking_policy': 'direct',
+                'name': 'SO-ITDDT0001',
             })
             self.sale_order.action_confirm()
 
             # Create two pickings, so 2 DDTs
-            for dummy in range(2):
+            for _i in range(2):
                 self._create_delivery(self.sale_order, 1)
 
         # Create one invoice
@@ -126,12 +119,11 @@ class TestItEdiDDT(TestItEdi):
             deferred_invoice = self.sale_order._create_invoices()
             deferred_invoice.action_post()
 
+        # makes _assert_export_invoice look in this module's test folder
+        self.module = "l10n_it_stock_ddt"
+
         # Check the XML output of the invoice
-        invoice_xml = deferred_invoice._l10n_it_edi_render_xml()
-        expected_xml = self._get_stock_ddt_test_file_content("deferred_invoice.xml")
-        result = etree.fromstring(invoice_xml)
-        expected = etree.fromstring(expected_xml)
-        self.assertXmlTreeEqual(result, expected)
+        self._assert_export_invoice(deferred_invoice, "deferred_invoice.xml")
 
     def _create_delivery(self, sale_order, qty=1):
         """ Create a picking of a limited quantity and create a backorder """

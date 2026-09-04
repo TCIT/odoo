@@ -12,11 +12,10 @@ from odoo.addons.website_sale.controllers import main
 class WebsiteSale(main.WebsiteSale):
 
     @route()
-    def pricelist(self, promo, **post):
-        order = request.website.sale_get_order()
-        if not order:
+    def pricelist(self, promo, reward_id=None, **post):
+        if not (order_sudo := request.cart):
             return request.redirect('/shop')
-        coupon_status = order._try_apply_code(promo)
+        coupon_status = order_sudo._try_apply_code(promo)
         if coupon_status.get('not_found'):
             return super().pricelist(promo, **post)
         elif coupon_status.get('error'):
@@ -25,31 +24,16 @@ class WebsiteSale(main.WebsiteSale):
             reward_successfully_applied = True
             if len(coupon_status) == 1:
                 coupon, rewards = next(iter(coupon_status.items()))
-                if request.env.context.get('product_id') or (len(rewards) == 1 and not rewards.multi_product):
-                    reward_successfully_applied = self._apply_reward(order, rewards, coupon)
+                if len(rewards) == 1:
+                    reward = rewards
+                else:
+                    reward = reward_id in rewards.ids and rewards.browse(reward_id)
+                if reward and (not reward.multi_product or request.env.context.get('product_id')):
+                    reward_successfully_applied = self._apply_reward(order_sudo, reward, coupon)
 
             if reward_successfully_applied:
                 request.session['successful_code'] = promo
         return request.redirect(post.get('r', '/shop/cart'))
-
-    @route()
-    def shop_payment(self, **post):
-        order = request.website.sale_get_order()
-        if order:
-            order._update_programs_and_rewards()
-            order._auto_apply_rewards()
-        return super().shop_payment(**post)
-
-    @route()
-    def cart(self, **post):
-        order = request.website.sale_get_order()
-        if order and order.state != 'draft':
-            request.session['sale_order_id'] = None
-            order = request.website.sale_get_order()
-        if order:
-            order._update_programs_and_rewards()
-            order._auto_apply_rewards()
-        return super().cart(**post)
 
     @route(['/coupon/<string:code>'], type='http', auth='public', website=True, sitemap=False)
     def activate_coupon(self, code, r='/shop', **kw):
@@ -60,9 +44,8 @@ class WebsiteSale(main.WebsiteSale):
         code = code.strip()
 
         request.session['pending_coupon_code'] = code
-        order = request.website.sale_get_order()
-        if order:
-            result = order._try_pending_coupon()
+        if order_sudo := request.cart:
+            result = order_sudo._try_pending_coupon()
             if isinstance(result, dict) and 'error' in result:
                 url_query['coupon_error'] = result['error']
             else:
@@ -75,9 +58,8 @@ class WebsiteSale(main.WebsiteSale):
 
     @route('/shop/claimreward', type='http', auth='public', website=True, sitemap=False)
     def claim_reward(self, reward_id, code=None, **post):
-        order_sudo = request.website.sale_get_order()
         redirect = post.get('r', '/shop/cart')
-        if not order_sudo:
+        if not (order_sudo := request.cart):
             return request.redirect(redirect)
 
         try:
@@ -106,7 +88,7 @@ class WebsiteSale(main.WebsiteSale):
                         and program_sudo.applies_on == 'future'
                         and program_sudo.program_type not in ('ewallet', 'loyalty'))
                 ):
-                    return self.pricelist(code)
+                    return self.pricelist(code, reward_id=reward_id)
         if coupon:
             self._apply_reward(order_sudo, reward_sudo, coupon)
         return request.redirect(redirect)
@@ -137,13 +119,3 @@ class WebsiteSale(main.WebsiteSale):
             else:
                 order._remove_delivery_line()
         return True
-
-    @route()
-    def cart_update_json(self, *args, set_qty=None, **kwargs):
-        # When a reward line is deleted we remove it from the auto claimable rewards
-        if set_qty == 0:
-            request.update_context(website_sale_loyalty_delete=True)
-            # We need to update the website since `get_sale_order` is called on the website
-            # and does not follow the request's context
-            request.website = request.website.with_context(website_sale_loyalty_delete=True)
-        return super().cart_update_json(*args, set_qty=set_qty, **kwargs)

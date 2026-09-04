@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { _t } from "@web/core/l10n/translation";
 import { x2ManyCommands } from "@web/core/orm_service";
 import { Dialog } from '@web/core/dialog/dialog';
@@ -7,8 +5,9 @@ import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { parseInteger  } from "@web/views/fields/parsers";
 import { getId } from "@web/model/relational_model/utils";
-import { Component, useRef, onMounted } from "@odoo/owl";
+import { Component, useRef, onMounted, onWillStart } from "@odoo/owl";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
+import { user } from "@web/core/user";
 
 export class GenerateDialog extends Component {
     static template = "stock.generate_serial_dialog";
@@ -34,6 +33,9 @@ export class GenerateDialog extends Component {
         this.keepLines = useRef('keepLines');
         this.lots = useRef('lots');
         this.orm = useService("orm");
+        onWillStart(async () => {
+            this.displayUOM = await user.hasGroup("uom.group_uom");
+        });
         onMounted(() => {
             if (this.props.mode === 'generate') {
                 this.nextSerialCount.el.value = this.props.move.data.product_uom_qty || 2;
@@ -42,6 +44,15 @@ export class GenerateDialog extends Component {
                 }
             }
         });
+    }
+    async _onGenerateCustomSerial() {
+        const product = (await this.orm.searchRead("product.product", [["id", "=", this.props.move.data.product_id.id]], ["lot_sequence_id"]))[0];
+        this.sequence = product.lot_sequence_id;
+        if (product.lot_sequence_id) {
+            this.sequence = (await this.orm.searchRead("ir.sequence", [["id", "=", this.sequence[0]]], ["number_next_actual"]))[0];
+            this.nextCustomSerialNumber = await this.orm.call("ir.sequence", "next_by_id", [this.sequence.id]);
+            this.nextSerial.el.value = this.nextCustomSerialNumber;
+        }
     }
     async _onGenerate() {
         let count;
@@ -55,11 +66,12 @@ export class GenerateDialog extends Component {
         }
         const move_line_vals = await this.orm.call("stock.move", "action_generate_lot_line_vals", [{
                 ...this.props.move.context,
-                default_product_id: this.props.move.data.product_id[0],
-                default_location_dest_id: this.props.move.data.location_dest_id[0],
-                default_location_id: this.props.move.data.location_id[0],
+                default_product_id: this.props.move.data.product_id.id,
+                default_location_dest_id: this.props.move.data.location_dest_id.id,
+                default_location_id: this.props.move.data.location_id.id,
                 default_tracking: this.props.move.data.has_tracking,
                 default_quantity: qtyToProcess,
+                default_uom_id: this.props.move.data.has_tracking === 'lot' ? this.props.move.data.product_uom?.id : undefined,
             },
             this.props.mode,
             this.nextSerial.el?.value,

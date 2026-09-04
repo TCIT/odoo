@@ -1,28 +1,36 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* base_setup
-# 
+# * base_setup
+#
 # Translators:
-# Wil Odoo, 2024
-# Abe Manyo, 2024
-# 
+# arfa simoncelli, 2022
+# Martin Trigaux, 2023
+# Abe Manyo, 2023
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Abe Manyo (abem)" <abem@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# "Nurul Aini Akrima Sabila (nuaas)" <nuaas@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Abe Manyo, 2024\n"
-"Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-11 07:58+0000\n"
+"Last-Translator: \"Nurul Aini Akrima Sabila (nuaas)\" <nuaas@odoo.com>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-19/"
+"base_setup/id/>\n"
+"Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: id\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
-msgid "<span class=\"fa fa-lg fa-users\" aria-label=\"Number of active users\"/>"
+msgid ""
+"<span class=\"fa fa-lg fa-users\" aria-label=\"Number of active users\"/>"
 msgstr "<span class=\"fa fa-lg fa-users\" aria-label=\"Jumlah user aktif\"/>"
 
 #. module: base_setup
@@ -31,15 +39,17 @@ msgid ""
 "<span class=\"o_form_label\" invisible=\"active_user_count &gt; 1\">\n"
 "                                        Active User\n"
 "                                    </span>\n"
-"                                    <span class=\"o_form_label\" invisible=\"active_user_count &lt;= 1\">\n"
+"                                    <span class=\"o_form_label\" "
+"invisible=\"active_user_count &lt;= 1\">\n"
 "                                        Active Users\n"
 "                                    </span>"
 msgstr ""
 "<span class=\"o_form_label\" invisible=\"active_user_count &gt; 1\">\n"
 "                                        User Aktif\n"
 "                                    </span>\n"
-"                                    <span class=\"o_form_label\" invisible=\"active_user_count &lt;= 1\">\n"
-"                                        User-User Aktif\n"
+"                                    <span class=\"o_form_label\" "
+"invisible=\"active_user_count &lt;= 1\">\n"
+"                                        User Aktif\n"
 "                                    </span>"
 
 #. module: base_setup
@@ -48,7 +58,8 @@ msgid ""
 "<span class=\"o_form_label\" invisible=\"company_count &gt; 1\">\n"
 "                                        Company\n"
 "                                    </span>\n"
-"                                    <span class=\"o_form_label\" invisible=\"company_count &lt;= 1\">\n"
+"                                    <span class=\"o_form_label\" "
+"invisible=\"company_count &lt;= 1\">\n"
 "                                        Companies\n"
 "                                    </span>\n"
 "                                    <br/>"
@@ -56,8 +67,9 @@ msgstr ""
 "<span class=\"o_form_label\" invisible=\"company_count &gt; 1\">\n"
 "                                        Perusahaan\n"
 "                                    </span>\n"
-"                                    <span class=\"o_form_label\" invisible=\"company_count &lt;= 1\">\n"
-"                                        Perusahaan-Perusahaan\n"
+"                                    <span class=\"o_form_label\" "
+"invisible=\"company_count &lt;= 1\">\n"
+"                                        Perusahaan\n"
 "                                    </span>\n"
 "                                    <br/>"
 
@@ -67,15 +79,17 @@ msgid ""
 "<span class=\"o_form_label\" invisible=\"language_count &gt; 1\">\n"
 "                                            Language\n"
 "                                        </span>\n"
-"                                        <span class=\"o_form_label\" invisible=\"language_count &lt;= 1\">\n"
+"                                        <span class=\"o_form_label\" "
+"invisible=\"language_count &lt;= 1\">\n"
 "                                            Languages\n"
 "                                        </span>"
 msgstr ""
 "<span class=\"o_form_label\" invisible=\"language_count &gt; 1\">\n"
 "                                            Bahasa\n"
 "                                        </span>\n"
-"                                        <span class=\"o_form_label\" invisible=\"language_count &lt;= 1\">\n"
-"                                            Bahasa-Bahasa\n"
+"                                        <span class=\"o_form_label\" "
+"invisible=\"language_count &lt;= 1\">\n"
+"                                            Bahasa\n"
 "                                        </span>"
 
 #. module: base_setup
@@ -99,10 +113,18 @@ msgstr ""
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid ""
-"<strong>Save</strong> this page and come back here to set up reCaptcha."
+"<strong>Save</strong> this page and come back here to set up Google Places "
+"API key"
 msgstr ""
-"<strong>Simpan</strong> halaman ini dan kembali ke sini untuk mengatur ulang"
-" Captcha."
+"<strong>Simpan</strong> halaman ini dan kembali untuk setup Google Places "
+"API key"
+
+#. module: base_setup
+#: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
+msgid "<strong>Save</strong> this page and come back here to set up reCaptcha."
+msgstr ""
+"<strong>Simpan</strong> halaman ini dan kembali ke sini untuk mengatur ulang "
+"Captcha."
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -110,7 +132,6 @@ msgid ""
 "<strong>Save</strong> this page and come back here to set up the feature."
 msgstr ""
 "<strong>Simpan</strong> halaman ini dan kembali lagi untuk mengatur hal ini."
-" "
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -178,13 +199,13 @@ msgstr "Memungkinkan untuk bekerja dengan beberapa mata uang"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
-msgid "Automatically enrich your contact base with company data"
-msgstr "Secara otomatis memperkaya basis kontak Anda dengan data perusahaan"
+msgid "Autocomplete partner addresses with Google Places"
+msgstr "Selesaikan otomatis alamat partner dengan Google Place"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
-msgid "Automatically generate counterpart documents in recipient companies"
-msgstr "Secara otomatis buat dokumen counterpart di perusahaan penerima"
+msgid "Automatically enrich your contact base with company data"
+msgstr "Secara otomatis memperkaya basis kontak Anda dengan data perusahaan"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -192,9 +213,9 @@ msgid ""
 "By default, new users get highest access rights for all installed apps. If "
 "unchecked, new users will only have basic employee access."
 msgstr ""
-"Secara default, user-user baru mendapatkan hak akses tertinggi untuk semua "
-"app yang diinstal. Bila tidak dicentang, user-user baru hanya akan memiliki "
-"hak akses karyawan dasar."
+"Secara default, user baru mendapatkan hak akses tertinggi untuk semua app "
+"yang diinstal. Bila tidak dicentang, user baru hanya akan memiliki hak akses "
+"karyawan dasar."
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -248,8 +269,7 @@ msgid ""
 "company sells/buys to another of your company."
 msgstr ""
 "Konfigurasi aturan perusahaan agar secara otomatis membuat SO/PO ketika "
-"salah satu dari perusahaan Anda menjual/membeli ke perusahaan Anda yang "
-"lain."
+"salah satu dari perusahaan Anda menjual/membeli ke perusahaan Anda yang lain."
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -257,12 +277,25 @@ msgid "Contacts"
 msgstr "Kontak"
 
 #. module: base_setup
+#: model:ir.model.fields,field_description:base_setup.field_res_config_settings__company_country_group_codes
+msgid "Country Group Codes"
+msgstr "Kode Kelompok Negara"
+
+#. module: base_setup
+#: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
+msgid ""
+"Create corresponding in/out orders and bills when you sell/buy between your "
+"companies"
+msgstr ""
+"Buat pesanan dan tagihan masuk/keluar yang sesuai saat Anda menjual/membeli "
+"antara perusahaan Anda"
+
+#. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__report_footer
 msgid "Custom Report Footer"
 msgstr "Laporan Footer Kustom"
 
 #. module: base_setup
-#: model:ir.model.fields,field_description:base_setup.field_res_config_settings__user_default_rights
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid "Default Access Rights"
 msgstr "Hak Akses Standar"
@@ -270,8 +303,16 @@ msgstr "Hak Akses Standar"
 #. module: base_setup
 #. odoo-python
 #: code:addons/base_setup/models/res_config_settings.py:0
-msgid "Default User Template not found."
-msgstr "Template Pengguna Dasar tidak ditemukan."
+msgid "Default access for new users"
+msgstr "Akses standar untuk user baru"
+
+#. module: base_setup
+#: model:ir.model.fields,field_description:base_setup.field_ir_http__display_name
+#: model:ir.model.fields,field_description:base_setup.field_kpi_provider__display_name
+#: model:ir.model.fields,field_description:base_setup.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:base_setup.field_res_users__display_name
+msgid "Display Name"
+msgstr "Nama Tampilan"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -287,6 +328,12 @@ msgstr "Contoh Dokumen"
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid "Edit Layout"
 msgstr "Mengedit Tata Letak"
+
+#. module: base_setup
+#. odoo-python
+#: code:addons/base_setup/models/res_config_settings.py:0
+msgid "Edit new user default group"
+msgstr "Edit kelompok standar user baru"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -328,14 +375,22 @@ msgid "Geolocation"
 msgstr "Geolokasi"
 
 #. module: base_setup
-#: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_product_images
-msgid "Get product pictures using barcode"
-msgstr "Dapatkan gambar produk menggunakan barcode"
+#: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_google_address_autocomplete
+msgid "Google Address Autocomplete"
+msgstr "Autocomplete Alamat Google"
 
 #. module: base_setup
 #: model:ir.model,name:base_setup.model_ir_http
 msgid "HTTP Routing"
 msgstr "HTTP routing"
+
+#. module: base_setup
+#: model:ir.model.fields,field_description:base_setup.field_ir_http__id
+#: model:ir.model.fields,field_description:base_setup.field_kpi_provider__id
+#: model:ir.model.fields,field_description:base_setup.field_res_config_settings__id
+#: model:ir.model.fields,field_description:base_setup.field_res_users__id
+msgid "ID"
+msgstr "ID"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -361,6 +416,11 @@ msgstr "Transaksi Antar Perusahaan"
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__is_root_company
 msgid "Is Root Company"
 msgstr "Apakah Root Company"
+
+#. module: base_setup
+#: model:ir.model,name:base_setup.model_kpi_provider
+msgid "KPI Provider"
+msgstr "KPI Provider"
 
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_auth_ldap
@@ -416,17 +476,17 @@ msgstr "Beberapa Mata Uang"
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__active_user_count
 msgid "Number of Active Users"
-msgstr "Jumlah User-User Aktif"
+msgstr "Jumlah User Aktif"
 
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__company_count
 msgid "Number of Companies"
-msgstr "Jumlah Perusahaan "
+msgstr "Jumlah Perusahaan"
 
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__language_count
 msgid "Number of Languages"
-msgstr "Jumlah Bahasa-Bahasa"
+msgstr "Jumlah Bahasa"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -454,6 +514,11 @@ msgid "Permissions"
 msgstr "Izin"
 
 #. module: base_setup
+#: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_voip
+msgid "Phone"
+msgstr "Telepon"
+
+#. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid "Preview Document"
 msgstr "Pratinjau Dokumen"
@@ -477,6 +542,12 @@ msgstr "Lindungi formulir Anda dari spam dan penyalahgunaan."
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid "Protect your forms with CF Turnstile."
 msgstr "Lindungi formulir Anda dengan CF Turnstile."
+
+#. module: base_setup
+#. odoo-javascript
+#: code:addons/base_setup/static/src/views/module_views.xml:0
+msgid "Reset Updating States"
+msgstr "Reset Status yang Sedang Update"
 
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_sms
@@ -567,11 +638,6 @@ msgid "VAT"
 msgstr "PPN"
 
 #. module: base_setup
-#: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_voip
-msgid "VoIP"
-msgstr "VoIP"
-
-#. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid ""
 "When populating your address book, Odoo provides a list of matching "
@@ -582,6 +648,46 @@ msgstr ""
 "Saat memilih satu item, data perusahaan dan logo akan diisi otomatis."
 
 #. module: base_setup
+#. odoo-python
+#: code:addons/base_setup/models/res_users.py:0
+msgid "You have to install the Discuss application to use this feature."
+msgstr "Anda harus menginstal aplikasi Discuss untuk menggunakan fitur ini."
+
+#. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_google_recaptcha
 msgid "reCAPTCHA"
 msgstr "reCAPTCHA"
+
+#~ msgid "Asterisk (VoIP)"
+#~ msgstr "Asterisk (VoIP)"
+
+#~ msgid ""
+#~ "Automatically generate counterpart documents for orders/invoices between "
+#~ "companies"
+#~ msgstr ""
+#~ "Secara otomatis menghasilkan dokumen counterpart untuk pesanan/faktur "
+#~ "antar perusahaan"
+
+#~ msgid ""
+#~ "By default, new users get highest access rights for all installed apps."
+#~ msgstr ""
+#~ "Jika tidak diatur, pengguna baru mendapatkan hak akses tertinggi untuk "
+#~ "semua aplikasi terpasang. "
+
+#~ msgid "Default User Template not found."
+#~ msgstr "Template Pengguna Dasar tidak ditemukan."
+
+#~ msgid "Documentation"
+#~ msgstr "Dokumentasi"
+
+#~ msgid "Geo Localization"
+#~ msgstr "Geo Lokalisasi"
+
+#~ msgid "GeoLocalize your partners"
+#~ msgstr "GeoLokalisasi mitra Anda"
+
+#~ msgid "Google Calendar"
+#~ msgstr "Google Calendar"
+
+#~ msgid "Synchronize your calendar with Google Calendar"
+#~ msgstr "Sinkronisasi kalendar Anda dengan Google Calendar"

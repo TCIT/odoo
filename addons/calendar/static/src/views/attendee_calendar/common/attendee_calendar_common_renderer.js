@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { CalendarCommonRenderer } from "@web/views/calendar/calendar_common/calendar_common_renderer";
 import { AttendeeCalendarCommonPopover } from "@calendar/views/attendee_calendar/common/attendee_calendar_common_popover";
 
@@ -47,14 +45,19 @@ export class AttendeeCalendarCommonRenderer extends CalendarCommonRenderer {
 
     /**
      * @override
+     * On event mounted, open popover if 'default_calendar_event_id' is specified in the context,
+     * if the popover is not already opened and if the event is not being dragged.
      */
     onEventDidMount({ el, event }) {
         super.onEventDidMount(...arguments);
         const record = this.props.model.records[event.id];
-        if (record) {
-            if (this.env.searchModel?.context?.default_calendar_event_id === parseInt(event.id)) {
-                this.openPopover(el, record);
-            }
+        if (
+            record &&
+            this.env.searchModel?.context?.default_calendar_event_id === parseInt(event.id) &&
+            !this.popover.isOpen &&
+            !el.classList.contains('fc-event-dragging')
+        ) {
+            this.openPopover(el, record);
         }
     }
 

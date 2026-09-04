@@ -1,39 +1,49 @@
-from odoo import models, api
+from odoo import api, models
+from odoo.exceptions import AccessError
+from odoo.tools.misc import clean_context
 
 
 class IrAttachment(models.Model):
-    _inherit = 'ir.attachment'
+    _inherit = "ir.attachment"
+
+    @api.ondelete(at_uninstall=False)
+    def _prevent_delete_from_submitted_expense(self):
+        expense_attachments = self.filtered(lambda a: a.res_model == 'hr.expense' and a.res_id)
+        expenses = self.env['hr.expense'].browse(expense_attachments.mapped('res_id'))
+        if not all(
+            (expense.exists() and expense.state in {'draft', 'submitted'} and expense.has_access('write')) or self.env.su
+            for expense in expenses
+        ):
+            raise AccessError(self.env._("You can't delete attachments from an expense once it has been submitted."))
 
     @api.model_create_multi
     def create(self, vals_list):
-        attachments = super().create(vals_list)
-        if self.env.context.get('sync_attachment', True):
-            expenses_attachments = attachments.filtered(lambda att: att.res_model == 'hr.expense')
-            if expenses_attachments:
-                expenses = self.env['hr.expense'].browse(expenses_attachments.mapped('res_id'))
-                for expense in expenses.filtered('sheet_id'):
-                    checksums = set(expense.sheet_id.attachment_ids.mapped('checksum'))
-                    for attachment in expense.attachment_ids.filtered(lambda att: att.checksum not in checksums):
-                        attachment.copy({
-                            'res_model': 'hr.expense.sheet',
-                            'res_id': expense.sheet_id.id,
-                        })
-        return attachments
+        expense_attachments = [vals for vals in vals_list if vals.get('res_model') == 'hr.expense' and vals.get('res_id')]
+        expenses = self.env['hr.expense'].browse([vals['res_id'] for vals in expense_attachments])
+        if not all(
+            (expense.state in {'draft', 'submitted'} and (expense.has_access('write') or expense.employee_id.user_id == self.env.user)) or self.env.su
+            for expense in expenses
+        ):
+            raise AccessError(self.env._("You can't add attachments to an expense once it has been approved."))
 
-    def unlink(self):
-        if self.env.context.get('sync_attachment', True):
-            attachments_to_unlink = self.env['ir.attachment']
-            expenses_attachments = self.filtered(lambda att: att.res_model == 'hr.expense')
-            if expenses_attachments:
-                expenses = self.env['hr.expense'].browse(expenses_attachments.mapped('res_id'))
-                for expense in expenses.exists().filtered('sheet_id'):
-                    checksums = set(expense.attachment_ids.mapped('checksum'))
-                    attachments_to_unlink += expense.sheet_id.attachment_ids.filtered(lambda att: att.checksum in checksums)
-            sheets_attachments = self.filtered(lambda att: att.res_model == 'hr.expense.sheet')
-            if sheets_attachments:
-                sheets = self.env['hr.expense.sheet'].browse(sheets_attachments.mapped('res_id'))
-                for sheet in sheets.exists():
-                    checksums = set((sheet.attachment_ids & sheets_attachments).mapped('checksum'))
-                    attachments_to_unlink += sheet.expense_line_ids.attachment_ids.filtered(lambda att: att.checksum in checksums)
-            super(IrAttachment, attachments_to_unlink).unlink()
-        return super().unlink()
+        user_expenses = expenses.filtered(lambda expense: expense.employee_id.user_id == self.env.user)
+        user_expense_attachments = [
+            vals for vals in expense_attachments
+            if vals['res_id'] in user_expenses.ids and not expenses.browse(vals['res_id']).has_access('write')  # to not over sudo
+        ]
+        attachments = super(
+            IrAttachment,
+            self.sudo().with_context(clean_context(self.env.context)),
+        ).create([
+            {
+                'name': vals['name'],
+                'raw': vals['raw'],
+                'res_id': vals['res_id'],
+                'res_model': 'hr.expense',
+            } for vals in user_expense_attachments
+        ]).sudo(self.env.su).with_context(self.env.context)
+
+        remaining_vals_list = [vals for vals in vals_list if vals not in user_expense_attachments]
+        if remaining_vals_list:
+            attachments += super().create(remaining_vals_list)
+        return attachments

@@ -1,28 +1,46 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* auth_password_policy
-# 
-# Translators:
-# Wil Odoo, 2024
-# 
+# * auth_password_policy
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~18.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:40+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-07 04:38+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-19/"
+"auth_password_policy/id/>\n"
+"Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: id\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: auth_password_policy
 #: model:ir.model,name:auth_password_policy.model_res_config_settings
 msgid "Config Settings"
 msgstr "Pengaturan Konfigurasi"
+
+#. module: auth_password_policy
+#: model:ir.model.fields,field_description:auth_password_policy.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:auth_password_policy.field_res_users__display_name
+msgid "Display Name"
+msgstr "Nama Tampilan"
+
+#. module: auth_password_policy
+#: model:ir.model.fields,field_description:auth_password_policy.field_res_config_settings__id
+#: model:ir.model.fields,field_description:auth_password_policy.field_res_users__id
+msgid "ID"
+msgstr "ID"
+
+#. module: auth_password_policy
+#. odoo-javascript
+#: code:addons/auth_password_policy/static/src/password_meter.js:0
+msgid "Medium"
+msgstr "Media"
 
 #. module: auth_password_policy
 #: model:ir.model.fields,field_description:auth_password_policy.field_res_config_settings__minlength
@@ -33,8 +51,7 @@ msgstr "Panjang Minimal Password"
 #: model:ir.model.fields,help:auth_password_policy.field_res_config_settings__minlength
 msgid ""
 "Minimum number of characters passwords must contain, set to 0 to disable."
-msgstr ""
-"Jumlah karakter minimal untuk password, setel ke 0 untuk menonaktifkan."
+msgstr "Jumlah karakter minimal untuk password, setel ke 0 untuk menonaktifkan."
 
 #. module: auth_password_policy
 #. odoo-javascript
@@ -48,16 +65,30 @@ msgstr "Kata Sandi"
 msgid ""
 "Required: %s\n"
 "\n"
-"Hint: to increase password strength, increase length, use multiple words, and use non-letter characters."
+"Hint: to increase password strength, increase length, use multiple words, "
+"and use non-letter characters."
 msgstr ""
 "Membutuhkan: %s\n"
 "\n"
-"Hint: untuk meningkatkan kekuatan password, tambahkan karakter, gunakan lebih dari satu kata, dan gunakan karakter selain huruf."
+"Hint: untuk meningkatkan kekuatan password, tambahkan karakter, gunakan "
+"lebih dari satu kata, dan gunakan karakter selain huruf."
+
+#. module: auth_password_policy
+#. odoo-javascript
+#: code:addons/auth_password_policy/static/src/password_meter.js:0
+msgid "Strong"
+msgstr "Kuat"
 
 #. module: auth_password_policy
 #: model:ir.model,name:auth_password_policy.model_res_users
 msgid "User"
 msgstr "Pengguna"
+
+#. module: auth_password_policy
+#. odoo-javascript
+#: code:addons/auth_password_policy/static/src/password_meter.js:0
+msgid "Weak"
+msgstr "Lemah"
 
 #. module: auth_password_policy
 #. odoo-python
@@ -66,8 +97,8 @@ msgid ""
 "Your password must contain at least %(minimal_length)d characters and only "
 "has %(current_count)d."
 msgstr ""
-"Password Anda harus memiliki setidaknya %(minimal_length)d karakter dan saat"
-" ini hanya memiliki %(current_count)d."
+"Password Anda harus memiliki setidaknya %(minimal_length)d karakter dan saat "
+"ini hanya memiliki %(current_count)d."
 
 #. module: auth_password_policy
 #. odoo-javascript
@@ -86,3 +117,9 @@ msgstr "setidaknya %s karakter"
 #: code:addons/auth_password_policy/static/src/password_policy.js:0
 msgid "at least %s words"
 msgstr "setidaknya %s kata"
+
+#. module: auth_password_policy
+#. odoo-javascript
+#: code:addons/auth_password_policy/static/src/password_meter.js:0
+msgid "no requirements"
+msgstr "tidak ada persyaratan"

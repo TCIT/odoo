@@ -80,8 +80,28 @@
                                     Then, eWallets are proposed during the checkout, to pay orders.
                                 </p>
                             </div>
-                            <field name="trigger_product_ids" string="Gift Card Products" widget="many2many_tags" invisible="program_type != 'gift_card'"/>
-                            <field name="trigger_product_ids" string="eWallet Products" widget="many2many_tags" invisible="program_type != 'ewallet'"/>
+                            <label
+                                string="Gift Card Products"
+                                invisible="program_type != 'gift_card'"
+                                for="trigger_product_ids"
+                            />
+                            <label
+                                string="eWallet Products"
+                                invisible="program_type != 'ewallet'"
+                                for="trigger_product_ids"
+                            />
+                            <div
+                                id="trigger_products"
+                                invisible="program_type not in ['gift_card', 'ewallet']"
+                            >
+                                <field
+                                    name="trigger_product_ids"
+                                    widget="many2many_tags"
+                                    context="{
+                                        'loyalty_is_gift_card_product': program_type == 'gift_card'
+                                    }"
+                                />
+                            </div>
                             <field name="payment_program_discount_product_id" groups="base.group_no_one" invisible="program_type not in ('gift_card', 'ewallet')"/>
                             <field name="mail_template_id" invisible="program_type not in ('gift_card', 'ewallet')"/>
                             <field name="currency_id"/>
@@ -105,10 +125,13 @@
                             <label for="limit_usage" invisible="program_type in ('gift_card', 'ewallet')"/>
                             <span invisible="program_type in ('gift_card', 'ewallet')">
                                 <field name="limit_usage" class="oe_inline"/>
-                                <span invisible="not limit_usage"> to <field name="max_usage" class="oe_inline"/> usages</span>
+                                <span invisible="not limit_usage">
+                                    to <field name="max_usage" class="oe_inline"/> usages
+                                    <span class="text-muted">(<field name="total_order_count" class="oe_inline" readonly="1"/> used)</span>
+                                </span>
                             </span>
                             <field name="company_id" invisible="1"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="company_id" groups="base.group_multi_company" placeholder="Visible to all"/>
                             <field name="available_on" invisible="1"/>
                             <label class="o_form_label" for="available_on" string="Available On" invisible="1"/>
                             <div id="o_loyalty_program_availabilities" invisible="1"/>
@@ -174,6 +197,7 @@
     <record id="loyalty_program_discount_loyalty_action" model="ir.actions.act_window">
         <field name="name">Discount &amp; Loyalty</field>
         <field name="res_model">loyalty.program</field>
+        <field name="path">discount-loyalty</field>
         <field name="view_mode">list,form</field>
         <field name="domain">[('program_type', 'not in', ('gift_card', 'ewallet'))]</field>
         <field name="help" type="html">
@@ -217,6 +241,7 @@
     <record id="loyalty_program_gift_ewallet_action" model="ir.actions.act_window">
         <field name="name">Gift cards &amp; eWallet</field>
         <field name="res_model">loyalty.program</field>
+        <field name="path">gift-cards-ewallet</field>
         <field name="view_mode">list,form</field>
         <field name="context">{'menu_type': 'gift_ewallet', 'default_program_type': 'gift_card'}</field>
         <field name="domain">[('program_type', 'in', ('gift_card', 'ewallet'))]</field>

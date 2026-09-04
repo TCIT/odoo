@@ -5,6 +5,8 @@ import { getContent } from "../_helpers/selection";
 import { insertText } from "../_helpers/user_actions";
 import { unformat } from "../_helpers/format";
 import { press, waitFor, queryOne } from "@odoo/hoot-dom";
+import { expectElementCount } from "../_helpers/ui_expectations";
+import { findInSelection } from "@html_editor/utils/selection";
 
 function expectContentToBe(el, html) {
     expect(getContent(el)).toBe(unformat(html));
@@ -13,13 +15,13 @@ function expectContentToBe(el, html) {
 test.tags("desktop");
 test("can add a table using the powerbox and keyboard", async () => {
     const { el, editor } = await setupEditor("<p>a[]</p>");
-    expect(".o-we-powerbox").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
     expectContentToBe(el, `<p>a[]</p>`);
 
     // open powerbox
     await insertText(editor, "/");
     await waitFor(".o-we-powerbox");
-    expect(".o-we-tablepicker").toHaveCount(0);
+    await expectElementCount(".o-we-tablepicker", 0);
 
     // filter to get table command in first position
     await insertText(editor, "table");
@@ -28,20 +30,20 @@ test("can add a table using the powerbox and keyboard", async () => {
     // press enter to open tablepicker
     await press("Enter");
     await waitFor(".o-we-tablepicker");
-    expect(".o-we-powerbox").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
 
     // press enter to validate current dimension (3x3)
     await press("Enter");
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(0);
-    expect(".o-we-tablepicker").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
+    await expectElementCount(".o-we-tablepicker", 0);
     expectContentToBe(
         el,
         `<p>a</p>
         <table class="table table-bordered o_table">
             <tbody>
                 <tr>
-                    <td><p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p></td>
+                    <td><p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]<br></p></td>
                     <td><p><br></p></td>
                     <td><p><br></p></td>
                 </tr>
@@ -57,7 +59,7 @@ test("can add a table using the powerbox and keyboard", async () => {
                 </tr>
             </tbody>
         </table>
-        <p><br></p>`
+        <p data-selection-placeholder="" style="margin: -9px 0px 8px;"><br></p>`
     );
 });
 
@@ -70,12 +72,11 @@ test("can close table picker with escape", async () => {
     expectContentToBe(el, "<p>a/table[]</p>");
     await animationFrame();
     await press("Enter");
-    await waitFor(".o-we-tablepicker");
-    expect(".o-we-tablepicker").toHaveCount(1);
+    await expectElementCount(".o-we-tablepicker", 1);
     expectContentToBe(el, "<p>a[]</p>");
     await press("escape");
     await animationFrame();
-    expect(".o-we-tablepicker").toHaveCount(0);
+    await expectElementCount(".o-we-tablepicker", 0);
 });
 
 test.tags("iframe", "desktop");
@@ -83,14 +84,14 @@ test("in iframe, can add a table using the powerbox and keyboard", async () => {
     const { el, editor } = await setupEditor("<p>a[]</p>", {
         props: { iframe: true },
     });
-    expect(".o-we-powerbox").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
     expect(getContent(el)).toBe(`<p>a[]</p>`);
     expect(":iframe .o_table").toHaveCount(0);
 
     // open powerbox
     await insertText(editor, "/");
     await waitFor(".o-we-powerbox");
-    expect(".o-we-tablepicker").toHaveCount(0);
+    await expectElementCount(".o-we-tablepicker", 0);
 
     // filter to get table command in first position
     await insertText(editor, "table");
@@ -99,13 +100,13 @@ test("in iframe, can add a table using the powerbox and keyboard", async () => {
     // press enter to open tablepicker
     await press("Enter");
     await waitFor(".o-we-tablepicker");
-    expect(".o-we-powerbox").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
 
     // press enter to validate current dimension (3x3)
     await press("Enter");
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(0);
-    expect(".o-we-tablepicker").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
+    await expectElementCount(".o-we-tablepicker", 0);
     expect(":iframe .o_table").toHaveCount(1);
 });
 
@@ -153,24 +154,24 @@ test("add table inside empty list", async () => {
     const { el, editor } = await setupEditor("<ul><li>[]<br></li></ul>");
 
     // open powerbox
-    insertText(editor, "/");
+    await insertText(editor, "/");
     await waitFor(".o-we-powerbox");
-    expect(".o-we-tablepicker").toHaveCount(0);
+    await expectElementCount(".o-we-tablepicker", 0);
 
     // filter to get table command in first position
-    insertText(editor, "table");
+    await insertText(editor, "table");
     await animationFrame();
 
     // press enter to open tablepicker
     await press("Enter");
     await waitFor(".o-we-tablepicker");
-    expect(".o-we-powerbox").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
 
     // press enter to validate current dimension (3x3)
     await press("Enter");
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(0);
-    expect(".o-we-tablepicker").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
+    await expectElementCount(".o-we-tablepicker", 0);
     expectContentToBe(
         el,
         `<ul>
@@ -179,7 +180,7 @@ test("add table inside empty list", async () => {
                 <table class="table table-bordered o_table">
                     <tbody>
                         <tr>
-                            <td><p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p></td>
+                            <td><p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]<br></p></td>
                             <td><p><br></p></td>
                             <td><p><br></p></td>
                         </tr>
@@ -195,7 +196,7 @@ test("add table inside empty list", async () => {
                         </tr>
                     </tbody>
                 </table>
-                <br>
+                <p data-selection-placeholder="" style="margin: -9px 0px 8px;"><br></p>
             </li>
         </ul>`
     );
@@ -206,24 +207,24 @@ test("add table inside non-empty list", async () => {
     const { el, editor } = await setupEditor("<ul><li>abc[]</li></ul>");
 
     // open powerbox
-    insertText(editor, "/");
+    await insertText(editor, "/");
     await waitFor(".o-we-powerbox");
-    expect(".o-we-tablepicker").toHaveCount(0);
+    await expectElementCount(".o-we-tablepicker", 0);
 
     // filter to get table command in first position
-    insertText(editor, "table");
+    await insertText(editor, "table");
     await animationFrame();
 
     // press enter to open tablepicker
     await press("Enter");
     await waitFor(".o-we-tablepicker");
-    expect(".o-we-powerbox").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
 
     // press enter to validate current dimension (3x3)
     await press("Enter");
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(0);
-    expect(".o-we-tablepicker").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
+    await expectElementCount(".o-we-tablepicker", 0);
     expectContentToBe(
         el,
         `<ul>
@@ -232,7 +233,7 @@ test("add table inside non-empty list", async () => {
                 <table class="table table-bordered o_table">
                     <tbody>
                         <tr>
-                            <td><p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p></td>
+                            <td><p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]<br></p></td>
                             <td><p><br></p></td>
                             <td><p><br></p></td>
                         </tr>
@@ -248,7 +249,7 @@ test("add table inside non-empty list", async () => {
                         </tr>
                     </tbody>
                 </table>
-                <br>
+                <p data-selection-placeholder="" style="margin: -9px 0px 8px;"><br></p>
             </li>
         </ul>`
     );
@@ -263,12 +264,11 @@ test("should close the table picker when any key except arrow keys pressed", asy
     expectContentToBe(el, "<p>a/table[]</p>");
     await animationFrame();
     await press("Enter");
-    await waitFor(".o-we-tablepicker");
-    expect(".o-we-tablepicker").toHaveCount(1);
+    await expectElementCount(".o-we-tablepicker", 1);
     expectContentToBe(el, "<p>a[]</p>");
     await insertText(editor, "b");
     await animationFrame();
-    expect(".o-we-tablepicker").toHaveCount(0);
+    await expectElementCount(".o-we-tablepicker", 0);
     expectContentToBe(el, "<p>ab[]</p>");
     await insertText(editor, "/");
     await waitFor(".o-we-powerbox");
@@ -276,10 +276,152 @@ test("should close the table picker when any key except arrow keys pressed", asy
     expectContentToBe(el, "<p>ab/table[]</p>");
     await animationFrame();
     await press("Enter");
-    await waitFor(".o-we-tablepicker");
-    expect(".o-we-tablepicker").toHaveCount(1);
+    await expectElementCount(".o-we-tablepicker", 1);
     expectContentToBe(el, "<p>ab[]</p>");
     await insertText(editor, "/");
     await animationFrame();
-    expect(".o-we-tablepicker").toHaveCount(0);
+    await expectElementCount(".o-we-tablepicker", 0);
+});
+
+test.tags("desktop");
+test("should not navigate table cells when table picker is open", async () => {
+    const { el, editor } = await setupEditor(
+        unformat(`
+            <table class="table table-bordered o_table">
+                <tbody>
+                    <tr>
+                        <td><p><br></p></td>
+                    </tr>
+                    <tr>
+                        <td><p><br></p></td>
+                    </tr>
+                    <tr>
+                        <td><p>[]<br></p></td>
+                    </tr>
+                </tbody>
+            </table>
+        `)
+    );
+    // open powerbox
+    await insertText(editor, "/");
+    await waitFor(".o-we-powerbox");
+
+    // filter to get table command in first position
+    await insertText(editor, "table");
+    await animationFrame();
+
+    // press enter to open tablepicker
+    await press("Enter");
+    await waitFor(".o-we-tablepicker");
+
+    // navigate to 1x3
+    press("ArrowUp");
+    await animationFrame();
+    press("ArrowUp");
+    await animationFrame();
+    press("Enter");
+    await animationFrame();
+    expectContentToBe(
+        el,
+        `
+            <p data-selection-placeholder=""><br></p>
+            <table class="table table-bordered o_table">
+                <tbody>
+                    <tr>
+                        <td><p><br></p></td>
+                    </tr>
+                    <tr>
+                        <td><p><br></p></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p data-selection-placeholder=""><br></p>
+                            <table class="table table-bordered o_table">
+                                <tbody>
+                                    <tr>
+                                        <td><p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]<br></p></td>
+                                        <td><p><br></p></td>
+                                        <td><p><br></p></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p data-selection-placeholder="" style="margin: -9px 0px 8px;"><br></p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p data-selection-placeholder="" style="margin: -9px 0px 8px;"><br></p>
+        `
+    );
+});
+
+test.tags("desktop");
+test("should not navigate table cells when powerbox is open", async () => {
+    const { el, editor } = await setupEditor(
+        unformat(`
+            <table class="table table-bordered o_table">
+                <tbody>
+                    <tr>
+                        <td><p><br></p></td>
+                    </tr>
+                    <tr>
+                        <td><p>test[]</p></td>
+                    </tr>
+                    <tr>
+                        <td><p><br></p></td>
+                    </tr>
+                </tbody>
+            </table>
+        `)
+    );
+
+    // Open powerbox
+    await insertText(editor, "/");
+    await waitFor(".o-we-powerbox");
+
+    // Cursor is in second td.
+    const secondTd = el.querySelectorAll("td")[1];
+
+    // Selection starts in first cell
+    let selectedTd = findInSelection(editor.shared.selection.getEditableSelection(), "td");
+    expect(selectedTd).toBe(secondTd);
+
+    // ArrowUp should not navigate table cells
+    press("ArrowUp");
+    await animationFrame();
+
+    selectedTd = findInSelection(editor.shared.selection.getEditableSelection(), "td");
+    expect(selectedTd).toBe(secondTd);
+
+    // ArrowDown should not navigate table cells
+    press("ArrowDown");
+    await animationFrame();
+
+    selectedTd = findInSelection(editor.shared.selection.getEditableSelection(), "td");
+    expect(selectedTd).toBe(secondTd);
+
+    // Enter applies the powerbox command in the same cell
+    press("Enter");
+    await animationFrame();
+
+    expectContentToBe(
+        el,
+        `
+            <p data-selection-placeholder=""><br></p>
+            <table class="table table-bordered o_table">
+                <tbody>
+                    <tr>
+                        <td><p><br></p></td>
+                        </tr>
+                    <tr>
+                        <td><h1>test[]</h1></td>
+                    </tr>
+                    <tr>
+                        <td><p><br></p></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p data-selection-placeholder="" style="margin: -9px 0px 8px;"><br></p>
+        `
+    );
 });

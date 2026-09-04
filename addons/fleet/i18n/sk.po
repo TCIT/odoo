@@ -1,25 +1,35 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* fleet
-# 
+# * fleet
+#
 # Translators:
-# Dávid Kováč, 2024
-# Wil Odoo, 2024
-# Tomáš Píšek, 2025
-# 
+# Jan Prokop, 2022
+# Alexandra Brencicova <alexandra.brencicova@gmail.com>, 2022
+# SAKodoo <sak@odoo.com>, 2022
+# Filip Brenčič <brencicf5@gmail.com>, 2022
+# Pavol Krnáč <pavol.krnac@ekoenergo.sk>, 2022
+# Damian Brencic <brencicdamian12313@gmail.com>, 2022
+# Matus Krnac <matus.krnac@gmail.com>, 2022
+# Jaroslav Bosansky <jaro.bosansky@ekoenergo.sk>, 2022
+# Rastislav Brencic <rastislav.brencic@azet.sk>, 2022
+# Martin Trigaux, 2022
+# Tomáš Píšek <Tomas.Pisek@seznam.cz>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Tomáš Píšek, 2025\n"
-"Language-Team: Slovak (https://app.transifex.com/odoo/teams/41243/sk/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 13:18+0000\n"
+"Last-Translator: Tomáš Píšek <Tomas.Pisek@seznam.cz>\n"
+"Language-Team: Slovak <https://translate.odoo.com/projects/odoo-19/fleet/sk/>"
+"\n"
+"Language: sk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: sk\n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && "
+"n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_kanban
@@ -49,21 +59,17 @@ msgid "<span>cm</span>"
 msgstr ""
 
 #. module: fleet
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
-msgid "<span>g/km</span>"
-msgstr "<span>g/km</span>"
+#: model:ir.model.fields,help:fleet.field_fleet_vehicle__trailer_hook
+msgid ""
+"A trailer hitch is a device attached to a vehicle's chassis for towing "
+"purposes,             such as pulling trailers, boats, or other vehicles."
+msgstr ""
 
 #. module: fleet
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
-msgid "<span>kW</span>"
-msgstr "<span>kW</span>"
-
-#. module: fleet
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
-msgid "<span>km</span>"
+#: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__trailer_hook
+msgid ""
+"A trailer hitch is a device attached to a vehicle's chassis for towing "
+"purposes,            such as pulling trailers, boats, or other vehicles."
 msgstr ""
 
 #. module: fleet
@@ -122,6 +128,11 @@ msgid "Activities"
 msgstr "Aktivity"
 
 #. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_search
+msgid "Activities of"
+msgstr ""
+
+#. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__activity_exception_decoration
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_contract__activity_exception_decoration
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__activity_exception_decoration
@@ -138,12 +149,17 @@ msgid "Activity State"
 msgstr "Stav aktivity"
 
 #. module: fleet
+#: model:ir.model,name:fleet.model_mail_activity_type
+msgid "Activity Type"
+msgstr ""
+
+#. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__activity_type_icon
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_contract__activity_type_icon
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__activity_type_icon
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__activity_type_icon
 msgid "Activity Type Icon"
-msgstr "Ikona typu aktivity"
+msgstr "Ikona typ aktivity"
 
 #. module: fleet
 #: model:ir.actions.act_window,name:fleet.mail_activity_type_action_config_fleet
@@ -152,9 +168,14 @@ msgid "Activity Types"
 msgstr "Typy aktivít"
 
 #. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_search
+msgid "Activity type"
+msgstr ""
+
+#. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_tag_action
 msgid "Add a new tag"
-msgstr "Pridaj nový tag"
+msgstr "Pridať nový štítok"
 
 #. module: fleet
 #: model:res.groups,name:fleet.fleet_group_manager
@@ -172,6 +193,11 @@ msgid "All vehicles"
 msgstr "Všetky vozidlá"
 
 #. module: fleet
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__drive_type__awd
+msgid "All-Wheel Drive (AWD)"
+msgstr ""
+
+#. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
 msgid "Apply New Driver"
 msgstr ""
@@ -179,7 +205,7 @@ msgstr ""
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_brand_view_kanban
 msgid "Archive"
-msgstr "Archivovať"
+msgstr ""
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_form
@@ -187,6 +213,7 @@ msgstr "Archivovať"
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_services_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_services_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_brand_view_search
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
 msgid "Archived"
@@ -219,7 +246,7 @@ msgstr "Počet príloh"
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_send_mail__attachment_ids
 msgid "Attachments"
-msgstr "Prílohy"
+msgstr ""
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_kanban
@@ -229,7 +256,7 @@ msgstr "Omeškanie obnovenia"
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_send_mail__author_id
 msgid "Author"
-msgstr "Autor"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__transmission__automatic
@@ -246,31 +273,31 @@ msgstr "Dostupné"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__avatar_1920
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__avatar_1920
 msgid "Avatar"
-msgstr "Avatar"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__avatar_1024
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__avatar_1024
 msgid "Avatar 1024"
-msgstr "Avatar 1024"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__avatar_128
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__avatar_128
 msgid "Avatar 128"
-msgstr "Avatar 128"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__avatar_256
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__avatar_256
 msgid "Avatar 256"
-msgstr "Avatar 256"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__avatar_512
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__avatar_512
 msgid "Avatar 512"
-msgstr "Avatar 512"
+msgstr ""
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_7
@@ -325,6 +352,7 @@ msgstr "Výmena brzdových platničiek"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__brand_id
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__brand_id
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
 msgid "Brand"
 msgstr "Značka"
@@ -341,25 +369,20 @@ msgid "CNG"
 msgstr ""
 
 #. module: fleet
-#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__co2
-#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__default_co2
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_tree
 msgid "CO2 Emissions"
 msgstr "CO2 Emisie"
-
-#. module: fleet
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_tree
-msgid "CO2 Emissions g/km"
-msgstr ""
-
-#. module: fleet
-#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__co2_standard
-msgid "CO2 Standard"
-msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle__co2
 msgid "CO2 emissions of the vehicle"
 msgstr "CO2 emisie vozidla"
+
+#. module: fleet
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__co2
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__default_co2
+msgid "CO₂ Emissions"
+msgstr ""
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_service_1
@@ -374,7 +397,7 @@ msgstr ""
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_send_mail_view_form
 msgid "Cancel"
-msgstr "Zrušené"
+msgstr "Zrušiť"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__write_off_date
@@ -422,15 +445,17 @@ msgstr "Kategórie"
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_model_category_action
 msgid ""
-"Categories will help you manage your fleet more efficiently and arrange your"
-" vehicles."
+"Categories will help you manage your fleet more efficiently and arrange your "
+"vehicles."
 msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_service_type__category
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__category_id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__category_id
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__category_id
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_search
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_report_view_search
 msgid "Category"
 msgstr "Kategória"
 
@@ -467,8 +492,7 @@ msgstr "Vyberte, či je zmluva stále platná alebo nie"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_service_type__category
-msgid ""
-"Choose whether the service refer to contracts, vehicle services or both"
+msgid "Choose whether the service refer to contracts, vehicle services or both"
 msgstr "Vyberte, či sa služba týka zmlúv, služieb vozidla alebo oboch"
 
 #. module: fleet
@@ -477,8 +501,9 @@ msgid "Closed"
 msgstr "Zavreté"
 
 #. module: fleet
-#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__co2_standard
-msgid "Co2 Standard"
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__co2_emission_unit
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__co2_emission_unit
+msgid "Co2 Emission Unit"
 msgstr ""
 
 #. module: fleet
@@ -518,11 +543,6 @@ msgid "Configuration"
 msgstr "Konfigurácia"
 
 #. module: fleet
-#: model:ir.model,name:fleet.model_res_partner
-msgid "Contact"
-msgstr "Kontakt"
-
-#. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_search
 msgid "Contains Vehicle"
 msgstr ""
@@ -530,7 +550,7 @@ msgstr ""
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_send_mail__body
 msgid "Contents"
-msgstr "Obsahy"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_service_type__category__contract
@@ -568,6 +588,7 @@ msgstr "Zmluvné protokoly"
 
 #. module: fleet
 #: model:mail.activity.type,name:fleet.mail_act_fleet_contract_to_renew
+#: model:mail.activity.type,summary:fleet.mail_act_fleet_contract_to_renew
 msgid "Contract to Renew"
 msgstr "Zmluva na obnovenie"
 
@@ -726,6 +747,9 @@ msgstr "Denne"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_contract__date
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__date
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer__date
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__recorded_date
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_report_view_search
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_view_search
 msgid "Date"
 msgstr "Dátum"
 
@@ -748,8 +772,8 @@ msgstr "Dátum kedy začína pokrytie zmluvy"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_log_contract__expiration_date
 msgid ""
-"Date when the coverage of the contract expirates (by default, one year after"
-" begin date)"
+"Date when the coverage of the contract expirates (by default, one year after "
+"begin date)"
 msgstr ""
 "Dátum kedy pokrytie zmluvy vyprší (v predvolenom nastavení, jeden rok od "
 "dátumu začiatku)"
@@ -767,7 +791,7 @@ msgstr "Upozornnenie na meškajúcu zmluvu"
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_brand_view_kanban
 msgid "Delete"
-msgstr "Zmazať"
+msgstr ""
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_service_2
@@ -801,9 +825,12 @@ msgstr "Nafta"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model_brand__display_name
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model_category__display_name
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer__display_name
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__display_name
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_send_mail__display_name
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_state__display_name
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_tag__display_name
+#: model:ir.model.fields,field_description:fleet.field_mail_activity_type__display_name
+#: model:ir.model.fields,field_description:fleet.field_res_config_settings__display_name
 msgid "Display Name"
 msgstr "Zobrazovaný názov"
 
@@ -818,15 +845,14 @@ msgid "Door Window Motor/Regulator Replacement"
 msgstr "Výmena pohonu sťahovania okien"
 
 #. module: fleet
-#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__doors
-#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__doors
-msgid "Doors Number"
-msgstr "Počet dverí"
-
-#. module: fleet
 #: model:fleet.vehicle.state,name:fleet.fleet_vehicle_state_downgraded
 msgid "Downgraded"
 msgstr "Zníženie úrovne"
+
+#. module: fleet
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__drive_type
+msgid "Drive Type"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__driver_id
@@ -844,7 +870,6 @@ msgstr "Vodič"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle__driver_id
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_log_contract__purchaser_id
-#: model:ir.model.fields,help:fleet.field_fleet_vehicle_odometer__driver_id
 msgid "Driver address of the vehicle"
 msgstr ""
 
@@ -893,6 +918,26 @@ msgstr "Elektrický"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__electric_assistance
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__electric_assistance
 msgid "Electric Assistance"
+msgstr ""
+
+#. module: fleet
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__co2_standard
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__co2_standard
+msgid "Emission Standard"
+msgstr ""
+
+#. module: fleet
+#: model:ir.model.fields,help:fleet.field_fleet_vehicle__co2_standard
+msgid ""
+"Emission Standard specifies the regulatory test procedure             or "
+"guideline under which a vehicle's emissions are measured."
+msgstr ""
+
+#. module: fleet
+#: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__co2_standard
+msgid ""
+"Emission Standard specifies the regulatory test procedure or             "
+"guideline under which a vehicle's emissions are measured."
 msgstr ""
 
 #. module: fleet
@@ -973,7 +1018,7 @@ msgid "Expires Today"
 msgstr ""
 
 #. module: fleet
-#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__first_contract_date
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__contract_date_start
 msgid "First Contract Date"
 msgstr "Dátum prvej zmluvy"
 
@@ -983,10 +1028,10 @@ msgid "Fiscality"
 msgstr ""
 
 #. module: fleet
-#: model:ir.module.category,name:fleet.module_fleet_category
 #: model:ir.ui.menu,name:fleet.fleet_vehicle_menu
 #: model:ir.ui.menu,name:fleet.fleet_vehicles
 #: model:ir.ui.menu,name:fleet.menu_root
+#: model:res.groups.privilege,name:fleet.res_groups_privilege_fleet
 #: model_terms:ir.ui.view,arch_db:fleet.res_config_settings_view_form
 msgid "Fleet"
 msgstr "Vozidlá"
@@ -1017,6 +1062,11 @@ msgid "Fleet Manager"
 msgstr "Manažér vozového parku"
 
 #. module: fleet
+#: model:ir.model,name:fleet.model_fleet_vehicle_odometer_report
+msgid "Fleet Odometer Analysis Report"
+msgstr ""
+
+#. module: fleet
 #: model:ir.model,name:fleet.model_fleet_service_type
 msgid "Fleet Service Type"
 msgstr "Typ služby vozového parku"
@@ -1025,6 +1075,11 @@ msgstr "Typ služby vozového parku"
 #: model:ir.actions.server,name:fleet.ir_cron_contract_costs_generator_ir_actions_server
 msgid "Fleet: Generate contracts costs based on costs frequency"
 msgstr "Vozový park: Vytvára zmluvné náklady "
+
+#. module: fleet
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_state__fold
+msgid "Folded in Kanban"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__message_follower_ids
@@ -1051,8 +1106,18 @@ msgid "Font awesome icon e.g. fa-tasks"
 msgstr "Úžasná ikona fronty napr. fa-tasks"
 
 #. module: fleet
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__drive_type__4wd
+msgid "Four-Wheel Drive (4WD)"
+msgstr ""
+
+#. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__frame_size
 msgid "Frame Size"
+msgstr ""
+
+#. module: fleet
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__drive_type__fwd
+msgid "Front-Wheel Drive (FWD)"
 msgstr ""
 
 #. module: fleet
@@ -1073,6 +1138,8 @@ msgstr "Výmena palivového čerpadla"
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__fuel_type
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__default_fuel_type
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__fuel_type
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_report_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
 msgid "Fuel Type"
 msgstr "Typ paliva"
@@ -1104,17 +1171,6 @@ msgstr "Budúci vodič"
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__default_fuel_type__gasoline
 msgid "Gasoline"
 msgstr "Benzín"
-
-#. module: fleet
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_costs_report_view_search
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_search
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_services_view_search
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_search
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_view_search
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_service_types_view_search
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
-msgid "Group By"
-msgstr "Zoskupiť podľa"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__contract_renewal_overdue
@@ -1168,9 +1224,13 @@ msgstr "Výmena potrubia kúrenia"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__horsepower
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__horsepower
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__power_unit__horsepower
-#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__power_unit__horsepower
 msgid "Horsepower"
 msgstr "Výkon motora"
+
+#. module: fleet
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__power_unit__horsepower
+msgid "Horsepower (hp)"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__horsepower_tax
@@ -1195,9 +1255,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model_brand__id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model_category__id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer__id
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_send_mail__id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_state__id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_tag__id
+#: model:ir.model.fields,field_description:fleet.field_mail_activity_type__id
+#: model:ir.model.fields,field_description:fleet.field_res_config_settings__id
 msgid "ID"
 msgstr "ID"
 
@@ -1242,31 +1305,31 @@ msgstr "Výmena zapaľovacej cievky"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__image_1920
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__image_1920
 msgid "Image"
-msgstr "Obrázok"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__image_1024
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__image_1024
 msgid "Image 1024"
-msgstr "Obrázok 1024"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__image_128
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__image_128
 msgid "Image 128"
-msgstr "Obrázok 128"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__image_256
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__image_256
 msgid "Image 256"
-msgstr "Obrázok 256"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__image_512
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__image_512
 msgid "Image 512"
-msgstr "Obrázok 512"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__contract_state__open
@@ -1314,11 +1377,6 @@ msgid "Junior"
 msgstr "Junior"
 
 #. module: fleet
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_view_kanban
-msgid "Km"
-msgstr "Km"
-
-#. module: fleet
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__fuel_type__lpg
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__default_fuel_type__lpg
 msgid "LPG"
@@ -1327,7 +1385,7 @@ msgstr "LPG"
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_send_mail__lang
 msgid "Language"
-msgstr "Jazyk"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__contract_state
@@ -1426,11 +1484,16 @@ msgstr ""
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_send_mail__template_id
 msgid "Mail Template"
-msgstr "Mailová šablóna"
+msgstr ""
 
 #. module: fleet
 #: model:ir.actions.server,name:fleet.action_fleet_vehicle_send_mail
 msgid "Mail to Driver"
+msgstr ""
+
+#. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
+msgid "Make Vehicle Available"
 msgstr ""
 
 #. module: fleet
@@ -1450,6 +1513,11 @@ msgid "Manage efficiently your different effective vehicles Costs with Odoo."
 msgstr ""
 
 #. module: fleet
+#: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_odometer_reporting_action
+msgid "Manage efficiently your vehicle Odometers with Odoo."
+msgstr ""
+
+#. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_service_10
 msgid "Management Fee"
 msgstr "Spravovací poplatok"
@@ -1461,7 +1529,10 @@ msgid "Manual"
 msgstr "Manuálne"
 
 #. module: fleet
+#. odoo-python
+#: code:addons/fleet/models/fleet_vehicle_model_brand.py:0
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__brand_id
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_services_view_search
 msgid "Manufacturer"
 msgstr "Výrobca"
 
@@ -1478,7 +1549,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__message_has_error
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__message_has_error
 msgid "Message Delivery error"
-msgstr "Chyba zobrazovania správ"
+msgstr "Chyba doručenia správy"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__message_ids
@@ -1489,10 +1560,19 @@ msgid "Messages"
 msgstr "Správy"
 
 #. module: fleet
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__mileage_delta
+msgid "Mileage Delta"
+msgstr ""
+
+#. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__model_id
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__model_id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model_brand__model_ids
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__model_id
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_services_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_search
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_report_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
 msgid "Model"
@@ -1532,6 +1612,8 @@ msgid "Model of a vehicle"
 msgstr "Model vozidla"
 
 #. module: fleet
+#. odoo-python
+#: code:addons/fleet/models/fleet_vehicle_model_brand.py:0
 #: model:ir.actions.act_window,name:fleet.fleet_vehicle_model_action
 #: model:ir.ui.menu,name:fleet.fleet_models_configuration
 #: model:ir.ui.menu,name:fleet.fleet_vehicle_model_menu
@@ -1546,6 +1628,12 @@ msgstr "Modely"
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_log_contract__cost_frequency__monthly
 msgid "Monthly"
 msgstr "Mesačne"
+
+#. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_search
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
+msgid "My Activities"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__my_activity_date_deadline
@@ -1636,6 +1724,11 @@ msgid "No data for analysis"
 msgstr "Žiadne údaje na analýzu"
 
 #. module: fleet
+#: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_odometer_reporting_action
+msgid "No data for odometer analysis"
+msgstr ""
+
+#. module: fleet
 #. odoo-python
 #: code:addons/fleet/models/fleet_vehicle.py:0
 msgid "No plate"
@@ -1666,6 +1759,12 @@ msgid "Number of Actions"
 msgstr "Počet akcií"
 
 #. module: fleet
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__doors
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__doors
+msgid "Number of Doors"
+msgstr ""
+
+#. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle__doors
 msgid "Number of doors of the vehicle"
 msgstr "Počet dverí vozidla"
@@ -1684,7 +1783,7 @@ msgstr "Počet chýb"
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_log_services__message_needaction_counter
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr "Počet správ, ktoré vyžadujú akciu"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle__message_has_error_counter
@@ -1707,10 +1806,20 @@ msgid "Odometer"
 msgstr "Tachometer"
 
 #. module: fleet
+#: model:ir.actions.act_window,name:fleet.fleet_vehicle_odometer_reporting_action
+msgid "Odometer Analysis"
+msgstr ""
+
+#. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_view_tree
 msgid "Odometer Logs"
 msgstr "Protokly tachometra"
+
+#. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
+msgid "Odometer Report"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__odometer_unit
@@ -1720,6 +1829,7 @@ msgstr "Jednotka počítadla tachometra"
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__odometer
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer__value
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__odometer_value
 msgid "Odometer Value"
 msgstr "Hodnota počítadla tachometra"
 
@@ -1743,6 +1853,7 @@ msgstr "Stav tachometra vozidla v momente tohoto protokolu"
 #. module: fleet
 #: model:ir.actions.act_window,name:fleet.fleet_vehicle_odometer_action
 #: model:ir.ui.menu,name:fleet.fleet_vehicle_odometer_menu
+#: model:ir.ui.menu,name:fleet.menu_fleet_odometer_reporting_odometer
 msgid "Odometers"
 msgstr ""
 
@@ -1767,18 +1878,12 @@ msgid "Omnium"
 msgstr "Omnium "
 
 #. module: fleet
-#. odoo-python
-#: code:addons/fleet/models/fleet_vehicle_model.py:0
-msgid "Operation not supported."
-msgstr ""
-
-#. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_send_mail__lang
 msgid ""
 "Optional translation language (ISO code) to select when sending out an "
-"email. If not set, the english version will be used. This should usually be "
-"a placeholder expression that provides the appropriate language, e.g. {{ "
-"object.partner_id.lang }}."
+"email. If not set, the main partner's language will be used. This should "
+"usually be a placeholder expression that provides the appropriate language, "
+"e.g. {{ object.partner_id.lang }}."
 msgstr ""
 
 #. module: fleet
@@ -1789,7 +1894,7 @@ msgstr "Možnosti"
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__order_date
 msgid "Order Date"
-msgstr "Dátum objednávky"
+msgstr ""
 
 #. module: fleet
 #: model:fleet.vehicle.state,name:fleet.fleet_vehicle_state_ordered
@@ -1813,15 +1918,11 @@ msgstr "Výmena kyslíkovej sondy"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__plan_to_change_bike
-#: model:ir.model.fields,field_description:fleet.field_res_partner__plan_to_change_bike
-#: model:ir.model.fields,field_description:fleet.field_res_users__plan_to_change_bike
 msgid "Plan To Change Bike"
 msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__plan_to_change_car
-#: model:ir.model.fields,field_description:fleet.field_res_partner__plan_to_change_car
-#: model:ir.model.fields,field_description:fleet.field_res_users__plan_to_change_car
 msgid "Plan To Change Car"
 msgstr "Plán na zmenu auta"
 
@@ -1873,7 +1974,7 @@ msgstr "Výkon vozidla v kW"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__vehicle_properties
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
 msgid "Properties"
-msgstr "Vlastnosti"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__net_car_value
@@ -1894,11 +1995,22 @@ msgstr "Oprava radiátora"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__vehicle_range
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__vehicle_range
 msgid "Range"
-msgstr "Rozsah"
+msgstr ""
+
+#. module: fleet
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__range_unit
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__range_unit
+msgid "Range Unit"
+msgstr ""
 
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_action
 msgid "Ready to manage your fleet more efficiently?"
+msgstr ""
+
+#. module: fleet
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__drive_type__rwd
+msgid "Rear-Wheel Drive (RWD)"
 msgstr ""
 
 #. module: fleet
@@ -1929,7 +2041,7 @@ msgstr "Registrovaný"
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__acquisition_date
 msgid "Registration Date"
-msgstr "Dátum registrácie"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_send_mail__render_model
@@ -1997,7 +2109,7 @@ msgstr "Zodpovedný užívateľ"
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_brand_view_kanban
 msgid "Restore"
-msgstr "Obnoviť"
+msgstr ""
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_38
@@ -2023,24 +2135,24 @@ msgstr "Aktuálne"
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_send_mail_view_form
 msgid "Save as new template"
-msgstr "Uložiť ako novú šablónu"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__seats
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__seats
-msgid "Seats Number"
-msgstr "Číslo sedadiel"
+msgid "Seating Capacity"
+msgstr ""
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_send_mail_view_form
 msgid "Send"
-msgstr "Poslať"
+msgstr ""
 
 #. module: fleet
 #. odoo-python
 #: code:addons/fleet/models/fleet_vehicle.py:0
 msgid "Send Email"
-msgstr "Poslať email"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model,name:fleet.model_fleet_vehicle_send_mail
@@ -2118,8 +2230,8 @@ msgstr "Nastavenia"
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
-msgid "Show all records which has next action date is before today"
-msgstr "Zobraz všetky záznamy, ktorých následná aktivita je pred dnešným dňom"
+msgid "Show all records whose next activity date is past"
+msgstr ""
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_service_6
@@ -2130,6 +2242,13 @@ msgstr "Snežné pneumatiky"
 #: model:fleet.service.type,name:fleet.type_service_41
 msgid "Spark Plug Replacement"
 msgstr "Výmena zapaľovacej sviečky"
+
+#. module: fleet
+#: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__doors
+msgid ""
+"Specifies the total number of doors, including the truck and hatch doors, if "
+"applicable."
+msgstr ""
 
 #. module: fleet
 #. odoo-python
@@ -2190,7 +2309,7 @@ msgstr ""
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_send_mail__subject
 msgid "Subject"
-msgstr "Predmet"
+msgstr ""
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vechicle_costs_report_view_tree
@@ -2205,19 +2324,19 @@ msgstr "Letné pneumatiky"
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_tag__name
 msgid "Tag Name"
-msgstr "Názov tagu"
+msgstr "Názov štítku"
 
 #. module: fleet
 #: model:ir.model.constraint,message:fleet.constraint_fleet_vehicle_tag_name_uniq
 msgid "Tag name already exists!"
-msgstr "Názov značky už existuje!"
+msgstr ""
 
 #. module: fleet
 #: model:ir.actions.act_window,name:fleet.fleet_vehicle_tag_action
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__tag_ids
 #: model:ir.ui.menu,name:fleet.fleet_vehicle_tag_menu
 msgid "Tags"
-msgstr "Tagy"
+msgstr "Štítky"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
@@ -2233,7 +2352,7 @@ msgstr "Daňová listina"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_contract__notes
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_form
 msgid "Terms and Conditions"
-msgstr "Obchodné podmienky"
+msgstr "Pojmy a podmienky"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle__country_code
@@ -2267,8 +2386,14 @@ msgid ""
 "This is the date at which the car will be available, if not set it means "
 "available instantly"
 msgstr ""
-"Toto je dátum, kedy bude auto k dispozícii, ak nie je nastavené, znamená to,"
-" že je okamžite k dispozícii"
+"Toto je dátum, kedy bude auto k dispozícii, ak nie je nastavené, znamená to, "
+"že je okamžite k dispozícii"
+
+#. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
+msgid ""
+"This will allow this vehicle to be selectable for the Salary Configurator"
+msgstr ""
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_44
@@ -2288,7 +2413,7 @@ msgstr "Pneumatiková služba"
 #. module: fleet
 #: model:fleet.vehicle.state,name:fleet.fleet_vehicle_state_to_order
 msgid "To Order"
-msgstr "Na objednanie"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__service_activity__today
@@ -2320,7 +2445,8 @@ msgstr "Cestovná asistencia"
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_log_services_action
 msgid ""
 "Track all the services done on your vehicle.\n"
-"            Services can be of many types: occasional repair, fixed maintenance, etc."
+"            Services can be of many types: occasional repair, fixed "
+"maintenance, etc."
 msgstr ""
 "Sledujte všetky služby vykonané na vašom vozidle.\n"
 "Služby môžu byť rôzneho druhu: príležitostná oprava, pravidelná údržba, atď."
@@ -2401,10 +2527,12 @@ msgstr "Jednotka"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_contract__vehicle_id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__vehicle_id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer__vehicle_id
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__vehicle_id
 #: model:ir.ui.menu,name:fleet.fleet_vehicles_configuration
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_costs_report_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_search
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_report_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
@@ -2438,6 +2566,11 @@ msgid "Vehicle Name"
 msgstr ""
 
 #. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_report_view_graph
+msgid "Vehicle Odometer Timeline"
+msgstr ""
+
+#. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__vehicle_properties_definition
 msgid "Vehicle Properties"
 msgstr ""
@@ -2450,13 +2583,13 @@ msgstr "Stav vozidla"
 #. module: fleet
 #: model:ir.model,name:fleet.model_fleet_vehicle_tag
 msgid "Vehicle Tag"
-msgstr "Značka vozidla"
+msgstr "Štítok vozidla"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_tag_view_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_tag_view_view_tree
 msgid "Vehicle Tags"
-msgstr "Značky vozidla"
+msgstr "Štítky vozidla"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__vehicle_type
@@ -2516,6 +2649,13 @@ msgstr "Referencia dodávateľa"
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
 msgid "Vendors"
 msgstr "Dodávatelia"
+
+#. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vechicle_costs_report_view_form
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_form
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
+msgid "Visible to all"
+msgstr ""
 
 #. module: fleet
 #: model:fleet.vehicle.state,name:fleet.fleet_vehicle_state_waiting_list
@@ -2620,11 +2760,13 @@ msgstr ""
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form_quick_create
 msgid "e.g. Model S"
 msgstr "napr. Model S"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form_quick_create
 msgid "e.g. PAE 326"
 msgstr "napr. PAE 326"
 
@@ -2634,6 +2776,24 @@ msgid "e.g. Tesla"
 msgstr "napr. Tesla"
 
 #. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
+msgid "eg. WLTP, Euro 6, or EPA, ..."
+msgstr ""
+
+#. module: fleet
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__co2_emission_unit__g/km
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__co2_emission_unit__g/km
+msgid "g/km"
+msgstr ""
+
+#. module: fleet
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__co2_emission_unit__g/mi
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__co2_emission_unit__g/mi
+msgid "g/mi"
+msgstr ""
+
+#. module: fleet
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__power_unit__power
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__power_unit__power
 msgid "kW"
@@ -2641,11 +2801,15 @@ msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__odometer_unit__kilometers
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__range_unit__km
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__range_unit__km
 msgid "km"
 msgstr "km"
 
 #. module: fleet
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__odometer_unit__miles
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__range_unit__mi
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__range_unit__mi
 msgid "mi"
 msgstr ""
 
@@ -2663,3 +2827,49 @@ msgstr "zobraziť protokol počítadla prejdených kilometrov pre toto vozidlo"
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
 msgid "show the services logs for this vehicle"
 msgstr "zobraziť servisné protokoly pre toto vozidlo"
+
+#~ msgid "<span>g/km</span>"
+#~ msgstr "<span>g/km</span>"
+
+#~ msgid "<span>kW</span>"
+#~ msgstr "<span>kW</span>"
+
+#~ msgid "Close Contract"
+#~ msgstr "Uzavretá zmluva"
+
+#~ msgid "Contact"
+#~ msgstr "Kontakt"
+
+#~ msgid "Date when the vehicle has been immatriculated"
+#~ msgstr "Den vyradenia vozidla z prevádzky"
+
+#~ msgid "Doors Number"
+#~ msgstr "Počet dverí"
+
+#~ msgid "Group By"
+#~ msgstr "Zoskupiť podľa"
+
+#~ msgid "Immatriculation Date"
+#~ msgstr "Dátum pridelenia evidenčného čísla vozidla"
+
+#~ msgid "Km"
+#~ msgstr "Km"
+
+#~ msgid "Name of contract to renew soon"
+#~ msgstr "Názov kontraktu na skoré obnovenie"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Počet správ, ktoré vyžadujú akciu"
+
+#~ msgid "Reset To Draft"
+#~ msgstr "Obnoviť návrh"
+
+#~ msgid "Seats Number"
+#~ msgstr "Číslo sedadiel"
+
+#~ msgid "Show all records which has next action date is before today"
+#~ msgstr ""
+#~ "Zobraz všetky záznamy, ktorých následná aktivita je pred dnešným dňom"
+
+#~ msgid "Total of contracts due or overdue minus one"
+#~ msgstr "Celkovo splatných kontraktov alebo po splatnosti mínus jeden"

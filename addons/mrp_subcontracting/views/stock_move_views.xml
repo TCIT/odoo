@@ -8,7 +8,6 @@
         <field name="arch" type="xml">
             <list editable="bottom">
                 <field name="company_id" column_invisible="True"/>
-                <field name="product_uom_category_id" column_invisible="True"/>
                 <field name="owner_id" column_invisible="True"/>
                 <field name="tracking" column_invisible="True"/>
                 <field name="package_id" column_invisible="True"/>
@@ -24,7 +23,7 @@
                     required="tracking in ('serial', 'lot')"
                     context="{'default_product_id': product_id}"/>
                 <field name="quantity"/>
-                <field name="product_uom_id" groups="uom.group_uom"/>
+                <field name="product_uom_id" groups="uom.group_uom" widget="many2one_uom"/>
             </list>
         </field>
     </record>
@@ -78,7 +77,6 @@
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
-                    <field name="product_uom_category_id" invisible="1"/>
                     <field name="company_id" invisible="1"/>
                     <field name="product_id" invisible="1" readonly="state == 'done'"/>
                     <field name="sequence" invisible="1"/>
@@ -89,8 +87,8 @@
                     <field name="product_uom" invisible="1"/>
                     <field name="product_uom_qty" invisible="1" readonly="state == 'done'"/>
                     <group>
-                        <field name="order_finished_lot_id"/>
-                        <field name="product_uom" groups="uom.group_uom"/>
+                        <field name="order_finished_lot_ids"/>
+                        <field name="product_uom" groups="uom.group_uom" widget="many2one_uom"/>
                         <field name="quantity" string="Total Consumed" readonly="1"/>
                     </group>
                     <field name="move_line_ids"
@@ -101,7 +99,6 @@
                             <field name="state" column_invisible="True"/>
                             <field name="tracking" column_invisible="True"/>
                             <field name="product_uom_id" column_invisible="True"/>
-                            <field name="product_uom_category_id" column_invisible="True"/>
                             <field name="picking_id" column_invisible="True"/>
                             <field name="move_id" column_invisible="True"/>
                             <field name="location_id" column_invisible="True"/>
@@ -122,7 +119,7 @@
         <field name="priority">1000</field>
         <field name="inherit_id" ref="mrp_subcontracting_move_form_view" />
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='order_finished_lot_id']" position="attributes">
+            <xpath expr="//field[@name='order_finished_lot_ids']" position="attributes">
                 <attribute name="options">{'no_open': True}</attribute>
             </xpath>
             <xpath expr="//list" position="attributes">
@@ -138,17 +135,14 @@
         <field name="model">stock.move</field>
         <field name="priority">1000</field>
         <field name="arch" type="xml">
-            <list delete="0" create="0" decoration-muted="is_done" decoration-warning="quantity - product_uom_qty &gt; 0.0001" decoration-success="not is_done and quantity - product_uom_qty &lt; 0.0001" js_class="subcontracting_portal_move_list_view">
+            <list delete="0" create="0" decoration-muted="state in ['done', 'cancel']" decoration-warning="quantity - product_uom_qty &gt; 0.0001" decoration-success="state not in ['done', 'cancel'] and quantity - product_uom_qty &lt; 0.0001" js_class="subcontracting_portal_move_list_view">
                 <field name="company_id" column_invisible="True"/>
                 <field name="sequence" column_invisible="True"/>
-                <field name="product_uom_category_id" column_invisible="True"/>
-                <field name="name" column_invisible="True"/>
                 <field name="unit_factor" column_invisible="True"/>
                 <field name="date" column_invisible="True"/>
                 <field name="picking_type_id" column_invisible="True"/>
                 <field name="has_tracking" column_invisible="True"/>
                 <field name="operation_id" column_invisible="True"/>
-                <field name="is_done" column_invisible="True"/>
                 <field name="bom_line_id" column_invisible="True"/>
                 <field name="location_id" column_invisible="True"/>
                 <field name="warehouse_id" column_invisible="True"/>
@@ -157,9 +151,9 @@
                 <field name="state" column_invisible="True" force_save="1"/>
                 <field name="raw_material_production_id" column_invisible="True"/>
                 <field name="product_id" required="1" readonly="state == 'done'"/>
-                <field name="order_finished_lot_id"/>
+                <field name="order_finished_lot_ids"/>
                 <field name="quantity" string="Consumed" readonly="1"/>
-                <field name="product_uom" groups="uom.group_uom"/>
+                <field name="product_uom" groups="uom.group_uom" widget="many2one_uom"/>
             </list>
         </field>
     </record>
@@ -169,7 +163,7 @@
         <field name="inherit_id" ref="stock.view_move_search" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='partner_id']" position="after">
-                <field name="order_finished_lot_id"/>
+                <field name="order_finished_lot_ids"/>
             </xpath>
         </field>
     </record>

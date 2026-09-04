@@ -40,7 +40,7 @@ class ResConfigSettings(models.TransientModel):
 
     invoice_mail_template_id = fields.Many2one(
         comodel_name='mail.template',
-        string="Invoice Email Template",
+        string="Email Template",
         domain=[('model', '=', 'account.move')],
         config_parameter='sale.default_invoice_email_template',
         help="Email sent to the customer once the invoice is available.",
@@ -57,26 +57,30 @@ class ResConfigSettings(models.TransientModel):
     prepayment_percent = fields.Float(
         related='company_id.prepayment_percent',
         readonly=False)
+    downpayment_account_id = fields.Many2one(related='company_id.downpayment_account_id', readonly=False)
 
     # Modules
     module_delivery = fields.Boolean("Delivery Methods")
     module_delivery_bpost = fields.Boolean("bpost Connector")
     module_delivery_dhl = fields.Boolean("DHL Express Connector")
     module_delivery_easypost = fields.Boolean("Easypost Connector")
-    module_delivery_fedex = fields.Boolean("FedEx Connector")
+    module_delivery_envia = fields.Boolean("Envia.com Connector")
+    module_delivery_fedex_rest = fields.Boolean("FedEx Connector")
     module_delivery_sendcloud = fields.Boolean("Sendcloud Connector")
     module_delivery_shiprocket = fields.Boolean("Shiprocket Connector")
-    module_delivery_ups = fields.Boolean("UPS Connector")
-    module_delivery_usps = fields.Boolean("USPS Connector")
     module_delivery_starshipit = fields.Boolean("Starshipit Connector")
+    module_delivery_ups_rest = fields.Boolean("UPS Connector")
+    module_delivery_usps_rest = fields.Boolean("USPS Connector")
 
     module_product_email_template = fields.Boolean("Specific Email")
     module_sale_amazon = fields.Boolean("Amazon Sync")
+    module_sale_commission = fields.Boolean("Commissions")
+    module_sale_gelato = fields.Boolean("Gelato")
     module_sale_loyalty = fields.Boolean("Coupons & Loyalty")
     module_sale_margin = fields.Boolean("Margins")
-    module_sale_product_matrix = fields.Boolean("Sales Grid Entry")
     module_sale_pdf_quote_builder = fields.Boolean("PDF Quote builder")
-    module_sale_commission = fields.Boolean("Commissions")
+    module_sale_product_matrix = fields.Boolean("Sales Grid Entry")
+    module_sale_shopee = fields.Boolean("Shopee Sync")
 
     #=== ONCHANGE METHODS ===#
 
@@ -121,6 +125,9 @@ class ResConfigSettings(models.TransientModel):
         if self.default_invoice_policy != 'order':
             self.env['ir.config_parameter'].set_param(key='sale.automatic_invoice', value=False)
 
-        send_invoice_cron = self.env.ref('sale.send_invoice_cron', raise_if_not_found=False)
-        if send_invoice_cron and send_invoice_cron.active != self.automatic_invoice:
-            send_invoice_cron.active = self.automatic_invoice
+    # === ACTION METHODS === #
+
+    # Unique name to avoid colliding with `website_payment`.
+    def action_sale_start_payment_onboarding(self):
+        menu = self.env.ref('sale.menu_sale_general_settings', raise_if_not_found=False)
+        return self._start_payment_onboarding(menu and menu.id)

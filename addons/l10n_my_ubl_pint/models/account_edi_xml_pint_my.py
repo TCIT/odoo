@@ -3,9 +3,9 @@
 from odoo import models, _
 
 
-class AccountEdiXmlUBLPINTMY(models.AbstractModel):
-    _inherit = "account.edi.xml.ubl_bis3"
+class AccountEdiXmlPint_My(models.AbstractModel):
     _name = 'account.edi.xml.pint_my'
+    _inherit = ["account.edi.xml.ubl_bis3"]
     _description = "Malaysian implementation of Peppol International (PINT) model for Billing"
     """
     * PINT Official documentation: https://docs.peppol.eu/poac/pint/pint/
@@ -16,87 +16,110 @@ class AccountEdiXmlUBLPINTMY(models.AbstractModel):
         # EXTENDS account_edi_ubl_cii
         return f"{invoice.name.replace('/', '_')}_pint_my.xml"
 
-    def _export_invoice_vals(self, invoice):
-        # EXTENDS account_edi_ubl_cii
-        vals = super()._export_invoice_vals(invoice)
-        vals['vals'].update({
-            # see https://docs.peppol.eu/poac/my/pint-my/bis/#profiles
-            'customization_id': self._get_customization_ids()['pint_my'],
-            'profile_id': 'urn:peppol:bis:billing',
-        })
-        if invoice.currency_id != invoice.company_id.currency_id:
-            # see https://docs.peppol.eu/poac/my/pint-my/bis/#_tax_in_accounting_currency
-            vals['vals']['tax_currency_code'] = invoice.company_id.currency_id.name  # accounting currency
-        return vals
+    def _get_customization_id(self, process_type='billing'):
+        if process_type == 'billing':
+            return 'urn:peppol:pint:billing-1@my-1'
 
-    def _get_invoice_tax_totals_vals_list(self, invoice, taxes_vals):
-        # EXTENDS account_edi_ubl_cii
-        vals_list = super()._get_invoice_tax_totals_vals_list(invoice, taxes_vals)
-        company_currency = invoice.company_id.currency_id
-        if invoice.currency_id != company_currency:
-            # see https://docs.peppol.eu/poac/my/pint-my/bis/#_tax_in_accounting_currency
-            vals_list.append({
-                'currency': company_currency,
-                'currency_dp': company_currency.decimal_places,
-                'tax_amount': taxes_vals['tax_amount'],
-                'tax_subtotal_vals': [],
-            })
-        return vals_list
+    # -------------------------------------------------------------------------
+    # EXPORT: Templates
+    # -------------------------------------------------------------------------
 
-    def _get_partner_party_tax_scheme_vals_list(self, partner, role):
-        """ [aligned-ibrp-cl-01-my]-Malaysian invoice tax categories MUST be coded using Malaysian codes. """
-        # EXTENDS account_edi_ubl_cii
-        tax_scheme_vals_list = super()._get_partner_party_tax_scheme_vals_list(partner, role)
-        # See https://docs.peppol.eu/poac/my/pint-my/bis/#_seller_tax_identifier
-        tax_scheme_vals_list[0]['company_id'] = partner.sst_registration_number or 'NA'
-        if role == 'supplier':
-            # TIN
-            gst_tax_scheme = tax_scheme_vals_list[0].copy()
-            gst_tax_scheme.update({
-                'company_id': partner.vat,
-                'tax_scheme_vals': {'id': 'GST'},
-            })
-            tax_scheme_vals_list.append(gst_tax_scheme)
+    def _ubl_default_tax_category_grouping_key(self, base_line, tax_data, vals, currency):
+        # EXTENDS account.edi.xml.ubl_bis3
 
-        return tax_scheme_vals_list
+        # In malaysia, tax on good is paid at the manufacturer level. It is thus common to invoice without taxes,
+        # unless invoicing for a service.
+        if not tax_data:
+            return
 
-    def _get_tax_unece_codes(self, customer, supplier, tax):
-        """
-        In malaysia, only the following codes can be used: T, E, O
-        https://docs.peppol.eu/poac/my/pint-my/bis/#_tax_category_code
-        """
-        # OVERRIDE account_edi_ubl_cii
-        codes = {
-            'tax_category_code': False,
-            'tax_exemption_reason_code': False,
-            'tax_exemption_reason': False,
-        }
+        grouping_key = super()._ubl_default_tax_category_grouping_key(base_line, tax_data, vals, currency)
+        if not grouping_key:
+            return
+
         # If a business is not registered for SST and/or TTx, the business is not allowed to charge sales tax,
         # service tax or tourism tax in the e-Invoice.
         # In this case, the tax category code should be 'O' (Outside scope of tax).
         # For now, we do not properly support Tourism tax (TTx) due to a lack of clarity on the subject.
+        supplier = vals['supplier']
         if not supplier.sst_registration_number:
-            codes['tax_category_code'] = 'O'
-        elif tax.amount != 0:
-            codes['tax_category_code'] = 'T'
+            grouping_key['tax_category_code'] = 'O'
+        elif tax_data['tax'].amount != 0:
+            grouping_key['tax_category_code'] = 'T'
         else:
-            codes['tax_category_code'] = 'E'
-        return codes
+            grouping_key['tax_category_code'] = 'E'
+
+        return grouping_key
+
+    def _ubl_add_tax_totals_nodes(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_tax_totals_nodes(vals)
+        nodes = vals['document_node']['cac:TaxTotal']
+
+        if not nodes:
+            tax_total_node = self._ubl_get_tax_total_node(vals, {
+                'currency': vals['currency_id'],
+                'amount': 0.0,
+                'subtotals': {},
+            })
+            nodes.append(tax_total_node)
+
+    def _ubl_add_party_tax_scheme_nodes(self, vals):
+        # EXTENDS account.edi.ubl_bis3
+        super()._ubl_add_party_tax_scheme_nodes(vals)
+        partner = vals['party_vals']['partner']
+        commercial_partner = partner.commercial_partner_id
+
+        if commercial_partner.country_code == 'MY':
+            vals['party_node']['cac:PartyTaxScheme'] = [{
+                'cbc:CompanyID': {'_text': commercial_partner.sst_registration_number or 'NA'},
+                'cac:TaxScheme': {
+                    'cbc:ID': {'_text': 'NOT_EU_VAT'},
+                },
+            }]
+
+    def _ubl_add_accounting_supplier_party_tax_scheme_nodes(self, vals):
+        # EXTENDS account.edi.ubl_bis3
+        super()._ubl_add_accounting_supplier_party_tax_scheme_nodes(vals)
+        nodes = vals['party_node']['cac:PartyTaxScheme']
+        partner = vals['party_vals']['partner']
+        commercial_partner = partner.commercial_partner_id
+
+        if commercial_partner.country_code == 'MY':
+            nodes.append({
+                'cbc:CompanyID': {'_text': commercial_partner.vat or 'NA'},
+                'cac:TaxScheme': {
+                    'cbc:ID': {'_text': 'GST'},
+                },
+            })
+
+    def _ubl_add_customization_id_node(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_customization_id_node(vals)
+        vals['document_node']['cbc:CustomizationID']['_text'] = 'urn:peppol:pint:billing-1@my-1'
+
+    def _ubl_add_profile_id_node(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_profile_id_node(vals)
+        vals['document_node']['cbc:ProfileID']['_text'] = 'urn:peppol:bis:billing'
+
+    # -------------------------------------------------------------------------
+    # EXPORT: Constraints
+    # -------------------------------------------------------------------------
 
     def _export_invoice_constraints(self, invoice, vals):
         # EXTENDS account_edi_ubl_cii
         constraints = super()._export_invoice_constraints(invoice, vals)
 
         # A tax category "Outside of tax cope" can only have an amount of 0.
-        for tax_total_val in vals['vals']['tax_total_vals']:
-            for tax_subtotal_val in tax_total_val['tax_subtotal_vals']:
-                tax_category_vals = tax_subtotal_val['tax_category_vals']
-                if tax_category_vals['tax_category_code'] == 'O' and tax_category_vals['percent'] != 0:
-                    constraints['peppol_my_sst_registration'] = _(
-                        "If your business is registered for SST, please provide your registration number in your company details.\n"
-                        "Otherwise, you are not allowed to charge sales or services taxes in the e-Invoice."
-                    )
-                    break
+        for tax_total_node in vals['document_node']['cac:TaxTotal']:
+            for tax_subtotal_node in tax_total_node['cac:TaxSubtotal']:
+                for tax_category_node in tax_subtotal_node['cac:TaxCategory']:
+                    if tax_category_node['cbc:ID'] == 'O' and tax_subtotal_node['cbc:Percent'] != 0:
+                        constraints['peppol_my_sst_registration'] = _(
+                            "If your business is registered for SST, please provide your registration number in your company details.\n"
+                            "Otherwise, you are not allowed to charge sales or services taxes in the e-Invoice."
+                        )
+                        break
 
         # In malaysia, tax on good is paid at the manufacturer level. It is thus common to invoice without taxes,
         # unless invoicing for a service.
@@ -104,3 +127,17 @@ class AccountEdiXmlUBLPINTMY(models.AbstractModel):
         constraints.pop('cen_en16931_tax_line', '')
 
         return constraints
+
+    # -------------------------------------------------------------------------
+    # IMPORT
+    # -------------------------------------------------------------------------
+    def _import_ubl_invoice_add_customer_values(self, collected_values):
+        # EXTENDS account.edi.xml.ubl_bis3; Prioritize PartyLegalEntity when inferring the supplier tax identifier.
+        super()._import_ubl_invoice_add_customer_values(collected_values)
+        odoo_document_type = collected_values['odoo_document_type']
+        party_tag = "AccountingCustomerParty" if odoo_document_type == 'sale' else "AccountingSupplierParty"
+        tree = collected_values['tree']
+        party_legal_entity_node = tree.find(f"./{{*}}{party_tag}/{{*}}Party/{{*}}PartyLegalEntity")
+        if party_legal_entity_node is None:
+            return
+        collected_values['customer_values']['vat'] = party_legal_entity_node.findtext("./{*}CompanyID")

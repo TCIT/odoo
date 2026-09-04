@@ -1,45 +1,54 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_check_printing
-# 
+# * account_check_printing
+#
 # Translators:
-# emre oktem, 2024
-# Ulaş Sarıkaya <hasanulassarikaya@gmail.com>, 2024
-# Nadir Gazioglu <nadirgazioglu@gmail.com>, 2024
-# Ayhan KIZILTAN <akiziltan76@hotmail.com>, 2024
-# Ediz Duman <neps1192@gmail.com>, 2024
-# Alexander B. <road2monstercat@gmail.com>, 2024
-# Yedigen, 2024
-# Martin Trigaux, 2024
-# Umur Akın <umura@projetgrup.com>, 2024
-# Murat Kaplan <muratk@projetgrup.com>, 2024
-# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2024
-# Wil Odoo, 2025
-# 
+# Ulaş Sarıkaya <hasanulassarikaya@gmail.com>, 2022
+# Ayhan KIZILTAN <akiziltan76@hotmail.com>, 2022
+# Nadir Gazioglu <nadirgazioglu@gmail.com>, 2022
+# Yedigen, 2022
+# Martin Trigaux, 2022
+# abc Def <hdogan1974@gmail.com>, 2022
+# Levent Karakaş <levent@mektup.at>, 2022
+# Alexander B. <road2monstercat@gmail.com>, 2022
+# Murat Kaplan <muratk@projetgrup.com>, 2022
+# Umur Akın <umura@projetgrup.com>, 2022
+# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# DeepL <noreply-mt-deepl@weblate.org>, 2025.
+# Odoo Turkish Import <dyki+tr@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
-"Language-Team: Turkish (https://app.transifex.com/odoo/teams/41243/tr/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-04 21:27+0000\n"
+"Last-Translator: Odoo Turkish Import <dyki+tr@odoo.com>\n"
+"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-19/"
+"account_check_printing/tr/>\n"
+"Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: tr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: account_check_printing
 #. odoo-python
 #: code:addons/account_check_printing/models/account_journal.py:0
 msgid "%(journal)s: Check Number Sequence"
-msgstr ""
+msgstr "%(journal)s: Çek Numarası Sırası"
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_payment.py:0
+msgid "%(number)s in journal %(journal)s"
+msgstr "%(number)s yevmiyede %(journal)s"
 
 #. module: account_check_printing
 #: model_terms:ir.ui.view,arch_db:account_check_printing.account_journal_dashboard_kanban_view_inherited
 msgid "<span>&amp;nbsp;</span>"
-msgstr ""
+msgstr "<span>&amp;nbsp;</span>"
 
 #. module: account_check_printing
 #: model:ir.model.fields,help:account_check_printing.field_res_company__account_check_printing_margin_left
@@ -52,8 +61,8 @@ msgid ""
 "Adjust the margins of generated checks to make it fit your printer's "
 "settings."
 msgstr ""
-"Oluşturulan çeklerin kenar boşluklarını yazıcınızın ayarlarına uydurmak için"
-" ayarlayın."
+"Oluşturulan çeklerin kenar boşluklarını yazıcınızın ayarlarına uydurmak için "
+"ayarlayın."
 
 #. module: account_check_printing
 #: model:ir.model.fields,field_description:account_check_printing.field_account_payment__check_amount_in_words
@@ -102,7 +111,7 @@ msgstr "Sağ Kenar Boşluğu Kontrol Et"
 #. module: account_check_printing
 #: model:ir.model.fields,field_description:account_check_printing.field_account_journal__check_sequence_id
 msgid "Check Sequence"
-msgstr "Çek Sırano"
+msgstr "Çek Sıra no"
 
 #. module: account_check_printing
 #: model:ir.model.fields,field_description:account_check_printing.field_res_company__account_check_printing_margin_top
@@ -114,15 +123,14 @@ msgstr "Üst Kenar Boşluğunu Kontrol Et"
 #. odoo-python
 #: code:addons/account_check_printing/models/account_payment.py:0
 msgid "Check numbers can only consist of digits"
-msgstr "Check numbers can only consist of digits"
+msgstr "Çek numaraları sadece rakamlardan oluşabilir"
 
 #. module: account_check_printing
 #: model:ir.model.fields,help:account_check_printing.field_account_journal__check_manual_sequencing
 #: model:ir.model.fields,help:account_check_printing.field_account_payment__check_manual_sequencing
 msgid "Check this option if your pre-printed checks are not numbered."
 msgstr ""
-"Numara verilmeden önce çekleri ön çıktı olarak izlemek isterseniz bunu "
-"seçin."
+"Eğer önceden basılmış çek çıktılarınız numaralı değil ise bu seçeneği seçin."
 
 #. module: account_check_printing
 #: model_terms:ir.ui.view,arch_db:account_check_printing.account_journal_dashboard_kanban_view_inherited
@@ -134,7 +142,7 @@ msgstr "Yazdırılacak Çek"
 #: code:addons/account_check_printing/models/account_payment.py:0
 #: model:account.payment.method,name:account_check_printing.account_payment_method_check
 msgid "Checks"
-msgstr "Kontroller"
+msgstr "Çekler"
 
 #. module: account_check_printing
 #: model:ir.model.fields,help:account_check_printing.field_account_journal__check_sequence_id
@@ -179,18 +187,33 @@ msgid "Default"
 msgstr "Öntanımlı"
 
 #. module: account_check_printing
+#: model:ir.model.fields,field_description:account_check_printing.field_account_journal__display_name
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment__display_name
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment_method__display_name
 #: model:ir.model.fields,field_description:account_check_printing.field_print_prenumbered_checks__display_name
+#: model:ir.model.fields,field_description:account_check_printing.field_res_company__display_name
+#: model:ir.model.fields,field_description:account_check_printing.field_res_config_settings__display_name
 msgid "Display Name"
-msgstr "İsim Göster"
+msgstr "Görünen Ad"
 
 #. module: account_check_printing
 #. odoo-python
 #: code:addons/account_check_printing/models/account_payment.py:0
 msgid "Go to the configuration panel"
-msgstr "Yapılandırma paneline git"
+msgstr "Yapılandırma ekranına git"
 
 #. module: account_check_printing
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment__check_layout_available
+msgid "Has Check Layout"
+msgstr "Çek Düzeni Var"
+
+#. module: account_check_printing
+#: model:ir.model.fields,field_description:account_check_printing.field_account_journal__id
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment__id
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment_method__id
 #: model:ir.model.fields,field_description:account_check_printing.field_print_prenumbered_checks__id
+#: model:ir.model.fields,field_description:account_check_printing.field_res_company__id
+#: model:ir.model.fields,field_description:account_check_printing.field_res_config_settings__id
 msgid "ID"
 msgstr "ID"
 
@@ -198,11 +221,11 @@ msgstr "ID"
 #. odoo-python
 #: code:addons/account_check_printing/models/account_payment.py:0
 msgid ""
-"In order to print multiple checks at once, they must belong to the same bank"
-" journal."
+"In order to print multiple checks at once, they must belong to the same bank "
+"journal."
 msgstr ""
-"Aynı anda birden çok çek yazdırmak için, aynı banka yevmiyesine ait olmaları"
-" gerekir."
+"Aynı anda birden çok çek yazdırmak için, aynı banka yevmiyesine ait olmaları "
+"gerekir."
 
 #. module: account_check_printing
 #: model:ir.model,name:account_check_printing.model_account_journal
@@ -229,18 +252,34 @@ msgstr "Elle Numaralandırma"
 #: model:ir.model.fields,help:account_check_printing.field_account_payment__payment_method_line_id
 msgid ""
 "Manual: Pay or Get paid by any method outside of Odoo.\n"
-"Payment Providers: Each payment provider has its own Payment Method. Request a transaction on/to a card thanks to a payment token saved by the partner when buying or subscribing online.\n"
+"Payment Providers: Each payment provider has its own Payment Method. Request "
+"a transaction on/to a card thanks to a payment token saved by the partner "
+"when buying or subscribing online.\n"
 "Check: Pay bills by check and print it from Odoo.\n"
-"Batch Deposit: Collect several customer checks at once generating and submitting a batch deposit to your bank. Module account_batch_payment is necessary.\n"
-"SEPA Credit Transfer: Pay in the SEPA zone by submitting a SEPA Credit Transfer file to your bank. Module account_sepa is necessary.\n"
-"SEPA Direct Debit: Get paid in the SEPA zone thanks to a mandate your partner will have granted to you. Module account_sepa is necessary.\n"
+"Batch Deposit: Collect several customer checks at once generating and "
+"submitting a batch deposit to your bank. Module account_batch_payment is "
+"necessary.\n"
+"SEPA Credit Transfer: Pay in the SEPA zone by submitting a SEPA Credit "
+"Transfer file to your bank. Module account_iso20022 is necessary.\n"
+"SEPA Direct Debit: Get paid in the SEPA zone thanks to a mandate your "
+"partner will have granted to you. Module account_iso20022 is necessary.\n"
+"U.S. ISO20022: Pay in the US by submitting an ISO20022 file to your bank. "
+"Module account_iso20022 is necessary.\n"
 msgstr ""
 "Manuel: Odoo dışında herhangi bir yöntemle ödeme yapın veya ödeme alın.\n"
-"Ödeme Sağlayıcıları: Her ödeme sağlayıcısının kendi Ödeme Yöntemi vardır. Çevrimiçi satın alırken veya abone olurken iş ortağı tarafından kaydedilen bir ödeme belirteci sayesinde bir kart üzerinde / karta işlem talep edin.\n"
+"Ödeme Sağlayıcıları: Her ödeme sağlayıcısının kendi Ödeme Yöntemi vardır. "
+"Çevrimiçi satın alırken veya abone olurken iş ortağı tarafından kaydedilen "
+"bir ödeme belirteci sayesinde bir kart üzerinde / karta işlem talep edin.\n"
 "Çek: Faturaları çek ile ödeyin ve Odoo'dan yazdırın.\n"
-"Toplu Para Yatırma: Aynı anda birkaç müşteri çeki toplayın ve bankanıza bir toplu para yatırma işlemi oluşturun ve gönderin. account_batch_payment modülü gereklidir.\n"
-"SEPA Kredi Transferi: Bankanıza bir SEPA Kredi Transferi dosyası göndererek SEPA bölgesinde ödeme yapın. Modül account_sepa gereklidir.\n"
-"SEPA Doğrudan Borçlandırma: İş Ortağınızın size vereceği bir yetki sayesinde SEPA bölgesinde ödeme alın. Modül account_sepa gereklidir.\n"
+"Toplu Para Yatırma: Aynı anda birkaç müşteri çeki toplayın ve bankanıza bir "
+"toplu para yatırma işlemi oluşturun ve gönderin. account_batch_payment "
+"modülü gereklidir.\n"
+"SEPA Alacak Transferi: Bankanıza bir SEPA Alacak Transferi dosyası "
+"göndererek SEPA bölgesinde ödeme yapın. account_iso20022 modülü gereklidir.\n"
+"SEPA Doğrudan Borç: Ortağınızın size vereceği bir yetki sayesinde SEPA "
+"bölgesinde ödeme alın. Modül account_iso20022 gereklidir.\n"
+"ABD ISO20022: Bankanıza bir ISO20022 dosyası göndererek ABD'de ödeme yapın. "
+"account_iso20022 modülü gereklidir.\n"
 
 #. module: account_check_printing
 #: model:ir.model.fields,field_description:account_check_printing.field_res_company__account_check_printing_multi_stub
@@ -294,8 +333,8 @@ msgstr ""
 #. module: account_check_printing
 #: model_terms:ir.ui.view,arch_db:account_check_printing.print_pre_numbered_checks_view
 msgid ""
-"Please enter the number of the first pre-printed check that you are about to"
-" print on."
+"Please enter the number of the first pre-printed check that you are about to "
+"print on."
 msgstr ""
 "Lütfen üzerine basmak üzere olduğunuz ilk önceden yazdırılmış çekin "
 "numarasını girin."
@@ -327,7 +366,7 @@ msgstr "Tarih Etiketini Yazdır"
 #: model:ir.model,name:account_check_printing.model_print_prenumbered_checks
 #: model_terms:ir.ui.view,arch_db:account_check_printing.print_pre_numbered_checks_view
 msgid "Print Pre-numbered Checks"
-msgstr "Önizleme İçin Yazdır"
+msgstr "Numaralandırılmış Çekleri Yazdır"
 
 #. module: account_check_printing
 #. odoo-python
@@ -344,7 +383,8 @@ msgstr "Sağ Kenar Boşluğu"
 #: model:ir.model.fields,help:account_check_printing.field_res_company__account_check_printing_layout
 #: model:ir.model.fields,help:account_check_printing.field_res_config_settings__account_check_printing_layout
 msgid ""
-"Select the format corresponding to the check paper you will be printing your checks on.\n"
+"Select the format corresponding to the check paper you will be printing your "
+"checks on.\n"
 "In order to disable the printing feature, select 'None'."
 msgstr ""
 "Çeklerinizi yazdıracağınız çek kağıdına karşılık gelen formatı seçin.\n"
@@ -358,7 +398,7 @@ msgstr "Gönderildi"
 #. module: account_check_printing
 #: model:ir.model.fields,help:account_check_printing.field_account_journal__check_next_number
 msgid "Sequence number of the next printed check."
-msgstr "Bir sonraki basılan kontrolün sıra numarası."
+msgstr "Bir sonraki basılmış çekin sıra numarası."
 
 #. module: account_check_printing
 #: model:ir.model.fields,field_description:account_check_printing.field_account_payment__show_check_number
@@ -372,8 +412,18 @@ msgid ""
 "Something went wrong with Check Layout, please select another layout in "
 "Invoicing/Accounting Settings and try again."
 msgstr ""
-"Çek Çıktı Düzeni ile ilgili bir sorun oluştu, lütfen Faturalandırma/Muhasebe"
-" Ayarları'nda başka bir çıktı düzeni seçin ve yeniden deneyin."
+"Çek Çıktı Düzeni ile ilgili bir sorun oluştu, lütfen Faturalandırma/Muhasebe "
+"Ayarları'nda başka bir çıktı düzeni seçin ve yeniden deneyin."
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_journal.py:0
+msgid ""
+"The check number you entered (%(num)s) exceeds the maximum allowed value of %"
+"(max)d. Please enter a smaller number."
+msgstr ""
+"Girdiğiniz çek numarası (%(num)s) izin verilen maksimum %(max)d değerini "
+"aşıyor. Lütfen daha küçük bir sayı girin."
 
 #. module: account_check_printing
 #. odoo-python
@@ -424,8 +474,10 @@ msgid ""
 "This option allows you to print the date label on the check as per CPA.\n"
 "Disable this if your pre-printed check includes the date label."
 msgstr ""
-"Bu seçenek, çek üzerindeki tarih etiketini EBM'ye göre yazdırmanıza olanak tanır.\n"
-"Önceden yazdırılmış çekiniz tarih etiketini içeriyorsa bunu devre dışı bırakın."
+"Bu seçenek, çek üzerindeki tarih etiketini EBM'ye göre yazdırmanıza olanak "
+"tanır.\n"
+"Önceden yazdırılmış çekiniz tarih etiketini içeriyorsa bunu devre dışı "
+"bırakın."
 
 #. module: account_check_printing
 #: model_terms:ir.ui.view,arch_db:account_check_printing.print_pre_numbered_checks_view
@@ -452,3 +504,71 @@ msgid ""
 msgstr ""
 "Bir çek çıktı düzeni seçmelisiniz. Bunun için Faturalama/Muhasebe "
 "Ayarları'na gidin, 'Çek çıktı düzeni'ni arayın ve bir tane ayarlayın."
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_payment.py:0
+msgid "check_number"
+msgstr "check_number"
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_payment.py:0
+msgid "out_refund"
+msgstr "out_refund"
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_payment.py:0
+msgid "sep"
+msgstr "sep"
+
+#~ msgid "Contact"
+#~ msgstr "Kontak"
+
+#~ msgid "Journal Entry"
+#~ msgstr "Yevmiye Kaydı"
+
+#~ msgid ""
+#~ "Manual: Pay or Get paid by any method outside of Odoo.\n"
+#~ "Payment Providers: Each payment provider has its own Payment Method. "
+#~ "Request a transaction on/to a card thanks to a payment token saved by the "
+#~ "partner when buying or subscribing online.\n"
+#~ "Check: Pay bills by check and print it from Odoo.\n"
+#~ "Batch Deposit: Collect several customer checks at once generating and "
+#~ "submitting a batch deposit to your bank. Module account_batch_payment is "
+#~ "necessary.\n"
+#~ "SEPA Credit Transfer: Pay in the SEPA zone by submitting a SEPA Credit "
+#~ "Transfer file to your bank. Module account_sepa is necessary.\n"
+#~ "SEPA Direct Debit: Get paid in the SEPA zone thanks to a mandate your "
+#~ "partner will have granted to you. Module account_sepa is necessary.\n"
+#~ msgstr ""
+#~ "Manuel: Odoo dışında herhangi bir yöntemle ödeme yapın veya ödeme alın.\n"
+#~ "Ödeme Sağlayıcıları: Her ödeme sağlayıcısının kendi Ödeme Yöntemi vardır. "
+#~ "Çevrimiçi satın alırken veya abone olurken iş ortağı tarafından "
+#~ "kaydedilen bir ödeme belirteci sayesinde bir kart üzerinde / karta işlem "
+#~ "talep edin.\n"
+#~ "Çek: Faturaları çek ile ödeyin ve Odoo'dan yazdırın.\n"
+#~ "Toplu Para Yatırma: Aynı anda birkaç müşteri çeki toplayın ve bankanıza "
+#~ "bir toplu para yatırma işlemi oluşturun ve gönderin. "
+#~ "account_batch_payment modülü gereklidir.\n"
+#~ "SEPA Kredi Transferi: Bankanıza bir SEPA Kredi Transferi dosyası "
+#~ "göndererek SEPA bölgesinde ödeme yapın. Modül account_sepa gereklidir.\n"
+#~ "SEPA Doğrudan Borçlandırma: İş Ortağınızın size vereceği bir yetki "
+#~ "sayesinde SEPA bölgesinde ödeme alın. Modül account_sepa gereklidir.\n"
+
+#~ msgid "Preferred Payment Method"
+#~ msgstr "Tercih Edilen Ödeme Yöntemi"
+
+#~ msgid ""
+#~ "Preferred payment method when paying this vendor. This is used to filter "
+#~ "vendor bills by preferred payment method to register payments in mass. "
+#~ "Use cases: create bank files for batch wires, check runs."
+#~ msgstr ""
+#~ "Bu satıcıya ödeme yaparken tercih edilen ödeme yöntemi. Bu, ödemeleri "
+#~ "toplu olarak kaydetmek için satıcı faturalarını tercih edilen ödeme "
+#~ "yöntemine göre filtrelemek için kullanılır. Kullanım örnekleri: toplu "
+#~ "işler için banka dosyaları oluşturun, çalıştırmaları kontrol edin."
+
+#~ msgid "Register Payment"
+#~ msgstr "Ödeme Kaydet"

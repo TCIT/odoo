@@ -5,9 +5,11 @@ from lxml import etree
 from unittest.mock import patch
 
 from odoo.http import request
+from odoo.tests import tagged
 from odoo.tools import SQL, mute_logger
 
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo
+from ..mobile_utils import _get_app_sha256_cert_fingerprints
 
 
 class PasskeyTest(HttpCaseWithUserDemo):
@@ -129,6 +131,47 @@ class PasskeyTest(HttpCaseWithUserDemo):
                     }
                 },
             },
+            "test-android": {
+                "user": self.admin_user,
+                "supports_sign_count": False,
+                "credential_identifier": "t_i1_F91Wg-FpFzae96DZ7wziguF_cLR4CAW96C8YeY",
+                "public_key": "pQECAyYgASFYIMJQcfCY2QEb2WlZdY4I5xiC5qWmuo0zkxIrf4vYLPBHIlggsq2k9b53CRzIk0u3FMTCKid8fDVF0_KXZ7qa7eOZdo0",
+                "host": "http://localhost:8069",
+                "android_origin": "android:apk-key-hash:1nMgAsotAcn9_JRzWtBzzyw2ECkfS_ddkcIdN7IY6JE",
+                "registration": {
+                    "id": "t_i1_F91Wg-FpFzae96DZ7wziguF_cLR4CAW96C8YeY",
+                    "rawId": "t_i1_F91Wg-FpFzae96DZ7wziguF_cLR4CAW96C8YeY",
+                    "response": {
+                        "attestationObject": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVikSZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NFAAAAAAAAAAAAAAAAAAAAAAAAAAAAILf4tfxfdVoPhaRc2nveg2e8M4oLhf3C0eAgFvegvGHmpQECAyYgASFYIMJQcfCY2QEb2WlZdY4I5xiC5qWmuo0zkxIrf4vYLPBHIlggsq2k9b53CRzIk0u3FMTCKid8fDVF0_KXZ7qa7eOZdo0",
+                        "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoicGs5eWhUQWhUQzNvS0dSUzdXd3g5aDExa0VXZlo3WWREZFNNRmNkbWE2U3RRZTJ1TlNaQTVCQWNvX18zeUFWYVpiT3ZsdWlNTFR5aHZzY0hQZzdxZHciLCJvcmlnaW4iOiJhbmRyb2lkOmFway1rZXktaGFzaDoxbk1nQXNvdEFjbjlfSlJ6V3RCenp5dzJFQ2tmU19kZGtjSWRON0lZNkpFIiwiY3Jvc3NPcmlnaW4iOmZhbHNlLCJhbmRyb2lkUGFja2FnZU5hbWUiOiJhbmRyb2lkOmFway1rZXktaGFzaDoxbk1nQXNvdEFjbjlfSlJ6V3RCenp5dzJFQ2tmU19kZGtjSWRON0lZNkpFIn0",
+                        "transports": [
+                            "internal"
+                        ],
+                        "publicKeyAlgorithm": -7,
+                        "publicKey": "pQECAyYgASFYIMJQcfCY2QEb2WlZdY4I5xiC5qWmuo0zkxIrf4vYLPBHIlggsq2k9b53CRzIk0u3FMTCKid8fDVF0_KXZ7qa7eOZdo0",
+                        "authenticatorData": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVikSZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NFAAAAAAAAAAAAAAAAAAAAAAAAAAAAILf4tfxfdVoPhaRc2nveg2e8M4oLhf3C0eAgFvegvGHmpQECAyYgASFYIMJQcfCY2QEb2WlZdY4I5xiC5qWmuo0zkxIrf4vYLPBHIlggsq2k9b53CRzIk0u3FMTCKid8fDVF0_KXZ7qa7eOZdo0"
+                    },
+                    "type": "public-key",
+                    "clientExtensionResults": {},
+                    "authenticatorAttachment": "platform"
+                },
+                "auth": {
+                    "challenge": "ocotP-82vkwm--GGtcdO7X0rtelYvW2RgTlwlQDWeerAhj38erGico6ChaXWrgpX-kR1r-DBmf_7EK6VgSk-Jg",
+                    "response": {
+                        "id": "t_i1_F91Wg-FpFzae96DZ7wziguF_cLR4CAW96C8YeY",
+                        "rawId": "t_i1_F91Wg-FpFzae96DZ7wziguF_cLR4CAW96C8YeY",
+                        "response": {
+                            "authenticatorData": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MFAAAAAA",
+                            "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoib2NvdFAtODJ2a3dtLS1HR3RjZE83WDBydGVsWXZXMlJnVGx3bFFEV2VlckFoajM4ZXJHaWNvNkNoYVhXcmdwWC1rUjFyLURCbWZfN0VLNlZnU2stSmciLCJvcmlnaW4iOiJhbmRyb2lkOmFway1rZXktaGFzaDoxbk1nQXNvdEFjbjlfSlJ6V3RCenp5dzJFQ2tmU19kZGtjSWRON0lZNkpFIiwiY3Jvc3NPcmlnaW4iOmZhbHNlLCJhbmRyb2lkUGFja2FnZU5hbWUiOiJhbmRyb2lkOmFway1rZXktaGFzaDoxbk1nQXNvdEFjbjlfSlJ6V3RCenp5dzJFQ2tmU19kZGtjSWRON0lZNkpFIn0",
+                            "signature": "MEUCIGG5zk-BGwbCropY-HOy-1EE7u3ZvQmvD3oBGZjCB5tOAiEA00krBZFIJSjIN8DOHgIwRTPur0b5xTBtzAEG2Fr0kJM",
+                            "userHandle": "Mg"
+                        },
+                        "type": "public-key",
+                        "clientExtensionResults": {},
+                        "authenticatorAttachment": "platform"
+                    }
+                }
+            },
         }
 
         for key, values in self.passkeys.items():
@@ -195,8 +238,9 @@ class PasskeyTest(HttpCaseWithUserDemo):
             wizard_id = self.rpc('res.users', 'action_create_passkey', self.admin_user.id)['result']['res_id']
 
             # Adding a passkey triggers an identity check. Confirm using the password and run the check.
-            self.rpc('res.users.identitycheck', 'write', wizard_id, {'password': self.admin_user.login})
-            action = self.rpc('res.users.identitycheck', 'run_check', wizard_id)['result']
+            action = self.rpc('res.users.identitycheck', 'run_check', wizard_id,
+                context={'password': self.admin_user.login}
+            )['result']
 
             # Create the passkey creation wizard and set a name for the key
             wizard_id = self.rpc(action['res_model'], 'create', {'name': 'test-yubikey'})['result']
@@ -212,7 +256,7 @@ class PasskeyTest(HttpCaseWithUserDemo):
             self.assertEqual(self.admin_user.auth_passkey_key_ids.sign_count, 0)
 
     def test_authentication(self):
-        for key in ['test-yubikey', 'test-yubikey-nano', 'test-keepassxc']:
+        for key in ['test-yubikey', 'test-yubikey-nano', 'test-keepassxc', 'test-android']:
             passkey = self.passkeys[key]
             auth = passkey['auth']
             webauthn_challenge, webauthn_response = auth['challenge'], auth['response']
@@ -264,7 +308,7 @@ class PasskeyTest(HttpCaseWithUserDemo):
                 self.assertEqual(error, 'Cannot find a challenge for this session')
 
     def test_check_identity(self):
-        for key in ['test-yubikey', 'test-yubikey-nano', 'test-keepassxc']:
+        for key in ['test-yubikey', 'test-yubikey-nano', 'test-keepassxc', 'test-android']:
             passkey = self.passkeys[key]
             user, auth = passkey['user'], passkey['auth']
             webauthn_challenge, webauthn_response = auth['challenge'], auth['response']
@@ -276,7 +320,7 @@ class PasskeyTest(HttpCaseWithUserDemo):
                 self.authenticate(user.login, user.login)
 
                 # Call a method which triggers an identity check
-                wizard_id = self.rpc('res.users', 'preference_change_password', user.id)['result']['res_id']
+                wizard_id = self.rpc('res.users', 'api_key_wizard', user.id)['result']['res_id']
 
                 # Mimic what the Javascript code is doing when clicking on the button "Use a passkey"
 
@@ -284,11 +328,11 @@ class PasskeyTest(HttpCaseWithUserDemo):
                 # It sets the webauthn challenge in the session
                 self.url_open('/auth/passkey/start-auth', '{}', headers={"Content-Type": "application/json"})
 
-                # 2. Set the webauthn response in the password field
-                self.rpc('res.users.identitycheck', 'write', wizard_id, {'password': json.dumps(webauthn_response)})
-
-                # 3. Call the check method, which if successful returns the action to run following the identity check
-                response = self.rpc('res.users.identitycheck', 'run_check', wizard_id)
+                # 2. Call the check method with the webauthn response in the password,
+                # which if successful returns the action to run following the identity check
+                response = self.rpc('res.users.identitycheck', 'run_check', wizard_id,
+                    context={'password': json.dumps(webauthn_response)}
+                )
 
                 # Assert the identity check is successful
                 self.assertTrue(response.get('result'))
@@ -299,10 +343,11 @@ class PasskeyTest(HttpCaseWithUserDemo):
                 else:
                     self.assertEqual(passkey['passkey'].sign_count, sign_count)
 
-                # 4. Attempt a replay attack, without reseting the challenge
-                self.rpc('res.users.identitycheck', 'write', wizard_id, {'password': json.dumps(webauthn_response)})
+                # 3. Attempt a replay attack, without reseting the challenge
                 with mute_logger('odoo.http'):
-                    response = self.rpc('res.users.identitycheck', 'run_check', wizard_id)
+                    response = self.rpc('res.users.identitycheck', 'run_check', wizard_id,
+                        context={'password': json.dumps(webauthn_response)}
+                    )
 
                 # Assert the authentication failed
                 self.assertFalse(response.get('result'))
@@ -315,15 +360,16 @@ class PasskeyTest(HttpCaseWithUserDemo):
                 # The authentication fail, hence the sign count doesn't increase
                 self.assertEqual(passkey['passkey'].sign_count, sign_count)
 
-                # 5. Do a second authentication with the same challenge and same response
+                # 4. Do a second authentication with the same challenge and same response
 
                 # Reset the challenge, which is forced to the same challenge with a mock patch above
                 self.url_open('/auth/passkey/start-auth', '{}', headers={"Content-Type": "application/json"})
 
                 # Write the same webauthn response
-                self.rpc('res.users.identitycheck', 'write', wizard_id, {'password': json.dumps(webauthn_response)})
                 with mute_logger('odoo.http'):
-                    response = self.rpc('res.users.identitycheck', 'run_check', wizard_id)
+                    response = self.rpc('res.users.identitycheck', 'run_check', wizard_id,
+                        context={'password': json.dumps(webauthn_response)}
+                    )
 
                 if passkey.get('supports_sign_count', True):
                     # If the passkey supports sign_count, a replay attack with the same challenge must fail
@@ -336,13 +382,14 @@ class PasskeyTest(HttpCaseWithUserDemo):
 
                 self.assertEqual(passkey['passkey'].sign_count, sign_count)
 
-            # 6. Do a third authentication, with another challenge but the same reponse
+            # 5. Do a third authentication, with another challenge but the same reponse
             # This block is outside the block `with self.patch_start_auth(webauthn_challenge):`
             # hence it will generate a random challenge.
             self.url_open('/auth/passkey/start-auth', '{}', headers={"Content-Type": "application/json"})
-            self.rpc('res.users.identitycheck', 'write', wizard_id, {'password': json.dumps(webauthn_response)})
             with mute_logger('odoo.http'):
-                response = self.rpc('res.users.identitycheck', 'run_check', wizard_id)
+                response = self.rpc('res.users.identitycheck', 'run_check', wizard_id,
+                    context={'password': json.dumps(webauthn_response)}
+                )
             self.assertFalse(response.get('result'))
             self.assertTrue(response.get('error'))
             self.assertEqual(passkey['passkey'].sign_count, sign_count)
@@ -436,3 +483,41 @@ class PasskeyTest(HttpCaseWithUserDemo):
 
             # Login successful, redirected to /odoo
             self.assertTrue(response.url.endswith('/odoo'))
+
+    def test_android_digital_asset_links(self):
+        response = self.url_open('/.well-known/assetlinks.json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["Content-Type"], "application/json")
+        data = response.json()
+        self.assertGreater(len(data), 0, "Should a least have one entry")
+        for index, (package_name, fingerprints) in enumerate(_get_app_sha256_cert_fingerprints()):
+            # Two relations required for PassKey to work on Android
+            self.assertEqual(data[index]["relation"], [
+                "delegate_permission/common.handle_all_urls",
+                "delegate_permission/common.get_login_creds",
+            ])
+            # Data for our official Android App
+            self.assertEqual(data[index]["target"], {
+                'namespace': 'android_app',
+                'package_name': package_name,
+                'sha256_cert_fingerprints': fingerprints,
+            })
+
+
+@tagged('post_install', '-at_install')
+class PasskeyTestTours(PasskeyTest):
+    def test_passkey_login(self):
+        self.env['ir.config_parameter'].sudo().set_param('web.base.url', self.passkeys['test-keepassxc']['host'])
+        with self.patch_start_auth(self.passkeys['test-keepassxc']['auth']['challenge']):
+            self.start_tour("/web/login?debug=tests", 'passkeys_tour_login')
+
+    def test_passkey_backend(self):
+        # All these tests rely on each other but had to be split up to patch different methods.
+        self.env['ir.config_parameter'].sudo().set_param('web.base.url', self.passkeys['test-yubikey']['host'])
+        self.admin_user.tz = 'UTC'  # workaround to fix timezone not being set so you are unable to click any buttons on the profile page
+        self.admin_user.auth_passkey_key_ids.unlink()
+        with self.patch_start_registration(self.passkeys['test-yubikey']['registration']['challenge']):
+            self.start_tour("/odoo?debug=tests", 'passkeys_tour_registration', login="admin")
+        with self.patch_start_auth(self.passkeys['test-yubikey']['auth']['challenge']):
+            self.start_tour("/odoo?debug=tests", 'passkeys_tour_verify', login="admin")
+        self.start_tour("/odoo?debug=tests", 'passkeys_tour_delete', login="admin")

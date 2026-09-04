@@ -1,44 +1,50 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* base_import_module
-# 
+# * base_import_module
+#
 # Translators:
-# Erno Iipponen <erno.iipponen@web-veistamo.fi>, 2024
-# Kari Lindgren <kari.lindgren@emsystems.fi>, 2024
-# Martin Trigaux, 2024
-# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2024
-# Mikko Salmela <salmemik@gmail.com>, 2024
-# Miku Laitinen <miku.laitinen@gmail.com>, 2024
-# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2024
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2024
-# Tuomas Lyyra <tuomas.lyyra@legenda.fi>, 2024
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024
-# 
+# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2022
+# Kari Lindgren <kari.lindgren@emsystems.fi>, 2022
+# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Mikko Salmela <salmemik@gmail.com>, 2022
+# Miku Laitinen <miku.laitinen@gmail.com>, 2022
+# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2022
+# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2023
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Saara Hakanen <sahak@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~12.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-19 15:46+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024\n"
-"Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 20:15+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-19/"
+"base_import_module/fi/>\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fi\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: base_import_module
 #. odoo-python
 #: code:addons/base_import_module/models/ir_module.py:0
 msgid ""
 "\n"
-"You may need the Enterprise version to install the data module. Please visit https://www.odoo.com/pricing-plan for more information.\n"
-"If you need Website themes, it can be downloaded from https://github.com/odoo/design-themes.\n"
+"You may need the Enterprise version to install the data module. Please visit "
+"https://www.odoo.com/pricing-plan for more information.\n"
+"If you need Website themes, it can be downloaded from https://github.com/"
+"odoo/design-themes.\n"
 msgstr ""
 "\n"
-"Saatat tarvita Enterprise-version datamoduulin asentamiseen. Lisätietoja on osoitteessa https://www.odoo.com/pricing-plan.\n"
-"Jos tarvitset Website-teemoja, ne voi ladata osoitteesta https://github.com/odoo/design-themes.\n"
+"Saatat tarvita Enterprise-version datamoduulin asentamiseen. Lisätietoja on "
+"osoitteessa https://www.odoo.com/pricing-plan.\n"
+"Jos tarvitset Website-teemoja, ne voi ladata osoitteesta https://github.com/"
+"odoo/design-themes.\n"
 
 #. module: base_import_module
 #: model_terms:ir.ui.view,arch_db:base_import_module.module_form_apps_inherit
@@ -94,6 +100,10 @@ msgstr "Luotu"
 
 #. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module__display_name
+#: model:ir.model.fields,field_description:base_import_module.field_base_module_uninstall__display_name
+#: model:ir.model.fields,field_description:base_import_module.field_ir_http__display_name
+#: model:ir.model.fields,field_description:base_import_module.field_ir_module_module__display_name
+#: model:ir.model.fields,field_description:base_import_module.field_ir_ui_view__display_name
 msgid "Display Name"
 msgstr "Näyttönimi"
 
@@ -108,7 +118,7 @@ msgid ""
 msgstr ""
 "Virhe tuotaessa moduulia '%(module)s'.\n"
 "\n"
-" %(error_message)s\n"
+" %(error_message)s \n"
 "\n"
 
 #. module: base_import_module
@@ -124,14 +134,22 @@ msgstr "Pakota alustus"
 
 #. module: base_import_module
 #: model:ir.model.fields,help:base_import_module.field_base_import_module__force
-msgid ""
-"Force init mode even if installed. (will update `noupdate='1'` records)"
+msgid "Force init mode even if installed. (will update `noupdate='1'` records)"
 msgstr ""
-"Pakota alustus vaikka moduuli olisi asennettuna. (päivittää myös "
+"Pakota init-tila, vaikkei moduulia olisi asennettu. (päivittää myös "
 "noupdate=\"1\"-tietueet)"
 
 #. module: base_import_module
+#: model:ir.model,name:base_import_module.model_ir_http
+msgid "HTTP Routing"
+msgstr "HTTP-reititys"
+
+#. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module__id
+#: model:ir.model.fields,field_description:base_import_module.field_base_module_uninstall__id
+#: model:ir.model.fields,field_description:base_import_module.field_ir_http__id
+#: model:ir.model.fields,field_description:base_import_module.field_ir_module_module__id
+#: model:ir.model.fields,field_description:base_import_module.field_ir_ui_view__id
 msgid "ID"
 msgstr "ID"
 
@@ -240,11 +258,21 @@ msgid "No file sent."
 msgstr "Tiedostoa ei lähetetty."
 
 #. module: base_import_module
-#: model_terms:ir.ui.view,arch_db:base_import_module.view_base_module_import
-msgid "Note: you can only import data modules (.xml files and static assets)"
+#. odoo-python
+#: code:addons/base_import_module/models/ir_module.py:0
+msgid "No manifest found in '%(modules)s'. Can't import the zip file."
 msgstr ""
-"Huomaa: voit ladata vain datamoduuleita (.xml-tiedostoja ja staattisia "
-"resursseja)"
+"Kohteesta '%(modules)s' ei löytynyt manifestia: ZIP-tiedoston tuonti "
+"epäonnistui."
+
+#. module: base_import_module
+#: model_terms:ir.ui.view,arch_db:base_import_module.view_base_module_import
+msgid ""
+"Note: you can only import data modules (.xml files, i18n files and static "
+"assets)"
+msgstr ""
+"Huomaa: voit tuoda vain datamoduuleja (.xml-tiedostoja, i18n-tiedostoja ja "
+"staattisia resursseja)"
 
 #. module: base_import_module
 #: model:ir.model.fields.selection,name:base_import_module.selection__ir_module_module__module_type__official
@@ -255,7 +283,7 @@ msgstr "Viralliset sovellukset"
 #. odoo-python
 #: code:addons/base_import_module/models/ir_module.py:0
 msgid "Only administrators can install data modules."
-msgstr "Vain järjestelmänvalvojat voivat asentaa datamoduuleja."
+msgstr "Vain ylläpitäjät voivat asentaa datamoduuleja."
 
 #. module: base_import_module
 #. odoo-python
@@ -284,8 +312,18 @@ msgstr "Studio-mukautukset edellyttävät Odoon Studio-sovellusta."
 #. odoo-python
 #: code:addons/base_import_module/models/ir_module.py:0
 msgid ""
-"The installation of the data module would fail as the following dependencies"
-" can't be found in the addons-path:\n"
+"The assets path in the manifest of imported module '%(module_name)s' cannot "
+"contain glob wildcards (e.g., *, **)."
+msgstr ""
+"Tuodun moduulin '%(module_name)s' manifestissa oleva resurssipolku ei saa "
+"sisältää jokerimerkkejä (esim. *, **)."
+
+#. module: base_import_module
+#. odoo-python
+#: code:addons/base_import_module/models/ir_module.py:0
+msgid ""
+"The installation of the data module would fail as the following dependencies "
+"can't be found in the addons-path:\n"
 msgstr ""
 "Datamoduulin asennus epäonnistuu, koska seuraavia riippuvuuksia ei löydy "
 "addons-polusta:\n"
@@ -314,7 +352,7 @@ msgstr "Tuntemattomat moduuliriippuvuudet:"
 #: model_terms:ir.ui.view,arch_db:base_import_module.module_form_apps_inherit
 #: model_terms:ir.ui.view,arch_db:base_import_module.module_view_kanban_apps_inherit
 msgid "Upgrade"
-msgstr "Päivitä"
+msgstr "Tee versionkorotus"
 
 #. module: base_import_module
 #: model:ir.model,name:base_import_module.model_ir_ui_view
@@ -330,3 +368,36 @@ msgstr "valmis"
 #: model:ir.model.fields.selection,name:base_import_module.selection__base_import_module__state__init
 msgid "init"
 msgstr "alustus"
+
+#~ msgid "Import App"
+#~ msgstr "Tuo App"
+
+#~ msgid "Import module"
+#~ msgstr "Tuo moduuli"
+
+#~ msgid "Last Modified on"
+#~ msgstr "Viimeksi muokattu"
+
+#~ msgid ""
+#~ "Note: you can only import data modules (.xml files and static assets)"
+#~ msgstr ""
+#~ "Huomaa: voit ladata vain datamoduuleita (.xml-tiedostoja ja staattisia "
+#~ "resursseja)"
+
+#~ msgid "Open Modules"
+#~ msgstr "Avaa moduuleja"
+
+#~ msgid "Select module package to import (.zip file):"
+#~ msgstr "Valitse tuotaa moduulipaketti (.zip tiedosto):"
+
+#~ msgid "Studio customizations require Studio"
+#~ msgstr "Studio-mukautukset edellyttävät Studiota"
+
+#~ msgid ""
+#~ "Unmet module dependencies: \n"
+#~ "\n"
+#~ " - %s"
+#~ msgstr ""
+#~ "Moduulien riippuvuuksissa ei ole täytetty: \n"
+#~ "\n"
+#~ " - %s"

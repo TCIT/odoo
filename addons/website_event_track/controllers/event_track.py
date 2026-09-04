@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from ast import literal_eval
@@ -14,9 +13,9 @@ import json
 import operator
 import pytz
 
-from odoo import exceptions, http, fields, tools, _
-from odoo.http import request
-from odoo.osv import expression
+from odoo import http, fields, tools, _
+from odoo.fields import Domain
+from odoo.http import content_disposition, request
 from odoo.tools import is_html_empty, plaintext2html
 from odoo.tools.misc import babel_locale_parse
 
@@ -45,7 +44,7 @@ class EventTrackController(http.Controller):
         unpublished tracks from the search results."""
         search_domain_base = self._get_event_tracks_agenda_domain(event)
         if not request.env.user.has_group('event.group_event_registration_desk'):
-            search_domain_base = expression.AND([
+            search_domain_base = Domain.AND([
                 search_domain_base,
                 [('is_published', '=', True)]
             ])
@@ -80,10 +79,11 @@ class EventTrackController(http.Controller):
             # TODO: remove in a few stable versions (v19?), including the "prevent_redirect" param in templates
             slug = request.env['ir.http']._slug
             return request.redirect(f'/event/{slug(event)}/track', code=301)
+        seo_object = event.track_menu_ids.filtered(lambda menu: menu.menu_id.url.endswith('/track'))
 
         return request.render(
             "website_event_track.tracks_session",
-            self._event_tracks_get_values(event, tag=tag, **searches)
+            self._event_tracks_get_values(event, tag=tag, **searches) | {'seo_object': seo_object}
         )
 
     def _event_tracks_get_values(self, event, tag=None, **searches):
@@ -95,9 +95,9 @@ class EventTrackController(http.Controller):
 
         # search on content
         if searches.get('search'):
-            search_domain = expression.AND([
+            search_domain = Domain.AND([
                 search_domain,
-                [('name', 'ilike', searches['search'])]
+                ['|', ('name', 'ilike', searches['search']), ('partner_name', 'ilike', searches['search'])]
             ])
 
         # search on tags
@@ -116,7 +116,7 @@ class EventTrackController(http.Controller):
                 [('tag_ids', 'in', [tag.id for tag in grouped_tags[group]])]
                 for group in grouped_tags
             ]
-            search_domain = expression.AND([
+            search_domain = Domain.AND([
                 search_domain,
                 *search_domain_items
             ])
@@ -149,12 +149,13 @@ class EventTrackController(http.Controller):
         if tracks_announced:
             tracks_announced = tracks_announced.sorted('wishlisted_by_default', reverse=True)
             tracks_by_day.append({'date': False, 'name': _('Coming soon'), 'tracks': tracks_announced})
+        # Check if there are any ongoing or upcoming tracks
+        has_upcoming_or_ongoing = any(track for track in tracks_sudo if not track.is_track_done)
 
         for tracks_group in tracks_by_day:
-            # the tracks group is folded if all tracks are done (and if it's not "today")
-            tracks_group['default_collapsed'] = (today_tz != tracks_group['date']) and all(
-                track.is_track_done and not track.is_track_live
-                for track in tracks_group['tracks']
+           tracks_group['default_collapsed'] = (
+                has_upcoming_or_ongoing and
+                tracks_group['date'] and all(track.is_track_done for track in tracks_group['tracks'])
             )
 
         # return rendering values
@@ -162,6 +163,7 @@ class EventTrackController(http.Controller):
             # event information
             'event': event,
             'main_object': event,
+            'slots': event.event_slot_ids._filter_open_slots().grouped('date'),
             # tracks display information
             'tracks': tracks_sudo,
             'tracks_by_day': tracks_by_day,
@@ -179,6 +181,7 @@ class EventTrackController(http.Controller):
             'is_html_empty': is_html_empty,
             'hostname': request.httprequest.host.split(':')[0],
             'is_event_user': request.env.user.has_group('event.group_event_user'),
+            'website_visitor_timezone': request.env['website.visitor']._get_visitor_timezone(),
         }
 
     # ------------------------------------------------------------
@@ -188,11 +191,15 @@ class EventTrackController(http.Controller):
     @http.route(['''/event/<model("event.event"):event>/agenda'''], type='http', auth="public", website=True, sitemap=False)
     def event_agenda(self, event, tag=None, **post):
         event = event.with_context(tz=event.date_tz or 'UTC')
+        seo_object = event.track_menu_ids.filtered(lambda menu: menu.menu_id.url.endswith('/agenda'))
         vals = {
             'event': event,
             'main_object': event,
+            'seo_object': seo_object,
+            'slots': event.event_slot_ids._filter_open_slots().grouped('date'),
             'tag': tag,
             'is_event_user': request.env.user.has_group('event.group_event_user'),
+            'website_visitor_timezone': request.env['website.visitor']._get_visitor_timezone(),
         }
 
         vals.update(self._prepare_calendar_values(event))
@@ -210,7 +217,7 @@ class EventTrackController(http.Controller):
         local_tz = pytz.timezone(event.date_tz or 'UTC')
         lang_code = request.env.context.get('lang')
 
-        base_track_domain = expression.AND([
+        base_track_domain = Domain.AND([
             self._get_event_tracks_agenda_domain(event),
             [('date', '!=', False)]
         ])
@@ -259,7 +266,7 @@ class EventTrackController(http.Controller):
 
             time_slots_count = int(((end_time_slot - start_time_slot).total_seconds() / 3600) * 4)
             current_time_slot = start_time_slot
-            for i in range(0, time_slots_count + 1):
+            for _i in range(0, time_slots_count + 1):
                 global_time_slots_by_day[day][current_time_slot] = tracks_by_rounded_times.get(current_time_slot, {})
                 global_time_slots_by_day[day][current_time_slot]['formatted_time'] = self._get_locale_time(current_time_slot, lang_code)
                 current_time_slot = current_time_slot + timedelta(minutes=15)
@@ -379,6 +386,7 @@ class EventTrackController(http.Controller):
             # event information
             'event': event,
             'main_object': track,
+            'slots': event.event_slot_ids._filter_open_slots().grouped('date'),
             'track': track,
             # sidebar
             'tracks_other': tracks_other,
@@ -389,9 +397,10 @@ class EventTrackController(http.Controller):
             'hostname': request.httprequest.host.split(':')[0],
             'is_event_user': request.env.user.has_group('event.group_event_user'),
             'user_event_manager': request.env.user.has_group('event.group_event_manager'),
+            'website_visitor_timezone': request.env['website.visitor']._get_visitor_timezone(),
         }
 
-    @http.route("/event/track/toggle_reminder", type="json", auth="public", website=True)
+    @http.route("/event/track/toggle_reminder", type="jsonrpc", auth="public", website=True)
     def track_reminder_toggle(self, track_id, set_reminder_on):
         """ Set a reminder a track for current visitor. Track visitor is created or updated
         if it already exists. Exception made if un-favoriting and no track_visitor
@@ -420,13 +429,47 @@ class EventTrackController(http.Controller):
 
         return result
 
+    @http.route('/event/track/send_email_reminder', type="jsonrpc", auth="public", website=True)
+    def send_email_reminder(self, track_id, email_to):
+        """ Send email, to email_to if the user is public otherwise to the user email address,
+        with tracks' reminders for external calendars. """
+        template = self.env.ref("website_event_track.mail_template_data_track_reminder", raise_if_not_found=False)
+        if not template:
+            return {'success': False, 'error': 'missing_template'}
+
+        track_su = self.env['event.track'].sudo().browse(track_id)
+        # Check that the visitor has the permission to read the track on the website.
+        track = track_su.filtered_domain(self._get_event_tracks_domain(track_su.event_id))
+        valid_email_to = tools.email_normalize(email_to if request.env.user._is_public() else request.env.user.email)
+        error_message = ''
+        if not track:
+            error_message = _('Invalid data.')
+        elif not valid_email_to:
+            error_message = _('Invalid email.')
+        elif track.is_track_done or track.event_id.is_finished:
+            error_message = _('The talk is already finished.')
+        elif not track.is_track_upcoming:
+            error_message = _('The talk has already begun.')
+        if error_message:
+            return {'success': False, 'message': error_message}
+
+        template.sudo().with_context(
+            lang=request.cookies.get('frontend_lang') if request.env.user._is_public() else request.env.context.get('lang', request.env.user.lang)
+        ).send_mail(track.id, email_values={'email_to': valid_email_to})
+        return {'success': True}
+
     # ------------------------------------------------------------
     # TRACK PROPOSAL
     # ------------------------------------------------------------
 
     @http.route(['''/event/<model("event.event"):event>/track_proposal'''], type='http', auth="public", website=True, sitemap=False)
     def event_track_proposal(self, event, **post):
-        return request.render("website_event_track.event_track_proposal", {'event': event, 'main_object': event})
+        return request.render("website_event_track.event_track_proposal", {
+            'event': event,
+            'main_object': event,
+            'seo_object': event.track_proposal_menu_ids,
+            'slots': event.event_slot_ids._filter_open_slots().grouped('date'),
+        })
 
     @http.route(['''/event/<model("event.event"):event>/track_proposal/post'''], type='http', auth="public", methods=['POST'], website=True)
     def event_track_proposal_post(self, event, **post):
@@ -489,9 +532,25 @@ class EventTrackController(http.Controller):
         return json.dumps({'success': True})
 
     # ACL : This route is necessary since rpc search_read method in js is not accessible to all users (e.g. public user).
-    @http.route(['''/event/track_tag/search_read'''], type='json', auth="public", website=True)
+    @http.route(['''/event/track_tag/search_read'''], type='jsonrpc', auth="public", website=True)
     def website_event_track_fetch_tags(self, domain, fields):
         return request.env['event.track.tag'].search_read(domain, fields)
+
+    # ------------------------------------------------------------
+    # HELPERS ROUTES
+    # ------------------------------------------------------------
+
+    @http.route(['''/event/<model("event.event"):event>/track/<model("event.track"):track>/ics'''], type='http', auth="public", website=True, sitemap=False)
+    def event_track_ics_file(self, event, track):
+        files = track._get_ics_file()
+        content = files.get(track.id)
+        if not content:
+            return NotFound()
+        return request.make_response(content, [
+            ('Content-Type', 'application/octet-stream'),
+            ('Content-Length', len(content)),
+            ('Content-Disposition', content_disposition(f'{event.name}-{track.name}.ics'))
+        ])
 
     # ------------------------------------------------------------
     # TOOLS

@@ -3,8 +3,9 @@
 
 import logging
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.addons.product.models.product_template import PRICE_CONTEXT_KEYS
+from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -20,20 +21,31 @@ class EventBoothCategory(models.Model):
         domain=[('service_tracking', '=', 'event_booth')], default=_default_product_id,
         groups="event.group_event_registration_desk")
     price = fields.Float(
-        string='Price', compute='_compute_price', digits='Product Price', readonly=False,
+        string='Price', compute='_compute_price', min_display_digits='Product Price', readonly=False,
         store=True, groups="event.group_event_registration_desk")
     price_incl = fields.Float(
-        string='Price incl', compute='_compute_price_incl', digits='Product Price', readonly=False,
+        string='Price incl', compute='_compute_price_incl', min_display_digits='Product Price', readonly=False,
         groups="event.group_event_registration_desk")
     currency_id = fields.Many2one(related='product_id.currency_id', groups="event.group_event_registration_desk")
     price_reduce = fields.Float(
         string='Price Reduce', compute='_compute_price_reduce',
-        compute_sudo=True, digits='Product Price', groups="event.group_event_registration_desk")
+        compute_sudo=True, min_display_digits='Product Price', groups="event.group_event_registration_desk")
     price_reduce_taxinc = fields.Float(
         string='Price Reduce Tax inc', compute='_compute_price_reduce_taxinc',
         compute_sudo=True
     )
     image_1920 = fields.Image(compute='_compute_image_1920', readonly=False, store=True)
+
+    @api.constrains('product_id')
+    def _check_service_tracking(self):
+        for record in self:
+            if record.product_id and record.product_id.service_tracking != 'event_booth':
+                raise ValidationError(
+                    _(
+                        'The product, %(product_name)s , is used for Event Booth, it must have service_tracking set to "Event Booth".',
+                        product_name=record.product_id.name
+                    )
+                )
 
     @api.depends('product_id')
     def _compute_image_1920(self):

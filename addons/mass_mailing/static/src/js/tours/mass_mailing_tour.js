@@ -1,7 +1,5 @@
-/** @odoo-module **/
-
     import { registry } from "@web/core/registry";
-    import { stepUtils } from "@web_tour/tour_service/tour_utils";
+    import { stepUtils } from "@web_tour/tour_utils";
     import { _t } from "@web/core/l10n/translation";
 
     import { markup } from "@odoo/owl";
@@ -32,7 +30,7 @@
         trigger: 'div[name="subject"]',
         content: markup(_t('Pick the <b>email subject</b>.')),
         tooltipPosition: 'bottom',
-        run: 'click',
+        run: "edit",
     }, {
         isActive: ["auto"],
         trigger: 'div[name="contact_list_ids"] > .o_input_dropdown > input[type="text"]',
@@ -43,25 +41,25 @@
         run: 'click',
     }, {
         isActive: ["enterprise"],
-        trigger: 'div[name="body_arch"] :iframe #newsletter',
+        trigger: 'div[name="body_arch"] .o_mailing_template_preview_wrapper [data-name="newsletter"]',
         content: markup(_t('Choose this <b>theme</b>.')),
         tooltipPosition: 'left',
         run: 'click',
     }, {
         isActive: ["community"],
-        trigger: 'div[name="body_arch"] :iframe #default',
+        trigger: 'div[name="body_arch"] .o_mailing_template_preview_wrapper [data-name="default"]',
         content: markup(_t('Choose this <b>theme</b>.')),
         tooltipPosition: 'right',
         run: 'click',
     }, {
         isActive: ["enterprise"],
-        trigger: 'div[name="body_arch"] :iframe div.theme_selection_done div.s_text_block',
+        trigger: 'div[name="body_arch"] :iframe section.s_text_block',
         content: _t('Click on this paragraph to edit it.'),
         tooltipPosition: 'top',
         run: 'click',
     }, {
         isActive: ["community"],
-        trigger: 'div[name="body_arch"] :iframe div.o_mail_block_title_text',
+        trigger: 'div[name="body_arch"] :iframe section.s_text_block',
         content: _t('Click on this paragraph to edit it.'),
         tooltipPosition: 'top',
         run: 'click',

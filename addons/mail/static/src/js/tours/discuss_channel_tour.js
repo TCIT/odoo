@@ -2,6 +2,7 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 
 import { markup } from "@odoo/owl";
+import { delay } from "@web/core/utils/concurrency";
 
 registry.category("web_tour.tours").add("discuss_channel_tour", {
     url: "/odoo",
@@ -14,7 +15,7 @@ registry.category("web_tour.tours").add("discuss_channel_tour", {
             run: "click",
         },
         {
-            trigger: ".o-mail-DiscussSidebarCategory-channel .o-mail-DiscussSidebarCategory-add",
+            trigger: ".o-mail-DiscussSearch-inputContainer",
             content: markup(
                 _t(
                     "<p>Channels make it easy to organize information across different topics and groups.</p> <p>Try to <b>create your first channel</b> (e.g. sales, marketing, product XYZ, after work party, etc).</p>"
@@ -24,13 +25,13 @@ registry.category("web_tour.tours").add("discuss_channel_tour", {
             run: "click",
         },
         {
-            trigger: ".o-discuss-ChannelSelector input",
+            trigger: ".o_command_palette_search input",
             content: markup(_t("<p>Create a channel here.</p>")),
             tooltipPosition: "bottom",
             run: `edit SomeChannel_${new Date().getTime()}`,
         },
         {
-            trigger: ".o-discuss-ChannelSelector-suggestion",
+            trigger: ".o-mail-DiscussCommand-createChannel",
             content: markup(_t("<p>Create a public or private channel.</p>")),
             run: "click",
             tooltipPosition: "right",
@@ -46,19 +47,22 @@ registry.category("web_tour.tours").add("discuss_channel_tour", {
             run: `edit SomeText_${new Date().getTime()}`,
         },
         {
-            trigger: ".o-mail-Composer-send:enabled",
+            trigger: ".o-mail-Composer-input",
             content: _t("Post your message on the thread"),
             tooltipPosition: "top",
-            run: "click",
+            run: "press Enter",
         },
         {
-            trigger: ".o-mail-Message:contains(today at)",
-            content: _t("Hover on your message and mark as todo"),
+            trigger: ".o-mail-Message[data-persistent] [title='Add Star']:not(:visible)",
+            content: _t("Hover on your message and add a star"),
             tooltipPosition: "top",
-            run: "hover && click .o-mail-Message [title='Mark as Todo']",
+            async run(helpers) {
+                await delay(1000);
+                await helpers.click();
+            },
         },
         {
-            trigger: "button:contains(Starred)",
+            trigger: "button[data-mailbox-id='starred']",
             content: _t(
                 "Once a message has been starred, you can come back and review it at any time here."
             ),
@@ -66,7 +70,7 @@ registry.category("web_tour.tours").add("discuss_channel_tour", {
             run: "click",
         },
         {
-            trigger: ".o-mail-DiscussSidebarCategory-chat .o-mail-DiscussSidebarCategory-add",
+            trigger: ".o-mail-DiscussSearch-inputContainer",
             content: markup(
                 _t(
                     "<p><b>Chat with coworkers</b> in real-time using direct messages.</p><p><i>You might need to invite users from the Settings app first.</i></p>"
@@ -74,9 +78,6 @@ registry.category("web_tour.tours").add("discuss_channel_tour", {
             ),
             tooltipPosition: "bottom",
             run: "click",
-        },
-        {
-            trigger: ".o-discuss-ChannelSelector",
         },
     ],
 });

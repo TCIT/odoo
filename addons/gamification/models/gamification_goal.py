@@ -11,7 +11,7 @@ from odoo.tools.safe_eval import safe_eval, time
 _logger = logging.getLogger(__name__)
 
 
-class Goal(models.Model):
+class GamificationGoal(models.Model):
     """Goal instance for a user
 
     An individual goal for a user on a specified time period"""
@@ -22,7 +22,8 @@ class Goal(models.Model):
     _order = 'start_date desc, end_date desc, definition_id, id'
 
     definition_id = fields.Many2one('gamification.goal.definition', string="Goal Definition", required=True, ondelete="cascade")
-    user_id = fields.Many2one('res.users', string="User", required=True, auto_join=True, ondelete="cascade")
+    user_id = fields.Many2one('res.users', string="User", required=True, bypass_search_access=True, index=True, ondelete="cascade")
+    user_partner_id = fields.Many2one('res.partner', related='user_id.partner_id')
     line_id = fields.Many2one('gamification.challenge.line', string="Challenge Line", ondelete="cascade")
     challenge_id = fields.Many2one(
         related='line_id.challenge_id', store=True, readonly=True, index=True,
@@ -162,7 +163,7 @@ class Goal(models.Model):
                         'time': time,
                     }
                     code = definition.compute_code.strip()
-                    safe_eval(code, cxt, mode="exec", nocopy=True)
+                    safe_eval(code, cxt, mode="exec")
                     # the result of the evaluated codeis put in the 'result' local variable, propagated to the context
                     result = cxt.get('result')
                     if isinstance(result, (float, int)):
@@ -211,6 +212,9 @@ class Goal(models.Model):
                                     goals_to_write.update(goal._get_write_values(aggregate))
 
                 else:
+                    field_name = definition.field_id.name
+                    field = Obj._fields.get(field_name)
+                    sum_supported = bool(field) and field.type in {'integer', 'float', 'monetary'}
                     for goal in goals:
                         # eval the domain with user replaced by goal user object
                         domain = safe_eval(definition.domain, {'user': goal.user_id})
@@ -221,8 +225,7 @@ class Goal(models.Model):
                         if goal.end_date and field_date_name:
                             domain.append((field_date_name, '<=', goal.end_date))
 
-                        if definition.computation_mode == 'sum':
-                            field_name = definition.field_id.name
+                        if definition.computation_mode == 'sum' and sum_supported:
                             res = Obj._read_group(domain, [], [f'{field_name}:{definition.computation_mode}'])
                             new_value = res[0][0] or 0.0
 
@@ -274,7 +277,7 @@ class Goal(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        return super(Goal, self.with_context(no_remind_goal=True)).create(vals_list)
+        return super(GamificationGoal, self.with_context(no_remind_goal=True)).create(vals_list)
 
     def write(self, vals):
         """Overwrite the write method to update the last_update field to today
@@ -283,7 +286,7 @@ class Goal(models.Model):
         change, a report is generated
         """
         vals['last_update'] = fields.Date.context_today(self)
-        result = super(Goal, self).write(vals)
+        result = super().write(vals)
         for goal in self:
             if goal.state != "draft" and ('definition_id' in vals or 'user_id' in vals):
                 # avoid drag&drop in kanban view
@@ -332,3 +335,6 @@ class Goal(models.Model):
             return action
 
         return False
+
+    def _mail_get_partner_fields(self, introspect_fields=False):
+        return ['user_partner_id']

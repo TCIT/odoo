@@ -16,7 +16,6 @@ import { patchWithCleanup } from "./utils";
 export const defaultLocalization = {
     dateFormat: "MM/dd/yyyy",
     timeFormat: "HH:mm:ss",
-    shortTimeFormat: "HH:mm",
     dateTimeFormat: "MM/dd/yyyy HH:mm:ss",
     decimalPoint: ".",
     direction: "ltr",
@@ -137,11 +136,7 @@ export function makeMockFetch(mockRPC) {
     return async (input, params) => {
         let route = typeof input === "string" ? input : input.url;
         if (route.includes("load_menus")) {
-            const routeArray = route.split("/");
-            params = {
-                hash: routeArray.pop(),
-            };
-            route = routeArray.join("/");
+            route = route.split("?")[0];
         }
         let res;
         let status;
@@ -191,14 +186,6 @@ export const fakeTitleService = {
             setParts(parts) {
                 current = Object.assign({}, current, parts);
             },
-        };
-    },
-};
-
-export const fakeColorSchemeService = {
-    start() {
-        return {
-            switchToColorScheme() {},
         };
     },
 };
@@ -254,19 +241,6 @@ export function patchUserWithCleanup(patch) {
     patchWithCleanup(user, patch);
 }
 
-export const fakeCompanyService = {
-    start() {
-        return {
-            allowedCompanies: {},
-            allowedCompaniesWithAncestors: {},
-            activeCompanyIds: [],
-            currentCompany: {},
-            setCompanies: () => {},
-            getCompany: () => {},
-        };
-    },
-};
-
 export function makeFakeBarcodeService() {
     return {
         start() {
@@ -316,8 +290,6 @@ function makeFakeActionService() {
 }
 
 export const mocks = {
-    color_scheme: () => fakeColorSchemeService,
-    company: () => fakeCompanyService,
     command: () => fakeCommandService,
     effect: () => effectService, // BOI The real service ? Is this what we want ?
     localization: makeFakeLocalizationService,

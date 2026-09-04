@@ -5,7 +5,7 @@
     'countries': ['cr'],
     'url': 'https://github.com/CLEARCORP/odoo-costa-rica',
     'author': 'ClearCorp S.A.',
-    'website': 'https://www.odoo.com/documentation/master/applications/finance/fiscal_localizations.html',
+    'website': 'https://www.odoo.com/documentation/latest/applications/finance/fiscal_localizations.html',
     'category': 'Accounting/Localizations/Account Charts',
     'description': """
 Chart of accounts for Costa Rica.
@@ -24,9 +24,6 @@ please go to http://translations.launchpad.net/openerp-costa-rica.
         'account',
     ],
     'auto_install': ['account'],
-    'data': [
-        'data/l10n_cr_res_partner_title.xml',
-    ],
     'demo': [
         'demo/demo_company.xml',
     ],

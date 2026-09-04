@@ -1,7 +1,5 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 import configuratorTourUtils from "@sale/js/tours/product_configurator_tour_utils";
 import tourUtils from "@sale/js/tours/tour_utils";
 
@@ -28,7 +26,7 @@ registry.category("web_tour.tours").add('sale_product_configurator_edition_tour'
         },
         {
             // check updated price
-            trigger: 'table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] span:contains("Customizable Desk")) td[name="price"] span:contains("800.40")',
+            trigger: '.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] span:contains("Customizable Desk")) span[name="sale_product_configurator_formatted_price"]:contains("800.40")',
         },
         {
             trigger: 'table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] span:contains("Customizable Desk")) td>div[name="ptal"]:has(div>label:contains("Legs")) label:has(span:contains("Custom")) ~ input',

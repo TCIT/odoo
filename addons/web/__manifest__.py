@@ -15,12 +15,16 @@ This module provides the core of the Odoo Web Client.
     'auto_install': True,
     'data': [
         'security/ir.model.access.csv',
+        'security/web_security.xml',
         'views/webclient_templates.xml',
         'views/report_templates.xml',
         'views/base_document_layout_views.xml',
         'views/partner_view.xml',
         'views/speedscope_template.xml',
+        'views/memory_template.xml',
+        'views/speedscope_config_wizard.xml',
         'views/neutralize_views.xml',
+        'views/ir_ui_view_views.xml',
         'data/ir_attachment.xml',
         'data/report_layout.xml',
     ],
@@ -61,9 +65,8 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/scss/mimetypes.scss',
             'web/static/src/scss/ui.scss',
             'web/static/src/views/fields/translation_dialog.scss',
-            'web/static/src/legacy/scss/ui.scss',
 
-            'web/static/src/polyfills/clipboard.js',
+            'web/static/src/polyfills/**/*.js',
 
             'web/static/lib/popper/popper.js',
             'web/static/lib/bootstrap/js/dist/util/index.js',
@@ -115,14 +118,11 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/webclient/actions/reports/*.js',
             'web/static/src/webclient/actions/reports/*.xml',
 
-            'web/static/src/libs/pdfjs.js',
-
             'web/static/src/scss/ace.scss',
             'web/static/src/scss/base_document_layout.scss',
 
-            'web/static/src/legacy/scss/dropdown.scss',
-            'web/static/src/legacy/scss/fields.scss',
             'base/static/src/scss/res_partner.scss',
+            'base/static/src/scss/res_users.scss',
 
             # Form style should be computed before
             'web/static/src/views/form/button_box/*.scss',
@@ -152,7 +152,9 @@ This module provides the core of the Odoo Web Client.
         'web.assets_frontend_minimal': [
             'web/static/src/polyfills/object.js',
             'web/static/src/polyfills/array.js',
+            'web/static/src/polyfills/promise.js',
             'web/static/src/module_loader.js',
+            'web/static/src/polyfills/set.js',
             'web/static/src/session.js',
             'web/static/src/core/browser/cookie.js',
             'web/static/src/core/utils/ui.js',
@@ -187,8 +189,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/scss/ui.scss',
             'web/static/src/views/fields/translation_dialog.scss',
             'web/static/src/views/fields/signature/signature_field.scss',
-
-            'web/static/src/legacy/scss/ui.scss',
 
             ('include', 'web.assets_frontend_minimal'),
 
@@ -235,16 +235,13 @@ This module provides the core of the Odoo Web Client.
             ('remove', 'web/static/src/core/emoji_picker/emoji_data.js'),
             'web/static/src/core/commands/default_providers.js',
             'web/static/src/core/commands/command_palette.js',
-            'web/static/src/public/error_notifications.js',
-            'web/static/src/public/public_component_service.js',
-            'web/static/src/public/datetime_picker_widget.js',
-            'web/static/src/libs/pdfjs.js',
+            'web/static/src/public/**/*.js',
+            'web/static/src/public/**/*.xml',
+            ('remove', 'web/static/src/public/database_manager.js'),
 
             'web/static/src/legacy/js/public/public_root.js',
             'web/static/src/legacy/js/public/public_root_instance.js',
             'web/static/src/legacy/js/public/public_widget.js',
-            'web/static/src/legacy/js/public/signin.js',
-
         ],
         'web.assets_frontend_lazy': [
             ('include', 'web.assets_frontend'),
@@ -328,6 +325,7 @@ This module provides the core of the Odoo Web Client.
             "web/static/lib/ace/mode-qweb.js",
             "web/static/lib/ace/mode-python.js",
             "web/static/lib/ace/mode-scss.js",
+            "web/static/lib/ace/mode-json.js",
             "web/static/lib/ace/theme-monokai.js",
         ],
 
@@ -448,23 +446,31 @@ This module provides the core of the Odoo Web Client.
             ('remove', 'web/static/lib/hoot/ui/hoot_style.css'),
             ('remove', 'web/static/lib/hoot/tests/**/*'),
 
-            # Odoo mocks
-            # ! must be loaded before other @web assets
-            'web/static/tests/_framework/mock_module_loader.js',
+            # Applied here to allow libs above to be loaded normally
+            'web/static/tests/_framework/hoot_module_loader.js',
 
             # Assets for features to test (views, services, fields, ...)
             # Typically includes most files in 'web.web.assets_backend'
             ('include', 'web.assets_backend'),
             ('include', 'web.assets_backend_lazy'),
 
-            'web/static/src/public/public_component_service.js',
+            'web/static/src/polyfills/set.js',
+            'web/static/src/public/**/*.js',
+            'web/static/src/public/**/*.xml',
+            'web/static/tests/public/**/*.xml',
+            ('remove', 'web/static/src/public/database_manager.js'),
+            ('remove', 'web/static/src/public/error_notifications.js'),
             'web/static/src/webclient/clickbot/clickbot.js',
+        ],
+        # Lazy-loaded assets needed by test framework when not in headless mode
+        'web.assets_unit_tests_setup_ui': [
+            "web/static/lib/diff_match_patch/diff_match_patch.js",
+            "web/static/lib/prismjs/prism.js",
         ],
         # Unit test files
         'web.assets_unit_tests': [
             'web/static/tests/**/*',
 
-            ('remove', 'web/static/tests/_framework/mock_module_loader.js'),
             ('remove', 'web/static/tests/tours/**/*'),
             ('remove', 'web/static/tests/legacy/**/*'), # to remove when all legacy tests are ported
         ],
@@ -472,7 +478,6 @@ This module provides the core of the Odoo Web Client.
             ('include', 'web.assets_backend'),
             ('include', 'web.assets_backend_lazy'),
 
-            'web/static/src/public/public_component_service.js',
             'web/static/tests/legacy/patch_translations.js',
             'web/static/lib/qunit/qunit-2.9.1.css',
             'web/static/lib/qunit/qunit-2.9.1.js',
@@ -513,6 +518,9 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/webclient/clickbot/clickbot.js',
         ],
         'web.qunit_suite_tests': [
+            'web/static/src/legacy/js/core/class.js',
+            'web/static/src/legacy/js/public/minimal_dom.js',
+            'web/static/src/legacy/js/public/public_widget.js',
             'web/static/tests/legacy/core/**/*.js',
             'web/static/tests/legacy/search/**/*.js',
             ('remove', 'web/static/tests/legacy/search/helpers.js'),
@@ -526,9 +534,6 @@ This module provides the core of the Odoo Web Client.
             # Legacy
             'web/static/tests/legacy/legacy_tests/**/*.js',
             ('remove', 'web/static/tests/legacy/legacy_tests/helpers/**/*.js'),
-        ],
-        'web.qunit_mobile_suite_tests': [
-            'web/static/tests/legacy/mobile/**/*.js',
         ],
         'web.assets_clickbot': [
             'web/static/src/webclient/clickbot/clickbot.js',
@@ -548,5 +553,6 @@ This module provides the core of the Odoo Web Client.
         ],
     },
     'bootstrap': True,  # load translations for login screen,
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

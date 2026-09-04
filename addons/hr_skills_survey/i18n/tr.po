@@ -1,110 +1,95 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* hr_skills_survey
-# 
+# * hr_skills_survey
+#
 # Translators:
-# emre oktem, 2024
-# Tiffany Chang, 2024
-# Ramiz Deniz Öner <deniz@denizoner.com>, 2024
-# Yedigen, 2024
-# Umur Akın <umura@projetgrup.com>, 2024
-# Ediz Duman <neps1192@gmail.com>, 2024
-# Murat Kaplan <muratk@projetgrup.com>, 2024
-# Martin Trigaux, 2024
-# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2024
-# 
+# Yedigen, 2022
+# Umur Akın <umura@projetgrup.com>, 2022
+# Ediz Duman <neps1192@gmail.com>, 2022
+# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# "Malaz Siddig Elsayed Abuidris (msea)" <msea@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2024\n"
-"Language-Team: Turkish (https://app.transifex.com/odoo/teams/41243/tr/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-07 18:16+0000\n"
+"Last-Translator: \"Malaz Siddig Elsayed Abuidris (msea)\" <msea@odoo.com>\n"
+"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-19/"
+"hr_skills_survey/tr/>\n"
+"Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: tr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Weblate 2026.6.1\n"
+
+#. module: hr_skills_survey
+#. odoo-python
+#: code:addons/hr_skills_survey/models/hr_resume_line.py:0
+msgid "%s (copy)"
+msgstr "%s (kopya)"
 
 #. module: hr_skills_survey
 #: model:hr.resume.line,name:hr_skills_survey.resume_line_valid
 msgid "AWS Cloud"
-msgstr ""
+msgstr "AWS Bulut"
 
 #. module: hr_skills_survey
 #: model:ir.model.fields,field_description:hr_skills_survey.field_hr_resume_line__survey_id
-#: model:ir.model.fields.selection,name:hr_skills_survey.selection__hr_resume_line__display_type__certification
-#: model_terms:ir.ui.view,arch_db:hr_skills_survey.hr_resume_line_view_search
 msgid "Certification"
 msgstr "Sertifikasyon"
 
 #. module: hr_skills_survey
-#: model:ir.ui.menu,name:hr_skills_survey.hr_employee_certication_report_menu
-msgid "Certifications"
-msgstr "Sertifikalar"
-
-#. module: hr_skills_survey
 #: model:ir.model.fields,field_description:hr_skills_survey.field_hr_resume_line__department_id
-#: model_terms:ir.ui.view,arch_db:hr_skills_survey.hr_resume_line_view_search
 msgid "Department"
 msgstr "Departman"
 
 #. module: hr_skills_survey
-#: model:ir.model.fields,field_description:hr_skills_survey.field_hr_resume_line__display_type
-msgid "Display Type"
-msgstr "Görünüm Türü"
-
-#. module: hr_skills_survey
-#: model_terms:ir.ui.view,arch_db:hr_skills_survey.hr_resume_line_view_search
-msgid "Employee"
-msgstr "Çalışan"
-
-#. module: hr_skills_survey
-#: model:ir.actions.act_window,name:hr_skills_survey.hr_employee_certification_report_action
-msgid "Employee Certifications"
-msgstr ""
+#: model:ir.model.fields,field_description:hr_skills_survey.field_hr_resume_line__display_name
+#: model:ir.model.fields,field_description:hr_skills_survey.field_survey_survey__display_name
+#: model:ir.model.fields,field_description:hr_skills_survey.field_survey_user_input__display_name
+msgid "Display Name"
+msgstr "İsim Göster"
 
 #. module: hr_skills_survey
 #: model:ir.model.fields,field_description:hr_skills_survey.field_hr_resume_line__expiration_status
 msgid "Expiration Status"
-msgstr ""
-
-#. module: hr_skills_survey
-#: model_terms:ir.ui.view,arch_db:hr_skills_survey.hr_resume_line_view_search
-msgid "Expiration date"
-msgstr ""
+msgstr "Son geçerlilik tarihi durumu"
 
 #. module: hr_skills_survey
 #: model:ir.model.fields.selection,name:hr_skills_survey.selection__hr_resume_line__expiration_status__expired
-#: model_terms:ir.ui.view,arch_db:hr_skills_survey.hr_resume_line_view_search
 msgid "Expired"
 msgstr "Süresi Doldu"
 
 #. module: hr_skills_survey
 #: model:ir.model.fields.selection,name:hr_skills_survey.selection__hr_resume_line__expiration_status__expiring
 msgid "Expiring"
-msgstr ""
+msgstr "Süresi dolmak üzere"
 
 #. module: hr_skills_survey
-#: model_terms:ir.ui.view,arch_db:hr_skills_survey.hr_resume_line_view_search
-msgid "Expiring Soon"
-msgstr "Süresi dolmak üzere"
+#: model:ir.model.fields,field_description:hr_skills_survey.field_hr_resume_line__id
+#: model:ir.model.fields,field_description:hr_skills_survey.field_survey_survey__id
+#: model:ir.model.fields,field_description:hr_skills_survey.field_survey_user_input__id
+msgid "ID"
+msgstr "ID"
 
 #. module: hr_skills_survey
 #: model:hr.resume.line.type,name:hr_skills_survey.resume_type_certification
 msgid "Internal Certification"
-msgstr ""
+msgstr "Dahili Sertifika"
 
 #. module: hr_skills_survey
 #: model:hr.resume.line,name:hr_skills_survey.resume_line_expiring
 msgid "MongoDB Developer"
-msgstr ""
+msgstr "MongoDB Geliştirici"
 
 #. module: hr_skills_survey
 #: model:hr.resume.line,name:hr_skills_survey.resume_line_aws
 msgid "Oracle DB"
-msgstr ""
+msgstr "Oracle DB"
 
 #. module: hr_skills_survey
 #: model:ir.model,name:hr_skills_survey.model_hr_resume_line
@@ -114,9 +99,11 @@ msgstr "Bir personelin özgeçmiş satırı"
 #. module: hr_skills_survey
 #: model:ir.model.fields,help:hr_skills_survey.field_survey_survey__certification_validity_months
 msgid ""
-"Specify the number of months the certification is valid after being awarded."
-" Enter 0 for certifications that never expire."
+"Specify the number of months the certification is valid after being awarded. "
+"Enter 0 for certifications that never expire."
 msgstr ""
+"Sertifikanın verildikten sonra geçerli olacağı ay sayısını belirtin. Süresi "
+"dolmayan sertifikalar için 0 girin."
 
 #. module: hr_skills_survey
 #: model:ir.model,name:hr_skills_survey.model_survey_survey
@@ -134,21 +121,9 @@ msgid "Valid"
 msgstr "Geçerli"
 
 #. module: hr_skills_survey
-#: model_terms:ir.ui.view,arch_db:hr_skills_survey.hr_resume_line_view_search
-msgid "Valid Until"
-msgstr "Geçerlilik Bitişi"
-
-#. module: hr_skills_survey
 #: model:ir.model.fields,field_description:hr_skills_survey.field_survey_survey__certification_validity_months
 msgid "Validity"
 msgstr "Geçerlilik"
 
-#. module: hr_skills_survey
-#: model_terms:ir.ui.view,arch_db:hr_skills_survey.hr_employee_certification_report_view_list
-msgid "Validity End"
-msgstr ""
-
-#. module: hr_skills_survey
-#: model_terms:ir.ui.view,arch_db:hr_skills_survey.hr_employee_certification_report_view_list
-msgid "Validity Start"
-msgstr "Geçerlilik Başlangıcı"
+#~ msgid "Display Type"
+#~ msgstr "Görünüm Türü"

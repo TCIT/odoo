@@ -7,7 +7,7 @@
 This module allows to fill Purchase Orders rapidly
 by choosing product variants quantity through a Grid Entry.
     """,
-    'category': 'Inventory/Purchase',
+    'category': 'Supply Chain/Purchase',
     'version': '1.0',
     'depends': ['purchase', 'product_matrix'],
     'data': [
@@ -23,5 +23,6 @@ by choosing product variants quantity through a Grid Entry.
             'purchase_product_matrix/static/tests/tours/**/*',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

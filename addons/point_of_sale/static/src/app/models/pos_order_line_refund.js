@@ -1,5 +1,3 @@
-import { uuidv4 } from "@point_of_sale/utils";
-
 // Little class to manage the refund of a line
 // This will be also usefull when needed to save
 // the refund in indexedDB
@@ -9,7 +7,6 @@ export class PosOrderLineRefund {
     }
 
     setup(vals, models) {
-        this.uuid = vals.uuid || uuidv4();
         this.line_uuid = vals.line_uuid || false;
         this.destination_order_uuid = vals.destination_order_uuid || false;
         this.qty = vals.qty || 0;
@@ -25,7 +22,7 @@ export class PosOrderLineRefund {
         return this.models["pos.order.line"].find((l) => l.uuid === this.line_uuid);
     }
 
-    get destination_order() {
+    get destinationOrder() {
         if (!this.destination_order_uuid) {
             return false;
         }
@@ -39,6 +36,6 @@ export class PosOrderLineRefund {
         }
 
         const line = this.line;
-        return line.qty - this.refunded_qty;
+        return line.qty - this.refundedQty;
     }
 }

@@ -1,20 +1,19 @@
-import { messageActionsRegistry } from "@mail/core/common/message_actions";
+import { registerMessageAction } from "@mail/core/common/message_actions";
 import { _t } from "@web/core/l10n/translation";
 
-messageActionsRegistry.add("create-or-view-thread", {
-    condition: (component) =>
-        component.message.thread?.eq(component.props.thread) &&
-        component.message.thread.hasSubChannelFeature &&
-        component.store.self.isInternalUser,
+registerMessageAction("create-or-view-thread", {
+    condition: ({ message, store, thread }) =>
+        message.thread?.eq(thread) &&
+        message.thread.hasSubChannelFeature &&
+        store.self.main_user_id?.share === false,
     icon: "fa fa-comments-o",
-    onClick: (component) => {
-        if (component.message.linkedSubChannel) {
-            component.message.linkedSubChannel.open();
+    onSelected: ({ message }) => {
+        if (message.linkedSubChannel) {
+            message.linkedSubChannel.open({ focus: true });
         } else {
-            component.message.thread.createSubChannel({ initialMessage: component.message });
+            message.thread.createSubChannel({ initialMessage: message });
         }
     },
-    title: (component) =>
-        component.message.linkedSubChannel ? _t("View Thread") : _t("Create Thread"),
+    name: ({ message }) => (message.linkedSubChannel ? _t("View Thread") : _t("Create Thread")),
     sequence: 75,
 });

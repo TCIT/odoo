@@ -1,6 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.exceptions import ValidationError
+from freezegun import freeze_time
+
+from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Command
 from odoo.tests import new_test_user, tagged
 from odoo.tools.float_utils import float_compare
@@ -161,6 +163,31 @@ class TestLoyalty(TestSaleCouponCommon):
         # During the cancel process, we are trying to get `use_count` of the coupon,
         # and we call the `_compute_use_count` that is also in pos_loyalty.
         # This last one will try to find related POS lines while user have not access to POS.
+        order._action_cancel()
+        self.assertFalse(order.coupon_point_ids)
+
+    def test_salesperson_can_cancel_order_with_coupons(self):
+        """Test that a salesperson can cancel an order with coupon points without access error."""
+        user_salesman = new_test_user(
+            self.env, login="user_salesman", groups="sales_team.group_sale_salesman"
+        )
+        self.env["loyalty.program"].create({
+            "name": "10% Discount",
+            "program_type": "coupons",
+            "trigger": "auto",
+            "reward_ids": [Command.create({"reward_type": "discount", "discount": 10})],
+        })
+        order = (
+            self
+            .env["sale.order"]
+            .with_user(user_salesman)
+            .create({
+                "partner_id": self.partner.id,
+                "order_line": [Command.create({"product_id": self.product_a.id})],
+            })
+        )
+        order.action_confirm()
+        self.assertTrue(order.coupon_point_ids)
         order._action_cancel()
         self.assertFalse(order.coupon_point_ids)
 
@@ -351,7 +378,7 @@ class TestLoyalty(TestSaleCouponCommon):
             'order_line': [
                 Command.create({
                     'product_id': self.product_A.id,
-                    'tax_id': False,
+                    'tax_ids': False,
                 }),
             ]
         })
@@ -380,6 +407,61 @@ class TestLoyalty(TestSaleCouponCommon):
         order.action_confirm()
         self.assertEqual(loyalty_card.points, 90)
 
+    def test_multiple_rewards_after_confirm(self):
+        """
+        Check that multiple rewards from a loyalty promotion program are correctly applied to a SO
+        after its confirmation by asserting that:
+            - Both rewards are applied to the order lines.
+            - The total points cost matches the rule's requirement.
+            - The coupon's points are fully consumed after applying the rewards.
+        """
+        promo_program = self.env['loyalty.program'].create({
+            'name': 'Multiple Rewards Promotion',
+            'program_type': 'promotion',
+            'applies_on': 'current',
+            'company_id': self.env.company.id,
+            'trigger': 'auto',
+            'rule_ids': [
+                Command.create({
+                    'product_ids': self.product_A,
+                    'reward_point_amount': 1,
+                    'reward_point_mode': 'order',
+                    'minimum_qty': 1,
+                }),
+            ],
+            'reward_ids': [
+                Command.create({
+                    'discount': 10,
+                    'discount_applicability': 'specific',
+                    'discount_product_ids': [self.product_A.id],
+                    'required_points': 0.5,
+                }),
+                Command.create({
+                    'discount': 15,
+                    'discount_applicability': 'specific',
+                    'discount_product_ids': [self.product_B.id],
+                    'required_points': 0.5,
+                }),
+            ],
+        })
+
+        order = self.empty_order
+        order.order_line = [
+            Command.create({'product_id': self.product_A.id, 'product_uom_qty': 1}),
+            Command.create({'product_id': self.product_B.id, 'product_uom_qty': 1}),
+        ]
+        order.action_confirm()
+
+        order._update_programs_and_rewards()
+        coupon = order.coupon_point_ids.coupon_id.filtered(lambda c: c.program_id == promo_program)
+        reward1, reward2 = rewards = promo_program.reward_ids
+        order._apply_program_reward(reward1, coupon)
+        order._apply_program_reward(reward2, coupon)
+
+        self.assertEqual(order.order_line.reward_id, rewards, "All rewards should be applied")
+        self.assertEqual(sum(order.order_line.mapped('points_cost')), 1)
+        self.assertEqual(coupon.points, 0)
+
     def test_points_awarded_discount_code_no_domain_program(self):
         """
         Check the calculation for points awarded when there is a discount coupon applied and the
@@ -398,7 +480,7 @@ class TestLoyalty(TestSaleCouponCommon):
             'order_line': [
                 Command.create({
                     'product_id': self.product_A.id,
-                    'tax_id': False,
+                    'tax_ids': False,
                 }),
             ]
         })
@@ -416,10 +498,8 @@ class TestLoyalty(TestSaleCouponCommon):
         related to that discount is not in the domain of the loyalty program.
         Expected behavior: The discount is not included in the computation of points
         """
-        product_category_base = self.env.ref('product.product_category_1')
         product_category_food = self.env['product.category'].create({
             'name': "Food",
-            'parent_id': product_category_base.id
         })
 
         self.product_A.categ_id = product_category_food
@@ -439,11 +519,11 @@ class TestLoyalty(TestSaleCouponCommon):
             'order_line': [
                 Command.create({
                     'product_id': self.product_A.id,
-                    'tax_id': False,
+                    'tax_ids': False,
                 }),
                 Command.create({
                     'product_id': self.product_B.id,
-                    'tax_id': False,
+                    'tax_ids': False,
                 }),
             ]
         })
@@ -462,10 +542,8 @@ class TestLoyalty(TestSaleCouponCommon):
         domain of the loyalty program.
         Expected behavior: The discount is included in the computation of points
         """
-        product_category_base = self.env.ref('product.product_category_1')
         product_category_food = self.env['product.category'].create({
             'name': "Food",
-            'parent_id': product_category_base.id
         })
 
         self.product_A.categ_id = product_category_food
@@ -492,11 +570,11 @@ class TestLoyalty(TestSaleCouponCommon):
             'order_line': [
                 Command.create({
                     'product_id': self.product_A.id,
-                    'tax_id': False,
+                    'tax_ids': False,
                 }),
                 Command.create({
                     'product_id': self.product_B.id,
-                    'tax_id': False,
+                    'tax_ids': False,
                 }),
             ]
         })
@@ -523,7 +601,7 @@ class TestLoyalty(TestSaleCouponCommon):
             'order_line': [
                 Command.create({
                     'product_id': self.product_A.id,
-                    'tax_id': False,
+                    'tax_ids': False,
                 }),
             ]
         })
@@ -571,7 +649,7 @@ class TestLoyalty(TestSaleCouponCommon):
             'order_line': [
                 Command.create({
                     'product_id': self.product_A.id,
-                    'tax_id': False,
+                    'tax_ids': False,
                 }),
             ]
         })
@@ -646,13 +724,11 @@ class TestLoyalty(TestSaleCouponCommon):
             (0, False, {
                 'product_id': self.product_A.id,
                 'name': '1 Product A',
-                'product_uom': self.uom_unit.id,
                 'product_uom_qty': 1.0,
             }),
             (0, False, {
                 'product_id': self.product_B.id,
                 'name': '2 Product B',
-                'product_uom': self.uom_unit.id,
                 'product_uom_qty': 1.0,
             }),
         ]})
@@ -717,7 +793,6 @@ class TestLoyalty(TestSaleCouponCommon):
             (0, False, {
                 'product_id': self.product_A.id,
                 'name': '1 Product A',
-                'product_uom': self.uom_unit.id,
                 'product_uom_qty': 1.0,
             }),
         ]})
@@ -954,23 +1029,35 @@ class TestLoyalty(TestSaleCouponCommon):
 
     def test_ewallet_applied_ewallet_topup_in_order(self):
         self.ewallet.points = 10
-
+        ewallet_top_up = Command.create({
+            'product_id': self.env.ref('loyalty.ewallet_product_50').id,
+            'product_uom_qty': 1,
+            'price_unit': 50,
+        })
         order = self.env['sale.order'].create({
             'partner_id': self.partner.id,
             'order_line': [Command.create({
                 'product_id': self.product_a.id,
                 'points_cost': 100,
                 'product_uom_qty': 1,
-            }), Command.create({
-                'product_id': self.env.ref('loyalty.ewallet_product_50').id,
-                'product_uom_qty': 1,
-            })],
+            }),
+                ewallet_top_up
+            ],
         })
         order._update_programs_and_rewards()
         self._claim_reward(order, self.ewallet_program, coupon=self.ewallet)
         order.action_confirm()
 
         self.assertEqual(self.ewallet.points, 50)
+
+        # Case 2: eWallet top-up should be excluded from the discountable amount when paying with an eWallet
+        order = self.env['sale.order'].create({
+            'partner_id': self.partner.id,
+            'order_line': [ewallet_top_up],
+        })
+        order._update_programs_and_rewards()
+        with self.assertRaisesRegex(UserError, "There is nothing to discount"):
+            self._claim_reward(order, self.ewallet_program, coupon=self.ewallet)
 
     def test_discount_reward_claimable_only_once(self):
         """
@@ -1065,3 +1152,207 @@ class TestLoyalty(TestSaleCouponCommon):
         order._update_programs_and_rewards()
         rewards = [value.ids for value in order._get_claimable_rewards().values()]
         self.assertTrue(any(loyalty_program_tag.reward_ids[0].id in r for r in rewards))
+
+    def test_domain_on_cheapest_reward(self):
+        product_tag = self.env['product.tag'].create({'name': "Discountable"})
+        self.env['loyalty.program'].create({
+            'name': "10% Discount",
+            'program_type': 'promo_code',
+            'rule_ids': [Command.create({'code': "10discount"})],
+            'reward_ids': [
+                Command.create({
+                    'reward_type': 'discount',
+                    'discount': 10,
+                    'discount_mode': 'percent',
+                    'discount_applicability': 'cheapest',
+                    'discount_product_tag_id': product_tag.id,
+                }),
+            ],
+        })
+        self.product_A.product_tag_ids = product_tag
+        order = self.empty_order
+        order.write({
+            'order_line':[
+                # product_A: lst_price: 100, Tax included price: 115
+                Command.create({'product_id': self.product_A.id}),
+                # Product_B: lst_price: 5, Tax included price: 5.75
+                Command.create({'product_id': self.product_B.id}),
+            ]
+        })
+        self._apply_promo_code(order, '10discount')
+        msg = "Discount should only be applied to the line with a correctly tagged product."
+        self.assertEqual(order.order_line[2].price_total, -11.5, msg)
+
+        self.product_C.write({
+            'list_price': 50,
+            'product_tag_ids': product_tag,
+        })
+        order.order_line[2:].unlink()
+        order.write({
+            'order_line':[
+                # product_C: lst_price = Tax included price: 50
+                Command.create({'product_id': self.product_C.id}),
+            ]
+        })
+        self._apply_promo_code(order, '10discount')
+        msg = "Discount should be applied to the line with the cheapest valid product."
+        self.assertEqual(order.order_line[3].price_total, -5.0, msg)
+
+    def test_sol_free_product_description_equals_reward_description(self):
+        """
+        Ensure that if a "Free Product" reward is added to a sale order,
+        its line description matches the reward description.
+        """
+        loyalty_program = self.env['loyalty.program'].create(
+            self.env['loyalty.program']._get_template_values()['buy_x_get_y']
+        )
+        reward = loyalty_program.reward_ids[0]
+        updated_description = f"{reward.description} Adding manual description"
+        reward.description = updated_description
+
+        order = self.empty_order
+        order.write({
+            'order_line': [
+                Command.create({
+                    'product_id': reward.reward_product_id.id,
+                    'name': '1 Product',
+                    'product_uom_qty': 4.0,
+                }),
+            ]
+        })
+        order._update_programs_and_rewards()
+        self._claim_reward(order, loyalty_program)
+
+        self.assertEqual(len(order.order_line.ids), 2)
+        self.assertEqual(order.order_line[1].name, updated_description)
+
+    def test_archiving_loyalty_card_unlinks_draft_points_from_sale_order(self):
+        """
+        When a loyalty card has points accrued from a draft sale order, archiving the
+        card should unlink those draft points so they are no longer claimable on that order
+        """
+        loyalty_program = self.env['loyalty.program'].create({
+            'name': 'Loyalty Program',
+            'program_type': 'loyalty',
+            'trigger': 'auto',
+            'applies_on': 'both',
+            'rule_ids': [
+                Command.create({
+                    'reward_point_mode': 'unit',
+                    'reward_point_amount': 100,
+                    'product_ids': [self.product_a.id],
+                }),
+            ],
+            'reward_ids': [
+                Command.create({
+                    'reward_type': 'discount',
+                    'discount': 50,
+                    'discount_mode': 'percent',
+                    'discount_applicability': 'order',
+                    'required_points': 10,
+                }),
+            ],
+        })
+        loyalty_card = self.env['loyalty.card'].create({
+            'program_id': loyalty_program.id,
+            'partner_id': self.partner.id,
+            'points': 0,
+        })
+        sale_order = self.empty_order
+        sale_order.write({
+            'order_line': [
+                Command.create({
+                    'product_id': self.product_a.id,
+                }),
+            ]
+        })
+        sale_order._update_programs_and_rewards()
+        claimable_rewards = sale_order._get_claimable_rewards()
+        self.assertTrue(claimable_rewards[loyalty_card])
+        loyalty_card.action_archive()
+        claimable_rewards = sale_order._get_claimable_rewards()
+        self.assertFalse(claimable_rewards.get(loyalty_card))
+
+    def test_free_product_sol_is_zero_price(self):
+        self.env['res.config.settings'].create({
+            'group_discount_per_so_line': True,
+        }).execute()
+        loyalty_program = self.env['loyalty.program'].create({
+            'name': 'Loyalty Program',
+            'program_type': 'promotion',
+            'trigger': 'auto',
+            'applies_on': 'both',
+            'rule_ids': [
+                Command.create({
+                    'reward_point_mode': 'unit',
+                    'reward_point_amount': 1,
+                    'product_ids': [self.product_a.id],
+                }),
+            ],
+            'reward_ids': [
+                Command.create({
+                    'reward_type': 'product',
+                    'reward_product_id': self.product_B.id,
+                    'reward_product_qty': 1,
+                    'required_points': 1,
+                }),
+            ],
+        })
+        sale_order = self.empty_order
+        sale_order.write({
+            'order_line': [
+                Command.create({
+                    'product_id': self.product_a.id,
+                    'product_uom_qty': 1,
+                }),
+            ],
+        })
+        sale_order._update_programs_and_rewards()
+        self._claim_reward(sale_order, loyalty_program)
+        # In real use case, so.plan_id is set to False in _verify_cart_after_update in
+        # sale_subscription module. Since discount depends on so.plan_id, this triggers
+        # a recomputation of the discount.
+        # Here we manually call the compute method to simulate the behavior
+        sale_order.order_line._compute_discount()
+        reward_line = sale_order.order_line.filtered('reward_id')
+        self.assertEqual(reward_line.discount, 100)
+        self.assertEqual(reward_line.price_total, 0)
+
+    def test_reapplying_reward_keeps_reward_price_unit(self):
+        """
+        Ensure that re-applying a reward doesn't reset the existing reward line unit price to zero
+        """
+        self.immediate_promotion_program.active = True
+        sale_order = self.empty_order
+        sale_order.write({
+            'order_line': [
+                Command.create({
+                    'product_id': self.product_A.id,
+                    'product_uom_qty': 1,
+                }),
+            ],
+        })
+        sale_order._update_programs_and_rewards()
+        self._claim_reward(sale_order, self.immediate_promotion_program)
+        reward_line = sale_order.order_line.filtered('reward_id')
+        reward_line_price_unit = reward_line.price_unit
+        sale_order._update_programs_and_rewards()
+        self._claim_reward(sale_order, self.immediate_promotion_program)
+        self.assertEqual(reward_line.price_unit, reward_line_price_unit)
+
+    @freeze_time("2026-01-10")
+    def test_expired_ewallet_is_not_claimable(self):
+        self.ewallet.expiration_date = '2026-01-01'
+        sale_order = self.empty_order
+        sale_order.write({
+            'partner_id': self.partner.id,
+            'order_line': [
+                Command.create({
+                    'product_id': self.product_a.id,
+                }),
+            ],
+        })
+        sale_order.action_open_reward_wizard()
+        sale_order._update_programs_and_rewards()
+        claimable_rewards = sale_order._get_claimable_rewards()
+        self.assertFalse(claimable_rewards.get(self.ewallet))

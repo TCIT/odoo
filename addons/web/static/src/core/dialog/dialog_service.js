@@ -39,7 +39,7 @@ export const dialogService = {
 
         const add = (dialogClass, props, options = {}) => {
             const id = nextId++;
-            const close = () => remove();
+            const close = (params) => remove(params);
             const subEnv = reactive({
                 id,
                 close,
@@ -49,6 +49,7 @@ export const dialogService = {
             deactivate();
             stack.push(subEnv);
             document.body.classList.add("modal-open");
+            let isBeingClosed = false;
 
             const scrollOrigin = { top: window.scrollY, left: window.scrollX };
             subEnv.scrollToOrigin = () => {
@@ -65,26 +66,33 @@ export const dialogService = {
                     subEnv,
                 },
                 {
-                    onRemove: () => {
-                        stack.pop();
+                    onRemove: async (closeParams) => {
+                        if (isBeingClosed) {
+                            return;
+                        }
+                        isBeingClosed = true;
+                        await options.onClose?.(closeParams);
+                        stack.splice(
+                            stack.findIndex((d) => d.id === id),
+                            1
+                        );
                         deactivate();
                         if (stack.length) {
                             stack.at(-1).isActive = true;
                         } else {
                             document.body.classList.remove("modal-open");
                         }
-                        options.onClose?.();
                     },
-                    rootId: options.context?.root?.el.getRootNode()?.host?.id,
+                    rootId: options.context?.root?.el?.getRootNode()?.host?.id,
                 }
             );
 
             return remove;
         };
 
-        function closeAll() {
+        function closeAll(params) {
             for (const dialog of [...stack].reverse()) {
-                dialog.close();
+                dialog.close(params);
             }
         }
 

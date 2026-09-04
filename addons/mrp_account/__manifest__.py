@@ -4,7 +4,7 @@
 {
     'name': 'Accounting - MRP',
     'version': '1.0',
-    'category': 'Manufacturing/Manufacturing',
+    'category': 'Supply Chain/Manufacturing',
     'summary': 'Analytic accounting in Manufacturing',
     'description': """
 Analytic Accounting in MRP
@@ -32,8 +32,14 @@ If the automated inventory valuation is active, the necessary accounting entries
     'demo': [
         'data/mrp_account_demo.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'mrp_account/static/src/**/*',
+        ],
+    },
     'installable': True,
     'auto_install': True,
     'post_init_hook': '_configure_journals',
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

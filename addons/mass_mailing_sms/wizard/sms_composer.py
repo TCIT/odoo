@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import werkzeug.urls
-
-from odoo import _, api, Command, fields, models
+from odoo import _, api, Command, fields, models, tools
 
 
-class SMSComposer(models.TransientModel):
+class SmsComposer(models.TransientModel):
     _inherit = 'sms.composer'
 
     # mass mode with mass sms
@@ -18,10 +16,12 @@ class SMSComposer(models.TransientModel):
     # Mass mode specific
     # ------------------------------------------------------------
 
-    def _get_unsubscribe_url(self, res_id, trace_code, number):
-        return werkzeug.urls.url_join(
-            self.get_base_url(),
-            '/sms/%s/%s' % (self.mailing_id.id, trace_code)
+    def _get_unsubscribe_url(self, mailing_id, trace_code):
+        # Resolve the base URL from the recipient (passed in context) so the opt-out
+        # link stays on the recipient's website in multi-website setups, like the mail.
+        return tools.urls.urljoin(
+            self.mailing_id._get_recipient_base_url(),
+            '/sms/%s/%s' % (mailing_id, trace_code)
         )
 
     @api.model
@@ -47,13 +47,16 @@ class SMSComposer(models.TransientModel):
             trace_values['trace_status'] = 'cancel'
         else:
             if self.mass_sms_allow_unsubscribe:
-                stop_sms = self._get_unsubscribe_info(self._get_unsubscribe_url(record.id, trace_code, sms_values['number']))
+                unsubscribe_url = self.with_context(
+                    mailing_recipient_record=record
+                )._get_unsubscribe_url(self.mailing_id.id, trace_code)
+                stop_sms = self._get_unsubscribe_info(unsubscribe_url)
                 sms_values['body'] = '%s\n%s' % (sms_values['body'] or '', stop_sms)
         return trace_values
 
     def _get_optout_record_ids(self, records, recipients_info):
         """ Fetch opt-out records based on mailing. """
-        res = super(SMSComposer, self)._get_optout_record_ids(records, recipients_info)
+        res = super()._get_optout_record_ids(records, recipients_info)
         if self.mailing_id:
             optout_res_ids = self.mailing_id._get_opt_out_list_sms()
             res += optout_res_ids
@@ -61,14 +64,14 @@ class SMSComposer(models.TransientModel):
 
     def _get_done_record_ids(self, records, recipients_info):
         """ A/B testing could lead to records having been already mailed. """
-        res = super(SMSComposer, self)._get_done_record_ids(records, recipients_info)
+        res = super()._get_done_record_ids(records, recipients_info)
         if self.mailing_id:
             seen_ids, seen_list = self.mailing_id._get_seen_list_sms()
             res += seen_ids
         return res
 
     def _prepare_body_values(self, records):
-        all_bodies = super(SMSComposer, self)._prepare_body_values(records)
+        all_bodies = super()._prepare_body_values(records)
         if self.mailing_id:
             tracker_values = self.mailing_id._get_link_tracker_values()
             for sms_id, body in all_bodies.items():
@@ -77,22 +80,47 @@ class SMSComposer(models.TransientModel):
         return all_bodies
 
     def _prepare_mass_sms_values(self, records):
-        result = super(SMSComposer, self)._prepare_mass_sms_values(records)
-        if self.composition_mode == 'mass' and self.mailing_id:
-            for record in records:
-                sms_values = result[record.id]
+        # In mass mailing only, add 'mailing.trace' values directly in the o2m field
+        result = super()._prepare_mass_sms_values(records)
+        if not self._is_mass_sms():
+            return result
 
-                trace_values = self._prepare_mass_sms_trace_values(record, sms_values)
-                sms_values.update({
-                    'mailing_id': self.mailing_id.id,
-                    'mailing_trace_ids': [(0, 0, trace_values)],
-                })
+        for record in records:
+            sms_values = result[record.id]
+
+            trace_values = self._prepare_mass_sms_trace_values(record, sms_values)
+            sms_values.update({
+                'mailing_id': self.mailing_id.id,
+                'mailing_trace_ids': [(0, 0, trace_values)],
+            })
         return result
 
     def _prepare_mass_sms(self, records, sms_record_values):
-        sms_all = super(SMSComposer, self)._prepare_mass_sms(records, sms_record_values)
+        sms_all = super()._prepare_mass_sms(records, sms_record_values)
         if self.mailing_id:
             updated_bodies = sms_all._update_body_short_links()
             for sms in sms_all:
                 sms.body = updated_bodies[sms.id]
         return sms_all
+
+    def _is_mass_sms(self):
+        return self.composition_mode == 'mass' and self.mailing_id
+
+    def _filter_out_and_handle_revoked_sms_values(self, sms_values_all):
+        # Filter out canceled sms of mass mailing and create traces for canceled ones.
+        results = super()._filter_out_and_handle_revoked_sms_values(sms_values_all)
+        if not self._is_mass_sms():
+            return results
+        self.env['mailing.trace'].sudo().create([
+            trace_commands[0][2]
+            for mail_values in results.values()
+            if mail_values.get('state') == 'canceled' and mail_values['mailing_trace_ids']
+            for trace_commands in (mail_values['mailing_trace_ids'],)
+            # Ensure it is a create command
+            if len(trace_commands) == 1 and len(trace_commands[0]) == 3 and trace_commands[0][0] == 0
+        ])
+        return {
+            res_id: sms_values
+            for res_id, sms_values in results.items()
+            if sms_values.get('state') != 'canceled'
+        }

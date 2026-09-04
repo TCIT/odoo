@@ -1,26 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* fleet
-# 
+# * fleet
+#
 # Translators:
-# Wil Odoo, 2024
-# Chloe Wang, 2024
-# Raymond Yu <cl_yu@hotmail.com>, 2024
-# Odoo哥 <vnsoft.he@gmail.com>, 2024
-# 
+# Martin Trigaux, 2022
+# Raymond Yu <cl_yu@hotmail.com>, 2022
+# Jeffery CHEN <jeffery9@gmail.com>, 2022
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Odoo哥 <vnsoft.he@gmail.com>, 2024\n"
-"Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/zh_CN/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 17:51+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
+"projects/odoo-19/fleet/zh_Hans/>\n"
+"Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_kanban
@@ -52,22 +53,18 @@ msgid "<span>cm</span>"
 msgstr "<span>厘米</span>"
 
 #. module: fleet
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
-msgid "<span>g/km</span>"
-msgstr "<span>克/公里</span>"
+#: model:ir.model.fields,help:fleet.field_fleet_vehicle__trailer_hook
+msgid ""
+"A trailer hitch is a device attached to a vehicle's chassis for towing "
+"purposes,             such as pulling trailers, boats, or other vehicles."
+msgstr "拖车挂钩，一种安装在车辆底盘上的牵引装置，用于拖曳拖车、船只或其他车辆。"
 
 #. module: fleet
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
-msgid "<span>kW</span>"
-msgstr "<span>千瓦</span>"
-
-#. module: fleet
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
-msgid "<span>km</span>"
-msgstr "<span>千米</span>"
+#: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__trailer_hook
+msgid ""
+"A trailer hitch is a device attached to a vehicle's chassis for towing "
+"purposes,            such as pulling trailers, boats, or other vehicles."
+msgstr "拖车挂钩 ，一种安装在车辆底盘上的牵引装置，用于拖曳拖车、船只或其他车辆。"
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_1
@@ -125,6 +122,11 @@ msgid "Activities"
 msgstr "活动"
 
 #. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_search
+msgid "Activities of"
+msgstr "活动："
+
+#. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__activity_exception_decoration
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_contract__activity_exception_decoration
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__activity_exception_decoration
@@ -141,6 +143,11 @@ msgid "Activity State"
 msgstr "活动状态"
 
 #. module: fleet
+#: model:ir.model,name:fleet.model_mail_activity_type
+msgid "Activity Type"
+msgstr "活动类型"
+
+#. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__activity_type_icon
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_contract__activity_type_icon
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__activity_type_icon
@@ -152,6 +159,11 @@ msgstr "活动类型图标"
 #: model:ir.actions.act_window,name:fleet.mail_activity_type_action_config_fleet
 #: model:ir.ui.menu,name:fleet.fleet_menu_config_activity_type
 msgid "Activity Types"
+msgstr "活动类型"
+
+#. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_search
+msgid "Activity type"
 msgstr "活动类型"
 
 #. module: fleet
@@ -175,6 +187,11 @@ msgid "All vehicles"
 msgstr "所有"
 
 #. module: fleet
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__drive_type__awd
+msgid "All-Wheel Drive (AWD)"
+msgstr "全轮驱动（AWD）"
+
+#. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
 msgid "Apply New Driver"
 msgstr "申请新司机"
@@ -190,6 +207,7 @@ msgstr "存档"
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_services_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_services_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_brand_view_search
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
 msgid "Archived"
@@ -328,6 +346,7 @@ msgstr "更换刹车片"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__brand_id
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__brand_id
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
 msgid "Brand"
 msgstr "品牌"
@@ -344,25 +363,20 @@ msgid "CNG"
 msgstr "CNG"
 
 #. module: fleet
-#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__co2
-#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__default_co2
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_tree
 msgid "CO2 Emissions"
 msgstr "二氧化碳排放量"
-
-#. module: fleet
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_tree
-msgid "CO2 Emissions g/km"
-msgstr "二氧化碳排放量 克/公里"
-
-#. module: fleet
-#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__co2_standard
-msgid "CO2 Standard"
-msgstr "CO2 标准"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle__co2
 msgid "CO2 emissions of the vehicle"
 msgstr "车辆的CO2排放量"
+
+#. module: fleet
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__co2
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__default_co2
+msgid "CO₂ Emissions"
+msgstr "二氧化碳排放量"
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_service_1
@@ -425,15 +439,17 @@ msgstr "类别"
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_model_category_action
 msgid ""
-"Categories will help you manage your fleet more efficiently and arrange your"
-" vehicles."
+"Categories will help you manage your fleet more efficiently and arrange your "
+"vehicles."
 msgstr "分类可帮助您更有效地管理车队和安排车辆。"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_service_type__category
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__category_id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__category_id
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__category_id
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_search
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_report_view_search
 msgid "Category"
 msgstr "类别"
 
@@ -470,8 +486,7 @@ msgstr "选择合同是否依旧有效"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_service_type__category
-msgid ""
-"Choose whether the service refer to contracts, vehicle services or both"
+msgid "Choose whether the service refer to contracts, vehicle services or both"
 msgstr "选择是服务合同还是车辆服务，或两者的"
 
 #. module: fleet
@@ -480,9 +495,10 @@ msgid "Closed"
 msgstr "已关闭"
 
 #. module: fleet
-#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__co2_standard
-msgid "Co2 Standard"
-msgstr "Co2标准"
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__co2_emission_unit
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__co2_emission_unit
+msgid "Co2 Emission Unit"
+msgstr "二氧化碳排放单位"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__color
@@ -519,11 +535,6 @@ msgstr "配置设置"
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_brand_view_kanban
 msgid "Configuration"
 msgstr "配置"
-
-#. module: fleet
-#: model:ir.model,name:fleet.model_res_partner
-msgid "Contact"
-msgstr "联系人"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_search
@@ -571,6 +582,7 @@ msgstr "合同记录"
 
 #. module: fleet
 #: model:mail.activity.type,name:fleet.mail_act_fleet_contract_to_renew
+#: model:mail.activity.type,summary:fleet.mail_act_fleet_contract_to_renew
 msgid "Contract to Renew"
 msgstr "待续签的合同"
 
@@ -729,6 +741,9 @@ msgstr "每天"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_contract__date
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__date
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer__date
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__recorded_date
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_report_view_search
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_view_search
 msgid "Date"
 msgstr "日期"
 
@@ -751,8 +766,8 @@ msgstr "有效期内的合同的起始日期"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_log_contract__expiration_date
 msgid ""
-"Date when the coverage of the contract expirates (by default, one year after"
-" begin date)"
+"Date when the coverage of the contract expirates (by default, one year after "
+"begin date)"
 msgstr "合同到期日期（默认为合同开始日期一年之后的日期）"
 
 #. module: fleet
@@ -802,9 +817,12 @@ msgstr "柴油"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model_brand__display_name
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model_category__display_name
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer__display_name
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__display_name
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_send_mail__display_name
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_state__display_name
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_tag__display_name
+#: model:ir.model.fields,field_description:fleet.field_mail_activity_type__display_name
+#: model:ir.model.fields,field_description:fleet.field_res_config_settings__display_name
 msgid "Display Name"
 msgstr "显示名称"
 
@@ -819,15 +837,14 @@ msgid "Door Window Motor/Regulator Replacement"
 msgstr "门窗电机/调节器的更换"
 
 #. module: fleet
-#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__doors
-#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__doors
-msgid "Doors Number"
-msgstr "车门数量"
-
-#. module: fleet
 #: model:fleet.vehicle.state,name:fleet.fleet_vehicle_state_downgraded
 msgid "Downgraded"
 msgstr "信用等级下降"
+
+#. module: fleet
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__drive_type
+msgid "Drive Type"
+msgstr "驱动类型"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__driver_id
@@ -845,7 +862,6 @@ msgstr "驾驶员"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle__driver_id
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_log_contract__purchaser_id
-#: model:ir.model.fields,help:fleet.field_fleet_vehicle_odometer__driver_id
 msgid "Driver address of the vehicle"
 msgstr "车辆的驾驶员地址"
 
@@ -894,6 +910,26 @@ msgstr "电子启动"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__electric_assistance
 msgid "Electric Assistance"
 msgstr "电力援助"
+
+#. module: fleet
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__co2_standard
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__co2_standard
+msgid "Emission Standard"
+msgstr "排放标准"
+
+#. module: fleet
+#: model:ir.model.fields,help:fleet.field_fleet_vehicle__co2_standard
+msgid ""
+"Emission Standard specifies the regulatory test procedure             or "
+"guideline under which a vehicle's emissions are measured."
+msgstr "排放标准规定车辆排放测量所依据的法规测试程序或指南。"
+
+#. module: fleet
+#: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__co2_standard
+msgid ""
+"Emission Standard specifies the regulatory test procedure or             "
+"guideline under which a vehicle's emissions are measured."
+msgstr "排放标准规定车辆排放测量所依据的法规测试程序或指南。"
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_service_16
@@ -973,7 +1009,7 @@ msgid "Expires Today"
 msgstr "今日到期"
 
 #. module: fleet
-#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__first_contract_date
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__contract_date_start
 msgid "First Contract Date"
 msgstr "首次合同日期"
 
@@ -983,10 +1019,10 @@ msgid "Fiscality"
 msgstr "财务"
 
 #. module: fleet
-#: model:ir.module.category,name:fleet.module_fleet_category
 #: model:ir.ui.menu,name:fleet.fleet_vehicle_menu
 #: model:ir.ui.menu,name:fleet.fleet_vehicles
 #: model:ir.ui.menu,name:fleet.menu_root
+#: model:res.groups.privilege,name:fleet.res_groups_privilege_fleet
 #: model_terms:ir.ui.view,arch_db:fleet.res_config_settings_view_form
 msgid "Fleet"
 msgstr "车队"
@@ -1017,6 +1053,11 @@ msgid "Fleet Manager"
 msgstr "车队管理员"
 
 #. module: fleet
+#: model:ir.model,name:fleet.model_fleet_vehicle_odometer_report
+msgid "Fleet Odometer Analysis Report"
+msgstr "车队里程表分析报告"
+
+#. module: fleet
 #: model:ir.model,name:fleet.model_fleet_service_type
 msgid "Fleet Service Type"
 msgstr "车辆服务类型"
@@ -1025,6 +1066,11 @@ msgstr "车辆服务类型"
 #: model:ir.actions.server,name:fleet.ir_cron_contract_costs_generator_ir_actions_server
 msgid "Fleet: Generate contracts costs based on costs frequency"
 msgstr "车队：根据支出频率生成合同成本"
+
+#. module: fleet
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_state__fold
+msgid "Folded in Kanban"
+msgstr "折叠看板"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__message_follower_ids
@@ -1051,9 +1097,19 @@ msgid "Font awesome icon e.g. fa-tasks"
 msgstr "Font Awesome图标，例如：fa-tasks"
 
 #. module: fleet
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__drive_type__4wd
+msgid "Four-Wheel Drive (4WD)"
+msgstr "四轮驱动（4WD）"
+
+#. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__frame_size
 msgid "Frame Size"
 msgstr "框架大小"
+
+#. module: fleet
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__drive_type__fwd
+msgid "Front-Wheel Drive (FWD)"
+msgstr "前轮驱动（FWD）"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_cost_report__fuel_type
@@ -1073,6 +1129,8 @@ msgstr "更换燃油泵"
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__fuel_type
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__default_fuel_type
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__fuel_type
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_report_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
 msgid "Fuel Type"
 msgstr "燃油类型"
@@ -1104,17 +1162,6 @@ msgstr "将来驾驶员："
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__default_fuel_type__gasoline
 msgid "Gasoline"
 msgstr "汽油"
-
-#. module: fleet
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_costs_report_view_search
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_search
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_services_view_search
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_search
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_view_search
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_service_types_view_search
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
-msgid "Group By"
-msgstr "分组方式"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__contract_renewal_overdue
@@ -1168,9 +1215,13 @@ msgstr "更换热水管"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__horsepower
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__horsepower
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__power_unit__horsepower
-#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__power_unit__horsepower
 msgid "Horsepower"
 msgstr "马力"
+
+#. module: fleet
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__power_unit__horsepower
+msgid "Horsepower (hp)"
+msgstr "马力（hp）"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__horsepower_tax
@@ -1195,9 +1246,12 @@ msgstr "液态氢"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model_brand__id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model_category__id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer__id
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_send_mail__id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_state__id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_tag__id
+#: model:ir.model.fields,field_description:fleet.field_mail_activity_type__id
+#: model:ir.model.fields,field_description:fleet.field_res_config_settings__id
 msgid "ID"
 msgstr "ID"
 
@@ -1312,11 +1366,6 @@ msgstr "是关注者"
 #: model:fleet.vehicle.tag,name:fleet.vehicle_tag_junior
 msgid "Junior"
 msgstr "初级"
-
-#. module: fleet
-#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_view_kanban
-msgid "Km"
-msgstr "千米"
 
 #. module: fleet
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__fuel_type__lpg
@@ -1434,6 +1483,11 @@ msgid "Mail to Driver"
 msgstr "邮寄给司机"
 
 #. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
+msgid "Make Vehicle Available"
+msgstr "启用车辆"
+
+#. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_log_contract_action
 msgid ""
 "Manage all your contracts (leasing, insurances, etc.) with\n"
@@ -1450,6 +1504,11 @@ msgid "Manage efficiently your different effective vehicles Costs with Odoo."
 msgstr "用Odoo有效地管理您不同的有效车辆成本。"
 
 #. module: fleet
+#: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_odometer_reporting_action
+msgid "Manage efficiently your vehicle Odometers with Odoo."
+msgstr "通过 Odoo 高效管理您的车辆里程表。"
+
+#. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_service_10
 msgid "Management Fee"
 msgstr "管理费"
@@ -1461,7 +1520,10 @@ msgid "Manual"
 msgstr "手动"
 
 #. module: fleet
+#. odoo-python
+#: code:addons/fleet/models/fleet_vehicle_model_brand.py:0
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__brand_id
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_services_view_search
 msgid "Manufacturer"
 msgstr "制造商"
 
@@ -1489,10 +1551,19 @@ msgid "Messages"
 msgstr "消息"
 
 #. module: fleet
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__mileage_delta
+msgid "Mileage Delta"
+msgstr "里程变化量"
+
+#. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__model_id
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__model_id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model_brand__model_ids
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__model_id
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_services_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_search
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_report_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
 msgid "Model"
@@ -1532,6 +1603,8 @@ msgid "Model of a vehicle"
 msgstr "车辆型号"
 
 #. module: fleet
+#. odoo-python
+#: code:addons/fleet/models/fleet_vehicle_model_brand.py:0
 #: model:ir.actions.act_window,name:fleet.fleet_vehicle_model_action
 #: model:ir.ui.menu,name:fleet.fleet_models_configuration
 #: model:ir.ui.menu,name:fleet.fleet_vehicle_model_menu
@@ -1546,6 +1619,12 @@ msgstr "模型"
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_log_contract__cost_frequency__monthly
 msgid "Monthly"
 msgstr "每月"
+
+#. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_search
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
+msgid "My Activities"
+msgstr "我的活动"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__my_activity_date_deadline
@@ -1636,6 +1715,11 @@ msgid "No data for analysis"
 msgstr "无分析数据"
 
 #. module: fleet
+#: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_odometer_reporting_action
+msgid "No data for odometer analysis"
+msgstr "无里程分析数据"
+
+#. module: fleet
 #. odoo-python
 #: code:addons/fleet/models/fleet_vehicle.py:0
 msgid "No plate"
@@ -1664,6 +1748,12 @@ msgstr "备注"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__message_needaction_counter
 msgid "Number of Actions"
 msgstr "操作数量"
+
+#. module: fleet
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__doors
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__doors
+msgid "Number of Doors"
+msgstr "车门数目"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle__doors
@@ -1707,10 +1797,20 @@ msgid "Odometer"
 msgstr "里程表"
 
 #. module: fleet
+#: model:ir.actions.act_window,name:fleet.fleet_vehicle_odometer_reporting_action
+msgid "Odometer Analysis"
+msgstr "里程表分析"
+
+#. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_view_tree
 msgid "Odometer Logs"
 msgstr "里程表记录"
+
+#. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
+msgid "Odometer Report"
+msgstr "里程表报告"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__odometer_unit
@@ -1720,6 +1820,7 @@ msgstr "里程表单位"
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__odometer
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer__value
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__odometer_value
 msgid "Odometer Value"
 msgstr "里程表数值"
 
@@ -1743,6 +1844,7 @@ msgstr "当前车辆里程表读数"
 #. module: fleet
 #: model:ir.actions.act_window,name:fleet.fleet_vehicle_odometer_action
 #: model:ir.ui.menu,name:fleet.fleet_vehicle_odometer_menu
+#: model:ir.ui.menu,name:fleet.menu_fleet_odometer_reporting_odometer
 msgid "Odometers"
 msgstr "里程表"
 
@@ -1767,21 +1869,13 @@ msgid "Omnium"
 msgstr "Omnium"
 
 #. module: fleet
-#. odoo-python
-#: code:addons/fleet/models/fleet_vehicle_model.py:0
-msgid "Operation not supported."
-msgstr "操作不支持。"
-
-#. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_send_mail__lang
 msgid ""
 "Optional translation language (ISO code) to select when sending out an "
-"email. If not set, the english version will be used. This should usually be "
-"a placeholder expression that provides the appropriate language, e.g. {{ "
-"object.partner_id.lang }}."
+"email. If not set, the main partner's language will be used. This should "
+"usually be a placeholder expression that provides the appropriate language, "
+"e.g. {{ object.partner_id.lang }}."
 msgstr ""
-"发送电子邮件时可选择的翻译语言（ISO 代码）。如果未设置，将使用英语版本。这通常应是一个提供适当语言的占位符表达式，例如 {{ "
-"object.partner_id.lang}}。"
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_service_15
@@ -1815,15 +1909,11 @@ msgstr "更换氧传感器"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__plan_to_change_bike
-#: model:ir.model.fields,field_description:fleet.field_res_partner__plan_to_change_bike
-#: model:ir.model.fields,field_description:fleet.field_res_users__plan_to_change_bike
 msgid "Plan To Change Bike"
 msgstr "计划更换自行车"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__plan_to_change_car
-#: model:ir.model.fields,field_description:fleet.field_res_partner__plan_to_change_car
-#: model:ir.model.fields,field_description:fleet.field_res_users__plan_to_change_car
 msgid "Plan To Change Car"
 msgstr "更换车辆计划"
 
@@ -1899,9 +1989,20 @@ msgid "Range"
 msgstr "范围"
 
 #. module: fleet
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__range_unit
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__range_unit
+msgid "Range Unit"
+msgstr "范围单元"
+
+#. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_action
 msgid "Ready to manage your fleet more efficiently?"
 msgstr "高效管理车队，您准备好了吗？"
+
+#. module: fleet
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__drive_type__rwd
+msgid "Rear-Wheel Drive (RWD)"
+msgstr "后轮驱动（RWD）"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_contract__cost_generated
@@ -1961,7 +2062,7 @@ msgstr "更换车辆"
 #. module: fleet
 #: model:ir.ui.menu,name:fleet.menu_fleet_reporting
 msgid "Reporting"
-msgstr "报表"
+msgstr "报告"
 
 #. module: fleet
 #: model:fleet.vehicle.state,name:fleet.fleet_vehicle_state_reserve
@@ -2030,8 +2131,8 @@ msgstr "保存为新模版"
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__seats
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__seats
-msgid "Seats Number"
-msgstr "座位数"
+msgid "Seating Capacity"
+msgstr "座位容量"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_send_mail_view_form
@@ -2120,8 +2221,8 @@ msgstr "设置"
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
-msgid "Show all records which has next action date is before today"
-msgstr "显示下一操作日期早于今天的所有记录"
+msgid "Show all records whose next activity date is past"
+msgstr "显示所有逾期未完成活动的记录"
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_service_6
@@ -2132,6 +2233,13 @@ msgstr "雪地胎"
 #: model:fleet.service.type,name:fleet.type_service_41
 msgid "Spark Plug Replacement"
 msgstr "更换火花塞"
+
+#. module: fleet
+#: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__doors
+msgid ""
+"Specifies the total number of doors, including the truck and hatch doors, if "
+"applicable."
+msgstr "指定车门总数，包括卡车门和舱门（如适用）。"
 
 #. module: fleet
 #. odoo-python
@@ -2271,6 +2379,12 @@ msgid ""
 msgstr "这是汽车可以使用的日期，如果不设置它意味着可以立即使用"
 
 #. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
+msgid ""
+"This will allow this vehicle to be selectable for the Salary Configurator"
+msgstr "这样就可以在薪资配置器中选择该车辆"
+
+#. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_44
 msgid "Tie Rod End Replacement"
 msgstr "万向轴更换"
@@ -2320,7 +2434,8 @@ msgstr "游览助理"
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_log_services_action
 msgid ""
 "Track all the services done on your vehicle.\n"
-"            Services can be of many types: occasional repair, fixed maintenance, etc."
+"            Services can be of many types: occasional repair, fixed "
+"maintenance, etc."
 msgstr ""
 "跟踪您的车辆所做的所有服务。\n"
 "         服务可以有多种类型：临时维修、定期保养等。"
@@ -2401,10 +2516,12 @@ msgstr "单位"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_contract__vehicle_id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__vehicle_id
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer__vehicle_id
+#: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_odometer_report__vehicle_id
 #: model:ir.ui.menu,name:fleet.fleet_vehicles_configuration
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_costs_report_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_search
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_report_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_view_search
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_search
@@ -2436,6 +2553,11 @@ msgstr "车辆信息"
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_cost_report__name
 msgid "Vehicle Name"
 msgstr "车辆名称"
+
+#. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_odometer_report_view_graph
+msgid "Vehicle Odometer Timeline"
+msgstr "车辆里程表时间线"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_model__vehicle_properties_definition
@@ -2516,6 +2638,13 @@ msgstr "供应商参考"
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
 msgid "Vendors"
 msgstr "供应商"
+
+#. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vechicle_costs_report_view_form
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_form
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
+msgid "Visible to all"
+msgstr "对所有人可见"
 
 #. module: fleet
 #: model:fleet.vehicle.state,name:fleet.fleet_vehicle_state_waiting_list
@@ -2619,11 +2748,13 @@ msgstr "您可以为每个品牌定义多种车型( 比如 A3，A4) 为每个品
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form_quick_create
 msgid "e.g. Model S"
 msgstr "例如. 型号S"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form_quick_create
 msgid "e.g. PAE 326"
 msgstr "例如：PAE 326"
 
@@ -2633,6 +2764,24 @@ msgid "e.g. Tesla"
 msgstr "例如：特斯拉"
 
 #. module: fleet
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
+#: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
+msgid "eg. WLTP, Euro 6, or EPA, ..."
+msgstr "例如 WLTP、Euro 6 或 EPA，..."
+
+#. module: fleet
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__co2_emission_unit__g/km
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__co2_emission_unit__g/km
+msgid "g/km"
+msgstr "g/km"
+
+#. module: fleet
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__co2_emission_unit__g/mi
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__co2_emission_unit__g/mi
+msgid "g/mi"
+msgstr "g/mi"
+
+#. module: fleet
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__power_unit__power
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__power_unit__power
 msgid "kW"
@@ -2640,11 +2789,15 @@ msgstr "千瓦"
 
 #. module: fleet
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__odometer_unit__kilometers
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__range_unit__km
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__range_unit__km
 msgid "km"
 msgstr "千米"
 
 #. module: fleet
 #: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__odometer_unit__miles
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle__range_unit__mi
+#: model:ir.model.fields.selection,name:fleet.selection__fleet_vehicle_model__range_unit__mi
 msgid "mi"
 msgstr "英里"
 
@@ -2662,3 +2815,63 @@ msgstr "显示辆车的里程表记录"
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form
 msgid "show the services logs for this vehicle"
 msgstr "显示该车辆的服务记录"
+
+#~ msgid "<span>g/km</span>"
+#~ msgstr "<span>克/公里</span>"
+
+#~ msgid "<span>kW</span>"
+#~ msgstr "<span>千瓦</span>"
+
+#~ msgid "CO2 Emissions g/km"
+#~ msgstr "二氧化碳排放量 克/公里"
+
+#~ msgid "Close Contract"
+#~ msgstr "关闭合同"
+
+#~ msgid "Co2 Standard"
+#~ msgstr "Co2标准"
+
+#~ msgid "Contact"
+#~ msgstr "联系人"
+
+#~ msgid "Contains Vehicles"
+#~ msgstr "包含车辆"
+
+#~ msgid "Date when the vehicle has been immatriculated"
+#~ msgstr "车辆注册日期"
+
+#~ msgid "Doors Number"
+#~ msgstr "车门数量"
+
+#~ msgid "Group By"
+#~ msgstr "分组"
+
+#~ msgid "Immatriculation Date"
+#~ msgstr "注册日期"
+
+#~ msgid "Km"
+#~ msgstr "千米"
+
+#~ msgid "Name of contract to renew soon"
+#~ msgstr "需马上续签合同的名称"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "需要作业消息数量"
+
+#~ msgid "Reset To Draft"
+#~ msgstr "重置为草稿"
+
+#~ msgid "Seats Number"
+#~ msgstr "座位数"
+
+#~ msgid "Show all records which has next action date is before today"
+#~ msgstr "显示所有的在今天之前的下一个行动日期的记录"
+
+#~ msgid "Start Contract"
+#~ msgstr "开始合同"
+
+#~ msgid "Total of contracts due or overdue minus one"
+#~ msgstr "截止或者逾期减一的合同总计"
+
+#~ msgid "img"
+#~ msgstr "图片"

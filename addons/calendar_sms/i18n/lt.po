@@ -1,29 +1,34 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* calendar_sms
-# 
+# * calendar_sms
+#
 # Translators:
-# Martin Trigaux, 2024
-# Silvija Butko <silvija.butko@gmail.com>, 2024
-# Linas Versada <linaskrisiukenas@gmail.com>, 2024
-# Gailius Kazlauskas <gailius@vialaurea.lt>, 2024
-# grupoda2 <dmitrijus.ivanovas@gmail.com>, 2024
-# Greta Šeštokė, 2024
-# Jonas Zinkevicius <jozi@odoo.com>, 2024
-# 
+# Gailius Kazlauskas <gailius@vialaurea.lt>, 2022
+# Jonas Zinkevicius <jozi@odoo.com>, 2022
+# grupoda2 <dmitrijus.ivanovas@gmail.com>, 2022
+# Silvija Butko <silvija.butko@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Linas Versada <linaskrisiukenas@gmail.com>, 2022
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Vytenis Viruišis <vytenis@users.noreply.translate.odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0+e\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 12:52+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Jonas Zinkevicius <jozi@odoo.com>, 2024\n"
-"Language-Team: Lithuanian (https://app.transifex.com/odoo/teams/41243/lt/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-05 01:37+0000\n"
+"Last-Translator: Vytenis Viruišis <vytenis@users.noreply.translate.odoo.com>"
+"\n"
+"Language-Team: Lithuanian <https://translate.odoo.com/projects/odoo-19/"
+"calendar_sms/lt/>\n"
+"Language: lt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: lt\n"
-"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);\n"
+"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < "
+"11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 "
+": n % 1 != 0 ? 2: 3);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: calendar_sms
 #: model:ir.model,name:calendar_sms.model_calendar_event
@@ -34,6 +39,13 @@ msgstr "Įvykis kalendoriuje"
 #: model:sms.template,name:calendar_sms.sms_template_data_calendar_reminder
 msgid "Calendar Event: Reminder"
 msgstr ""
+
+#. module: calendar_sms
+#: model:ir.model.fields,field_description:calendar_sms.field_calendar_alarm__display_name
+#: model:ir.model.fields,field_description:calendar_sms.field_calendar_alarm_manager__display_name
+#: model:ir.model.fields,field_description:calendar_sms.field_calendar_event__display_name
+msgid "Display Name"
+msgstr "Rodomas pavadinimas"
 
 #. module: calendar_sms
 #: model:ir.model,name:calendar_sms.model_calendar_alarm
@@ -54,16 +66,16 @@ msgstr ""
 #. module: calendar_sms
 #: model:sms.template,body:calendar_sms.sms_template_data_calendar_reminder
 msgid ""
-"Event reminder: {{ object.name }}, {{ "
-"object.get_display_time_tz(object.partner_id.tz) }}"
+"Event reminder: {{ object.name }}, "
+"{{ object.get_display_time_tz(object.partner_id.tz) }}"
 msgstr ""
 
 #. module: calendar_sms
-#. odoo-python
-#: code:addons/calendar_sms/models/calendar_alarm.py:0
-#: model:ir.model.fields,field_description:calendar_sms.field_calendar_alarm__sms_notify_responsible
-msgid "Notify Responsible"
-msgstr ""
+#: model:ir.model.fields,field_description:calendar_sms.field_calendar_alarm__id
+#: model:ir.model.fields,field_description:calendar_sms.field_calendar_alarm_manager__id
+#: model:ir.model.fields,field_description:calendar_sms.field_calendar_event__id
+msgid "ID"
+msgstr "ID"
 
 #. module: calendar_sms
 #: model_terms:ir.ui.view,arch_db:calendar_sms.view_calendar_event_form_inherited
@@ -101,9 +113,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/calendar_sms/models/calendar_event.py:0
 msgid "There are no attendees on these events"
-msgstr "Šiuose susitikimuose nėra dalyvių."
+msgstr "Šiuose susitikimuose nėra dalyvių"
 
 #. module: calendar_sms
 #: model:ir.model.fields,field_description:calendar_sms.field_calendar_alarm__alarm_type
 msgid "Type"
 msgstr "Tipas"
+
+#~ msgid "Send SMS Text Message"
+#~ msgstr "Siųsti SMS žinutę"

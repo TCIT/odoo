@@ -1,23 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* product_margin
-# 
-# Translators:
-# Wil Odoo, 2024
-# 
+# * product_margin
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Fernanda Alvarez (mfar)" <mfar@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Spanish (Latin America) (https://app.transifex.com/odoo/teams/41243/es_419/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 13:23+0000\n"
+"Last-Translator: \"Fernanda Alvarez (mfar)\" <mfar@odoo.com>\n"
+"Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
+"odoo-19/product_margin/es_419/>\n"
+"Language: es_419\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: es_419\n"
-"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: product_margin
 #: model:ir.model.fields,field_description:product_margin.field_product_product__purchase_num_invoiced
@@ -86,6 +87,7 @@ msgstr "Creado el"
 
 #. module: product_margin
 #: model:ir.model.fields,field_description:product_margin.field_product_margin__display_name
+#: model:ir.model.fields,field_description:product_margin.field_product_product__display_name
 msgid "Display Name"
 msgstr "Nombre en pantalla"
 
@@ -137,6 +139,7 @@ msgstr "Información general"
 
 #. module: product_margin
 #: model:ir.model.fields,field_description:product_margin.field_product_margin__id
+#: model:ir.model.fields,field_description:product_margin.field_product_product__id
 msgid "ID"
 msgstr "ID"
 
@@ -207,12 +210,16 @@ msgstr "Margen de producto"
 #. odoo-python
 #: code:addons/product_margin/wizard/product_margin.py:0
 #: model:ir.actions.act_window,name:product_margin.product_margin_act_window
-#: model:ir.ui.menu,name:product_margin.menu_action_product_margin
 #: model_terms:ir.ui.view,arch_db:product_margin.view_product_margin_form
 #: model_terms:ir.ui.view,arch_db:product_margin.view_product_margin_graph
 #: model_terms:ir.ui.view,arch_db:product_margin.view_product_margin_tree
 msgid "Product Margins"
 msgstr "Márgenes de producto"
+
+#. module: product_margin
+#: model:ir.ui.menu,name:product_margin.menu_action_product_margin
+msgid "Product Margins…"
+msgstr "Márgenes del producto…"
 
 #. module: product_margin
 #: model:ir.model,name:product_margin.model_product_product
@@ -269,14 +276,13 @@ msgstr ""
 #: model:ir.model.fields,help:product_margin.field_product_product__total_cost
 msgid "Sum of Multiplication of Invoice price and quantity of Vendor Bills "
 msgstr ""
-"Suma de la multiplicación del precio de la factura y la cantidad de facturas"
-" de proveedores"
+"Suma de la multiplicación del precio de la factura y la cantidad de facturas "
+"de proveedores "
 
 #. module: product_margin
 #: model:ir.model.fields,help:product_margin.field_product_product__sale_expected
 msgid ""
-"Sum of Multiplication of Sale Catalog price and quantity of Customer "
-"Invoices"
+"Sum of Multiplication of Sale Catalog price and quantity of Customer Invoices"
 msgstr ""
 "Suma de la multiplicación del precio del catálogo de venta y la cantidad de "
 "las facturas de cliente"

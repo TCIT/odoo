@@ -11,13 +11,13 @@
                 <!-- Employee is not present/connected and it is normal according to his work schedule -->
                 <i t-if="record.hr_icon_display == 'presence_absent'" class="fa fa-fw fa-circle text-warning" title="Absent" role="img" aria-label="Absent"/>
                 <!-- Employee is connected but according to his work schedule, he should not work for now  -->
-                <i t-if="record.hr_icon_display == 'presence_out_of_working_hour'" class="fa fa-fw fa-circle text-muted" title="Out of Working Hours" role="img" aria-label="Out of Working Hours"/>
+                <i t-if="record.hr_icon_display == 'presence_out_of_working_hour'" class="fa fa-fw fa-circle text-muted" title="Off-Hours" role="img" aria-label="Off-Hours"/>
             </span>
         </xpath>
     </t>
 
     <t t-name="hr.avatarCardResourceInfos">
-        <small class="text-muted" t-if="record.job_title" t-esc="record.job_title"/>
+        <small class="text-muted" t-if="record.job_id" t-esc="record.job_id[1]"/>
         <span class="text-muted" t-if="record.department_id" data-tooltip="Department" t-esc="record.department_id[1]"/>
     </t>
 </templates>

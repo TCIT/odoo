@@ -16,8 +16,9 @@ export class IntegerField extends Component {
         humanReadable: { type: Boolean, optional: true },
         decimals: { type: Number, optional: true },
         inputType: { type: String, optional: true },
+        min: { type: Number, optional: true },
+        max: { type: Number, optional: true },
         step: { type: Number, optional: true },
-        placeholder: { type: String, optional: true },
     };
     static defaultProps = {
         formatNumber: true,
@@ -33,7 +34,7 @@ export class IntegerField extends Component {
         useInputField({
             getValue: () => this.formattedValue,
             refName: "numpadDecimal",
-            parse: (v) => parseInteger(v),
+            parse: (v) => parseInteger(v, { allowOperation: true }),
         });
         useNumpadDecimal();
     }
@@ -51,6 +52,9 @@ export class IntegerField extends Component {
             !this.props.formatNumber ||
             (!this.props.readonly && this.props.inputType === "number")
         ) {
+            if (this.value === false) {
+                return "";
+            }
             return this.value;
         }
         if (this.props.humanReadable && !this.state.hasFocus) {
@@ -107,13 +111,14 @@ export const integerField = {
     ],
     supportedTypes: ["integer"],
     isEmpty: (record, fieldName) => record.data[fieldName] === false,
-    extractProps: ({ attrs, options }) => ({
+    extractProps: ({ options }) => ({
         formatNumber:
             options?.enable_formatting !== undefined ? Boolean(options.enable_formatting) : true,
         humanReadable: !!options.human_readable,
         inputType: options.type,
+        min: options.min,
+        max: options.max,
         step: options.step,
-        placeholder: attrs.placeholder,
         decimals: options.decimals || 0,
     }),
 };

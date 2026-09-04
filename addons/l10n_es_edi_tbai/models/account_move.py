@@ -4,10 +4,9 @@
 from collections import defaultdict
 
 from markupsafe import Markup
-from psycopg2.errors import LockNotAvailable
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import LockError, UserError
 
 TBAI_REFUND_REASONS = [
     ('R1', "R1: Art. 80.1, 80.2, 80.6 and rights founded error"),
@@ -127,12 +126,12 @@ class AccountMove(models.Model):
                 # button_cancel calls button_draft.
                 # Draft button does not appear for user.
                 raise UserError(_("You cannot reset to draft an entry that has been posted to TicketBAI's chain"))
-        super().button_draft()
+        return super().button_draft()
 
     @api.ondelete(at_uninstall=False)
     def _l10n_es_tbai_unlink_except_in_chain(self):
         # Prevent deleting moves that are part of the TicketBAI chain
-        if not self._context.get('force_delete') and any(m.l10n_es_tbai_chain_index for m in self):
+        if not self.env.context.get('force_delete') and any(m.l10n_es_tbai_chain_index for m in self):
             raise UserError(_('You cannot delete a move that has a TicketBAI chain id.'))
 
     # -------------------------------------------------------------------------
@@ -143,7 +142,7 @@ class AccountMove(models.Model):
         # Ensure the move is posted
         if self.state != 'posted':
             return _("Cannot send an entry that is not posted to TicketBAI.")
-        if self.l10n_es_tbai_state in ('sent', 'cancelled'):
+        if self.l10n_es_tbai_state in ('sent', 'cancelled') and not self.env.context.get('batuz_correction'):
             return _("This entry has already been posted.")
         if self.company_id.l10n_es_tbai_tax_agency == 'bizkaia' and self.is_purchase_document() and not self.ref:
             return _("You need to fill in the Reference field as the invoice number from your vendor.")
@@ -165,7 +164,7 @@ class AccountMove(models.Model):
 
     def _l10n_es_tbai_post_document_in_chatter(self, message, cancel=False):
         test_suffix = '(test mode)' if self.company_id.l10n_es_tbai_test_env else ''
-        self.with_context(no_new_invoice=True).message_post(
+        self.message_post(
             body=Markup("<pre>TicketBAI: posted {document_type} XML {test_suffix}\n{message}</pre>").format(
                 document_type='emission' if not cancel else 'cancellation',
                 test_suffix=test_suffix,
@@ -177,27 +176,35 @@ class AccountMove(models.Model):
     def _l10n_es_tbai_lock_move(self):
         """ Acquire a write lock on the invoices in self. """
         self.ensure_one()
-
         try:
-            with self.env.cr.savepoint(flush=False):
-                self.env.cr.execute('SELECT * FROM account_move WHERE id = %s FOR UPDATE NOWAIT', [self.id])
-        except LockNotAvailable:
+            self.lock_for_update()
+        except LockError:
             raise UserError(_('Cannot send this entry as it is already being processed.'))
 
     # -------------------------------------------------------------------------
     # WEB SERVICE CALLS
     # -------------------------------------------------------------------------
 
+    def l10n_es_tbai_resend_bill(self):
+        self.ensure_one()
+        self.l10n_es_tbai_post_document_id = False
+        if error := self.with_context(batuz_correction=True)._l10n_es_tbai_post():
+            error = error + "\n\n" + _("Be careful if you modified this vendor bill, "
+                                       "because the official version is still the previous one sent. ")
+            raise UserError(error)  # This way, we rollback when rejected and the old accepted document is kept
+
     def l10n_es_tbai_send_bill(self):
         for bill in self:
             error = bill._l10n_es_tbai_post()
             if self.env['account.move.send']._can_commit():
-                self._cr.commit()
+                self.env.cr.commit()
             if error:
                 raise UserError(error)
 
     def l10n_es_tbai_cancel(self):
         for invoice in self:
+            if invoice.inalterable_hash:
+                raise UserError(_('You cannot reset to draft a locked journal entry.'))
             invoice._l10n_es_tbai_lock_move()
 
             if invoice.l10n_es_tbai_cancel_document_id and invoice.l10n_es_tbai_cancel_document_id.state == 'rejected':
@@ -217,7 +224,7 @@ class AccountMove(models.Model):
                 invoice._l10n_es_tbai_post_document_in_chatter(edi_document.response_message, cancel=True)
 
             if self.env['account.move.send']._can_commit():
-                self._cr.commit()
+                self.env.cr.commit()
 
             if edi_document.state != 'accepted':
                 raise UserError(edi_document.response_message)
@@ -261,7 +268,7 @@ class AccountMove(models.Model):
             'is_sale': self.is_sale_document(),
             'partner': self.commercial_partner_id,
             'is_simplified': self.l10n_es_is_simplified,
-            'delivery_date': self.delivery_date if self.delivery_date and self.delivery_date != self.invoice_date else None,
+            'delivery_date': self.delivery_date if self.delivery_date != fields.Datetime.today() else None,
             **self._l10n_es_tbai_get_attachment_values(cancel),
         }
         if values['is_sale']:
@@ -285,9 +292,14 @@ class AccountMove(models.Model):
         base_lines = [self._prepare_product_base_line_for_taxes_computation(x) for x in base_amls]
         for base_line in base_lines:
             base_line['name'] = base_line['record'].name
-        tax_amls = self.line_ids.filtered(lambda x: x.display_type == 'tax')
+        tax_amls = self.line_ids.filtered('tax_repartition_line_id')
         tax_lines = [self._prepare_tax_line_for_taxes_computation(x) for x in tax_amls]
         self.env['l10n_es_edi_tbai.document']._add_base_lines_tax_amounts(base_lines, self.company_id, tax_lines=tax_lines)
+        for base_line in base_lines:
+            sign = base_line['is_refund'] and -1 or 1
+            base_line['gross_price_unit'] = sign * base_line['gross_price_unit']
+            base_line['discount_amount'] = sign * base_line['discount_amount']
+            base_line['price_total'] = sign * base_line['price_total']
         taxes = self.invoice_line_ids.tax_ids.flatten_taxes_hierarchy()
         is_oss = any(tax._l10n_es_get_regime_code() == '17' for tax in taxes)
 
@@ -307,6 +319,7 @@ class AccountMove(models.Model):
             'refund_reason': self.l10n_es_tbai_refund_reason,
             'refunded_doc': self.reversed_entry_id.l10n_es_tbai_post_document_id,
             'refunded_doc_invoice_date': self.reversed_entry_id.invoice_date if self.reversed_entry_id else False,
+            'refunded_name': self.reversed_entry_id.name if self.reversed_entry_id else False,
         }
 
     def _l10n_es_tbai_get_vendor_bill_values_batuz(self):
@@ -315,7 +328,6 @@ class AccountMove(models.Model):
             'ref': self.ref,
             'is_refund': self.move_type == 'in_refund',
             'invoice_date': self.invoice_date,
-            'tipofactura': 'F5' if self._l10n_es_is_dua() else 'F1',
              **self._l10n_es_tbai_get_vendor_bill_tax_values(),
         }
         # Check if intracom
@@ -323,12 +335,23 @@ class AccountMove(models.Model):
         mod_303_11 = self.env.ref('l10n_es.mod_303_casilla_11_balance')._get_matching_tags()
         tax_tags = self.invoice_line_ids.tax_ids.flatten_taxes_hierarchy().repartition_line_ids.tag_ids
         intracom = bool(tax_tags & (mod_303_10 + mod_303_11))
-        values['regime_key'] = ['09'] if intracom else ['01']
+        reagyp = self.invoice_line_ids.tax_ids.filtered(lambda t: t.l10n_es_type == 'sujeto_agricultura')
+        if intracom:
+            values['regime_key'] = ['09']
+        elif reagyp:
+            values['regime_key'] = ['02']
+        else:
+            values['regime_key'] = ['01']
         # Credit notes (factura rectificativa)
         if values['is_refund']:
             values['refund_reason'] = self.l10n_es_tbai_refund_reason
             values['credit_note_invoices'] = self.reversed_entry_id | self.l10n_es_tbai_reversed_ids
-
+        if reagyp:
+            values['tipofactura'] = 'F6'
+        elif self._l10n_es_is_dua():
+            values['tipofactura'] = 'F5'
+        else:
+            values['tipofactura'] = 'F1'
         return values
 
     def _l10n_es_tbai_get_vendor_bill_tax_values(self):

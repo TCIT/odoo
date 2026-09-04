@@ -9,14 +9,17 @@
     'depends': [
         'l10n_in',
         'stock',
+        'stock_account',
     ],
     'data': [
         'views/report_stockpicking_operations.xml',
     ],
     'demo': [
         'data/product_demo.xml',
+        'data/warehouse_demo.xml',
     ],
     'installable': True,
     'auto_install': True,
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

@@ -6,7 +6,7 @@ import re
 from odoo import api, fields, models
 
 
-class Track(models.Model):
+class EventTrack(models.Model):
     _inherit = 'event.track'
 
     youtube_video_url = fields.Char('YouTube Video Link')
@@ -31,7 +31,7 @@ class Track(models.Model):
     @api.depends('youtube_video_id', 'is_youtube_replay', 'date_end', 'is_track_done')
     def _compute_website_image_url(self):
         youtube_thumbnail_tracks = self.filtered(lambda track: not track.website_image and track.youtube_video_id)
-        super(Track, self - youtube_thumbnail_tracks)._compute_website_image_url()
+        super(EventTrack, self - youtube_thumbnail_tracks)._compute_website_image_url()
         for track in youtube_thumbnail_tracks:
             track.website_image_url = f'https://img.youtube.com/vi/{track.youtube_video_id}/maxresdefault.jpg'
 

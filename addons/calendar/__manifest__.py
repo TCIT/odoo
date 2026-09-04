@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
@@ -49,18 +48,16 @@ If you need to manage your meetings, you should install the CRM module.
         # Unit test files
         'web.assets_unit_tests': [
             'calendar/static/tests/**/*.js',
-            ('remove', 'calendar/static/tests/legacy/**/*'),  # to remove when all legacy tests are ported
             ('remove', 'calendar/static/tests/helpers/**/*'),
             ('remove', 'calendar/static/tests/tours/**/*'),
         ],
         'web.qunit_suite_tests': [
-            'calendar/static/tests/legacy/**/*',
             'calendar/static/tests/helpers/**/*',
-            'calendar/static/tests/tours/**/*',
         ],
         'web.assets_tests': [
             'calendar/static/tests/tours/**/*',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

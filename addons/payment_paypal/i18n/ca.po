@@ -1,30 +1,29 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* payment_paypal
-# 
+# * payment_paypal
+#
 # Translators:
-# Martin Trigaux, 2024
-# Guspy12, 2024
-# RGB Consulting <odoo@rgbconsulting.com>, 2024
-# Ivan Espinola, 2024
-# Manel Fernandez Ramirez <manelfera@outlook.com>, 2024
-# Bàrbara Partegàs <barbararof@gmail.com>, 2024
-# marcescu, 2024
-# Carles Antoli <carlesantoli@hotmail.com>, 2024
-# 
+# Martin Trigaux, 2018
+# RGB Consulting <odoo@rgbconsulting.com>, 2018
+# Joan Ignasi Florit <jfloritmir@gmail.com>, 2018
+# Quim - eccit <quim@eccit.com>, 2018
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Carles Antoli <carlesantoli@hotmail.com>, 2024\n"
-"Language-Team: Catalan (https://app.transifex.com/odoo/teams/41243/ca/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-07 23:13+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Catalan <https://translate.odoo.com/projects/odoo-19/"
+"payment_paypal/ca/>\n"
+"Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ca\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: payment_paypal
 #: model_terms:ir.ui.view,arch_db:payment_paypal.payment_provider_form
@@ -44,14 +43,14 @@ msgstr "Codi"
 #. module: payment_paypal
 #. odoo-python
 #: code:addons/payment_paypal/models/payment_provider.py:0
-msgid "Could not establish the connection to the API."
-msgstr "No s'ha pogut establir la connexió a l'API."
+msgid "Could not generate a new access token."
+msgstr "No ha estat possible generar un nou token d'accés."
 
 #. module: payment_paypal
-#. odoo-python
-#: code:addons/payment_paypal/models/payment_provider.py:0
-msgid "Could not generate a new access token."
-msgstr ""
+#: model:ir.model.fields,field_description:payment_paypal.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:payment_paypal.field_payment_transaction__display_name
+msgid "Display Name"
+msgstr "Nom mostrat"
 
 #. module: payment_paypal
 #: model:ir.model.fields,field_description:payment_paypal.field_payment_provider__paypal_email_account
@@ -69,22 +68,22 @@ msgid "How to configure your paypal account?"
 msgstr "Com configurar el vostre compte de paypal?"
 
 #. module: payment_paypal
+#: model:ir.model.fields,field_description:payment_paypal.field_payment_provider__id
+#: model:ir.model.fields,field_description:payment_paypal.field_payment_transaction__id
+msgid "ID"
+msgstr "ID"
+
+#. module: payment_paypal
 #. odoo-python
 #: code:addons/payment_paypal/controllers/main.py:0
 msgid "Invalid response format, can't normalize."
-msgstr ""
+msgstr "Format de resposta no vàlid, no es pot normalitzar."
 
 #. module: payment_paypal
 #. odoo-python
 #: code:addons/payment_paypal/models/payment_transaction.py:0
 msgid "Missing value for txn_id (%(txn_id)s) or txn_type (%(txn_type)s)."
 msgstr "Falta el valor per a txn_id (%(txn_id)s) or txn_type (%(txn_type)s)."
-
-#. module: payment_paypal
-#. odoo-python
-#: code:addons/payment_paypal/models/payment_transaction.py:0
-msgid "No transaction found matching reference %s."
-msgstr "No s'ha trobat cap transacció que coincideixi amb la referència %s."
 
 #. module: payment_paypal
 #: model:ir.model.fields.selection,name:payment_paypal.selection__payment_provider__code__paypal
@@ -133,21 +132,15 @@ msgstr "Transacció de pagament"
 
 #. module: payment_paypal
 #. odoo-javascript
-#: code:addons/payment_paypal/static/src/js/payment_form.js:0
+#: code:addons/payment_paypal/static/src/interactions/payment_form.js:0
 msgid "Payment processing failed"
-msgstr ""
+msgstr "Error en processar el pagament"
 
 #. module: payment_paypal
 #. odoo-python
 #: code:addons/payment_paypal/models/payment_transaction.py:0
 msgid "Received data with invalid payment status: %s"
 msgstr "Dades rebudes amb un estat de pagament no vàlid:%s"
-
-#. module: payment_paypal
-#. odoo-python
-#: code:addons/payment_paypal/models/payment_provider.py:0
-msgid "The communication with the API failed. Details: %s"
-msgstr ""
 
 #. module: payment_paypal
 #. odoo-python
@@ -179,6 +172,12 @@ msgid "The technical code of this payment provider."
 msgstr "El codi tècnic d'aquest proveïdor de pagaments."
 
 #. module: payment_paypal
+#. odoo-python
+#: code:addons/payment_paypal/controllers/main.py:0
+msgid "Unable to verify the payment data"
+msgstr ""
+
+#. module: payment_paypal
 #: model_terms:ir.ui.view,arch_db:payment_paypal.payment_provider_form
 msgid "Webhook ID"
 msgstr ""
@@ -188,3 +187,6 @@ msgstr ""
 #: code:addons/payment_paypal/models/payment_provider.py:0
 msgid "You must have an HTTPS connection to generate a webhook."
 msgstr ""
+
+#~ msgid "Paypal"
+#~ msgstr "Paypal"

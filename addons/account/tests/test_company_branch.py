@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from contextlib import nullcontext
+from contextlib import nullcontext, closing
 from freezegun import freeze_time
 from functools import partial
 
 from odoo import Command, fields
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests import tagged, Form
 
 
@@ -166,7 +166,7 @@ class TestCompanyBranch(AccountTestInvoicingCommon):
                     invoice_date=invoice_date,
                     move_type=move_type,
                     company=company.name,
-                ), self.env.cr.savepoint() as sp:
+                ), closing(self.env.cr.savepoint()):
                     check = partial(self.assertRaises, UserError) if failure_expected else nullcontext
                     move = self.init_invoice(
                         move_type, amounts=[100], taxes=self.root_company.account_sale_tax_id,
@@ -178,7 +178,6 @@ class TestCompanyBranch(AccountTestInvoicingCommon):
                         self.branch_a[lock] = branch_lock
                     with check():
                         move.button_draft()
-                    sp.close()
 
     def test_change_record_company(self):
         account = self.env['account.account'].create({
@@ -253,3 +252,99 @@ class TestCompanyBranch(AccountTestInvoicingCommon):
         })
         self.env['account.chart.template'].try_loading('generic_coa', company=root_company.child_ids[0], install_demo=False)
         self.assertEqual(root_company.currency_id, root_company.child_ids[0].currency_id)
+
+    def test_switch_company_currency(self):
+        """
+        A user should not be able to switch the currency of another company
+        when that company already has posted account move lines.
+        """
+        # Create company A (user's company)
+        company_a = self.env['res.company'].create({
+            'name': "Company A",
+        })
+
+        # Get company B from test setup
+        company_b = self.company_data['company']
+
+        # Create a purchase journal for company B
+        journal = self.env['account.journal'].create({
+            'name': "Vendor Bills Journal",
+            'code': "VEND",
+            'type': "purchase",
+            'company_id': company_b.id,
+            'currency_id': company_b.currency_id.id,
+        })
+
+        # Create an invoice for company B
+        invoice = self.env['account.move'].create({
+            'move_type': "in_invoice",
+            'company_id': company_b.id,
+            'journal_id': journal.id,
+        })
+        invoice.currency_id = self.env.ref('base.USD').id
+
+        # Add a line to the invoice using an expense account
+        self.env['account.move.line'].create({
+            'move_id': invoice.id,
+            'account_id': self.company_data["default_account_expense"].id,
+            'name': "Test Invoice Line",
+            'company_id': company_b.id,
+        })
+
+        # Create a user that only belongs to company A
+        user = self.env['res.users'].create({
+            'name': "User A",
+            'login': "user_a@example.com",
+            'email': "user_a@example.com",
+            'company_id': company_a.id,
+            'company_ids': [Command.set([company_a.id])],
+        })
+
+        # Try to change company B's currency as user A (should raise UserError)
+        user_env = self.env(user=user)
+        with self.assertRaises(UserError):
+            user_env['res.company'].browse(company_b.id).write({
+                'currency_id': self.env.ref('base.EUR').id,
+            })
+
+    def test_set_fiscalyear_last_day_to_negative_value(self):
+        """Test that ensure that fiscalyear_last_day raises ValidationError when set
+           to negative value."""
+        with self.assertRaises(ValidationError):
+            self.root_company.fiscalyear_last_day = -1
+
+    def test_branch_user_bank_statement_foreign_currency(self):
+        # Create a user that only belongs to branch a
+        user = self.env['res.users'].create({
+            'name': "User A",
+            'login': "user_a@example.com",
+            'email': "user_a@example.com",
+            'company_id': self.branch_a.id,
+            'company_ids': [Command.set([self.branch_a.id])],
+            'group_ids': [Command.set([
+                self.env.ref('account.group_account_user').id,
+            ])],
+        })
+
+        journal = self.env['account.journal'].create({
+            'name': "Bank (EUR)",
+            'code': "EBNK",
+            'type': "bank",
+            'company_id': self.root_company.id,
+            'currency_id': self.other_currency.id,
+        })
+
+        statement_line = self.env['account.bank.statement.line'].with_user(user.id).create({
+            'date': '2019-01-01',
+            'journal_id': journal.id,
+            'payment_ref': 'line_1',
+            'partner_id': False,
+            'foreign_currency_id': False,
+            'amount': 25,
+            'company_id': self.branch_a.id
+        })
+
+        self.assertRecordValues(statement_line, [{
+            'amount_total_in_currency_signed': 25,
+            'amount_total_signed': 12.5,
+        }])

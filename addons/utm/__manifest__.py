@@ -3,7 +3,7 @@
 
 {
     'name': 'UTM Trackers',
-    'category': 'Hidden',
+    'category': 'Marketing',
     'description': """
 Enable management of UTM trackers: campaign, medium, source.
 """,
@@ -31,5 +31,6 @@ Enable management of UTM trackers: campaign, medium, source.
             'utm/static/src/**/*',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

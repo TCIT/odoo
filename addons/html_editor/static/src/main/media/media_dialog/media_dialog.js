@@ -4,9 +4,9 @@ import { Dialog } from "@web/core/dialog/dialog";
 import { Notebook } from "@web/core/notebook/notebook";
 import { ImageSelector } from "./image_selector";
 import { IconSelector } from "./icon_selector";
-import { VideoSelector } from "./video_selector";
 
 import { Component, useState, useRef, useEffect } from "@odoo/owl";
+import { iconClasses } from "@html_editor/utils/dom_info";
 
 export const TABS = {
     IMAGES: {
@@ -21,12 +21,6 @@ export const TABS = {
         Component: IconSelector,
         sequence: 20,
     },
-    VIDEOS: {
-        id: "VIDEOS",
-        title: _t("Videos"),
-        Component: VideoSelector,
-        sequence: 30,
-    },
 };
 
 const DEFAULT_SEQUENCE = 50;
@@ -36,12 +30,18 @@ export class MediaDialog extends Component {
     static template = "html_editor.MediaDialog";
     static defaultProps = {
         useMediaLibrary: true,
+        extraTabs: [],
     };
     static components = {
         Dialog,
         Notebook,
     };
-    static props = ["*"];
+    static props = {
+        extraTabs: { type: Array, optional: true, element: Object },
+        visibleTabs: { type: Array, optional: true, element: String },
+        activeTab: { type: String, optional: true },
+        "*": true,
+    };
 
     setup() {
         this.size = "xl";
@@ -58,27 +58,30 @@ export class MediaDialog extends Component {
 
         this.initialIconClasses = [];
 
-        this.tabs = { ...TABS };
-
         this.notebookPages = [];
-        this.addDefaultTabs();
-        this.addExtraTabs();
+        this.addTabs();
         this.notebookPages.sort((a, b) => sequence(a) - sequence(b));
+        this.tabs = Object.fromEntries(this.notebookPages.map((tab) => [tab.id, tab]));
 
         this.errorMessages = {};
 
         this.state = useState({
             activeTab: this.initialActiveTab,
+            isSaving: false,
         });
 
         useEffect(
             (nbSelectedAttachments) => {
                 // Disable/enable the add button depending on whether some media
                 // are selected or not.
-                this.addButtonRef.el.toggleAttribute("disabled", !nbSelectedAttachments);
+                this.addButtonRef.el.toggleAttribute(
+                    "disabled",
+                    !nbSelectedAttachments || this.state.isSaving
+                );
             },
-            () => [this.selectedMedia[this.state.activeTab].length]
+            () => [this.selectedMedia[this.state.activeTab].length, this.state.isSaving]
         );
+        this.abortUploads = null;
     }
 
     get initialActiveTab() {
@@ -86,9 +89,15 @@ export class MediaDialog extends Component {
             return this.props.activeTab;
         }
         if (this.props.media) {
-            const correspondingTab = Object.keys(this.tabs).find((id) =>
-                this.tabs[id].Component.tagNames.includes(this.props.media.tagName)
-            );
+            const correspondingTab =
+                Object.keys(this.tabs).find((id) =>
+                    this.tabs[id].Component.mediaSpecificClasses.some((cls) =>
+                        [...this.props.media.classList].includes(cls)
+                    )
+                ) ||
+                Object.keys(this.tabs).find((id) =>
+                    this.tabs[id].Component.tagNames.includes(this.props.media.tagName)
+                );
             if (correspondingTab) {
                 return correspondingTab;
             }
@@ -97,6 +106,9 @@ export class MediaDialog extends Component {
     }
 
     addTab(tab, additionalProps = {}) {
+        if (this.props.visibleTabs && !this.props.visibleTabs.includes(tab.id)) {
+            return;
+        }
         this.selectedMedia[tab.id] = [];
         this.notebookPages.push({
             ...tab,
@@ -112,6 +124,7 @@ export class MediaDialog extends Component {
                 selectMedia: (...args) =>
                     this.selectMedia(...args, tab.id, additionalProps.multiSelect),
                 save: this.save.bind(this),
+                setAbortUploadsCallback: (abortFunc) => (this.abortUploads = abortFunc),
                 onAttachmentChange: this.props.onAttachmentChange,
                 errorMessages: (errorMessage) => (this.errorMessages[tab.id] = errorMessage),
                 modalRef: this.modalRef,
@@ -119,31 +132,26 @@ export class MediaDialog extends Component {
         });
     }
 
-    /**
-     * Method no longer used, kept for compatibility (stable policy).
-     * To be removed in master.
-     */
     addTabs() {
-        this.addDefaultTabs();
-    }
-
-    addDefaultTabs() {
         const onlyImages =
             this.props.onlyImages ||
             (this.props.media &&
                 this.props.media.parentElement &&
                 (this.props.media.parentElement.dataset.oeField === "image" ||
                     this.props.media.parentElement.dataset.oeType === "image"));
-        const noIcons = onlyImages || this.props.noIcons;
-        const noVideos = onlyImages || this.props.noVideos;
 
         if (!this.props.noImages) {
             this.addTab(TABS.IMAGES, {
                 useMediaLibrary: this.props.useMediaLibrary,
                 multiSelect: this.props.multiImages,
+                addFieldImage: this.props.addFieldImage,
             });
         }
-        if (!noIcons) {
+        if (onlyImages) {
+            return;
+        }
+        const addIcons = !this.props.visibleTabs || this.props.visibleTabs.includes(TABS.ICONS.id);
+        if (addIcons) {
             const fonts = TABS.ICONS.Component.initFonts();
             this.addTab(TABS.ICONS, {
                 fonts,
@@ -154,31 +162,23 @@ export class MediaDialog extends Component {
                 TABS.ICONS.Component.tagNames.includes(this.props.media.tagName)
             ) {
                 const classes = this.props.media.className.split(/\s+/);
-                const mediaFont = fonts.find((font) => classes.includes(font.base));
-                if (mediaFont) {
-                    const selectedIcon = mediaFont.icons.find((icon) =>
+                const predefinedMediaFont = fonts.find((font) => classes.includes(font.base));
+                if (predefinedMediaFont) {
+                    const selectedIcon = predefinedMediaFont.icons.find((icon) =>
                         icon.names.some((name) => classes.includes(name))
                     );
                     if (selectedIcon) {
                         this.initialIconClasses.push(...selectedIcon.names);
                         this.selectMedia(selectedIcon, TABS.ICONS.id);
                     }
+                } else {
+                    const iconRegex = new RegExp(`\\b(?:${iconClasses.join("|")})(?:-\\S+)?\\b`);
+                    const fallbackIconClasses = classes.filter((cls) => iconRegex.test(cls));
+                    this.initialIconClasses.push(...fallbackIconClasses);
                 }
             }
         }
-        if (!noVideos) {
-            this.addTab(TABS.VIDEOS, {
-                vimeoPreviewIds: this.props.vimeoPreviewIds,
-                isForBgVideo: this.props.isForBgVideo,
-            });
-        }
-    }
-
-    addExtraTabs() {
-        for (const tab of this.props.extraTabs || []) {
-            this.addTab(tab);
-            this.tabs[tab.id] = tab;
-        }
+        this.props.extraTabs.forEach((tab) => this.addTab(tab));
     }
 
     /**
@@ -198,35 +198,6 @@ export class MediaDialog extends Component {
                 const style = this.props.media.getAttribute("style");
                 if (style) {
                     element.setAttribute("style", style);
-                }
-                if (this.state.activeTab === this.tabs.IMAGES.id) {
-                    if (this.props.media.dataset.shape) {
-                        element.dataset.shape = this.props.media.dataset.shape;
-                    }
-                    if (this.props.media.dataset.shapeColors) {
-                        element.dataset.shapeColors = this.props.media.dataset.shapeColors;
-                    }
-                    if (this.props.media.dataset.shapeFlip) {
-                        element.dataset.shapeFlip = this.props.media.dataset.shapeFlip;
-                    }
-                    if (this.props.media.dataset.shapeRotate) {
-                        element.dataset.shapeRotate = this.props.media.dataset.shapeRotate;
-                    }
-                    if (this.props.media.dataset.hoverEffect) {
-                        element.dataset.hoverEffect = this.props.media.dataset.hoverEffect;
-                    }
-                    if (this.props.media.dataset.hoverEffectColor) {
-                        element.dataset.hoverEffectColor =
-                            this.props.media.dataset.hoverEffectColor;
-                    }
-                    if (this.props.media.dataset.hoverEffectStrokeWidth) {
-                        element.dataset.hoverEffectStrokeWidth =
-                            this.props.media.dataset.hoverEffectStrokeWidth;
-                    }
-                    if (this.props.media.dataset.hoverEffectIntensity) {
-                        element.dataset.hoverEffectIntensity =
-                            this.props.media.dataset.hoverEffectIntensity;
-                    }
                 }
             }
             for (const otherTab of Object.keys(this.tabs).filter(
@@ -260,10 +231,8 @@ export class MediaDialog extends Component {
                                 }
                             } else {
                                 // Regex
-                                for (const className of element.classList) {
-                                    if (className.match(candidateName)) {
-                                        return false;
-                                    }
+                                if (candidateName.match(name)) {
+                                    return false;
                                 }
                             }
                         }
@@ -282,6 +251,11 @@ export class MediaDialog extends Component {
     }
 
     selectMedia(media, tabId, multiSelect) {
+        if (media && !Object.keys(media).length) {
+            // Clear media selection when an empty object is passed
+            this.selectedMedia[tabId] = [];
+            return;
+        }
         if (multiSelect) {
             const isMediaSelected = this.selectedMedia[tabId]
                 .map(({ id }) => id)
@@ -311,21 +285,31 @@ export class MediaDialog extends Component {
         // way to simply close the dialog if the media element remains the same.
         const saveSelectedMedia =
             selectedMedia.length &&
-            (this.state.activeTab !== this.tabs.ICONS.id ||
+            (this.state.activeTab !== TABS.ICONS.id ||
                 selectedMedia[0].initialIconChanged ||
                 !this.props.media);
+        this.state.isSaving = true;
         if (saveSelectedMedia) {
             const elements = await this.renderMedia(selectedMedia);
             if (this.props.multiImages) {
-                this.props.save(elements);
+                await this.props.save(elements, selectedMedia, this.state.activeTab);
             } else {
-                this.props.save(elements[0]);
+                await this.props.save(elements[0], selectedMedia, this.state.activeTab);
             }
         }
         this.props.close();
+        this.state.isSaving = false;
     }
 
     onTabChange(tab) {
         this.state.activeTab = tab;
+    }
+    async close() {
+        if (this.abortUploads) {
+            this.abortUploads();
+            delete this.abortUploads;
+        }
+        this.state.isSaving = false;
+        await this.props.close();
     }
 }

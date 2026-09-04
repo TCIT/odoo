@@ -51,29 +51,6 @@ class TestSpreadsheetDashboard(DashboardTestCommon):
         with self.assertRaises(UserError, msg="You cannot delete a_group as it is used in another module"):
             group.unlink()
 
-    def test_load_with_user_locale(self):
-        dashboard = self.create_dashboard().with_user(self.user)
-        self.user.lang = "en_US"
-        data = dashboard.get_readonly_dashboard()
-        locale = data["snapshot"]["settings"]["locale"]
-        self.assertEqual(locale["code"], "en_US")
-        self.assertEqual(len(data["revisions"]), 0)
-
-        self.env.ref("base.lang_fr").active = True
-        self.user.lang = "fr_FR"
-        data = dashboard.get_readonly_dashboard()
-        locale = data["snapshot"]["settings"]["locale"]
-        self.assertEqual(locale["code"], "fr_FR")
-        self.assertEqual(len(data["revisions"]), 0)
-
-    def test_load_with_company_currency(self):
-        dashboard = self.create_dashboard().with_user(self.user)
-        data = dashboard.get_readonly_dashboard()
-        self.assertEqual(
-            data["default_currency"],
-            self.env["res.currency"].get_company_currency_for_spreadsheet()
-        )
-
     def test_unpublish_dashboard(self):
         group = self.env["spreadsheet.dashboard.group"].create({
             "name": "Dashboard group"
@@ -93,14 +70,18 @@ class TestSpreadsheetDashboard(DashboardTestCommon):
         dashboard.is_published = True
         self.assertEqual(group.published_dashboard_ids, dashboard)
 
-    def test_get_sample_dashboard(self):
-        sample_dashboard_path = "spreadsheet_dashboard/tests/data/sample_dashboard.json"
-        dashboard = self.create_dashboard()
-        dashboard.sample_dashboard_file_path = sample_dashboard_path
-        dashboard.main_data_model_ids = [(4, self.env.ref("base.model_res_users").id)]
-        self.env["res.users"].search([]).action_archive()
+    def test_toggle_favorite(self):
+        dashboard = self.create_dashboard().with_user(self.user)
 
-        self.assertEqual(dashboard.with_user(self.user).get_readonly_dashboard(), {
-            "is_sample": True,
-            "snapshot": {"sheets": []},
-        })
+        self.assertFalse(dashboard.is_favorite)
+        self.assertNotIn(self.user, dashboard.favorite_user_ids)
+
+        dashboard.with_user(self.user).action_toggle_favorite()
+
+        self.assertTrue(dashboard.is_favorite)
+        self.assertIn(self.user, dashboard.favorite_user_ids)
+
+        dashboard.with_user(self.user).action_toggle_favorite()
+
+        self.assertFalse(dashboard.is_favorite)
+        self.assertNotIn(self.user, dashboard.favorite_user_ids)

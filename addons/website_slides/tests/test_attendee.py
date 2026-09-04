@@ -8,6 +8,7 @@ from odoo import fields
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.base.tests.common import HttpCaseWithUserPortal
 from odoo.addons.website_slides.tests import common
+from odoo.exceptions import AccessError
 from odoo.tests import tagged, users
 
 @tagged('post_install', '-at_install')
@@ -163,6 +164,9 @@ class TestAttendee(common.SlidesCase):
         self.channel.with_user(self.user_portal)._action_add_members(user_portal_partner)
         self.assertFalse(user_portal_partner.id in self.channel.partner_ids.ids)
 
+        with self.assertRaises(AccessError):
+            self.channel.with_user(self.user_portal)._action_add_members(user_portal_partner, raise_on_access=True)
+
         user_portal_channel_partner = self.env['slide.channel.partner'].create({
             'channel_id': self.channel.id,
             'partner_id': user_portal_partner.id,
@@ -251,6 +255,9 @@ class TestAttendeeCase(HttpCaseWithUserPortal):
     def setUp(self):
         super(TestAttendeeCase, self).setUp()
         self.user_admin = self.env.ref('base.user_admin')
+        self.user_admin.write({
+            'email': 'mitchell.admin@example.com',
+        })
         self.user_emp = mail_new_test_user(
             self.env,
             email='employee@example.com',
@@ -259,6 +266,9 @@ class TestAttendeeCase(HttpCaseWithUserPortal):
             name='Eglantine Employee',
             notification_type='email',
         )
+        self.user_public = mail_new_test_user(
+            self.env, login="user_public", name="User Public", groups="base.group_public"
+        )
         self.channel = self.env['slide.channel'].with_user(self.user_admin).create({
             'name': 'All about attendee status - Attendees only',
             'channel_type': 'training',
@@ -266,6 +276,13 @@ class TestAttendeeCase(HttpCaseWithUserPortal):
             'visibility': 'public',
             'is_published': True,
         })
+        self.channel_connect, self.channel_members, self.channel_link = self.env['slide.channel'].with_user(self.user_admin).create([{
+            'name': f'Channel {visibility}',
+            'visibility': visibility,
+            'is_published': True,
+            'enroll': 'invite' if visibility == 'members' else 'public',
+        } for visibility in ['connected', 'members', 'link']])
+        self.available_channels = self.channel_connect | self.channel_members | self.channel_link | self.channel
         self.slide = self.env['slide.slide'].with_user(self.user_admin).create({
             'name': 'How to understand membership',
             'channel_id': self.channel.id,
@@ -588,4 +605,86 @@ class TestAttendeeCase(HttpCaseWithUserPortal):
             mail_vals['subject'],
             'Bonjour',
             "Mail subject should have been translated into recipient's language"
+        )
+
+    @users('user_emp', 'portal')
+    def test_channel_visibility_on_website(self):
+        """Check visibility of channels for Internal/Portal users."""
+        visible_channel = self.env['slide.channel'].search([
+            ('id', 'in', self.available_channels.ids),
+            ('is_visible', '=', True),
+        ])
+        self.assertIn(self.channel, visible_channel)
+        self.assertIn(self.channel_connect, visible_channel)
+        self.assertNotIn(self.channel_members, visible_channel)
+        self.assertNotIn(self.channel_link, visible_channel)
+
+        # Check the inverse condition
+        hidden_channel = self.env['slide.channel'].search([
+            ('id', 'in', self.available_channels.ids),
+            ('is_visible', '!=', True),
+        ])
+        self.assertIn(self.channel_link, hidden_channel)
+        self.assertNotIn(self.channel, hidden_channel)
+        self.assertNotIn(self.channel_connect, hidden_channel)
+
+        # Add attendee to channel
+        self.channel_link._action_add_members(self.env.user.partner_id)
+        self.channel_members._action_add_members(self.env.user.partner_id)
+
+        visible_channel = self.env['slide.channel'].search([
+            ('id', 'in', self.available_channels.ids),
+            ('is_visible', '=', True),
+        ])
+        self.assertIn(self.channel_members, visible_channel)
+        self.assertIn(self.channel_link, visible_channel)
+        self.assertEqual(
+            self.env['slide.channel'].search([('is_visible', '=', True)]),
+            self.env['slide.channel'].search([('is_visible', '!=', False)]),
+        )
+
+    @users('user_public')
+    def test_channel_visibility_public_user(self):
+        """Check visibility of channels for Public users."""
+        visible_channel = self.env['slide.channel'].search([
+            ('id', 'in', self.available_channels.ids),
+            ('is_visible', '=', True),
+        ])
+        self.assertIn(self.channel, visible_channel)
+        self.assertNotIn(self.channel_connect, visible_channel)
+        self.assertNotIn(self.channel_members, visible_channel)
+        self.assertNotIn(self.channel_link, visible_channel)
+
+        # Check the inverse condition
+        hidden_channel = self.env['slide.channel'].search([
+            ('id', 'in', self.available_channels.ids),
+            ('is_visible', '!=', True),
+        ])
+        self.assertIn(self.channel_link, hidden_channel)
+        self.assertEqual(
+            self.env['slide.channel'].search([('is_visible', '=', True)]),
+            self.env['slide.channel'].search([('is_visible', '!=', False)]),
+        )
+
+    def test_slide_slide_notification_link(self):
+        """Check link shared in content notification mail redirect to appropriate content"""
+        self.authenticate("portal", "portal")
+
+        url = self.slide.website_share_url
+        response = self.url_open(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertURLEqual(
+            response.url,
+            f"/slides/{self.channel.id}?access_error=course_content&access_error_slide_id={self.slide.id}&access_error_slide_name=How+to+understand+membership",
+            "Unathorized user cannot access non published content",
+        )
+
+        # Adding attendee to the course
+        self.channel._action_add_members(self.user_portal.partner_id)
+        response = self.url_open(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertURLEqual(
+            response.url,
+            f"/slides/slide/{self.env['ir.http']._slug(self.slide)}",
+            "Should redirect to the slide page",
         )

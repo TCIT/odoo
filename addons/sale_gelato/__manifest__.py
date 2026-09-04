@@ -4,7 +4,7 @@
     'name': "Gelato",
     'summary': "Place orders through Gelato's print-on-demand service",
     'category': 'Sales/Sales',
-    'depends': ['sale_management', 'delivery'],
+    'depends': ['sale', 'delivery'],
     'data': [
         'data/product_data.xml',
         'data/delivery_carrier_data.xml',  # Depends on product_data.xml
@@ -16,5 +16,6 @@
         'views/product_template_views.xml',
         'wizards/res_config_settings_views.xml',
     ],
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

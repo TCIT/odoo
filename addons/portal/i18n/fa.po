@@ -1,25 +1,36 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* portal
-# 
+# * portal
+#
 # Translators:
-# zakariya moradi, 2025
-# Hamid Darabi, 2025
-# Tiffany Chang, 2025
-# 
+# سید محمد آذربرا <mohammadazarbara98@gmail.com>, 2023
+# Arash Sardari <arashss77@gmail.com>, 2023
+# Mohammad Tahmasebi <hit.tah75@gmail.com>, 2023
+# Hamid Darabi, 2023
+# Faraz Sadri Alamdari <ifarazir@gmail.com>, 2023
+# Farid Hariri <fhari1234@gmail.com>, 2023
+# Hanna Kheradroosta, 2023
+# Martin Trigaux, 2023
+# Hamed Mohammadi <hamed@dehongi.com>, 2023
+# fardin mardani, 2023
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Heshmatkhah <maheshmatkhah.soft@gmail.com>, 2026.
+# Aliraza Habibitanha <alireza.habibitanha@gmail.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:25+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Tiffany Chang, 2025\n"
-"Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-09 10:32+0000\n"
+"Last-Translator: Aliraza Habibitanha <alireza.habibitanha@gmail.com>\n"
+"Language-Team: Persian <https://translate.odoo.com/projects/odoo-19/portal/"
+"fa/>\n"
+"Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fa\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -28,9 +39,9 @@ msgstr "\" برای تأیید اقدام خود."
 
 #. module: portal
 #. odoo-javascript
-#: code:addons/portal/static/src/js/portal_sidebar.js:0
+#: code:addons/portal/static/src/interactions/sidebar.js:0
 msgid "%s days overdue"
-msgstr "%s روز دیرکرد"
+msgstr "%s روز تأخیر"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -48,39 +59,40 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.my_account_link
 msgid ""
-"<i class=\"fa fa-fw fa-id-card-o me-1 small text-primary text-primary-"
-"emphasis\"/> My Account"
+"<i class=\"fa fa-fw fa-id-card-o me-1 small text-primary-emphasis\"/> My "
+"Account"
 msgstr ""
+"<i class=\"fa fa-fw fa-id-card-o me-1 small text-primary-emphasis\"/> حساب "
+"کاربری من"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.user_dropdown
 msgid ""
-"<i class=\"fa fa-fw fa-sign-out me-1 small text-primary text-primary-"
-"emphasis\"/> Logout"
+"<i class=\"fa fa-fw fa-sign-out me-1 small text-primary-emphasis\"/> Logout"
 msgstr ""
+"<i class=\"fa fa-fw fa-sign-out me-1 small text-primary-emphasis\"/> خروج از "
+"حساب کاربری"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.user_dropdown
-msgid ""
-"<i class=\"fa fa-fw fa-th me-1 small text-primary text-primary-emphasis\"/> "
-"Apps"
+msgid "<i class=\"fa fa-fw fa-th me-1 small text-primary-emphasis\"/> Apps"
 msgstr ""
+"<i class=\"fa fa-fw fa-th me-1 small text-primary-emphasis\"/> برنامه ها "
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.side_content
 msgid "<i class=\"fa fa-pencil\"/> Edit information"
-msgstr ""
-"```html\n"
-"<i class=\"fa fa-pencil\"/> ویرایش اطلاعات\n"
-"```"
+msgstr "<i class=\"fa fa-pencil\"/> ویرایش اطلاعات"
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_footer
+msgid "<i class=\"fw-light fa fa-angle-left me-2\"/>Discard"
+msgstr "<i class=\"fw-light fa fa-angle-left me-2\"/>لغو"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_back_in_edit_mode
 msgid "<i class=\"oi oi-arrow-right me-1\"/>Back to edit mode"
-msgstr ""
-"```html\n"
-"<i class=\"oi oi-arrow-right me-1\"/>بازگشت به حالت ویرایش\n"
-"```"
+msgstr "<i class=\"oi oi-arrow-right me-1\"/>بازگشت به حالت ویرایش"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.record_pager
@@ -88,79 +100,114 @@ msgid ""
 "<i class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"Previous\" "
 "title=\"Previous\"/>"
 msgstr ""
-"```html\n"
-"<i class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"قبلی\" title=\"قبلی\"/>\n"
-"```"
+"<i class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"Previous\" "
+"title=\"Previous\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.record_pager
-msgid "<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" title=\"Next\"/>"
+msgid ""
+"<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
+"title=\"Next\"/>"
 msgstr ""
-"```html\n"
-"<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"بعدی\" title=\"بعدی\"/>\n"
-"```"
+"<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
+"title=\"Next\"/>"
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.my_addresses
+msgid "<i class=\"oi oi-plus me-2\"/>Add Address"
+msgstr "<i class=\"oi oi-plus me-2\"/>افزودن نشانی"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
-msgid "<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
-msgstr "<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
+msgid ""
+"<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
+msgstr ""
+"<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
 
 #. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid "<option value=\"\">Country...</option>"
-msgstr ""
-"```html\n"
-"<option value=\"\">کشور...</option>\n"
-"```"
+msgstr "<option value=\"\">کشور...</option>"
 
 #. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
-msgid "<option value=\"\">select...</option>"
-msgstr ""
-"```html\n"
-"<option value=\"\">انتخاب کنید...</option>\n"
-"```"
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
+msgid "<option value=\"\">State / Province...</option>"
+msgstr "<option value=\"\">ایالت / استان...</option>"
 
 #. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid ""
 "<small class=\"form-text text-muted\">\n"
-"                Company name, VAT Number and country can not be changed once document(s) have been issued for your account.\n"
-"                <br/>Please contact us directly for that operation.\n"
-"            </small>"
+"                            Changing VAT number is not allowed once "
+"document(s) have\n"
+"                            been issued for your account. Please contact us "
+"directly for this\n"
+"                            operation.\n"
+"                        </small>"
 msgstr ""
-"```html\n"
 "<small class=\"form-text text-muted\">\n"
-"        نام شرکت، شماره مالیات بر ارزش افزوده و کشور قابل تغییر نیستند پس از اینکه سند(ها) برای حساب شما صادر شدند.\n"
-"        <br/>لطفاً برای این کار مستقیماً با ما تماس بگیرید.\n"
-"</small>\n"
-"```"
+"                            زمانی که سندی برای حساب شما صادر شده باشد، تغییر "
+"شناسه مالیاتی\n"
+"                            مجاز نیست. برای انجام این عملیات مستقیماً با ما "
+"تماس بگیرید.\n"
+"                        </small>"
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
+msgid ""
+"<small class=\"form-text text-muted\">\n"
+"                            The VAT number can only be updated on the "
+"company account.\n"
+"                        </small>"
+msgstr ""
+"<small class=\"form-text text-muted\">\n"
+"                            شناسه مالیاتی فقط در حساب شرکت قابل به‌روزرسانی "
+"است.\n"
+"                        </small>"
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
+msgid ""
+"<small class=\"form-text text-muted\">\n"
+"                    Changing country is not allowed once document(s) have\n"
+"                    been issued for your account. Please contact us directly "
+"for this\n"
+"                    operation.\n"
+"                </small>"
+msgstr ""
+"<small class=\"form-text text-muted\">\n"
+"                    زمانی که سندی برای حساب شما صادر شده باشد، تغییر کشور\n"
+"                    مجاز نیست. لطفاً برای انجام این عملیات مستقیماً با ما تماس "
+"بگیرید.\n"
+"                </small>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.pager
 msgid ""
-"<span class=\"fa fa-chevron-left\" role=\"img\" aria-label=\"Previous\" "
+"<span class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"Previous\" "
 "title=\"Previous\"/>"
 msgstr ""
-"```html\n"
-"<span class=\"fa fa-chevron-left\" role=\"img\" aria-label=\"قبلی\" title=\"قبلی\"/>\n"
-"```"
+"<span class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"قبلی\" "
+"title=\"قبلی\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.pager
-msgid "<span class=\"fa fa-chevron-right\" role=\"img\" aria-label=\"Next\" title=\"Next\"/>"
+msgid ""
+"<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
+"title=\"Next\"/>"
 msgstr ""
-"```html\n"
-"<span class=\"fa fa-chevron-right\" role=\"img\" aria-label=\"بعدی\" title=\"بعدی\"/>\n"
-"```"
+"<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"بعدی\" "
+"title=\"بعدی\"/>"
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_footer
+msgid "<span class=\"px-3\">or</span>"
+msgstr "<span class=\"px-3\">یا</span>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_searchbar
 msgid "<span class=\"small me-1 navbar-text\">Filter By:</span>"
-msgstr ""
-"```html\n"
-"<span class=\"small me-1 navbar-text\">فیلتر بر اساس:</span>\n"
-"```"
+msgstr "<span class=\"small me-1 navbar-text\">فیلتر بر اساس:</span>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_searchbar
@@ -170,95 +217,12 @@ msgstr "<span class=\"small me-1 navbar-text\">گروه‌بندی بر اساس
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_searchbar
 msgid "<span class=\"small me-1 navbar-text\">Sort By:</span>"
-msgstr ""
-"```html\n"
-"<span class=\"small me-1 navbar-text\">مرتب‌سازی بر اساس:</span>\n"
-"```"
+msgstr "<span class=\"small me-1 navbar-text\">مرتب‌سازی بر اساس:</span>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_share_template
 msgid "<strong>Open </strong>"
 msgstr "<strong>باز کردن </strong>"
-
-#. module: portal
-#: model:mail.template,body_html:portal.mail_template_data_portal_welcome
-msgid ""
-"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: 16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;\"><tr><td align=\"center\">\n"
-"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"padding: 16px; background-color: white; color: #454748; border-collapse:separate;\">\n"
-"<tbody>\n"
-"    <!-- HEADER -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr><td valign=\"middle\">\n"
-"                    <span style=\"font-size: 10px;\">Your Account</span><br/>\n"
-"                    <span style=\"font-size: 20px; font-weight: bold;\" t-out=\"object.user_id.name or ''\">Marc Demo</span>\n"
-"                </td><td valign=\"middle\" align=\"right\" t-if=\"not object.user_id.company_id.uses_default_logo\">\n"
-"                    <img t-attf-src=\"/logo.png?company={{ object.user_id.company_id.id }}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-alt=\"object.user_id.company_id.name\"/>\n"
-"                </td></tr>\n"
-"                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
-"                  <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
-"                </td></tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"    <!-- CONTENT -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
-"                    <div>\n"
-"                        Dear <t t-out=\"object.user_id.name or ''\">Marc Demo</t>,<br/> <br/>\n"
-"                        Welcome to <t t-out=\"object.user_id.company_id.name\">YourCompany</t>'s Portal!<br/><br/>\n"
-"                        An account has been created for you with the following login: <t t-out=\"object.user_id.login\">demo</t><br/><br/>\n"
-"                        Click on the button below to pick a password and activate your account.\n"
-"                        <div style=\"margin: 16px 0px 16px 0px; text-align: center;\">\n"
-"                            <a t-att-href=\"object.user_id.partner_id._get_signup_url()\" style=\"display: inline-block; padding: 10px; text-decoration: none; font-size: 12px; background-color: #875A7B; color: #fff; border-radius: 5px;\">\n"
-"                                <strong>Activate Account</strong>\n"
-"                            </a>\n"
-"                        </div>\n"
-"                        <t t-out=\"object.wizard_id.welcome_message or ''\">Welcome to our company's portal.</t>\n"
-"                    </div>\n"
-"                </td></tr>\n"
-"                <tr><td style=\"text-align:center;\">\n"
-"                  <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
-"                </td></tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"    <!-- FOOTER -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr><td valign=\"middle\" align=\"left\">\n"
-"                    <t t-out=\"object.user_id.company_id.name or ''\">YourCompany</t>\n"
-"                </td></tr>\n"
-"                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: 0.7;\">\n"
-"                    <t t-out=\"object.user_id.company_id.phone or ''\">+1 650-123-4567</t>\n"
-"                    <t t-if=\"object.user_id.company_id.email\">\n"
-"                        | <a t-attf-href=\"'mailto:%s' % {{ object.user_id.company_id.email }}\" style=\"text-decoration:none; color: #454748;\" t-out=\"object.user_id.company_id.email or ''\">info@yourcompany.com</a>\n"
-"                    </t>\n"
-"                    <t t-if=\"object.user_id.company_id.website\">\n"
-"                        | <a t-attf-href=\"'%s' % {{ object.user_id.company_id.website }}\" style=\"text-decoration:none; color: #454748;\" t-out=\"object.user_id.company_id.website or ''\">http://www.example.com</a>\n"
-"                    </t>\n"
-"                </td></tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"</tbody>\n"
-"</table>\n"
-"</td></tr>\n"
-"<!-- POWERED BY -->\n"
-"<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
-"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;\">\n"
-"      <tr><td style=\"text-align: center; font-size: 13px;\">\n"
-"        Powered by <a target=\"_blank\" href=\"https://www.odoo.com?utm_source=db&amp;utm_medium=portalinvite\" style=\"color: #875A7B;\">Odoo</a>\n"
-"      </td></tr>\n"
-"    </table>\n"
-"</td></tr>\n"
-"</table>\n"
-"            "
-msgstr ""
 
 #. module: portal
 #: model:ir.model,name:portal.model_res_users_apikeys_description
@@ -267,7 +231,7 @@ msgstr "شرح کلید API"
 
 #. module: portal
 #. odoo-javascript
-#: code:addons/portal/static/src/js/portal_security.js:0
+#: code:addons/portal/static/src/interactions/portal_security.js:0
 msgid "API Key Ready"
 msgstr "کلید API آماده است"
 
@@ -295,6 +259,11 @@ msgid "Add a note"
 msgstr "افزودن یادداشت"
 
 #. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.my_addresses
+msgid "Add an address"
+msgstr "افزودن آدرس"
+
+#. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 msgid "Add attachment"
@@ -311,14 +280,35 @@ msgid "Add extra content to display in the email"
 msgstr "افزودن محتوای اضافی برای نمایش در ایمیل"
 
 #. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.portal_my_home
+msgid "Add, remove or modify your addresses"
+msgstr "آدرس‌های خود را اضافه، حذف یا تغییر دهید."
+
+#. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "Added On"
 msgstr "اضافه شده در"
 
 #. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_management
+msgid "Address Management"
+msgstr "مدیریت آدرس"
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.portal_breadcrumbs
+#: model_terms:ir.ui.view,arch_db:portal.portal_my_home
+msgid "Addresses"
+msgstr "آدرس ها"
+
+#. module: portal
 #: model:ir.model.fields.selection,name:portal.selection__portal_wizard_user__email_state__exist
 msgid "Already Registered"
 msgstr "قبلاً ثبت‌نام کرده‌اید"
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
+msgid "Apartment, suite, etc."
+msgstr "آپارتمان، سوئیت، و غیره."
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -330,6 +320,17 @@ msgstr "آیا مطمئن هستید که می‌خواهید این کار را
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 msgid "Avatar"
 msgstr "آواتار"
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_card
+msgid "Billing Address"
+msgstr "آدرس صورت‌حساب"
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_management
+#: model_terms:ir.ui.view,arch_db:portal.my_addresses
+msgid "Billing address"
+msgstr "آدرس صورت‌حساب"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -345,40 +346,31 @@ msgstr "تغییر کلمه عبور"
 #. module: portal
 #. odoo-python
 #: code:addons/portal/controllers/portal.py:0
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
 msgid ""
 "Changing VAT number is not allowed once document(s) have been issued for "
 "your account. Please contact us directly for this operation."
 msgstr ""
 "تغییر شماره مالیات بر ارزش افزوده پس از صدور سند(ها) برای حساب شما مجاز "
-"نیست. لطفاً برای انجام این عملیات مستقیماً با ما تماس بگیرید."
+"نیست. لطفاً برای این عملیات مستقیماً با ما تماس بگیرید."
 
 #. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
+#. odoo-python
+#: code:addons/portal/controllers/portal.py:0
 msgid ""
-"Changing company name is not allowed once document(s) have been issued for "
+"Changing your country is not allowed once document(s) have been issued for "
 "your account. Please contact us directly for this operation."
 msgstr ""
-"تغییر نام شرکت امکان‌پذیر نیست وقتی که سند(ها) برای حساب شما صادر شده‌اند. "
-"لطفاً برای این عملیات مستقیماً با ما تماس بگیرید."
-
-#. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
-msgid ""
-"Changing the country is not allowed once document(s) have been issued for "
-"your account. Please contact us directly for this operation."
-msgstr ""
-"تغییر کشور پس از صدور سند(ها) برای حساب شما مجاز نیست. لطفاً برای این عملیات"
-" مستقیماً با ما تماس بگیرید."
+"تغییر کشور پس از صدور سند(ها) برای حساب شما مجاز نیست. لطفاً برای این عملیات "
+"مستقیماً با ما تماس بگیرید."
 
 #. module: portal
 #. odoo-javascript
-#: code:addons/portal/static/src/js/portal_security.js:0
+#: code:addons/portal/static/src/interactions/portal_security.js:0
 msgid "Check failed"
 msgstr "بررسی شکست خورد"
 
 #. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid "City"
 msgstr "شهر"
 
@@ -390,7 +382,7 @@ msgstr "اینجا کلیک کنید تا سند خود را ببینید."
 
 #. module: portal
 #. odoo-javascript
-#: code:addons/portal/static/src/js/portal_security.js:0
+#: code:addons/portal/static/src/interactions/portal_security.js:0
 #: model_terms:ir.ui.view,arch_db:portal.portal_back_in_edit_mode
 #: model_terms:ir.ui.view,arch_db:portal.side_content
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
@@ -398,7 +390,7 @@ msgid "Close"
 msgstr "بستن"
 
 #. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid "Company Name"
 msgstr "نام شرکت"
 
@@ -414,13 +406,13 @@ msgstr "پیکربندی پارامترهای اتصال خود را تنظیم 
 
 #. module: portal
 #. odoo-javascript
-#: code:addons/portal/static/src/js/portal_security.js:0
+#: code:addons/portal/static/src/interactions/portal_security.js:0
 msgid "Confirm"
 msgstr "تایید کردن"
 
 #. module: portal
 #. odoo-javascript
-#: code:addons/portal/static/src/js/portal_security.js:0
+#: code:addons/portal/static/src/interactions/portal_security.js:0
 msgid "Confirm Password"
 msgstr "رمز عبور را تایید کنید"
 
@@ -451,14 +443,19 @@ msgstr "مخاطبان"
 
 #. module: portal
 #. odoo-javascript
-#: code:addons/portal/static/src/js/portal_composer.js:0
-msgid "Could not save file <strong>%s</strong>"
-msgstr "نمی‌تواند ذخیره کند فایل <strong>%s</strong>"
+#: code:addons/portal/static/src/interactions/portal_composer.js:0
+msgid "Could not save file %s"
+msgstr "فایل %s ذخیره نشد"
 
 #. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid "Country"
 msgstr "کشور"
+
+#. module: portal
+#: model:ir.model,website_form_label:portal.model_res_partner
+msgid "Create a Customer"
+msgstr "ایجاد مشتری"
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_share__create_uid
@@ -506,6 +503,17 @@ msgid "Delete Account"
 msgstr "حذف حساب"
 
 #. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_card
+msgid "Delivery Address"
+msgstr "آدرس تحویل"
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_management
+#: model_terms:ir.ui.view,arch_db:portal.my_addresses
+msgid "Delivery address"
+msgstr "آدرس تحویل"
+
+#. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "Description"
 msgstr "توصیف"
@@ -525,43 +533,54 @@ msgstr "کلیدهای API توسعه‌دهنده"
 msgid ""
 "Disable your account, preventing any further login.<br/>\n"
 "                                        <b>\n"
-"                                            <i class=\"fa fa-exclamation-triangle text-danger\"/>\n"
+"                                            <i class=\"fa fa-exclamation-"
+"triangle text-danger\"/>\n"
 "                                            This action cannot be undone.\n"
 "                                        </b>"
 msgstr ""
 "حساب کاربری خود را غیرفعال کنید تا از هرگونه ورود بیشتر جلوگیری شود.<br/>\n"
 "                                        <b>\n"
-"                                            <i class=\"fa fa-exclamation-triangle text-danger\"/>\n"
+"                                            <i class=\"fa fa-exclamation-"
+"triangle text-danger\"/>\n"
 "                                            این عمل برگشت‌پذیر نیست.\n"
 "                                        </b>"
 
 #. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details
-msgid "Discard"
-msgstr "رها کردن"
-
-#. module: portal
+#: model:ir.model.fields,field_description:portal.field_ir_http__display_name
+#: model:ir.model.fields,field_description:portal.field_ir_qweb__display_name
+#: model:ir.model.fields,field_description:portal.field_ir_ui_view__display_name
+#: model:ir.model.fields,field_description:portal.field_mail_message__display_name
+#: model:ir.model.fields,field_description:portal.field_mail_thread__display_name
+#: model:ir.model.fields,field_description:portal.field_portal_mixin__display_name
 #: model:ir.model.fields,field_description:portal.field_portal_share__display_name
 #: model:ir.model.fields,field_description:portal.field_portal_wizard__display_name
 #: model:ir.model.fields,field_description:portal.field_portal_wizard_user__display_name
+#: model:ir.model.fields,field_description:portal.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:portal.field_res_partner__display_name
+#: model:ir.model.fields,field_description:portal.field_res_users_apikeys_description__display_name
 msgid "Display Name"
-msgstr "نام نمایش داده شده"
+msgstr "نام نمایشی"
 
 #. module: portal
 #. odoo-javascript
-#: code:addons/portal/static/src/js/portal_sidebar.js:0
+#: code:addons/portal/static/src/interactions/sidebar.js:0
 msgid "Due in %s days"
-msgstr "تحویل در %s روز"
+msgstr "در %s روز مهلت دارد"
 
 #. module: portal
 #. odoo-javascript
-#: code:addons/portal/static/src/js/portal_sidebar.js:0
+#: code:addons/portal/static/src/interactions/sidebar.js:0
 msgid "Due today"
 msgstr "سررسید امروز"
 
 #. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_card
+msgid "Edit this address"
+msgstr "ویرایش این نشانی"
+
+#. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_wizard_user__email
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid "Email"
 msgstr "پست الکترونیک"
 
@@ -596,12 +615,12 @@ msgstr "گذرواژه فراموش شده؟"
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 msgid "Give a duration for the key's validity"
-msgstr ""
+msgstr "با توجه به مدت زمان تعریف شده برای اعتبار کلید"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "Go Back"
-msgstr "برگشتن"
+msgstr "بازگشت"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
@@ -631,8 +650,10 @@ msgid ""
 "Here is your new API key, use it instead of a password for RPC access.\n"
 "                Your login is still necessary for interactive usage."
 msgstr ""
-"اینجا کلید API جدید شما است، به جای رمز عبور برای دسترسی به RPC از آن استفاده کنید.\n"
-"                                       ورود شما همچنان برای استفاده تعاملی لازم است."
+"اینجا کلید API جدید شما است، به جای رمز عبور برای دسترسی به RPC از آن "
+"استفاده کنید.\n"
+"                                       ورود شما همچنان برای استفاده تعاملی "
+"لازم است."
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_breadcrumbs
@@ -640,11 +661,37 @@ msgid "Home"
 msgstr "خانه"
 
 #. module: portal
+#: model:ir.model.fields,field_description:portal.field_ir_http__id
+#: model:ir.model.fields,field_description:portal.field_ir_qweb__id
+#: model:ir.model.fields,field_description:portal.field_ir_ui_view__id
+#: model:ir.model.fields,field_description:portal.field_mail_message__id
+#: model:ir.model.fields,field_description:portal.field_mail_thread__id
+#: model:ir.model.fields,field_description:portal.field_portal_mixin__id
 #: model:ir.model.fields,field_description:portal.field_portal_share__id
 #: model:ir.model.fields,field_description:portal.field_portal_wizard__id
 #: model:ir.model.fields,field_description:portal.field_portal_wizard_user__id
+#: model:ir.model.fields,field_description:portal.field_res_config_settings__id
+#: model:ir.model.fields,field_description:portal.field_res_partner__id
+#: model:ir.model.fields,field_description:portal.field_res_users_apikeys_description__id
 msgid "ID"
 msgstr "شناسه"
+
+#. module: portal
+#. odoo-python
+#: code:addons/portal/controllers/portal.py:0
+msgid ""
+"If you are ordering for an external person, please place your order via the "
+"backend. If you wish to change your name or email address, please do so in "
+"the account settings or contact your administrator."
+msgstr ""
+"اگر برای فردی خارجی سفارش می‌دهید، لطفاً سفارش خود را از طریق بک‌اند ثبت کنید. "
+"اگر می‌خواهید نام یا آدرس ایمیل خود را تغییر دهید، لطفاً این کار را در تنظیمات "
+"حساب انجام دهید یا با مدیر خود تماس بگیرید."
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
+msgid "If you want to modify it, update"
+msgstr "اگر می‌خواهید آن را تغییر دهید، می‌توانید"
 
 #. module: portal
 #. odoo-javascript
@@ -685,11 +732,6 @@ msgid "Invitation Message"
 msgstr "پیام دعوت"
 
 #. module: portal
-#: model:mail.template,description:portal.mail_template_data_portal_welcome
-msgid "Invitation email to contacts to create a user account"
-msgstr "ایمیل دعوت‌نامه به مخاطبین برای ایجاد حساب کاربری"
-
-#. module: portal
 #. odoo-python
 #: code:addons/portal/wizard/portal_share.py:0
 msgid "Invitation to access %s"
@@ -714,17 +756,11 @@ msgid ""
 msgstr "بسیار مهم است که این توضیحات واضح و کامل باشد"
 
 #. module: portal
-#. odoo-javascript
-#: code:addons/portal/static/src/xml/portal_security.xml:0
-msgid "Key Description"
-msgstr "توضیحات کلید"
-
-#. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_share__write_uid
 #: model:ir.model.fields,field_description:portal.field_portal_wizard__write_uid
 #: model:ir.model.fields,field_description:portal.field_portal_wizard_user__write_uid
 msgid "Last Updated by"
-msgstr "آخرین بروز رسانی توسط"
+msgstr "آخرین تغییر توسط"
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_share__write_date
@@ -755,6 +791,11 @@ msgid "Log out from all devices"
 msgstr "از تمامی دستگاه‌ها خارج شوید"
 
 #. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_card
+msgid "Main Address"
+msgstr "آدرس اصلی"
+
+#. module: portal
 #: model:ir.model,name:portal.model_mail_message
 msgid "Message"
 msgstr "پیام"
@@ -763,11 +804,11 @@ msgstr "پیام"
 #. odoo-python
 #: code:addons/portal/models/mail_thread.py:0
 msgid ""
-"Model %(model_name)s does not support token signature, as it does not have "
-"%(field_name)s field."
+"Model %(model_name)s does not support token signature, as it does not have %"
+"(field_name)s field."
 msgstr ""
-"مدل %(model_name)s از امضای توکن پشتیبانی نمی‌کند، زیرا دارای فیلد "
-"%(field_name)s نیست."
+"مدل %(model_name)s از امضای توکن پشتیبانی نمی‌کند، زیرا دارای فیلد %"
+"(field_name)s نیست."
 
 #. module: portal
 #. odoo-python
@@ -781,9 +822,9 @@ msgid "My account"
 msgstr "حساب من"
 
 #. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
-msgid "Name"
-msgstr "نام"
+#: model_terms:ir.ui.view,arch_db:portal.my_addresses
+msgid "My addresses"
+msgstr "آدرس‌های من"
 
 #. module: portal
 #. odoo-javascript
@@ -793,7 +834,7 @@ msgstr "نام‌ کلید خود را مشخص کنید"
 
 #. module: portal
 #. odoo-javascript
-#: code:addons/portal/static/src/js/portal_security.js:0
+#: code:addons/portal/static/src/interactions/portal_security.js:0
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "New API Key"
 msgstr "کلید API جدید"
@@ -852,7 +893,7 @@ msgid "Password:"
 msgstr "گذرواژه:"
 
 #. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid "Phone"
 msgstr "تلفن"
 
@@ -890,11 +931,6 @@ msgid "Portal User Config"
 msgstr "پیکربندی کاربر پرتال"
 
 #. module: portal
-#: model:mail.template,name:portal.mail_template_data_portal_welcome
-msgid "Portal: User Invite"
-msgstr "پورتال: دعوت کاربر"
-
-#. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_record_sidebar
 msgid "Powered by"
 msgstr "راه اندازی شده به وسیله"
@@ -908,8 +944,7 @@ msgstr "قبلی"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid ""
-"Put my email and phone in a block list to make sure I'm never contacted "
-"again"
+"Put my email and phone in a block list to make sure I'm never contacted again"
 msgstr ""
 "قراردادن ایمیل و شماره تلفن من در لیست مسدودیت تا اطمینان حاصل شود که دیگر "
 "هرگز با من تماس گرفته نمی‌شود"
@@ -917,10 +952,7 @@ msgstr ""
 #. module: portal
 #: model:ir.model,name:portal.model_ir_qweb
 msgid "Qweb"
-msgstr ""
-"```\n"
-"تمپلایت های Qweb\n"
-"```"
+msgstr "Qweb"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
@@ -948,6 +980,11 @@ msgid "Related Document Model"
 msgstr "مدل مدرک مربوطه"
 
 #. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_card
+msgid "Remove this address"
+msgstr "حذف این آدرس"
+
+#. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
 msgid "Revoke Access"
 msgstr "لغو دسترسی"
@@ -958,9 +995,14 @@ msgid "Revoke All Sessions"
 msgstr "لغو همه جلسات"
 
 #. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details
-msgid "Save"
-msgstr "ذخیره"
+#: model_terms:ir.ui.view,arch_db:portal.my_addresses
+msgid "Same as delivery address"
+msgstr "همان آدرس تحویل"
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_footer
+msgid "Save Address"
+msgstr "ذخیره آدرس"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -979,8 +1021,7 @@ msgstr "امنیت"
 
 #. module: portal
 #. odoo-javascript
-#: code:addons/portal/static/src/js/portal_security.js:0
-#: code:addons/portal/static/src/xml/portal_security.xml:0
+#: code:addons/portal/static/src/interactions/portal_security.js:0
 msgid "Security Control"
 msgstr "کنترل امنیتی"
 
@@ -993,18 +1034,20 @@ msgstr "توکن امنیتی"
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
 msgid ""
 "Select which contacts should belong to the portal in the list below.\n"
-"                        The email address of each selected contact must be valid and unique.\n"
-"                        If necessary, you can fix any contact's email address directly in the list."
+"                        The email address of each selected contact must be "
+"valid and unique.\n"
+"                        If necessary, you can fix any contact's email "
+"address directly in the list."
 msgstr ""
-"```html\n"
-"        انتخاب کنید کدام مخاطبین باید در پورتال موجود در لیست زیر قرار گیرند.\n"
-"                        آدرس ایمیل هر مخاطب انتخاب‌شده باید معتبر و منحصر به فرد باشد.\n"
-"                        در صورت لزوم، می‌توانید آدرس ایمیل هر مخاطب را مستقیماً در لیست اصلاح کنید.\n"
-"```"
+"انتخاب کنید کدام مخاطبین باید در پورتال موجود در لیست زیر قرار گیرند.\n"
+"                        آدرس ایمیل هر مخاطب انتخاب‌شده باید معتبر و منحصر به "
+"فرد باشد.\n"
+"                        در صورت لزوم، می‌توانید آدرس ایمیل هر مخاطب را "
+"مستقیماً در لیست اصلاح کنید."
 
 #. module: portal
 #. odoo-javascript
-#: code:addons/portal/static/src/js/portal_composer.js:0
+#: code:addons/portal/static/src/interactions/portal_composer.js:0
 #: model_terms:ir.ui.view,arch_db:portal.portal_share_wizard
 msgid "Send"
 msgstr "ارسال"
@@ -1033,11 +1076,11 @@ msgstr "ورود به سیستم"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.frontend_layout
 msgid "Skip to Content"
-msgstr ""
+msgstr "صرف نظر و مشاهده محتوا"
 
 #. module: portal
 #. odoo-javascript
-#: code:addons/portal/static/src/js/portal_composer.js:0
+#: code:addons/portal/static/src/interactions/portal_composer.js:0
 msgid ""
 "Some fields are required. Please make sure to write a message or attach a "
 "document"
@@ -1052,7 +1095,7 @@ msgid "Some required fields are empty."
 msgstr "بعضی فیلدهای اجباری خالی هستند."
 
 #. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid "State / Province"
 msgstr "ایالت / استان"
 
@@ -1062,20 +1105,27 @@ msgid "Status"
 msgstr "وضعیت"
 
 #. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
-msgid "Street"
-msgstr "آدرس"
-
-#. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
-msgid "Street 2"
-msgstr "آدرس 2"
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
+msgid "Street and Number"
+msgstr "خیابان و شماره"
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/signature_form/signature_form.xml:0
 msgid "Thank You!"
 msgstr "سپاسگزاریم!"
+
+#. module: portal
+#. odoo-python
+#: code:addons/portal/controllers/portal.py:0
+msgid "The %(field_name)s is managed on your company account."
+msgstr "%(field_name)s در حساب کاربری شرکت شما مدیریت می‌شود."
+
+#. module: portal
+#. odoo-python
+#: code:addons/portal/controllers/portal.py:0
+msgid "The %(field_name)s is managed on your main account address."
+msgstr "%(field_name)s در آدرس حساب کاربری اصلی شما مدیریت می‌شود."
 
 #. module: portal
 #. odoo-python
@@ -1096,6 +1146,13 @@ msgstr "ضمیمه %s نمی‌تواند حذف شود زیرا در حالت �
 msgid ""
 "The attachment does not exist or you do not have the rights to access it."
 msgstr "پیوست وجود ندارد یا شما دسترسی لازم برای مشاهده آن را ندارید."
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
+msgid ""
+"The company name and VAT number can only be updated on your main account."
+msgstr ""
+"نام شرکت و شناسه مالیاتی فقط در حساب کاربری اصلی شما قابل به‌روزرسانی هستند."
 
 #. module: portal
 #. odoo-python
@@ -1119,7 +1176,7 @@ msgstr "کلید بعداً نمی‌تواند بازیابی شود و فرا�
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 msgid "The key will be deleted once this period has elapsed."
-msgstr ""
+msgstr "پس از سپری شدن زمان اعتبار، کلید حذف خواهد شد."
 
 #. module: portal
 #. odoo-python
@@ -1144,7 +1201,8 @@ msgstr "پارتنر \"%s\" قبلاً به درگاه دسترسی دارد."
 #. odoo-python
 #: code:addons/portal/wizard/portal_wizard.py:0
 msgid "The partner \"%s\" has no portal access or is internal."
-msgstr "<span dir=\"rtl\">شریک \"%s\" دسترسی به پورتال ندارد یا داخلی است.</span>"
+msgstr ""
+"<span dir=\"rtl\">شریک \"%s\" دسترسی به پورتال ندارد یا داخلی است.</span>"
 
 #. module: portal
 #. odoo-python
@@ -1174,8 +1232,7 @@ msgstr "این شریک به یک کاربر داخلی متصل است و قب�
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
-msgid ""
-"This text is included at the end of the email sent to new portal users."
+msgid "This text is included at the end of the email sent to new portal users."
 msgstr ""
 "این متن در انتهای ایمیلی که برای کاربران جدید پورتال ارسال می‌شود، گنجانده "
 "شده است."
@@ -1196,14 +1253,21 @@ msgid "User"
 msgstr "کاربر"
 
 #. module: portal
+#. odoo-python
+#: code:addons/portal/controllers/portal.py:0
+msgid "User Dashboard"
+msgstr "داشبورد کاربر"
+
+#. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_wizard__user_ids
 msgid "Users"
 msgstr "کاربران"
 
 #. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
-msgid "VAT Number"
-msgstr "شماره ارزش افزوده"
+#. odoo-python
+#: code:addons/portal/controllers/portal.py:0
+msgid "VAT"
+msgstr "شناسه مالیاتی"
 
 #. module: portal
 #: model:ir.model.fields.selection,name:portal.selection__portal_wizard_user__email_state__ok
@@ -1236,8 +1300,11 @@ msgstr "نما"
 #: model:ir.model.fields,field_description:portal.field_fleet_vehicle_log_services__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_fleet_vehicle_model__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_gamification_badge__website_message_ids
+#: model:ir.model.fields,field_description:portal.field_gamification_badge_user__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_gamification_challenge__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_iap_account__website_message_ids
+#: model:ir.model.fields,field_description:portal.field_ir_actions_server__website_message_ids
+#: model:ir.model.fields,field_description:portal.field_ir_cron__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_lunch_supplier__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_mail_blacklist__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_mail_thread__website_message_ids
@@ -1245,9 +1312,10 @@ msgstr "نما"
 #: model:ir.model.fields,field_description:portal.field_mail_thread_cc__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_mail_thread_main_attachment__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_mail_thread_phone__website_message_ids
+#: model:ir.model.fields,field_description:portal.field_mail_tracking_duration_mixin__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_maintenance_equipment__website_message_ids
-#: model:ir.model.fields,field_description:portal.field_maintenance_equipment_category__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_maintenance_request__website_message_ids
+#: model:ir.model.fields,field_description:portal.field_maintenance_team__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_phone_blacklist__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_product_category__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_product_pricelist__website_message_ids
@@ -1270,8 +1338,11 @@ msgstr "پیام های وب سایت"
 #: model:ir.model.fields,help:portal.field_fleet_vehicle_log_services__website_message_ids
 #: model:ir.model.fields,help:portal.field_fleet_vehicle_model__website_message_ids
 #: model:ir.model.fields,help:portal.field_gamification_badge__website_message_ids
+#: model:ir.model.fields,help:portal.field_gamification_badge_user__website_message_ids
 #: model:ir.model.fields,help:portal.field_gamification_challenge__website_message_ids
 #: model:ir.model.fields,help:portal.field_iap_account__website_message_ids
+#: model:ir.model.fields,help:portal.field_ir_actions_server__website_message_ids
+#: model:ir.model.fields,help:portal.field_ir_cron__website_message_ids
 #: model:ir.model.fields,help:portal.field_lunch_supplier__website_message_ids
 #: model:ir.model.fields,help:portal.field_mail_blacklist__website_message_ids
 #: model:ir.model.fields,help:portal.field_mail_thread__website_message_ids
@@ -1279,9 +1350,10 @@ msgstr "پیام های وب سایت"
 #: model:ir.model.fields,help:portal.field_mail_thread_cc__website_message_ids
 #: model:ir.model.fields,help:portal.field_mail_thread_main_attachment__website_message_ids
 #: model:ir.model.fields,help:portal.field_mail_thread_phone__website_message_ids
+#: model:ir.model.fields,help:portal.field_mail_tracking_duration_mixin__website_message_ids
 #: model:ir.model.fields,help:portal.field_maintenance_equipment__website_message_ids
-#: model:ir.model.fields,help:portal.field_maintenance_equipment_category__website_message_ids
 #: model:ir.model.fields,help:portal.field_maintenance_request__website_message_ids
+#: model:ir.model.fields,help:portal.field_maintenance_team__website_message_ids
 #: model:ir.model.fields,help:portal.field_phone_blacklist__website_message_ids
 #: model:ir.model.fields,help:portal.field_product_category__website_message_ids
 #: model:ir.model.fields,help:portal.field_product_pricelist__website_message_ids
@@ -1314,7 +1386,7 @@ msgstr "نوشتن یک پیام ..."
 #. odoo-javascript
 #: code:addons/portal/static/src/chatter/core/composer_patch.js:0
 msgid "Write a message…"
-msgstr ""
+msgstr "متن پیام …"
 
 #. module: portal
 #. odoo-javascript
@@ -1326,6 +1398,12 @@ msgstr "کلید خود را بنویسید"
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "Wrong password."
 msgstr "کلمه عبور اشتباه است."
+
+#. module: portal
+#. odoo-python
+#: code:addons/portal/controllers/portal.py:0
+msgid "You cannot archive your main address"
+msgstr "نمی‌توانید آدرس اصلی خود را بایگانی کنید"
 
 #. module: portal
 #. odoo-python
@@ -1351,18 +1429,18 @@ msgid "You should first grant the portal access to the partner \"%s\"."
 msgstr "ابتدا باید دسترسی پرتال به شریک \"%s\" را اعطا کنید."
 
 #. module: portal
-#: model:mail.template,subject:portal.mail_template_data_portal_welcome
-msgid "Your account at {{ object.user_id.company_id.name }}"
-msgstr "حساب شما در {{ object.user_id.company_id.name }}"
-
-#. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_contact
 msgid "Your contact"
 msgstr "مخاطب شما"
 
 #. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
-msgid "Zip / Postal Code"
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
+msgid "Your name"
+msgstr "نام شما"
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
+msgid "Zip Code"
 msgstr "کد پستی"
 
 #. module: portal
@@ -1413,3 +1491,81 @@ msgstr "برای ارسال یک کامنت"
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 msgid "to your user account, it is very important to store it securely."
 msgstr "برای حساب کاربری خود، بسیار مهم است که آن را به صورت امن ذخیره کنید."
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.address_form_fields
+msgid "your account details"
+msgstr "جزئیات حساب خود را به‌روزرسانی کنید."
+
+#~ msgid "<i class=\"fa fa-pencil mx-1\"/>Edit Security Settings"
+#~ msgstr "<i class=\"fa fa-pencil mx-1\"/>ویرایش رشته امنیتی"
+
+#~ msgid "<i class=\"fa fa-pencil\"/> Edit"
+#~ msgstr "<i class=\"fa fa-pencil\"/> ویرایش"
+
+#~ msgid "Account Security"
+#~ msgstr "امنیت حساب"
+
+#~ msgid "An access token must be provided for each attachment."
+#~ msgstr "یک توکن دسترسی باید برای هر پیوست فراهم شود."
+
+#~ msgid ""
+#~ "Confirm\n"
+#~ "                                <span class=\"fa fa-long-arrow-right\"/>"
+#~ msgstr ""
+#~ "تایید\n"
+#~ "                                <span class=\"fa fa-long-arrow-right\"/>"
+
+#~ msgid "Could not save file <strong>%s</strong>"
+#~ msgstr "نمی‌تواند ذخیره کند فایل <strong>%s</strong>"
+
+#~ msgid "Discard"
+#~ msgstr "رها کردن"
+
+#~ msgid "Documents"
+#~ msgstr "اسناد"
+
+#~ msgid "Employees Only"
+#~ msgstr "فقط کارمندان"
+
+#~ msgid "Internal Note"
+#~ msgstr "یادداشت داخلی"
+
+#~ msgid "Name"
+#~ msgstr "نام"
+
+#~ msgid "Prev"
+#~ msgstr "قبلی"
+
+#~ msgid "Published on %s"
+#~ msgstr "منتشر شده روی %s"
+
+#~ msgid "Street"
+#~ msgstr "آدرس"
+
+#~ msgid "There are no comments for now."
+#~ msgstr "فعلا کامنتی موجود نیست."
+
+#~ msgid "VAT Number"
+#~ msgstr "شماره ارزش افزوده"
+
+#~ msgid "Visible"
+#~ msgstr "نمايان"
+
+#~ msgid "You are invited to access %s"
+#~ msgstr "شما برای دسترسی به %s دعوت شده اید"
+
+#~ msgid "You have been invited to access the following document:"
+#~ msgstr "شما دعوت شدید برای دسترسی به سند زیر:"
+
+#~ msgid "Zip / Postal Code"
+#~ msgstr "کد پستی"
+
+#~ msgid "avatar"
+#~ msgstr "آواتار"
+
+#~ msgid "comment"
+#~ msgstr "کامنت"
+
+#~ msgid "comments"
+#~ msgstr "کامنتها"

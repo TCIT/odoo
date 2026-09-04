@@ -16,6 +16,12 @@
                                 aria-label="Edit"
                             />
                         </t>
+                            <button
+                                class="btn btn-secondary fa fa-download"
+                                data-tooltip="Download"
+                                aria-label="Download"
+                                t-on-click="onFileDownload"
+                            />
                         <button
                             class="btn btn-secondary fa fa-trash o_clear_file_button"
                             data-tooltip="Clear"
@@ -44,6 +50,7 @@
                 t-att-src="url"
                 t-att-name="props.name"
                 t-on-error="onLoadFailed"
+                t-ref="iframeViewerPdf"
             />
         </t>
     </t>

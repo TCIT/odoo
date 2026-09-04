@@ -2,7 +2,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.addons.hr.tests.common import TestHrCommon
-from odoo.addons.base.models.ir_qweb import QWebException
 
 from odoo.addons.mail.tests.common import mail_new_test_user
 
@@ -38,7 +37,7 @@ class TestMultiCompanyReport(TestHrCommon):
         self.assertIn(b'Machin', content)
 
     def test_single_company_report(self):
-        with self.assertRaises(QWebException):  # CacheMiss followed by AccessError
+        with self.assertRaises(AccessError):  # CacheMiss followed by AccessError
             self.env['ir.actions.report'].with_user(self.res_users_hr_officer).with_company(
                 self.company_1
             )._render_qweb_pdf('hr.hr_employee_print_badge', res_ids=self.employees.ids)
@@ -97,3 +96,11 @@ class TestMultiCompany(TestHrCommon):
 
         with self.assertRaises(AccessError):
             self.employee_a.with_user(self.user_b).name
+
+    def test_compute_presence_state(self):
+        self.user_a.company_ids = self.company_a
+        # user A should still read the employee since he is the manager of that employee
+        self.employee_b.with_user(self.user_a).with_company(self.company_a).name
+
+        # user A should still read hr_presence_state even if he does not have access to the company of the employee
+        self.employee_b.with_user(self.user_a).with_company(self.company_a).hr_presence_state

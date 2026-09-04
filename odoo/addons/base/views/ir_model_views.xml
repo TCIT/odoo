@@ -1,36 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-        <!-- menu_create from model form -->
-        <record id="view_model_menu_create" model="ir.ui.view">
-            <field name="name">Create Menu</field>
-            <field name="model">wizard.ir.model.menu.create</field>
-            <field name="arch" type="xml">
-                <form string="Create Menu">
-                    <group>
-                        <field name="name"/>
-                        <field name="menu_id"/>
-                    </group>
-                    <footer>
-                        <button name="menu_create" string="Create Menu" type="object" class="btn-primary" data-hotkey="q"/>
-                        <button string="Cancel" class="btn-secondary" special="cancel" data-hotkey="x" />
-                    </footer>
-                </form>
-            </field>
-        </record>
-        <record id="act_menu_create" model="ir.actions.act_window">
-            <field name="name">Create Menu</field>
-            <field name="res_model">wizard.ir.model.menu.create</field>
-            <field name="view_mode">form</field>
-            <field name="target">new</field>
-            <field name="context">{'model_id': active_id}</field>
-        </record>
-
         <!-- model -->
         <record id="view_model_form" model="ir.ui.view">
             <field name="model">ir.model</field>
             <field name="arch" type="xml">
-                <form string="Model Description">
+                <form string="Model Description" duplicate="0">
                   <header><!-- used for override --></header>
                   <sheet>
                     <group>
@@ -38,6 +12,7 @@
                             <field name="name"/>
                             <field name="model" readonly="id"/>
                             <field name="order"/>
+                            <field name="abstract" readonly="id" groups="base.group_no_one"/>
                             <field name="transient" readonly="id" groups="base.group_no_one"/>
                         </group>
                         <group>
@@ -70,13 +45,15 @@
                                     </group>
                                     <notebook>
                                         <page name="base" string="Properties">
-                                            <group string="Base Properties">
+                                            <group>
                                                 <group>
                                                     <field name="required"/>
                                                     <field name="readonly"/>
                                                     <field name="store" groups="base.group_no_one"/>
                                                     <field name="index" groups="base.group_no_one"/>
                                                     <field name="copied" groups="base.group_no_one"/>
+                                                    <field name="state" groups="base.group_no_one"/>
+                                                    <field name="modules" groups="base.group_no_one"/>
                                                 </group>
                                                 <group>
                                                     <field name="translate"
@@ -119,12 +96,14 @@
                                                     </list>
                                                 </field>
                                             </group>
-                                            <group string="Advanced Properties" groups="base.group_no_one">
+                                        </page>
+                                        <page name="compute" string="Compute" groups="base.group_no_one">
+                                            <group>
                                                 <field name="related"/>
                                                 <field name="depends" required="compute not in [False, '']"/>
                                                 <field name="compute" widget="code" options="{'mode': 'python'}"/>
                                             </group>
-                                            <div groups="base.group_no_one">
+                                            <div>
                                                 <h3>How to define a computed field</h3>
                                                 <p>Computed fields are defined with the fields
                                                 <strong>Dependencies</strong> and <strong>Compute</strong>.</p>
@@ -154,12 +133,6 @@
                                         </page>
                                         <page name="groups" string="Access Rights">
                                             <field name="groups"/>
-                                        </page>
-                                        <page name="misc" string="Miscellaneous" groups="base.group_no_one">
-                                            <group>
-                                                <field name="state"/>
-                                                <field name="modules"/>
-                                            </group>
                                         </page>
                                     </notebook>
                                 </form>
@@ -212,7 +185,7 @@
         <record id="view_model_tree" model="ir.ui.view">
             <field name="model">ir.model</field>
             <field name="arch" type="xml">
-                <list string="Model Description">
+                <list string="Model Description" duplicate="0">
                     <field name="model"/>
                     <field name="name"/>
                     <field name="state"/>
@@ -226,6 +199,7 @@
                 <search string="Model Description">
                     <field name="name" filter_domain="['|', ('name','ilike',self), ('model','ilike',self)]" string="Model"/>
                     <field name="model" filter_domain="[('model','ilike',self)]" string="Technical Name"/>
+                    <filter string="Abstract" name="abstract" domain="[('abstract', '=', True)]"/>
                     <filter string="Transient" name="transient" domain="[('transient', '=', True)]"/>
                     <separator/>
                     <filter string="Custom" name="custom" domain="[('state', '=', 'manual')]"/>
@@ -260,13 +234,15 @@
                         </group>
                         <notebook>
                             <page name="base" string="Properties">
-                                <group string="Base Properties">
+                                <group>
                                     <group>
                                         <field name="required"/>
                                         <field name="readonly"/>
                                         <field name="store" groups="base.group_no_one"/>
                                         <field name="index" groups="base.group_no_one"/>
                                         <field name="copied" groups="base.group_no_one"/>
+                                        <field name="state" groups="base.group_no_one"/>
+                                        <field name="modules" groups="base.group_no_one"/>
                                     </group>
                                     <group>
                                         <field name="translate"
@@ -306,7 +282,7 @@
                                             readonly="ttype != 'monetary'"/>
                                     </group>
                                 </group>
-                                <group string="HTML/Sanitization Properties">
+                                <group string="HTML/Sanitization Properties" invisible="ttype != 'html'">
                                     <group>
                                         <field name="sanitize"
                                             invisible="ttype != 'html'"
@@ -345,12 +321,14 @@
                                         </list>
                                     </field>
                                 </group>
-                                <group string="Advanced Properties" groups="base.group_no_one">
+                            </page>
+                            <page name="compute" string="Compute" groups="base.group_no_one">
+                                <group>
                                     <field name="related"/>
-                                    <field name="depends" required="compute not in [False, '']"/>
+                                    <field name="depends" required="bool(compute) and store"/>
                                     <field name="compute" widget="code" options="{'mode': 'python'}"/>
                                 </group>
-                                <div groups="base.group_no_one">
+                                <div>
                                     <h3>How to define a computed field</h3>
                                     <p>Computed fields are defined with the fields
                                     <strong>Dependencies</strong> and <strong>Compute</strong>.</p>
@@ -380,12 +358,6 @@
                             </page>
                             <page name="groups" string="Access Rights">
                                 <field name="groups"/>
-                            </page>
-                            <page name="misc" string="Miscellaneous" groups="base.group_no_one">
-                                <group>
-                                    <field name="state"/>
-                                    <field name="modules"/>
-                                </group>
                             </page>
                         </notebook>
                     </sheet>
@@ -426,7 +398,7 @@
                     <field name="required"/>
                     <field name="readonly"/>
                     <field name="relation"/>
-                    <group expand="0" string="Group By">
+                    <group>
                         <filter string="Model" name="group_by_object" domain="[]" context="{'group_by':'model_id'}"/>
                         <filter string="Field Type" name="group_by_ttype" domain="[]" context="{'group_by':'ttype'}"/>
                     </group>
@@ -462,7 +434,7 @@
             <field name="arch" type="xml">
                 <list>
                     <field name="sequence" widget="handle"/>
-                    <field name="field_id"/>
+                    <field name="field_id" options="{'no_quick_create': True}"/>
                     <field name="value"/>
                     <field name="name"/>
                 </list>
@@ -538,7 +510,7 @@
                     <field name="model"/>
                     <field name="res_id"/>
                     <field name="noupdate"/>
-                    <group expand="0" string="Group By">
+                    <group>
                         <filter string="Module" name="group_by_module" domain="[]" context="{'group_by':'module'}"/>
                         <filter string="Model" name="group_by_object" domain="[]" context="{'group_by':'model'}"/>
                     </group>
@@ -592,7 +564,7 @@
                     <field name="model"/>
                     <field name="name"/>
                     <field name="message"/>
-                    <group expand="1" string="Group By">
+                    <group>
                         <filter name="module" string="Module" context="{'group_by' : 'module'}"/>
                         <filter name="model" string="Model" context="{'group_by': 'model'}"/>
                         <filter name="type" string="Constraint type" context="{'group_by' : 'type'}"/>
@@ -718,7 +690,7 @@
                     <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
                     <field name="model_id"/>
                     <field name="group_id"/>
-                    <group expand="0" string="Group By" colspan="11" col="11" groups="base.group_no_one">
+                    <group colspan="11" col="11" groups="base.group_no_one">
                         <filter string="Group" name="group" domain="[]" context="{'group_by': 'group_id'}"/>
                         <filter string="Model" name="group_by_object" domain="[]" context="{'group_by': 'model_id'}"/>
                     </group>

@@ -1,41 +1,51 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* pos_loyalty
-# 
-# Translators:
-# Wil Odoo, 2024
-# Abe Manyo, 2025
-# 
+# * pos_loyalty
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Abe Manyo (abem)" <abem@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~18.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Abe Manyo, 2025\n"
-"Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
+"POT-Creation-Date: 2026-03-20 18:35+0000\n"
+"PO-Revision-Date: 2026-08-02 13:35+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-19/"
+"pos_loyalty/id/>\n"
+"Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: id\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: pos_loyalty
 #: model:ir.model.fields,help:pos_loyalty.field_pos_order_line__reward_identifier_code
 msgid ""
 "\n"
-"        Technical field used to link multiple reward lines from the same reward together.\n"
+"        Technical field used to link multiple reward lines from the same "
+"reward together.\n"
 "    "
 msgstr ""
 "\n"
-"        Field teknis yang digunakan untuk menghubungkan lebih dari satu baris hadiah dari hadiah yang sama secara bersama-sama.\n"
+"        Field teknis yang digunakan untuk menghubungkan lebih dari satu "
+"baris hadiah dari hadiah yang sama secara bersama-sama.\n"
 "    "
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/partner_line/partner_line.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/partner_list_screen/partner_line/partner_line.js:0
 msgid "%s Points"
 msgstr "%s Point"
+
+#. module: pos_loyalty
+#. odoo-javascript
+#: code:addons/pos_loyalty/static/src/app/services/pos_store.js:0
+msgid ""
+"%s: %s\n"
+"Balance: %s"
+msgstr ""
 
 #. module: pos_loyalty
 #: model:loyalty.program,name:pos_loyalty.15_pc_on_next_order
@@ -49,19 +59,19 @@ msgstr "15% pada order Anda"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_order.js:0
+#: code:addons/pos_loyalty/static/src/app/models/pos_order.js:0
 msgid "A better global discount is already applied."
 msgstr "Diskon global yang lebih baik sudah diterapkan."
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/product_screen/order_summary/order_summary.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/order_summary/order_summary.js:0
 msgid "A coupon/loyalty card must have a unique code."
 msgstr "Kupon/kartu loyalitas harus memiliki kode unik."
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_loyalty/static/src/app/services/pos_store.js:0
 msgid "A reward could not be loaded"
 msgstr "Hadiah tidak dapat dimuat"
 
@@ -82,9 +92,15 @@ msgstr "Kartu loyalitas aktif"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/utils/manage_giftcard_popup/manage_giftcard_popup.xml:0
+#: code:addons/pos_loyalty/static/src/app/components/popups/manage_giftcard_popup/manage_giftcard_popup.xml:0
 msgid "Add Balance"
 msgstr "Tambahkan Saldo"
+
+#. module: pos_loyalty
+#. odoo-javascript
+#: code:addons/pos_loyalty/static/src/app/components/popups/manage_giftcard_popup/manage_giftcard_popup.xml:0
+msgid "Add existing Gift Card"
+msgstr "Tambahkan Gift Card yang tersedia"
 
 #. module: pos_loyalty
 #: model_terms:ir.ui.view,arch_db:pos_loyalty.loyalty_program_view_form_inherit_pos_loyalty
@@ -93,9 +109,15 @@ msgstr "Semua POS"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/utils/manage_giftcard_popup/manage_giftcard_popup.xml:0
+#: code:addons/pos_loyalty/static/src/app/components/popups/manage_giftcard_popup/manage_giftcard_popup.xml:0
 msgid "Amount"
 msgstr "Jumlah"
+
+#. module: pos_loyalty
+#. odoo-javascript
+#: code:addons/pos_loyalty/static/src/app/components/popups/manage_giftcard_popup/manage_giftcard_popup.js:0
+msgid "An error occurred while checking the gift card."
+msgstr "Terjadi error selagi memeriksa gift card."
 
 #. module: pos_loyalty
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_rule__any_product
@@ -104,7 +126,7 @@ msgstr "Produk Apapun"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/product_screen/order_summary/order_summary.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/order_summary/order_summary.js:0
 msgid ""
 "Are you sure you want to remove %s from this order?\n"
 " You will still be able to claim it through the reward button."
@@ -113,20 +135,32 @@ msgstr ""
 " Anda masih harus mengeklaim melalui tombol hadiah."
 
 #. module: pos_loyalty
+#. odoo-python
+#: code:addons/pos_loyalty/models/pos_order.py:0
+msgid "Assigning order %s"
+msgstr "Menugaskan pesanan %s"
+
+#. module: pos_loyalty
+#. odoo-python
+#: code:addons/pos_loyalty/models/pos_order.py:0
+msgid "Assigning partner %s"
+msgstr "Menugaskan partner %s"
+
+#. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/control_buttons/control_buttons.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/control_buttons/control_buttons.js:0
 msgid "Available rewards"
 msgstr "Hadiah tersedia"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/order_receipt/order_receipt.xml:0
+#: code:addons/pos_loyalty/static/src/app/screens/receipt_screen/order_receipt/order_receipt.xml:0
 msgid "Balance"
 msgstr "Saldo"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/order_receipt/order_receipt.xml:0
+#: code:addons/pos_loyalty/static/src/app/screens/receipt_screen/order_receipt/order_receipt.xml:0
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_rule__promo_barcode
 msgid "Barcode"
 msgstr "Barcode"
@@ -148,37 +182,30 @@ msgid "Coupon"
 msgstr "Kupon"
 
 #. module: pos_loyalty
-#. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/order_receipt/order_receipt.xml:0
-msgid "Coupon Codes"
-msgstr "Kode Kupon"
-
-#. module: pos_loyalty
 #: model:loyalty.program,portal_point_name:pos_loyalty.15_pc_on_next_order
 msgid "Coupon point(s)"
 msgstr "Poin kupon"
 
 #. module: pos_loyalty
+#: model:ir.model,website_form_label:pos_loyalty.model_res_partner
+msgid "Create a Customer"
+msgstr "Buat Pelanggan"
+
+#. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/product_screen/order_summary/order_summary.xml:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/order_summary/order_summary.xml:0
 msgid "Current Balance:"
 msgstr "Saldo Saat Ini:"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/order_receipt/order_receipt.xml:0
-msgid "Customer"
-msgstr "Pelanggan"
-
-#. module: pos_loyalty
-#. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_loyalty/static/src/app/services/pos_store.js:0
 msgid "Customer needed"
 msgstr "Pelanggan dibutuhkan"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/product_screen/order_summary/order_summary.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/order_summary/order_summary.js:0
 msgid "Deactivating reward"
 msgstr "Menonaktifkan hadiah"
 
@@ -189,39 +216,57 @@ msgid "Discount & Loyalty"
 msgstr "Diskon & Loyalitas"
 
 #. module: pos_loyalty
+#: model:ir.model.fields,field_description:pos_loyalty.field_account_move_line__display_name
+#: model:ir.model.fields,field_description:pos_loyalty.field_barcode_rule__display_name
+#: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_card__display_name
+#: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_mail__display_name
+#: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_program__display_name
+#: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_reward__display_name
+#: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_rule__display_name
+#: model:ir.model.fields,field_description:pos_loyalty.field_pos_config__display_name
+#: model:ir.model.fields,field_description:pos_loyalty.field_pos_order__display_name
+#: model:ir.model.fields,field_description:pos_loyalty.field_pos_order_line__display_name
+#: model:ir.model.fields,field_description:pos_loyalty.field_pos_session__display_name
+#: model:ir.model.fields,field_description:pos_loyalty.field_product_product__display_name
+#: model:ir.model.fields,field_description:pos_loyalty.field_product_template__display_name
+#: model:ir.model.fields,field_description:pos_loyalty.field_res_partner__display_name
+msgid "Display Name"
+msgstr "Nama Tampilan"
+
+#. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/control_buttons/control_buttons.js:0
-#: code:addons/pos_loyalty/static/src/overrides/components/control_buttons/control_buttons.xml:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/control_buttons/control_buttons.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/control_buttons/control_buttons.xml:0
 msgid "Enter Code"
 msgstr "Masukkan Kode"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/product_screen/order_summary/order_summary.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/order_summary/order_summary.js:0
 msgid "Enter Gift Card Number"
 msgstr "Masukkan Angka Gift Card"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/utils/manage_giftcard_popup/manage_giftcard_popup.xml:0
+#: code:addons/pos_loyalty/static/src/app/components/popups/manage_giftcard_popup/manage_giftcard_popup.xml:0
 msgid "Enter amount"
 msgstr "Masukkan jumlah"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/control_buttons/control_buttons.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/control_buttons/control_buttons.js:0
 msgid "Error"
 msgstr "Error!"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_loyalty/static/src/app/utils/order_payment_validation.js:0
 msgid "Error validating rewards"
 msgstr "Error memvalidasi reward"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/utils/manage_giftcard_popup/manage_giftcard_popup.xml:0
+#: code:addons/pos_loyalty/static/src/app/components/popups/manage_giftcard_popup/manage_giftcard_popup.xml:0
 msgid "Expiration"
 msgstr "Kadaluwarsa"
 
@@ -232,17 +277,13 @@ msgstr "Produk Gratis - Pena Sederhana"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_store.js:0
-msgid ""
-"Gift Card: %s\n"
-"Balance: %s"
-msgstr ""
-"Gift Card: %s\n"
-"Saldo: %s"
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/order_summary/order_summary.js:0
+msgid "Gift Card"
+msgstr "Gift Card"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/control_buttons/control_buttons.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/control_buttons/control_buttons.js:0
 msgid "Gift card or Discount code"
 msgstr "Gift card atau kode Diskon"
 
@@ -258,6 +299,30 @@ msgid "How many point this reward cost on the coupon."
 msgstr "Harga poin untuk hadiah ini pada kupon."
 
 #. module: pos_loyalty
+#: model:ir.model.fields,field_description:pos_loyalty.field_account_move_line__id
+#: model:ir.model.fields,field_description:pos_loyalty.field_barcode_rule__id
+#: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_card__id
+#: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_mail__id
+#: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_program__id
+#: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_reward__id
+#: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_rule__id
+#: model:ir.model.fields,field_description:pos_loyalty.field_pos_config__id
+#: model:ir.model.fields,field_description:pos_loyalty.field_pos_order__id
+#: model:ir.model.fields,field_description:pos_loyalty.field_pos_order_line__id
+#: model:ir.model.fields,field_description:pos_loyalty.field_pos_session__id
+#: model:ir.model.fields,field_description:pos_loyalty.field_product_product__id
+#: model:ir.model.fields,field_description:pos_loyalty.field_product_template__id
+#: model:ir.model.fields,field_description:pos_loyalty.field_res_partner__id
+msgid "ID"
+msgstr "ID"
+
+#. module: pos_loyalty
+#. odoo-javascript
+#: code:addons/pos_loyalty/static/src/app/components/popups/manage_giftcard_popup/manage_giftcard_popup.js:0
+msgid "Invalid Gift Card Code"
+msgstr "Kode Gift Card Tidak Valid"
+
+#. module: pos_loyalty
 #. odoo-python
 #: code:addons/pos_loyalty/models/pos_config.py:0
 msgid "Invalid gift card program reward. Use 1 currency per point discount."
@@ -269,8 +334,7 @@ msgstr ""
 #: code:addons/pos_loyalty/models/pos_config.py:0
 msgid "Invalid gift card program rule. Use 1 point per currency spent."
 msgstr ""
-"Peraturan program gift card tidak valid. Gunakan 1 mata uang per poin "
-"diskon."
+"Peraturan program gift card tidak valid. Gunakan 1 mata uang per poin diskon."
 
 #. module: pos_loyalty
 #. odoo-python
@@ -288,6 +352,11 @@ msgstr "Program gift card tidak valid. Lebih dari satu peraturan."
 #: model:ir.model.fields,field_description:pos_loyalty.field_pos_order_line__is_reward_line
 msgid "Is Reward Line"
 msgstr "Apakah Baris Hadiah"
+
+#. module: pos_loyalty
+#: model:ir.model,name:pos_loyalty.model_account_move_line
+msgid "Journal Item"
+msgstr ""
 
 #. module: pos_loyalty
 #: model:ir.model,name:pos_loyalty.model_loyalty_mail
@@ -322,15 +391,9 @@ msgstr "Peraturan Loyalitas"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/product_screen/order_summary/order_summary.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/order_summary/order_summary.js:0
 msgid "No"
 msgstr "Tidak"
-
-#. module: pos_loyalty
-#. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_order.js:0
-msgid "No product is compatible with this promotion."
-msgstr "Tidak ada produk yang kompatibel dengan promosi ini."
 
 #. module: pos_loyalty
 #. odoo-python
@@ -340,7 +403,7 @@ msgstr "Hadiah tidak dapat diklaim dengan kupon ini."
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/control_buttons/control_buttons.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/control_buttons/control_buttons.js:0
 msgid "No valid eWallet found"
 msgstr "Tidak ada eWallet valid yang ditemukan"
 
@@ -352,7 +415,13 @@ msgstr "Onsite %s"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/control_buttons/control_buttons.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/control_buttons/control_buttons.js:0
+msgid "Please select a customer and a valid eWallet."
+msgstr "Silakan pilih pelanggan dan eWallet valid."
+
+#. module: pos_loyalty
+#. odoo-javascript
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/control_buttons/control_buttons.js:0
 msgid "Please select a product for this reward"
 msgstr "Mohon periksa produk untuk hadiah ini"
 
@@ -360,6 +429,11 @@ msgstr "Mohon periksa produk untuk hadiah ini"
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_program__pos_order_count
 msgid "PoS Order Count"
 msgstr "Jumlah Order POS"
+
+#. module: pos_loyalty
+#: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_card__source_pos_order_partner_id
+msgid "PoS Order Customer"
+msgstr "PoS Pesanan Pelanggan"
 
 #. module: pos_loyalty
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_card__source_pos_order_id
@@ -404,7 +478,7 @@ msgstr "POS"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_order.js:0
+#: code:addons/pos_loyalty/static/src/app/models/pos_order.js:0
 msgid "Points"
 msgstr "Poin-Poin"
 
@@ -418,6 +492,11 @@ msgstr "Biaya Poin"
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_program__pos_report_print_id
 msgid "Print Report"
 msgstr "Cetak Laporan"
+
+#. module: pos_loyalty
+#: model:ir.model,name:pos_loyalty.model_product_template
+msgid "Product"
+msgstr "Produk"
 
 #. module: pos_loyalty
 #: model:ir.model,name:pos_loyalty.model_product_product
@@ -438,13 +517,13 @@ msgstr "Program: %(name)s, Produk Peraturan: `%(rule_product)s`"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/control_buttons/control_buttons.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/control_buttons/control_buttons.js:0
 msgid "Refund with eWallet"
 msgstr "Refund dengan eWallet"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/ticket_screen/ticket_screen.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/ticket_screen/ticket_screen.js:0
 msgid ""
 "Refunding a top up or reward product for an eWallet or gift card program is "
 "not allowed."
@@ -454,18 +533,20 @@ msgstr ""
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/control_buttons/control_buttons.xml:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/control_buttons/control_buttons.xml:0
 msgid "Reset Programs"
 msgstr "Reset Program"
 
 #. module: pos_loyalty
 #: model:ir.model.fields,help:pos_loyalty.field_loyalty_program__pos_config_ids
-msgid "Restrict publishing to those shops."
-msgstr "Batasi publikasi ke toko-toko tersebut."
+msgid ""
+"Restrict publishing to those shops. Note: A program will only be used in the "
+"shops using the same currency as the program."
+msgstr ""
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/control_buttons/control_buttons.xml:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/control_buttons/control_buttons.xml:0
 #: model:ir.model.fields,field_description:pos_loyalty.field_pos_order_line__reward_id
 msgid "Reward"
 msgstr "Hadiah"
@@ -477,19 +558,19 @@ msgstr "Kode Hadiah Pengidentifikasi"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_loyalty/static/src/app/services/pos_store.js:0
 msgid "Select program"
 msgstr "Pilih program"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/product_screen/order_summary/order_summary.xml:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/order_summary/order_summary.xml:0
 msgid "Sell physical gift card?"
 msgstr "Jual gift card fisik?"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/product_screen/order_summary/order_summary.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/order_summary/order_summary.js:0
 msgid "Sell/Manage physical gift card"
 msgstr "Jual/Kelola gift card fisik"
 
@@ -510,9 +591,9 @@ msgstr ""
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/order_receipt/order_receipt.xml:0
+#: code:addons/pos_loyalty/static/src/app/screens/receipt_screen/order_receipt/order_receipt.xml:0
 msgid "Spent:"
-msgstr "Digunakan:"
+msgstr "Dihabiskan:"
 
 #. module: pos_loyalty
 #: model:ir.model.fields,help:pos_loyalty.field_loyalty_rule__any_product
@@ -521,31 +602,31 @@ msgstr "Field teknis, apakah semua produk cocok"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_loyalty/static/src/app/services/pos_store.js:0
 msgid "That coupon code has already been scanned and activated."
 msgstr "Kode kupon tersebut telah discan dan diaktifkan."
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_loyalty/static/src/app/services/pos_store.js:0
 msgid "That promo code program has already been activated."
 msgstr "Program kode promo tersebut telah diaktifkan."
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_loyalty/static/src/app/services/pos_store.js:0
 msgid "That promo code program is expired."
 msgstr "Kode promo program tersebut sudah kadaluwarsa."
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_loyalty/static/src/app/services/pos_store.js:0
 msgid "That promo code program is not yet valid."
 msgstr "Kode promo porgram tersebut belum valid"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_loyalty/static/src/app/services/pos_store.js:0
 msgid "That promo code program requires a specific pricelist."
 msgstr "Kode promo program membutuhkan daftar harga spesifik."
 
@@ -558,7 +639,8 @@ msgstr "Kupon digunakan untuk mengeklaim hadiah."
 #. odoo-python
 #: code:addons/pos_loyalty/models/pos_order.py:0
 msgid ""
-"The following codes already exist in the database, perhaps they were already sold?\n"
+"The following codes already exist in the database, perhaps they were already "
+"sold?\n"
 "%s"
 msgstr ""
 "Kode berikut sudah ada di database, mungkin mereka sudah dijual?\n"
@@ -575,7 +657,7 @@ msgstr ""
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_loyalty/static/src/app/services/pos_store.js:0
 msgid ""
 "The reward \"%s\" contain an error in its domain, your domain must be "
 "compatible with the PoS client"
@@ -590,7 +672,7 @@ msgstr "Hadiah yang terkait baris ini."
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_order.js:0
+#: code:addons/pos_loyalty/static/src/app/models/pos_order.js:0
 msgid "The reward could not be applied."
 msgstr "Hadiah tidak dapat diterapkan."
 
@@ -602,14 +684,14 @@ msgstr "Tidak terdapat poin yang mencukupi untuk kupon: %s"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_order.js:0
+#: code:addons/pos_loyalty/static/src/app/models/pos_order.js:0
 msgid "There are not enough points on the coupon to claim this reward."
 msgstr ""
 "Tidak terdapat poin yang mencukupi pada kupon untuk mengeklaim hadiah ini."
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_order.js:0
+#: code:addons/pos_loyalty/static/src/app/models/pos_order.js:0
 msgid "There are not enough products in the basket to claim this reward."
 msgstr "Tidak terdapat produk di keranjang untuk mengeklaim hadiah ini."
 
@@ -621,7 +703,7 @@ msgid ""
 "print them."
 msgstr ""
 "Tidak ada templat email pada program gift card dan POS Anda disetel untuk "
-"mencetaknya. "
+"mencetaknya."
 
 #. module: pos_loyalty
 #. odoo-python
@@ -640,9 +722,12 @@ msgstr "Beikut adalah produk-produk yang valid untuk peraturan ini."
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/product_screen/order_summary/order_summary.js:0
-msgid "This Gift card is already been sold."
-msgstr "Gift card ini sudah dijual."
+#: code:addons/pos_loyalty/static/src/app/components/popups/manage_giftcard_popup/manage_giftcard_popup.js:0
+msgid ""
+"This code seems to be invalid, please check the Gift Card code and try again."
+msgstr ""
+"Kode ini sepertinya tidak valid, silakan periksa kode Gift Card dan coba "
+"lagi."
 
 #. module: pos_loyalty
 #. odoo-python
@@ -670,7 +755,7 @@ msgstr "Kupon ini belum valid (%s)."
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_loyalty/static/src/app/services/pos_store.js:0
 msgid ""
 "This gift card is not linked to any order. Do you really want to apply its "
 "reward?"
@@ -703,25 +788,31 @@ msgstr "Jenis"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_order.js:0
+#: code:addons/pos_loyalty/static/src/app/models/pos_order.js:0
 msgid "Unknown discount type"
 msgstr "Tipe diskon tidak diketahui"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_loyalty/static/src/app/services/pos_store.js:0
 msgid "Unpaid gift card"
 msgstr "Gift card belum dibayar"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_loyalty/static/src/app/services/pos_store.js:0
 msgid "Unpaid gift card rejected."
 msgstr "Gift card belum dibayar ditolak."
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/control_buttons/control_buttons.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/receipt_screen/order_receipt/order_receipt.xml:0
+msgid "Until:"
+msgstr "Sampai:"
+
+#. module: pos_loyalty
+#. odoo-javascript
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/control_buttons/control_buttons.js:0
 msgid "Use eWallet to pay"
 msgstr "Gunakan eWallet untuk membayar"
 
@@ -732,13 +823,7 @@ msgstr "Produk Valid"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/order_receipt/order_receipt.xml:0
-msgid "Valid until:"
-msgstr "Valid sampai:"
-
-#. module: pos_loyalty
-#. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/product_screen/order_summary/order_summary.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/order_summary/order_summary.js:0
 msgid "Validation Error"
 msgstr "Eror Validasi"
 
@@ -749,31 +834,29 @@ msgstr "Apakah baris ini bagian dari hadiah atau tidak."
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/order_receipt/order_receipt.xml:0
+#: code:addons/pos_loyalty/static/src/app/screens/receipt_screen/order_receipt/order_receipt.xml:0
 msgid "Won:"
 msgstr "Won:"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/product_screen/order_summary/order_summary.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/order_summary/order_summary.js:0
 msgid "Yes"
 msgstr "Ya"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/product_screen/order_summary/order_summary.js:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/order_summary/order_summary.js:0
+msgid "You cannot change the quantity or price of a physical gift card."
+msgstr "Anda tidak dapat mengubah kuantitas atau harga dari gift card fisik."
+
+#. module: pos_loyalty
+#. odoo-javascript
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/order_summary/order_summary.js:0
 msgid "You cannot set negative quantity or price to gift card or ewallet."
 msgstr ""
 "Anda tidak dapat menetapkan kuantitas negatif atau harga ke gift card atau "
 "ewallet."
-
-#. module: pos_loyalty
-#. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/control_buttons/control_buttons.js:0
-msgid ""
-"You either have not created an eWallet or all your eWallets have expired."
-msgstr ""
-"Anda antara belum membuat eWallet atau semua eWallet sudah kadaluwarsa."
 
 #. module: pos_loyalty
 #. odoo-python
@@ -784,36 +867,49 @@ msgstr ""
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/control_buttons/control_buttons.xml:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/control_buttons/control_buttons.xml:0
 msgid "eWallet"
 msgstr "eWallet"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/control_buttons/control_buttons.xml:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/control_buttons/control_buttons.xml:0
 msgid "eWallet Pay"
 msgstr "Pembayaran eWall"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/control_buttons/control_buttons.xml:0
+#: code:addons/pos_loyalty/static/src/app/screens/product_screen/control_buttons/control_buttons.xml:0
 msgid "eWallet Refund"
 msgstr "Refund eWallet"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_loyalty/static/src/app/services/pos_store.js:0
 msgid "eWallet requires a customer to be selected"
 msgstr "eWallet membutuhkan pelanggan untuk dipilih"
 
 #. module: pos_loyalty
 #. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/components/order_receipt/order_receipt.xml:0
+#: code:addons/pos_loyalty/static/src/app/screens/receipt_screen/order_receipt/order_receipt.xml:0
 msgid "no expiration"
 msgstr "tidak ada kadaluwarsa"
 
-#. module: pos_loyalty
-#. odoo-javascript
-#: code:addons/pos_loyalty/static/src/overrides/models/pos_order.js:0
-msgid "the gift cards"
-msgstr "gift card"
+#~ msgid ""
+#~ "Gift Card: %s\n"
+#~ "Balance: %s"
+#~ msgstr ""
+#~ "Gift Card: %s\n"
+#~ "Saldo: %s"
+
+#~ msgid "Restrict publishing to those shops."
+#~ msgstr "Batasi publikasi ke toko-toko tersebut."
+
+#~ msgid "Customer"
+#~ msgstr "Pelanggan"
+
+#~ msgid "This Gift card has already been sold."
+#~ msgstr "Gift Card ini sudah dijual."
+
+#~ msgid "the gift cards"
+#~ msgstr "gift card"

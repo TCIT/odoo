@@ -1,24 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* spreadsheet_account
-# 
+# * spreadsheet_account
+#
 # Translators:
-# Olga Gutorova, 2024
-# Wil Odoo, 2025
-# 
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Anastasiia Koroleva (koan)" <koan@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 13:04+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
-"Language-Team: Russian (https://app.transifex.com/odoo/teams/41243/ru/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-10 11:17+0000\n"
+"Last-Translator: \"Anastasiia Koroleva (koan)\" <koan@odoo.com>\n"
+"Language-Team: Russian <https://translate.odoo.com/projects/odoo-19/"
+"spreadsheet_account/ru/>\n"
+"Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ru\n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
+"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: spreadsheet_account
 #. odoo-javascript
@@ -33,8 +37,8 @@ msgid ""
 "'%s' is not a valid period. Supported formats are \"21/12/2022\", "
 "\"Q1/2022\", \"12/2022\", and \"2022\"."
 msgstr ""
-"'%s' не является допустимым периодом. Поддерживаются следующие форматы: "
-"\"21/12/2022\", \"Q1/2022\", \"12/2022\" и \"2022\"."
+"'%s' не является допустимым периодом. Поддерживаются следующие форматы: \"21/"
+"12/2022\", \"Q1/2022\", \"12/2022\" и \"2022\"."
 
 #. module: spreadsheet_account
 #: model:ir.model,name:spreadsheet_account.model_account_account
@@ -51,7 +55,7 @@ msgstr "Банк и касса"
 #. odoo-python
 #: code:addons/spreadsheet_account/models/account.py:0
 msgid "Cell Audit"
-msgstr ""
+msgstr "Аудит ячеек"
 
 #. module: spreadsheet_account
 #: model:ir.model,name:spreadsheet_account.model_res_company
@@ -95,6 +99,12 @@ msgid "Depreciation"
 msgstr "Амортизация"
 
 #. module: spreadsheet_account
+#: model:ir.model.fields,field_description:spreadsheet_account.field_account_account__display_name
+#: model:ir.model.fields,field_description:spreadsheet_account.field_res_company__display_name
+msgid "Display Name"
+msgstr "Display Name"
+
+#. module: spreadsheet_account
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/account_group_auto_complete.js:0
 msgid "Equity"
@@ -131,6 +141,12 @@ msgid "Get the total debit for the specified account(s) and period."
 msgstr "Получите общую сумму дебета по указанному счету (счетам) и периоду."
 
 #. module: spreadsheet_account
+#: model:ir.model.fields,field_description:spreadsheet_account.field_account_account__id
+#: model:ir.model.fields,field_description:spreadsheet_account.field_res_company__id
+msgid "ID"
+msgstr "ID"
+
+#. module: spreadsheet_account
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/account_group_auto_complete.js:0
 msgid "Income"
@@ -158,7 +174,7 @@ msgstr "Внебалансовый лист"
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 msgid "Offset applied to the years."
-msgstr ""
+msgstr "Смещение, применяемое к годам."
 
 #. module: spreadsheet_account
 #. odoo-javascript
@@ -187,20 +203,26 @@ msgstr "Дебиторская задолженность"
 #. module: spreadsheet_account
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
+msgid "Return the balance of accounts for the specified tag(s) and period"
+msgstr "Возвращает сальдо по счетам для указанных тегов и периода"
+
+#. module: spreadsheet_account
+#. odoo-javascript
+#: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 msgid "Return the partner balance for the specified account(s) and period"
-msgstr ""
+msgstr "Возвращает баланс партнера по указанным счетам и периоду"
 
 #. module: spreadsheet_account
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 msgid "Return the residual amount for the specified account(s) and period"
-msgstr ""
+msgstr "Возвращает остаток по указанным счетам и периоду"
 
 #. module: spreadsheet_account
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 msgid "Returns the account codes of a given group."
-msgstr ""
+msgstr "Возвращает коды счетов заданной группы."
 
 #. module: spreadsheet_account
 #. odoo-javascript
@@ -215,8 +237,7 @@ msgstr ""
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 msgid ""
 "Returns the starting date of the fiscal year encompassing the provided date."
-msgstr ""
-"Возвращает дату начала финансового года, охватывающего указанную дату."
+msgstr "Возвращает дату начала финансового года, охватывающего указанную дату."
 
 #. module: spreadsheet_account
 #. odoo-javascript
@@ -233,8 +254,14 @@ msgstr "Установите значение TRUE, чтобы включить 
 #. module: spreadsheet_account
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/plugins/accounting_plugin.js:0
+msgid "The balance for given account tag could not be computed."
+msgstr "Не удалось рассчитать сальдо для указанного тега счета."
+
+#. module: spreadsheet_account
+#. odoo-javascript
+#: code:addons/spreadsheet_account/static/src/plugins/accounting_plugin.js:0
 msgid "The balance for given partners could not be computed."
-msgstr ""
+msgstr "Не удалось рассчитать баланс по заданным партнерам."
 
 #. module: spreadsheet_account
 #. odoo-javascript
@@ -261,8 +288,8 @@ msgid ""
 "The date range. Supported formats are \"21/12/2022\", \"Q1/2022\", "
 "\"12/2022\", and \"2022\"."
 msgstr ""
-"Диапазон дат. Поддерживаются следующие форматы: \"21/12/2022\", \"Q1/2022\","
-" \"12/2022\" и \"2022\"."
+"Диапазон дат. Поддерживаются следующие форматы: \"21/12/2022\", \"Q1/2022\", "
+"\"12/2022\" и \"2022\"."
 
 #. module: spreadsheet_account
 #. odoo-javascript
@@ -280,7 +307,7 @@ msgstr "День, с которого следует отсчитывать на
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 msgid "The partner ids (separated by a comma)."
-msgstr ""
+msgstr "ID партнеров (указываются через запятую)."
 
 #. module: spreadsheet_account
 #. odoo-javascript
@@ -295,15 +322,38 @@ msgid ""
 "The prefix of the accounts. If none provided, all receivable and payable "
 "accounts will be used."
 msgstr ""
+"Префикс счетов. Если не указан – будут использованы все счета дебиторской и "
+"кредиторской задолженности."
 
 #. module: spreadsheet_account
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/plugins/accounting_plugin.js:0
 msgid "The residual amount for given accounts could not be computed."
-msgstr ""
+msgstr "Не удалось рассчитать остаток по заданным счетам."
+
+#. module: spreadsheet_account
+#. odoo-javascript
+#: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
+msgid "The tag ids (separated by a comma)."
+msgstr "Идентификаторы тегов (через запятую)."
 
 #. module: spreadsheet_account
 #. odoo-javascript
 #: code:addons/spreadsheet_account/static/src/accounting_functions.js:0
 msgid "The technical account type (possible values are: %s)."
-msgstr ""
+msgstr "Технический тип счета (возможные значения: %s)."
+
+#~ msgid "Account type."
+#~ msgstr "Тип счета."
+
+#~ msgid "Journal items for account prefix %s"
+#~ msgstr "Статьи журнала для префикса счета %s"
+
+#~ msgid "Reference date."
+#~ msgstr "Дата обращения."
+
+#~ msgid "Returns the account ids of a given group."
+#~ msgstr "Возвращает идентификаторы учетных записей заданной группы."
+
+#~ msgid "Year offset applied to date_range."
+#~ msgstr "Смещение года, применяемое к диапазону дат."

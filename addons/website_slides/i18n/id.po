@@ -1,24 +1,31 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_slides
-# 
+# * website_slides
+#
 # Translators:
-# Wil Odoo, 2024
-# Abe Manyo, 2025
-# 
+# Ryanto The <ry.the77@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Muftiara Syuhada <muftiara.syuhada@gmail.com>, 2022
+# Abe Manyo, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Abe Manyo (abem)" <abem@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# "Nurul Aini Akrima Sabila (nuaas)" <nuaas@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:23+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Abe Manyo, 2025\n"
-"Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
+"POT-Creation-Date: 2026-06-19 17:35+0000\n"
+"PO-Revision-Date: 2026-08-08 07:32+0000\n"
+"Last-Translator: \"Nurul Aini Akrima Sabila (nuaas)\" <nuaas@odoo.com>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-19/"
+"website_slides/id/>\n"
+"Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: id\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__members_engaged_count
@@ -113,32 +120,80 @@ msgid "% Completed Contents"
 msgstr "% Konten Selesai"
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 #: model_terms:ir.ui.view,arch_db:website_slides.mail_notification_channel_invite
 msgid "&amp;nbsp;"
 msgstr "&amp;nbsp;"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_results
 msgid "'. Showing results for '"
 msgstr "'. Menunjukkan hasil untuk '"
 
 #. module: website_slides
 #. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "(e.g., https://drive.google.com/file/d/ABC/view)."
+msgstr "(contoh., https://drive.google.com/file/d/ABC/view)."
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "(e.g., https://drive.google.com/file/d/ABC/view?usp=sharing)."
+msgstr "(contoh., https://drive.google.com/file/d/ABC/view?usp=sharing)."
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "(e.g., https://vimeo.com/ABC)."
+msgstr "(contoh., https://vimeo.com/ABC)."
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "(e.g., https://youtube/ABC)."
+msgstr "(contoh., https://youtube/ABC)."
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/interactions/slide_archive.js:0
 #: code:addons/website_slides/static/src/js/slides_course_slides_list.js:0
-#: code:addons/website_slides/static/src/js/slides_slide_archive.js:0
 msgid "(empty)"
 msgstr "(empty)"
 
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid ". This way, they will be secured."
-msgstr ". Dengan begini, mereka akan aman."
+msgid "(which means only accessible via link, not searchable)."
+msgstr ""
+"(yang berarti hanya dapat diakses melalui link, dan tidak dapat dicari)."
 
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_slide_demo_1_5
 msgid "3 Main Methodologies"
 msgstr "3 Metodologi Utama"
+
+#. module: website_slides
+#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_1_4
+#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_2_1
+#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_4_0
+msgid ""
+"<a href=\"#\" class=\"btn btn-outline-primary o_translate_inline\">Discover "
+"more</a>"
+msgstr ""
+"<a href=\"#\" class=\"btn btn-outline-primary o_translate_inline\">Temukan "
+"lebih banyak</a>"
+
+#. module: website_slides
+#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_1_4
+#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_2_1
+#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_4_0
+msgid ""
+"<a href=\"/contactus\" class=\"btn btn-primary rounded-circle "
+"o_translate_inline\">Contact us</a>"
+msgstr ""
+"<a href=\"/contactus\" class=\"btn btn-primary rounded-circle "
+"o_translate_inline\">Hubungi kami</a>"
 
 #. module: website_slides
 #. odoo-python
@@ -182,7 +237,8 @@ msgid ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        Hello<br/><br/>\n"
-"        You have been enrolled to a new course: <t t-out=\"object.channel_id.name or ''\">Basics of Gardening</t>.\n"
+"        You have been enrolled to a new course: <t t-"
+"out=\"object.channel_id.name or ''\">Basics of Gardening</t>.\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -190,7 +246,8 @@ msgstr ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        Halo<br/><br/>\n"
-"        Anda telah masuk ke kursus baru: <t t-out=\"object.channel_id.name or ''\">Basics of Gardening</t>.\n"
+"        Anda telah masuk ke kursus baru: <t t-out=\"object.channel_id.name "
+"or ''\">Basics of Gardening</t>.\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -201,7 +258,8 @@ msgid ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        Hello<br/><br/>\n"
-"        You have been invited to check out this course: <t t-out=\"object.channel_id.name or ''\">Basics of Gardening</t>.\n"
+"        You have been invited to check out this course: <t t-"
+"out=\"object.channel_id.name or ''\">Basics of Gardening</t>.\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -209,7 +267,8 @@ msgstr ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        Halo<br/><br/>\n"
-"        Anda telah diundang untuk memeriska kursus ini: <t t-out=\"object.channel_id.name or ''\">Basics of Gardening</t>.\n"
+"        Anda telah diundang untuk memeriska kursus ini: <t t-"
+"out=\"object.channel_id.name or ''\">Basics of Gardening</t>.\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -218,87 +277,107 @@ msgstr ""
 #: model:mail.template,body_html:website_slides.mail_template_channel_completed
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"                        <p style=\"margin: 0px;\">Hello <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>,</p><br/>\n"
+"                    <div style=\"margin: 0px; padding: 0px; font-size: 13px;"
+"\">\n"
+"                        <p style=\"margin: 0px;\">Hello <t t-"
+"out=\"object.partner_id.name or ''\">Brandon Freeman</t>,</p><br/>\n"
 "                        <p><b>Congratulations!</b></p>\n"
-"                        <p>You've completed the course <b t-out=\"object.channel_id.name or ''\">Basics of Gardening</b></p>\n"
+"                        <p>You've completed the course <b t-"
+"out=\"object.channel_id.name or ''\">Basics of Gardening</b></p>\n"
 "                        <p>Check out the other available courses.</p><br/>\n"
 "\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a href=\"/slides/all\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a href=\"/slides\" t-attf-style=\"background-"
+"color: {{object.channel_id.user_id.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
+"{{object.channel_id.user_id.company_id.email_primary_color or '#FFFFFF'}}; "
+"border-radius: 5px;\">\n"
 "                                Explore courses\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        Enjoy this exclusive content!\n"
-"                        <t t-if=\"object.channel_id.user_id.signature\" data-o-mail-quote-container=\"1\">\n"
+"                        <t t-if=\"object.channel_id.user_id.signature\" data-"
+"o-mail-quote-container=\"1\">\n"
 "                            <br/>\n"
-"                            <t t-out=\"object.channel_id.user_id.signature or ''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"object.channel_id.user_id.signature or ''\" data-o-"
+"mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    </div>\n"
 "                </div>\n"
 "            "
 msgstr ""
-"<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"                        <p style=\"margin: 0px;\">Halo <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>,</p><br/>\n"
-"                        <p><b>Selamat!</b></p>\n"
-"                        <p>Anda menyelesaikan kursus <b t-out=\"object.channel_id.name or ''\">Basics of Gardening</b></p>\n"
-"                        <p>Periksa kursus-kursus lain yang tersedia.</p><br/>\n"
-"\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a href=\"/slides/all\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">\n"
-"                                Temukan kursus-kursus\n"
-"                            </a>\n"
-"                        </div>\n"
-"                        Nikmati konten eksklusif ini!\n"
-"                        <t t-if=\"object.channel_id.user_id.signature\" data-o-mail-quote-container=\"1\">\n"
-"                            <br/>\n"
-"                            <t t-out=\"object.channel_id.user_id.signature or ''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
-"                        </t>\n"
-"                    </div>\n"
-"                </div>\n"
-"            "
 
 #. module: website_slides
 #: model:mail.template,body_html:website_slides.mail_template_channel_shared
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
+"\">\n"
 "                        Hello<br/><br/>\n"
-"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> shared the <strong t-out=\"object.name or ''\">document</strong> with you!\n"
-"                        </p><div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"object.website_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/image_256\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> "
+"shared the <strong t-out=\"object.name or ''\">document</strong> with you!\n"
+"                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
+"align: center;\">\n"
+"                            <a t-att-href=\"object.website_absolute_url\">\n"
+"                                <img t-att-alt=\"object.name\" t-attf-"
+"src=\"{{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/"
+"image_256\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"object.website_url\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px;                                 text-decoration: none; color: #fff; border-radius: 5px;\">\n"
-"                                View <strong t-out=\"object.name or ''\">Document</strong></a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a t-att-href=\"object.website_absolute_url\" t-"
+"attf-style=\"background-color: {{user.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px;                                 "
+"text-decoration: none; color: {{user.company_id.email_primary_color or "
+"'#FFFFFF'}}; border-radius: 5px;\">\n"
+"                                View <strong t-out=\"object.name or "
+"''\">Document</strong></a>\n"
 "                        </div>\n"
-"                        <t t-if=\"user.signature\" data-o-mail-quote-container=\"1\">\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
 "                            <br/>\n"
-"                            <t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-"
+"quote=\"1\">Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">"
+"\n"
 "                        Halo<br/><br/>\n"
-"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> membagikan <strong t-out=\"object.name or ''\">dokumen</strong> dengan Anda!\n"
-"                        </p><div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"object.website_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/image_256\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> "
+"membagikan <strong t-out=\"object.name or ''\">dokumen</strong> dengan "
+"Anda!\n"
+"                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
+"align: center;\">\n"
+"                            <a t-att-href=\"object.website_absolute_url\">\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{"
+"{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/image_256\" "
+"style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"object.website_url\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px;                                 text-decoration: none; color: #fff; border-radius: 5px;\">\n"
-"                                Lihat <strong t-out=\"object.name or ''\">Dokumen</strong></a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a t-att-href=\"object.website_absolute_url\" t-"
+"attf-style=\"background-color: {{user.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px;                                 "
+"text-decoration: none; color: {{user.company_id.email_primary_color or "
+"'#FFFFFF'}}; border-radius: 5px;\">\n"
+"                                Lihat <strong t-out=\"object.name or ''\">"
+"Dokumen</strong></a>\n"
 "                        </div>\n"
-"                        <t t-if=\"user.signature\" data-o-mail-quote-container=\"1\">\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
 "                            <br/>\n"
-"                            <t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">"
+"Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
@@ -308,40 +387,72 @@ msgstr ""
 #: model:mail.template,body_html:website_slides.slide_template_shared
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
+"\">\n"
 "                        Hello<br/><br/>\n"
-"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> shared the <t t-out=\"object.slide_category or ''\">document</t> <strong t-out=\"object.name or ''\">Trees</strong> with you!\n"
-"                        </p><div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> "
+"shared the <t t-out=\"object.slide_category or ''\">document</t> <strong t-"
+"out=\"object.name or ''\">Trees</strong> with you!\n"
+"                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
+"align: center;\">\n"
+"                            <a t-att-href=\"(object.website_share_url + '?"
+"fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
+"                                <img t-att-alt=\"object.name\" t-attf-"
+"src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/"
+"image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">View <strong t-out=\"object.name or ''\">Trees</strong></a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a t-att-href=\"(object.website_share_url + '?"
+"fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" t-"
+"attf-style=\"background-color: {{user.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
+"{{user.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px;"
+"\">View <strong t-out=\"object.name or ''\">Trees</strong></a>\n"
 "                        </div>\n"
-"                        <t t-if=\"user.signature\" data-o-mail-quote-container=\"1\">\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
 "                            <br/>\n"
-"                            <t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-"
+"quote=\"1\">Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">"
+"\n"
 "                        Halo<br/><br/>\n"
-"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> membagikan <t t-out=\"object.slide_category or ''\">dokumen</t> <strong t-out=\"object.name or ''\">Trees</strong> dengan Anda!\n"
-"                        </p><div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> "
+"membagikan <t t-out=\"object.slide_category or ''\">dokumen</t> <strong t-"
+"out=\"object.name or ''\">Pohon</strong> dengan Anda!\n"
+"                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
+"align: center;\">\n"
+"                            <a t-att-href=\"(object.website_share_url + "
+"'?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{"
+"{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" "
+"style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">Lihat <strong t-out=\"object.name or ''\">Trees</strong></a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a t-att-href=\"(object.website_share_url + "
+"'?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" t-"
+"attf-style=\"background-color: {{user.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {"
+"{user.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px;\">"
+"Lihat <strong t-out=\"object.name or ''\">Pojok</strong></a>\n"
 "                        </div>\n"
-"                        <t t-if=\"user.signature\" data-o-mail-quote-container=\"1\">\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
 "                            <br/>\n"
-"                            <t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">"
+"Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
@@ -351,48 +462,80 @@ msgstr ""
 #: model:mail.template,body_html:website_slides.slide_template_published
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
+"\">\n"
 "                        Hello<br/><br/>\n"
-"                        There is something new in the course <strong t-out=\"object.channel_id.name or ''\">Trees, Wood and Gardens</strong> you are following:<br/><br/>\n"
-"                        </p><center><strong t-out=\"object.name or ''\">Trees</strong></center>\n"
+"                        There is something new in the course <strong t-"
+"out=\"object.channel_id.name or ''\">Trees, Wood and Gardens</strong> you "
+"are following:<br/><br/>\n"
+"                        </p><center><strong t-out=\"object.name or "
+"''\">Trees</strong></center>\n"
 "                        <t t-if=\"object.image_1024\">\n"
-"                            <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <div style=\"padding: 16px 8px 16px 8px; text-"
+"align: center;\">\n"
 "                                <a t-att-href=\"object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                                <img t-att-alt=\"object.name\" t-attf-"
+"src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/"
+"image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        </t>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"object.website_share_url\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">View content</a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a t-att-href=\"object.website_share_url\" t-"
+"attf-style=\"background-color: "
+"{{object.user_id.company_id.email_secondary_color or '#875A7B'}}; padding: "
+"8px 16px 8px 16px; text-decoration: none; color: "
+"{{object.user_id.company_id.email_primary_color or '#FFFFFF'}}; border-"
+"radius: 5px;\">View content</a>\n"
 "                        </div>\n"
 "                        Enjoy this exclusive content!\n"
-"                        <t t-if=\"user.signature\" data-o-mail-quote-container=\"1\">\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
 "                            <br/>\n"
-"                            <t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-"
+"quote=\"1\">Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">"
+"\n"
 "                        Halo<br/><br/>\n"
-"                        Ada yang baru di kursus <strong t-out=\"object.channel_id.name or ''\">Trees, Wood and Gardens</strong> yang Anda ikuti:<br/><br/>\n"
-"                        </p><center><strong t-out=\"object.name or ''\">Trees</strong></center>\n"
+"                        Terdapat sesuatu yang baru di kursus <strong t-"
+"out=\"object.channel_id.name or ''\">Trees, Wood and Gardens</strong> yang "
+"Anda ikuti:<br/><br/>\n"
+"                        </p><center><strong t-out=\"object.name or ''\">"
+"Pohon</strong></center>\n"
 "                        <t t-if=\"object.image_1024\">\n"
-"                            <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <div style=\"padding: 16px 8px 16px 8px; text-"
+"align: center;\">\n"
 "                                <a t-att-href=\"object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{"
+"{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" "
+"style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        </t>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a t-att-href=\"object.website_share_url\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">Lihat konten</a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a t-att-href=\"object.website_share_url\" t-"
+"attf-style=\"background-color: {"
+"{object.user_id.company_id.email_secondary_color or '#875A7B'}}; padding: "
+"8px 16px 8px 16px; text-decoration: none; color: {"
+"{object.user_id.company_id.email_primary_color or '#FFFFFF'}}; border-"
+"radius: 5px;\">Lihat konten</a>\n"
 "                        </div>\n"
 "                        Nikmati konten eksklusif ini!\n"
-"                        <t t-if=\"user.signature\" data-o-mail-quote-container=\"1\">\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
 "                            <br/>\n"
-"                            <t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-quote=\"1\">"
+"Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
@@ -414,8 +557,8 @@ msgid ""
 "<i class=\"fa fa-bars\"/><span class=\"d-none d-md-inline-block "
 "ms-1\">Lessons</span>"
 msgstr ""
-"<i class=\"fa fa-bars\"/><span class=\"d-none d-md-inline-block "
-"ms-1\">Kursus</span>"
+"<i class=\"fa fa-bars\"/><span class=\"d-none d-md-inline-block ms-1\">"
+"Kursus</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.lesson_card
@@ -423,7 +566,13 @@ msgid "<i class=\"fa fa-check me-1\"/>Completed"
 msgstr "<i class=\"fa fa-check me-1\"/>Selesai"
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.course_card
+msgid "<i class=\"fa fa-check\" aria-hidden=\"true\"/> Completed"
+msgstr ""
+
+#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
 msgid "<i class=\"fa fa-check\"/> Completed"
 msgstr "<i class=\"fa fa-check\"/> Selesai"
@@ -459,8 +608,8 @@ msgstr "<i class=\"fa fa-cloud-upload me-1\"/>Tambahkan Konten"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
-msgid "<i class=\"fa fa-comments\"/> Comments ("
-msgstr "<i class=\"fa fa-comments\"/> Komentar ("
+msgid "<i class=\"fa fa-comments\"/> Comments"
+msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
@@ -482,11 +631,6 @@ msgid "<i class=\"fa fa-eraser me-1\"/>Clear filters"
 msgstr "<i class=\"fa fa-eraser me-1\"/>Bersihkan filter"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
-msgid "<i class=\"fa fa-eraser\"/> Clear filters"
-msgstr "<i class=\"fa fa-eraser\"/> Bersihkan filter"
-
-#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide_forbidden
 msgid ""
 "<i class=\"fa fa-exclamation-triangle\" role=\"img\" aria-"
@@ -497,8 +641,12 @@ msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
-msgid "<i class=\"fa fa-eye me-2\" aria-label=\"Views\" role=\"img\" title=\"Views\"/>"
-msgstr "<i class=\"fa fa-eye me-2\" aria-label=\"Views\" role=\"img\" title=\"Views\"/>"
+msgid ""
+"<i class=\"fa fa-eye me-2\" aria-label=\"Views\" role=\"img\" "
+"title=\"Views\"/>"
+msgstr ""
+"<i class=\"fa fa-eye me-2\" aria-label=\"Views\" role=\"img\" "
+"title=\"Views\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
@@ -512,11 +660,11 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
 msgid ""
-"<i class=\"fa fa-file-image-o me-2\" aria-label=\"Infographic\" role=\"img\""
-" title=\"Infographic\"/>"
+"<i class=\"fa fa-file-image-o me-2\" aria-label=\"Infographic\" role=\"img\" "
+"title=\"Infographic\"/>"
 msgstr ""
-"<i class=\"fa fa-file-image-o me-2\" aria-label=\"Infographic\" role=\"img\""
-" title=\"Infografik\"/>"
+"<i class=\"fa fa-file-image-o me-2\" aria-label=\"Infographic\" role=\"img\" "
+"title=\"Infografik\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
@@ -538,8 +686,12 @@ msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
-msgid "<i class=\"fa fa-flag me-2\" aria-label=\"Quiz\" role=\"img\" title=\"Quiz\"/>"
-msgstr "<i class=\"fa fa-flag me-2\" aria-label=\"Quiz\" role=\"img\" title=\"Quiz\"/>"
+msgid ""
+"<i class=\"fa fa-flag me-2\" aria-label=\"Quiz\" role=\"img\" title=\"Quiz\"/"
+">"
+msgstr ""
+"<i class=\"fa fa-flag me-2\" aria-label=\"Quiz\" role=\"img\" "
+"title=\"Quiz\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_aside_training_category
@@ -567,11 +719,6 @@ msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
 msgstr "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
-msgid "<i class=\"fa fa-graduation-cap me-1\"/>All courses"
-msgstr "<i class=\"fa fa-graduation-cap me-1\"/>Semua kursus"
-
-#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 msgid "<i class=\"fa fa-home\"/> About"
 msgstr "<i class=\"fa fa-home\"/> Tentang"
@@ -587,8 +734,8 @@ msgid ""
 "<i class=\"fa fa-home\"/><span class=\"d-none d-md-inline-block ms-1\">Back "
 "to course</span>"
 msgstr ""
-"<i class=\"fa fa-home\"/><span class=\"d-none d-md-inline-block "
-"ms-1\">Kembali ke kursus</span>"
+"<i class=\"fa fa-home\"/><span class=\"d-none d-md-inline-block ms-1\">"
+"Kembali ke kursus</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
@@ -605,8 +752,8 @@ msgid ""
 "<i class=\"fa fa-plus me-1\"/> <span class=\"d-none d-md-inline-block\">Add "
 "Content</span>"
 msgstr ""
-"<i class=\"fa fa-plus me-1\"/> <span class=\"d-none d-md-inline-"
-"block\">Tambahkan Konten</span>"
+"<i class=\"fa fa-plus me-1\"/> <span class=\"d-none d-md-inline-block\">"
+"Tambahkan Konten</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list
@@ -662,10 +809,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
 msgid ""
 "<i class=\"fa fa-share-alt\"/>\n"
-"                        <span class=\"d-none d-md-inline-block ms-2\">Share</span>"
+"                        <span class=\"d-none d-md-inline-block ms-2\">Share</"
+"span>"
 msgstr ""
 "<i class=\"fa fa-share-alt\"/>\n"
-"                        <span class=\"d-none d-md-inline-block ms-2\">Share</span>"
+"                        <span class=\"d-none d-md-inline-block ms-2\">Share</"
+"span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_sidebar
@@ -678,17 +827,15 @@ msgid ""
 "<i class=\"fa fa-sign-out\"/><span class=\"d-none d-md-inline-block "
 "ms-1\">Exit Fullscreen</span>"
 msgstr ""
-"<i class=\"fa fa-sign-out\"/><span class=\"d-none d-md-inline-block "
-"ms-1\">Exit Fullscreen</span>"
+"<i class=\"fa fa-sign-out\"/><span class=\"d-none d-md-inline-block ms-1\">"
+"Exit Fullscreen</span>"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_tags
 msgid ""
 "<i class=\"fa fa-tag me-2 text-muted\"/>\n"
-"                      My Courses"
+"          My Courses"
 msgstr ""
-"<i class=\"fa fa-tag me-2 text-muted\"/>\n"
-"                      Kursus Saya"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.user_profile_content
@@ -703,6 +850,13 @@ msgid ""
 msgstr ""
 "<i class=\"oi oi-chevron-left me-2\"/> <span class=\"d-none d-sm-inline-"
 "block\">Sebelumnya</span>"
+
+#. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
+msgid ""
+"<small class=\"text-muted d-none d-md-inline\"><i class=\"fa fa-check me-1\" "
+"role=\"img\"/>You are enrolled</small>"
+msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
@@ -738,17 +892,16 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_sample
 msgid ""
-"<span class=\"badge text-bg-info badge-arrow-right fw-normal "
-"m-1\">New</span>"
+"<span class=\"badge text-bg-info badge-arrow-right fw-normal m-1\">New</span>"
 msgstr ""
-"<span class=\"badge text-bg-info badge-arrow-right fw-normal "
-"m-1\">Baru</span>"
+"<span class=\"badge text-bg-info badge-arrow-right fw-normal m-1\">Baru</"
+"span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
 msgid ""
-"<span class=\"badge text-bg-primary badge-hide fw-normal m-1\">Add "
-"Quiz</span>"
+"<span class=\"badge text-bg-primary badge-hide fw-normal m-1\">Add Quiz</"
+"span>"
 msgstr ""
 "<span class=\"badge text-bg-primary badge-hide fw-normal m-1\">Tambahkan "
 "Quiz</span>"
@@ -756,11 +909,11 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
 msgid ""
-"<span class=\"badge text-bg-success fw-normal "
-"m-1\"><span>Preview</span></span>"
+"<span class=\"badge text-bg-success fw-normal m-1\"><span>Preview</span></"
+"span>"
 msgstr ""
-"<span class=\"badge text-bg-success fw-normal "
-"m-1\"><span>Pratinjau</span></span>"
+"<span class=\"badge text-bg-success fw-normal m-1\"><span>Pratinjau</span></"
+"span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_sample
@@ -768,13 +921,11 @@ msgid "<span class=\"badge text-bg-success fw-normal m-1\">Preview</span>"
 msgstr "<span class=\"badge text-bg-success fw-normal m-1\">Pratinjau</span>"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.course_card
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 msgid ""
-"<span class=\"badge text-bg-success pull-right\"><i class=\"fa fa-check\"/> "
-"Completed</span>"
+"<span class=\"d-none d-md-inline me-2 me-md-0\">Start now</span><i "
+"class=\"oi oi-arrow-right d-md-none\" aria-hidden=\"true\"/>"
 msgstr ""
-"<span class=\"badge text-bg-success pull-right\"><i class=\"fa fa-check\"/> "
-"Selesai</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
@@ -784,11 +935,6 @@ msgid ""
 msgstr ""
 "<span class=\"d-none d-sm-inline-block\">Berikutnya</span> <i class=\"oi oi-"
 "chevron-right ms-2\"/>"
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.slides_home_user_profile_small
-msgid "<span class=\"fw-bold text-muted me-2\">Current rank:</span>"
-msgstr "<span class=\"fw-bold text-muted me-2\">Peringkat saat in:</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_main
@@ -801,6 +947,13 @@ msgid "<span class=\"input-group-text\">Start at Page</span>"
 msgstr "<span class=\"input-group-text\">Mulai dari Halaman</span>"
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
+msgid ""
+"<span class=\"me-2 d-none d-md-inline\">Continue</span><i class=\"oi oi-"
+"arrow-right\" aria-hidden=\"true\"/>"
+msgstr ""
+
+#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list
 msgid ""
 "<span class=\"ms-1\">Lessons</span>\n"
@@ -808,15 +961,6 @@ msgid ""
 msgstr ""
 "<span class=\"ms-1\">Pelajaran</span>\n"
 "                                <span class=\"ms-1\">·</span>"
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
-msgid ""
-"<span class=\"o_form_label\">Slides</span>\n"
-"                    <span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-specific.\" groups=\"website.group_multi_website\"/>"
-msgstr ""
-"<span class=\"o_form_label\">Slide</span>\n"
-"                    <span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-specific.\" groups=\"website.group_multi_website\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
@@ -834,18 +978,11 @@ msgid "<span class=\"o_stat_text\">Embed Views</span>"
 msgstr "<span class=\"o_stat_text\">Embed Views</span>"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.course_card_information_arrow
-msgid "<span class=\"o_wslides_arrow\">New Content</span>"
-msgstr "<span class=\"o_wslides_arrow\">Konten Baru</span>"
-
-#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
 msgid ""
 "<span class=\"oi oi-arrow-right\"/>\n"
-"                                Create a Google Project and Get a Key"
+"                                        Create a Google Project and Get a Key"
 msgstr ""
-"<span class=\"oi oi-arrow-right\"/>\n"
-"                                Buat Google Project dan Dapatkan Kunci"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_aside_training
@@ -853,9 +990,11 @@ msgid "<span class=\"p-2\">Course content</span>"
 msgstr "<span class=\"p-2\">Konten Kursus</span>"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.user_quickkarma_card
-msgid "<span class=\"text-500 mx-2\">•</span>"
-msgstr "<span class=\"text-500 mx-2\">•</span>"
+#: model_terms:ir.ui.view,arch_db:website_slides.course_card_information_badge
+msgid ""
+"<span class=\"position-absolute top-0 badge bg-secondary mt-2 ms-2\">New "
+"Content</span>"
+msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
@@ -870,10 +1009,11 @@ msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
-msgid "<span class=\"text-muted fw-bold col-4 col-md-3\">External sources</span>"
+msgid ""
+"<span class=\"text-muted fw-bold col-4 col-md-3\">External sources</span>"
 msgstr ""
-"<span class=\"text-muted fw-bold col-4 col-md-3\">Sumber-sumber "
-"eksternal</span>"
+"<span class=\"text-muted fw-bold col-4 col-md-3\">Sumber-sumber eksternal</"
+"span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
@@ -883,25 +1023,27 @@ msgstr "<span class=\"text-muted fw-bold me-3\">Rating</span>"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
 msgid ""
-"<span class=\"text-muted text-truncate mw-100\" "
-"title=\"Invited\">Invited</span>"
+"<span class=\"text-muted text-truncate mw-100\" title=\"Invited\">Invited</"
+"span>"
 msgstr ""
-"<span class=\"text-muted text-truncate mw-100\" "
-"title=\"Invited\">Diundang</span>"
+"<span class=\"text-muted text-truncate mw-100\" title=\"Invited\">Diundang</"
+"span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
 msgid ""
-"<span class=\"text-muted text-truncate mw-100\" "
-"title=\"Ongoing\">Ongoing</span>"
+"<span class=\"text-muted text-truncate mw-100\" title=\"Ongoing\">Ongoing</"
+"span>"
 msgstr ""
-"<span class=\"text-muted text-truncate mw-100\" "
-"title=\"Ongoing\">Berlangsung</span>"
+"<span class=\"text-muted text-truncate mw-100\" title=\"Ongoing\">"
+"Berlangsung</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
-msgid "<span class=\"text-muted text-truncate mw-100\" title=\"Total\">Total</span>"
-msgstr "<span class=\"text-muted text-truncate mw-100\" title=\"Total\">Total</span>"
+msgid ""
+"<span class=\"text-muted text-truncate mw-100\" title=\"Total\">Total</span>"
+msgstr ""
+"<span class=\"text-muted text-truncate mw-100\" title=\"Total\">Total</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_sample
@@ -917,42 +1059,68 @@ msgstr "<span class=\"text-muted\">Bagian-bagian computer science</span>"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
 msgid ""
-"<span id=\"first\" class=\"me-1 me-sm-2\" title=\"First slide\" aria-label=\"First slide\" role=\"button\"><i class=\"fa fa-step-backward\"/></span>\n"
-"                                        <span id=\"previous\" class=\"mx-1 mx-sm-2\" title=\"Previous slide\" aria-label=\"Previous slide\" role=\"button\"><i class=\"fa fa-arrow-circle-left\"/></span>\n"
-"                                        <span id=\"next\" class=\"mx-1 mx-sm-2\" title=\"Next slide\" aria-label=\"Next slide\" role=\"button\"><i class=\"fa fa-arrow-circle-right\"/></span>\n"
-"                                        <span id=\"last\" class=\"mx-1 mx-sm-2\" title=\"Last slide\" aria-label=\"Last slide\" role=\"button\"><i class=\"fa fa-step-forward\"/></span>"
+"<span id=\"first\" class=\"me-1 me-sm-2\" title=\"First slide\" aria-"
+"label=\"First slide\" role=\"button\"><i class=\"fa fa-step-backward\"/></"
+"span>\n"
+"                                        <span id=\"previous\" class=\"mx-1 "
+"mx-sm-2\" title=\"Previous slide\" aria-label=\"Previous slide\" "
+"role=\"button\"><i class=\"fa fa-arrow-circle-left\"/></span>\n"
+"                                        <span id=\"next\" class=\"mx-1 mx-"
+"sm-2\" title=\"Next slide\" aria-label=\"Next slide\" role=\"button\"><i "
+"class=\"fa fa-arrow-circle-right\"/></span>\n"
+"                                        <span id=\"last\" class=\"mx-1 mx-"
+"sm-2\" title=\"Last slide\" aria-label=\"Last slide\" role=\"button\"><i "
+"class=\"fa fa-step-forward\"/></span>"
 msgstr ""
-"<span id=\"first\" class=\"me-1 me-sm-2\" title=\"First slide\" aria-label=\"First slide\" role=\"button\"><i class=\"fa fa-step-backward\"/></span>\n"
-"                                        <span id=\"previous\" class=\"mx-1 mx-sm-2\" title=\"Previous slide\" aria-label=\"Previous slide\" role=\"button\"><i class=\"fa fa-arrow-circle-left\"/></span>\n"
-"                                        <span id=\"next\" class=\"mx-1 mx-sm-2\" title=\"Next slide\" aria-label=\"Next slide\" role=\"button\"><i class=\"fa fa-arrow-circle-right\"/></span>\n"
-"                                        <span id=\"last\" class=\"mx-1 mx-sm-2\" title=\"Last slide\" aria-label=\"Last slide\" role=\"button\"><i class=\"fa fa-step-forward\"/></span>"
+"<span id=\"first\" class=\"me-1 me-sm-2\" title=\"First slide\" aria-"
+"label=\"First slide\" role=\"button\"><i class=\"fa fa-step-backward\"/></"
+"span>\n"
+"                                        <span id=\"previous\" class=\"mx-1 "
+"mx-sm-2\" title=\"Previous slide\" aria-label=\"Previous slide\" "
+"role=\"button\"><i class=\"fa fa-arrow-circle-left\"/></span>\n"
+"                                        <span id=\"next\" class=\"mx-1 mx-sm-"
+"2\" title=\"Next slide\" aria-label=\"Next slide\" role=\"button\"><i "
+"class=\"fa fa-arrow-circle-right\"/></span>\n"
+"                                        <span id=\"last\" class=\"mx-1 mx-sm-"
+"2\" title=\"Last slide\" aria-label=\"Last slide\" role=\"button\"><i "
+"class=\"fa fa-step-forward\"/></span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
 msgid ""
-"<span id=\"fullscreen\" class=\"ms-1 ms-sm-2\" title=\"View fullscreen\" aria-label=\"Fullscreen\" role=\"button\">\n"
+"<span id=\"fullscreen\" class=\"ms-1 ms-sm-2\" title=\"View fullscreen\" "
+"aria-label=\"Fullscreen\" role=\"button\">\n"
 "                                            <i class=\"fa fa-arrows-alt\"/>\n"
 "                                        </span>"
 msgstr ""
-"<span id=\"fullscreen\" class=\"ms-1 ms-sm-2\" title=\"View fullscreen\" aria-label=\"Fullscreen\" role=\"button\">\n"
+"<span id=\"fullscreen\" class=\"ms-1 ms-sm-2\" title=\"View fullscreen\" "
+"aria-label=\"Fullscreen\" role=\"button\">\n"
 "                                            <i class=\"fa fa-arrows-alt\"/>\n"
 "                                        </span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
 msgid ""
-"<span id=\"zoomout\" class=\"d-inline ms-2 me-2\" title=\"Zoom out\" aria-label=\"Zoom out\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-minus\"/>\n"
+"<span id=\"zoomout\" class=\"d-inline ms-2 me-2\" title=\"Zoom out\" aria-"
+"label=\"Zoom out\" role=\"button\">\n"
+"                                            <i class=\"fa fa-search-minus\"/"
+">\n"
 "                                        </span>\n"
-"                                        <span id=\"zoomin\" class=\"d-inline\" title=\"Zoom in\" aria-label=\"Zoom in\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-plus\"/>\n"
+"                                        <span id=\"zoomin\" class=\"d-"
+"inline\" title=\"Zoom in\" aria-label=\"Zoom in\" role=\"button\">\n"
+"                                            <i class=\"fa fa-search-plus\"/"
+">\n"
 "                                        </span>"
 msgstr ""
-"<span id=\"zoomout\" class=\"d-inline ms-2 me-2\" title=\"Zoom out\" aria-label=\"Zoom out\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-minus\"/>\n"
+"<span id=\"zoomout\" class=\"d-inline ms-2 me-2\" title=\"Zoom out\" aria-"
+"label=\"Zoom out\" role=\"button\">\n"
+"                                            <i class=\"fa fa-search-minus\"/>"
+"\n"
 "                                        </span>\n"
-"                                        <span id=\"zoomin\" class=\"d-inline\" title=\"Zoom in\" aria-label=\"Zoom in\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-plus\"/>\n"
+"                                        <span id=\"zoomin\" class=\"d-"
+"inline\" title=\"Zoom in\" aria-label=\"Zoom in\" role=\"button\">\n"
+"                                            <i class=\"fa fa-search-plus\"/>"
+"\n"
 "                                        </span>"
 
 #. module: website_slides
@@ -961,17 +1129,17 @@ msgid ""
 "<span name=\"done_members_count_label\" class=\"text-muted text-truncate "
 "mw-100\" title=\"Finished\">Finished</span>"
 msgstr ""
-"<span name=\"done_members_count_label\" class=\"text-muted text-truncate "
-"mw-100\" title=\"Finished\">Selesai</span>"
+"<span name=\"done_members_count_label\" class=\"text-muted text-truncate mw-"
+"100\" title=\"Finished\">Selesai</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
 msgid ""
-"<span name=\"members_completed_count_label\" "
-"class=\"o_stat_text\">Finished</span>"
+"<span name=\"members_completed_count_label\" class=\"o_stat_text\">Finished</"
+"span>"
 msgstr ""
-"<span name=\"members_completed_count_label\" "
-"class=\"o_stat_text\">Selesai</span>"
+"<span name=\"members_completed_count_label\" class=\"o_stat_text\">Selesai</"
+"span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
@@ -1053,8 +1221,9 @@ msgstr "<strong>Belum Ada Peserta!</strong>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_social_email
-msgid "<strong>Sharing is caring!</strong> Email(s) sent."
-msgstr "<strong>Sharing is caring!</strong> Email dikirim."
+msgid "<strong>Sharing is caring!</strong> Your email(s) will arrive shortly."
+msgstr ""
+"<strong>Sharing is caring!</strong> Email Anda akan sampai sebentar lagi."
 
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_slide_demo_2_1
@@ -1136,8 +1305,8 @@ msgid ""
 "A summary of know-how: how and what. All the basics for this course about "
 "gardening."
 msgstr ""
-"Ringkasan know-how: bagaimana dan apa. Semua pengetahuan dasar di kursus ini"
-" mengenai berkebun."
+"Ringkasan know-how: bagaimana dan apa. Semua pengetahuan dasar di kursus ini "
+"mengenai berkebun."
 
 #. module: website_slides
 #: model_terms:slide.slide,description:website_slides.slide_slide_demo_2_0
@@ -1186,7 +1355,8 @@ msgid "Access Refused"
 msgstr "Akses Ditolak"
 
 #. module: website_slides
-#: model:mail.activity.type,name:website_slides.mail_activity_data_access_request
+#. odoo-python
+#: code:addons/website_slides/models/slide_channel.py:0
 msgid "Access Request"
 msgstr "Permintaan Akses"
 
@@ -1206,7 +1376,8 @@ msgid "Accessed on"
 msgstr "Diakses pada"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.snippet_options
+#. odoo-javascript
+#: code:addons/website_slides/static/src/website_builder/courses_list_page_option.xml:0
 msgid "Achievements"
 msgstr "Pencapaian"
 
@@ -1214,7 +1385,7 @@ msgstr "Pencapaian"
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__message_needaction
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__message_needaction
 msgid "Action Needed"
-msgstr "Tindakan Diperluka"
+msgstr "Tindakan Diperlukan"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__active
@@ -1234,6 +1405,11 @@ msgid "Activities"
 msgstr "Aktivitas"
 
 #. module: website_slides
+#: model:ir.model,name:website_slides.model_mail_activity
+msgid "Activity"
+msgstr "Aktivitas"
+
+#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__activity_exception_decoration
 msgid "Activity Exception Decoration"
 msgstr "Dekorasi Pengecualian Aktivitas"
@@ -1246,7 +1422,7 @@ msgstr "Status Aktivitas"
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__activity_type_icon
 msgid "Activity Type Icon"
-msgstr "Ikon Jenis Aktifitas"
+msgstr "Ikon Jenis Aktivitas"
 
 #. module: website_slides
 #. odoo-javascript
@@ -1295,7 +1471,7 @@ msgstr "Tambahkan Tag"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_category_add.js:0
+#: code:addons/website_slides/static/src/interactions/category_add.js:0
 msgid "Add a section"
 msgstr "Add a section"
 
@@ -1364,7 +1540,7 @@ msgstr "Semua Informasi Peserta"
 
 #. module: website_slides
 #: model:ir.actions.act_window,name:website_slides.slide_channel_action_overview
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_results
 msgid "All Courses"
 msgstr "Semua Kursus"
 
@@ -1384,16 +1560,28 @@ msgstr "Semua pertanyaan harus dijawab!"
 #. odoo-python
 #: code:addons/website_slides/models/slide_question.py:0
 msgid ""
-"All questions must have at least one correct answer and one incorrect answer: \n"
+"All questions must have at least one correct answer and one incorrect "
+"answer: \n"
 "%s\n"
 msgstr ""
-"Semua pertanyaan harus memiliki setidaknya satu jawaban benar dan satu jawaban tidak benar: \n"
+"Semua pertanyaan harus memiliki setidaknya satu jawaban benar dan satu "
+"jawaban tidak benar: \n"
 "%s\n"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.user_profile_content
-msgid "All the courses you attend will appear here. <br/>"
-msgstr "Semua kursus yang Anda ikuti akan muncul di sini. <br/>"
+msgid ""
+"All the courses you attend will appear here. <br/>\n"
+"                        <a href=\"/slides/\" class=\"btn-link "
+"o_translate_inline\">\n"
+"                            <i class=\"fa fa-arrow-right\"/> Start Learning\n"
+"                        </a>"
+msgstr ""
+"Semua kursus yang Anda ikuti akan muncul di sini. <br/>\n"
+"                        <a href=\"/slides/\" class=\"btn-link "
+"o_translate_inline\">\n"
+"                            <i class=\"fa fa-arrow-right\"/> Mulai Belajar\n"
+"                        </a>"
 
 #. module: website_slides
 #: model_terms:slide.channel,description:website_slides.slide_channel_demo_5_furn2
@@ -1481,20 +1669,31 @@ msgid "Answers"
 msgstr "Jawaban"
 
 #. module: website_slides
+#: model:ir.model.fields.selection,name:website_slides.selection__slide_channel__visibility__link
+msgid "Anyone with the link"
+msgstr "Siapapun dengan link"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Anyone with the link."
+msgstr "Siapa pun dengan link."
+
+#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_gamification_challenge__challenge_category
 msgid "Appears in"
 msgstr "Tampil di"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_archive.js:0
+#: code:addons/website_slides/static/src/interactions/slide_archive.js:0
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_partner_view_tree
 msgid "Archive"
 msgstr "Arsip"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_archive.js:0
+#: code:addons/website_slides/static/src/interactions/slide_archive.js:0
 msgid "Archive Content"
 msgstr "Konten Arsip"
 
@@ -1510,14 +1709,14 @@ msgstr "Diarsipkan"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_archive.js:0
+#: code:addons/website_slides/static/src/interactions/slide_archive.js:0
 #: code:addons/website_slides/static/src/xml/slide_management.xml:0
 msgid "Are you sure you want to archive this content?"
 msgstr "Apakah Anda yakin ingin mengarsip konten ini?"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_category_delete.js:0
+#: code:addons/website_slides/static/src/interactions/category_delete.js:0
 #: code:addons/website_slides/static/src/xml/slide_management.xml:0
 msgid "Are you sure you want to delete this category?"
 msgstr "Apakah Anda yakin ingin menghapus kategori ini?"
@@ -1525,8 +1724,8 @@ msgstr "Apakah Anda yakin ingin menghapus kategori ini?"
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/slides_course_quiz.js:0
-msgid "Are you sure you want to delete this question \"<strong>%s</strong>\"?"
-msgstr "Apakah Anda yakin ingin menghapus pertanyaan ini \"<strong>%s</strong>\"?"
+msgid "Are you sure you want to delete this question \"%(title)s\"?"
+msgstr "Apakah Anda yakin Anda ingin menghapus pertanyaan ini \"%(title)s\"?"
 
 #. module: website_slides
 #. odoo-javascript
@@ -1612,14 +1811,12 @@ msgstr "Rata-Rata Ulasan"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 msgid "BUILDING BLOCKS DROPPED HERE WILL BE SHOWN ACROSS ALL LESSONS"
-msgstr ""
-"BLOK PENYUSUN YANG DILEPAS DI SINI AKAN DITUNJUKKAN DI SEMUA PELAJARAN"
+msgstr "BLOK PENYUSUN YANG DILEPAS DI SINI AKAN DITUNJUKKAN DI SEMUA PELAJARAN"
 
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/course_tag_add_dialog/course_tag_add_dialog.xml:0
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-#: code:addons/website_slides/static/src/js/slides_category_add.js:0
 msgid "Back"
 msgstr "Kembali"
 
@@ -1722,6 +1919,9 @@ msgstr "Tidak bisa ditandai sebagai belum selesai"
 
 #. module: website_slides
 #. odoo-javascript
+#: code:addons/website_slides/static/src/interactions/category_add.js:0
+#: code:addons/website_slides/static/src/interactions/category_delete.js:0
+#: code:addons/website_slides/static/src/interactions/enroll_email.js:0
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
 #: code:addons/website_slides/static/src/xml/slide_quiz_create.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_invite_view_form
@@ -1752,13 +1952,7 @@ msgid "Category"
 msgstr "Kategori"
 
 #. module: website_slides
-#: model:slide.channel.tag,name:website_slides.slide_channel_tag_other_1
-msgid "Certification"
-msgstr "Sertifikat"
-
-#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_res_config_settings__module_website_slides_survey
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
 msgid "Certifications"
 msgstr "Sertifikat-Sertifikat"
 
@@ -1767,12 +1961,6 @@ msgstr "Sertifikat-Sertifikat"
 #: model:gamification.goal.definition,name:website_slides.badge_data_certification_goal
 msgid "Certified Knowledge"
 msgstr "Pengetahuan Bersertifikat"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "Change video privacy settings"
-msgstr "Ganti pengaturan privasi video"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_partner__channel_id
@@ -1872,9 +2060,9 @@ msgid "Choose your wood!"
 msgstr "Pilih kayu Anda!"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
-msgid "Clear filters"
-msgstr "Bersihkan filter"
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+msgid "Clear Filters"
+msgstr "Bersihkan Filter"
 
 #. module: website_slides
 #. odoo-javascript
@@ -1893,10 +2081,11 @@ msgid "Click here to start the course"
 msgstr "Klik di sini untuk memulai kursus"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_results
 msgid "Click on \"New\" in the top-right corner to write your first course."
-msgstr "Klik pada \"Baru\" di pojok kanan-atas untuk menulis kursus pertama Anda."
+msgstr ""
+"Klik pada \"Baru\" di pojok kanan-atas untuk menulis kursus pertama Anda."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
@@ -1924,6 +2113,7 @@ msgstr "Klik pada <b>Kursus</b> Anda untuk kembali ke daftar isi."
 #: code:addons/website_slides/static/src/js/public/components/slide_quiz_finish_dialog/slide_quiz_finish_dialog.xml:0
 #: code:addons/website_slides/static/src/js/public/components/slide_share_dialog/slide_share_dialog.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.course_main
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_invite_view_form
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_share_modal_header
 msgid "Close"
@@ -1949,8 +2139,7 @@ msgstr "Warna-Warni"
 #: model_terms:ir.actions.act_window,help:website_slides.rating_rating_action_slide_channel
 msgid "Come back later to check the feedbacks given by your Attendees."
 msgstr ""
-"Kembali lagi nanti untuk memeriksa feedback yang diberikan oleh Peserta "
-"Anda."
+"Kembali lagi nanti untuk memeriksa feedback yang diberikan oleh Peserta Anda."
 
 #. module: website_slides
 #: model_terms:ir.actions.act_window,help:website_slides.slide_question_action_report
@@ -1979,9 +2168,9 @@ msgid ""
 "answering questions. In this course, you'll study those topics with "
 "activities about mathematics, science and logic."
 msgstr ""
-"Tugas umum bagi computer scientist adalah menanyakan dan menjawab pertanyaan"
-" yang tepat. Di kursus ini, Anda akan mempelajari topik-topik tersebut "
-"dengan aktivitas mengenai matematika, sains dan logika."
+"Tugas umum bagi computer scientist adalah menanyakan dan menjawab pertanyaan "
+"yang tepat. Di kursus ini, Anda akan mempelajari topik-topik tersebut dengan "
+"aktivitas mengenai matematika, sains dan logika."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_form_add
@@ -1989,8 +2178,8 @@ msgid ""
 "Common tasks for a computer scientist is asking the right questions and "
 "answering questions..."
 msgstr ""
-"Tugas umum bagi computer scientist adalah menanyakan dan menjawab pertanyaan"
-" yang tepat..."
+"Tugas umum bagi computer scientist adalah menanyakan dan menjawab pertanyaan "
+"yang tepat..."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
@@ -2036,7 +2225,7 @@ msgstr "Selesai"
 
 #. module: website_slides
 #. odoo-python
-#: code:addons/website_slides/models/slide_channel.py:0
+#: code:addons/website_slides/models/slide_channel_partner.py:0
 msgid "Completed Course"
 msgstr "Kursus yang Selesai"
 
@@ -2090,8 +2279,8 @@ msgid ""
 "available here. The tag \"<b>New</b>\" indicates that this lesson was "
 "created less than 7 days ago."
 msgstr ""
-"Selamat! Kursus pertama Anda tersedia. Mari kita lihat opsi yang tersedia di"
-" sini. Tag \"<b>Baru</b>\" mengindikasi bahwa pelajaran ini dibuat kurang "
+"Selamat! Kursus pertama Anda tersedia. Mari kita lihat opsi yang tersedia di "
+"sini. Tag \"<b>Baru</b>\" mengindikasi bahwa pelajaran ini dibuat kurang "
 "dari 7 hari yang lalu."
 
 #. module: website_slides
@@ -2103,8 +2292,8 @@ msgstr "Selamat, Anda telah mencapai peringkat baru!"
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/tours/slides_tour.js:0
 msgid ""
-"Congratulations, you've created your first course.<br/>Click on the title of"
-" this content to see it in fullscreen mode."
+"Congratulations, you've created your first course.<br/>Click on the title of "
+"this content to see it in fullscreen mode."
 msgstr ""
 "Selamat, Anda menyelesaikan kursus pertama Anda.<br/>Klik pada judul konten "
 "ini untuk melihatnya dalam mode fullscreen."
@@ -2142,13 +2331,6 @@ msgstr "Kontak Penanggungjawab"
 #: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
 msgid "Contact the responsible to enroll."
 msgstr "Hubungi penanggungjawab untuk mendaftar."
-
-#. module: website_slides
-#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_1_4
-#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_2_1
-#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_4_0
-msgid "Contact us"
-msgstr "Hubungi kami"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__slide_content_ids
@@ -2193,10 +2375,12 @@ msgstr "Multipurpose Internet Mail Extension"
 #: model_terms:ir.actions.act_window,help:website_slides.slide_slide_action
 msgid ""
 "Content are the lessons that compose a course\n"
-"                    <br>and can be of different types (presentations, documents, videos, ...)."
+"                    <br>and can be of different types (presentations, "
+"documents, videos, ...)."
 msgstr ""
 "Konten adalah pelajaran yang membuat kursus\n"
-"                    <br>dan dapat merupakan tipe-tipe berbeda (presentasi, dokumen, video, ...)."
+"                    <br>dan dapat merupakan tipe-tipe berbeda (presentasi, "
+"dokumen, video, ...)."
 
 #. module: website_slides
 #: model:ir.actions.act_window,name:website_slides.slide_slide_action
@@ -2214,6 +2398,7 @@ msgstr "Konten"
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
+#: model_terms:ir.ui.view,arch_db:website_slides.course_card
 msgid "Continue"
 msgstr "Lanjutkan"
 
@@ -2234,6 +2419,12 @@ msgstr "Salin Embed Code"
 #: code:addons/website_slides/static/src/js/public/components/slide_share_dialog/slide_share_dialog.js:0
 msgid "Copy Link"
 msgstr "Salin Link"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Copy the shareable link"
+msgstr "Salin link yang dapat dibagi"
 
 #. module: website_slides
 #: model:slide.answer,comment:website_slides.slide_slide_demo_1_4_question_0_0
@@ -2301,7 +2492,7 @@ msgstr "Jumlah Kursus"
 
 #. module: website_slides
 #. odoo-python
-#: code:addons/website_slides/models/slide_channel.py:0
+#: code:addons/website_slides/models/slide_channel_partner.py:0
 msgid "Course Finished"
 msgstr "Kursus yang Selesai"
 
@@ -2350,7 +2541,7 @@ msgstr "Kursus diberikan Peringkat"
 
 #. module: website_slides
 #. odoo-python
-#: code:addons/website_slides/models/slide_channel.py:0
+#: code:addons/website_slides/models/slide_channel_partner.py:0
 msgid "Course Set Uncompleted"
 msgstr "Kelompok Kursus Belum Selesai"
 
@@ -2375,7 +2566,7 @@ msgstr "Kelompok-Kelompok Tag Kursus"
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_tag_view_search
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_tag_view_tree
 msgid "Course Tags"
-msgstr "Tag-Tag Kursus"
+msgstr "Tag Kursus"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_form_add
@@ -2417,9 +2608,11 @@ msgid "Course: %s"
 msgstr "Kursus: %s"
 
 #. module: website_slides
+#. odoo-javascript
 #. odoo-python
 #: code:addons/website_slides/models/res_partner.py:0
 #: code:addons/website_slides/models/website.py:0
+#: code:addons/website_slides/static/src/website_builder/slides_searchbar_option.xml:0
 #: model:ir.actions.act_window,name:website_slides.slide_channel_action_report
 #: model:ir.ui.menu,name:website_slides.menu_slide_channel_pages
 #: model:ir.ui.menu,name:website_slides.website_slides_menu_courses
@@ -2427,23 +2620,24 @@ msgstr "Kursus: %s"
 #: model:ir.ui.menu,name:website_slides.website_slides_menu_report_courses
 #: model:website.menu,name:website_slides.website_menu_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_nav
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_bar
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_graph
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_search
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_tree
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_tree_report
-#: model_terms:ir.ui.view,arch_db:website_slides.slide_searchbar_input_snippet_options
 msgid "Courses"
-msgstr "Kursus-kursus"
+msgstr "Kursus"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.snippet_options
+#. odoo-javascript
+#: code:addons/website_slides/static/src/website_builder/courses_list_page_option_plugin.js:0
 msgid "Courses Page"
 msgstr "Halaman Kursus"
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__prerequisite_of_channel_ids
 msgid "Courses that have this course as prerequisite."
-msgstr "Kursus-kursus yang memiliki kursus ini sebagai prasyarat."
+msgstr "Kursus yang memiliki kursus ini sebagai prasyarat."
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__cover_properties
@@ -2471,6 +2665,11 @@ msgstr "Buat Tag Konten"
 #: model_terms:ir.actions.act_window,help:website_slides.slide_channel_tag_group_action
 msgid "Create a Course Group"
 msgstr "Buat Kelompok Kursus"
+
+#. module: website_slides
+#: model:ir.model,website_form_label:website_slides.model_res_partner
+msgid "Create a Customer"
+msgstr "Buat Pelanggan"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
@@ -2537,12 +2736,14 @@ msgid "DIY Furniture"
 msgstr "Furnitur DIY"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.slide_searchbar_input_snippet_options
+#. odoo-javascript
+#: code:addons/website_slides/static/src/website_builder/slides_searchbar_option_plugin.js:0
 msgid "Date (new to old)"
 msgstr "Tanggal (baru ke lama)"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.slide_searchbar_input_snippet_options
+#. odoo-javascript
+#: code:addons/website_slides/static/src/website_builder/slides_searchbar_option_plugin.js:0
 msgid "Date (old to new)"
 msgstr "Tanggal (lama ke baru)"
 
@@ -2568,13 +2769,22 @@ msgid "Defines the content that will be promoted on the course home page"
 msgstr "Mendefinisikan konten yang akan dipromosikan pada beranda kursus"
 
 #. module: website_slides
+#: model:ir.model.fields,help:website_slides.field_slide_channel__channel_type
+#: model:ir.model.fields,help:website_slides.field_slide_channel_partner__channel_type
+#: model:ir.model.fields,help:website_slides.field_slide_slide__channel_type
+msgid ""
+"Defines the course type (e.g., \"Training\" for interactive learning, or "
+"\"Documentation\" for resources and guides)."
+msgstr ""
+
+#. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__publish_template_id
 msgid ""
 "Defines the email your Attendees will receive each time you upload new "
 "content."
 msgstr ""
-"Mendefinisikan email Peserta Anda yang akan menerima konten baru setiap kali"
-" Anda mengunggah."
+"Mendefinisikan email Peserta Anda yang akan menerima konten baru setiap kali "
+"Anda mengunggah."
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__completed_template_id
@@ -2583,7 +2793,7 @@ msgid ""
 "your course."
 msgstr ""
 "Mendefinisikan email yang Peserta Anda akan terima ssekali setelah mereka "
-"mencapai akhir kursus Anda. "
+"mencapai akhir kursus Anda."
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__visibility
@@ -2594,7 +2804,7 @@ msgstr "Definisikan siapa yang dapat mengakses kursus dan konten Anda."
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_category_delete.js:0
+#: code:addons/website_slides/static/src/interactions/category_delete.js:0
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
 msgid "Delete"
@@ -2602,7 +2812,7 @@ msgstr "Hapus"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_category_delete.js:0
+#: code:addons/website_slides/static/src/interactions/category_delete.js:0
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list
 msgid "Delete Category"
 msgstr "Hapus Kategori"
@@ -2614,9 +2824,10 @@ msgid "Delete Question"
 msgstr "Hapus Pertanyaan"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/website_builder/slides_searchbar_option_plugin.js:0
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__description
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__description
-#: model_terms:ir.ui.view,arch_db:website_slides.slide_searchbar_input_snippet_options
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
 msgid "Description"
@@ -2639,13 +2850,6 @@ msgid "Discard"
 msgstr "Buang"
 
 #. module: website_slides
-#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_1_4
-#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_2_1
-#: model_terms:slide.slide,html_content:website_slides.slide_slide_demo_4_0
-msgid "Discover more"
-msgstr "Temukan lebih lanjut"
-
-#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.lesson_card
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 msgid "Dislike"
@@ -2665,6 +2869,15 @@ msgid "Display"
 msgstr "Tampilan"
 
 #. module: website_slides
+#: model:ir.model.fields,field_description:website_slides.field_base_partner_merge_automatic_wizard__display_name
+#: model:ir.model.fields,field_description:website_slides.field_gamification_challenge__display_name
+#: model:ir.model.fields,field_description:website_slides.field_gamification_karma_tracking__display_name
+#: model:ir.model.fields,field_description:website_slides.field_mail_activity__display_name
+#: model:ir.model.fields,field_description:website_slides.field_mail_message__display_name
+#: model:ir.model.fields,field_description:website_slides.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:website_slides.field_res_groups__display_name
+#: model:ir.model.fields,field_description:website_slides.field_res_partner__display_name
+#: model:ir.model.fields,field_description:website_slides.field_res_users__display_name
 #: model:ir.model.fields,field_description:website_slides.field_slide_answer__display_name
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__display_name
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_invite__display_name
@@ -2677,6 +2890,7 @@ msgstr "Tampilan"
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_partner__display_name
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_resource__display_name
 #: model:ir.model.fields,field_description:website_slides.field_slide_tag__display_name
+#: model:ir.model.fields,field_description:website_slides.field_website__display_name
 msgid "Display Name"
 msgstr "Nama Tampilan"
 
@@ -2714,13 +2928,11 @@ msgstr "Apakah Anda ingin membalas dengan benar?"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_course_enroll_email.js:0
+#: code:addons/website_slides/static/src/interactions/enroll_email.js:0
 msgid "Do you want to request access to this course?"
 msgstr "Apakah Anda ingin meminta akses ke kursus ini?"
 
 #. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.js:0
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_slide__slide_category__document
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
 msgid "Document"
@@ -2756,7 +2968,7 @@ msgid "Documents"
 msgstr "Dokumen"
 
 #. module: website_slides
-#: model:slide.channel.tag,name:website_slides.slide_channel_tag_other_2
+#: model:slide.channel.tag,name:website_slides.slide_channel_tag_dog_friendly
 msgid "Dog Friendly"
 msgstr "Dog Friendly"
 
@@ -2850,7 +3062,7 @@ msgstr "Elearning: Bagikan Kursus"
 #. module: website_slides
 #: model:mail.template,name:website_slides.slide_template_published
 msgid "Elearning: New Course Content Notification"
-msgstr "Elearning: Notifikasi Konten Baru Kursus "
+msgstr "Elearning: Notifikasi Konten Baru Kursus"
 
 #. module: website_slides
 #: model:mail.template,name:website_slides.mail_template_slide_channel_invite
@@ -2872,12 +3084,6 @@ msgstr "Templat email yang digunakan saat membagikan channel"
 #: model:ir.model.fields,help:website_slides.field_slide_channel__share_slide_template_id
 msgid "Email template used when sharing a slide"
 msgstr "Templat email yang digunakan saat membagikan slide"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_share_dialog/email_sharing_input.xml:0
-msgid "Email(s) sent."
-msgstr "Email terkirim."
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__embed_code
@@ -3055,6 +3261,11 @@ msgid "Filter &amp; order"
 msgstr "Filter &amp; urutkan"
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+msgid "Filters"
+msgstr "Penyaring"
+
+#. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/tours/slides_tour.js:0
 msgid "Finally you can click here to enjoy your content in fullscreen"
@@ -3096,27 +3307,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/tours/slides_tour.js:0
 msgid "First, let's add a <b>Document</b>. It has to be a .pdf file."
-msgstr ""
-"Pertama-tama, mari tambahkan <b>Dokumen</b>. Harus merupakan file .pdf."
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "First, upload the file on your Google Drive account."
-msgstr "Pertama-tama, unggah file pada akun Google Drive Anda."
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "First, upload your videos on Vimeo and mark them as"
-msgstr "Pertama-tama, unggah video Anda pada Vimeo dan tandai sebagai"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "First, upload your videos on YouTube and mark them as"
-msgstr ""
-"Pertama-tama, unggah video Anda pada YouTube dan tandai mereka sebagai"
+msgstr "Pertama-tama, mari tambahkan <b>Dokumen</b>. Harus merupakan file .pdf."
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__message_follower_ids
@@ -3162,8 +3353,8 @@ msgstr "Percobaan Keempat & Lebih"
 #: model_terms:slide.slide,description:website_slides.slide_slide_demo_5_2
 msgid "From a piece of wood to a fully functional furniture, step by step."
 msgstr ""
-"Dari sepotong kayu menjadi furnitur yang sepenuhnya fungsional, langkah demi"
-" langkah."
+"Dari sepotong kayu menjadi furnitur yang sepenuhnya fungsional, langkah demi "
+"langkah."
 
 #. module: website_slides
 #. odoo-python
@@ -3269,6 +3460,12 @@ msgstr "Google Drive Video"
 
 #. module: website_slides
 #. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Google Drive:"
+msgstr "Google Drive:"
+
+#. module: website_slides
+#. odoo-javascript
 #: code:addons/website_slides/static/src/activity/activity_patch.xml:0
 msgid "Grant Access"
 msgstr "Berikan Akses"
@@ -3282,13 +3479,6 @@ msgstr "Grafik Konten"
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_tag__group_id
 msgid "Group"
 msgstr "Grup"
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_partner_view_search
-#: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_partner_view_search
-#: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_search
-msgid "Group By"
-msgstr "Dikelompokkan berdasarkan"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_tag_group__name
@@ -3338,8 +3528,7 @@ msgstr "Memiliki Pesan"
 #: model_terms:slide.slide,description:website_slides.slide_slide_demo_1_6
 msgid "Here is How to get the Sweetest Strawberries you ever tasted!"
 msgstr ""
-"Berikut Bagaimana cara mendapatkan Stroberi Termanis yang pernah Anda "
-"cicipi!"
+"Berikut Bagaimana cara mendapatkan Stroberi Termanis yang pernah Anda cicipi!"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_nav
@@ -3362,6 +3551,12 @@ msgstr ""
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
 msgid "How do I add new content?"
 msgstr "Bagaimana cara saya menambahkan konten baru?"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "How to Add New Content:"
+msgstr "Cara Menambahkan Konten Baru:"
 
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_slide_demo_0_3
@@ -3395,20 +3590,8 @@ msgstr "Bagaimana cara menanam potted.list"
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "How to upload your PowerPoint Presentations or Word Documents?"
-msgstr "Bagaimana cara mengunggah Presentasi PowerPoint atau Dokumen Word?"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "How to upload your videos?"
-msgstr "Bagaimana cara mengunggah video Anda?"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "How to use Google Drive?"
-msgstr "Bagaimana cara menggunakan Google Drive?"
+msgid "How to upload Videos:"
+msgstr "Cara mengunggah Video:"
 
 #. module: website_slides
 #: model_terms:slide.slide,description:website_slides.slide_slide_demo_2_2
@@ -3423,6 +3606,15 @@ msgid "HowTo"
 msgstr "HowTo"
 
 #. module: website_slides
+#: model:ir.model.fields,field_description:website_slides.field_base_partner_merge_automatic_wizard__id
+#: model:ir.model.fields,field_description:website_slides.field_gamification_challenge__id
+#: model:ir.model.fields,field_description:website_slides.field_gamification_karma_tracking__id
+#: model:ir.model.fields,field_description:website_slides.field_mail_activity__id
+#: model:ir.model.fields,field_description:website_slides.field_mail_message__id
+#: model:ir.model.fields,field_description:website_slides.field_res_config_settings__id
+#: model:ir.model.fields,field_description:website_slides.field_res_groups__id
+#: model:ir.model.fields,field_description:website_slides.field_res_partner__id
+#: model:ir.model.fields,field_description:website_slides.field_res_users__id
 #: model:ir.model.fields,field_description:website_slides.field_slide_answer__id
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__id
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_invite__id
@@ -3435,6 +3627,7 @@ msgstr "HowTo"
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_partner__id
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_resource__id
 #: model:ir.model.fields,field_description:website_slides.field_slide_tag__id
+#: model:ir.model.fields,field_description:website_slides.field_website__id
 msgid "ID"
 msgstr "ID"
 
@@ -3479,16 +3672,6 @@ msgid ""
 msgstr ""
 "Bila Anda ingin yakin peserta Anda memahami dan menghafalkan konten, Anda "
 "dapat menambahkan Quiz pada pelajaran. Klik pada <b>Tambahkan Quiz</b>."
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid ""
-"If you want to use other types of files, you may want to use an external "
-"source (Google Drive) instead."
-msgstr ""
-"Bila ANda ingin menggunakan tipe file lain, Anda mungkin ingin menggunakan "
-"sumber eksternal (Google Drive)."
 
 #. module: website_slides
 #. odoo-javascript
@@ -3546,8 +3729,8 @@ msgstr "Sumber Gambar"
 #. odoo-python
 #: code:addons/website_slides/models/slide_channel.py:0
 msgid ""
-"Impossible to send emails. Select a \"Channel Share Template\" for courses "
-"%(course_names)s first"
+"Impossible to send emails. Select a \"Channel Share Template\" for courses %"
+"(course_names)s first"
 msgstr ""
 "Mustahil untuk mengirimkan email. Pilih \"Share Templat Channel\" untuk "
 "kursus %(course_names)s terlebih dahulu"
@@ -3556,11 +3739,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/website_slides/models/slide_slide.py:0
 msgid ""
-"Impossible to send emails. Select a \"Share Template\" for courses "
-"%(course_names)s first"
+"Impossible to send emails. Select a \"Share Template\" for courses %"
+"(course_names)s first"
 msgstr ""
-"Mustahil untuk mengirimkan email. Klik \"Share Templat\" untuk kursus "
-"%(course_names)s terlebih dahulu"
+"Mustahil untuk mengirimkan email. Klik \"Share Templat\" untuk kursus %"
+"(course_names)s terlebih dahulu"
 
 #. module: website_slides
 #: model:slide.answer,comment:website_slides.slide_slide_demo_1_4_question_0_1
@@ -3582,7 +3765,7 @@ msgstr "Tidak tepat! Meja adalah furnitur."
 #. module: website_slides
 #: model:slide.answer,comment:website_slides.slide_slide_demo_0_4_question_1_1
 msgid "Incorrect! Good luck digging a hole with a spoon..."
-msgstr "Tidak tepat! Sangat sulit menggali lobang dengan sendok... "
+msgstr "Tidak tepat! Sangat sulit menggali lobang dengan sendok..."
 
 #. module: website_slides
 #: model:slide.answer,comment:website_slides.slide_slide_demo_1_4_question_1_2
@@ -3731,6 +3914,11 @@ msgid "Is Published"
 msgstr "Dipublikasikan"
 
 #. module: website_slides
+#: model:ir.model.fields,field_description:website_slides.field_slide_channel__is_visible
+msgid "Is Visible On Website"
+msgstr "Apakah Terlihat Di Website"
+
+#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__is_category
 msgid "Is a category"
 msgstr "Apakah kategori"
@@ -3842,17 +4030,19 @@ msgstr "Ketahui diri Anda sendiri"
 #: model_terms:slide.channel,description:website_slides.slide_channel_demo_3_furn0
 #: model_terms:slide.channel,description_short:website_slides.slide_channel_demo_3_furn0
 msgid ""
-"Knowing which kind of wood to use depending on your application is important. In this course you\n"
+"Knowing which kind of wood to use depending on your application is "
+"important. In this course you\n"
 "will learn the basics of wood characteristics."
 msgstr ""
-"Penting untuk mengetahui kayu apa yang digunakan tergantung pada penerapan Anda. Di kursus ini Anda\n"
+"Penting untuk mengetahui kayu apa yang digunakan tergantung pada penerapan "
+"Anda. Di kursus ini Anda\n"
 "akan mempelajari dasar-dasar karakteristik kayu."
 
 #. module: website_slides
 #: model_terms:slide.slide,description:website_slides.slide_slide_demo_2_3
 msgid ""
-"Knowing wood characteristics is a requirement in order to know which kind of"
-" wood to use in a given situation."
+"Knowing wood characteristics is a requirement in order to know which kind of "
+"wood to use in a given situation."
 msgstr ""
 "Mengetahui karakteristik kayu adalah persyaratan untuk mengetahui kayu apa "
 "yang sebaiknya digunakan pada situasi yang berbeda-beda."
@@ -3926,7 +4116,8 @@ msgid "Latest achievements"
 msgstr "Pencapaian terkini"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.snippet_options
+#. odoo-javascript
+#: code:addons/website_slides/static/src/website_builder/courses_list_page_option.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.toggle_leaderboard
 msgid "Leaderboard"
 msgstr "Leaderboard"
@@ -3977,6 +4168,11 @@ msgid "Lessons"
 msgstr "Pelajaran-Pelajaran"
 
 #. module: website_slides
+#: model:slide.channel.tag.group,name:website_slides.slide_channel_tag_group_level
+msgid "Level"
+msgstr "Tingkatan"
+
+#. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_quiz_finish_dialog/slide_quiz_finish_dialog.js:0
 msgid "Level up!"
@@ -4005,16 +4201,14 @@ msgstr "Tautan..."
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_slide__document_google_url
-msgid ""
-"Link of the document (we currently only support Google Drive as source)"
+msgid "Link of the document (we currently only support Google Drive as source)"
 msgstr ""
 "Link dokumen (kami saat ini hanya mendukung Google Drive sebagai sumber)"
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_slide__image_google_url
 msgid "Link of the image (we currently only support Google Drive as source)"
-msgstr ""
-"Link gambar (kami saat ini hanya mendukung Google Drive sebagai sumber)"
+msgstr "Link gambar (kami saat ini hanya mendukung Google Drive sebagai sumber)"
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_slide__video_url
@@ -4058,7 +4252,7 @@ msgstr "Mailing"
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_slide_demo_2_0
 msgid "Main Trees Categories"
-msgstr "Kategori-Kategori Pohon Utama"
+msgstr "Kategori Pohon Utama"
 
 #. module: website_slides
 #: model:res.groups,name:website_slides.group_website_slides_manager
@@ -4122,6 +4316,16 @@ msgid "Menu Entry"
 msgstr "Entri Menu"
 
 #. module: website_slides
+#: model:ir.model,name:website_slides.model_base_partner_merge_automatic_wizard
+msgid "Merge Partner Wizard"
+msgstr ""
+
+#. module: website_slides
+#: model:ir.model,name:website_slides.model_mail_message
+msgid "Message"
+msgstr ""
+
+#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__message_has_error
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__message_has_error
 msgid "Message Delivery error"
@@ -4154,8 +4358,8 @@ msgid ""
 "Mighty forest just don't appear in a few weeks. Learn how time made our "
 "forests mighty and mysterious."
 msgstr ""
-"Hutan yang lebat tidak akan muncul dalam beberapa minggu. Pelajari bagaimana"
-" waktu membuat hutan lebat dan misterius."
+"Hutan yang lebat tidak akan muncul dalam beberapa minggu. Pelajari bagaimana "
+"waktu membuat hutan lebat dan misterius."
 
 #. module: website_slides
 #. odoo-javascript
@@ -4176,7 +4380,6 @@ msgstr "Sub-nav Mobile"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_sidebar
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
 msgid "More info"
 msgstr "Info lebih lanjut"
 
@@ -4194,14 +4397,15 @@ msgid "Most Voted"
 msgstr "Paling Banyak Upvote"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
-msgid "Most popular courses"
-msgstr "Kursus-kursus paling terkenal"
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Most formats via Google Drive (Docs, Sheets, PowerPoints, etc)."
+msgstr "Kebanyakan format melalui Google Drive (Doc, Sheet, PowerPoint, dsb)."
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__my_activity_date_deadline
 msgid "My Activity Deadline"
-msgstr "Deadline Kegiatan Saya"
+msgstr "Tenggat Aktivitas Saya"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_search
@@ -4209,14 +4413,9 @@ msgid "My Content"
 msgstr "Konten Saya"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
-msgid "My Courses"
-msgstr "Kursus-Kursus Saya"
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 msgid "My courses"
-msgstr "Kursus-kursus saya"
+msgstr "Kursus saya"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__name
@@ -4245,14 +4444,15 @@ msgid "New"
 msgstr "Baru"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/website_builder/courses_list_page_option.xml:0
+msgid "New Content Badge"
+msgstr "Lencana Konten Baru"
+
+#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__publish_template_id
 msgid "New Content Notification"
 msgstr "Notifikasi Konten Baru"
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.snippet_options
-msgid "New Content Ribbon"
-msgstr "Pita Konten Baru"
 
 #. module: website_slides
 #: model:ir.actions.act_window,name:website_slides.slide_channel_action_add
@@ -4272,11 +4472,6 @@ msgid "Newest"
 msgstr "Terbaru"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
-msgid "Newest courses"
-msgstr "Kursus-kursus terbaru"
-
-#. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_quiz_finish_dialog/slide_quiz_finish_dialog.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
@@ -4291,7 +4486,7 @@ msgstr "Kalender Acara Aktivitas Berikutnya"
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Batas Waktu Aktivitas Berikutnya"
+msgstr "Tenggat Aktivitas Berikutnya"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__activity_summary
@@ -4307,11 +4502,6 @@ msgstr "Tipe Aktivitas Berikutnya"
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_partner__next_slide_id
 msgid "Next Lesson"
 msgstr "Pelajaran Berikutnya"
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.slides_home_user_profile_small
-msgid "Next rank:"
-msgstr "Ranking berikutnya:"
 
 #. module: website_slides
 #. odoo-javascript
@@ -4337,8 +4527,8 @@ msgid "No Attendees Yet!"
 msgstr "Belum Ada Peserta!"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_results
 msgid "No Course created yet."
 msgstr "Belum ada Kursus yang dibuat."
 
@@ -4368,12 +4558,12 @@ msgid "No content was found using your search"
 msgstr "Tidak ada konten yang ditemukan menggunakan pencarian Anda"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_results
 msgid "No course was found matching your search"
 msgstr "Tidak ada kursus yang ditemukan yang cocok dengan pencarian Anda"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_results
 msgid "No course was found matching your search."
 msgstr "Tidak ada kursus yang ditemukan yang cocok dengan pencarian Anda."
 
@@ -4403,7 +4593,7 @@ msgid "No presentation available."
 msgstr "Tidak ada presentasi yang tersedia."
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_results
 msgid "No results found for '"
 msgstr "Tidak ada hasil yang ditemukan untuk '"
 
@@ -4487,7 +4677,7 @@ msgstr "Jumlah kesalahan"
 #: model:ir.model.fields,help:website_slides.field_slide_channel__message_needaction_counter
 #: model:ir.model.fields,help:website_slides.field_slide_slide__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr "Jumlah pesan yang membutuhkan tindakan"
+msgstr "Jumlah pesan yang membutuhkan action"
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__message_has_error_counter
@@ -4518,27 +4708,9 @@ msgid "Officer"
 msgstr "Petugas"
 
 #. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "On Google Drive"
-msgstr "Pada Google Drive"
-
-#. module: website_slides
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_channel__enroll__invite
 msgid "On Invitation"
 msgstr "Pada Undangan"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "On Vimeo"
-msgstr "Pada Vimeo"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "On YouTube"
-msgstr "Pada YouTube"
 
 #. module: website_slides
 #. odoo-javascript
@@ -4570,28 +4742,27 @@ msgid "Open"
 msgstr "Terbuka"
 
 #. module: website_slides
-#. odoo-python
-#: code:addons/website_slides/models/slide_channel.py:0
-msgid "Operation not supported"
-msgstr "Operation not supported"
-
-#. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel_invite__lang
 msgid ""
 "Optional translation language (ISO code) to select when sending out an "
-"email. If not set, the english version will be used. This should usually be "
-"a placeholder expression that provides the appropriate language, e.g. {{ "
-"object.partner_id.lang }}."
+"email. If not set, the main partner's language will be used. This should "
+"usually be a placeholder expression that provides the appropriate language, "
+"e.g. {{ object.partner_id.lang }}."
 msgstr ""
-"Bahasa terjemahan opsional (kode ISO) yang dipilih ketika mengirim email. "
-"Bila tidak diatur, versi Bahasa Inggris akan digunakan. Ini seharusnya "
+"Bahasa terjemahan opsional (kode ISO) untuk dipilih saat mengirimkan email. "
+"Bila tidak ditetapkan, bahasa utama partner akan digunakan. Ini biasanya "
 "merupakan expression placeholder yang menyediakan bahasa yang sesuai, "
-"misalnya {{ object.partner_id.lang }}."
+"contoh. {{ object.partner_id.lang }}."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
 msgid "Options"
 msgstr "Opsi"
+
+#. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+msgid "Overview"
+msgstr "Overview"
 
 #. module: website_slides
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_slide__slide_type__pdf
@@ -4602,6 +4773,12 @@ msgstr "PDF"
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__document_binary_content
 msgid "PDF Content"
 msgstr "Konten PDF"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "PDFs (local uploads)."
+msgstr "PDF (unggah lokal)."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
@@ -4636,25 +4813,20 @@ msgstr "Silakan"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_like.js:0
+#: code:addons/website_slides/static/src/interactions/slide_like.js:0
 msgid ""
-"Please <a href=\"/web/login?redirect=%(url)s\">login</a> or <a "
-"href=\"/web/signup?redirect=%(url)s\">create an account</a> to vote for this"
-" lesson"
+"Please %(a_login_open)slogin%(a_login_close)s or %(a_signup_open)screate an "
+"account%(a_signup_close)s to vote for this lesson"
 msgstr ""
-"Mohon <a href=\"/web/login?redirect=%(url)s\">login</a> atau <a "
-"href=\"/web/signup?redirect=%(url)s\">buat akun</a> untuk voting pelajaran "
-"ini"
+"Silakan %(a_login_open)slogin%(a_login_close)s atau %(a_signup_open)sbuat "
+"akun%(a_signup_close)s untuk voting pelajaran ini"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_like.js:0
-msgid ""
-"Please <a href=\"/web/login?redirect=%(url)s\">login</a> to vote for this "
-"lesson"
+#: code:addons/website_slides/static/src/interactions/slide_like.js:0
+msgid "Please %(a_login_open)slogin%(a_login_close)s to vote for this lesson"
 msgstr ""
-"Silakan <a href=\"/web/login?redirect=%(url)s\">login</a> untuk memvoting "
-"pelajaran ini"
+"Silakan %(a_login_open)slogin%(a_login_close)s untuk voting pelajaran ini"
 
 #. module: website_slides
 #. odoo-python
@@ -4666,7 +4838,7 @@ msgstr "Silakan masukkan link video Vimeo yang valid"
 #. odoo-python
 #: code:addons/website_slides/controllers/main.py:0
 msgid "Please enter valid Google Drive Link"
-msgstr "Silakan masukkan link video Google Drive yang valid "
+msgstr "Silakan masukkan link video Google Drive yang valid"
 
 #. module: website_slides
 #. odoo-javascript
@@ -4725,6 +4897,12 @@ msgid "Presentation"
 msgstr "Presentasi"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.js:0
+msgid "Presentation / Doc"
+msgstr "Presentasi / Doc"
+
+#. module: website_slides
 #: model:mail.message.subtype,description:website_slides.mt_channel_slide_published
 #: model:mail.message.subtype,name:website_slides.mt_channel_slide_published
 msgid "Presentation Published"
@@ -4763,6 +4941,7 @@ msgstr "Kemajuan"
 #: code:addons/website_slides/static/src/js/public/components/slide_quiz_finish_dialog/slide_xp_progress_bar.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.course_card
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_main
 msgid "Progress bar"
@@ -4779,7 +4958,8 @@ msgid "Public Views"
 msgstr "Public Views"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.slide_searchbar_input_snippet_options
+#. odoo-javascript
+#: code:addons/website_slides/static/src/website_builder/slides_searchbar_option_plugin.js:0
 msgid "Publication Date"
 msgstr "Tanggal Publikasi"
 
@@ -4816,8 +4996,8 @@ msgid ""
 "Publishing is restricted to the responsible of training courses or members "
 "of the publisher group for documentation courses"
 msgstr ""
-"Memposting dibatasi ke penanggungjawab kursus training atau anggota kelompok"
-" publisher untuk kursus dokumentasi"
+"Memposting dibatasi ke penanggungjawab kursus training atau anggota kelompok "
+"publisher untuk kursus dokumentasi"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_answer__question_id
@@ -4842,7 +5022,7 @@ msgstr "Pertanyaan"
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.js:0
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_slide__slide_category__quiz
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_slide__slide_type__quiz
-#: model:slide.channel.tag,name:website_slides.slide_channel_tag_other_0
+#: model:slide.channel.tag,name:website_slides.slide_channel_tag_quiz
 #: model_terms:ir.ui.view,arch_db:website_slides.gamification_karma_tracking_view_search
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_question_view_form
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
@@ -4894,7 +5074,7 @@ msgstr "Menilai Rata-Rata Teks"
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__rating_last_feedback
 msgid "Rating Last Feedback"
-msgstr "Nilai Feedback Terakhir"
+msgstr "Nilai Masukan Terakhir"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__rating_last_image
@@ -4939,11 +5119,6 @@ msgstr "Rating"
 #: model_terms:gamification.badge,description:website_slides.badge_data_karma
 msgid "Reach 2000 XP"
 msgstr "Mencapai 2000 XP"
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
-msgid "Reach new heights"
-msgstr "Mencapai record baru"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_invite__partner_ids
@@ -4991,15 +5166,20 @@ msgstr "Laporan"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_course_enroll_email.js:0
+#: code:addons/website_slides/static/src/interactions/enroll_email.js:0
 msgid "Request Access."
 msgstr "Minta Akses."
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_course_enroll_email.js:0
+#: code:addons/website_slides/static/src/interactions/enroll_email.js:0
 msgid "Request sent!"
 msgstr "Permintaan dikirim!"
+
+#. module: website_slides
+#: model:ir.model.fields,field_description:website_slides.field_mail_activity__request_partner_id
+msgid "Requesting Partner"
+msgstr "Partner yang Meminta"
 
 #. module: website_slides
 #. odoo-javascript
@@ -5017,11 +5197,10 @@ msgstr "Sumber Daya"
 #. module: website_slides
 #. odoo-python
 #: code:addons/website_slides/models/slide_slide_resource.py:0
-msgid ""
-"Resource %(resource_name)s is a link and should not contain a data file"
+msgid "Resource %(resource_name)s is a link and should not contain a data file"
 msgstr ""
-"Sumber daya %(resource_name)s adalah link dan seharusnya tidak memiliki file"
-" data"
+"Sumber daya %(resource_name)s adalah link dan seharusnya tidak memiliki file "
+"data"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_resource__resource_type
@@ -5071,7 +5250,7 @@ msgstr "Ulangi"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.profile_access_denied
 msgid "Return to the course."
-msgstr "Kembalikkan ke kursus."
+msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
@@ -5084,6 +5263,8 @@ msgid "Review Date"
 msgstr "Tanggal Tinjauan"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/interactions/portal_rating_composer.js:0
 #: model:ir.actions.act_window,name:website_slides.rating_rating_action_slide_channel
 #: model:ir.ui.menu,name:website_slides.website_slides_menu_report_reviews
 #: model_terms:ir.ui.view,arch_db:website_slides.course_main
@@ -5093,6 +5274,12 @@ msgstr "Tanggal Tinjauan"
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
 msgid "Reviews"
 msgstr "Tinjauan"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/interactions/portal_rating_composer.js:0
+msgid "Reviews (%s)"
+msgstr "Tinjauan (%s)"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__quiz_fourth_attempt_reward
@@ -5118,6 +5305,11 @@ msgstr "Reward: percobaan ketiga"
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
 msgid "Rewards"
 msgstr "Hadiah"
+
+#. module: website_slides
+#: model:slide.channel.tag.group,name:website_slides.slide_channel_tag_group_role
+msgid "Role"
+msgstr "Peran"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__is_seo_optimized
@@ -5146,9 +5338,9 @@ msgstr "Sampel"
 
 #. module: website_slides
 #. odoo-javascript
+#: code:addons/website_slides/static/src/interactions/category_add.js:0
 #: code:addons/website_slides/static/src/js/public/components/slide_unsubscribe_dialog/slide_unsubscribe_dialog.xml:0
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_category.xml:0
-#: code:addons/website_slides/static/src/js/slides_category_add.js:0
 #: code:addons/website_slides/static/src/xml/slide_quiz_create.xml:0
 msgid "Save"
 msgstr "Simpan"
@@ -5158,13 +5350,6 @@ msgstr "Simpan"
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_category.xml:0
 msgid "Save and Publish"
 msgstr "Simpan dan Publikasikan"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "Save your presentations or documents as PDF files and upload them."
-msgstr ""
-"Simpan presentasi atau dokumen Anda sebagai file PDF dan unggah mereka."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.rating_rating_view_tree_slide_channel
@@ -5183,9 +5368,14 @@ msgid "Search Contents"
 msgstr "Cari Konten"
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_bar
+msgid "Search Courses"
+msgstr ""
+
+#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_nav
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_search_bar
 msgid "Search courses"
 msgstr "Cari kursus"
 
@@ -5243,7 +5433,7 @@ msgstr "Pilih SecaraManual"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_category.js:0
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_category.xml:0
 msgid "Select or create a category"
 msgstr "Pilih atau buat kategori"
 
@@ -5261,7 +5451,7 @@ msgstr "Pilih atau buat kelompok tag"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_select_tags.xml:0
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_category.xml:0
 msgid "Select or create tags"
 msgstr "Pilih atau buat tag"
 
@@ -5336,12 +5526,26 @@ msgid "Sequence"
 msgstr "Urutan"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Set file permissions to"
+msgstr "Tetapkan izin file menjadi"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Set permissions to"
+msgstr "Tetapkan izin menjadi"
+
+#. module: website_slides
 #: model:ir.actions.act_window,name:website_slides.website_slides_action_settings
 #: model:ir.ui.menu,name:website_slides.website_slides_menu_config_settings
 msgid "Settings"
 msgstr "Pengaturan"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
 msgid "Share"
@@ -5486,15 +5690,6 @@ msgid "Signed In"
 msgstr "Signed in"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
-msgid ""
-"Skill up and have an impact! Your business career starts here.<br/>Time to "
-"start a course."
-msgstr ""
-"Tingkatkan ketrampilan untuk mulai melakukan perubahan! Karir bisnis Anda "
-"dimulai di sini.<br/>Waktunya untuk memulai kursus."
-
-#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_resource__slide_id
 msgid "Slide"
 msgstr "Slide"
@@ -5540,16 +5735,16 @@ msgstr "Gambar slide"
 #. odoo-python
 #: code:addons/website_slides/controllers/main.py:0
 msgid ""
-"Slide with questions must be marked as done when submitting all good answers"
-" "
+"Slide with questions must be marked as done when submitting all good answers "
 msgstr ""
-"Slide dengan pertanyaan yang harus ditandai sebagai selesai saat menyerahkan"
-" semua jawaban yang bagu"
+"Slide dengan pertanyaan yang harus ditandai sebagai selesai saat menyerahkan "
+"semua jawaban yang bagu "
 
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/xml/website_slides_fullscreen.xml:0
 #: model:ir.model,name:website_slides.model_slide_slide
+#: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
 msgid "Slides"
 msgstr "Slide"
 
@@ -5591,6 +5786,11 @@ msgid "Start at Page"
 msgstr "Mulai di Halama"
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.course_card
+msgid "Start now"
+msgstr "Mulai Sekarang"
+
+#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
 msgid "Start this Course"
 msgstr "Mulai Kursus ini"
@@ -5603,11 +5803,6 @@ msgid "Start with the customer – find out what they want and give it to them."
 msgstr ""
 "Mulai dengan pelanggan –  cari apa yang mereka inginkan dan berikan ke "
 "mereka."
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
-msgid "Start your online course today!"
-msgstr "Mulai kursus online Anda hari ini!"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_partner_view_search
@@ -5667,8 +5862,8 @@ msgstr "Informasi subscriber"
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_slide__slide_type
 msgid ""
-"Subtype of the slide category, allows more precision on the actual file type"
-" / source type."
+"Subtype of the slide category, allows more precision on the actual file "
+"type / source type."
 msgstr ""
 "Subtipe untuk kategori slide, memungkinkan akurasi lebih baik untuk tipe "
 "file/sumber yang sebenarnya."
@@ -5678,6 +5873,12 @@ msgstr ""
 #: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
 msgid "Succeed and gain karma"
 msgstr "Dapatkan karma bila sukses"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Supported Files:"
+msgstr "File yang Didukung:"
 
 #. module: website_slides
 #. odoo-javascript
@@ -5701,8 +5902,8 @@ msgstr "Nama Tag"
 #: model:ir.model.fields,help:website_slides.field_slide_channel_tag__color
 msgid ""
 "Tag color used in both backend and website. No color means no display in "
-"kanban or front-end, to distinguish internal tags from public categorization"
-" tags"
+"kanban or front-end, to distinguish internal tags from public categorization "
+"tags"
 msgstr ""
 "Warna tag digunakan pada backend dan website. Tidak ada warna berarti tidak "
 "ada tampilan di kanban atau front-end, untuk membedakkan tag internal dari "
@@ -5796,8 +5997,8 @@ msgstr ""
 #. module: website_slides
 #: model:ir.model.constraint,message:website_slides.constraint_slide_channel_check_enroll
 msgid ""
-"The Enroll Policy should be set to 'On Invitation' when visibility is set to"
-" 'Course Attendees'"
+"The Enroll Policy should be set to 'On Invitation' when visibility is set to "
+"'Course Attendees'"
 msgstr ""
 "Kebijakan Pendaftaran harus ditetapkan sebagai 'Pada undangan' saat "
 "visibilitas ditetapkan sebagai 'Peserta Kursus'"
@@ -5813,20 +6014,9 @@ msgstr ""
 "di antarmuka Google."
 
 #. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid ""
-"The Google Drive link to use here can be obtained by clicking the \"Share\" "
-"button in the Google interface."
-msgstr ""
-"Link Google Drive untuk digunakan di sini dapat didapatkan dengan mengeklik "
-"tombol \"Share\" di antarmuka Google."
-
-#. module: website_slides
 #: model:ir.model.constraint,message:website_slides.constraint_slide_channel_partner_check_completion
 msgid ""
-"The completion of a channel is a percentage and should be between 0% and "
-"100."
+"The completion of a channel is a percentage and should be between 0% and 100."
 msgstr ""
 "Tingkat penyelesaian channel adalah persentase dan harus di antara 0% dan "
 "100."
@@ -5861,11 +6051,18 @@ msgstr ""
 "judul"
 
 #. module: website_slides
+#: model:ir.model.fields,help:website_slides.field_slide_channel__website_absolute_url
+#: model:ir.model.fields,help:website_slides.field_slide_channel_tag_group__website_absolute_url
+#: model:ir.model.fields,help:website_slides.field_slide_slide__website_absolute_url
+msgid "The full absolute URL to access the document through the website."
+msgstr "URL absolut lengkap untuk mengakses dokumen melalui website."
+
+#. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__website_url
 #: model:ir.model.fields,help:website_slides.field_slide_channel_tag_group__website_url
 #: model:ir.model.fields,help:website_slides.field_slide_slide__website_url
-msgid "The full URL to access the document through the website."
-msgstr "URL lengkap untuk mengakses dokumen melalui website."
+msgid "The full relative URL to access the document through the website."
+msgstr "URL relatif lengkap untuk mengakses dokumen melalui website."
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_slide__can_self_mark_completed
@@ -5878,25 +6075,9 @@ msgid "The slide can be marked as not completed and the progression"
 msgstr "Slide dapat ditansai sebagai tidak selesai dan progres"
 
 #. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid ""
-"The video link to input here can be obtained by using the 'share' button in "
-"the Vimeo interface."
-msgstr ""
-"Link video untuk diinput di sini bisa didapatkan dengan menggunakan tombol "
-"'Share' di antarmuka Vimeo."
-
-#. module: website_slides
 #: model:ir.model.constraint,message:website_slides.constraint_slide_slide_partner_check_vote
 msgid "The vote must be 1, 0 or -1."
 msgstr "Vote harus merupakan 1, 0 atau -1."
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "Then, go into the file permissions and set it as \"Anyone with the link\"."
-msgstr "Lalu, pergi ke izin file dan tetapkan sebagai \"Siapapun dengan link\"."
 
 #. module: website_slides
 #: model:slide.tag,name:website_slides.slide_tag_demo_theory
@@ -5998,18 +6179,16 @@ msgstr "Ini adalah jawaban yang benar, selamat"
 #. odoo-python
 #: code:addons/website_slides/models/slide_question.py:0
 msgid ""
-"This question must have at least one correct answer and one incorrect "
-"answer."
+"This question must have at least one correct answer and one incorrect answer."
 msgstr ""
-"Pertanyaan ini harus memiliki setidaknya satu jawaban benar dan satu jawaban"
-" tidak benar."
+"Pertanyaan ini harus memiliki setidaknya satu jawaban benar dan satu jawaban "
+"tidak benar."
 
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/slides_course_quiz.js:0
 msgid "This quiz is already done. Retaking it is not possible."
-msgstr ""
-"Quiz ini sudah selesai. Anda tidak bisa melakukan ulang quiz ini lagi."
+msgstr "Quiz ini sudah selesai. Anda tidak bisa melakukan ulang quiz ini lagi."
 
 #. module: website_slides
 #. odoo-python
@@ -6031,16 +6210,6 @@ msgstr "Video ini sudah tersedia di channel ini pada konten berikut: %s"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid ""
-"Through Google Drive, we support most common types of documents.\n"
-"            Including regular documents (Google Doc, .docx), Sheets (Google Sheet, .xlsx), PowerPoints, ..."
-msgstr ""
-"Melalui Google Drive, kita mendukung sebagian besar tipe-tipe dokumen yang umum.\n"
-"                                        Termasuk dokumen-dokumen reguler (Google Doc, .docx), Sheets (Google Sheet, .xlsx), PowerPoints, ..."
-
-#. module: website_slides
-#. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_category.xml:0
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__name
 msgid "Title"
@@ -6048,8 +6217,6 @@ msgstr "Judul"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
 msgid "Toggle navigation"
 msgstr "Navigasi beralih"
 
@@ -6151,8 +6318,7 @@ msgstr "URL file Google Drive atau URL video Youtube"
 #. odoo-python
 #: code:addons/website_slides/wizard/slide_channel_invite.py:0
 msgid "Unable to post message, please configure the sender's email address."
-msgstr ""
-"Tidak dapat memposting pesan, mohon konfigurasi alamat email pengirim."
+msgstr "Tidak dapat memposting pesan, mohon konfigurasi alamat email pengirim."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_partner_view_tree
@@ -6179,20 +6345,27 @@ msgstr "Website Tidak Diketahui"
 
 #. module: website_slides
 #. odoo-javascript
+#: code:addons/website_slides/static/src/interactions/slide_like.js:0
 #: code:addons/website_slides/static/src/js/slides_course_join.js:0
-#: code:addons/website_slides/static/src/js/slides_slide_like.js:0
 msgid "Unknown error"
 msgstr "Error tidak diketahui"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_course_enroll_email.js:0
+#: code:addons/website_slides/static/src/interactions/enroll_email.js:0
 msgid "Unknown error, try again."
 msgstr "Error tidak diketahui, coba lagi."
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Unlisted"
+msgstr "Unlisted"
+
+#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_card
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 #: model_terms:ir.ui.view,arch_db:website_slides.lesson_card
 msgid "Unpublished"
 msgstr "Belum dipublikasikan"
@@ -6220,10 +6393,34 @@ msgstr "Unggah Kelompok"
 
 #. module: website_slides
 #. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Upload a PDF file from your computer or share a Google Drive link."
+msgstr "Unggah file PDF dari komputer Anda atau bagikan link Google Drive."
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Upload as"
+msgstr "Unggah sebagai"
+
+#. module: website_slides
+#. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_source_types.xml:0
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_slide__source_type__local_file
 msgid "Upload from Device"
 msgstr "Unggah dari Perangkat"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Upload the file to Drive."
+msgstr "Unggah file ke Drive."
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Upload the file to Google Drive."
+msgstr "Unggah file ke Google Drive."
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__user_id
@@ -6250,14 +6447,19 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_invite_view_form
 msgid "Use template"
-msgstr "Gunakan templat"
+msgstr "Menggunakan template"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Use the"
+msgstr "Gunakan"
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__tag_ids
 msgid "Used to categorize and filter displayed channels/courses"
 msgstr ""
-"Digunakan untuk mengkategorikan dan memfilter channel/sumber yang "
-"ditampilkan"
+"Digunakan untuk mengkategorikan dan memfilter channel/sumber yang ditampilkan"
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__color
@@ -6273,6 +6475,12 @@ msgstr "Pengguna"
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__user_vote
 msgid "User vote"
 msgstr "Voting user"
+
+#. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Using Google Drive:"
+msgstr "Menggunakan Google Drive:"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_question_view_form
@@ -6314,13 +6522,13 @@ msgid "Videos"
 msgstr "Video-Video"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+#: model_terms:ir.ui.view,arch_db:website_slides.slides_home_user_profile_small
 msgid "View"
 msgstr "Tampilan"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_home
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 #: model_terms:ir.ui.view,arch_db:website_slides.slides_home_user_achievements_small
 #: model_terms:ir.ui.view,arch_db:website_slides.toggle_leaderboard
 msgid "View all"
@@ -6355,6 +6563,12 @@ msgid "Vimeo Video"
 msgstr "Video Vimeo"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "Vimeo:"
+msgstr "Vimeo:"
+
+#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__website_published
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_tag_group__website_published
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__website_published
@@ -6380,7 +6594,7 @@ msgstr "Suara"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_like.js:0
+#: code:addons/website_slides/static/src/interactions/slide_like.js:0
 msgid "Votes and comments are disabled for this course"
 msgstr "Voting dan komentar dinonaktifkan untuk kursus ini"
 
@@ -6424,6 +6638,13 @@ msgid "Website / Slides"
 msgstr "Website / Slide"
 
 #. module: website_slides
+#: model:ir.model.fields,field_description:website_slides.field_slide_channel__website_absolute_url
+#: model:ir.model.fields,field_description:website_slides.field_slide_channel_tag_group__website_absolute_url
+#: model:ir.model.fields,field_description:website_slides.field_slide_slide__website_absolute_url
+msgid "Website Absolute URL"
+msgstr "URL Absolut Website"
+
+#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__website_message_ids
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__website_message_ids
 msgid "Website Messages"
@@ -6440,7 +6661,7 @@ msgstr "URL Websi8te"
 #: model:ir.model.fields,help:website_slides.field_slide_channel__website_message_ids
 #: model:ir.model.fields,help:website_slides.field_slide_slide__website_message_ids
 msgid "Website communication history"
-msgstr "Sejarah komunikasi situs"
+msgstr "Riwayat komunikasi situs"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__website_meta_description
@@ -6477,12 +6698,6 @@ msgstr ""
 "pada <b>\"Baru\"</b> untuk menulis kursus pertama Anda."
 
 #. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "What does"
-msgstr "Apa yang"
-
-#. module: website_slides
 #: model:slide.question,question:website_slides.slide_slide_demo_0_4_question_0
 msgid "What is a strawberry?"
 msgstr "Apa itu stroberi?"
@@ -6493,21 +6708,9 @@ msgid "What is the best tool to dig a hole for your plants?"
 msgstr "Apa alat terbaik untuk mengganti lobang untuk tanaman Anda?"
 
 #. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "What types of documents do we support?"
-msgstr "Tipe-tipe dokumen apa yang kita dukung?"
-
-#. module: website_slides
 #: model:slide.answer,text_value:website_slides.slide_slide_demo_1_4_question_1_2
 msgid "What was the question again?"
 msgstr "Apa tadi pertanyaannya?"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "When using local files, we only support PDF files."
-msgstr "Saat menggunakan file lokal, kita hanya mendukung file PDF."
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel_invite__enroll_mode
@@ -6515,8 +6718,8 @@ msgid ""
 "Whether invited partners will be added as enrolled. Otherwise, they will be "
 "added as invited."
 msgstr ""
-"Apakah partner yang diundang akan ditambahkan sebagai terdaftar. Bila tidak,"
-" mereka akan ditambahkan sebagai diundang."
+"Apakah partner yang diundang akan ditambahkan sebagai terdaftar. Bila tidak, "
+"mereka akan ditambahkan sebagai diundang."
 
 #. module: website_slides
 #: model_terms:slide.slide,description:website_slides.slide_slide_demo_4_1
@@ -6524,8 +6727,8 @@ msgid ""
 "Which wood type is best for my solid wood furniture? That's the question we "
 "help you answer in this video!"
 msgstr ""
-"Tipe kayu apa yang terbaik untuk furnitur kayu padat? Itulah pertanyaan yang"
-" kami bantu Anda jawab di video ini!"
+"Tipe kayu apa yang terbaik untuk furnitur kayu padat? Itulah pertanyaan yang "
+"kami bantu Anda jawab di video ini!"
 
 #. module: website_slides
 #. odoo-javascript
@@ -6535,7 +6738,7 @@ msgid ""
 "some questions and gaining some karma points"
 msgstr ""
 "Dengan Quiz Anda dapat memastikan murid tetap fokus dan termotivasi dengan "
-"menjawab beberapa pertaan dan mdapatkan "
+"menjawab beberapa pertaan dan mdapatkan"
 
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_category_demo_2_1
@@ -6583,19 +6786,20 @@ msgid ""
 "readers."
 msgstr ""
 "Tulis satu atau dua paragraf mendeskripsikan produk, layanan atau fitur "
-"tertentu milik Anda.<br> Agar sukses konten Anda harus berguna untuk pembaca"
-" Anda"
+"tertentu milik Anda.<br> Agar sukses konten Anda harus berguna untuk pembaca "
+"Anda"
 
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_quiz_finish_dialog/slide_quiz_finish_dialog.xml:0
 #: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
+#: model_terms:ir.ui.view,arch_db:website_slides.slides_home_user_profile_small
 msgid "XP"
 msgstr "XP"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_course_enroll_email.js:0
+#: code:addons/website_slides/static/src/interactions/enroll_email.js:0
 #: code:addons/website_slides/static/src/js/slides_course_quiz.js:0
 #: model:slide.answer,text_value:website_slides.slide_slide_demo_1_4_question_0_0
 #: model:slide.answer,text_value:website_slides.slide_slide_demo_1_4_question_1_0
@@ -6609,8 +6813,8 @@ msgstr "Ya"
 #. odoo-python
 #: code:addons/website_slides/models/slide_channel.py:0
 msgid ""
-"You are not allowed to add members to this course. Please contact the course"
-" responsible or an administrator."
+"You are not allowed to add members to this course. Please contact the course "
+"responsible or an administrator."
 msgstr ""
 "Anda tidak diizinkan untuk menambahkan anggota ke kursus ini. Silakan "
 "hubungi penanggungjawab kursus atau administrator."
@@ -6699,6 +6903,14 @@ msgstr ""
 
 #. module: website_slides
 #. odoo-python
+#: code:addons/website_slides/models/base_partner_merge.py:0
+msgid ""
+"You cannot merge these contacts because multiple contacts are enrolled in "
+"the same courses: %s"
+msgstr ""
+
+#. module: website_slides
+#. odoo-python
 #: code:addons/website_slides/controllers/main.py:0
 msgid "You cannot upload on this channel."
 msgstr "Anda tidak dapat mengunggah pada channel ini"
@@ -6717,13 +6929,13 @@ msgstr "Anda tidak memiliki izin untuk mengakses kursus ini."
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_like.js:0
+#: code:addons/website_slides/static/src/interactions/slide_like.js:0
 msgid "You don't have access to this lesson"
 msgstr "Anda tidak memiliki akses ke pelajaran ini"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_like.js:0
+#: code:addons/website_slides/static/src/interactions/slide_like.js:0
 msgid "You don't have enough karma to vote"
 msgstr "Anda tidak memiliki karma yang mencukupi untuk voting"
 
@@ -6761,7 +6973,6 @@ msgid "You have to sign in before"
 msgstr "Anda harus sign in sebelu"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_home
 msgid "You may now participate in our eLearning."
 msgstr "Anda sekarang dapat berpartisipasi dalam eLearning kami."
@@ -6774,7 +6985,7 @@ msgstr "Anda harus log in untuk menyerahkan quiz."
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/slides_slide_like.js:0
+#: code:addons/website_slides/static/src/interactions/slide_like.js:0
 msgid "You must be member of this course to vote"
 msgstr "Anda harus merupakan anggota kursus ini untuk dapat voting"
 
@@ -6806,19 +7017,15 @@ msgid "YouTube Video"
 msgstr "Video YouTube"
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "YouTube:"
+msgstr "YouTube:"
+
+#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.mail_notification_channel_invite
 msgid "Your"
 msgstr "Anda"
-
-#. module: website_slides
-#: model:slide.channel.tag.group,name:website_slides.slide_channel_tag_group_level
-msgid "Your Level"
-msgstr "Level Anda"
-
-#. module: website_slides
-#: model:slide.channel.tag.group,name:website_slides.slide_channel_tag_group_role
-msgid "Your Role"
-msgstr "Peran Anda"
 
 #. module: website_slides
 #: model_terms:ir.actions.act_window,help:website_slides.slide_channel_action_overview
@@ -6831,14 +7038,20 @@ msgstr ""
 "                    Unggah konten, siapkan hadiah, kelola peserta..."
 
 #. module: website_slides
+#. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_share_dialog/email_sharing_input.xml:0
+msgid "Your email(s) will arrive shortly."
+msgstr "Email Anda akan datang sebentar lagi."
+
+#. module: website_slides
 #. odoo-python
 #: code:addons/website_slides/models/slide_slide.py:0
 msgid ""
 "Your file could not be found on Google Drive, please check the link and/or "
 "privacy settings"
 msgstr ""
-"File Anda tidak dapat ditemukan di Google Drive, silakan periksa link "
-"dan/atau pengaturan privasi"
+"File Anda tidak dapat ditemukan di Google Drive, silakan periksa link dan/"
+"atau pengaturan privasi"
 
 #. module: website_slides
 #. odoo-javascript
@@ -6856,11 +7069,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/website_slides/models/slide_slide.py:0
 msgid ""
-"Your video could not be found on Vimeo, please check the link and/or privacy"
-" settings"
+"Your video could not be found on Vimeo, please check the link and/or privacy "
+"settings"
 msgstr ""
 "Video Anda tidak dapat ditemukan di Vimeo, silakan periksa link dan/atau "
-"pengaturan privasi "
+"pengaturan privasi"
 
 #. module: website_slides
 #. odoo-python
@@ -6870,7 +7083,7 @@ msgid ""
 "privacy settings"
 msgstr ""
 "Video Anda tidak dapat ditemukan di YouTube, silakan periksa link dan/atau "
-"pengaturan privasi "
+"pengaturan privasi"
 
 #. module: website_slides
 #. odoo-python
@@ -6879,12 +7092,6 @@ msgid "a course"
 msgstr "kursus"
 
 #. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.achievement_card
-msgid "achieved"
-msgstr "diraih"
-
-#. module: website_slides
-#: model_terms:ir.ui.view,arch_db:website_slides.courses_all
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_home
 msgid "and join this Community"
 msgstr "dan bergabung ke Komunitas ini"
@@ -6907,10 +7114,22 @@ msgstr "breadcrumb"
 
 #. module: website_slides
 #. odoo-javascript
+#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
+msgid "button to get a link"
+msgstr "tombol untuk mendapatkan link"
+
+#. module: website_slides
+#. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_share_dialog/email_sharing_input.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_social_email
 msgid "by email."
 msgstr "dengan email."
+
+#. module: website_slides
+#. odoo-python
+#: code:addons/website_slides/models/slide_channel.py:0
+msgid "copy"
+msgstr "salin"
 
 #. module: website_slides
 #. odoo-javascript
@@ -6921,7 +7140,7 @@ msgstr "kursus"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
 msgid "courses"
-msgstr "kursus-kursus"
+msgstr "kursus"
 
 #. module: website_slides
 #. odoo-javascript
@@ -6981,12 +7200,6 @@ msgid "e.g. \"Which animal cannot fly?\""
 msgstr "contoh \"Binatang mana yang tidak bisa terbang?\""
 
 #. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/xml/slide_quiz_create.xml:0
-msgid "e.g. \"{{placeholder || \"another animal\"}}\""
-msgstr "contoh. \"{{placeholder || \"another animal\"}}\""
-
-#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_form_add
 msgid "e.g. Computer Science for kids"
 msgstr "contoh Computer Science untuk anak-anak"
@@ -6994,8 +7207,8 @@ msgstr "contoh Computer Science untuk anak-anak"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
 msgid ""
-"e.g. In this video, we'll give you the keys on how Odoo can help you to grow"
-" your business. At the end, we'll propose you a quiz to test your knowledge."
+"e.g. In this video, we'll give you the keys on how Odoo can help you to grow "
+"your business. At the end, we'll propose you a quiz to test your knowledge."
 msgstr ""
 "contoh Di video ini, kami akan memberikan Anda inti-inti penting bagaimana "
 "Odoo dapat membantu Anda mengembangkan bisnis Anda. Di akhir video, kami "
@@ -7017,7 +7230,10 @@ msgid "e.g. Your Level"
 msgstr "contoh Level Anda"
 
 #. module: website_slides
+#. odoo-python
+#: code:addons/website_slides/controllers/main.py:0
 #: model:ir.ui.menu,name:website_slides.website_slides_menu_root
+#: model:res.groups.privilege,name:website_slides.res_groups_privilege_elearning
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
 msgid "eLearning"
 msgstr "eLearning"
@@ -7035,39 +7251,20 @@ msgstr "Gambaran Umum eLearning"
 
 #. module: website_slides
 #. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "for 'Private' videos and similar to"
-msgstr "untuk video 'Privat' dan yang mirip dengan"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "for public ones."
-msgstr "untuk yang publik."
-
-#. module: website_slides
-#. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_share_dialog/email_sharing_input.xml:0
 msgid "friend1@email.com, friend2@email.com"
 msgstr "teman1@email.com, teman2@email.com"
+
+#. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.courses_my
+msgid "hours"
+msgstr "jam"
 
 #. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
 msgid "https://drive.google.com/file/d/ABC/view?usp=sharing"
 msgstr "https://drive.google.com/file/d/ABC/view?usp=sharing"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "https://vimeo.com/558907333/30da9ff3d8"
-msgstr "https://vimeo.com/558907333/30da9ff3d8"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "https://vimeo.com/558907555"
-msgstr "https://vimeo.com/558907555"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
@@ -7081,28 +7278,6 @@ msgstr "bergabung"
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_social_email
 msgid "login"
 msgstr "login"
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid ""
-"mean? The Vimeo \"Private\" privacy setting means it is a video which can be viewed only by the users with the link to it.\n"
-"                Your video will never come up in the search results nor on your channel."
-msgstr ""
-"? Pengaturan privasi \"Privat\" Vimeo berarti video hanya dapat dilihat oleh user yang memiliki link ke video.\n"
-"                                    Video Anda tidak akan pernah muncul di hasil pencarian atau pada channel Anda."
-
-#. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid ""
-"means? The YouTube \"unlisted\" means it is a video which can be viewed only"
-" by the users with the link to it. Your video will never come up in the "
-"search results nor on your channel."
-msgstr ""
-"artinya? Pengaturan privasi \"unlisted\" YouTube berarti video hanya dapat "
-"dilihat oleh user yang memiliki link ke video. Video Anda tidak akan pernah "
-"muncul di hasil pencarian atau pada channel Anda."
 
 #. module: website_slides
 #. odoo-javascript
@@ -7130,6 +7305,12 @@ msgid "sign in"
 msgstr "sign in"
 
 #. module: website_slides
+#. odoo-python
+#: code:addons/website_slides/models/gamification_karma_tracking.py:0
+msgid "slide.channel"
+msgstr "slide.channel"
+
+#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
 msgid "start"
 msgstr "mulai"
@@ -7137,7 +7318,7 @@ msgstr "mulai"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_card
 msgid "steps"
-msgstr "langkah-langkah"
+msgstr "langkah"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.join_course_link
@@ -7189,12 +7370,6 @@ msgid "to unlock"
 msgstr "untuk membuka kunci"
 
 #. module: website_slides
-#. odoo-javascript
-#: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
-msgid "unlisted"
-msgstr "unlisted"
-
-#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_aside_training_category
 #: model_terms:ir.ui.view,arch_db:website_slides.user_quickkarma_card
@@ -7220,3 +7395,261 @@ msgstr "{{ user.name }} membagikan {{ object.slide_category }} dengan Anda!"
 #: model_terms:ir.ui.view,arch_db:website_slides.course_nav
 msgid "└<span class=\"ms-1\">Uncategorized</span>"
 msgstr "└<span class=\"ms-1\">Tanpa Kategori</span>"
+
+#~ msgid ""
+#~ "<a t-attf-href=\"/slides/course-#{request.params.get('channel_id')}\" "
+#~ "class=\"o_translate_inline\">Return to the course.</a>"
+#~ msgstr ""
+#~ "<a t-attf-href=\"/slides/course-#{request.params.get('channel_id')}\" "
+#~ "class=\"o_translate_inline\">Kembali ke kursus.</a>"
+
+#~ msgid ""
+#~ "Please <a t-attf-href=\"/odoo?redirect=#{request.httprequest.url}\" "
+#~ "class=\"fw-bold o_translate_inline\"> login </a> to share this"
+#~ msgstr ""
+#~ "Silakan <a t-attf-href=\"/odoo?redirect=#{request.httprequest.url}\" "
+#~ "class=\"fw-bold o_translate_inline\"> login </a> untuk membagikan ini"
+
+#~ msgid "<i class=\"fa fa-comments\"/> Comments ("
+#~ msgstr "<i class=\"fa fa-comments\"/> Komentar ("
+
+#~ msgid ". This way, they will be secured."
+#~ msgstr ". Dengan begini, mereka akan aman."
+
+#~ msgid ""
+#~ "<i class=\"fa fa-desktop me-2\"/>\n"
+#~ "                <span class=\"d-none d-sm-inline-block\">Fullscreen</span>"
+#~ msgstr ""
+#~ "<i class=\"fa fa-desktop me-2\"/>\n"
+#~ "                <span class=\"d-none d-sm-inline-block\">Fullscreen</span>"
+
+#~ msgid "<i class=\"fa fa-eraser\"/> Clear filters"
+#~ msgstr "<i class=\"fa fa-eraser\"/> Bersihkan filter"
+
+#~ msgid "<i class=\"fa fa-flag-checkered text-warning me-2\"/>Quiz"
+#~ msgstr "<i class=\"fa fa-flag-checkered text-warning me-2\"/>Quiz"
+
+#~ msgid "<i class=\"fa fa-graduation-cap me-1\"/>All courses"
+#~ msgstr "<i class=\"fa fa-graduation-cap me-1\"/>Semua kursus"
+
+#~ msgid ""
+#~ "<i class=\"fa fa-share-alt me-2\"/>\n"
+#~ "                <span class=\"d-none d-sm-inline-block\">Share</span>"
+#~ msgstr ""
+#~ "<i class=\"fa fa-share-alt me-2\"/>\n"
+#~ "                <span class=\"d-none d-sm-inline-block\">Share</span>"
+
+#~ msgid ""
+#~ "<i class=\"fa fa-tag me-2 text-muted\"/>\n"
+#~ "                      My Courses"
+#~ msgstr ""
+#~ "<i class=\"fa fa-tag me-2 text-muted\"/>\n"
+#~ "                      Kursus Saya"
+
+#~ msgid ""
+#~ "<small><span class=\"badge rounded-pill text-bg-success fw-normal\"><i "
+#~ "class=\"fa fa-check\"/> Completed</span></small>"
+#~ msgstr ""
+#~ "<small><span class=\"badge rounded-pill text-bg-success fw-normal\"><i "
+#~ "class=\"fa fa-check\"/> Selesai</span></small>"
+
+#~ msgid ""
+#~ "<span class=\"badge fw-bold px-2 py-1 m-1 text-bg-warning\">\n"
+#~ "                            <i class=\"fa fa-fw fa-flag\"/> 10 xp\n"
+#~ "                        </span>"
+#~ msgstr ""
+#~ "<span class=\"badge fw-bold px-2 py-1 m-1 text-bg-warning\">\n"
+#~ "                            <i class=\"fa fa-fw fa-flag\"/> 10 xp\n"
+#~ "                        </span>"
+
+#~ msgid ""
+#~ "<span class=\"badge rounded-pill text-bg-success pull-right py-1 "
+#~ "px-2\"><i class=\"fa fa-check\"/> Completed</span>"
+#~ msgstr ""
+#~ "<span class=\"badge rounded-pill text-bg-success pull-right py-1 "
+#~ "px-2\"><i class=\"fa fa-check\"/> Selesai</span>"
+
+#~ msgid ""
+#~ "<span class=\"badge text-bg-info badge-arrow-right fw-normal px-2 py-1 "
+#~ "m-1\">New</span>"
+#~ msgstr ""
+#~ "<span class=\"badge text-bg-info badge-arrow-right fw-normal px-2 py-1 "
+#~ "m-1\">Baru</span>"
+
+#~ msgid ""
+#~ "<span class=\"badge text-bg-light badge-hide border fw-normal px-2 py-1 "
+#~ "m-1\">Add Quiz</span>"
+#~ msgstr ""
+#~ "<span class=\"badge text-bg-light badge-hide border fw-normal px-2 py-1 "
+#~ "m-1\">Tambahkan Quiz</span>"
+
+#~ msgid ""
+#~ "<span class=\"badge text-bg-success fw-normal px-2 py-1 "
+#~ "m-1\"><span>Preview</span></span>"
+#~ msgstr ""
+#~ "<span class=\"badge text-bg-success fw-normal px-2 py-1 "
+#~ "m-1\"><span>Pratinjau</span></span>"
+
+#~ msgid ""
+#~ "<span class=\"badge text-bg-success fw-normal px-2 py-1 m-1\">Preview</"
+#~ "span>"
+#~ msgstr ""
+#~ "<span class=\"badge text-bg-success fw-normal px-2 py-1 m-1\">Pratinjau</"
+#~ "span>"
+
+#~ msgid "<span class=\"fw-bold text-muted me-2\">Current rank:</span>"
+#~ msgstr "<span class=\"fw-bold text-muted me-2\">Peringkat saat in:</span>"
+
+#~ msgid ""
+#~ "<span class=\"o_form_label\">Slides</span>\n"
+#~ "                    <span class=\"fa fa-lg fa-globe\" title=\"Values set "
+#~ "here are website-specific.\" groups=\"website.group_multi_website\"/>"
+#~ msgstr ""
+#~ "<span class=\"o_form_label\">Slide</span>\n"
+#~ "                    <span class=\"fa fa-lg fa-globe\" title=\"Values set "
+#~ "here are website-specific.\" groups=\"website.group_multi_website\"/>"
+
+#~ msgid "<span class=\"o_wslides_arrow\">New Content</span>"
+#~ msgstr "<span class=\"o_wslides_arrow\">Konten Baru</span>"
+
+#~ msgid ""
+#~ "<span class=\"oi oi-arrow-right\"/>\n"
+#~ "                                Create a Google Project and Get a Key"
+#~ msgstr ""
+#~ "<span class=\"oi oi-arrow-right\"/>\n"
+#~ "                                Buat Google Project dan Dapatkan Kunci"
+
+#~ msgid "<span class=\"text-500 mx-2\">•</span>"
+#~ msgstr "<span class=\"text-500 mx-2\">•</span>"
+
+#~ msgid ""
+#~ "<span id=\"zoomout\" class=\"d-none d-sm-inline ms-2 me-2\" title=\"Zoom "
+#~ "out\" aria-label=\"Zoom out\" role=\"button\">\n"
+#~ "                                            <i class=\"fa fa-search-"
+#~ "minus\"/>\n"
+#~ "                                        </span>\n"
+#~ "                                        <span id=\"zoomin\" class=\"d-"
+#~ "none d-sm-inline\" title=\"Zoom in\" aria-label=\"Zoom in\" "
+#~ "role=\"button\">\n"
+#~ "                                            <i class=\"fa fa-search-"
+#~ "plus\"/>\n"
+#~ "                                        </span>"
+#~ msgstr ""
+#~ "<span id=\"zoomout\" class=\"d-none d-sm-inline ms-2 me-2\" title=\"Zoom "
+#~ "out\" aria-label=\"Zoom out\" role=\"button\">\n"
+#~ "                                            <i class=\"fa fa-search-"
+#~ "minus\"/>\n"
+#~ "                                        </span>\n"
+#~ "                                        <span id=\"zoomin\" class=\"d-"
+#~ "none d-sm-inline\" title=\"Zoom in\" aria-label=\"Zoom in\" "
+#~ "role=\"button\">\n"
+#~ "                                            <i class=\"fa fa-search-"
+#~ "plus\"/>\n"
+#~ "                                        </span>"
+
+#~ msgid ""
+#~ "<span name=\"done_members_count_label\" class=\"text-muted\">Finished</"
+#~ "span>"
+#~ msgstr ""
+#~ "<span name=\"done_members_count_label\" class=\"text-muted\">Selesai</"
+#~ "span>"
+
+#~ msgid "<strong>Sharing is caring!</strong> Email(s) sent."
+#~ msgstr "<strong>Sharing is caring!</strong> Email dikirim."
+
+#~ msgid ""
+#~ "A good course has a structure. Pick a name for your first section and "
+#~ "click <b>Save</b> to create it."
+#~ msgstr ""
+#~ "Kursus yang bagus memiliki struktur. Pilih nama untuk bagian pertama Anda "
+#~ "dan klik <b>Simpan</b> untuk membuat bagian tersebut.  "
+
+#~ msgid "Already installing \"%s\"."
+#~ msgstr "Sedang menginstal  \"%s\"."
+
+#~ msgid "Certification"
+#~ msgstr "Sertifikat"
+
+#~ msgid "Change video privacy settings"
+#~ msgstr "Ganti pengaturan privasi video"
+
+#~ msgid "Clear filters"
+#~ msgstr "Bersihkan filter"
+
+#~ msgid "Click on the <b>Create</b> button to create your first course."
+#~ msgstr "Klik pada tombol <b>Buat</b> untuk membuat kursus pertama Anda."
+
+#~ msgid "Contact us"
+#~ msgstr "Kontak kami"
+
+#~ msgid "Creation Date"
+#~ msgstr "Tanggal Pembuatan"
+
+#~ msgid "Discover more"
+#~ msgstr "Temukan lebih lanjut"
+
+#~ msgid "Group By"
+#~ msgstr "Dikelompokkan berdasarkan"
+
+#~ msgid "Most popular courses"
+#~ msgstr "Kursus-kursus paling terkenal"
+
+#~ msgid "My Courses"
+#~ msgstr "Kursus-Kursus Saya"
+
+#~ msgid "New Content Ribbon"
+#~ msgstr "Pita Konten Baru"
+
+#~ msgid "Newest courses"
+#~ msgstr "Kursus-kursus terbaru"
+
+#~ msgid "Next rank:"
+#~ msgstr "Ranking berikutnya:"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Jumlah pesan yang butuh tindakan"
+
+#~ msgid ""
+#~ "Optional translation language (ISO code) to select when sending out an "
+#~ "email. If not set, the english version will be used. This should usually "
+#~ "be a placeholder expression that provides the appropriate language, e.g. "
+#~ "{{ object.partner_id.lang }}."
+#~ msgstr ""
+#~ "Bahasa terjemahan opsional (kode ISO) yang dipilih ketika mengirim email. "
+#~ "Bila tidak diatur, versi Bahasa Inggris akan digunakan. Ini seharusnya "
+#~ "merupakan expression placeholder yang menyediakan bahasa yang sesuai, "
+#~ "misalnya {{ object.partner_id.lang }}."
+
+#~ msgid "Reach new heights"
+#~ msgstr "Mencapai record baru"
+
+#~ msgid "Restrict publishing to this website."
+#~ msgstr "Batasi publikasi ke website ini."
+
+#~ msgid "Share on Twitter"
+#~ msgstr "Share ke Twitter"
+
+#~ msgid ""
+#~ "Skill up and have an impact! Your business career starts here.<br/>Time "
+#~ "to start a course."
+#~ msgstr ""
+#~ "Tingkatkan ketrampilan untuk mulai melakukan perubahan! Karir bisnis Anda "
+#~ "dimulai di sini.<br/>Waktunya untuk memulai kursus."
+
+#~ msgid "Start your online course today!"
+#~ msgstr "Mulai kursus online Anda hari ini!"
+
+#~ msgid "The full URL to access the document through the website."
+#~ msgstr "URL lengkap untuk mengakses dokumen melalui website."
+
+#~ msgid "When using local files, we only support PDF files."
+#~ msgstr "Saat menggunakan file lokal, kita hanya mendukung file PDF."
+
+#~ msgid "Your Level"
+#~ msgstr "Level Anda"
+
+#~ msgid "Your Role"
+#~ msgstr "Peran Anda"
+
+#~ msgid "achieved"
+#~ msgstr "diraih"

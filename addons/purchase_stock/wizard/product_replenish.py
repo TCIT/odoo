@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import _, api, fields, models
-from odoo.osv.expression import AND
+from odoo import api, fields, models
+from odoo.fields import Domain
 
 
 class ProductReplenish(models.TransientModel):
@@ -20,12 +19,18 @@ class ProductReplenish(models.TransientModel):
                     *self.env['stock.warehouse']._check_company_domain(company),
                 ], limit=1).id
             orderpoint = self.env['stock.warehouse.orderpoint'].search([('product_id', 'in', [product_tmpl_id.product_variant_id.id, product_id.id]), ("warehouse_id", "=", res['warehouse_id'])], limit=1)
-            res['supplier_id'] = False
-            if orderpoint:
+            if orderpoint.route_id:
+                res['route_id'] = orderpoint.route_id.id
+            if orderpoint.supplier_id:
                 res['supplier_id'] = orderpoint.supplier_id.id
-            elif product_tmpl_id.seller_ids:
-                res['supplier_id'] = product_tmpl_id.seller_ids[0].id
         return res
+
+    @api.onchange('route_id')
+    def _onchange_supplier_id(self):
+        if self.show_vendor and not self.supplier_id and self.product_tmpl_id.seller_ids:
+            self.supplier_id = self.product_tmpl_id.seller_ids[0].id
+        elif not self.show_vendor:
+            self.supplier_id = False
 
     @api.depends('route_id', 'supplier_id')
     def _compute_date_planned(self):
@@ -38,7 +43,7 @@ class ProductReplenish(models.TransientModel):
         res = super()._prepare_run_values()
         if self.supplier_id:
             res['supplierinfo_id'] = self.supplier_id
-            res['group_id'].partner_id = self.supplier_id.partner_id
+            # res['partner_id'] = self.supplier_id.partner_id
         return res
 
     def action_stock_replenishment_info(self):
@@ -81,12 +86,16 @@ class ProductReplenish(models.TransientModel):
 
         delay = supplier.delay + self.env.company.days_to_purchase
 
-        if bool(self.env['ir.config_parameter'].sudo().get_param('purchase.use_po_lead')):
-            delay += self.env.company.po_lead
         return fields.Datetime.add(date, days=delay)
 
     def _get_route_domain(self, product_tmpl_id):
         domain = super()._get_route_domain(product_tmpl_id)
-        if not product_tmpl_id.seller_ids:
-            domain = AND([domain, [('id', '!=', self.env.ref('purchase_stock.route_warehouse0_buy', raise_if_not_found=False).id)]])
+        company = product_tmpl_id.company_id or self.env.company
+        buy_route = self.env['stock.rule'].search([
+            ('action', '=', 'buy'),
+            ('company_id', '=', company.id),
+            ('picking_type_id.code', '=', 'incoming'),
+        ]).route_id
+        if buy_route and product_tmpl_id.seller_ids:
+            domain = Domain.OR([domain, Domain('id', 'in', buy_route.ids)])
         return domain

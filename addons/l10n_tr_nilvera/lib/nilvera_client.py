@@ -2,23 +2,23 @@ import logging
 import requests
 from datetime import datetime
 from json import JSONDecodeError
-from pprint import pformat
 
+from odoo import _
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
 def _get_nilvera_client(company, timeout_limit=None):
     return NilveraClient(
-        environment=company.l10n_tr_nilvera_environment,
-        api_key=company.l10n_tr_nilvera_api_key,
+        test_environment=company.l10n_tr_nilvera_use_test_env,
+        api_key=company.sudo().l10n_tr_nilvera_api_key,
         timeout_limit=timeout_limit,
     )
 
 
 class NilveraClient:
-    def __init__(self, environment=None, api_key=None, timeout_limit=None):
-        self.is_production = environment and environment == 'production'
+    def __init__(self, test_environment=False, api_key=None, timeout_limit=None):
+        self.is_production = not test_environment
         self.base_url = 'https://api.nilvera.com' if self.is_production else 'https://apitest.nilvera.com'
         self.timeout_limit = min(timeout_limit or 10, 30)
 
@@ -47,38 +47,36 @@ class NilveraClient:
                 files=files,
             )
         except requests.exceptions.RequestException as e:
-            _logger.error("Network error during request: %s", e)
-            raise UserError("Network connectivity issue. Please check your internet connection and try again.")
+            _logger.info(_("Network error during request: %s"), e)
+            raise UserError(_("Network connectivity issue. Please check your internet connection and try again."))
 
         end = datetime.utcnow()
-        self._log_request(method, start, end, url, params, json, response)
+        duration = (end - start).total_seconds()
+        self._log_request(method, duration, url, response.status_code)
 
         if handle_response:
             return self.handle_response(response)
         return response
 
-    def _log_request(self, method, start, end, url, params, json, response):
+    def _log_request(self, method, duration, url, status_code):
         _logger.info(
-            "%(method)s\nstart=%(start)s\nend=%(end)s\nurl=%(url)s\nparams=%(params)s\njson=%(json)s\nresponse=%(response)s",
+            '"%(method)s %(url)s" %(status)s %(duration).3f',
             {
-                "method": method,
-                "start": start,
-                "end": end,
-                "url": pformat(url),
-                "params": pformat(params),
-                "json": pformat(json),
-                "response": pformat(response),
+                'method': method,
+                'url': url,
+                'status': status_code,
+                'duration': duration,
             },
         )
 
     def handle_response(self, response):
         if response.status_code in {401, 403}:
-            raise UserError("Oops, seems like you're unauthorised to do this. Try another API key with more rights or contact Nilvera.")
+            raise UserError(_("Oops, seems like you're unauthorised to do this. Try another API key with more rights or contact Nilvera."))
         elif 403 < response.status_code < 600:
-            raise UserError("Odoo could not perform this action at the moment, try again later.\n%s - %s" % (response.reason, response.code))
+            raise UserError(_("Odoo could not perform this action at the moment, try again later.\n%s - %s", response.reason, response.status_code))
 
         try:
             return response.json()
         except JSONDecodeError:
-            _logger.exception("Invalid JSON response: %s", response.text)
-            raise UserError("An error occurred. Try again later.")
+            _logger.exception(_("Invalid JSON response: %s", response.text))
+            raise UserError(_("An error occurred. Try again later."))

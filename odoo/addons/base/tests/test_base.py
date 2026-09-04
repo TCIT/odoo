@@ -9,7 +9,6 @@ from odoo import Command
 from odoo.tests.common import TransactionCase, BaseCase
 from odoo.tools import mute_logger
 from odoo.tools.safe_eval import safe_eval, const_eval, expr_eval
-from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
 
 
 class TestSafeEval(BaseCase):
@@ -35,17 +34,17 @@ class TestSafeEval(BaseCase):
             self.assertEqual(expr_eval(expr), expected)
 
     def test_safe_eval_opcodes(self):
-        for expr, locals_dict, expected in [
+        for expr, context, expected in [
             ('[x for x in (1,2)]', {}, [1, 2]),  # LOAD_FAST_AND_CLEAR
             ('list(x for x in (1,2))', {}, [1, 2]),  # END_FOR, CALL_INTRINSIC_1
             ('v if v is None else w', {'v': False, 'w': 'foo'}, 'foo'),  # POP_JUMP_IF_NONE
             ('v if v is not None else w', {'v': None, 'w': 'foo'}, 'foo'),  # POP_JUMP_IF_NOT_NONE
             ('{a for a in (1, 2)}', {}, {1, 2}),  # RERAISE
         ]:
-            self.assertEqual(safe_eval(expr, locals_dict=locals_dict), expected)
+            self.assertEqual(safe_eval(expr, context), expected)
 
     def test_safe_eval_exec_opcodes(self):
-        for expr, locals_dict, expected in [
+        for expr, context, expected in [
             ("""
                 def f(v):
                     if v:
@@ -54,8 +53,47 @@ class TestSafeEval(BaseCase):
                 result = f(42)
             """, {}, 1),  # LOAD_FAST_CHECK
         ]:
-            safe_eval(dedent(expr), locals_dict=locals_dict, mode="exec", nocopy=True)
-            self.assertEqual(locals_dict['result'], expected)
+            safe_eval(dedent(expr), context, mode="exec")
+            self.assertEqual(context['result'], expected)
+
+    def test_safe_eval_strips(self):
+        # cpython strips spaces and tabs by deafult since 3.10
+        # https://github.com/python/cpython/commit/e799aa8b92c195735f379940acd9925961ad04ec
+        # but we need to strip all whitespaces
+        for expr, expected in [
+            # simple ascii
+            ("\n 1 + 2", 3),
+            ("\n\n\t 1 + 2 \n", 3),
+            ("   1 + 2", 3),
+            ("1 + 2   ", 3),
+
+            # Unicode (non-ASCII spaces)
+            ("\u00A01 + 2\u00A0", 3),  # nbsp
+        ]:
+            self.assertEqual(safe_eval(expr), expected)
+
+    def test_runs_top_level_scope(self):
+        # when we define var in top-level scope, it should become available in locals and globals
+        # such that f's frame will be able to access var too.
+        expr = dedent("""
+        var = 1
+        def f():
+            return var
+        f()
+        """)
+        safe_eval(expr, mode="exec")
+        safe_eval(expr, context={}, mode="exec")
+
+    def test_safe_eval_ctx_mutation(self):
+        # simple eval also has side-effect on context
+        expr = '(answer := 42)'
+        context = {}
+        self.assertEqual(safe_eval(expr, context), 42)
+        self.assertEqual(context, {'answer': 42})
+
+    def test_safe_eval_ctx_no_builtins(self):
+        ctx = {'__builtins__': {'max': min}}
+        self.assertEqual(safe_eval('max(1, 2)', ctx), 2)
 
     def test_01_safe_eval(self):
         """ Try a few common expressions to verify they work with safe_eval """
@@ -95,6 +133,35 @@ class TestSafeEval(BaseCase):
             safe_eval("self.__name__", {'self': self}, mode="exec")
 
 
+class TestSafeEvalTransaction(TransactionCase):
+
+    @mute_logger('odoo.sql_db')
+    def test_bubble_up_integrity_error(self):
+        vals = {
+            'module': 'module_test',
+            'name': 'duplicate_name',
+            'model': 'res.partner',
+        }
+        self.env['ir.model.data'].create(vals)
+
+        # Trigger `UniqueViolation` via `_obj_name_uniq` constraint.
+
+        with self.assertRaises(Exception) as normal_exception:
+            self.env['ir.model.data'].create(vals)
+
+        with self.assertRaises(Exception) as bubble_up_exception:
+            expr = """
+                self.env['ir.model.data'].create(vals)
+            """
+            safe_eval(dedent(expr), {'self': self, 'vals': vals}, mode='exec')
+
+        self.assertEqual(
+            type(normal_exception.exception),
+            type(bubble_up_exception.exception),
+            'Database integrity exception must be the same as normal business code evaluation.'
+        )
+
+
 class TestParentStore(TransactionCase):
     """ Verify that parent_store computation is done right """
 
@@ -120,6 +187,32 @@ class TestParentStore(TransactionCase):
         old_struct = new_cat0.search([('parent_id', 'child_of', self.cat0.id)])
         self.assertEqual(len(old_struct), 4, "After duplication, previous record must have old childs records only")
         self.assertFalse(new_struct & old_struct, "After duplication, nodes should not be mixed")
+
+    def test_missing_parent(self):
+        """ Missing parent id should not raise an error. """
+        # Missing parent with _parent_store
+        new_cat0 = self.cat0.copy()
+        records = new_cat0.search([('parent_id', 'parent_of', 999999999)])
+        self.assertEqual(len(records), 0)
+
+        # Missing parent without _parent_store
+        category = self.env['res.partner.category']
+        self.patch(self.env.registry['res.partner.category'], '_parent_store', False)
+        records = category.search([('parent_id', 'child_of', 999999999)])
+        self.assertEqual(len(records), 0)
+
+    def test_missing_child(self):
+        """ Missing child id should not raise an error. """
+        # Missing child with _parent_store
+        new_cat0 = self.cat0.copy()
+        records = new_cat0.search([('parent_id', 'child_of', 999999999)])
+        self.assertEqual(len(records), 0)
+
+        # Missing child without _parent_store
+        category = self.env['res.partner.category']
+        self.patch(self.env.registry['res.partner.category'], '_parent_store', False)
+        records = category.search([('parent_id', 'child_of', 999999999)])
+        self.assertEqual(len(records), 0)
 
     def test_duplicate_children_01(self):
         """ Duplicate the children then reassign them to the new parent (1st method). """
@@ -160,22 +253,67 @@ class TestParentStore(TransactionCase):
 class TestGroups(TransactionCase):
 
     def test_res_groups_fullname_search(self):
+        monkey = self.env['res.groups.privilege'].create({'name': 'Monkey'})
+        self.env['res.groups']._load_records([{
+            'xml_id': 'base.test_monkey_banana',
+            'values': {'name': 'Banana', 'privilege_id': monkey.id},
+        }, {
+            'xml_id': 'base.test_monkey_stuff',
+            'values': {'name': 'Stuff', 'privilege_id': monkey.id},
+        }, {
+            'xml_id': 'base.test_monkey_administrator',
+            'values': {'name': 'Administrator', 'privilege_id': monkey.id},
+        }, {
+            'xml_id': 'base.test_donky',
+            'values': {'name': 'Donky Monkey'},
+        }])
+
         all_groups = self.env['res.groups'].search([])
 
         groups = all_groups.search([('full_name', 'like', 'Sale')])
         self.assertItemsEqual(groups.ids, [g.id for g in all_groups if 'Sale' in g.full_name],
                               "did not match search for 'Sale'")
 
-        groups = all_groups.search([('full_name', 'like', 'Technical')])
-        self.assertItemsEqual(groups.ids, [g.id for g in all_groups if 'Technical' in g.full_name],
-                              "did not match search for 'Technical'")
+        groups = all_groups.search([('full_name', 'like', 'Master Data')])
+        self.assertItemsEqual(groups.ids, [g.id for g in all_groups if 'Master Data' in g.full_name],
+                              "did not match search for 'Master Data'")
 
-        groups = all_groups.search([('full_name', 'like', 'Sales /')])
-        self.assertItemsEqual(groups.ids, [g.id for g in all_groups if 'Sales /' in g.full_name],
-                              "did not match search for 'Sales /'")
+        groups = all_groups.search([('full_name', 'like', 'Monkey/Banana')])
+        self.assertItemsEqual(groups.mapped('full_name'), ['Monkey / Banana'],
+                              "did not match search for 'Monkey/Banana'")
 
-        groups = all_groups.search([('full_name', 'in', ['Administration / Access Rights','Contact Creation'])])
-        self.assertTrue(groups, "did not match search for 'Administration / Access Rights' and 'Contact Creation'")
+        groups = all_groups.search([('full_name', 'like', 'Monkey /')])
+        self.assertItemsEqual(groups.ids, [g.id for g in all_groups if 'Monkey /' in g.full_name],
+                              "did not match search for 'Monkey /'")
+
+        groups = all_groups.search([('full_name', 'like', 'Monk /')])
+        self.assertItemsEqual(groups.ids, [g.id for g in all_groups if 'Monkey /' in g.full_name],
+                              "did not match search for 'Monk /'")
+
+        groups = all_groups.search([('full_name', 'like', 'Monk')])
+        self.assertItemsEqual(groups.ids, [g.id for g in all_groups if 'Monk' in g.full_name],
+                              "did not match search for 'Monk'")
+
+        groups = all_groups.search([('full_name', 'in', ['Creation'])])
+        self.assertItemsEqual(groups.mapped('full_name'), ['Contact / Creation'])
+
+        groups = all_groups.search([('full_name', 'in', ['Role / Administrator', 'Creation'])])
+        self.assertItemsEqual(groups.mapped('full_name'), ['Contact / Creation', 'Role / Administrator'])
+
+        groups = all_groups.search([('full_name', 'like', 'Admin')])
+        self.assertItemsEqual(groups.mapped('full_name'), [g.full_name for g in all_groups if 'Admin' in g.full_name])
+
+        groups = all_groups.search([('full_name', 'not like', 'Role /')])
+        self.assertItemsEqual(groups.mapped('full_name'), [g.full_name for g in all_groups if 'Role /' not in g.full_name])
+
+        groups = all_groups.search([('full_name', '=', False)])
+        self.assertFalse(groups)
+
+        groups = all_groups.search([('full_name', '!=', False)])
+        self.assertEqual(groups, all_groups)
+
+        groups = all_groups.search([('full_name', 'like', '/')])
+        self.assertTrue(groups, "did not match search for '/'")
 
     def test_res_group_has_cycle(self):
         # four groups with no cycle, check them all together
@@ -208,25 +346,24 @@ class TestGroups(TransactionCase):
     def test_remove_groups(self):
         u1 = self.env['res.users'].create({'login': 'u1', 'name': 'U1'})
         u2 = self.env['res.users'].create({'login': 'u2', 'name': 'U2'})
-        default = self.env.ref('base.default_user')
         portal = self.env.ref('base.group_portal')
-        p = self.env['res.users'].create({'login': 'p', 'name': 'P', 'groups_id': [Command.set([portal.id])]})
+        p = self.env['res.users'].create({'login': 'p', 'name': 'P', 'group_ids': [Command.set([portal.id])]})
 
-        a = self.env['res.groups'].create({'name': 'A', 'users': [Command.set(u1.ids)]})
-        b = self.env['res.groups'].create({'name': 'B', 'users': [Command.set(u1.ids)]})
-        c = self.env['res.groups'].create({'name': 'C', 'implied_ids': [Command.set(a.ids)], 'users': [Command.set([p.id, u2.id, default.id])]})
-        d = self.env['res.groups'].create({'name': 'D', 'implied_ids': [Command.set(a.ids)], 'users': [Command.set([u2.id, default.id])]})
+        a = self.env['res.groups'].create({'name': 'A', 'user_ids': [Command.set(u1.ids)]})
+        b = self.env['res.groups'].create({'name': 'B', 'user_ids': [Command.set(u1.ids)]})
+        c = self.env['res.groups'].create({'name': 'C', 'implied_ids': [Command.set(a.ids)], 'user_ids': [Command.set([p.id, u2.id])]})
+        d = self.env['res.groups'].create({'name': 'D', 'implied_ids': [Command.set(a.ids)], 'user_ids': [Command.set([u2.id])]})
 
         def assertUsersEqual(users, group):
             self.assertEqual(
                 sorted([r.login for r in users]),
-                sorted([r.login for r in group.with_context(active_test=False).users])
+                sorted(group.with_context(active_test=False).mapped('all_user_ids.login'))
             )
         # sanity checks
-        assertUsersEqual([u1, u2, p, default], a)
+        assertUsersEqual([u1, u2, p], a)
         assertUsersEqual([u1], b)
-        assertUsersEqual([u2, p, default], c)
-        assertUsersEqual([u2, default], d)
+        assertUsersEqual([u2, p], c)
+        assertUsersEqual([u2], d)
 
         # C already implies A, we want none of B+C to imply A
         (b + c)._remove_group(a)
@@ -240,15 +377,14 @@ class TestGroups(TransactionCase):
         #   not have U1 as a user
         # - P should be removed as was only added via inheritance to C
         # - U2 should not be removed from A since it is implied via C but also via D
-        assertUsersEqual([u1, u2, default], a)
+        assertUsersEqual([u1, u2], a)
         assertUsersEqual([u1], b)
-        assertUsersEqual([u2, p, default], c)
-        assertUsersEqual([u2, default], d)
+        assertUsersEqual([u2, p], c)
+        assertUsersEqual([u2], d)
 
-        # When adding the template user to a new group, it should add it to existing internal users
+        # When adding a new group to all users
         e = self.env['res.groups'].create({'name': 'E'})
-        default.write({'groups_id': [Command.link(e.id)]})
-        self.assertIn(u1, e.users)
-        self.assertIn(u2, e.users)
-        self.assertIn(default, e.with_context(active_test=False).users)
-        self.assertNotIn(p, e.users)
+        self.env.ref('base.group_user').write({'implied_ids': [Command.link(e.id)]})
+        self.assertIn(u1, e.all_user_ids)
+        self.assertIn(u2, e.all_user_ids)
+        self.assertNotIn(p, e.all_user_ids)

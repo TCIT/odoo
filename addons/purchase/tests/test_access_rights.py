@@ -1,8 +1,10 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.tests import Form, tagged
+
+from odoo import Command
 from odoo.exceptions import AccessError
+from odoo.tests import Form, tagged
+
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
 
 @tagged('post_install', '-at_install')
@@ -23,7 +25,7 @@ class TestPurchaseInvoice(AccountTestInvoicingCommon):
             'name': 'Purchase user',
             'login': 'purchaseUser',
             'email': 'pu@odoo.com',
-            'groups_id': [(6, 0, [group_purchase_user.id, group_employee.id, group_partner_manager.id])],
+            'group_ids': [(6, 0, [group_purchase_user.id, group_employee.id, group_partner_manager.id])],
         })
 
         cls.vendor = cls.env['res.partner'].create({
@@ -69,7 +71,8 @@ class TestPurchaseInvoice(AccountTestInvoicingCommon):
 
     def test_read_purchase_order(self):
         """ Check that a purchase user can read all purchase order and 'in' invoices"""
-        purchase_user_2 = self.purchase_user.copy({
+        self.purchase_user.write({'group_ids': [(4, self.env.ref('account.group_account_readonly').id)]})
+        purchase_user_2 = self.purchase_user.sudo().copy({
             'name': 'Purchase user 2',
             'login': 'purchaseUser2',
             'email': 'pu2@odoo.com',
@@ -116,22 +119,46 @@ class TestPurchaseInvoice(AccountTestInvoicingCommon):
         self.purchase_user.write({
             'company_ids': [(4, company.id)],
             'company_id': company.id,
-            'groups_id': [(3, group_purchase_manager.id)],
+            'group_ids': [(3, group_purchase_manager.id)],
         })
         order.with_user(self.purchase_user).button_confirm()
         self.assertEqual(order.state, 'to approve')
         order.with_user(self.purchase_user).button_approve()
         self.assertEqual(order.state, 'to approve')
-        self.purchase_user.groups_id += group_purchase_manager
+        self.purchase_user.group_ids += group_purchase_manager
         order.with_user(self.purchase_user).button_approve()
         self.assertEqual(order.state, 'purchase')
 
     def test_create_product_purchase_user(self):
         uom = self.env.ref('uom.product_uom_gram')
-        self.purchase_user.groups_id += self.env.ref('product.group_product_manager')
+        self.purchase_user.group_ids += self.env.ref('product.group_product_manager')
         product = self.env['product.template'].with_user(self.purchase_user).create({
             'name': 'Test Product UOM Default',
             'type': 'consu',
             'uom_id': uom.id,
         })
         self.assertTrue(product, "The default purchase UOM should be in the same category as the sale UOM.")
+
+    def test_prepare_purchase_order_line_from_branch_company(self):
+        """Check that a purchase order line can be created from a nested branch company."""
+        self.env.company.child_ids = [Command.create({
+            'name': "Test Branch",
+            'child_ids': [Command.create({'name': "Nested Branch"})],
+        })]
+        nested_branch = self.env.company.child_ids.child_ids
+        self.purchase_user.write({
+            'company_ids': [Command.set(nested_branch.ids)],
+            'company_id': nested_branch.id,
+        })
+
+        PurchaseOrder = self.env['purchase.order'].with_user(self.purchase_user)
+        order = PurchaseOrder.create({'partner_id': self.vendor.id})
+        nested_branch = nested_branch.with_env(PurchaseOrder.env)
+        product = self.product.with_env(PurchaseOrder.env)
+        vendor = self.vendor.with_env(PurchaseOrder.env)
+
+        self.env.invalidate_all()
+        po_line_vals = PurchaseOrder.order_line._prepare_purchase_order_line(
+            product, 1, product.uom_id, nested_branch, vendor, order,
+        )
+        self.assertTrue(PurchaseOrder.order_line.create(po_line_vals))

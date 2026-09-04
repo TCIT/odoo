@@ -2,10 +2,6 @@
     display: none;
 }
 
-.o-chatter-disabled .o-mail-Message-actions {
-    display: none;
-}
-
 .o-mail-Chatter-top {
     z-index: $o-mail-NavigableList-zIndex - 2;
     background-color: $o-webclient-background-color;
@@ -18,8 +14,22 @@
 .o-mail-Chatter-top, .o-mail-Chatter-content {
     --Chatter-default-padding-x: #{$o-spacer};
 
-    padding-left: var(--ChatterAsideForm-padding-left, var(--Chatter-default-padding-x));
     padding-right: var(--Chatter-default-padding-x);
+}
+
+.o-mail-Chatter-top .o-mail-Composer {
+    --Chatter-default-padding-x: #{$o-spacer};
+    --mail-Chatter-contentPaddingLeft: var(--ChatterAsideForm-padding-left, calc(var(--Chatter-default-padding-x) / 2));
+    margin-left: calc((var(--mail-Chatter-contentPaddingLeft)) * -1);
+}
+
+.o-mail-Chatter-top {
+    padding-left: var(--ChatterAsideForm-padding-left, var(--Chatter-default-padding-x));
+}
+
+.o-mail-Chatter-content {
+    --mail-Chatter-contentPaddingLeft: var(--ChatterAsideForm-padding-left, var(--Chatter-default-padding-x));
+    padding-left: calc(var(--mail-Chatter-contentPaddingLeft) - #{($o-mail-Message-sidebarWidth - $o-mail-Avatar-size) / 2});
 }
 
 .o-mail-Followers-button:focus {
@@ -37,13 +47,11 @@
 }
 
 .o-mail-Follower-avatar {
-    width: $o-mail-Avatar-sizeSmall;
-    height: $o-mail-Avatar-sizeSmall;
+    --Avatar-size: #{$o-mail-Avatar-sizeSmall};
 }
 
-.o-mail-Follower-details:hover,
-.o-mail-Follower-action:hover {
-    background-color: var(--chatter_follower-bg--hover, #{$o-gray-300});
+.o-mail-Follower:has(.o-mail-Follower-action:hover), .o-mail-FollowerList-unfollow:has(.o-mail-Follower-action:hover) {
+    background-color: inherit !important;
 }
 
 .btn.o-mail-Chatter-follow:hover {

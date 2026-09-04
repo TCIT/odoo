@@ -1,22 +1,22 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 import {
     clickOnEditAndWaitEditMode,
     clickOnSave,
     registerWebsitePreviewTour,
 } from "@website/js/tours/tour_utils";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 
 function applyForAJob(jobName, application) {
     return [{
         content: "Select Job",
         trigger: `.oe_website_jobs h3:contains(${jobName})`,
         run: "click",
+        expectUnloadPage: true,
     }, {
         content: "Apply",
         trigger: ".js_hr_recruitment a:contains('Apply')",
         run: "click",
+        expectUnloadPage: true,
     }, {
         content: "Complete name",
         trigger: "input[name=partner_name]",
@@ -35,12 +35,13 @@ function applyForAJob(jobName, application) {
         run: `edit linkedin.com/in/${application.name.toLowerCase().replace(' ', '-')}`,
     }, {
         content: "Complete Subject",
-        trigger: "textarea[name=applicant_notes]",
+        trigger: "textarea[name=short_introduction]",
         run: `edit ${application.subject}`,
     }, { // TODO: Upload a file ?
         content: "Send the form",
         trigger: ".s_website_form_send",
         run: "click",
+        expectUnloadPage: true,
     }, {
         content: "Check the form is submitted without errors",
         trigger: "#jobs_thankyou h1:contains('Congratulations')",
@@ -62,6 +63,7 @@ registry.category("web_tour.tours").add('website_hr_recruitment_tour', {
         run: () => {
             window.location.href = '/jobs';
         },
+        expectUnloadPage: true,
     },
     ...applyForAJob('Internship', {
         name: 'Jack Doe',
@@ -98,12 +100,22 @@ registerWebsitePreviewTour('website_hr_recruitment_tour_edit_form', {
         this.anchor.value = "FAKE_JOB_ID_DEFAULT_VAL";
     },
 }, {
+    content: 'Make the department_id field visible',
+    trigger: ':iframe form',
+    run() {
+        const departmentEl = this.anchor.querySelector('input[name="department_id"]');
+        departmentEl.value = 'FAKE_DEPARTMENT_ID_DEFAULT_VAL';
+        departmentEl.type = 'text';
+        departmentEl.closest('.s_website_form_field').classList.remove('s_website_form_dnone');
+    },
+},
+{
     content: 'Edit the form',
     trigger: ':iframe input[type="file"]',
     run: "click",
 }, {
     content: 'Add a new field',
-    trigger: 'we-button[data-add-field]',
+    trigger: 'div[data-container-title="Field"] button.btn-success',
     run: "click",
 },
 ...clickOnSave(),
@@ -126,11 +138,27 @@ registerWebsitePreviewTour('website_hr_recruitment_tour_edit_form', {
 }, {
     content: 'Check that a job_id has been loaded',
     trigger: ":iframe form input[name=job_id]:not(:visible):not([value='']):not([value=FAKE_JOB_ID_DEFAULT_VAL])",
+}, {
+    content: 'Check that a department_id has been loaded',
+    trigger: ':iframe input[name="department_id"][value="FAKE_DEPARTMENT_ID_DEFAULT_VAL"]',
+    run: function () {
+        if (this.anchor.value === "FAKE_DEPARTMENT_ID_DEFAULT_VAL") {
+            console.error('The department_id data-for should have been applied');
+        }
+    }
 },
 ...clickOnEditAndWaitEditMode(),
 {
-    content: 'Verify that the job_id field has kept its default value',
-    trigger: ":iframe form input[name=job_id][value=FAKE_JOB_ID_DEFAULT_VAL]:not(:visible)",
+    content: 'Verify that the job_id hidden field has lost its default value',
+    trigger: ":iframe form input[name=job_id]:not(:visible):not([value='']):not([value=FAKE_JOB_ID_DEFAULT_VAL])",
+}, {
+    content: 'Verify that the department_id shown field has kept its default value',
+    trigger: ':iframe form input[name="department_id"][value="FAKE_DEPARTMENT_ID_DEFAULT_VAL"]',
+    run: function () {
+        if (this.anchor.value !== "FAKE_DEPARTMENT_ID_DEFAULT_VAL") {
+            console.error('The department_id field has lost its default value');
+        }
+    },
 },
 ]);
 
@@ -156,6 +184,6 @@ registerWebsitePreviewTour('model_required_field_should_have_action_name', {
     run: "click",
 }, {
     content: "Select model-required field",
-    trigger: "we-customizeblock-options we-alert > span:not(:contains(undefined))",
+    trigger: ".options-container .alert > span:not(:contains(undefined))",
 }
 ]);

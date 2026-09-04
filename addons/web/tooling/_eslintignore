@@ -13,6 +13,10 @@ addons/*
 !web_enterprise
 !web_enterprise/**/*
 
+# Whitelist web_mobile
+!web_mobile
+!web_mobile/**/*
+
 # Whitelist web_studio
 !web_studio
 !web_studio/**/*
@@ -20,10 +24,9 @@ addons/*
 # BlackList libs
 addons/web/static/lib/**/*
 
-# Whitelist Hoot (but not its libs)
+# Whitelist Hoot
 !addons/web/static/lib/hoot
 !addons/web/static/lib/hoot/**/*
-addons/web/static/lib/hoot/lib/**/*
 
 # Ignore everything in web legacy but the top level (adapters)
 addons/web/static/src/legacy/**/*
@@ -74,6 +77,45 @@ web_gantt/static/tests/legacy/**/*
 !addons/html_editor
 !addons/html_editor/**/*
 
+# Whitelist html_builder
+!addons/html_builder
+!addons/html_builder/**/*
+
+# blacklist html_editor libs
+addons/html_editor/static/lib/diff2html/*.js
+
+# Whitelist website
+!addons/website
+!addons/website/**/*
+
+# Whitelist website blog
+!addons/website_blog
+!addons/website_blog/**/*
+
+# Whitelist web_grid
+!web_grid
+!web_grid/**/*
+
+# Whitelist timesheet_grid
+!timesheet_grid
+!timesheet_grid/**/*
+
+# Whitelist timer
+!timer
+!timer/**/*
+
+# Whitelist industry_fsm
+!industry_fsm
+!industry_fsm/**/*
+
+# Whitelist helpdesk
+!helpdesk
+!helpdesk/**
+!helpdesk_timesheet
+!helpdesk_timesheet/**
+!helpdesk_sale_timesheet
+!helpdesk_sale_timesheet/**
+
 # planning
 # whitelist new code
 !planning
@@ -113,9 +155,17 @@ web_map/static/tests/legacy/**/*
 !addons/purchase
 !addons/purchase/**/*
 
+# Whitelist documents_document
+!documents
+!documents/**/*
+
 # Whitelist documents_spreadsheet
 !documents_spreadsheet
 !documents_spreadsheet/**/*
+
+# Whitelist test_documents_full
+!test_documents_full
+!test_documents_full/**/*
 
 # Whitelist spreadsheet
 !addons/spreadsheet
@@ -156,10 +206,6 @@ addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js
 !addons/spreadsheet_dashboard_event_sale
 !addons/spreadsheet_dashboard_event_sale/**/*
 
-# Whitelist spreadsheet_dashboard_hr_contract
-!spreadsheet_dashboard_hr_contract
-!spreadsheet_dashboard_hr_contract/**/*
-
 # Whitelist spreadsheet_dashboard_crm
 !spreadsheet_dashboard_crm
 !spreadsheet_dashboard_crm/**/*
@@ -193,26 +239,65 @@ addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js
 !addons/im_livechat/**/*
 !addons/mail
 !addons/mail/**/*
+!addons/portal
+!addons/portal/**/*
 !addons/snailmail
 !addons/snailmail/**/*
 !addons/test_discuss_full
 !addons/test_discuss_full/**/*
+!addons/test_mail
+!addons/test_mail/**/*
 !addons/website_livechat
 !addons/website_livechat/**/*
+!addons/website_slides
+!addons/website_slides/**/*
 !approvals
 !approvals/**/*
 !test_discuss_full_enterprise
 !test_discuss_full_enterprise/**/*
+!test_mail_enterprise
+!test_mail_enterprise/**/*
 !whatsapp
 !whatsapp/**/*
+
+# Whitelist voip modules
+!voip*
+!voip*/**/*
+
+# BlackList voip libs
+voip/static/lib/**/*
+
+# Whitelist stock_barcode modules
+!stock_barcode
+!stock_barcode/**/*
+!stock_barcode_barcodelookup
+!stock_barcode_barcodelookup/**/*
+!stock_barcode_mrp
+!stock_barcode_mrp/**/*
+!stock_barcode_mrp_subcontracting
+!stock_barcode_mrp_subcontracting/**/*
+!stock_barcode_picking_batch
+!stock_barcode_picking_batch/**/*
+!stock_barcode_product_expiry
+!stock_barcode_product_expiry/**/*
+!stock_barcode_quality_control
+!stock_barcode_quality_control/**/*
+!stock_barcode_quality_control_picking_batch
+!stock_barcode_quality_control_picking_batch/**/*
+!stock_barcode_quality_mrp
+!stock_barcode_quality_mrp/**/*
+
+# Whitelist Brazilian eCommerce adaptations
+!addons/l10n_br_website_sale
+!addons/l10n_br_website_sale/**/*
 
 # Whitelist point_of_sale
 !addons/point_of_sale
 !addons/point_of_sale/**/*
 
 # Whitelist community pos modules
-!addons/hw_posbox_homepage
-!addons/hw_posbox_homepage/**/*
+!addons/iot_drivers
+!addons/iot_drivers/**/*
 !addons/l10n_ar_pos
 !addons/l10n_ar_pos/**/*
 !addons/l10n_co_pos
@@ -245,8 +330,6 @@ addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js
 !addons/pos_online_payment/**/*
 !addons/pos_online_payment_self_order
 !addons/pos_online_payment_self_order/**/*
-!addons/pos_paytm
-!addons/pos_paytm/**/*
 !addons/pos_restaurant
 !addons/pos_restaurant/**/*
 !addons/pos_restaurant_adyen
@@ -269,12 +352,12 @@ addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js
 !addons/pos_self_order_sale/**/*
 !addons/pos_self_order_stripe
 !addons/pos_self_order_stripe/**/*
-!addons/pos_six
-!addons/pos_six/**/*
 !addons/pos_stripe
 !addons/pos_stripe/**/*
 !addons/spreadsheet_dashboard_pos_hr
 !addons/spreadsheet_dashboard_pos_hr/**/*
+!addons/pos_cashmatic
+!addons/pos_cashmatic/**/*
 
 # Whitelist enterprise pos modules
 !l10n_cl_edi_pos
@@ -289,6 +372,8 @@ addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js
 !l10n_mx_edi_pos/**/*
 !l10n_pl_reports_pos_jpk
 !l10n_pl_reports_pos_jpk/**/*
+!l10n_br_edi_pos
+!l10n_br_edi_pos/**/*
 !pos_account_reports
 !pos_account_reports/**/*
 !pos_blackbox_be
@@ -301,14 +386,12 @@ addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js
 !pos_iot/**/*
 !pos_iot_six
 !pos_iot_six/**/*
-!pos_l10n_se
-!pos_l10n_se/**/*
+!l10n_se_pos
+!l10n_se_pos/**/*
 !pos_online_payment_self_order_preparation_display
 !pos_online_payment_self_order_preparation_display/**/*
 !pos_order_tracking_display
 !pos_order_tracking_display/**/*
-!pos_preparation_display
-!pos_preparation_display/**/*
 !pos_restaurant_appointment
 !pos_restaurant_appointment/**/*
 !pos_restaurant_preparation_display
@@ -319,6 +402,8 @@ addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js
 !pos_self_order_preparation_display/**/*
 !pos_settle_due
 !pos_settle_due/**/*
+!pos_tyro
+!pos_tyro/**/*
 
 # Whitelist misc enterprise modules
 !sign
@@ -326,3 +411,16 @@ addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js
 
 !sign_itsme
 !sign_itsme/**
+
+# Whitelist the shop floor module
+!mrp_workorder
+!mrp_workorder/**
+
+!ai
+!ai/**
+
+!ai_livechat
+!ai_livechat/**
+
+!ai_website_livechat
+!ai_website_livechat/**

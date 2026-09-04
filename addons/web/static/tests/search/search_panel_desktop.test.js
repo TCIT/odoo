@@ -8,10 +8,12 @@ import {
     defineModels,
     fields,
     getService,
+    MockServer,
     models,
     mountWithCleanup,
     mountWithSearch,
     onRpc,
+    patchWithCleanup,
     toggleMenuItem,
     toggleSearchBarMenu,
 } from "@web/../tests/web_test_helpers";
@@ -181,7 +183,14 @@ class Category extends models.Model {
     ];
 }
 
-defineModels([Partner, Company, Category]);
+class User extends models.Model {
+    _name = "res.users";
+    has_group() {
+        return true;
+    }
+}
+
+defineModels([Partner, Company, Category, User]);
 
 defineActions([
     {
@@ -266,6 +275,310 @@ test("basic rendering of a component with search panel", async () => {
 
     expect.verifySteps(["search_panel_select_range", "search_panel_select_multi_range"]);
     expect(component.domain).toEqual([]); // initial domain (does not need the sections to be loaded)
+});
+
+test("when category is empty fallback to All", async () => {
+    Partner._views.search = /* xml */ `
+            <search>
+                <searchpanel>
+                    <field name="company_id" enable_counters="1"/>
+                </searchpanel>
+            </search>
+        `;
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+
+    expect(`.o_search_panel`).toHaveCount(1);
+    expect(`.o_search_panel_section`).toHaveCount(1);
+    expect(queryAllTexts`.o_search_panel_section:eq(0) .o_search_panel_category_value`).toEqual([
+        "All",
+        "asustek\n2",
+        "agrolait\n2",
+    ]);
+    expect(`.o_kanban_record:not(.o_kanban_ghost)`).toHaveCount(4);
+
+    MockServer.env["partner"].unlink([2, 4]);
+
+    await contains(queryAll`.o_search_panel_category_value header`[2]).click();
+    expect(queryAllTexts`.o_search_panel_category_value header.active`).toEqual(["All"]);
+    expect(`.o_kanban_record:not(.o_kanban_ghost)`).toHaveCount(2);
+});
+
+test("cache search panel", async () => {
+    let spSelectRangeDef;
+    let spSelectMultiRangeDef;
+    onRpc("search_panel_select_range", () => spSelectRangeDef);
+    onRpc("search_panel_select_multi_range", () => spSelectMultiRangeDef);
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+
+    expect(`.o_search_panel`).toHaveCount(1);
+    expect(`.o_search_panel_section`).toHaveCount(2);
+    expect(queryAllTexts`.o_search_panel_section:eq(0) .o_search_panel_category_value`).toEqual([
+        "All",
+        "asustek\n2",
+        "agrolait\n2",
+    ]);
+    expect(queryAllTexts`.o_search_panel_section:eq(1) .o_search_panel_filter_value`).toEqual([
+        "gold\n1",
+        "silver\n3",
+    ]);
+
+    spSelectRangeDef = new Deferred();
+    spSelectMultiRangeDef = new Deferred();
+
+    // Go to a form view
+    await getService("action").doAction(2);
+    expect(`.o_form_view`).toHaveCount(1);
+
+    // Came back to search panel
+    await getService("action").doAction(1);
+    // Search Panel is rendered with cached data !
+    expect(`.o_search_panel`).toHaveCount(1);
+    expect(`.o_search_panel_section`).toHaveCount(2);
+    expect(queryAllTexts`.o_search_panel_section:eq(0) .o_search_panel_category_value`).toEqual([
+        "All",
+        "asustek\n2",
+        "agrolait\n2",
+    ]);
+    expect(queryAllTexts`.o_search_panel_section:eq(1) .o_search_panel_filter_value`).toEqual([
+        "gold\n1",
+        "silver\n3",
+    ]);
+
+    spSelectRangeDef.resolve({
+        parent_field: "parent_id",
+        values: [
+            {
+                id: 3,
+                display_name: "asustek",
+                parent_id: false,
+                __count: 1,
+            },
+            {
+                id: 5,
+                display_name: "agrolait",
+                parent_id: false,
+                __count: 2,
+            },
+            {
+                id: 7,
+                display_name: "plop",
+                parent_id: false,
+                __count: 4,
+            },
+        ],
+    });
+    await animationFrame();
+
+    expect(`.o_search_panel`).toHaveCount(1);
+    expect(`.o_search_panel_section`).toHaveCount(2);
+
+    expect(queryAllTexts`.o_search_panel_section:eq(0) .o_search_panel_category_value`).toEqual([
+        "All",
+        "asustek\n1",
+        "agrolait\n2",
+        "plop\n4",
+    ]);
+    expect(queryAllTexts`.o_search_panel_section:eq(1) .o_search_panel_filter_value`).toEqual([
+        "gold\n1",
+        "silver\n3",
+    ]);
+
+    spSelectMultiRangeDef.resolve({
+        values: [
+            {
+                id: 6,
+                display_name: "gold",
+                __count: 5,
+            },
+            {
+                id: 7,
+                display_name: "silver",
+                __count: 3,
+            },
+            {
+                id: 9,
+                display_name: "plop",
+                __count: 2,
+            },
+        ],
+    });
+    await animationFrame();
+
+    expect(`.o_search_panel`).toHaveCount(1);
+    expect(`.o_search_panel_section`).toHaveCount(2);
+
+    expect(queryAllTexts`.o_search_panel_section:eq(0) .o_search_panel_category_value`).toEqual([
+        "All",
+        "asustek\n1",
+        "agrolait\n2",
+        "plop\n4",
+    ]);
+    expect(queryAllTexts`.o_search_panel_section:eq(1) .o_search_panel_filter_value`).toEqual([
+        "gold\n5",
+        "silver\n3",
+        "plop\n2",
+    ]);
+});
+
+test("cache search panel (onFinish called after anoter load - Category)", async () => {
+    const spSelectRangeDef = [null, new Deferred(), new Deferred()];
+    let spSelectRangeCount = 0;
+    onRpc("search_panel_select_range", () => spSelectRangeDef[spSelectRangeCount++]);
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+
+    expect(`.o_search_panel`).toHaveCount(1);
+    expect(`.o_search_panel_section`).toHaveCount(2);
+    expect(queryAllTexts`.o_search_panel_section:eq(0) .o_search_panel_category_value`).toEqual([
+        "All",
+        "asustek\n2",
+        "agrolait\n2",
+    ]);
+    expect(queryAllTexts`.o_search_panel_section:eq(1) .o_search_panel_filter_value`).toEqual([
+        "gold\n1",
+        "silver\n3",
+    ]);
+
+    // Go to a form view
+    await getService("action").doAction(2);
+    expect(`.o_form_view`).toHaveCount(1);
+
+    // Came back to search panel
+    await getService("action").doAction(1);
+    await animationFrame();
+
+    // Click on a Filter !
+    await contains(queryAll`.o_search_panel_label`[4]).click();
+    await animationFrame();
+
+    // resolve RPCs (3th call) from the click
+    spSelectRangeDef[2].resolve({
+        parent_field: "parent_id",
+        values: [
+            {
+                id: 11,
+                display_name: "plop22",
+                parent_id: false,
+                __count: 8,
+            },
+        ],
+    });
+    await animationFrame();
+    expect(queryAllTexts`.o_search_panel_section:eq(0) .o_search_panel_category_value`).toEqual([
+        "All",
+        "plop22\n8",
+    ]);
+
+    // resolve RPCs (2nd call) from the came back => must be ignored
+    spSelectRangeDef[1].resolve({
+        parent_field: "parent_id",
+        values: [
+            {
+                id: 3,
+                display_name: "asustek",
+                parent_id: false,
+                __count: 1,
+            },
+            {
+                id: 5,
+                display_name: "agrolait",
+                parent_id: false,
+                __count: 2,
+            },
+            {
+                id: 7,
+                display_name: "plop",
+                parent_id: false,
+                __count: 4,
+            },
+        ],
+    });
+    await animationFrame();
+    expect(queryAllTexts`.o_search_panel_section:eq(0) .o_search_panel_category_value`).toEqual([
+        "All",
+        "plop22\n8",
+    ]);
+});
+
+test("cache search panel (onFinish called after anoter load - Filters)", async () => {
+    const spSelectMultiRangeDef = [null, new Deferred(), new Deferred()];
+    let spSelectMultiRangeCount = 0;
+    onRpc(
+        "search_panel_select_multi_range",
+        () => spSelectMultiRangeDef[spSelectMultiRangeCount++]
+    );
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+
+    expect(`.o_search_panel`).toHaveCount(1);
+    expect(`.o_search_panel_section`).toHaveCount(2);
+    expect(queryAllTexts`.o_search_panel_section:eq(0) .o_search_panel_category_value`).toEqual([
+        "All",
+        "asustek\n2",
+        "agrolait\n2",
+    ]);
+    expect(queryAllTexts`.o_search_panel_section:eq(1) .o_search_panel_filter_value`).toEqual([
+        "gold\n1",
+        "silver\n3",
+    ]);
+
+    // Go to a form view
+    await getService("action").doAction(2);
+    expect(`.o_form_view`).toHaveCount(1);
+
+    // Came back to search panel
+    await getService("action").doAction(1);
+    await animationFrame();
+
+    // click on a Category
+    await contains(queryAll`.o_search_panel_label`[1]).click();
+    await animationFrame();
+
+    // resolve RPCs (3th call) from the click
+    spSelectMultiRangeDef[2].resolve({
+        values: [
+            {
+                id: 13,
+                display_name: "plop22",
+                __count: 99,
+            },
+        ],
+    });
+    await animationFrame();
+    expect(queryAllTexts`.o_search_panel_section:eq(1) .o_search_panel_filter_value`).toEqual([
+        "plop22\n99",
+    ]);
+
+    // resolve RPCs (2nd call) from the came back => must be ignored
+    spSelectMultiRangeDef[1].resolve({
+        values: [
+            {
+                id: 6,
+                display_name: "gold",
+                __count: 5,
+            },
+            {
+                id: 7,
+                display_name: "silver",
+                __count: 3,
+            },
+            {
+                id: 9,
+                display_name: "plop",
+                __count: 2,
+            },
+        ],
+    });
+    await animationFrame();
+    expect(queryAllTexts`.o_search_panel_section:eq(1) .o_search_panel_filter_value`).toEqual([
+        "plop22\n99",
+    ]);
 });
 
 test("sections with custom icon and color", async () => {
@@ -452,7 +765,11 @@ test("use category (on selection) to refine search", async () => {
 test("category has been archived", async () => {
     Company._fields.active = fields.Boolean({ string: "Archived" });
     Company._records = [
-        { id: 3, name: "asustek" },
+        {
+            name: "asustek",
+            id: 3,
+            active: false,
+        },
         {
             name: "Company 5",
             id: 5,
@@ -812,9 +1129,6 @@ test("concurrency: single category", async () => {
     const compPromise = mountWithSearch(TestComponent, {
         resModel: "partner",
         searchViewId: false,
-        context: {
-            searchpanel_default_company_id: [5],
-        },
     });
 
     // Case 1: search panel is awaited to build the query with search defaults
@@ -1361,7 +1675,7 @@ test("filter with domain", async () => {
 
     onRpc("search_panel_select_multi_range", ({ kwargs }) => {
         expect.step("search_panel_select_multi_range");
-        expect({ ...kwargs, context: {} }).toEqual({
+        expect({ ...kwargs, context: {} }).toMatchObject({
             group_by: false,
             category_domain: [],
             context: {},
@@ -1582,9 +1896,7 @@ test("tests conservation of category record order", async () => {
 });
 
 test("search panel is available on list and kanban by default", async () => {
-    Partner._views = {
-        ...Partner._views,
-        [["search", false]]: /* xml */ `
+    Partner._views.search = /* xml */ `
             <search>
                 <filter name="false_domain" string="False Domain" domain="[(0, '=', 1)]"/>
                 <filter name="filter" string="Filter" domain="[('bar', '=', true)]"/>
@@ -1595,8 +1907,7 @@ test("search panel is available on list and kanban by default", async () => {
                     <field name="category_id" select="multi" enable_counters="1" expand="1"/>
                 </searchpanel>
             </search>
-        `,
-    };
+        `;
 
     onRpc("has_group", () => true);
     await mountWithCleanup(WebClient);
@@ -1618,9 +1929,7 @@ test("search panel is available on list and kanban by default", async () => {
 });
 
 test("search panel with view_types attribute", async () => {
-    Partner._views = {
-        ...Partner._views,
-        [["search", false]]: /* xml */ `
+    Partner._views.search = /* xml */ `
             <search>
                 <filter name="false_domain" string="False Domain" domain="[(0, '=', 1)]"/>
                 <filter name="filter" string="Filter" domain="[('bar', '=', true)]"/>
@@ -1631,8 +1940,7 @@ test("search panel with view_types attribute", async () => {
                     <field name="category_id" select="multi" enable_counters="1" expand="1"/>
                 </searchpanel>
             </search>
-        `,
-    };
+        `;
 
     onRpc("has_group", () => true);
     await mountWithCleanup(WebClient);
@@ -2726,6 +3034,64 @@ test("reached limit for a filter", async () => {
     expect(`.o_search_panel_filter_value`).toHaveCount(0);
 });
 
+test("error message is correctly cleared (category case)", async () => {
+    Company._records.push({ id: 8, name: "third company", category_id: 6 });
+    Partner._records[0].company_id = 8;
+    Partner._views = {
+        search: /* xml */ `
+            <search>
+                <filter name="filter_bar_false" string="Not Bar" domain="[('bar', '=', false)]"/>
+                <searchpanel>
+                    <field name="company_id" limit="2"/>
+                </searchpanel>
+            </search>
+        `,
+    };
+
+    await mountWithSearch(TestComponent, {
+        resModel: "partner",
+        searchViewId: false,
+    });
+
+    expect(`section div.alert.alert-warning`).toHaveCount(1);
+    expect(`section div.alert.alert-warning`).toHaveText("Too many items to display.");
+
+    await toggleSearchBarMenu();
+    await toggleMenuItem("Not Bar");
+
+    expect(`section div.alert.alert-warning`).toHaveCount(0);
+    expect(`.o_search_panel_category_value`).toHaveCount(2);
+});
+
+test("error message is correctly cleared (filter case)", async () => {
+    Company._records.push({ id: 8, name: "third company", category_id: 6 });
+    Partner._records[0].company_id = 8;
+    Partner._views = {
+        search: /* xml */ `
+            <search>
+                <filter name="filter_bar_false" string="Not Bar" domain="[('bar', '=', false)]"/>
+                <searchpanel>
+                    <field name="company_id" select="multi" limit="2"/>
+                </searchpanel>
+            </search>
+        `,
+    };
+
+    await mountWithSearch(TestComponent, {
+        resModel: "partner",
+        searchViewId: false,
+    });
+
+    expect(`section div.alert.alert-warning`).toHaveCount(1);
+    expect(`section div.alert.alert-warning`).toHaveText("Too many items to display.");
+
+    await toggleSearchBarMenu();
+    await toggleMenuItem("Not Bar");
+
+    expect(`section div.alert.alert-warning`).toHaveCount(0);
+    expect(`.o_search_panel_filter_value`).toHaveCount(1);
+});
+
 test("a selected value becomming invalid should no more impact the view", async () => {
     Partner._views = {
         search: /* xml */ `
@@ -2843,6 +3209,7 @@ test("Display message when no filter availible", async () => {
         resModel: "partner",
         searchViewId: false,
     });
+    await contains(`.o_search_panel_sidebar button`).click();
     expect(`.o_search_panel_empty_state`).toHaveCount(1);
     expect(`.o_search_panel_empty_state button`).toHaveCount(1);
 });
@@ -2856,43 +3223,42 @@ test("Don't display empty state message when some filters are available", async 
 });
 
 test("search panel can be collapsed/expanded", async () => {
-    await mountWithSearch(TestComponent, {
-        resModel: "partner",
-        searchViewId: false,
+    patchWithCleanup(localStorage, {
+        setItem(key, value) {
+            if (key.startsWith("search_panel_expanded")) {
+                expect.step(["setItem", key, value]);
+            }
+            super.setItem(...arguments);
+        },
     });
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
     expect(`.o_search_panel`).toHaveCount(1);
     expect(`.o_search_panel_section`).toHaveCount(2);
 
     await contains(`.o_search_panel button`).click();
+    expect.verifySteps([["setItem", "search_panel_expanded,false,1", false]]);
     expect(`.o_search_panel`).toHaveCount(0);
     expect(`.o_search_panel_sidebar`).toHaveCount(1);
     expect(`.o_search_panel_sidebar`).toHaveText("All");
 
     await contains(`.o_search_panel_sidebar button`).click();
+    expect.verifySteps([["setItem", "search_panel_expanded,false,1", true]]);
     expect(`.o_search_panel`).toHaveCount(1);
 
     await contains(queryAll`.o_search_panel_category_value header`[1]).click();
     await contains(queryAll`.o_search_panel_filter_value input`[1]).click();
     await contains(`.o_search_panel button`).click();
+    expect.verifySteps([["setItem", "search_panel_expanded,false,1", false]]);
     expect(`.o_search_panel`).toHaveCount(0);
     expect(`.o_search_panel_sidebar`).toHaveCount(1);
     expect(`.o_search_panel_sidebar`).toHaveText("asusteksilver");
 });
 
-test("search panel can be collapsed by default", async () => {
-    Partner._views = {
-        search: /* xml */ `
-            <search>
-                <searchpanel fold="true">
-                    <field name="company_id" enable_counters="1"/>
-                </searchpanel>
-            </search>
-        `,
-    };
-    await mountWithSearch(TestComponent, {
-        resModel: "partner",
-        searchViewId: false,
-    });
+test("search panel can be collapsed by default if it was set in local storage beforehand", async () => {
+    localStorage.setItem("search_panel_expanded,false,1", false);
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
     expect(`.o_search_panel`).toHaveCount(0);
     expect(`.o_search_panel_sidebar`).toHaveCount(1);
     expect(`.o_search_panel_sidebar`).toHaveText("All");
@@ -2977,4 +3343,118 @@ test("search panel width is kept when switching between controllers", async () =
     expect(queryFirst(".o_search_panel").offsetWidth).toBe(newWidth);
     await getService("action").switchView("kanban");
     expect(queryFirst(".o_search_panel").offsetWidth).toBe(newWidth);
+});
+
+test("hide search panel if there is no records", async () => {
+    Partner._records = [];
+    Partner._views = {
+        search: /* xml */ `
+            <search>
+                <searchpanel>
+                    <field name="company_id" enable_counters="1"/>
+                </searchpanel>
+            </search>
+        `,
+    };
+
+    await mountWithSearch(TestComponent, {
+        resModel: "partner",
+        searchViewId: false,
+    });
+
+    expect(`.o_search_panel_sidebar`).toHaveCount(1);
+    expect(`.o_search_panel`).toHaveCount(0);
+});
+
+test("many2one: select one, hierarchize and depth", async () => {
+    Company._records = [
+        { id: 1, name: "L0" },
+        { id: 2, name: "L1", parent_id: 1 },
+        { id: 3, name: "L2", parent_id: 2 },
+        { id: 4, name: "L3_1", parent_id: 3 },
+        { id: 5, name: "L3_2", parent_id: 3 },
+        { id: 6, name: "L_4_1", parent_id: 4 },
+        { id: 7, name: "L_4_2", parent_id: 5 },
+    ];
+    Partner._records[0].company_id = 6;
+    Partner._records[1].company_id = 7;
+    Partner._views = {
+        search: /* xml */ `
+            <search>
+                <searchpanel>
+                    <field name="company_id" depth="3"/>
+                </searchpanel>
+            </search>
+        `,
+    };
+
+    await mountWithSearch(TestComponent, {
+        resModel: "partner",
+        searchViewId: false,
+    });
+    expect(`.o_search_panel_field .o_search_panel_category_value`).toHaveCount(6);
+    expect(`.o_toggle_fold > i`).toHaveCount(5);
+
+    await contains(`.o_search_panel_category_value header:contains(L3_2)`).click();
+    expect(`.o_search_panel_field .o_search_panel_category_value`).toHaveCount(7);
+    expect(`.o_toggle_fold > i`).toHaveCount(5);
+});
+
+test("many2one: select one, hierarchize and depth and search_default", async () => {
+    Company._records = [
+        { id: 1, name: "L0" },
+        { id: 2, name: "L1", parent_id: 1 },
+        { id: 3, name: "L2", parent_id: 2 },
+        { id: 4, name: "L3_1", parent_id: 3 },
+        { id: 5, name: "L3_2", parent_id: 3 },
+        { id: 6, name: "L_4_1", parent_id: 4 },
+        { id: 7, name: "L_4_2", parent_id: 5 },
+    ];
+    Partner._records[0].company_id = 6;
+    Partner._records[1].company_id = 7;
+    Partner._views = {
+        search: /* xml */ `
+            <search>
+                <searchpanel>
+                    <field name="company_id" depth="2"/>
+                </searchpanel>
+            </search>
+        `,
+    };
+
+    await mountWithSearch(TestComponent, {
+        resModel: "partner",
+        searchViewId: false,
+        context: {
+            searchpanel_default_company_id: 6,
+        },
+    });
+    expect(`.o_search_panel_field .o_search_panel_category_value`).toHaveCount(7);
+    expect(`.o_toggle_fold > i`).toHaveCount(5);
+});
+
+test("search panel with sample data", async () => {
+    Partner._records = [];
+    Partner._views.kanban = /* xml */ `
+        <kanban sample="1">
+            <templates>
+                <div t-name="card" class="oe_kanban_global_click">
+                    <field name="foo"/>
+                </div>
+            </templates>
+        </kanban>`;
+    Partner._views.list = /* xml */ `
+        <list sample="1">
+            <field name="foo"/>
+        </list>`;
+
+    onRpc("has_group", () => true);
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+
+    await getService("action").switchView("kanban");
+    expect(`.o_search_panel_filter_value:eq(0) input`).toHaveStyle({ "pointer-events": "auto" });
+
+    await getService("action").switchView("list");
+    expect(`.o_search_panel_filter_value:eq(0) input`).toHaveStyle({ "pointer-events": "auto" });
 });

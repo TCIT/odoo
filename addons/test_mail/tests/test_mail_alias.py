@@ -24,6 +24,17 @@ class TestMailAliasCommon(MailCommon):
             'alias_name': 'test.alias',
         })
 
+        cls.company_no_alias = cls.env['res.company'].create({
+            'alias_domain_id': False,
+            'country_id': cls.env.ref('base.be').id,
+            'currency_id': cls.env.ref('base.EUR').id,
+            'email': 'company_no_alias@test.example.com',
+            'name': 'No Alias Company',
+        })
+        cls.user_erp_manager.write({
+            'company_ids': [(4, cls.company_no_alias.id)],
+        })
+
 
 @tagged('mail_gateway', 'mail_alias', 'multi_company')
 class TestMailAlias(TestMailAliasCommon):
@@ -36,15 +47,54 @@ class TestMailAlias(TestMailAliasCommon):
             with self.assertRaises(exceptions.ValidationError):
                 self.env['ir.config_parameter'].set_param('mail.catchall.domain.allowed', value)
 
-        for value, expected in [
+        test_cases = [
             ('', False),
             ('hello.com', 'hello.com'),
             ('hello.com,,', 'hello.com'),
             ('hello.com,bonjour.com', 'hello.com,bonjour.com'),
             ('hello.COM, BONJOUR.com', 'hello.com,bonjour.com'),
-        ]:
-            self.env['ir.config_parameter'].set_param('mail.catchall.domain.allowed', value)
-            self.assertEqual(self.env['ir.config_parameter'].get_param('mail.catchall.domain.allowed'), expected)
+        ]
+        for value, expected in test_cases:
+            with self.subTest(value=value):
+                self.env['ir.config_parameter'].set_param('mail.catchall.domain.allowed', value)
+                self.assertEqual(self.env['ir.config_parameter'].get_param('mail.catchall.domain.allowed'), expected)
+
+        # test create and write sanitization
+        for value, expected in test_cases:
+            with self.subTest(value=value):
+                self.env["ir.config_parameter"].search([
+                    ("key", "=", "mail.catchall.domain.allowed")
+                ]).unlink()
+                self.env["ir.config_parameter"].create({
+                    "key": "mail.catchall.domain.allowed",
+                    "value": value,
+                })
+                # check after create
+                self.assertEqual(
+                    self.env["ir.config_parameter"].get_param(
+                        "mail.catchall.domain.allowed"
+                    ),
+                    expected,
+                )
+
+                icp_record = self.env["ir.config_parameter"].search([
+                    ("key", "=", "mail.catchall.domain.allowed")
+                ])
+                icp_record.write({
+                        "key": "mail.catchall.domain.allowed",
+                        "value": "randomPlaceHolder",
+                    })
+                icp_record.write({
+                        "key": "mail.catchall.domain.allowed",
+                        "value": value,
+                    })
+                # check after write
+                self.assertEqual(
+                    self.env["ir.config_parameter"].get_param(
+                        "mail.catchall.domain.allowed"
+                    ),
+                    expected,
+                )
 
     @users('erp_manager')
     def test_alias_domain_company_check(self):
@@ -124,19 +174,19 @@ class TestMailAlias(TestMailAliasCommon):
         self.assertEqual((new_mail_alias + other_alias).alias_domain_id, mail_alias_domain)
 
         # test you cannot create  or update aliases matching bounce / catchall of same alias domain
-        with self.assertRaises(exceptions.ValidationError), self.cr.savepoint():
+        with self.assertRaises(exceptions.ValidationError):
             self.env['mail.alias'].create({
                 'alias_model_id': alias_model_id,
                 'alias_name': mail_alias_domain.catchall_alias,
             })
-        with self.assertRaises(exceptions.ValidationError), self.cr.savepoint():
+        with self.assertRaises(exceptions.ValidationError):
             self.env['mail.alias'].create({
                 'alias_model_id': alias_model_id,
                 'alias_name': mail_alias_domain.bounce_alias,
             })
-        with self.assertRaises(exceptions.UserError), self.cr.savepoint():
+        with self.assertRaises(exceptions.UserError):
             new_mail_alias.write({'alias_name': mail_alias_domain.catchall_alias})
-        with self.assertRaises(exceptions.UserError), self.cr.savepoint():
+        with self.assertRaises(exceptions.UserError):
             new_mail_alias.write({'alias_name': mail_alias_domain.bounce_alias})
 
         # other domains bounce / catchall do not prevent
@@ -150,17 +200,17 @@ class TestMailAlias(TestMailAliasCommon):
         new_mail_alias.write({'alias_name': mail_alias_domain_c2.bounce_alias})
         other_alias.write({'alias_name': mail_alias_domain_c2.catchall_alias})
         # changing domain would clash with existing catchall
-        with self.assertRaises(exceptions.UserError), self.cr.savepoint():
+        with self.assertRaises(exceptions.UserError):
             new_mail_alias.write({'alias_domain_id': mail_alias_domain_c2.id,})
 
         new_mail_alias.write({'alias_name': 'unused.test.alias'})
         # test that alias {name, alias_domain_id} should be unique
-        with self.assertRaises(exceptions.UserError), self.cr.savepoint():
+        with self.assertRaises(exceptions.UserError):
             self.env['mail.alias'].create({
                 'alias_model_id': alias_model_id,
                 'alias_name': 'unused.test.alias',
             })
-        with self.assertRaises(exceptions.UserError), self.cr.savepoint():
+        with self.assertRaises(exceptions.UserError):
             self.env['mail.alias'].create([
                 {
                     'alias_model_id': alias_model_id,
@@ -168,7 +218,7 @@ class TestMailAlias(TestMailAliasCommon):
                 }
                 for alias_name in ('new.alias.1', 'new.alias.2', 'new.alias.1')
             ])
-        with self.assertRaises(exceptions.UserError), self.cr.savepoint():
+        with self.assertRaises(exceptions.UserError):
             other_alias.write({'alias_name': 'unused.test.alias'})
 
         # also valid for void domain
@@ -178,13 +228,13 @@ class TestMailAlias(TestMailAliasCommon):
             'alias_name': 'no.domain',
         })
         self.assertFalse(nodom_alias.alias_domain_id)
-        with self.assertRaises(exceptions.UserError), self.cr.savepoint():
+        with self.assertRaises(exceptions.UserError):
             self.env['mail.alias'].create({
                 'alias_domain_id': False,
                 'alias_model_id': alias_model_id,
                 'alias_name': 'no.domain',
             })
-        with self.assertRaises(exceptions.UserError), self.cr.savepoint():
+        with self.assertRaises(exceptions.UserError):
             self.env['mail.alias'].create([
                 {
                     'alias_domain_id': False,
@@ -192,7 +242,7 @@ class TestMailAlias(TestMailAliasCommon):
                     'alias_name': 'dupes.wo.domain',
                 } for _x in range(2)
             ])
-        with self.assertRaises(exceptions.UserError), self.cr.savepoint():
+        with self.assertRaises(exceptions.UserError):
             other_alias.write({
                 'alias_domain_id': False,
                 'alias_name': 'no.domain',
@@ -206,7 +256,7 @@ class TestMailAlias(TestMailAliasCommon):
         })
         self.assertEqual(other_domain_alias.alias_domain_id, mail_alias_domain_c2)
         # changing domain would violate uniqueness
-        with self.assertRaises(exceptions.UserError), self.cr.savepoint():
+        with self.assertRaises(exceptions.UserError):
             other_domain_alias.write({'alias_domain_id': mail_alias_domain.id})
 
     @users('admin')
@@ -219,7 +269,7 @@ class TestMailAlias(TestMailAliasCommon):
             'alias_name': 'unused.test.alias'
         })
 
-        with mute_logger('odoo.sql_db'), self.assertRaises(psycopg2.errors.UniqueViolation), self.cr.savepoint():
+        with mute_logger('odoo.sql_db'), self.assertRaises(psycopg2.errors.UniqueViolation):
             new_mail_alias.copy({'alias_name': 'unused.test.alias'})
 
         # test that duplicating an alias should have blank name
@@ -458,7 +508,7 @@ class TestAliasCompany(TestMailAliasCommon):
         self.assertEqual(self.company_2.alias_domain_id, mail_alias_domain_c2)
 
         # cannot unlink alias domain as there are aliases linked to it
-        with self.assertRaises(psycopg2.errors.ForeignKeyViolation), self.cr.savepoint(), mute_logger('odoo.sql_db'):
+        with self.assertRaises(psycopg2.errors.IntegrityError), mute_logger('odoo.sql_db'):
             mail_alias_domain.unlink()
 
         # eject linked aliases then remove alias domain of first company; should
@@ -504,6 +554,7 @@ class TestAliasCompany(TestMailAliasCommon):
         """ Test initial setup values: currently all companies share the same
         alias configuration as it is unique. """
         self.assertEqual(self.test_alias_mc.alias_domain_id, self.mail_alias_domain)
+        self.assertFalse(self.company_no_alias.alias_domain_id)
 
         self.assertEqual(self.company_admin.alias_domain_id, self.mail_alias_domain)
         self.assertEqual(self.company_admin.bounce_email, f'{self.alias_bounce}@{self.alias_domain}')
@@ -589,9 +640,9 @@ class TestMailAliasDomain(TestMailAliasCommon):
 
         # should not clash with existing aliases, to avoid valid aliases be
         # considered as bounce / catchall
-        with self.assertRaises(exceptions.UserError), self.cr.savepoint():
+        with self.assertRaises(exceptions.UserError):
             alias_domain.write({'bounce_alias': self.test_alias_mc.alias_name})
-        with self.assertRaises(exceptions.UserError), self.cr.savepoint():
+        with self.assertRaises(exceptions.UserError):
             alias_domain.write({'catchall_alias': self.test_alias_mc.alias_name})
 
     @users('admin')
@@ -601,7 +652,7 @@ class TestMailAliasDomain(TestMailAliasCommon):
         alias_domain = self.mail_alias_domain.with_env(self.env)
 
         # copying directly would duplicate bounce / catchall emails
-        with mute_logger('odoo.sql_db'), self.assertRaises(psycopg2.errors.UniqueViolation), self.cr.savepoint():
+        with mute_logger('odoo.sql_db'), self.assertRaises(psycopg2.errors.UniqueViolation):
             new_alias_domain = alias_domain.copy()
 
         # same domain name is authorized if bounce and catchall are different
@@ -620,12 +671,12 @@ class TestMailAliasDomain(TestMailAliasCommon):
             'name': alias_domain.name,
         })
         # any not unique should raise UniqueViolation (SQL constraint fired after check)
-        with mute_logger('odoo.sql_db'), self.assertRaises(psycopg2.errors.UniqueViolation), self.cr.savepoint():
+        with mute_logger('odoo.sql_db'), self.assertRaises(psycopg2.errors.UniqueViolation):
             self.env['mail.alias.domain'].create({
                 'bounce_alias': alias_domain.bounce_alias,
                 'name': alias_domain.name,
             })
-        with mute_logger('odoo.sql_db'), self.assertRaises(psycopg2.errors.UniqueViolation), self.cr.savepoint():
+        with mute_logger('odoo.sql_db'), self.assertRaises(psycopg2.errors.UniqueViolation):
             self.env['mail.alias.domain'].create({
                 'catchall_alias': alias_domain.catchall_alias,
                 'name': alias_domain.name,
@@ -644,20 +695,39 @@ class TestMailAliasDomain(TestMailAliasCommon):
         alias_domain = self.mail_alias_domain.with_env(self.env)
 
         # sanitization of name (both create and write)
-        for failing_name in [
-            'outlook.fr, gmail.com',
+        for failing_name, expected_name in [
+            ('outlook.fr, gmail.com', 'outlook.fr-gmail.com'),
             # accents
-            'provaïder',
-            'provaïder.cöm',
-            # fail
-            '', ' ',
+            ('provaïder', 'provaider'),
+            ('provaïder.cöm', 'provaider.com'),
+            # capitalization
+            ('Test.mycompany.com', 'test.mycompany.com'),
+            ('test.mycompany.Com', 'test.mycompany.com'),
         ]:
             with self.subTest(failing_name=failing_name):
-                with self.assertRaises(exceptions.ValidationError):
-                    _new_domain = self.env['mail.alias.domain'].create({'name': failing_name})
+                new_domain = self.env['mail.alias.domain'].create({'name': failing_name})
+                self.assertEqual(new_domain.name, expected_name)
 
-                with self.assertRaises(exceptions.ValidationError):
-                    alias_domain.write({'name': failing_name})
+                new_domain.write({'name': failing_name})
+                self.assertEqual(new_domain.name, expected_name)
+
+                # Cleanup
+                new_domain.unlink()
+
+        # empty domains
+        with self.subTest(failing_name=''):
+            with mute_logger('odoo.sql_db'), self.assertRaises(exceptions.ValidationError):
+                self.env['mail.alias.domain'].create({'name': ''})
+
+            with mute_logger('odoo.sql_db'), self.assertRaises(exceptions.ValidationError):
+                alias_domain.write({'name': ''})
+
+        with self.subTest(failing_name=' '):
+            with mute_logger('odoo.sql_db'), self.assertRaises(psycopg2.errors.NotNullViolation):
+                self.env['mail.alias.domain'].create({'name': ' '})
+
+            with mute_logger('odoo.sql_db'), self.assertRaises(exceptions.ValidationError):
+                alias_domain.write({'name': ' '})
 
         # sanitization of bounce / catchall
         for (
@@ -942,6 +1012,8 @@ class TestMailAliasMixin(TestMailAliasCommon):
             (False, self.env['res.company'], self.mail_alias_domain_c2),
             (self.env.user.company_id.id, self.company_2, self.mail_alias_domain_c2),
             (self.company_admin.id, self.company_admin, self.mail_alias_domain),
+            # company without alias domain -> set False on alias also, to avoid MC issues
+            (self.company_no_alias.id, self.company_no_alias, self.env['mail.alias.domain']),
         ]:
             with self.subTest(create_cid=create_cid, exp_company=exp_company, exp_alias_domain=exp_alias_domain):
                 counter += 1

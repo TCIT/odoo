@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import ast
 
-from odoo import api, fields, models, tools
-from odoo.exceptions import UserError
-from odoo.tools.safe_eval import safe_eval, datetime
+from odoo import api, fields, models
 
 
 class IrFilters(models.Model):
@@ -12,9 +10,7 @@ class IrFilters(models.Model):
     _order = 'model_id, name, id desc'
 
     name = fields.Char(string='Filter Name', required=True)
-    user_id = fields.Many2one('res.users', string='User', ondelete='cascade',
-                              help="The user this filter is private to. When left empty the filter is public "
-                                   "and available to all users.")
+    user_ids = fields.Many2many('res.users', string='Users', ondelete='cascade', help="The users the filter is shared with. If empty, the filter is shared with all users.", context={'active_test': False})
     domain = fields.Text(default='[]', required=True)
     context = fields.Text(default='{}', required=True)
     sort = fields.Char(default='[]', required=True)
@@ -24,18 +20,33 @@ class IrFilters(models.Model):
                                 help="The menu action this filter applies to. "
                                      "When left empty the filter applies to all menus "
                                      "for this model.")
-    embedded_action_id = fields.Many2one('ir.embedded.actions', help="The embedded action this filter is applied to", ondelete="cascade")
+    embedded_action_id = fields.Many2one('ir.embedded.actions', help="The embedded action this filter is applied to", ondelete="cascade", index='btree_not_null')
     embedded_parent_res_id = fields.Integer(help="id of the record the filter should be applied to. Only used in combination with embedded actions")
     active = fields.Boolean(default=True)
+
+    _get_filters_index = models.Index(
+        '(model_id, action_id, embedded_action_id, embedded_parent_res_id)',
+    )
+    # The embedded_parent_res_id can only be defined when the embedded_action_id field is set.
+    # As the embedded model is linked to only one res_model, It ensure the unicity of the filter regarding the
+    # embedded_parent_res_model and the embedded_parent_res_id
+    _check_res_id_only_when_embedded_action = models.Constraint(
+        'CHECK(NOT (embedded_parent_res_id IS NOT NULL AND embedded_action_id IS NULL))',
+        "Constraint to ensure that the embedded_parent_res_id is only defined when a top_action_id is defined.",
+    )
+    _check_sort_json = models.Constraint(
+        "CHECK(sort IS NULL OR jsonb_typeof(sort::jsonb) = 'array')",
+        "Invalid sort definition",
+    )
 
     @api.model
     def _list_all_models(self):
         lang = self.env.lang or 'en_US'
-        self._cr.execute(
+        self.env.cr.execute(
             "SELECT model, COALESCE(name->>%s, name->>'en_US') FROM ir_model ORDER BY 2",
             [lang],
         )
-        return self._cr.fetchall()
+        return self.env.cr.fetchall()
 
     def copy_data(self, default=None):
         vals_list = super().copy_data(default=default)
@@ -52,11 +63,10 @@ class IrFilters(models.Model):
         return new_filter
 
     def _get_eval_domain(self):
-        self.ensure_one()
-        return safe_eval(self.domain, {
-            'datetime': datetime,
-            'context_today': datetime.datetime.now,
-        })
+        try:
+            return ast.literal_eval(self.domain)
+        except ValueError as e:
+            raise ValueError("Invalid domain: {self.domain}") from e
 
     @api.model
     def _get_action_domain(self, action_id=None, embedded_action_id=None, embedded_parent_res_id=None):
@@ -78,114 +88,22 @@ class IrFilters(models.Model):
             The action does not have to correspond to the model, it may only be
             a contextual action.
         :return: list of :meth:`~osv.read`-like dicts containing the
-            ``name``, ``is_default``, ``domain``, ``user_id`` (m2o tuple),
+            ``name``, ``is_default``, ``domain``, ``user_ids`` (m2m),
             ``action_id`` (m2o tuple), ``embedded_action_id`` (m2o tuple), ``embedded_parent_res_id``
             and ``context`` of the matching ``ir.filters``.
         """
-        # available filters: private filters (user_id=uid) and public filters (uid=NULL),
+        # available filters: private filters (user_ids=uids) and public filters (uids=NULL),
         # and filters for the action (action_id=action_id) or global (action_id=NULL)
         user_context = self.env['res.users'].context_get()
         action_domain = self._get_action_domain(action_id, embedded_action_id, embedded_parent_res_id)
         return self.with_context(user_context).search_read(
-            action_domain + [('model_id', '=', model), ('user_id', 'in', [self._uid, False])],
-            ['name', 'is_default', 'domain', 'context', 'user_id', 'sort', 'embedded_action_id', 'embedded_parent_res_id'],
+            action_domain + [('model_id', '=', model), ('user_ids', 'in', [self.env.uid, False])],
+            ['name', 'is_default', 'domain', 'context', 'user_ids', 'sort', 'embedded_action_id', 'embedded_parent_res_id'],
         )
 
     @api.model
-    def _check_global_default(self, vals, matching_filters):
-        """ _check_global_default(dict, list(dict), dict) -> None
-
-        Checks if there is a global default for the model_id requested.
-
-        If there is, and the default is different than the record being written
-        (-> we're not updating the current global default), raise an error
-        to avoid users unknowingly overwriting existing global defaults (they
-        have to explicitly remove the current default before setting a new one)
-
-        This method should only be called if ``vals`` is trying to set
-        ``is_default``
-
-        :raises odoo.exceptions.UserError: if there is an existing default and
-                                            we're not updating it
-        """
-        domain = self._get_action_domain(vals.get('action_id'), vals.get('embedded_action_id'), vals.get('embedded_parent_res_id'))
-        defaults = self.search(domain + [
-            ('model_id', '=', vals['model_id']),
-            ('user_id', '=', False),
-            ('is_default', '=', True),
-        ])
-
-        if not defaults:
-            return
-        if matching_filters and (matching_filters[0]['id'] == defaults.id):
-            return
-
-        raise UserError(self.env._("There is already a shared filter set as default for %(model)s, delete or change it before setting a new default", model=vals.get('model_id')))
-
-    @api.model
-    @api.returns('self', lambda value: value.id)
-    def create_or_replace(self, vals):
-        action_id = vals.get('action_id')
+    def create_filter(self, vals):
         embedded_action_id = vals.get('embedded_action_id')
         if not embedded_action_id and 'embedded_parent_res_id' in vals:
             del vals['embedded_parent_res_id']
-        embedded_parent_res_id = vals.get('embedded_parent_res_id')
-        current_filters = self.get_filters(vals['model_id'], action_id, embedded_action_id, embedded_parent_res_id)
-        matching_filters = [f for f in current_filters
-                            if f['name'].lower() == vals['name'].lower()
-                            # next line looks for matching user_ids (specific or global), i.e.
-                            # f.user_id is False and vals.user_id is False or missing,
-                            # or f.user_id.id == vals.user_id
-                            if (f['user_id'] and f['user_id'][0]) == vals.get('user_id')]
-
-        if vals.get('is_default'):
-            if vals.get('user_id'):
-                # Setting new default: any other default that belongs to the user
-                # should be turned off
-                domain = self._get_action_domain(action_id, embedded_action_id, embedded_parent_res_id)
-                defaults = self.search(domain + [
-                    ('model_id', '=', vals['model_id']),
-                    ('user_id', '=', vals['user_id']),
-                    ('is_default', '=', True),
-                ])
-                if defaults:
-                    defaults.write({'is_default': False})
-            else:
-                self._check_global_default(vals, matching_filters)
-
-        # When a filter exists for the same (name, model, user) triple, we simply
-        # replace its definition (considering action_id irrelevant here)
-        if matching_filters:
-            matching_filter = self.browse(matching_filters[0]['id'])
-            matching_filter.write(vals)
-            return matching_filter
-
         return self.create(vals)
-
-    _sql_constraints = [
-        # Partial constraint, complemented by unique index (see below). Still
-        # useful to keep because it provides a proper error message when a
-        # violation occurs, as it shares the same prefix as the unique index.
-        ('name_model_uid_unique', 'unique (model_id, user_id, action_id, embedded_action_id, embedded_parent_res_id, name)',
-            'Filter names must be unique'),
-
-        # The embedded_parent_res_id can only be defined when the embedded_action_id field is set.
-        # As the embedded model is linked to only one res_model, It ensure the unicity of the filter regarding the
-        # embedded_parent_res_model and the embedded_parent_res_id
-        (
-            'check_res_id_only_when_embedded_action',
-            """CHECK(
-                NOT (embedded_parent_res_id IS NOT NULL AND embedded_action_id IS NULL)
-            )""",
-            'Constraint to ensure that the embedded_parent_res_id is only defined when a top_action_id is defined.'
-        ),
-        ('check_sort_json', "CHECK(sort IS NULL OR jsonb_typeof(sort::jsonb) = 'array')", 'Invalid sort definition'),
-    ]
-
-    def _auto_init(self):
-        result = super(IrFilters, self)._auto_init()
-        # Use unique index to implement unique constraint on the lowercase name (not possible using a constraint)
-        tools.create_unique_index(self._cr, 'ir_filters_name_model_uid_unique_action_index',
-                                  self._table, ['model_id', 'COALESCE(user_id,-1)', 'COALESCE(action_id,-1)',
-                                                'lower(name)', 'embedded_parent_res_id', 'COALESCE(embedded_action_id,-1)'])
-        return result

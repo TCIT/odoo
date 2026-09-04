@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from . import test_access_rights
@@ -14,10 +13,12 @@ from . import test_leave_requests
 from . import test_out_of_office
 from . import test_company_leave
 from . import test_res_partner
+from . import test_resource_calendar
 from . import test_mandatory_days
 from . import test_global_leaves
 from . import test_uninstall
 from . import test_holidays_calendar
+from . import test_holidays_mail
 from . import test_negative
 from . import test_past_accruals
 from . import test_allocations
@@ -26,3 +27,12 @@ from . import test_timeoff_event
 from . import test_working_hours
 from . import test_dashboard
 from . import test_expiring_leaves
+from . import test_hr_departure_wizard
+from . import test_time_off_card_tour
+from . import test_hr_leave_type_tour
+from . import test_time_off_graph_view_tour
+from . import test_leave_type_data
+from . import test_multi_contract
+from . import test_time_off_allocation_tour
+from . import test_flexible_resource_calendar
+from . import test_hr_leave_report

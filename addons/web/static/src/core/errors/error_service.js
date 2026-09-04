@@ -3,6 +3,14 @@ import { registry } from "../registry";
 import { completeUncaughtError, getErrorTechnicalName } from "./error_utils";
 import { isBrowserFirefox, isBrowserChrome } from "@web/core/browser/feature_detection";
 
+export class HTMLElementLoadingError extends Error {
+    static message = "Error loading an HTML Element";
+    constructor(message = HTMLElementLoadingError.message, event) {
+        super(message);
+        this.event = event;
+    }
+}
+
 /**
  * Uncaught Errors have 4 properties:
  * - name: technical name of the error (UncaughtError, ...)
@@ -82,13 +90,14 @@ export const errorService = {
 
         browser.addEventListener("error", async (ev) => {
             const { colno, error, filename, lineno, message } = ev;
-            const errorsToIgnore = [
-                // Ignore some unnecessary "ResizeObserver loop limit exceeded" error in Firefox.
-                "ResizeObserver loop completed with undelivered notifications.",
-                // ignore Chrome video internal error: https://crbug.com/809574
-                "ResizeObserver loop limit exceeded",
-            ];
-            if (!(error instanceof Error) && errorsToIgnore.includes(message)) {
+            // We never want to display the following ResizeObserver error to the end-user. It
+            // simply indicates that the browser delayed notifications to the next frame to prevent
+            // infinite loop, which is how he's supposed to behave. However, it would be interesting
+            // to track places from where this error could be thrown, and try to fix them.
+            // https://trackjs.com/javascript-errors/resizeobserver-loop-completed-with-undelivered-notifications/
+            const resizeObserverError =
+                "ResizeObserver loop completed with undelivered notifications.";
+            if (!(error instanceof Error) && message === resizeObserverError) {
                 ev.preventDefault();
                 return;
             }
@@ -122,7 +131,28 @@ export const errorService = {
         });
 
         browser.addEventListener("unhandledrejection", async (ev) => {
-            const error = ev.reason;
+            let error = ev.reason;
+
+            if (error && error.type === "error" && "eventPhase" in error) {
+                // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/error_event
+                // See also MDN's img, script and iframe docs. The error Event *doesn't* bubble.
+                // We sometimes reject a promise with the Event dispatched by the "error" handler
+                // of an HTMLElement. If the code throwing that at us doesn't wrap the event in an
+                // actual Error, there is no reason to do more than the spec: we do not handle
+                // this error bubbling to us via the Promise being rejected.
+                if (!error.bubbles) {
+                    ev.preventDefault();
+                    return;
+                }
+                // If for some reason the error Event bubbles then do something
+                // a bit meaningful.
+                let message;
+                if (error.target) {
+                    message = `${HTMLElementLoadingError.message}: ${error.target.nodeName}`;
+                }
+                error = new HTMLElementLoadingError(message, error);
+            }
+
             let traceback;
             if (isBrowserChrome() && ev instanceof CustomEvent && error === undefined) {
                 // This fix is ad-hoc to a bug in the Honey Paypal extension

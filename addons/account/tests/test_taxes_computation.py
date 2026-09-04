@@ -1,3 +1,4 @@
+from odoo import Command
 from odoo.addons.account.tests.common import TestTaxCommon
 from odoo.tests import tagged
 
@@ -40,6 +41,23 @@ class TestTaxesComputation(TestTaxCommon):
                     (115.19, 9.21),
                 ),
             },
+        )
+        self._run_js_tests()
+
+    def test_taxes_filtering(self):
+        tax_percent_1 = self.percent_tax(10.0)
+        tax_percent_2 = self.percent_tax(20.0)
+        self.assert_taxes_computation(
+            tax_percent_1 | tax_percent_2,
+            100.0,
+            {
+                'total_included': 110.0,
+                'total_excluded': 100.0,
+                'taxes_data': (
+                    (100.0, 10.0),
+                ),
+            },
+            excluded_tax_ids=tax_percent_2.ids,
         )
         self._run_js_tests()
 
@@ -473,6 +491,40 @@ class TestTaxesComputation(TestTaxCommon):
         )
         self._run_js_tests()
 
+    def test_random_case_10_reverse_charge(self):
+        """ Reverse charge taxes are always price-excluded. """
+        tax = self.percent_tax(
+            21.0,
+            invoice_repartition_line_ids=[
+                Command.create({'repartition_type': 'base', 'factor_percent': 100.0}),
+                Command.create({'repartition_type': 'tax', 'factor_percent': 100.0}),
+                Command.create({'repartition_type': 'tax', 'factor_percent': -100.0}),
+            ],
+            refund_repartition_line_ids=[
+                Command.create({'repartition_type': 'base', 'factor_percent': 100.0}),
+                Command.create({'repartition_type': 'tax', 'factor_percent': 100.0}),
+                Command.create({'repartition_type': 'tax', 'factor_percent': -100.0}),
+            ],
+        )
+
+        expected_values = [
+            tax,
+            100.0,
+            {
+                'total_included': 100.0,
+                'total_excluded': 100.0,
+                'taxes_data': (
+                    (100.0, 21.0),
+                    (100.0, -21.0),
+                ),
+            },
+        ]
+
+        self.assert_taxes_computation(*expected_values)
+        tax.price_include_override = 'tax_included'
+        self.assert_taxes_computation(*expected_values)
+        self._run_js_tests()
+
     def test_fixed_tax_price_included_affect_base_on_0(self):
         tax = self.fixed_tax(0.05, price_include_override='tax_included', include_base_amount=True)
         self.assert_taxes_computation(
@@ -489,6 +541,14 @@ class TestTaxesComputation(TestTaxCommon):
         self._run_js_tests()
 
     def test_percent_taxes_for_l10n_in(self):
+        """ Test suite for the complex GST taxes in l10n_in. This case implies 3 percentage taxes:
+        t1: % tax, include_base_amount
+        t2: same % as t1, include_base_amount, not is_base_affected
+        t3: % tax
+
+        This case is complex because the amounts of t1 and t2 must always be the same.
+        Furthermore, it's a complicated setup due to the usage of include_base_amount / is_base_affected.
+        """
         tax1 = self.percent_tax(6)
         tax2 = self.percent_tax(6)
         tax3 = self.percent_tax(3)
@@ -631,9 +691,98 @@ class TestTaxesComputation(TestTaxCommon):
             },
             rounding_method='round_globally',
         )
+
+        # tax       price_incl      incl_base_amount    is_base_affected
+        # ----------------------------------------------------------------
+        # tax1      T               T
+        # tax2      T               T
+        tax1.is_base_affected = False
+        self.assert_taxes_computation(
+            tax1 + tax2,
+            200.0,
+            {
+                'total_included': 200.0,
+                'total_excluded': 178.571429,
+                'taxes_data': (
+                    (178.571429, 10.714286),
+                    (178.571429, 10.714286),
+                ),
+            },
+            rounding_method='round_globally',
+        )
+
+        # tax       price_incl      incl_base_amount    is_base_affected
+        # ----------------------------------------------------------------
+        # tax1      T               T                   T
+        # tax2
+        # tax3                                          T
+        tax1.is_base_affected = True
+        tax2.price_include = False
+        tax2.include_base_amount = False
+        self.assert_taxes_computation(
+            tax1 + tax2 + tax3,
+            106.0,
+            {
+                'total_included': 115.18,
+                'total_excluded': 100.0,
+                'taxes_data': (
+                    (100.0, 6.0),
+                    (100.0, 6.0),
+                    (106.0, 3.18),
+                ),
+            },
+            rounding_method='round_globally',
+            excluded_special_modes=['total_included'],
+        )
+
+        # tax       price_incl      incl_base_amount    is_base_affected
+        # ----------------------------------------------------------------
+        # tax1      T               T                   T
+        # tax2                                          T
+        # tax3                                          T
+        tax2.is_base_affected = True
+        self.assert_taxes_computation(
+            tax1 + tax2 + tax3,
+            106.0,
+            {
+                'total_included': 115.54,
+                'total_excluded': 100.0,
+                'taxes_data': (
+                    (100.0, 6.0),
+                    (106.0, 6.36),
+                    (106.0, 3.18),
+                ),
+            },
+            rounding_method='round_globally',
+        )
+
+        # tax       price_incl      incl_base_amount    is_base_affected
+        # ----------------------------------------------------------------
+        # tax1      T                                   T
+        # tax2
+        # tax3                                          T
+        tax1.include_base_amount = False
+        self.assert_taxes_computation(
+            tax1 + tax2 + tax3,
+            106.0,
+            {
+                'total_included': 115.0,
+                'total_excluded': 100.0,
+                'taxes_data': (
+                    (100.0, 6.0),
+                    (100.0, 6.0),
+                    (100.0, 3.0),
+                ),
+            },
+            rounding_method='round_globally',
+        )
         self._run_js_tests()
 
     def test_division_taxes_for_l10n_br(self):
+        """ Test suite for the complex division taxes in l10n_be. This case implies 5 division taxes
+        and is quite complicated to handle because they have to be computed all together and are
+        computed as part of the price_unit.
+        """
         tax1 = self.division_tax(5)
         tax2 = self.division_tax(3)
         tax3 = self.division_tax(0.65)
@@ -678,6 +827,10 @@ class TestTaxesComputation(TestTaxCommon):
         self._run_js_tests()
 
     def test_fixed_taxes_for_l10n_be(self):
+        """ Test suite for the mixing of fixed and percentage taxes in l10n_be. This case implies a fixed tax that affect
+        the base of the following percentage tax. We also have to maintain the case in which the fixed tax is after the percentage
+        one.
+        """
         tax1 = self.fixed_tax(1)
         tax2 = self.percent_tax(21)
         tax3 = self.fixed_tax(2)
@@ -735,7 +888,7 @@ class TestTaxesComputation(TestTaxCommon):
                 'taxes_data': (
                     (99.0, 1.0),
                     (100.0, 21.0),
-                    (121.0, 2.0),
+                    (100.0, 2.0),
                 ),
             },
             rounding_method='round_globally',
@@ -820,7 +973,7 @@ class TestTaxesComputation(TestTaxCommon):
                 'taxes_data': (
                     (100.0, 1.0),
                     (100.0, 21.0),
-                    (122.0, 2.0),
+                    (121.0, 2.0),
                 ),
             },
             rounding_method='round_globally',
@@ -841,7 +994,7 @@ class TestTaxesComputation(TestTaxCommon):
                 'taxes_data': (
                     (100.0, 1.0),
                     (100.0, 21.0),
-                    (122.0, 2.0),
+                    (100.0, 2.0),
                 ),
             },
             rounding_method='round_globally',
@@ -868,6 +1021,70 @@ class TestTaxesComputation(TestTaxCommon):
             },
             rounding_method='round_globally',
         )
+
+        tax1.include_base_amount = False
+        tax1.price_include_override = False
+
+        # Negative price, negative quantity
+        self.assert_taxes_computation(
+            tax1,
+            -10.0,
+            {
+                'total_included': 22.0,
+                'total_excluded': 20.0,
+                'taxes_data': (
+                    (20.0, 2.0),
+                ),
+            },
+            rounding_method='round_globally',
+            quantity=-2,
+        )
+
+        # Negative price, positive quantity
+        self.assert_taxes_computation(
+            tax1,
+            -10.0,
+            {
+                'total_included': -22.0,
+                'total_excluded': -20.0,
+                'taxes_data': (
+                    (-20.0, -2.0),
+                ),
+            },
+            rounding_method='round_globally',
+            quantity=2,
+        )
+
+        # Edge case 1: null price, negative quantity
+        self.assert_taxes_computation(
+            tax1,
+            0.0,
+            {
+                'total_included': -1.0,
+                'total_excluded': 0.0,
+                'taxes_data': (
+                    (0.0, -1.0),
+                ),
+            },
+            rounding_method='round_globally',
+            quantity=-1,
+        )
+
+        # Edge case 2: null price, positive quantity
+        self.assert_taxes_computation(
+            tax1,
+            0.0,
+            {
+                'total_included': 1.0,
+                'total_excluded': 0.0,
+                'taxes_data': (
+                    (0.0, 1.0),
+                ),
+            },
+            rounding_method='round_globally',
+            quantity=1,
+        )
+
         self._run_js_tests()
 
     def test_adapt_price_unit_to_another_taxes(self):

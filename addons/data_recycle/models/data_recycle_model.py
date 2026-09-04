@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import ast
@@ -6,10 +5,10 @@ import ast
 from collections import defaultdict
 from dateutil.relativedelta import relativedelta
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, modules
 from odoo.exceptions import UserError
-from odoo.tools import config, split_every
-from odoo.osv import expression
+from odoo.fields import Domain
+from odoo.tools import _, split_every
 
 # When recycle_mode = automatic, _recycle_records calls action_validate.
 # This is quite slow so requires smaller batch size.
@@ -17,7 +16,7 @@ DR_CREATE_STEP_AUTO = 5000
 DR_CREATE_STEP_MANUAL = 50000
 
 
-class DataRecycleModel(models.Model):
+class Data_RecycleModel(models.Model):
     _name = 'data_recycle.model'
     _description = 'Recycling Model'
     _order = 'name'
@@ -60,7 +59,7 @@ class DataRecycleModel(models.Model):
     # User Notifications for Manual clean
     notify_user_ids = fields.Many2many(
         'res.users', string='Notify Users',
-        domain=lambda self: [('groups_id', 'in', self.env.ref('base.group_system').id)],
+        domain=lambda self: [('all_group_ids', 'in', self.env.ref('base.group_system').id)],
         default=lambda self: self.env.user,
         help='List of users to notify when there are new records to recycle')
     notify_frequency = fields.Integer(string='Notify', default=1)
@@ -70,9 +69,10 @@ class DataRecycleModel(models.Model):
         ('months', 'Months')], string='Notify Frequency Period', default='weeks')
     last_notification = fields.Datetime(readonly=True)
 
-    _sql_constraints = [
-        ('check_notif_freq', 'CHECK(notify_frequency > 0)', 'The notification frequency should be greater than 0'),
-    ]
+    _check_notif_freq = models.Constraint(
+        'CHECK(notify_frequency > 0)',
+        'The notification frequency should be greater than 0',
+    )
 
     @api.constrains('recycle_action')
     def _check_recycle_action(self):
@@ -107,7 +107,7 @@ class DataRecycleModel(models.Model):
     def _recycle_records(self, batch_commits=False):
         self.env.flush_all()
         records_to_clean = []
-        is_test = bool(config['test_enable'] or config['test_file'])
+        is_test = modules.module.current_test
 
         existing_recycle_records = self.env['data_recycle.record'].with_context(
             active_test=False).search([('recycle_model_id', 'in', self.ids)])
@@ -116,14 +116,14 @@ class DataRecycleModel(models.Model):
             mapped_existing_records[recycle_record.recycle_model_id].append(recycle_record.res_id)
 
         for recycle_model in self:
-            rule_domain = ast.literal_eval(recycle_model.domain) if recycle_model.domain and recycle_model.domain != '[]' else []
+            rule_domain = Domain(ast.literal_eval(recycle_model.domain)) if recycle_model.domain and recycle_model.domain != '[]' else Domain.TRUE
             if recycle_model.time_field_id and recycle_model.time_field_delta and recycle_model.time_field_delta_unit:
                 if recycle_model.time_field_id.ttype == 'date':
                     now = fields.Date.today()
                 else:
                     now = fields.Datetime.now()
                 delta = relativedelta(**{recycle_model.time_field_delta_unit: recycle_model.time_field_delta})
-                rule_domain = expression.AND([rule_domain, [(recycle_model.time_field_id.name, '<=', now - delta)]])
+                rule_domain &= Domain(recycle_model.time_field_id.name, '<=', now - delta)
             model = self.env[recycle_model.res_model_name]
             if recycle_model.include_archived:
                 model = model.with_context(active_test=False)
@@ -186,7 +186,6 @@ class DataRecycleModel(models.Model):
                     }
                 ),
                 model=self._name,
-                notify_author=True,
                 partner_ids=partner_ids,
                 res_id=self.id,
                 subject=_('Data to Recycle'),

@@ -1,14 +1,15 @@
 import { Transition } from "@web/core/transition";
 import { MainComponentsContainer } from "@web/core/main_components_container";
-import { Navbar } from "@point_of_sale/app/navbar/navbar";
-import { usePos } from "@point_of_sale/app/store/pos_hook";
-import { reactive, Component, onMounted, onWillStart } from "@odoo/owl";
+import { Navbar } from "@point_of_sale/app/components/navbar/navbar";
+import { usePos } from "@point_of_sale/app/hooks/pos_hook";
+import { Component, onMounted, onWillStart } from "@odoo/owl";
 import { effect } from "@web/core/utils/reactive";
 import { batched } from "@web/core/utils/timing";
-import { deduceUrl } from "@point_of_sale/utils";
 import { useOwnDebugContext } from "@web/core/debug/debug_context";
+import { CustomerDisplayPosAdapter } from "@point_of_sale/app/customer_display/customer_display_adapter";
 import { useIdleTimer } from "./utils/use_idle_timer";
 import useTours from "./hooks/use_tours";
+import { init as initDebugFormatters } from "./utils/debug-formatter";
 
 /**
  * Chrome is the root component of the PoS App.
@@ -19,21 +20,27 @@ export class Chrome extends Component {
     static props = { disableLoader: Function };
     setup() {
         this.pos = usePos();
-        useIdleTimer(this.pos.idleTimeout, () => this.pos.showScreen(this.pos.firstScreen));
-        const reactivePos = reactive(this.pos);
-        // TODO: Should we continue on exposing posmodel as global variable?
-        window.posmodel = reactivePos;
+        useIdleTimer(this.pos.idleTimeout, (ev) => {
+            const stopEventPropagation = ["mousedown", "click", "keypress"];
+            if (stopEventPropagation.includes(ev.type)) {
+                ev.stopPropagation();
+            }
+            this.pos.navigateToFirstPage();
+            return false;
+        });
+        if (this.pos.router.state.current === "SaverScreen") {
+            this.pos.navigateToFirstPage();
+        }
+
+        window.posmodel = this.pos;
         useOwnDebugContext();
+        if (this.env.debug) {
+            initDebugFormatters();
+        }
 
         if (odoo.use_pos_fake_tours) {
             window.pos_fake_tour = useTours();
         }
-        // prevent backspace from performing a 'back' navigation
-        document.addEventListener("keydown", (ev) => {
-            if (ev.key === "Backspace" && !ev.target.matches("input, textarea")) {
-                ev.preventDefault();
-            }
-        });
 
         if (this.pos.config.iface_big_scrollbars) {
             const body = document.getElementsByTagName("body")[0];
@@ -42,83 +49,34 @@ export class Chrome extends Component {
 
         onWillStart(this.pos._loadFonts);
         onMounted(this.props.disableLoader);
-        if (this.pos.config.customer_display_type === "none") {
-            return;
-        }
-        this.customerDisplayChannel = new BroadcastChannel("UPDATE_CUSTOMER_DISPLAY");
         effect(
-            batched(
-                ({
-                    selectedOrder,
-                    scaleData,
-                    scaleWeight,
-                    scaleTare,
-                    totalPriceOnScale,
-                    isScaleScreenVisible,
-                }) => {
-                    if (selectedOrder) {
-                        const allScaleData = {
-                            ...scaleData,
-                            weight: scaleWeight,
-                            tare: scaleTare,
-                            totalPriceOnScale,
-                            isScaleScreenVisible,
-                        };
-                        this.sendOrderToCustomerDisplay(selectedOrder, allScaleData);
-                    }
+            batched(({ selectedOrder, scale }) => {
+                if (selectedOrder) {
+                    const scaleData = scale.product
+                        ? {
+                              product: { ...scale.product },
+                              unitPrice: scale.unitPriceString,
+                              totalPrice: scale.totalPriceString,
+                              netWeight: scale.netWeightString,
+                              grossWeight: scale.grossWeightString,
+                              tare: scale.tareWeightString,
+                          }
+                        : null;
+                    this.sendOrderToCustomerDisplay(selectedOrder, scaleData);
                 }
-            ),
+            }),
             [this.pos]
         );
     }
 
     sendOrderToCustomerDisplay(selectedOrder, scaleData) {
-        const customerDisplayData = selectedOrder.getCustomerDisplayData();
-        customerDisplayData.isScaleScreenVisible = scaleData.isScaleScreenVisible;
-        if (scaleData) {
-            customerDisplayData.scaleData = {
-                productName: scaleData.productName,
-                uomName: scaleData.uomName,
-                uomRounding: scaleData.uomRounding,
-                productPrice: scaleData.productPrice,
-            };
-        }
-        customerDisplayData.weight = scaleData.weight;
-        customerDisplayData.tare = scaleData.tare;
-        customerDisplayData.totalPriceOnScale = scaleData.totalPriceOnScale;
-
-        if (this.pos.config.customer_display_type === "local") {
-            this.customerDisplayChannel.postMessage(customerDisplayData);
-        }
-        if (this.pos.config.customer_display_type === "remote") {
-            this.pos.data.call("pos.config", "update_customer_display", [
-                [this.pos.config.id],
-                customerDisplayData,
-                this.pos.config.access_token,
-            ]);
-        }
-        if (this.pos.config.customer_display_type === "proxy") {
-            const proxyIP = this.pos.getDisplayDeviceIP();
-            fetch(`${deduceUrl(proxyIP)}/hw_proxy/customer_facing_display`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    params: {
-                        action: "set",
-                        data: customerDisplayData,
-                    },
-                }),
-            }).catch(() => {
-                console.log("Failed to send data to customer display");
-            });
-        }
+        const adapter = new CustomerDisplayPosAdapter();
+        adapter.formatOrderData(selectedOrder);
+        adapter.data.scaleData = scaleData;
+        adapter.dispatch(this.pos);
     }
 
     // GETTERS //
-
     get showCashMoveButton() {
         return Boolean(this.pos.config.cash_control);
     }

@@ -1,94 +1,66 @@
-import { Component, onMounted, useRef, useState } from "@odoo/owl";
-import { useSelfOrder } from "@pos_self_order/app/self_order_service";
-import { attributeFlatter, attributeFormatter } from "@pos_self_order/app/utils";
-import { floatIsZero } from "@web/core/utils/numbers";
+import { Component, useState } from "@odoo/owl";
+import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
+import { AttributeSelectionHelper } from "./attribute_selection_helper";
 
 export class AttributeSelection extends Component {
     static template = "pos_self_order.AttributeSelection";
-    static props = ["product"];
+    static props = ["productTemplate", "onSelection?", "isCombo?"];
 
     setup() {
         this.selfOrder = useSelfOrder();
-        this.numberOfAttributes = this.props.product.attribute_line_ids.length;
-        this.currentAttribute = 0;
-
-        this.gridsRef = {};
-        this.valuesRef = {};
-        for (const attr of this.props.product.attribute_line_ids) {
-            this.gridsRef[attr.id] = useRef(`attribute_grid_${attr.id}`);
-            this.valuesRef[attr.id] = {};
-            for (const value of attr.product_template_value_ids) {
-                this.valuesRef[attr.id][value.id] = useRef(`value_${attr.id}_${value.id}`);
-            }
-        }
-
-        this.state = useState({
-            showNext: false,
-            showCustomInput: false,
-        });
-
-        this.selectedValues = useState(this.env.selectedValues);
-
-        this.initAttribute();
-        onMounted(this.onMounted);
-    }
-
-    onMounted() {
-        for (const attr of Object.entries(this.valuesRef)) {
-            let classicValue = 0;
-            for (const valueRef of Object.values(attr[1])) {
-                if (valueRef.el) {
-                    const height = valueRef.el.parentNode.offsetHeight;
-                    if (classicValue === 0) {
-                        classicValue = height;
-                    } else {
-                        if (height !== classicValue || height > window.innerHeight * 0.18) {
-                            this.gridsRef[attr[0]].el.classList.remove(
-                                "row-cols-2",
-                                "row-cols-sm-3",
-                                "row-cols-md-4",
-                                "row-cols-xl-5",
-                                "row-cols-xxl-6"
-                            );
-                            this.gridsRef[attr[0]].el.classList.add("row-cols-1");
-                            for (const gridValueRef of Object.values(attr[1])) {
-                                gridValueRef.el.classList.remove("ratio", "ratio-16x9");
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    get showNextBtn() {
-        for (const attrSelection of Object.values(this.selectedValues)) {
-            if (!attrSelection) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    get attributeSelected() {
-        const flatAttribute = attributeFlatter(this.selectedValues);
-        const customAttribute = this.env.customValues;
-        return attributeFormatter(
-            this.selfOrder.models["product.attribute"].getAllBy("id"),
-            flatAttribute,
-            customAttribute
+        this.envSelectedValues = useState(this.env.selectedValues);
+        this.attributesToDisplay = this.props.productTemplate.attribute_line_ids.filter(
+            (a) => this.availableAttributeValue(a).length > 0
         );
     }
 
-    availableAttributeValue(attribute) {
-        return this.selfOrder.config.self_ordering_mode === "kiosk"
-            ? attribute.product_template_value_ids.filter((a) => !a.is_custom)
-            : attribute.product_template_value_ids;
+    get selectedValues() {
+        return (this.envSelectedValues[this.props.productTemplate.id] ??=
+            new AttributeSelectionHelper(this.selfOrder, this.attributesToDisplay));
     }
 
+    isValueSelected(attribute, value) {
+        return this.selectedValues.isValueSelected(attribute, value);
+    }
+
+    selectAttribute(attribute, value) {
+        this.selectedValues.selectAttribute(attribute, value, this.props.onSelection);
+    }
+
+    availableAttributeValue(attribute) {
+        const isKiosk = this.selfOrder.kioskMode;
+        const isNoVariantCreation = attribute.attribute_id.create_variant === "no_variant";
+        return attribute.product_template_value_ids.filter((a) => {
+            if (isKiosk && a.is_custom) {
+                return false;
+            }
+            if (this.props.isCombo) {
+                return isNoVariantCreation;
+            }
+            return true;
+        });
+    }
+
+    getCustomSelectedValue(attribute) {
+        if (attribute.attribute_id.display_type === "multi") {
+            return null;
+        }
+        const valueId = this.selectedValues.getSelectedValue(attribute);
+        if (!valueId) {
+            return null;
+        }
+
+        const value = this.selfOrder.models["product.template.attribute.value"].get(valueId);
+        if (value?.is_custom) {
+            return value;
+        }
+
+        return null;
+    }
+    /*
+    // TODO: Initialize attributes required for editing a line item
     initAttribute() {
+
         const initCustomValue = (value) => {
             const selectedValue = this.selfOrder.editedLine?.custom_attribute_value_ids.find(
                 (v) => v.custom_product_template_attribute_value_id === value.id
@@ -109,7 +81,7 @@ export class AttributeSelection extends Component {
             return false;
         };
 
-        for (const attr of this.props.product.attribute_line_ids) {
+        for (const attr of this.props.productTemplate.attribute_line_ids) {
             this.selectedValues[attr.id] = {};
 
             for (const value of attr.product_template_value_ids) {
@@ -124,20 +96,14 @@ export class AttributeSelection extends Component {
                 }
             }
         }
-    }
-
-    isChecked(attribute, value) {
-        return attribute.attribute_id.display_type === "multi"
-            ? this.selectedValues[attribute.id][value.id]
-            : parseInt(this.selectedValues[attribute.id]) === value.id;
-    }
+    }*/
 
     shouldShowPriceExtra(value) {
         const priceExtra = value.price_extra;
-        return !floatIsZero(priceExtra, this.selfOrder.config.currency_decimals);
+        return !this.selfOrder.config.currency_id.isZero(priceExtra);
     }
 
-    getfPriceExtra(value) {
+    formatExtraPrice(value) {
         const priceExtra = value.price_extra;
         const sign = priceExtra < 0 ? "- " : "+ ";
         return sign + this.selfOrder.formatMonetary(Math.abs(priceExtra));

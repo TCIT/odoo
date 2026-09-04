@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from ast import literal_eval
@@ -6,17 +5,18 @@ from dateutil.relativedelta import relativedelta
 import json
 import werkzeug.urls
 
+from markupsafe import Markup
 from pytz import utc, timezone
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, tools, _
 from odoo.exceptions import UserError, ValidationError
-from odoo.osv import expression
+from odoo.fields import Domain
 from odoo.tools.misc import get_lang, format_date
 
 GOOGLE_CALENDAR_URL = 'https://www.google.com/calendar/render?'
 
 
-class Event(models.Model):
+class EventEvent(models.Model):
     _name = 'event.event'
     _inherit = [
         'event.event',
@@ -24,6 +24,7 @@ class Event(models.Model):
         'website.published.multi.mixin',
         'website.cover_properties.mixin',
         'website.searchable.mixin',
+        'website.page_visibility_options.mixin',
     ]
 
     def _default_cover_properties(self):
@@ -47,7 +48,7 @@ class Event(models.Model):
         [('public', 'Public'), ('link', 'Via a Link'), ('logged_users', 'Logged Users')],
         string="Website Visibility", required=True, default='public', tracking=True,
         help="""Defines the Visibility of the Event on the Website and searches.\n
-            Note that the Event is however always available via its link.""")
+            Note that the EventEvent is however always available via its link.""")
     website_published = fields.Boolean(tracking=True)
     website_menu = fields.Boolean(
         string='Website Menu',
@@ -61,12 +62,6 @@ class Event(models.Model):
     introduction_menu_ids = fields.One2many(
         "website.event.menu", "event_id", string="Introduction Menus",
         domain=[("menu_type", "=", "introduction")])
-    location_menu = fields.Boolean(
-        "Location Menu", compute="_compute_website_menu_data",
-        readonly=False, store=True)
-    location_menu_ids = fields.One2many(
-        "website.event.menu", "event_id", string="Location Menus",
-        domain=[("menu_type", "=", "location")])
     address_name = fields.Char(related='address_id.name')
     register_menu = fields.Boolean(
         "Register Menu", compute="_compute_website_menu_data",
@@ -81,6 +76,9 @@ class Event(models.Model):
     community_menu_ids = fields.One2many(
         "website.event.menu", "event_id", string="Event Community Menus",
         domain=[("menu_type", "=", "community")])
+    other_menu_ids = fields.One2many(
+        "website.event.menu", "event_id", string="Other Menus",
+        domain=[("menu_type", "=", "other")])
     # live information
     is_ongoing = fields.Boolean(
         'Is Ongoing', compute='_compute_time_data', search='_search_is_ongoing',
@@ -94,6 +92,12 @@ class Event(models.Model):
         'Remaining before start', compute='_compute_time_data',
         help="Remaining time before event starts (minutes)")
 
+    @api.depends('website_url')
+    def _compute_event_share_url(self):
+        """Fall back on the website_url to share the event."""
+        for event in self:
+            event.event_share_url = event.event_url or tools.urls.urljoin(event.get_base_url(), event.website_url)
+ 
     @api.depends('registration_ids')
     @api.depends_context('uid')
     def _compute_is_participating(self):
@@ -103,13 +107,9 @@ class Event(models.Model):
 
     @api.model
     def _search_is_participating(self, operator, value):
-        if operator not in ['=', '!=']:
-            raise NotImplementedError(_('This operator is not supported'))
-        if not isinstance(value, bool):
-            raise UserError(_('Value should be True or False (not %)', value))
-        check_is_participating = operator == '=' and value or operator == '!=' and not value
-
-        return [('id', 'in' if check_is_participating else 'not in', self._fetch_is_participating_events().ids)]
+        if operator != 'in':
+            return NotImplemented
+        return [('id', 'in', self._fetch_is_participating_events().ids)]
 
     @api.model
     def _fetch_is_participating_events(self):
@@ -130,20 +130,20 @@ class Event(models.Model):
         if self.env.user._is_public() and not current_visitor:
             return self.env['event.event']
 
-        base_domain = [('state', 'in', ['open', 'done'])]
+        base_domain = Domain('state', 'in', ['open', 'done'])
         if self:
-            base_domain = expression.AND([[('event_id', 'in', self.ids)], base_domain])
+            base_domain = Domain('event_id', 'in', self.ids) & base_domain
 
-        visitor_domain = []
+        visitor_domain = Domain.TRUE
         partner_id = self.env.user.partner_id
         if current_visitor:
-            visitor_domain = [('visitor_id', '=', current_visitor.id)]
+            visitor_domain = Domain('visitor_id', '=', current_visitor.id)
             partner_id = current_visitor.partner_id
         if partner_id:
-            visitor_domain = expression.OR([visitor_domain, [('partner_id', '=', partner_id.id)]])
+            visitor_domain |= Domain('partner_id', '=', partner_id.id)
 
         registrations_events = self.env['event.registration'].sudo()._read_group(
-            expression.AND([visitor_domain, base_domain]),
+            visitor_domain & base_domain,
             ['event_id'], ['__count'])
         return self.env['event.event'].browse([event.id for event, _reg_count in registrations_events])
 
@@ -163,26 +163,18 @@ class Event(models.Model):
 
     @api.model
     def _search_is_visible_on_website(self, operator, value):
-        if operator not in ['=', '!=']:
-            raise NotImplementedError(_('This operator is not supported'))
-        if not isinstance(value, bool):
-            raise UserError(_('Value should be True or False (not %)', value))
-        check_is_visible_on_website = operator == '=' and value or operator == '!=' and not value
+        if operator != 'in':
+            return NotImplemented
         user = self.env.user
-        domain = [('is_participating', '=', True)]
-
+        visibility = ['public']
         if not user._is_public():
-            domain = expression.OR([domain, [('website_visibility', 'in', ['public', 'logged_users'])]])
-        else:
-            domain = expression.OR([domain, [('website_visibility', '=', 'public')]])
-
-        event_ids = self.env['event.event']._search(domain)
-        return [('id', 'in' if check_is_visible_on_website else 'not in', event_ids)]
+            visibility.append('logged_users')
+        return ['|', ('is_participating', '=', True), ('website_visibility', 'in', visibility)]
 
     @api.depends('website_url')
     def _compute_event_register_url(self):
         for event in self:
-            event.event_register_url = werkzeug.urls.url_join(event.get_base_url(), f"{event.website_url}/register")
+            event.event_register_url = tools.urls.urljoin(event.get_base_url(), f"{event.website_url}/register")
 
     @api.depends('event_type_id')
     def _compute_website_menu(self):
@@ -207,7 +199,6 @@ class Event(models.Model):
         at will afterwards. """
         for event in self:
             event.introduction_menu = event.website_menu
-            event.location_menu = event.website_menu
             event.register_menu = event.website_menu
 
     @api.depends('date_begin', 'date_end')
@@ -229,7 +220,7 @@ class Event(models.Model):
 
     @api.depends('name')
     def _compute_website_url(self):
-        super(Event, self)._compute_website_url()
+        super()._compute_website_url()
         for event in self:
             if event.id:  # avoid to perform a slug on a not yet saved record in case of an onchange.
                 event.website_url = '/event/%s' % self.env['ir.http']._slug(event)
@@ -248,6 +239,19 @@ class Event(models.Model):
     # CRUD
     # ------------------------------------------------------------
 
+    def copy(self, default=None):
+        res = super().copy(default=default)
+        res.copy_event_menus(self)
+        return res
+
+    def copy_event_menus(self, old_events):
+        for new_event, old_event in zip(self, old_events):
+            default_menu_values = {'event_id': new_event.id}
+            new_event.menu_id = old_event.menu_id.copy({'name': new_event.name, 'website_id': new_event.website_id.id})
+            new_event.introduction_menu_ids = old_event.introduction_menu_ids.copy(default_menu_values)
+            new_event.other_menu_ids = old_event.other_menu_ids.copy(default_menu_values)
+            (new_event.introduction_menu_ids + new_event.other_menu_ids + new_event.community_menu_ids + new_event.register_menu_ids).menu_id.parent_id = new_event.menu_id
+
     @api.model_create_multi
     def create(self, vals_list):
         events = super().create(vals_list)
@@ -256,7 +260,7 @@ class Event(models.Model):
 
     def write(self, vals):
         menus_state_by_field = self._split_menus_state_by_field()
-        res = super(Event, self).write(vals)
+        res = super().write(vals)
         menus_update_by_field = self._get_menus_update_by_field(menus_state_by_field, force_update=vals.keys())
         self._update_website_menus(menus_update_by_field=menus_update_by_field)
         return res
@@ -273,15 +277,15 @@ class Event(models.Model):
         menu to de-activate. Due to saas-13.3 improvement of menu management
         this is done using side-methods to ease inheritance.
 
-        :return list: list of fields, each of which triggering a menu update
-          like website_menu, website_track, ... """
-        return ['community_menu', 'introduction_menu', 'location_menu', 'register_menu']
+        :returns: list of fields, each of which triggering a menu update
+          like website_menu, website_track, ...
+        :rtype: list"""
+        return ['community_menu', 'introduction_menu', 'register_menu']
 
     def _get_menu_type_field_matching(self):
         return {
             'community': 'community_menu',
             'introduction': 'introduction_menu',
-            'location': 'location_menu',
             'register': 'register_menu',
         }
 
@@ -290,7 +294,7 @@ class Event(models.Model):
         menu activated and de-activated. Purpose is to find those whose value
         changed and update the underlying menus.
 
-        :return dict: key = name of field triggering a website menu update, get {
+        :returns: key = name of field triggering a website menu update, get {
           'activated': subset of self having its menu currently set to True
           'deactivated': subset of self having its menu currently set to False
         } """
@@ -313,7 +317,7 @@ class Event(models.Model):
           is used notably when a direct write to a stored editable field messes with
           its pre-computed value, notably in a transient mode (aka demo for example);
 
-        :return dict: key = name of field triggering a website menu update, get {
+        :returns: key = name of field triggering a website menu update, get {
           'activated': subset of self having its menu toggled to True
           'deactivated': subset of self having its menu toggled to False
         } """
@@ -339,13 +343,14 @@ class Event(models.Model):
           * menu_type: type of menu entry (used in inheriting modules to ease
             menu management; not used in this module in 13.3 due to technical
             limitations);
+          * parent_menu_type: menu_type of already created menu entry (used for
+            making submenu of existing menu entry)
         """
         self.ensure_one()
         return [
-            (_('Introduction'), False, 'website_event.template_intro', 1, 'introduction'),
-            (_('Location'), False, 'website_event.template_location', 50, 'location'),
-            (_('Info'), '/event/%s/register' % self.env['ir.http']._slug(self), False, 100, 'register'),
-            (_('Community'), '/event/%s/community' % self.env['ir.http']._slug(self), False, 80, 'community'),
+            (_('Home'), False, 'website_event.template_intro', 1, 'introduction', False),
+            (_('Practical'), '/event/%s/register' % self.env['ir.http']._slug(self), False, 100, 'register', False),
+            (_('Rooms'), '/event/%s/community' % self.env['ir.http']._slug(self), False, 80, 'community', False),
         ]
 
     def _update_website_menus(self, menus_update_by_field=None):
@@ -364,8 +369,6 @@ class Event(models.Model):
                 event._update_website_menu_entry('community_menu', 'community_menu_ids', 'community')
             if event.menu_id and (not menus_update_by_field or event in menus_update_by_field.get('introduction_menu')):
                 event._update_website_menu_entry('introduction_menu', 'introduction_menu_ids', 'introduction')
-            if event.menu_id and (not menus_update_by_field or event in menus_update_by_field.get('location_menu')):
-                event._update_website_menu_entry('location_menu', 'location_menu_ids', 'location')
             if event.menu_id and (not menus_update_by_field or event in menus_update_by_field.get('register_menu')):
                 event._update_website_menu_entry('register_menu', 'register_menu_ids', 'register')
 
@@ -379,7 +382,7 @@ class Event(models.Model):
         :param fname_o2m: o2m linking towards website.event.menu matching the
           boolean fields (normally an entry of website.event.menu with type matching
           the boolean field name)
-        :param method_name: method returning menu entries information: url, sequence, ...
+        :param fmenu_type:
         """
         self.ensure_one()
         new_menu = None
@@ -388,15 +391,15 @@ class Event(models.Model):
                      if menu_info[4] == fmenu_type]
         if self[fname_bool] and not self[fname_o2m]:
             # menus not found but boolean True: get menus to create
-            for name, url, xml_id, menu_sequence, menu_type in menu_data:
-                new_menu = self._create_menu(menu_sequence, name, url, xml_id, menu_type)
+            for name, url, xml_id, menu_sequence, menu_type, parent_menu_type in menu_data:
+                new_menu = self._create_menu(menu_sequence, name, url, xml_id, menu_type, parent_menu_type)
         elif not self[fname_bool]:
             # will cascade delete to the website.event.menu
             self[fname_o2m].mapped('menu_id').sudo().unlink()
 
         return new_menu
 
-    def _create_menu(self, sequence, name, url, xml_id, menu_type):
+    def _create_menu(self, sequence, name, url, xml_id, menu_type, parent_menu_type=False):
         """ Create a new menu for the current event.
 
         If url: create a website menu. Menu leads directly to the URL that
@@ -406,10 +409,12 @@ class Event(models.Model):
         xml_id. Take its url back thanks to new_page of website, then link
         it to a menu. Template is duplicated and linked to a new url, meaning
         each menu will have its own copy of the template. This is currently
-        limited to two menus: introduction and location.
+        limited to one menu: introduction(Home).
 
         :param menu_type: type of menu. Mainly used for inheritance purpose
           allowing more fine-grain tuning of menus.
+        :param parent_menu_type: The type of the parent menu. If specified, the
+          menu will be created as a child of the parent menu with the given type.
         """
         self.browse().check_access('write')
         view_id = False
@@ -423,10 +428,18 @@ class Event(models.Model):
             view = self.env["ir.ui.view"].browse(view_id)
             url = f"/event/{self.env['ir.http']._slug(self)}/page/{view.key.split('.')[-1]}"  # url contains starting "/"
 
+        parent_id = self.menu_id.id
+        if parent_menu_type:
+            parent_menu = self.env['website.event.menu'].search([
+                ('event_id', '=', self.id),
+                ('menu_type', '=', parent_menu_type)
+            ], limit=1)
+            if parent_menu:
+                parent_id = parent_menu.menu_id.id
         website_menu = self.env['website.menu'].sudo().create({
             'name': name,
             'url': url,
-            'parent_id': self.menu_id.id,
+            'parent_id': parent_id,
             'sequence': sequence,
             'website_id': self.website_id.id,
         })
@@ -458,18 +471,18 @@ class Event(models.Model):
             if self.is_published:
                 return self.env.ref('website_event.mt_event_published', raise_if_not_found=False)
             return self.env.ref('website_event.mt_event_unpublished', raise_if_not_found=False)
-        return super(Event, self)._track_subtype(init_values)
+        return super()._track_subtype(init_values)
 
-    def _get_external_description(self):
-        """ Adding the URL of the event into the description """
-        self.ensure_one()
-        event_url = f'<a href="{self.event_register_url}">{self.name}</a>'
-        description = event_url + '\n' + super()._get_external_description()
-        return description
-
-    def _get_event_resource_urls(self):
-        url_date_start = self.date_begin.astimezone(timezone(self.date_tz)).strftime('%Y%m%dT%H%M%S')
-        url_date_stop = self.date_end.astimezone(timezone(self.date_tz)).strftime('%Y%m%dT%H%M%S')
+    def _get_event_resource_urls(self, slot=False):
+        """ Prepare the Google and iCal urls for the event.
+        :param slot: If a slot is given, prepare the urls for the given slot.
+        Returns:
+            The google and iCal url in a dictionnary
+        """
+        start = slot.start_datetime if slot else self.date_begin
+        end = slot.end_datetime if slot else self.date_end
+        url_date_start = start.astimezone(timezone(self.date_tz)).strftime('%Y%m%dT%H%M%S')
+        url_date_stop = end.astimezone(timezone(self.date_tz)).strftime('%Y%m%dT%H%M%S')
         params = {
             'action': 'TEMPLATE',
             'text': self.name,
@@ -481,14 +494,16 @@ class Event(models.Model):
             params.update(location=self.address_inline)
         encoded_params = werkzeug.urls.url_encode(params)
         google_url = GOOGLE_CALENDAR_URL + encoded_params
-        iCal_url = f'/event/{self.id:d}/ics?{encoded_params}'
+        iCal_url = f'/event/{self.id:d}/ics'
+        if slot:
+            iCal_url += '?' + werkzeug.urls.url_encode({'slot_id': slot.id})
         return {'google_url': google_url, 'iCal_url': iCal_url}
 
     def _default_website_meta(self):
-        res = super(Event, self)._default_website_meta()
+        res = super()._default_website_meta()
         event_cover_properties = json.loads(self.cover_properties)
         # background-image might contain single quotes eg `url('/my/url')`
-        res['default_opengraph']['og:image'] = res['default_twitter']['twitter:image'] = event_cover_properties.get('background-image', 'none')[4:-1].strip("'")
+        res['default_opengraph']['og:image'] = res['default_twitter']['twitter:image'] = event_cover_properties.get('background-image', 'none')[4:-1].strip("\"'")
         res['default_opengraph']['og:title'] = res['default_twitter']['twitter:title'] = self.name
         res['default_opengraph']['og:description'] = res['default_twitter']['twitter:description'] = self.subtitle
         res['default_twitter']['twitter:card'] = 'summary'
@@ -500,33 +515,37 @@ class Event(models.Model):
 
     @api.model
     def _search_build_dates(self):
-        today = fields.Datetime.today()
-
-        def sdn(date):
-            return fields.Datetime.to_string(date.replace(hour=23, minute=59, second=59))
+        now = fields.Datetime.now()
+        # To fetch the remaining events of the user's current day, the end of the user's day must
+        # be localized and then converted in UTC, as it is the timezone used to record dates and
+        # times in db.
+        tz = timezone(self.env.user.tz or self.env.context.get('tz') or 'UTC')
+        localized_today_begin = tz.localize(fields.Datetime.today())
+        utc_today_end = localized_today_begin.replace(hour=23, minute=59, second=59).astimezone(utc)
 
         def sd(date):
             return fields.Datetime.to_string(date)
 
         def get_month_filter_domain(filter_name, months_delta):
-            first_day_of_the_month = today.replace(day=1)
+            localized_month_begin = localized_today_begin.replace(day=1)
+            utc_months_delta_end = (localized_month_begin + relativedelta(months=months_delta + 1)).astimezone(utc)
             filter_string = _('This month') if months_delta == 0 \
-                else format_date(self.env, value=today + relativedelta(months=months_delta),
+                else format_date(self.env, value=localized_today_begin + relativedelta(months=months_delta),
                     date_format='LLLL', lang_code=get_lang(self.env).code).capitalize()
             return [filter_name, filter_string, [
-                ("date_end", ">=", sd(first_day_of_the_month + relativedelta(months=months_delta))),
-                ("date_begin", "<", sd(first_day_of_the_month + relativedelta(months=months_delta+1)))],
+                ("date_end", ">=", sd(now)),
+                ("date_begin", "<", sd(utc_months_delta_end))],
                 0]
 
         return [
-            ['upcoming', _('Upcoming Events'), [("date_end", ">", sd(today))], 0],
+            ['scheduled', _('Scheduled Events'), [("date_end", ">=", sd(now))], 0],
             ['today', _('Today'), [
-                ("date_end", ">", sd(today)),
-                ("date_begin", "<", sdn(today))],
+                ("date_end", ">", sd(now)),
+                ("date_begin", "<", sd(utc_today_end))],
                 0],
             get_month_filter_domain('month', 0),
             ['old', _('Past Events'), [
-                ("date_end", "<", sd(today))],
+                ("date_end", "<", sd(now))],
                 0],
             ['all', _('All Events'), [], 0]
         ]
@@ -548,7 +567,7 @@ class Event(models.Model):
         search_tags = self.env['event.tag']
         if tags:
             try:
-                tag_ids = literal_eval(tags)
+                tag_ids = list(filter(None, [self.env['ir.http']._unslug(tag)[1] for tag in tags.split(',')])) or literal_eval(tags)
             except SyntaxError:
                 pass
             else:
@@ -576,7 +595,7 @@ class Event(models.Model):
             if date == date_details[0]:
                 domain.append(date_details[2])
                 no_country_domain.append(date_details[2])
-                if date_details[0] != 'upcoming':
+                if date_details[0] != 'scheduled':
                     current_date = date_details[1]
 
         search_fields = ['name']
@@ -623,5 +642,8 @@ class Event(models.Model):
             for event, data in zip(self, results_data):
                 begin = self.env['ir.qweb.field.date'].record_to_html(event, 'date_begin', {})
                 end = self.env['ir.qweb.field.date'].record_to_html(event, 'date_end', {})
-                data['range'] = '%s🠖%s' % (begin, end) if begin != end else begin
+                data['range'] = (
+                    Markup('{} <i class="fa fa-long-arrow-right"></i> {}').format(begin, end)
+                    if begin != end else begin
+                )
         return results_data

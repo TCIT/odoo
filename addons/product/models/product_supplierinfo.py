@@ -4,19 +4,11 @@
 from odoo import api, fields, models, _
 
 
-class SupplierInfo(models.Model):
-    _name = "product.supplierinfo"
+class ProductSupplierinfo(models.Model):
+    _name = 'product.supplierinfo'
     _description = "Supplier Pricelist"
     _order = 'sequence, min_qty DESC, price, id'
     _rec_name = 'partner_id'
-
-    def _default_product_id(self):
-        product_id = self.env.get('default_product_id')
-        if not product_id:
-            model, active_id = [self.env.context.get(k) for k in ['model', 'active_id']]
-            if model == 'product.product' and active_id:
-                product_id = self.env[model].browse(active_id).exists()
-        return product_id
 
     partner_id = fields.Many2one(
         'res.partner', 'Vendor',
@@ -30,15 +22,13 @@ class SupplierInfo(models.Model):
         help="This vendor's product code will be used when printing a request for quotation. Keep empty to use the internal one.")
     sequence = fields.Integer(
         'Sequence', default=1, help="Assigns the priority to the list of product vendor.")
-    product_uom = fields.Many2one(
-        'uom.uom', 'Unit of Measure',
-        related='product_tmpl_id.uom_po_id')
+    product_uom_id = fields.Many2one(
+        'uom.uom', 'Unit', compute='_compute_product_uom_id', store=True, readonly=False, required=True, precompute=True)
     min_qty = fields.Float(
-        'Quantity', default=0.0, required=True, digits="Product Unit of Measure",
-        help="The quantity to purchase from this vendor to benefit from the price, expressed in the vendor Product Unit of Measure if not any, in the default unit of measure of the product otherwise.")
+        'Quantity', default=0.0, required=True, digits="Product Unit",
+        help="The quantity to purchase from this vendor to benefit from the unit price. If a vendor unit is set, quantity should be specified in this unit, otherwise it should be specified in the default unit of the product.")
     price = fields.Float(
-        'Price', default=0.0, digits='Product Price',
-        required=True, help="The price to purchase a product")
+        'Unit Price', min_display_digits='Product Price', default=0.0, help="The price to purchase a product")
     price_discounted = fields.Float('Discounted Price', compute='_compute_price_discounted')
     company_id = fields.Many2one(
         'res.company', 'Company',
@@ -52,24 +42,48 @@ class SupplierInfo(models.Model):
     product_id = fields.Many2one(
         'product.product', 'Product Variant', check_company=True,
         domain="[('product_tmpl_id', '=', product_tmpl_id)] if product_tmpl_id else []",
-        default=_default_product_id,
+        compute='_compute_product_id', store=True, readonly=False, precompute=True,
         help="If not set, the vendor price will apply to all variants of this product.")
     product_tmpl_id = fields.Many2one(
-        'product.template', 'Product Template', check_company=True,
-        index=True, ondelete='cascade')
+        'product.template', 'Product Template', check_company=True, compute='_compute_product_tmpl_id', precompute=True,
+        store=True, readonly=False, required=True, index=True, ondelete='cascade')
     product_variant_count = fields.Integer('Variant Count', related='product_tmpl_id.product_variant_count')
     delay = fields.Integer(
-        'Delivery Lead Time', default=1, required=True,
+        'Lead Time', default=1, required=True,
         help="Lead time in days between the confirmation of the purchase order and the receipt of the products in your warehouse. Used by the scheduler for automatic computation of the purchase order planning.")
     discount = fields.Float(
         string="Discount (%)",
         digits='Discount',
         readonly=False)
 
+    @api.depends('product_id', 'product_tmpl_id')
+    def _compute_product_uom_id(self):
+        for rec in self:
+            if not rec.product_uom_id:
+                rec.product_uom_id = rec.product_id.uom_id if rec.product_id else rec.product_tmpl_id.uom_id
+
+    @api.depends('product_id', 'product_tmpl_id')
+    def _compute_price(self):
+        for rec in self:
+            rec.price = rec.product_id.standard_price if rec.product_id else rec.product_tmpl_id.standard_price if rec.product_tmpl_id else 0.0
+
     @api.depends('discount', 'price')
     def _compute_price_discounted(self):
         for rec in self:
-            rec.price_discounted = rec.price * (1 - rec.discount / 100)
+            product_uom = (rec.product_id or rec.product_tmpl_id).uom_id
+            rec.price_discounted = rec.product_uom_id._compute_price(rec.price, product_uom) * (1 - rec.discount / 100)
+
+    @api.depends('product_id')
+    def _compute_product_tmpl_id(self):
+        for rec in self:
+            if rec.product_id:
+                rec.product_tmpl_id = rec.product_id.product_tmpl_id
+
+    @api.depends('product_id', 'product_tmpl_id', 'product_variant_count')
+    def _compute_product_id(self):
+        for rec in self:
+            if self.env.get('default_product_id'):
+                rec.product_id = self.env.get('default_product_id')
 
     @api.onchange('product_tmpl_id')
     def _onchange_product_tmpl_id(self):
@@ -102,4 +116,4 @@ class SupplierInfo(models.Model):
         return super().write(vals)
 
     def _get_filtered_supplier(self, company_id, product_id, params=False):
-        return self.filtered(lambda s: (not s.company_id or s.company_id.id == company_id.id) and (s.partner_id.active and (not s.product_id or s.product_id == product_id)))
+        return self.filtered(lambda s: (not s.company_id or s.company_id.id == company_id.id) and (s.partner_id.sudo().active and (not s.product_id or s.product_id == product_id)))

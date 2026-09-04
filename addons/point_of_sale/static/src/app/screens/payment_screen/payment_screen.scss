@@ -1,10 +1,10 @@
 .left-content {
-  width: $left-pane-width;
-  min-width: $left-pane-width;
+  width: $pos-left-pane-width;
+  min-width: $pos-left-pane-width;
 
   @include media-breakpoint-down(xl) {
-      width: $left-pane-width-tablet;
-      min-width: $left-pane-width-tablet;
+      width: $pos-left-pane-width-tablet;
+      min-width: $pos-left-pane-width-tablet;
   }
 }
 
@@ -41,14 +41,18 @@
     }
 }
 
-@for $size from 1 through length($o-colors) {
-  .btn.o_colorlist_item_color_transparent_#{$size - 1} {
-    &:hover {
-      filter: brightness(98%);
-    }
+.paymentline.selected {
+  background: $o-component-active-bg;
+  border: $border-width solid $o-component-active-border;
+  color: $o-component-active-color;
+}
 
-    &:active {
-      border: $border-width solid nth($o-colors, $size);
-    }
-  }
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(30px); }
+  50% { opacity: 0.5; transform: translateY(0px); }
+  100% { opacity: 1; }
+}
+
+.fade-effect {
+  animation: fadeInOut 1000ms ease-in-out;
 }

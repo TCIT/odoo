@@ -4,6 +4,16 @@ import { session } from "@web/session";
 import { hasTouch } from "@web/core/browser/feature_detection";
 import { user } from "@web/core/user";
 import { Component, whenReady } from "@odoo/owl";
+import { rpc } from "./core/network/rpc";
+import { RPCCache } from "./core/network/rpc_cache";
+
+// Chrome iOS wraps some text nodes (like measures, email...)
+// with a `<chrome_annotation>` tag, which breaks OWL rendering.
+// This meta tag allows to disable this behavior.
+const chromeMetaTag = document.createElement("meta");
+chromeMetaTag.setAttribute("name", "chrome");
+chromeMetaTag.setAttribute("content", "nointentdetection");
+document.head.appendChild(chromeMetaTag);
 
 /**
  * Function to start a webclient.
@@ -21,6 +31,10 @@ export async function startWebClient(Webclient) {
         isEnterprise: session.server_version_info.slice(-1)[0] === "e",
     };
     odoo.isReady = false;
+
+    if (window.isSecureContext && session.browser_cache_secret) {
+        rpc.setCache(new RPCCache("rpc", session.registry_hash, session.browser_cache_secret));
+    }
 
     await whenReady();
     const app = await mountComponent(Webclient, document.body, { name: "Odoo Web Client" });

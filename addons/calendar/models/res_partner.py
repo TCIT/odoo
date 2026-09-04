@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from collections import defaultdict
 from datetime import datetime
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.tools import SQL
 
 
-class Partner(models.Model):
+class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     meeting_count = fields.Integer("# Meetings", compute='_compute_meeting_count')
@@ -48,18 +48,26 @@ class Partner(models.Model):
             # Add the events linked to the children of the partner
             for p in self.browse(meetings.keys()):
                 partner = p
-                while partner.parent_id:
+                while partner.parent_id and partner.parent_id in all_partners:
                     partner = partner.parent_id
                     if partner in self:
                         meetings[partner.id] = meetings.get(partner.id, set()) | meetings[p.id]
             return {p_id: list(meetings.get(p_id, set())) for p_id in self.ids}
         return {}
 
+    def _compute_application_statistics_hook(self):
+        data_list = super()._compute_application_statistics_hook()
+        for partner in self.filtered('meeting_count'):
+            stat_info = {'iconClass': 'fa-calendar', 'value': partner.meeting_count, 'label': _('Meetings'), 'tagClass': 'o_tag_color_3'}
+            data_list[partner.id].append(stat_info)
+        return data_list
+
     def get_attendee_detail(self, meeting_ids):
         """ Return a list of dict of the given meetings with the attendees details
             Used by:
-                - many2many_attendee.js: Many2ManyAttendee
-                - calendar_model.js (calendar.CalendarModel)
+
+            - many2many_attendee.js: Many2ManyAttendee
+            - calendar_model.js (calendar.CalendarModel)
         """
         attendees_details = []
         meetings = self.env['calendar.event'].browse(meeting_ids)
@@ -79,6 +87,12 @@ class Partner(models.Model):
             })
         return attendees_details
 
+    def _creation_message(self):
+        self.ensure_one()
+        if self.env.context.get('mail_create_log_from_calendar_sync'):
+            return _('Contact created through Calendar sync.')
+        return super()._creation_message()
+
     @api.model
     def _set_calendar_last_notif_ack(self):
         partner = self.env['res.users'].browse(self.env.context.get('uid', self.env.uid)).partner_id
@@ -94,3 +108,21 @@ class Partner(models.Model):
         }
         action['domain'] = ['|', ('id', 'in', self._compute_meeting()[self.id]), ('partner_ids', 'in', self.ids)]
         return action
+
+    def _get_busy_calendar_events(self, start_datetime, end_datetime):
+        """Get a mapping from partner id to attended events intersecting with the time interval.
+
+        :rtype: dict[int, <calendar.event>]
+        """
+        events = self.env['calendar.event'].search([
+            ('stop', '>=', start_datetime.replace(tzinfo=None)),
+            ('start', '<=', end_datetime.replace(tzinfo=None)),
+            ('partner_ids', 'in', self.ids),
+            ('show_as', '=', 'busy'),
+        ])
+
+        event_by_partner_id = defaultdict(lambda: self.env['calendar.event'])
+        for event in events:
+            for partner in event.partner_ids:
+                event_by_partner_id[partner.id] |= event
+        return dict(event_by_partner_id)

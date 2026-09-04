@@ -9,24 +9,47 @@ from datetime import timedelta
 
 from odoo import _, api, fields, models, tools, Command
 from odoo.addons.base.models.avatar_mixin import get_hsl_from_seed
+from odoo.addons.base.models.ir_mail_server import MailDeliveryException
 from odoo.addons.mail.tools.discuss import Store
+from odoo.addons.mail.tools.web_push import PUSH_NOTIFICATION_TYPE
 from odoo.exceptions import AccessError, UserError, ValidationError
-from odoo.osv import expression
-from odoo.tools import format_list, get_lang, html_escape
+from odoo.fields import Domain
+from odoo.tools import format_list, email_normalize, html_escape
+from odoo.tools.misc import hash_sign, OrderedSet
+from odoo.tools.sql import SQL
 
 channel_avatar = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 530.06 530.06">
-<circle cx="265.03" cy="265.03" r="265.03" fill="#875a7b"/>
+<rect width="530.06" height="530.06" fill="#875a7b"/>
 <path d="M416.74,217.29l5-28a8.4,8.4,0,0,0-8.27-9.88H361.09l10.24-57.34a8.4,8.4,0,0,0-8.27-9.88H334.61a8.4,8.4,0,0,0-8.27,6.93L315.57,179.4H246.5l10.24-57.34a8.4,8.4,0,0,0-8.27-9.88H220a8.4,8.4,0,0,0-8.27,6.93L201,179.4H145.6a8.42,8.42,0,0,0-8.28,6.93l-5,28a8.4,8.4,0,0,0,8.27,9.88H193l-16,89.62H121.59a8.4,8.4,0,0,0-8.27,6.93l-5,28a8.4,8.4,0,0,0,8.27,9.88H169L158.73,416a8.4,8.4,0,0,0,8.27,9.88h28.45a8.42,8.42,0,0,0,8.28-6.93l10.76-60.29h69.07L273.32,416a8.4,8.4,0,0,0,8.27,9.88H310a8.4,8.4,0,0,0,8.27-6.93l10.77-60.29h55.38a8.41,8.41,0,0,0,8.28-6.93l5-28a8.4,8.4,0,0,0-8.27-9.88H337.08l16-89.62h55.38A8.4,8.4,0,0,0,416.74,217.29ZM291.56,313.84H222.5l16-89.62h69.07Z" fill="#ffffff"/>
 </svg>'''
 group_avatar = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 530.06 530.06">
-<circle cx="265.03" cy="265.03" r="265.03" fill="#875a7b"/>
+<rect width="530.06" height="530.06" fill="#875a7b"/>
 <path d="m184.356059,265.030004c-23.740561,0.73266 -43.157922,10.11172 -58.252302,28.136961l-29.455881,0c-12.0169,0 -22.128621,-2.96757 -30.335161,-8.90271s-12.309921,-14.618031 -12.309921,-26.048671c0,-51.730902 9.08582,-77.596463 27.257681,-77.596463c0.87928,0 4.06667,1.53874 9.56217,4.61622s12.639651,6.19167 21.432451,9.34235s17.512401,4.72613 26.158581,4.72613c9.8187,0 19.563981,-1.68536 29.236061,-5.05586c-0.73266,5.4223 -1.0991,10.25834 -1.0991,14.508121c0,20.370061 5.93514,39.127962 17.805421,56.273922zm235.42723,140.025346c0,17.585601 -5.34888,31.470971 -16.046861,41.655892s-24.912861,15.277491 -42.645082,15.277491l-192.122688,0c-17.732221,0 -31.947101,-5.09257 -42.645082,-15.277491s-16.046861,-24.070291 -16.046861,-41.655892c0,-7.7669 0.25653,-15.350691 0.76937,-22.751371s1.53874,-15.387401 3.07748,-23.960381s3.48041,-16.523211 5.82523,-23.850471s5.4955,-14.471411 9.45226,-21.432451s8.49978,-12.89618 13.628841,-17.805421c5.12906,-4.90924 11.393931,-8.82951 18.794611,-11.76037s15.570511,-4.3964 24.509931,-4.3964c1.46554,0 4.61622,1.57545 9.45226,4.72613s10.18492,6.6678 16.046861,10.55136c5.86194,3.88356 13.702041,7.40068 23.520741,10.55136s19.710601,4.72613 29.675701,4.72613s19.857001,-1.57545 29.675701,-4.72613s17.658801,-6.6678 23.520741,-10.55136c5.86194,-3.88356 11.21082,-7.40068 16.046861,-10.55136s7.98672,-4.72613 9.45226,-4.72613c8.93942,0 17.109251,1.46554 24.509931,4.3964s13.665551,6.85113 18.794611,11.76037c5.12906,4.90924 9.67208,10.844381 13.628841,17.805421s7.10744,14.105191 9.45226,21.432451s4.28649,15.277491 5.82523,23.850471s2.56464,16.559701 3.07748,23.960381s0.76937,14.984471 0.76937,22.751371zm-225.095689,-280.710152c0,15.534021 -5.4955,28.796421 -16.486501,39.787422s-24.253401,16.486501 -39.787422,16.486501s-28.796421,-5.4955 -39.787422,-16.486501s-16.486501,-24.253401 -16.486501,-39.787422s5.4955,-28.796421 16.486501,-39.787422s24.253401,-16.486501 39.787422,-16.486501s28.796421,5.4955 39.787422,16.486501s16.486501,24.253401 16.486501,39.787422zm154.753287,84.410884c0,23.300921 -8.24325,43.194632 -24.729751,59.681133s-36.380212,24.729751 -59.681133,24.729751s-43.194632,-8.24325 -59.681133,-24.729751s-24.729751,-36.380212 -24.729751,-59.681133s8.24325,-43.194632 24.729751,-59.681133s36.380212,-24.729751 59.681133,-24.729751s43.194632,8.24325 59.681133,24.729751s24.729751,36.380212 24.729751,59.681133zm126.616325,49.459502c0,11.43064 -4.10338,20.113531 -12.309921,26.048671s-18.318261,8.90271 -30.335161,8.90271l-29.455881,0c-15.094381,-18.025241 -34.511741,-27.404301 -58.252302,-28.136961c11.87028,-17.145961 17.805421,-35.903862 17.805421,-56.273922c0,-4.24978 -0.36644,-9.08582 -1.0991,-14.508121c9.67208,3.3705 19.417361,5.05586 29.236061,5.05586c8.64618,0 17.365781,-1.57545 26.158581,-4.72613s15.936951,-6.26487 21.432451,-9.34235s8.68289,-4.61622 9.56217,-4.61622c18.171861,0 27.257681,25.865561 27.257681,77.596463zm-28.136961,-133.870386c0,15.534021 -5.4955,28.796421 -16.486501,39.787422s-24.253401,16.486501 -39.787422,16.486501s-28.796421,-5.4955 -39.787422,-16.486501s-16.486501,-24.253401 -16.486501,-39.787422s5.4955,-28.796421 16.486501,-39.787422s24.253401,-16.486501 39.787422,-16.486501s28.796421,5.4955 39.787422,16.486501s16.486501,24.253401 16.486501,39.787422z" fill="#ffffff"/>
 </svg>'''
 
 
-class Channel(models.Model):
-    _description = 'Discussion Channel'
+def is_channel(channel):
+    """Predicate to filter channels for which the channel type is 'channel'.
+
+    :returns: Whether the channel type is 'channel'.
+    :rtype: bool
+    """
+    return channel.channel_type == "channel"
+
+
+def is_channel_or_group(channel):
+    """Predicate to filter channels for which the channel type is either
+    'channel' or 'group'.
+
+    :returns: Whether the channel type is 'channel' or 'group'.
+    :rtype: bool
+    """
+    return channel.channel_type in ("channel", "group")
+
+
+class DiscussChannel(models.Model):
     _name = 'discuss.channel'
+    _description = 'Discussion Channel'
     _mail_flat_thread = False
     _mail_post_access = 'read'
     _inherit = ["mail.thread", "bus.listener.mixin"]
@@ -59,16 +82,27 @@ class Channel(models.Model):
         compute='_compute_channel_partner_ids', inverse='_inverse_channel_partner_ids',
         search='_search_channel_partner_ids')
     channel_member_ids = fields.One2many('discuss.channel.member', 'channel_id', string='Members')
-    parent_channel_id = fields.Many2one("discuss.channel", help="Parent channel", ondelete="cascade", index=True, auto_join=True, readonly=True)
+    parent_channel_id = fields.Many2one("discuss.channel", help="Parent channel", ondelete="cascade", index=True, bypass_search_access=True, readonly=True)
     sub_channel_ids = fields.One2many("discuss.channel", "parent_channel_id", string="Sub Channels", readonly=True)
     from_message_id = fields.Many2one("mail.message", help="The message the channel was created from.", readonly=True)
     pinned_message_ids = fields.One2many('mail.message', 'res_id', domain=[('model', '=', 'discuss.channel'), ('pinned_at', '!=', False)], string='Pinned Messages')
     sfu_channel_uuid = fields.Char(groups="base.group_system")
     sfu_server_url = fields.Char(groups="base.group_system")
     rtc_session_ids = fields.One2many('discuss.channel.rtc.session', 'channel_id', groups="base.group_system")
-    is_member = fields.Boolean('Is Member', compute='_compute_is_member', search='_search_is_member')
+    call_history_ids = fields.One2many("discuss.call.history", "channel_id")
+    is_member = fields.Boolean("Is Member", compute="_compute_is_member", search="_search_is_member", compute_sudo=True)
+    # sudo: discuss.channel - sudo for performance, self member can be accessed on accessible channel
+    self_member_id = fields.Many2one("discuss.channel.member", compute="_compute_self_member_id", compute_sudo=True)
+    # sudo: discuss.channel - sudo for performance, invited members can be accessed on accessible channel
+    invited_member_ids = fields.One2many("discuss.channel.member", compute="_compute_invited_member_ids", compute_sudo=True)
     member_count = fields.Integer(string="Member Count", compute='_compute_member_count', compute_sudo=True)
-    last_interest_dt = fields.Datetime("Last Interest", index=True, help="Contains the date and time of the last interesting event that happened in this channel. This updates itself when new message posted.")
+    message_count = fields.Integer("# Messages", readonly=True, compute="_compute_message_count")
+    last_interest_dt = fields.Datetime(
+        "Last Interest",
+        default=lambda self: fields.Datetime.now() - timedelta(seconds=1),
+        index=True,
+        help="Contains the date and time of the last interesting event that happened in this channel. This updates itself when new message posted.",
+    )
     group_ids = fields.Many2many(
         'res.groups', string='Auto Subscription',
         help="Members of those groups will automatically added as followers. "
@@ -76,22 +110,25 @@ class Channel(models.Model):
              "if necessary.")
     # access
     uuid = fields.Char('UUID', size=50, default=_generate_random_token, copy=False)
-    group_public_id = fields.Many2one('res.groups', string='Authorized Group', compute='_compute_group_public_id', readonly=False, store=True)
+    group_public_id = fields.Many2one('res.groups', string='Authorized Group', compute='_compute_group_public_id', recursive=True, readonly=False, store=True)
     invitation_url = fields.Char('Invitation URL', compute='_compute_invitation_url')
-    allow_public_upload = fields.Boolean(default=False)
-    _sql_constraints = [
-        ('channel_type_not_null', 'CHECK(channel_type IS NOT NULL)', 'The channel type cannot be empty'),
-        ("from_message_id_unique", "UNIQUE(from_message_id)", "Messages can only be linked to one sub-channel"),
-        (
-            "sub_channel_no_group_public_id",
-            "CHECK(parent_channel_id IS NULL OR group_public_id IS NULL)",
-            "Group public id should not be set on sub-channels as access is based on parent channel",
-        ),
-        ('uuid_unique', 'UNIQUE(uuid)', 'The channel UUID must be unique'),
-        ('group_public_id_check',
-         "CHECK (channel_type = 'channel' OR group_public_id IS NULL)",
-         'Group authorization and group auto-subscription are only supported on channels.')
-    ]
+    channel_name_member_ids = fields.One2many(
+        "discuss.channel.member",
+        compute="_compute_channel_name_member_ids",
+        help="Members from which the channel name is computed when the name field is empty.",
+    )
+    _from_message_id_unique = models.Constraint(
+        'UNIQUE(from_message_id)',
+        'Messages can only be linked to one sub-channel',
+    )
+    _uuid_unique = models.Constraint(
+        'UNIQUE(uuid)',
+        'The channel UUID must be unique',
+    )
+    _group_public_id_check = models.Constraint(
+        "CHECK (channel_type = 'channel' OR group_public_id IS NULL)",
+        'Group authorization and group auto-subscription are only supported on channels.',
+    )
 
     # CONSTRAINTS
     @api.constrains("from_message_id")
@@ -100,14 +137,14 @@ class Channel(models.Model):
         if failing_channels := self.sudo().filtered(
             lambda c: c.from_message_id
             and (
-                c.from_message_id.res_id != c.parent_channel_id.id
+                c.from_message_id.res_id not in [c.parent_channel_id.id] + c.parent_channel_id.sub_channel_ids.ids
                 or c.from_message_id.model != "discuss.channel"
             )
         ):
             raise ValidationError(
                 _(
-                    "Cannot create %(channels)s: initial message should belong to parent channel.",
-                    channels=format_list(self.env, failing_channels.mapped("name")),
+                    "Cannot create %(channels)s: initial message should belong to parent channel or one of its sub-channels.",
+                    channels=failing_channels.mapped("name"),
                 )
             )
 
@@ -118,13 +155,14 @@ class Channel(models.Model):
             lambda c: c.parent_channel_id
             and (
                 c.parent_channel_id.parent_channel_id
-                or c.parent_channel_id.channel_type != "channel"
+                or c.parent_channel_id.channel_type not in ["channel", "group"]
+                or c.parent_channel_id.channel_type != c.channel_type
             )
         ):
             raise ValidationError(
                 _(
-                    "Cannot create %(channels)s: parent should not be a sub-channel and should be of type 'channel'.",
-                    channels=format_list(self.env, failing_channels.mapped("name")),
+                    "Cannot create %(channels)s: parent should not be a sub-channel and should be of type 'channel' or 'group'. The sub-channel should have the same type as the parent.",
+                    channels=failing_channels.mapped("name"),
                 ),
             )
 
@@ -143,6 +181,49 @@ class Channel(models.Model):
             raise ValidationError(_("For %(channels)s, channel_type should be 'channel' to have the group-based authorization or group auto-subscription.", channels=', '.join([ch.name for ch in failing_channels])))
 
     # COMPUTE / INVERSE
+
+    @api.depends("channel_name_member_ids", "name")
+    def _compute_display_name(self):
+        for channel in self:
+            if channel.name:
+                channel.display_name = channel.name
+                continue
+            parts = channel.channel_name_member_ids.mapped(
+                lambda m: m.partner_id.name or m.guest_id.name
+            )
+            if channel.member_count > 3:
+                remaining = channel.member_count - 3
+                parts.append(
+                    self.env._("1 other") if remaining == 1 else self.env._("%s others", remaining)
+                )
+            channel.display_name = format_list(self.env, parts)
+
+    @api.depends("channel_member_ids")
+    def _compute_channel_name_member_ids(self):
+        to_compute = self.filtered(
+            lambda c: c.channel_type in self._member_based_naming_channel_types()
+        )
+        (self - to_compute).channel_name_member_ids = False
+        if not to_compute:
+            return
+        self.env.cr.execute("""
+            SELECT channel.id, member.id
+              FROM discuss_channel channel
+      JOIN LATERAL
+                (
+                   SELECT id
+                     FROM discuss_channel_member M
+                    WHERE M.channel_id = channel.id
+                 ORDER BY id
+                    LIMIT 3
+                ) as member ON TRUE
+             WHERE channel.id IN %s
+        """, (tuple(to_compute.ids),))
+        channel_id_to_member_ids = defaultdict(list)
+        for channel_id, member_id in self.env.cr.fetchall():
+            channel_id_to_member_ids[channel_id].append(member_id)
+        for channel in self:
+            channel.channel_name_member_ids = channel_id_to_member_ids.get(channel.id)
 
     @api.depends("channel_type", "is_member", "group_public_id")
     @api.depends_context("uid")
@@ -200,15 +281,12 @@ class Channel(models.Model):
     @api.depends_context('uid', 'guest')
     @api.depends('channel_member_ids')
     def _compute_is_member(self):
-        if not self:
-            return
-        members = self.env['discuss.channel.member'].search([('channel_id', 'in', self.ids), ('is_self', '=', True)])
-        is_member_channels = members.channel_id
         for channel in self:
-            channel.is_member = channel in is_member_channels
+            channel.is_member = bool(channel.self_member_id)
 
     def _search_is_member(self, operator, operand):
-        is_in = (operator == '=' and operand) or (operator == '!=' and not operand)
+        if operator != 'in':
+            return NotImplemented
         # Separate query to fetch candidate channels because the sub-select that _search would
         # generate leads psql query plan to take bad decisions. When candidate ids are explicitly
         # given it doesn't need to make (incorrect) guess, at the cost of one extra but fast query.
@@ -223,7 +301,32 @@ class Channel(models.Model):
             channels = current_partner.sudo().channel_ids
         else:
             channels = self.env["discuss.channel"]
-        return [('id', "in" if is_in else "not in", channels.ids)]
+        return [('id', 'in', channels.ids)]
+
+    @api.depends_context("uid", "guest")
+    @api.depends("channel_member_ids")
+    def _compute_self_member_id(self):
+        member_by_channel = {
+            channel: self.env["discuss.channel.member"].browse(member_id)
+            for channel, member_id in self.env["discuss.channel.member"]._read_group(
+                [("channel_id", "in", self.ids), ("is_self", "=", True)], ["channel_id"], ["id:max"]
+            )
+        }
+        for channel in self:
+            channel.self_member_id = member_by_channel.get(channel)
+
+    @api.depends("channel_member_ids.rtc_inviting_session_id")
+    def _compute_invited_member_ids(self):
+        members_by_channel = {
+            channel: self.env["discuss.channel.member"].browse(member_ids)
+            for channel, member_ids in self.env["discuss.channel.member"]._read_group(
+                [("channel_id", "in", self.ids), ("rtc_inviting_session_id", "!=", False)],
+                ["channel_id"],
+                ["id:array_agg"],
+            )
+        }
+        for channel in self:
+            channel.invited_member_ids = members_by_channel.get(channel)
 
     @api.depends('channel_member_ids')
     def _compute_member_count(self):
@@ -232,12 +335,27 @@ class Channel(models.Model):
         for channel in self:
             channel.member_count = member_count_by_channel_id.get(channel.id, 0)
 
-    @api.depends('channel_type')
+    @api.depends("message_ids")
+    def _compute_message_count(self):
+        read_group_res = self.env["mail.message"]._read_group(
+            domain=[
+                ("model", "=", "discuss.channel"),
+                ("res_id", "in", self.ids),
+                ("message_type", "not in", ["user_notification", "notification"])
+            ], groupby=["res_id"], aggregates=["__count"]
+        )
+        message_count_by_channel_id = dict(read_group_res)
+        for channel in self:
+            channel.message_count = message_count_by_channel_id.get(channel.id, 0)
+
+    @api.depends("channel_type", "parent_channel_id.group_public_id")
     def _compute_group_public_id(self):
-        channels = self.filtered(lambda channel: channel.channel_type == 'channel')
-        channels.filtered(
-            lambda channel: not channel.parent_channel_id and not channel.group_public_id
-        ).group_public_id = self.env.ref("base.group_user")
+        channels = self.filtered(lambda channel: channel.channel_type == "channel")
+        for channel in channels:
+            if channel.parent_channel_id:
+                channel.group_public_id = channel.parent_channel_id.group_public_id
+            elif not channel.group_public_id:
+                channel.group_public_id = self.env.ref("base.group_user")
         (self - channels).group_public_id = None
 
     @api.depends('uuid')
@@ -248,6 +366,10 @@ class Channel(models.Model):
     # ------------------------------------------------------------
     # CRUD
     # ------------------------------------------------------------
+
+    @api.model
+    def _get_allowed_channel_member_create_params(self):
+        return ["partner_id", "guest_id", "unpin_dt", "last_interest_dt"]
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -265,14 +387,18 @@ class Channel(models.Model):
                 if cmd[0] != 0:
                     raise ValidationError(_('Invalid value when creating a channel with memberships, only 0 is allowed.'))
                 for field_name in cmd[2]:
-                    if field_name not in ["partner_id", "guest_id", "unpin_dt", "last_interest_dt", "fold_state"]:
+                    if field_name not in self._get_allowed_channel_member_create_params():
                         raise ValidationError(
                             _(
                                 "Invalid field “%(field_name)s” when creating a channel with members.",
                                 field_name=field_name,
                             )
                         )
-            membership_pids = [cmd[2]['partner_id'] for cmd in membership_ids_cmd if cmd[0] == 0]
+            membership_pids = [
+                cmd[2]["partner_id"]
+                for cmd in membership_ids_cmd
+                if cmd[0] == 0 and "partner_id" in cmd[2]
+            ]
 
             partner_ids_to_add = partner_ids
             # always add current user to new channel to have right values for
@@ -288,11 +414,12 @@ class Channel(models.Model):
             vals.pop('channel_partner_ids', False)
 
         # Create channel and alias
-        channels = super(Channel, self.with_context(mail_create_bypass_create_check=self.env['discuss.channel.member']._bypass_create_check, mail_create_nolog=True, mail_create_nosubscribe=True)).create(vals_list)
+        channels = super(DiscussChannel, self.with_context(mail_create_bypass_create_check=self.env['discuss.channel.member']._bypass_create_check, mail_create_nolog=True, mail_create_nosubscribe=True)).create(vals_list)
         # pop the mail_create_bypass_create_check key to avoid leaking it outside of create)
         channels = channels.with_context(mail_create_bypass_create_check=None)
         channels._subscribe_users_automatically()
-
+        if not self.env.context.get("install_mode") and not self.env.user._is_public():
+            Store(bus_channel=self.env.user).add(channels).bus_send()
         return channels
 
     @api.ondelete(at_uninstall=False)
@@ -316,149 +443,238 @@ class Channel(models.Model):
             raise UserError(
                 _(
                     "Cannot change initial message nor parent channel of: %(channels)s.",
-                    channels=format_list(self.env, self.mapped("name")),
+                    channels=self.mapped("name"),
                 )
             )
-        old_vals = {channel: channel._channel_basic_info() for channel in self}
+        if "group_public_id" in vals:
+            if failing_channels := self.filtered(lambda channel: channel.parent_channel_id):
+                raise UserError(
+                    self.env._(
+                        "Cannot change authorized group of sub-channel: %(channels)s.",
+                        channels=failing_channels.mapped("name"),
+                    )
+                )
+
+        def get_field_name(field_description):
+            if isinstance(field_description, Store.Attr):
+                return field_description.field_name
+            return field_description
+
+        def get_field_value(channel, field_description):
+            if isinstance(field_description, Store.Attr):
+                if field_description.predicate and not field_description.predicate(channel):
+                    return None
+            if isinstance(field_description, Store.Relation):
+                return field_description._get_value(channel).records
+            if isinstance(field_description, Store.Attr):
+                return field_description._get_value(channel)
+            return channel[field_description]
+
+        def get_vals(channel):
+            return {
+                subchannel: {
+                    get_field_name(field_description): (
+                        get_field_value(channel, field_description),
+                        field_description,
+                    )
+                    for field_description in field_descriptions
+                }
+                for subchannel, field_descriptions in self._sync_field_names().items()
+            }
+
+        old_vals = {channel: get_vals(channel) for channel in self}
         result = super().write(vals)
         for channel in self:
-            info = channel._channel_basic_info()
-            diff = {}
-            for key, value in info.items():
-                if value != old_vals[channel][key]:
-                    diff[key] = value
-            if diff:
-                channel._bus_send_store(channel, diff)
+            new_subchannel_vals = get_vals(channel)
+            for subchannel, values in new_subchannel_vals.items():
+                diff = []
+                for field_name, (value, field_description) in values.items():
+                    if value != old_vals[channel][subchannel][field_name][0]:
+                        diff.append(field_description)
+                if diff:
+                    Store(
+                        bus_channel=channel,
+                        bus_subchannel=subchannel,
+                    ).add(channel, diff).bus_send()
         if vals.get('group_ids'):
             self._subscribe_users_automatically()
         return result
 
-    def init(self):
-        self._cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = %s', ('discuss_channel_member_seen_message_id_idx',))
-        if not self._cr.fetchone():
-            self._cr.execute('CREATE INDEX discuss_channel_member_seen_message_id_idx ON discuss_channel_member (channel_id,partner_id,seen_message_id)')
+    def _sync_field_names(self):
+        # keys are bus subchannel names, values are lists of field names to sync
+        res = defaultdict(list)
+        res[None] += [
+            Store.Attr("avatar_cache_key", predicate=is_channel_or_group),
+            "channel_type",
+            "create_uid",
+            "default_display_mode",
+            Store.Attr("description", predicate=is_channel_or_group),
+            Store.Many("group_ids", [], predicate=is_channel),
+            Store.One("group_public_id", predicate=is_channel),
+            "last_interest_dt",
+            "member_count",
+            "name",
+            "uuid",
+        ]
+        return res
 
     # ------------------------------------------------------------
     # MEMBERS MANAGEMENT
     # ------------------------------------------------------------
 
     def _subscribe_users_automatically(self):
-        new_members = self._subscribe_users_automatically_get_members()
-        if new_members:
-            to_create = [
-                {'channel_id': channel_id, 'partner_id': partner_id}
-                for channel_id in new_members
-                for partner_id in new_members[channel_id]
-            ]
-            # sudo: discuss.channel.member - adding member of other users based on channel auto-subscribe
-            self.env['discuss.channel.member'].sudo().create(to_create)
-        for channel in self:
-            channel.group_ids._bus_send_store(
-                channel, {**channel._channel_basic_info(), "is_pinned": True}
-            )
+        if not (new_members_to_create := self._subscribe_users_automatically_get_members()):
+            return
+        to_create = [
+            {"channel_id": channel_id, "partner_id": partner_id}
+            for channel_id in new_members_to_create
+            for partner_id in new_members_to_create[channel_id]
+        ]
+        # sudo: discuss.channel.member - adding member of other users based on channel auto-subscribe
+        new_members = self.env["discuss.channel.member"].sudo().create(to_create)
+        notifications = defaultdict(lambda: self.env["discuss.channel.member"])
+        for member in new_members:
+            bus_channel = member._bus_channel()
+            notifications[bus_channel] |= member
+        for bus_channel, members in notifications.items():
+            members = members.with_prefetch(new_members.ids)
+            Store(bus_channel=bus_channel).add(members.channel_id).add(
+                members,
+                [
+                    Store.One("channel_id", [], as_thread=True),
+                    *self.env["discuss.channel.member"]._to_store_persona(),
+                    "unpin_dt",
+                ],
+            ).bus_send()
 
     def _subscribe_users_automatically_get_members(self):
         """ Return new members per channel ID """
         return dict(
             (channel.id,
-             ((channel.group_ids.users.partner_id.filtered(lambda p: p.active) - channel.channel_partner_ids).ids))
+             ((channel.group_ids.all_user_ids.partner_id.filtered(lambda p: p.active) - channel.channel_partner_ids).ids))
                 for channel in self
             )
 
     def action_unfollow(self):
         self._action_unfollow(self.env.user.partner_id)
 
-    def _action_unfollow(self, partner=None, guest=None):
+    def _action_unfollow(self, partner=None, guest=None, post_leave_message=True):
         self.ensure_one()
+        if partner is None:
+            partner = self.env["res.partner"]
+        if guest is None:
+            guest = self.env["mail.guest"]
         self.message_unsubscribe(partner.ids)
-        custom_store = Store(self, {"is_pinned": False, "isLocallyPinned": False})
         member = self.env["discuss.channel.member"].search(
             [
                 ("channel_id", "=", self.id),
                 ("partner_id", "=", partner.id) if partner else ("guest_id", "=", guest.id),
             ]
         )
+        custom_store = Store(bus_channel=member._bus_channel() or partner.main_user_id or guest)
+        custom_store.add(self, {"close_chat_window": True, "isLocallyPinned": False}).bus_send()
         if not member:
-            target = partner or guest
-            target._bus_send_store(custom_store, notification_type="discuss.channel/leave")
             return
-        notification = Markup('<div class="o_mail_notification">%s</div>') % _(
-            "left the channel"
-        )
-        # sudo: mail.message - post as sudo since the user just unsubscribed from the channel
-        member.channel_id.sudo().message_post(
-            body=notification, subtype_xmlid="mail.mt_comment", author_id=partner.id
-        )
-        # send custom store after message_post to avoid is_pinned reset to True
-        member._bus_send_store(custom_store, notification_type="discuss.channel/leave")
+        if self.channel_type != "channel" and post_leave_message:
+            notification = Markup('<div class="o_mail_notification" data-oe-type="channel-left">%s</div>') % _(
+                "left the channel"
+            )
+            # sudo: mail.message - post as sudo since the user just unsubscribed from the channel
+            member.channel_id.sudo().message_post(
+                body=notification, subtype_xmlid="mail.mt_comment", author_id=partner.id
+            )
         member.unlink()
-        self._bus_send_store(
+        Store(bus_channel=self).add(
             self,
-            {
-                "channelMembers": Store.many(member, "DELETE", only_id=True),
-                "memberCount": self.member_count,
-            },
+            [
+                Store.Many("channel_member_ids", [], mode="DELETE", value=member),
+                "member_count",
+            ],
+        ).bus_send()
+
+    def add_members(
+        self, partner_ids=None, guest_ids=None, invite_to_rtc_call=False, post_joined_message=True
+    ):
+        """ Adds the given partner_ids and guest_ids as member of self channels. """
+        return self._add_members(
+            partners=self.env["res.partner"].browse(partner_ids or []).exists(),
+            guests=self.env["mail.guest"].browse(guest_ids or []).exists(),
+            invite_to_rtc_call=invite_to_rtc_call,
+            post_joined_message=post_joined_message,
         )
 
-    def add_members(self, partner_ids=None, guest_ids=None, invite_to_rtc_call=False, open_chat_window=False, post_joined_message=True):
-        """ Adds the given partner_ids and guest_ids as member of self channels. """
+    def _add_members(
+        self,
+        *,
+        guests=None,
+        partners=None,
+        users=None,
+        create_member_params=None,
+        invite_to_rtc_call=False,
+        post_joined_message=True,
+        inviting_partner=None,
+    ):
+        inviting_partner = inviting_partner or self.env["res.partner"]
+        partners = partners or self.env["res.partner"]
+        if users:
+            partners |= users.partner_id
+        guests = guests or self.env["mail.guest"]
         current_partner, current_guest = self.env["res.partner"]._get_current_persona()
-        partners = self.env['res.partner'].browse(partner_ids or []).exists()
-        guests = self.env['mail.guest'].browse(guest_ids or []).exists()
         all_new_members = self.env["discuss.channel.member"]
         for channel in self:
             members_to_create = []
-            existing_members = self.env['discuss.channel.member'].search(expression.AND([
-                [('channel_id', '=', channel.id)],
-                expression.OR([
-                    [('partner_id', 'in', partners.ids)],
-                    [('guest_id', 'in', guests.ids)]
-                ])
-            ]))
+            existing_members = self.env['discuss.channel.member'].search(
+                Domain('channel_id', '=', channel.id)
+                & (Domain('partner_id', 'in', partners.ids) | Domain('guest_id', 'in', guests.ids))
+            )
             members_to_create += [{
+                **(create_member_params or {}),
                 'partner_id': partner.id,
                 'channel_id': channel.id,
             } for partner in partners - existing_members.partner_id]
             members_to_create += [{
+                **(create_member_params or {}),
                 'guest_id': guest.id,
                 'channel_id': channel.id,
             } for guest in guests - existing_members.guest_id]
-            new_members = self.env['discuss.channel.member'].create(members_to_create)
+            if channel.parent_channel_id and channel.parent_channel_id.has_access("write"):
+                new_members = self.env["discuss.channel.member"].sudo().create(members_to_create)
+            else:
+                new_members = self.env["discuss.channel.member"].create(members_to_create)
             all_new_members += new_members
             for member in new_members:
                 payload = {
-                    "channel": {
-                        **member.channel_id._channel_basic_info(),
-                        "model": "discuss.channel",
-                        "is_pinned": True,
-                    },
-                    "open_chat_window": open_chat_window,
+                    "channel_id": member.channel_id.id,
+                    "invite_to_rtc_call": invite_to_rtc_call,
+                    "data": Store(bus_channel=member._bus_channel())
+                    .add(member.channel_id)
+                    .add(member, "unpin_dt")
+                    .get_result(),
                 }
                 if not member.is_self and not self.env.user._is_public():
                     payload["invited_by_user_id"] = self.env.user.id
                 member._bus_send("discuss.channel/joined", payload)
-                if post_joined_message:
+                if channel.channel_type != "channel" and post_joined_message:
                     notification = (
                         _("joined the channel")
                         if member.is_self
                         else _("invited %s to the channel", member._get_html_link(for_persona=True))
                     )
                     member.channel_id.message_post(
-                        body=Markup('<div class="o_mail_notification">%s</div>') % notification,
+                        author_id=inviting_partner.id or None,
+                        body=Markup('<div class="o_mail_notification" data-oe-type="channel-joined">%s</div>') % notification,
                         message_type="notification",
                         subtype_xmlid="mail.mt_comment",
                     )
             if new_members:
-                channel._bus_send_store(
-                    Store(channel, {"memberCount": channel.member_count}).add(new_members)
-                )
-            if existing_members and (current_partner or current_guest):
+                Store(bus_channel=channel).add(channel, "member_count").add(new_members).bus_send()
+            if existing_members and (bus_channel := current_partner.main_user_id or current_guest):
                 # If the current user invited these members but they are already present, notify the current user about their existence as well.
                 # In particular this fixes issues where the current user is not aware of its own member in the following case:
                 # create channel from form view, and then join from discuss without refreshing the page.
-                (current_partner or current_guest)._bus_send_store(
-                    Store(channel, {"memberCount": channel.member_count}).add(existing_members)
-                )
+                Store(
+                    bus_channel=bus_channel,
+                ).add(channel, "member_count").add(existing_members).bus_send()
         if invite_to_rtc_call:
             for channel in self:
                 current_channel_member = self.env['discuss.channel.member'].search([('channel_id', '=', channel.id), ('is_self', '=', True)])
@@ -468,9 +684,91 @@ class Channel(models.Model):
                     current_channel_member.sudo()._rtc_invite_members(member_ids=new_members.ids)
         return all_new_members
 
+    def invite_by_email(self, emails):
+        """
+        Send channel invitation emails to a list of email addresses. Existing members'
+        email addresses are ignored.
+
+        :param emails: List of email addresses to invite.
+        :type emails: list[str]
+
+        """
+        if not self.env.user._is_internal() or not self.has_access("read"):
+            raise AccessError(self.env._("You don't have access to invite users to this channel."))
+        if not self._allow_invite_by_email():
+            raise UserError(
+                self.env._("Inviting by email is not allowed for this channel type (%s).")
+                % self.channel_type
+            )
+        eligible_emails = OrderedSet(norm for email in emails if email and (norm := email_normalize(email)))
+        # Removing emails linked to members of this channel.
+        member_domain = Domain("channel_id", "=", self.id) & Domain.OR(
+            [
+                [(field, "=ilike", email)]
+                for email in eligible_emails
+                for field in ("guest_id.email", "partner_id.email")
+            ],
+        )
+        eligible_emails -= set(
+            self.env["discuss.channel.member"]
+            .search_fetch(member_domain, ["partner_id", "guest_id"])
+            .mapped(lambda m: email_normalize(m.partner_id.email or m.guest_id.email))
+        )
+        mail_body = Markup("<p>%s</p>") % self.env._(
+            "%(user_name)s has invited you to the %(strong_start)s%(channel_name)s%(strong_end)s channel."
+        ) % {
+            "user_name": self.env.user.name,
+            "channel_name": self.name,
+            "strong_start": Markup("<strong>"),
+            "strong_end": Markup("</strong>"),
+        }
+        to_create = []
+        for addr in eligible_emails:
+            body = self.env["ir.qweb"]._render(
+                "mail.discuss_channel_invitation_template",
+                {
+                    "base_url": self.env["ir.config_parameter"].get_base_url(),
+                    "channel": self,
+                    "email_token": hash_sign(self.env(su=True), "mail.invite_email", addr),
+                    "mail_body": mail_body,
+                    "user": self.env.user,
+                },
+                minimal_qcontext=True,
+            )
+            to_create.append(
+                {
+                    "body_html": body,
+                    "email_from": self.env.user.partner_id.email_formatted,
+                    "email_to": addr,
+                    "message_type": "user_notification",
+                    "model": "discuss.channel",
+                    "res_id": self.id,
+                    "subject": self.env._("%(author_name)s has invited you to a channel")
+                    % {"author_name": self.env.user.name},
+                },
+            )
+        if not to_create:
+            return
+        try:
+            # sudo - mail.mail: internal users having read access to the channel can invite others.
+            self.env["mail.mail"].sudo().create(to_create).send(raise_exception=True)
+        except MailDeliveryException as mde:
+            error_msg = self.env._(
+                "There was an error when trying to deliver your Email, please check your configuration."
+            )
+            if len(mde.args) == 2 and isinstance(mde.args[1], ConnectionRefusedError):
+                error_msg = self.env._(
+                    "Could not contact the mail server, please check your outgoing email server configuration."
+                )
+            raise UserError(error_msg) from mde
+
     # ------------------------------------------------------------
     # RTC
     # ------------------------------------------------------------
+
+    def _get_call_notification_tag(self):
+        self.ensure_one()
+        return f"call_{self.id}"
 
     def _rtc_cancel_invitations(self, member_ids=None):
         """ Cancels the invitations of the RTC call from all invited members,
@@ -479,82 +777,101 @@ class Channel(models.Model):
             :param list member_ids: list of the members ids from which the invitation has to be removed
         """
         self.ensure_one()
-        channel_member_domain = [
+        channel_member_domain = Domain([
             ('channel_id', '=', self.id),
             ('rtc_inviting_session_id', '!=', False),
-        ]
+        ])
         if member_ids:
-            channel_member_domain = expression.AND([channel_member_domain, [('id', 'in', member_ids)]])
+            channel_member_domain &= Domain('id', 'in', member_ids)
         members = self.env['discuss.channel.member'].search(channel_member_domain)
         members.rtc_inviting_session_id = False
-        members._bus_send_store(self, {"rtcInvitingSession": False})
         if members:
-            self._bus_send_store(
+            Store(bus_channel=self).add(
                 self,
                 {
-                    "invitedMembers": Store.many(
+                    "invited_member_ids": Store.Many(
                         members,
-                        "DELETE",
-                        fields={"channel": [], "persona": ["name", "im_status"]},
+                        [
+                            Store.One("channel_id", [], as_thread=True),
+                            *self.env["discuss.channel.member"]._to_store_persona("avatar_card"),
+                        ],
+                        mode="DELETE",
                     ),
                 },
-            )
+            ).bus_send()
+            devices, private_key, public_key = self._web_push_get_partners_parameters(members.partner_id.ids)
+            if devices:
+                self._web_push_send_notification(devices, private_key, public_key, payload={
+                    "title": "",
+                    "options": {
+                        "data": {
+                            "type": PUSH_NOTIFICATION_TYPE.CANCEL
+                        },
+                        "tag": self._get_call_notification_tag(),
+                    }
+                })
 
     # ------------------------------------------------------------
     # MAILING
     # ------------------------------------------------------------
 
-    def _notify_get_recipients(self, message, msg_vals, **kwargs):
-        """ Override recipients computation as channel is not a standard
-        mail.thread document. Indeed there are no followers on a channel.
-        Instead of followers it has members that should be notified.
-
-        :param message: see ``MailThread._notify_get_recipients()``;
-        :param msg_vals: see ``MailThread._notify_get_recipients()``;
-        :param kwargs: see ``MailThread._notify_get_recipients()``;
-
-        :return recipients: structured data holding recipients data. See
-          ``MailThread._notify_thread()`` for more details about its content
-          and use;
-        """
-        # get values from msg_vals or from message if msg_vals doen't exists
-        message_type = msg_vals.get('message_type', 'comment') if msg_vals else message.message_type
-        pids = msg_vals.get('partner_ids', []) if msg_vals else message.partner_ids.ids
+    def _notify_get_recipients(self, message, msg_vals=False, **kwargs):
+        # Override recipients computation as channel is not a standard
+        # mail.thread document. Indeed there are no followers on a channel.
+        # Instead of followers it has members that should be notified.
+        msg_vals = msg_vals or {}
 
         # notify only user input (comment, whatsapp messages or incoming / outgoing emails)
+        message_type = msg_vals['message_type'] if 'message_type' in msg_vals else message.message_type
         if message_type not in ('comment', 'email', 'email_outgoing', 'whatsapp_message'):
             return []
 
         recipients_data = []
         author_id = msg_vals.get("author_id") or message.author_id.id
+        pids = msg_vals['partner_ids'] or [] if 'partner_ids' in msg_vals else message.partner_ids.ids
         if pids:
             email_from = tools.email_normalize(msg_vals.get('email_from') or message.email_from)
             self.env['res.partner'].flush_model(['active', 'email', 'partner_share'])
-            self.env['res.users'].flush_model(['notification_type', 'partner_id'])
-            sql_query = """
-                SELECT DISTINCT ON (partner.id) partner.id,
+            self.env['res.users'].flush_model(['active', 'notification_type', 'partner_id', 'share'])
+            sql_query = SQL(
+                """
+                SELECT partner.id,
+                       partner.email_normalized,
                        partner.lang,
+                       partner.name,
                        partner.partner_share,
-                       users.id as uid,
-                       COALESCE(users.notification_type, 'email') as notif,
-                       COALESCE(users.share, FALSE) as ushare
+                       sub_user.uid as uid,
+                       COALESCE(sub_user.notification_type, 'email') as notif,
+                       COALESCE(sub_user.share, FALSE) as ushare
                   FROM res_partner partner
-             LEFT JOIN res_users users on partner.id = users.partner_id
+     LEFT JOIN LATERAL (
+                        SELECT users.id AS uid,
+                               users.notification_type AS notification_type,
+                               users.share AS share
+                          FROM res_users users
+                         WHERE users.partner_id = partner.id AND users.active
+                      ORDER BY users.share ASC NULLS FIRST, users.id ASC
+                         FETCH FIRST ROW ONLY
+                       ) sub_user ON TRUE
                  WHERE partner.active IS TRUE
-                       AND partner.email != %s
-                       AND partner.id = ANY(%s) AND partner.id != ANY(%s)"""
-            self.env.cr.execute(
-                sql_query,
-                (email_from or '', list(pids), [author_id] if author_id else [], )
+                       AND partner.email != %(email)s
+                       AND partner.id IN %(partner_ids)s AND partner.id != %(author_id)s
+                """,
+                email=email_from or "",
+                partner_ids=tuple(pids),
+                author_id=author_id or 0,
             )
-            for partner_id, lang, partner_share, uid, notif, ushare in self._cr.fetchall():
+            self.env.cr.execute(sql_query)
+            for partner_id, email_normalized, lang, name, partner_share, uid, notif, ushare in self.env.cr.fetchall():
                 # ocn_client: will add partners to recipient recipient_data. more ocn notifications. We neeed to filter them maybe
                 recipients_data.append({
                     'active': True,
+                    'email_normalized': email_normalized,
                     'id': partner_id,
                     'is_follower': False,
                     'groups': [],
                     'lang': lang,
+                    'name': name,
                     'notif': notif,
                     'share': partner_share,
                     'type': 'user' if not partner_share and notif else 'customer',
@@ -562,27 +879,27 @@ class Channel(models.Model):
                     'ushare': ushare,
                 })
 
-        domain = expression.AND([
+        domain = Domain.AND([
             [("channel_id", "=", self.id)],
             [("partner_id", "!=", author_id)],
             [("partner_id.active", "=", True)],
             [("mute_until_dt", "=", False)],
-            [("partner_id.user_ids.res_users_settings_ids.mute_until_dt", "=", False)],
-            expression.OR([
+            [("partner_id.user_ids.manual_im_status", "!=", "busy")],
+            Domain.OR([
                 [("channel_id.channel_type", "!=", "channel")],
-                expression.AND([
+                Domain.AND([
                     [("channel_id.channel_type", "=", "channel")],
-                    expression.OR([
+                    Domain.OR([
                         [("custom_notifications", "=", "all")],
-                        expression.AND([
+                        Domain.AND([
                             [("custom_notifications", "=", False)],
                             [("partner_id.user_ids.res_users_settings_ids.channel_notifications", "=", "all")],
                         ]),
-                        expression.AND([
+                        Domain.AND([
                             [("custom_notifications", "=", "mentions")],
                             [("partner_id", "in", pids)],
                         ]),
-                        expression.AND([
+                        Domain.AND([
                             [("custom_notifications", "=", False)],
                             [("partner_id.user_ids.res_users_settings_ids.channel_notifications", "=", False)],
                             [("partner_id", "in", pids)],
@@ -608,11 +925,11 @@ class Channel(models.Model):
             })
         return recipients_data
 
-    def _notify_get_recipients_groups(self, message, model_description, msg_vals=None):
-        """ All recipients of a message on a channel are considered as partners.
-        This means they will receive a minimal email, without a link to access
-        in the backend. Mailing lists should indeed send minimal emails to avoid
-        the noise. """
+    def _notify_get_recipients_groups(self, message, model_description, msg_vals=False):
+        # All recipients of a message on a channel are considered as partners.
+        # This means they will receive a minimal email, without a link to access
+        # in the backend. Mailing lists should indeed send minimal emails to avoid
+        # the noise.
         groups = super()._notify_get_recipients_groups(
             message, model_description, msg_vals=msg_vals
         )
@@ -627,21 +944,23 @@ class Channel(models.Model):
     def _notify_thread(self, message, msg_vals=False, **kwargs):
         # link message to channel
         rdata = super()._notify_thread(message, msg_vals=msg_vals, **kwargs)
-        payload = {"data": Store(message).get_result(), "id": self.id}
+        payload = {"data": Store(bus_channel=self).add(message).get_result(), "id": self.id}
         if temporary_id := self.env.context.get("temporary_id"):
             payload["temporary_id"] = temporary_id
         if kwargs.get("silent"):
             payload["silent"] = True
-        self._bus_send_store(self, {"is_pinned": True}, subchannel="members")
         self._bus_send("discuss.channel/new_message", payload)
         return rdata
 
-    def _notify_by_web_push_prepare_payload(self, message, msg_vals=False):
-        payload = super()._notify_by_web_push_prepare_payload(message, msg_vals=msg_vals)
+    def _notify_by_web_push_prepare_payload(self, message, msg_vals=False, force_record_name=False):
+        payload = super()._notify_by_web_push_prepare_payload(
+            message, msg_vals=msg_vals, force_record_name=force_record_name,
+        )
+        msg_vals = msg_vals or {}
         payload['options']['data']['action'] = 'mail.action_discuss'
-        record_name = msg_vals.get('record_name') if msg_vals and 'record_name' in msg_vals else message.record_name
-        author_id = [msg_vals["author_id"]] if msg_vals and msg_vals.get("author_id") else message.author_id.ids
-        author = self.env["res.partner"].browse(author_id) or self.env["mail.guest"].browse(
+        record_name = force_record_name or message.record_name
+        author_ids = [msg_vals["author_id"]] if msg_vals.get("author_id") else message.author_id.ids
+        author = self.env["res.partner"].browse(author_ids) or self.env["mail.guest"].browse(
             msg_vals.get("author_guest_id", message.author_guest_id.id)
         )
         if self.channel_type == 'chat':
@@ -664,40 +983,42 @@ class Channel(models.Model):
         super()._notify_thread_by_web_push(message, [r for r in recipients_data if r["notif"] == "web_push"], msg_vals=msg_vals, **kwargs)
 
     def _message_receive_bounce(self, email, partner):
-        """ Override bounce management to unsubscribe bouncing addresses """
+        # Override bounce management to unsubscribe bouncing addresses
         for p in partner:
             if p.message_bounce >= self.MAX_BOUNCE_LIMIT:
                 self._action_unfollow(p)
         return super()._message_receive_bounce(email, partner)
 
-    def _message_compute_author(self, author_id=None, email_from=None, raise_on_email=True):
-        return super()._message_compute_author(author_id=author_id, email_from=email_from, raise_on_email=False)
+    def _get_allowed_message_params(self):
+        return super()._get_allowed_message_params() | {"special_mentions", "parent_id"}
 
-    def _message_compute_parent_id(self, parent_id):
-        # super() unravels the chain of parents to set parent_id as the first
-        # ancestor. We don't want that in channel.
-        if not parent_id:
-            return parent_id
-        return self.env['mail.message'].search(
-            [('id', '=', parent_id),
-             ('model', '=', self._name),
-             ('res_id', '=', self.id)
-            ]).id
-
-    def _get_allowed_message_post_params(self):
-        return super()._get_allowed_message_post_params() | {"special_mentions", "parent_id"}
-
-    @api.returns('mail.message', lambda value: value.id)
-    def message_post(self, *, message_type='notification', **kwargs):
-        if (not self.env.user or self.env.user._is_public()) and self.is_member:
-            # sudo: discuss.channel - guests don't have access for creating mail.message
-            self = self.sudo()
-        # sudo: discuss.channel - write to discuss.channel is not accessible for most users
-        self.sudo().last_interest_dt = fields.Datetime.now()
-        if "everyone" in kwargs.pop("special_mentions", []):
-            kwargs["partner_ids"] = list(
-                set(kwargs["partner_ids"] + self.channel_member_ids.partner_id.ids)
+    def _get_allowed_message_partner_ids(self, partner_ids):
+        """Ensure only partners having access to the channel can be mentioned."""
+        partners = self.env["res.partner"].browse(partner_ids)
+        if self.channel_type == "channel":
+            if self.group_public_id:
+                partners = partners.filtered(
+                    lambda p: p.user_ids.all_group_ids & self.group_public_id,
+                )
+        else:
+            partners = (
+                self.env["discuss.channel.member"]
+                .search_fetch(
+                    [("channel_id", "=", self.id), ("partner_id", "in", partner_ids)],
+                    ["partner_id"],
+                )
+                .partner_id
             )
+        return partners.ids
+
+    def message_post(self, *, message_type="notification", partner_ids=None, **kwargs):
+        if message_type not in ["notification", "user_notification"]:
+            # sudo: discuss.channel - write to discuss.channel is not accessible for most users
+            self.sudo().last_interest_dt = fields.Datetime.now()
+        if "everyone" in kwargs.pop("special_mentions", []):
+            partner_ids = list(OrderedSet((partner_ids or []) + self.channel_member_ids.partner_id.ids))
+        if partner_ids:
+            kwargs["partner_ids"] = self._get_allowed_message_partner_ids(partner_ids)
         # mail_post_autofollow=False is necessary to prevent adding followers
         # when using mentions in channels. Followers should not be added to
         # channels, and especially not automatically (because channel membership
@@ -705,22 +1026,47 @@ class Channel(models.Model):
         # The current client code might be setting the key to True on sending
         # message but it is only useful when targeting customers in chatter.
         # This value should simply be set to False in channels no matter what.
-        return super(Channel, self.with_context(mail_create_nosubscribe=True, mail_post_autofollow=False)).message_post(message_type=message_type, **kwargs)
+        return super(
+            DiscussChannel,
+            self.with_context(mail_post_autofollow_author_skip=True, mail_post_autofollow=False),
+        ).message_post(message_type=message_type, **kwargs)
 
     def _message_post_after_hook(self, message, msg_vals):
-        """
-        Automatically set the message posted by the current user as seen for themselves.
-        """
-        if (current_channel_member := self.env["discuss.channel.member"].search([
-            ("channel_id", "=", self.id), ("is_self", "=", True)
-        ])) and message.is_current_user_or_guest_author:
-            current_channel_member._set_last_seen_message(message, notify=False)
-            current_channel_member._set_new_message_separator(message.id + 1, sync=True)
+        # Automatically set the message posted by the current user as seen for themselves.
+        if self.self_member_id and message.is_current_user_or_guest_author:
+            self.self_member_id._set_last_seen_message(message, notify=False)
+            self.self_member_id._set_new_message_separator(message.id + 1)
+        # Invite mentioned partners to sub-channel.
+        if self.parent_channel_id and message.partner_ids:
+            members = self.env["discuss.channel.member"].search([
+                ("channel_id", "=", self.parent_channel_id.id),
+                ("partner_id", "in", message.partner_ids.ids),
+            ])
+
+            def wants_channel_notifications(partner):
+                return not partner.user_ids or any(
+                    user.res_users_settings_id.channel_notifications != "no_notif"
+                    for user in partner.user_ids
+                )
+
+            to_invite = members.filtered(lambda m:
+                m.custom_notifications != "no_notif" if m.custom_notifications
+                else wants_channel_notifications(m.partner_id)
+            ).partner_id
+            if self.parent_channel_id.channel_type == "channel":
+                to_invite |= (message.partner_ids - members.partner_id).filtered(
+                    wants_channel_notifications
+                )
+            self._add_members(partners=to_invite)
         return super()._message_post_after_hook(message, msg_vals)
 
+    def _message_update_content(self, message, /, *, partner_ids=None, **kwargs):
+        if partner_ids:
+            kwargs["partner_ids"] = self._get_allowed_message_partner_ids(partner_ids)
+        super()._message_update_content(message, **kwargs)
+
     def _check_can_update_message_content(self, message):
-        """ We don't call super in this override as we want to ignore the
-        mail.thread behavior completely """
+        # Don't call super in this override as we want to ignore the mail.thread behavior completely
         if not message.message_type == 'comment':
             raise UserError(_("Only messages type comment can have their content updated on model 'discuss.channel'"))
 
@@ -736,9 +1082,28 @@ class Channel(models.Model):
         return attachments
 
     def _message_subscribe(self, partner_ids=None, subtype_ids=None, customer_ids=None):
-        """ Do not allow follower subscription on channels. Only members are
-        considered. """
+        # Do not allow follower subscription on channels. Only members are considered
         raise UserError(_('Adding followers on channels is not possible. Consider adding members instead.'))
+
+    def _should_invite_members_to_join_call(self):
+        self.ensure_one()
+        return len(self.rtc_session_ids) == 1 and self.channel_type != "channel"
+
+    def _get_access_action(self, access_uid=None, force_website=False):
+        """ Redirect to Discuss instead of form view. """
+        self.ensure_one()
+        if not self.env.user._is_internal() or force_website:
+            return {
+                "type": "ir.actions.act_url",
+                "url": f"/discuss/channel/{self.id}",
+                "target": "self",
+                "target_type": "public",
+            }
+        return {
+            "type": "ir.actions.act_url",
+            "url": f"/odoo/action-mail.action_discuss?active_id={self.id}",
+            "target": "self",
+        }
 
     # ------------------------------------------------------------
     # BROADCAST
@@ -750,13 +1115,10 @@ class Channel(models.Model):
             :param partner_ids : the partner to notify
         """
         for partner in self.env['res.partner'].browse(partner_ids):
-            user_id = partner.user_ids and partner.user_ids[0] or False
-            if user_id:
-                user_channels = self.with_user(user_id).with_context(
-                    # sudo: res.company - context is required by ir.rules
-                    allowed_company_ids=user_id.sudo().company_ids.ids
-                )
-                partner._bus_send_store(user_channels)
+            if user := partner.main_user_id:
+                Store(bus_channel=user).add(
+                    self.with_user(user).with_context(allowed_company_ids=[]),
+                ).bus_send()
 
     # ------------------------------------------------------------
     # INSTANT MESSAGING API
@@ -790,7 +1152,7 @@ class Channel(models.Model):
                             (fields.Datetime.now() if pinned else None, message_to_update.id))
         message_to_update.invalidate_recordset(['pinned_at'])
 
-        self._bus_send_store(message_to_update, {"pinned_at": message_to_update.pinned_at})
+        Store(bus_channel=self).add(message_to_update, "pinned_at").bus_send()
         if pinned:
             notification_text = '''
                 <div data-oe-type="pin" class="o_mail_notification">
@@ -801,7 +1163,7 @@ class Channel(models.Model):
             notification = Markup(notification_text) % {
                 'user_pinned_a_message_to_this_channel': Markup('<a href="#" data-oe-type="highlight" data-oe-id="%s">%s</a>') % (
                     message_id,
-                    _('%(user_name)s pinned a message to this channel.', user_name=self.env.user.display_name),
+                    _('%(user_name)s pinned a message to this channel.', user_name=self.self_member_id._get_html_link_title()),
                 ),
                 'see_all_pins': _('See all pinned messages.'),
             }
@@ -814,19 +1176,29 @@ class Channel(models.Model):
         if member:
             return member
         if not self.env.user._is_public():
-            return self.add_members(partner_ids=self.env.user.partner_id.ids)
+            return self._add_members(users=self.env.user)
         guest = self.env["mail.guest"]._get_guest_from_context()
         if guest:
-            return self.add_members(guest_ids=guest.ids)
+            return self._add_members(guests=guest)
         return self.env["discuss.channel.member"]
 
-    def _find_or_create_persona_for_channel(self, guest_name, timezone, country_code, post_joined_message=True):
+    def _find_or_create_persona_for_channel(
+        self,
+        guest_name,
+        timezone,
+        country_code,
+        create_member_params=None,
+        post_joined_message=True,
+    ):
         """
-        :param channel: channel to add the persona to
         :param guest_name: name of the persona
         :param post_joined_message: whether to post a message to the channel
             to notify that the persona joined
-        :return tuple(partner, guest):
+
+        :param dict create_member_params: optional parameters to pass to the
+            channel member create function.
+
+        :rtype: tuple[partner, guest]
         """
         self.ensure_one()
         guest = self.env["mail.guest"]
@@ -834,21 +1206,16 @@ class Channel(models.Model):
         if member:
             return member.partner_id, member.guest_id
         if not self.env.user._is_public():
-            self.add_members([self.env.user.partner_id.id], post_joined_message=post_joined_message)
+            self._add_members(users=self.env.user, post_joined_message=post_joined_message)
         else:
-            guest = self.env["mail.guest"]._get_guest_from_context()
-            if not guest:
-                guest = self.env["mail.guest"].create(
-                    {
-                        "country_id": self.env["res.country"].search([("code", "=", country_code)]).id,
-                        "lang": get_lang(self.env).code,
-                        "name": guest_name,
-                        "timezone": timezone,
-                    }
-                ).sudo(False)
-                guest._set_auth_cookie()
-                self = self.with_context(guest=guest)
-            self.add_members(guest_ids=guest.ids, post_joined_message=post_joined_message)
+            guest = guest._get_or_create_guest(
+                guest_name=guest_name, country_code=country_code, timezone=timezone
+            )
+            self.with_context(guest=guest)._add_members(
+                guests=guest,
+                create_member_params=create_member_params,
+                post_joined_message=post_joined_message,
+            )
         return self.env.user.partner_id if not guest else self.env["res.partner"], guest
 
     @api.model
@@ -863,176 +1230,182 @@ class Channel(models.Model):
         channels += self.env["discuss.channel"].search(pinned_member_domain)
         return channels
 
-    def _channel_basic_info(self):
-        self.ensure_one()
-        data = self._read_format(
-            [
-                "allow_public_upload",
-                "channel_type",
-                "create_uid",
-                "description",
-                "last_interest_dt",
-                "name",
-                "uuid",
-            ],
-            load=False,
-        )[0]
-        data["authorizedGroupFullName"] = self.group_public_id.full_name
-        data["avatarCacheKey"] = self.avatar_cache_key
-        data["defaultDisplayMode"] = self.default_display_mode
-        data["group_based_subscription"] = bool(self.group_ids)
-        data["memberCount"] = self.member_count
-        return data
+    def _to_store_defaults(self, target: Store.Target):
+        # As the method uses partial recordsets with filtered (that lose the prefetch ids) it is
+        # best to prefetch these computed fields once to avoid doing partial queries multiple times,
+        # especially because these 2 fields are used in ACL too.
+        self.fetch(["is_member", "self_member_id"])
+        # Avoid sending potentially a lot of members for big channels: exclude chat and other small
+        # channels from this optimization because they are assumed to be smaller and it's important
+        # to know the member list for them.
+        channels_with_all_members = self.filtered(
+            lambda channel: channel.channel_type not in self._lazy_load_members_channel_types(),
+        )
+        all_members = (
+            self.self_member_id
+            | self.invited_member_ids
+            # sudo: discuss.channel - reading sessions of accessible channel is acceptable
+            | self.sudo().rtc_session_ids.channel_member_id
+            | channels_with_all_members.channel_member_ids
+            | self.channel_name_member_ids
+        )
+        # Prefetch all members at once. The first field accessed on a member will be channel_id
+        # (in _to_store_defaults of livechat), but the field is known for some of the members
+        # (through inverse of channels_with_all_members.channel_member_ids), so the ORM will only
+        # prefetch all fields for members with unknown channel_id. The following line force a
+        # single fetch for all fields of all members.
+        all_members.mapped("create_date")  # any field in table will do except channel_id
+        # prefetch in batch, including nested relations (member, guest, ...)
+        Store(bus_channel=target.channel, bus_subchannel=target.subchannel).add(all_members)
+        res = [
+            Store.Attr("avatar_cache_key", predicate=is_channel_or_group),
+            "channel_type",
+            "create_uid",
+            Store.Many(
+                "channel_member_ids",
+                only_data=True,
+                sort="id",
+                predicate=lambda channel: channel in channels_with_all_members,
+            ),
+            "default_display_mode",
+            Store.Attr("description", predicate=is_channel_or_group),
+            Store.One("from_message_id", predicate=is_channel_or_group),
+            Store.Many("group_ids", [], predicate=is_channel, sudo=True),  # sudo: we are reading only the ids (comodel is inaccessible)
+            Store.One("group_public_id", ["full_name"], predicate=is_channel),
+            Store.Many(
+                "invited_member_ids",
+                [
+                    Store.One("channel_id", [], as_thread=True),
+                    *self.env["discuss.channel.member"]._to_store_persona("avatar_card"),
+                ],
+                mode="ADD",
+            ),
+            "last_interest_dt",
+            "member_count",
+            "name",
+            Store.Many(
+                "channel_name_member_ids",
+                sort="id",
+                predicate=lambda c: c.channel_type in self._member_based_naming_channel_types(),
+            ),
+            Store.One("parent_channel_id", predicate=is_channel_or_group),
+            # sudo: discuss.channel: reading sessions of accessible channel is acceptable
+            Store.Many(
+                "rtc_session_ids",
+                mode="ADD",
+                extra_fields=self.sudo().rtc_session_ids._get_store_extra_fields(),
+                sudo=True,
+            ),
+            "uuid",
+        ]
+        if target.is_current_user(self.env):
+            # sudo: bus.bus: reading non-sensitive last id
+            bus_last_id = self.env["bus.bus"].sudo()._bus_last_id()
+            res = res + [
+                {"fetchChannelInfoState": "fetched"},
+                "is_editable",
+                "message_needaction_counter",
+                {"message_needaction_counter_bus_id": bus_last_id},
+                Store.One(
+                    "self_member_id",
+                    extra_fields=[
+                        "custom_channel_name",
+                        "custom_notifications",
+                        "last_interest_dt",
+                        "message_unread_counter",
+                        {"message_unread_counter_bus_id": bus_last_id},
+                        "mute_until_dt",
+                        "new_message_separator",
+                        # sudo: discuss.channel.rtc.session - each member can see who is inviting them
+                        Store.One("rtc_inviting_session_id", sudo=True),
+                        "unpin_dt",
+                    ],
+                    only_data=True,
+                ),
+            ]
+        return res
 
-    def _to_store(self, store: Store):
-        """Adds channel data to the given store."""
-        if not self:
-            return []
-        # sudo: bus.bus: reading non-sensitive last id
-        bus_last_id = self.env["bus.bus"].sudo()._bus_last_id()
-        current_partner, current_guest = self.env["res.partner"]._get_current_persona()
-        self.env['discuss.channel'].flush_model()
-        self.env['discuss.channel.member'].flush_model()
-        # Query instead of ORM for performance reasons: "LEFT JOIN" is more
-        # efficient than "id IN" for the cross-table condition between channel
-        # (for channel_type) and member (for other fields).
-        self.env.cr.execute("""
-                 SELECT discuss_channel_member.id
-                   FROM discuss_channel_member
-              LEFT JOIN discuss_channel
-                     ON discuss_channel.id = discuss_channel_member.channel_id
-                    AND discuss_channel.channel_type != 'channel'
-                  WHERE discuss_channel_member.channel_id in %(channel_ids)s
-                    AND (
-                        discuss_channel.id IS NOT NULL
-                     OR discuss_channel_member.rtc_inviting_session_id IS NOT NULL
-                     OR discuss_channel_member.partner_id = %(current_partner_id)s
-                     OR discuss_channel_member.guest_id = %(current_guest_id)s
-                    )
-               ORDER BY discuss_channel_member.id ASC
-        """, {'channel_ids': tuple(self.ids), 'current_partner_id': current_partner.id or None, 'current_guest_id': current_guest.id or None})
-        all_needed_members = self.env['discuss.channel.member'].browse([m['id'] for m in self.env.cr.dictfetchall()])
-        Store(all_needed_members)  # prefetch in batch
-        members_by_channel = defaultdict(lambda: self.env['discuss.channel.member'])
-        invited_members_by_channel = defaultdict(lambda: self.env['discuss.channel.member'])
-        member_of_current_user_by_channel = defaultdict(lambda: self.env['discuss.channel.member'])
-        for member in all_needed_members:
-            members_by_channel[member.channel_id] += member
-            if member.rtc_inviting_session_id:
-                invited_members_by_channel[member.channel_id] += member
-            if (current_partner and member.partner_id == current_partner) or (current_guest and member.guest_id == current_guest):
-                member_of_current_user_by_channel[member.channel_id] = member
-        for channel in self:
-            member = member_of_current_user_by_channel.get(channel, self.env['discuss.channel.member']).with_prefetch([m.id for m in member_of_current_user_by_channel.values()])
-            info = channel._channel_basic_info()
-            info["is_editable"] = channel.is_editable
-            info["fetchChannelInfoState"] = "fetched"
-            info["parent_channel_id"] = Store.one(channel.parent_channel_id)
-            info["from_message_id"] = Store.one(channel.from_message_id)
-            info["group_public_id"] = channel.group_public_id.id or False
-            # find the channel member state
-            if current_partner or current_guest:
-                info['message_needaction_counter'] = channel.message_needaction_counter
-                info["message_needaction_counter_bus_id"] = bus_last_id
-                if member:
-                    store.add(
-                        member,
-                        extra_fields={
-                            "last_interest_dt": True,
-                            "message_unread_counter": True,
-                            "message_unread_counter_bus_id": bus_last_id,
-                            "new_message_separator": True
-                        },
-                    )
-                    info['state'] = member.fold_state or 'closed'
-                    info['custom_notifications'] = member.custom_notifications
-                    info['mute_until_dt'] = fields.Datetime.to_string(member.mute_until_dt)
-                    info['custom_channel_name'] = member.custom_channel_name
-                    info['is_pinned'] = member.is_pinned
-                    if member.rtc_inviting_session_id:
-                        # sudo: discuss.channel.rtc.session - reading sessions of accessible channel is acceptable
-                        info["rtcInvitingSession"] = Store.one(member.rtc_inviting_session_id.sudo())
-            # add members info
-            if channel.channel_type != 'channel':
-                # avoid sending potentially a lot of members for big channels
-                # exclude chat and other small channels from this optimization because they are
-                # assumed to be smaller and it's important to know the member list for them
-                store.add(members_by_channel[channel] - member)
-            # add RTC sessions info
-            invited_members = invited_members_by_channel[channel]
-            info["invitedMembers"] = Store.many(
-                invited_members, "ADD", fields={"channel": [], "persona": ["name", "im_status"]}
-            )
-            # sudo: discuss.channel.rtc.session - reading sessions of accessible channel is acceptable
-            info["rtcSessions"] = Store.many(channel.sudo().rtc_session_ids, "ADD", extra=True)
-            store.add(channel, info)
+    def _to_store(self, store: Store, fields):
+        store.add_records_fields(self, fields)
 
     # User methods
+
     @api.model
-    @api.returns('self', lambda channels: Store(channels).get_result())
-    def channel_get(self, partners_to, pin=True, force_open=False):
+    def _get_or_create_chat(self, partners_to, pin=True):
         """ Get the canonical private channel between some partners, create it if needed.
             To reuse an old channel (conversation), this one must be private, and contains
             only the given partners.
             :param partners_to : list of res.partner ids to add to the conversation
             :param pin : True if getting the channel should pin it for the current user
-            :param force_open : True if getting the channel should open it for the current user
             :returns: channel_info of the created or existing channel
             :rtype: dict
         """
-        if self.env.user.partner_id.id not in partners_to:
-            partners_to.append(self.env.user.partner_id.id)
-        if len(partners_to) > 2:
+        partners = (
+            self.env["res.partner"]
+            .with_context(active_test=False)
+            .search([("id", "in", partners_to)])
+        ) | self.env.user.partner_id
+        if len(partners) > 2:
             raise UserError(_("A chat should not be created with more than 2 persons. Create a group instead."))
         # determine type according to the number of partner in the channel
         self.flush_model()
         self.env['discuss.channel.member'].flush_model()
-        self.env.cr.execute("""
+        self.env.cr.execute(
+            SQL(
+                """
             SELECT M.channel_id
             FROM discuss_channel C, discuss_channel_member M
             WHERE M.channel_id = C.id
-                AND M.partner_id IN %s
+                AND M.partner_id IN %(partner_ids)s
                 AND C.channel_type LIKE 'chat'
                 AND NOT EXISTS (
                     SELECT 1
                     FROM discuss_channel_member M2
                     WHERE M2.channel_id = C.id
-                        AND M2.partner_id NOT IN %s
+                        AND M2.partner_id NOT IN %(partner_ids)s
                 )
             GROUP BY M.channel_id
-            HAVING ARRAY_AGG(DISTINCT M.partner_id ORDER BY M.partner_id) = %s
+            HAVING ARRAY_AGG(DISTINCT M.partner_id ORDER BY M.partner_id) = %(sorted_partner_ids)s
             LIMIT 1
-        """, (tuple(partners_to), tuple(partners_to), sorted(list(partners_to)),))
+                """,
+                partner_ids=tuple(partners.ids),
+                sorted_partner_ids=sorted(partners.ids),
+            )
+        )
         result = self.env.cr.dictfetchall()
+        # use the same "now" in the whole function to ensure unpin_dt > last_interest_dt
+        now = fields.Datetime.now()
+        last_interest_dt = now - timedelta(seconds=1)
         if result:
             # get the existing channel between the given partners
             channel = self.browse(result[0].get('channel_id'))
             # pin or open the channel for the current partner
-            if pin or force_open:
-                member = self.env['discuss.channel.member'].search([('partner_id', '=', self.env.user.partner_id.id), ('channel_id', '=', channel.id)])
-                vals = {'last_interest_dt': fields.Datetime.now()}
-                if pin:
-                    vals['unpin_dt'] = False
-                if force_open:
-                    vals['fold_state'] = "open"
-                member.write(vals)
+            if pin:
+                channel.self_member_id.write(
+                    {"last_interest_dt": last_interest_dt, "unpin_dt": False}
+                )
             channel._broadcast(self.env.user.partner_id.ids)
         else:
             # create a new one
-            channel = self.create({
-                'channel_member_ids': [
-                    Command.create({
-                        'partner_id': partner_id,
-                        # only pin for the current user, so the chat does not show up for the correspondent until a message has been sent
-                        # manually set the last_interest_dt to make sure that it works well with the default last_interest_dt (datetime.now())
-                        'unpin_dt': False if partner_id == self.env.user.partner_id.id else fields.Datetime.now(),
-                        'last_interest_dt': fields.Datetime.now() if partner_id == self.env.user.partner_id.id else fields.Datetime.now() - timedelta(seconds=30),
-                    }) for partner_id in partners_to
-                ],
-                'channel_type': 'chat',
-                'name': ', '.join(self.env['res.partner'].browse(partners_to).mapped('name')),
-            })
-            channel._broadcast(partners_to)
+            channel = self.create(
+                {
+                    "channel_member_ids": [
+                        Command.create(
+                            {
+                                "last_interest_dt": last_interest_dt,
+                                "partner_id": partner.id,
+                                # only pin for the current user, so the chat does not show up for the correspondent until a message has been sent
+                                "unpin_dt": False if partner == self.env.user.partner_id else now,
+                            }
+                        )
+                        for partner in partners
+                    ],
+                    "channel_type": "chat",
+                    "last_interest_dt": last_interest_dt,
+                    "name": ", ".join(partners.mapped("name")),
+                }
+            )
+            channel._broadcast(partners.ids)
         return channel
 
     def channel_pin(self, pinned=False):
@@ -1041,15 +1414,37 @@ class Channel(models.Model):
             [('partner_id', '=', self.env.user.partner_id.id), ('channel_id', '=', self.id), ('is_pinned', '!=', pinned)])
         if member:
             member.write({'unpin_dt': False if pinned else fields.Datetime.now()})
+        store = Store(bus_channel=self.env.user)
         if not pinned:
-            self.env.user._bus_send("discuss.channel/unpin", {"id": self.id})
+            store.add(self, {"close_chat_window": True})
         else:
-            self.env.user._bus_send_store(self)
+            store.add(self)
+        store.bus_send()
+
+    def _allow_invite_by_email(self):
+        return self.channel_type == "group" or (
+            self.channel_type == "channel" and not self.group_public_id
+        )
 
     def _types_allowing_seen_infos(self):
         """ Return the channel types which allow sending seen infos notification
         on the channel """
         return ["chat", "group"]
+
+    def _types_allowing_unfollow(self):
+        """ Return the channel types which allow leaving the channel, channel will be unpinned
+        otherwise """
+        return ["channel", "group"]
+
+    def _member_based_naming_channel_types(self):
+        """ Return the channel types that use member-based naming,
+            specifically the `channel_name_member_ids` field.
+        """
+        return ["group"]
+
+    def _lazy_load_members_channel_types(self):
+        """ Return the channel types that load members lazily. """
+        return ["channel", "group"]
 
     def channel_fetched(self):
         """ Broadcast the channel_fetched notification to channel members
@@ -1090,13 +1485,17 @@ class Channel(models.Model):
 
     def channel_set_custom_name(self, name):
         self.ensure_one()
-        member = self.env['discuss.channel.member'].search([('partner_id', '=', self.env.user.partner_id.id), ('channel_id', '=', self.id)])
-        member.write({'custom_channel_name': name})
-        member._bus_send_store(self, {"custom_channel_name": name})
+        self.self_member_id.custom_channel_name = name
+        Store(bus_channel=self.self_member_id._bus_channel()).add(
+            self.self_member_id,
+            "custom_channel_name",
+        ).bus_send()
 
     def channel_rename(self, name):
         self.ensure_one()
         self.write({'name': name})
+        body = Markup('<div data-oe-type="channel_rename" class="o_mail_notification">%s</div>') % name
+        self.message_post(body=body, message_type="notification", subtype_xmlid="mail.mt_comment")
 
     def channel_change_description(self, description):
         self.ensure_one()
@@ -1106,11 +1505,10 @@ class Channel(models.Model):
         """Shortcut to add the current user as member of self channels.
         Prefer calling add_members() directly when possible.
         """
-        self.add_members(self.env.user.partner_id.ids)
+        self._add_members(users=self.env.user)
 
     @api.model
-    @api.returns('self', lambda channels: Store(channels).get_result())
-    def channel_create(self, name, group_id):
+    def _create_channel(self, name, group_id):
         """ Create a channel and add the current partner, broadcast it (to make the user directly
             listen to it when polling)
             :param name : the name of the channel to create
@@ -1127,12 +1525,10 @@ class Channel(models.Model):
         new_channel.group_public_id = group.id if group else None
         notification = Markup('<div class="o_mail_notification">%s</div>') % _("created this channel.")
         new_channel.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment")
-        self.env.user._bus_send_store(new_channel)
         return new_channel
 
     @api.model
-    @api.returns('self', lambda channels: Store(channels).get_result())
-    def create_group(self, partners_to, default_display_mode=False, name=''):
+    def _create_group(self, partners_to, default_display_mode=False, name=''):
         """ Creates a group channel.
 
             :param partners_to : list of res.partner ids to add to the conversation
@@ -1141,7 +1537,7 @@ class Channel(models.Model):
             :returns: channel_info of the created channel
             :rtype: dict
         """
-        partners_to = set(partners_to)
+        partners_to = OrderedSet(partners_to)
         channel = self.create({
             'channel_member_ids': [Command.create({'partner_id': partner_id}) for partner_id in partners_to],
             'channel_type': 'group',
@@ -1156,20 +1552,26 @@ class Channel(models.Model):
         message = self.env["mail.message"]
         if from_message_id:
             message = self.env["mail.message"].search([("id", "=", from_message_id)])
+        if not name:
+            name = self.env._("New Thread")
+            if message:
+                if message._filter_empty():
+                    name = self.env._("This message has been removed")
+                elif stripped := message.body and message.body.striptags():
+                    name = stripped[:30]
         sub_channel = self.create(
             {
-                "channel_member_ids": [Command.create({"partner_id": self.env.user.partner_id.id})],
-                "channel_type": "channel",
+                "channel_type": self.channel_type,
                 "from_message_id": message.id,
-                "name": name or (message.body.striptags()[:30] if message.body else _("New Thread")),
+                "name": name,
                 "parent_channel_id": self.id,
             }
         )
-        self.env.user.partner_id._bus_send_store(Store(sub_channel))
+        sub_channel.add_members(partner_ids=(self.env.user.partner_id | message.author_id).ids, post_joined_message=False)
         notification = (
             Markup('<div class="o_mail_notification">%s</div>')
             % _(
-                "%(user)s started a thread: %(goto)s%(thread_name)s%(goto_end)s. %(goto_all)sSee all threads%(goto_all_end)s."
+                "%(user)s started a thread: %(goto)s%(thread_name)s%(goto_end)s."
             )
         ) % {
             "user": self.env.user.display_name,
@@ -1178,8 +1580,6 @@ class Channel(models.Model):
             )
             % sub_channel.id,
             "goto_end": Markup("</a>"),
-            "goto_all": Markup("<a href='#' data-oe-type='sub-channels-menu'>"),
-            "goto_all_end": Markup("</a>"),
             "thread_name": sub_channel.name,
         }
         self.message_post(
@@ -1190,30 +1590,23 @@ class Channel(models.Model):
     @api.readonly
     @api.model
     def get_mention_suggestions(self, search, limit=8):
-        """ Return 'limit'-first channels' id, name, channel_type and authorizedGroupFullName fields such that the
+        """ Return 'limit'-first channels' name, channel_type and group_public_id fields such that the
             name matches a 'search' string. Exclude channels of type chat (DM) and group.
         """
-        domain = expression.AND([
-                        [('name', 'ilike', search)],
-                        [('channel_type', '=', 'channel')],
-                        [('channel_partner_ids', 'in', [self.env.user.partner_id.id])]
-                    ])
+        domain = [("name", "ilike", search), ("channel_type", "=", "channel")]
         channels = self.search(domain, limit=limit)
-        return [{
-            'authorizedGroupFullName': channel.group_public_id.full_name,
-            'channel_type': channel.channel_type,
-            'model': "discuss.channel",
-            'id': channel.id,
-            'name': channel.name,
-            'parent_channel_id': {
-                'id': channel.parent_channel_id.id,
-                'model': 'discuss.channel'
-            } if channel.parent_channel_id else False,
-        } for channel in channels]
+        channel_fields = [
+            "name",
+            "channel_type",
+            Store.One("group_public_id", ["full_name"]),
+            Store.One("parent_channel_id", [])
+        ]
+        store = Store().add(channels, channel_fields)
+        return store.get_result()
 
     def _get_last_messages(self):
         """ Return the last message for each of the given channels."""
-        if not self:
+        if not self.ids:
             return self.env["mail.message"]
         self.env['mail.message'].flush_model()
         self.env.cr.execute(
@@ -1236,16 +1629,12 @@ class Channel(models.Model):
         )
         return self.env["mail.message"].browse([mid for (mid,) in self.env.cr.fetchall() if mid])
 
-    def _load_more_members(self, known_member_ids):
-        self.ensure_one()
-        unknown_members = self.env['discuss.channel.member'].search(
-            domain=[('id', 'not in', known_member_ids), ('channel_id', '=', self.id)],
-            limit=100
-        )
-        count = self.env['discuss.channel.member'].search_count(
-            domain=[('channel_id', '=', self.id)],
-        )
-        return Store(unknown_members).add(self, {"memberCount": count}).get_result()
+    def _clean_empty_message(self, message):
+        super()._clean_empty_message(message)
+        message.parent_id = False
+
+    def _get_store_message_update_extra_fields(self):
+        return super()._get_store_message_update_extra_fields() + [Store.One("parent_id")]
 
     # ------------------------------------------------------------
     # COMMANDS
@@ -1262,15 +1651,13 @@ class Channel(models.Model):
             )
         else:
             if members := self.channel_member_ids.filtered(lambda m: not m.is_self):
+                member_names = html_escape(format_list(self.env, [f"%(member_{member.id})s" for member in members])) % {
+                    f"member_{member.id}": member._get_html_link(for_persona=True)
+                    for member in members
+                }
                 msg = _(
                     "You are in a private conversation with %(member_names)s.",
-                    member_names=html_escape(
-                        format_list(self.env, [f"%(member_{member.id})s" for member in members])
-                    )
-                    % {
-                        f"member_{member.id}": member._get_html_link(for_persona=True)
-                        for member in members
-                    },
+                    member_names=member_names,
                 )
             else:
                 msg = _("You are alone in a private conversation.")
@@ -1283,7 +1670,8 @@ class Channel(models.Model):
             "%(new_line)sType %(bold_start)s@username%(bold_end)s to mention someone, and grab their attention."
             "%(new_line)sType %(bold_start)s#channel%(bold_end)s to mention a channel."
             "%(new_line)sType %(bold_start)s/command%(bold_end)s to execute a command."
-            "%(new_line)sType %(bold_start)s:shortcut%(bold_end)s to insert a canned response in your message.",
+            "%(new_line)sType %(bold_start)s::shortcut%(bold_end)s to insert a canned response in your message."
+            "%(new_line)sType %(bold_start)s:emoji:%(bold_end)s to insert an emoji in your message.",
             bold_start=Markup("<b>"),
             bold_end=Markup("</b>"),
             new_line=Markup("<br>"),
@@ -1291,7 +1679,7 @@ class Channel(models.Model):
         return msg
 
     def execute_command_leave(self, **kwargs):
-        if self.channel_type in ('channel', 'group'):
+        if self.channel_type in self._types_allowing_unfollow():
             self.action_unfollow()
         else:
             self.channel_pin(False)
@@ -1304,13 +1692,13 @@ class Channel(models.Model):
                 list_params.append(_("more"))
             else:
                 list_params.append(_("you"))
+            member_names = html_escape(format_list(self.env, list_params)) % {
+                f"member_{member.id}": member._get_html_link(for_persona=True)
+                for member in members
+            }
             msg = _(
                 "Users in this channel: %(members)s.",
-                members=html_escape(format_list(self.env, list_params))
-                % {
-                    f"member_{member.id}": member._get_html_link(for_persona=True)
-                    for member in members
-                },
+                members=member_names,
             )
         else:
             msg = _("You are alone in this channel.")

@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 import base64
+import functools
 import json
 import logging
 import os
@@ -7,23 +7,24 @@ import shutil
 import subprocess
 import tempfile
 import zipfile
+
 from contextlib import closing
+from datetime import datetime
 from xml.etree import ElementTree as ET
 
 import psycopg2
 from psycopg2.extensions import quote_ident
-from decorator import decorator
 from pytz import country_timezones
 
-import odoo
+import odoo.api
+import odoo.modules.neutralize
 import odoo.release
 import odoo.sql_db
 import odoo.tools
-from odoo import SUPERUSER_ID
 from odoo.exceptions import AccessDenied
 from odoo.release import version_info
 from odoo.sql_db import db_connect
-from odoo.tools import SQL
+from odoo.tools import osutil, SQL
 from odoo.tools.misc import exec_pg_environ, find_pg_tool
 
 _logger = logging.getLogger(__name__)
@@ -42,37 +43,35 @@ def database_identifier(cr, name: str) -> SQL:
     return SQL(name)
 
 
-def check_db_management_enabled(method):
-    def if_db_mgt_enabled(method, self, *args, **kwargs):
+def check_db_management_enabled(func, /):
+    @functools.wraps(func)
+    def if_db_mgt_enabled(*args, **kwargs):
         if not odoo.tools.config['list_db']:
             _logger.error('Database management functions blocked, admin disabled database listing')
             raise AccessDenied()
-        return method(self, *args, **kwargs)
-    return decorator(if_db_mgt_enabled, method)
+        return func(*args, **kwargs)
+    return if_db_mgt_enabled
 
-#----------------------------------------------------------
+# ----------------------------------------------------------
 # Master password required
-#----------------------------------------------------------
+# ----------------------------------------------------------
+
 
 def check_super(passwd):
     if passwd and odoo.tools.config.verify_admin_password(passwd):
         return True
     raise odoo.exceptions.AccessDenied()
 
-# This should be moved to odoo.modules.db, along side initialize().
-def _initialize_db(id, db_name, demo, lang, user_password, login='admin', country_code=None, phone=None):
-    try:
-        db = odoo.sql_db.db_connect(db_name)
-        with closing(db.cursor()) as cr:
-            # TODO this should be removed as it is done by Registry.new().
-            odoo.modules.db.initialize(cr)
-            odoo.tools.config['load_language'] = lang
-            cr.commit()
 
-        registry = odoo.modules.registry.Registry.new(db_name, demo, None, update_module=True)
+# This should be moved to odoo.modules.db, along side initialize().
+def _initialize_db(db_name, demo, lang, user_password, login='admin', country_code=None, phone=None):
+    try:
+        odoo.tools.config['load_language'] = lang
+
+        registry = odoo.modules.registry.Registry.new(db_name, update_module=True, new_db_demo=demo)
 
         with closing(registry.cursor()) as cr:
-            env = odoo.api.Environment(cr, SUPERUSER_ID, {})
+            env = odoo.api.Environment(cr, odoo.api.SUPERUSER_ID, {})
 
             if lang:
                 modules = env['ir.module.module'].search([('state', '=', 'installed')])
@@ -102,6 +101,30 @@ def _initialize_db(id, db_name, demo, lang, user_password, login='admin', countr
     except Exception as e:
         _logger.exception('CREATE DATABASE failed:')
 
+
+def _check_faketime_mode(db_name):
+    if os.getenv('ODOO_FAKETIME_TEST_MODE') and db_name in odoo.tools.config['db_name']:
+        try:
+            db = odoo.sql_db.db_connect(db_name)
+            with db.cursor() as cursor:
+                cursor.execute("SELECT (pg_catalog.now() AT TIME ZONE 'UTC');")
+                server_now = cursor.fetchone()[0]
+                time_offset = (datetime.now() - server_now).total_seconds()
+
+                cursor.execute("""
+                    CREATE OR REPLACE FUNCTION public.now()
+                        RETURNS timestamp with time zone AS $$
+                            SELECT pg_catalog.now() +  %s * interval '1 second';
+                        $$ LANGUAGE sql;
+                """, (int(time_offset), ))
+                cursor.execute("SELECT (now() AT TIME ZONE 'UTC');")
+                new_now = cursor.fetchone()[0]
+                _logger.info("Faketime mode, new cursor now is %s", new_now)
+                cursor.commit()
+        except psycopg2.Error as e:
+            _logger.warning("Unable to set fakedtimed NOW() : %s", e)
+
+
 def _create_empty_database(name):
     db = odoo.sql_db.db_connect('postgres')
     with closing(db.cursor()) as cr:
@@ -109,6 +132,7 @@ def _create_empty_database(name):
         cr.execute("SELECT datname FROM pg_database WHERE datname = %s",
                    (name,), log_exceptions=False)
         if cr.fetchall():
+            _check_faketime_mode(name)
             raise DatabaseExists("database %r already exists!" % (name,))
         else:
             # database-altering operations cannot be executed inside a transaction
@@ -139,6 +163,7 @@ def _create_empty_database(name):
                 cr.execute("ALTER FUNCTION unaccent(text) IMMUTABLE")
     except psycopg2.Error as e:
         _logger.warning("Unable to create PostgreSQL extensions : %s", e)
+    _check_faketime_mode(name)
 
     # restore legacy behaviour on pg15+
     try:
@@ -153,7 +178,7 @@ def exp_create_database(db_name, demo, lang, user_password='admin', login='admin
     """ Similar to exp_create but blocking."""
     _logger.info('Create database `%s`.', db_name)
     _create_empty_database(db_name)
-    _initialize_db(id, db_name, demo, lang, user_password, login, country_code, phone)
+    _initialize_db(db_name, demo, lang, user_password, login, country_code, phone)
     return True
 
 @check_db_management_enabled
@@ -174,7 +199,7 @@ def exp_duplicate_database(db_original_name, db_name, neutralize_database=False)
     registry = odoo.modules.registry.Registry.new(db_name)
     with registry.cursor() as cr:
         # if it's a copy of a database, force generation of a new dbuuid
-        env = odoo.api.Environment(cr, SUPERUSER_ID, {})
+        env = odoo.api.Environment(cr, odoo.api.SUPERUSER_ID, {})
         env['ir.config_parameter'].init(force=True)
         if neutralize_database:
             odoo.modules.neutralize.neutralize_database(cr)
@@ -251,20 +276,21 @@ def dump_db_manifest(cr):
     return manifest
 
 @check_db_management_enabled
-def dump_db(db_name, stream, backup_format='zip'):
+def dump_db(db_name, stream, backup_format='zip', with_filestore=True):
     """Dump database `db` into file-like object `stream` if stream is None
     return a file object with the dump """
 
-    _logger.info('DUMP DB: %s format %s', db_name, backup_format)
+    _logger.info('DUMP DB: %s format %s %s', db_name, backup_format, 'with filestore' if with_filestore else 'without filestore')
 
     cmd = [find_pg_tool('pg_dump'), '--no-owner', db_name]
     env = exec_pg_environ()
 
     if backup_format == 'zip':
         with tempfile.TemporaryDirectory() as dump_dir:
-            filestore = odoo.tools.config.filestore(db_name)
-            if os.path.exists(filestore):
-                shutil.copytree(filestore, os.path.join(dump_dir, 'filestore'))
+            if with_filestore:
+                filestore = odoo.tools.config.filestore(db_name)
+                if os.path.exists(filestore):
+                    shutil.copytree(filestore, os.path.join(dump_dir, 'filestore'))
             with open(os.path.join(dump_dir, 'manifest.json'), 'w') as fh:
                 db = odoo.sql_db.db_connect(db_name)
                 with db.cursor() as cr:
@@ -272,10 +298,10 @@ def dump_db(db_name, stream, backup_format='zip'):
             cmd.insert(-1, '--file=' + os.path.join(dump_dir, 'dump.sql'))
             subprocess.run(cmd, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, check=True)
             if stream:
-                odoo.tools.osutil.zip_dir(dump_dir, stream, include_dir=False, fnct_sort=lambda file_name: file_name != 'dump.sql')
+                osutil.zip_dir(dump_dir, stream, include_dir=False, fnct_sort=lambda file_name: file_name != 'dump.sql')
             else:
                 t=tempfile.TemporaryFile()
-                odoo.tools.osutil.zip_dir(dump_dir, t, include_dir=False, fnct_sort=lambda file_name: file_name != 'dump.sql')
+                osutil.zip_dir(dump_dir, t, include_dir=False, fnct_sort=lambda file_name: file_name != 'dump.sql')
                 t.seek(0)
                 return t
     else:
@@ -342,7 +368,7 @@ def restore_db(db, dump_file, copy=False, neutralize_database=False):
 
         registry = odoo.modules.registry.Registry.new(db)
         with registry.cursor() as cr:
-            env = odoo.api.Environment(cr, SUPERUSER_ID, {})
+            env = odoo.api.Environment(cr, odoo.api.SUPERUSER_ID, {})
             if copy:
                 # if it's a copy of a database, force generation of a new dbuuid
                 env['ir.config_parameter'].init(force=True)
@@ -388,8 +414,7 @@ def exp_change_admin_password(new_password):
 def exp_migrate_databases(databases):
     for db in databases:
         _logger.info('migrate database %s', db)
-        odoo.tools.config['update']['base'] = True
-        odoo.modules.registry.Registry.new(db, force_demo=False, update_module=True)
+        odoo.modules.registry.Registry.new(db, update_module=True, upgrade_modules={'base'})
     return True
 
 #----------------------------------------------------------
@@ -414,8 +439,7 @@ def list_dbs(force=False):
         # In case --db-filter is not provided and --database is passed, Odoo will not
         # fetch the list of databases available on the postgres server and instead will
         # use the value of --database as comma seperated list of exposed databases.
-        res = sorted(db.strip() for db in odoo.tools.config['db_name'].split(','))
-        return res
+        return sorted(odoo.tools.config['db_name'])
 
     chosen_template = odoo.tools.config['db_template']
     templates_list = tuple({'postgres', chosen_template})
@@ -466,7 +490,7 @@ def exp_list_lang():
 
 def exp_list_countries():
     list_countries = []
-    root = ET.parse(os.path.join(odoo.tools.config['root_path'], 'addons/base/data/res_country_data.xml')).getroot()
+    root = ET.parse(os.path.join(odoo.tools.config.root_path, 'addons/base/data/res_country_data.xml')).getroot()
     for country in root.find('data').findall('record[@model="res.country"]'):
         name = country.find('field[@name="name"]').text
         code = country.find('field[@name="code"]').text

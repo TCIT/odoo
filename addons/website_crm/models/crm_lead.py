@@ -4,7 +4,7 @@
 from odoo import api, fields, models
 
 
-class Lead(models.Model):
+class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
     visitor_ids = fields.Many2many('website.visitor', string="Web Visitors")
@@ -39,12 +39,16 @@ class Lead(models.Model):
         return action
 
     def _merge_get_fields_specific(self):
-        fields_info = super(Lead, self)._merge_get_fields_specific()
+        fields_info = super()._merge_get_fields_specific()
         # add all the visitors from all lead to merge
         fields_info['visitor_ids'] = lambda fname, leads: [(6, 0, leads.visitor_ids.ids)]
         return fields_info
 
     def website_form_input_filter(self, request, values):
+        if 'partner_id' in values:
+            values.pop('email_from', None)
+            values.pop('phone', None)
+
         values['medium_id'] = values.get('medium_id') or \
                               self.sudo().default_get(['medium_id']).get('medium_id') or \
                               self.env['utm.medium']._fetch_or_create_utm_medium('website').id

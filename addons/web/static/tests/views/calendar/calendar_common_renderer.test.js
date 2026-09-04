@@ -1,6 +1,6 @@
 import { beforeEach, expect, test } from "@odoo/hoot";
 import { queryAllTexts, queryFirst, queryRect } from "@odoo/hoot-dom";
-import { runAllTimers } from "@odoo/hoot-mock";
+import { runAllTimers, mockTimeZone } from "@odoo/hoot-mock";
 import { mockService, mountWithCleanup, preloadBundle } from "@web/../tests/web_test_helpers";
 import {
     DEFAULT_DATE,
@@ -11,13 +11,16 @@ import {
 } from "./calendar_test_helpers";
 
 import { CalendarCommonRenderer } from "@web/views/calendar/calendar_common/calendar_common_renderer";
+import { CallbackRecorder } from "@web/search/action_hook";
 
 const FAKE_PROPS = {
     model: FAKE_MODEL,
     createRecord() {},
     deleteRecord() {},
     editRecord() {},
-    displayName: "Plop",
+    callbackRecorder: new CallbackRecorder(),
+    onSquareSelection() {},
+    cleanSquareSelection() {},
 };
 
 async function start(props = {}, target) {
@@ -143,6 +146,35 @@ test(`Week: check dates`, async () => {
     ]);
 });
 
+test("Week: check dates across a DST transition happening at local midnight (Africa/Cairo)", async () => {
+    // Egypt springs its clock forward from 00:00 to 01:00 on the last Friday of
+    // April, so "midnight" doesn't exist as a local time that day. This used to
+    // make FullCalendar's Luxon timezone plugin resolve that day's header to the
+    // previous day (duplicating its weekday name).
+    mockTimeZone("Africa/Cairo");
+    await start({ model: { ...FAKE_MODEL, scale: "week", date: luxon.DateTime.local(2027, 4, 25) } });
+
+    expect(`.fc-col-header-cell.fc-day`).toHaveCount(7);
+    expect(queryAllTexts(`.fc-col-header-cell .o_cw_day_name`)).toEqual([
+        "Sun",
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+    ]);
+    expect(queryAllTexts`.fc-col-header-cell .o_cw_day_number`).toEqual([
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "1",
+    ]);
+});
+
 test(`Day: automatically scroll to 6am`, async () => {
     await mountWithCleanup(`<div class="scrollable" style="height: 500px;"/>`);
     await start({ model: { ...FAKE_MODEL, scale: "day" } }, queryFirst(`.scrollable`));
@@ -159,4 +191,9 @@ test(`Week: automatically scroll to 6am`, async () => {
     const containerDimensions = queryRect(`.fc-scrollgrid-section-liquid .fc-scroller`);
     const dayStartDimensions = queryRect(`.fc-timegrid-slot[data-time="06:00:00"]:eq(0)`);
     expect(Math.abs(dayStartDimensions.y - containerDimensions.y)).toBeLessThan(2);
+});
+
+test("Month: remove row when no day of current month", async () => {
+    await start({ model: { ...FAKE_MODEL, scale: "month" } });
+    expect(".fc-day-other, .fc-day-disabled").toHaveCount(4);
 });

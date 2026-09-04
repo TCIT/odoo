@@ -65,7 +65,7 @@ class UserInputSession(http.Controller):
         # Note that at this stage survey.session_state can be False meaning that the survey has ended (session closed)
         return request.render('survey.user_input_session_manage', self._prepare_manage_session_values(survey))
 
-    @http.route('/survey/session/next_question/<string:survey_token>', type='json', auth='user', website=True)
+    @http.route('/survey/session/next_question/<string:survey_token>', type='jsonrpc', auth='user', website=True)
     def survey_session_next_question(self, survey_token, go_back=False, **kwargs):
         """ This route is called when the host goes to the next question of the session.
 
@@ -120,7 +120,7 @@ class UserInputSession(http.Controller):
         else:
             return {}
 
-    @http.route('/survey/session/results/<string:survey_token>', type='json', auth='user', website=True)
+    @http.route('/survey/session/results/<string:survey_token>', type='jsonrpc', auth='user', website=True)
     def survey_session_results(self, survey_token, **kwargs):
         """ This route is called when the host shows the current question's results.
 
@@ -141,7 +141,7 @@ class UserInputSession(http.Controller):
 
         return self._prepare_question_results_values(survey, user_input_lines)
 
-    @http.route('/survey/session/leaderboard/<string:survey_token>', type='json', auth='user', website=True)
+    @http.route('/survey/session/leaderboard/<string:survey_token>', type='jsonrpc', auth='user', website=True)
     def survey_session_leaderboard(self, survey_token, **kwargs):
         """ This route is called when the host shows the current question's attendees leaderboard.
 
@@ -182,7 +182,7 @@ class UserInputSession(http.Controller):
                                   dict(**survey_error, session_code=session_code))
         return request.redirect(survey.get_start_url())
 
-    @http.route('/survey/check_session_code/<string:session_code>', type='json', auth='public', website=True)
+    @http.route('/survey/check_session_code/<string:session_code>', type='jsonrpc', auth='public', website=True)
     def survey_check_session_code(self, session_code):
         """ Checks if the given code is matching a survey session_code.
         If yes, redirect to /s/code route.
@@ -206,6 +206,14 @@ class UserInputSession(http.Controller):
             'is_session_closed': not survey.session_state,
         }
 
+        if is_last_question:
+            _, triggered_questions_by_answer = survey._get_conditional_maps()
+            next_question = survey.session_question_id
+            values['survey_last_triggering_answers'] = [
+                answer.id for answer in triggered_questions_by_answer
+                if answer in next_question.suggested_answer_ids and any(q.sequence > next_question.sequence for q in triggered_questions_by_answer[answer])
+            ]
+
         values.update(self._prepare_question_results_values(survey, request.env['survey.user_input.line']))
 
         return values
@@ -224,9 +232,14 @@ class UserInputSession(http.Controller):
           (and not the id or anything else we can identify).
           In other words, we need to know if the answer at index 2 is correct or not.
         - answer_count
-          The number of answers to the current question. """
+          The number of answers to the current question.
+        - selected_answers
+          The current question selected answers.
+        """
 
         question = survey.session_question_id
+        if not question:
+            return {}
         answers_validity = []
         if (any(answer.is_correct for answer in question.suggested_answer_ids)):
             answers_validity = [answer.is_correct for answer in question.suggested_answer_ids]
@@ -248,4 +261,5 @@ class UserInputSession(http.Controller):
             'answers_validity': json.dumps(answers_validity),
             'answer_count': survey.session_question_answer_count,
             'attendees_count': survey.session_answer_count,
+            'selected_answers': user_input_lines.suggested_answer_id.ids,
         }

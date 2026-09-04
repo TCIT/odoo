@@ -4,18 +4,24 @@ from collections import defaultdict
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools.sql import column_exists, create_column, drop_index, index_exists
+from odoo.tools.sql import column_exists, create_column
 
 
 class AccountMove(models.Model):
-
     _inherit = "account.move"
 
-    _sql_constraints = [(
-        'unique_name', "", "Another entry with the same name already exists.",
-    ), (
-        'unique_name_latam', "", "Another entry with the same name already exists.",
-    )]
+    _unique_name = models.UniqueIndex(
+        "(name, journal_id)"
+        " WHERE (state = 'posted' AND name != '/'"
+        " AND (l10n_latam_document_type_id IS NULL OR move_type NOT IN ('in_invoice', 'in_refund', 'in_receipt')))",
+        "Another entry with the same name already exists.",
+    )
+    _unique_name_latam = models.UniqueIndex(
+        "(name, commercial_partner_id, l10n_latam_document_type_id, company_id)"
+        " WHERE (state = 'posted' AND name != '/'"
+        " AND (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')))",
+        "Another entry with the same name already exists.",
+    )
 
     def _auto_init(self):
         # Skip the computation of the field `l10n_latam_document_type_id` at the module installation
@@ -47,28 +53,15 @@ class AccountMove(models.Model):
         # for a Chilian or Argentian company (`res.company`) before installing `l10n_cl` or `l10n_ar`.
         if not column_exists(self.env.cr, "account_move", "l10n_latam_document_type_id"):
             create_column(self.env.cr, "account_move", "l10n_latam_document_type_id", "int4")
-
-        if not index_exists(self.env.cr, "account_move_unique_name_latam"):
-            drop_index(self.env.cr, "account_move_unique_name", self._table)
-            self.env.cr.execute("""
-                CREATE UNIQUE INDEX account_move_unique_name
-                                 ON account_move(name, journal_id)
-                              WHERE (state = 'posted' AND name != '/'
-                                AND (l10n_latam_document_type_id IS NULL OR move_type NOT IN ('in_invoice', 'in_refund', 'in_receipt')));
-                CREATE UNIQUE INDEX account_move_unique_name_latam
-                                 ON account_move(name, commercial_partner_id, l10n_latam_document_type_id, company_id)
-                              WHERE (state = 'posted' AND name != '/'
-                                AND (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')));
-            """)
         return super()._auto_init()
 
     l10n_latam_available_document_type_ids = fields.Many2many('l10n_latam.document.type', compute='_compute_l10n_latam_available_document_types')
     l10n_latam_document_type_id = fields.Many2one(
-        'l10n_latam.document.type', string='Document Type', readonly=False, auto_join=True, index='btree_not_null', compute='_compute_l10n_latam_document_type', store=True)
+        'l10n_latam.document.type', string='Document Type', readonly=False, bypass_search_access=True, index='btree_not_null', compute='_compute_l10n_latam_document_type', store=True)
     l10n_latam_document_number = fields.Char(
         compute='_compute_l10n_latam_document_number', inverse='_inverse_l10n_latam_document_number',
         string='Document Number', readonly=False)
-    l10n_latam_use_documents = fields.Boolean(related='journal_id.l10n_latam_use_documents')
+    l10n_latam_use_documents = fields.Boolean(compute='_compute_l10n_latam_use_documents', search='_search_l10n_latam_use_documents')
     l10n_latam_manual_document_number = fields.Boolean(compute='_compute_l10n_latam_manual_document_number', string='Manual Number')
     l10n_latam_document_type_id_code = fields.Char(related='l10n_latam_document_type_id.code', string='Doc Type')
 
@@ -80,8 +73,8 @@ class AccountMove(models.Model):
         * If move use document and are numbered manually do not compute name at all (will be set manually)
         * If move use document and is in draft state and has not been posted before we restart name to False (this is
            when we change the document type) """
-        without_doc_type = self.filtered(lambda x: x.journal_id.l10n_latam_use_documents and not x.l10n_latam_document_type_id)
-        manual_documents = self.filtered(lambda x: x.journal_id.l10n_latam_use_documents and x.l10n_latam_manual_document_number)
+        without_doc_type = self.filtered(lambda x: x.l10n_latam_use_documents and not x.l10n_latam_document_type_id)
+        manual_documents = self.filtered(lambda x: x.l10n_latam_use_documents and x.l10n_latam_manual_document_number)
         (without_doc_type + manual_documents.filtered(lambda x: not x.name)).name = False
         # we need to group moves by document type as _compute_name will apply the same name prefix of the first record to the others
         group_by_document_type = defaultdict(self.env['account.move'].browse)
@@ -91,7 +84,7 @@ class AccountMove(models.Model):
             super(AccountMove, group)._compute_name()
 
     def _compute_name_placeholder(self):
-        use_documents_moves = self.filtered(lambda m: m.journal_id.l10n_latam_use_documents)
+        use_documents_moves = self.filtered(lambda m: m.l10n_latam_use_documents)
         use_documents_moves.name_placeholder = False
         if other_moves := self - use_documents_moves:
             super(AccountMove, other_moves)._compute_name_placeholder()
@@ -99,7 +92,7 @@ class AccountMove(models.Model):
     @api.depends('l10n_latam_document_type_id', 'journal_id')
     def _compute_l10n_latam_manual_document_number(self):
         """ Indicates if this document type uses a sequence or if the numbering is made manually """
-        recs_with_journal_id = self.filtered(lambda x: x.journal_id and x.journal_id.l10n_latam_use_documents)
+        recs_with_journal_id = self.filtered(lambda x: x.journal_id and x.l10n_latam_use_documents)
         for rec in recs_with_journal_id:
             rec.l10n_latam_manual_document_number = rec._is_manual_document_number()
         remaining = self - recs_with_journal_id
@@ -107,6 +100,11 @@ class AccountMove(models.Model):
 
     def _is_manual_document_number(self):
         return self.journal_id.type == 'purchase'
+
+    @api.depends('journal_id')
+    def _compute_l10n_latam_use_documents(self):
+        for rec in self:
+            rec.l10n_latam_use_documents = rec.journal_id.l10n_latam_use_documents and rec.move_type != 'in_receipt'
 
     @api.depends('name')
     def _compute_l10n_latam_document_number(self):
@@ -120,13 +118,15 @@ class AccountMove(models.Model):
         remaining = self - recs_with_name
         remaining.l10n_latam_document_number = False
 
-    @api.onchange('l10n_latam_document_type_id', 'l10n_latam_document_number')
+    @api.onchange('l10n_latam_document_type_id', 'l10n_latam_document_number', 'partner_id')
     def _inverse_l10n_latam_document_number(self):
         for rec in self.filtered(lambda x: x.l10n_latam_document_type_id):
             if not rec.l10n_latam_document_number:
                 rec.name = False
             else:
-                l10n_latam_document_number = rec.l10n_latam_document_type_id._format_document_number(rec.l10n_latam_document_number)
+                l10n_latam_document_number = rec.l10n_latam_document_number
+                if not rec._skip_format_document_number():
+                    l10n_latam_document_number = rec.l10n_latam_document_type_id._format_document_number(rec.l10n_latam_document_number)
                 if rec.l10n_latam_document_number != l10n_latam_document_number:
                     rec.l10n_latam_document_number = l10n_latam_document_number
                 rec.name = "%s %s" % (rec.l10n_latam_document_type_id.doc_code_prefix, l10n_latam_document_number)
@@ -134,7 +134,7 @@ class AccountMove(models.Model):
     @api.onchange('l10n_latam_document_type_id')
     def _onchange_l10n_latam_document_type_id(self):
         # if we change document or journal and we are in draft and not posted, we clean number so that is recomputed
-        if (self.journal_id.l10n_latam_use_documents and self.l10n_latam_document_type_id
+        if (self.l10n_latam_use_documents and self.l10n_latam_document_type_id
               and not self.l10n_latam_manual_document_number and self.state == 'draft' and not self.posted_before):
             self.name = False
             self._compute_name()
@@ -151,8 +151,20 @@ class AccountMove(models.Model):
             return 'never'
         return super(AccountMove, self)._deduce_sequence_number_reset(name)
 
+    def _get_last_sequence_domain(self, relaxed=False):
+        no_anti_regex = False
+        if self.l10n_latam_use_documents:
+            no_anti_regex = True
+        where_string, param = super(AccountMove, self.with_context(no_anti_regex=no_anti_regex))._get_last_sequence_domain(relaxed)
+        return where_string, param
+
+    def _skip_format_document_number(self):
+        """Hook to be overridden in localisation"""
+        self.ensure_one()
+        return False
+
     def _get_starting_sequence(self):
-        if self.journal_id.l10n_latam_use_documents:
+        if self.l10n_latam_use_documents:
             if self.l10n_latam_document_type_id:
                 return "%s 00000000" % (self.l10n_latam_document_type_id.doc_code_prefix)
             # There was no pattern found, propose one
@@ -220,14 +232,22 @@ class AccountMove(models.Model):
     def _compute_l10n_latam_document_type(self):
         for rec in self.filtered(lambda x: x.state == 'draft' and (not x.posted_before if x.move_type in ['out_invoice', 'out_refund'] else True)):
             document_types = rec.l10n_latam_available_document_type_ids._origin
-            rec.l10n_latam_document_type_id = document_types and document_types[0].id
+            if rec.debit_origin_id:
+                document_types = document_types.filtered(lambda x: x.internal_type == 'debit_note')
+            if rec.l10n_latam_document_type_id not in document_types:
+                rec.l10n_latam_document_type_id = document_types and document_types[0].id
 
     def _compute_made_sequence_gap(self):
-        use_documents_moves = self.filtered(lambda m: m.journal_id.l10n_latam_use_documents)
+        use_documents_moves = self.filtered(lambda m: m.l10n_latam_use_documents)
         use_documents_moves.made_sequence_gap = False
         if other_moves := self - use_documents_moves:
             super(AccountMove, other_moves)._compute_made_sequence_gap()
 
     def _set_next_made_sequence_gap(self, made_gap: bool):
-        if other_moves := self.filtered(lambda m: not m.journal_id.l10n_latam_use_documents):
+        if other_moves := self.filtered(lambda m: not m.l10n_latam_use_documents):
             super(AccountMove, other_moves)._set_next_made_sequence_gap(made_gap)
+
+    def _search_l10n_latam_use_documents(self, operator, value):
+        if operator not in ('=', '!='):
+            return NotImplemented
+        return [('journal_id.l10n_latam_use_documents', operator, value), ('move_type', '!=', 'in_receipt')]

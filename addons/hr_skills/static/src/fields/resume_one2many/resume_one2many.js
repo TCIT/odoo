@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { onMounted, onPatched, useRef } from "@odoo/owl";
@@ -56,7 +54,7 @@ export class ResumeX2ManyField extends SkillsX2ManyField {
         ListRenderer: ResumeListRenderer,
     };
     getWizardTitleName() {
-        return _t("New Resume line");
+        return _t("New Resume Line");
     }
 }
 

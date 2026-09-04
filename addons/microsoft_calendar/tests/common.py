@@ -1,13 +1,19 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 import pytz
 from datetime import datetime, timedelta
 from markupsafe import Markup
 from unittest.mock import patch, MagicMock
+from contextlib import contextmanager
+from freezegun import freeze_time
 
 from odoo import fields
 
 from odoo.tests.common import HttpCase
+from odoo.tools import mute_logger
 
-from odoo.addons.microsoft_calendar.models.microsoft_sync import MicrosoftSync
+from odoo.addons.microsoft_calendar.models.microsoft_sync import MicrosoftCalendarSync
+
 
 def mock_get_token(user):
     return f"TOKEN_FOR_USER_{user.id}"
@@ -20,14 +26,14 @@ def _modified_date_in_the_future(event):
     return (event.write_date + timedelta(seconds=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 def patch_api(func):
-    @patch.object(MicrosoftSync, '_microsoft_insert', MagicMock())
-    @patch.object(MicrosoftSync, '_microsoft_delete', MagicMock())
-    @patch.object(MicrosoftSync, '_microsoft_patch', MagicMock())
+    @patch.object(MicrosoftCalendarSync, '_microsoft_insert', MagicMock())
+    @patch.object(MicrosoftCalendarSync, '_microsoft_delete', MagicMock())
+    @patch.object(MicrosoftCalendarSync, '_microsoft_patch', MagicMock())
     def patched(self, *args, **kwargs):
         return func(self, *args, **kwargs)
     return patched
 
-# By inheriting from TransactionCase, postcommit hooks (so methods tagged with `@after_commit` in MicrosoftSync),
+# By inheriting from TransactionCase, postcommit hooks (so methods tagged with `@after_commit` in MicrosoftCalendarSync),
 # are not called because no commit is done.
 # To be able to manually call these postcommit hooks, we need to inherit from HttpCase.
 # Note: as postcommit hooks are called separately, do not forget to invalidate cache for records read during the test.
@@ -36,6 +42,10 @@ class TestCommon(HttpCase):
     @patch_api
     def setUp(self):
         super(TestCommon, self).setUp()
+        m = mute_logger('odoo.addons.auth_signup.models.res_users')
+        mute_logger.__enter__(m)  # noqa: PLC2801
+        self.addCleanup(mute_logger.__exit__, m, None, None, None)
+
         self.env.user.unpause_microsoft_synchronization()
 
         # prepare users
@@ -115,11 +125,11 @@ class TestCommon(HttpCase):
             },
             "start": {
                 'dateTime': pytz.utc.localize(self.simple_event_values["start"]).isoformat(),
-                'timeZone': 'Europe/London'
+                'timeZone': 'UTC',
             },
             "end": {
                 'dateTime': pytz.utc.localize(self.simple_event_values["stop"]).isoformat(),
-                'timeZone': 'Europe/London'
+                'timeZone': 'UTC',
             },
             "isAllDay": False,
             "organizer": {
@@ -153,11 +163,11 @@ class TestCommon(HttpCase):
             },
             'start': {
                 'dateTime': self.start_date.strftime("%Y-%m-%dT%H:%M:%S+00:00"),
-                'timeZone': 'Europe/London'
+                'timeZone': 'UTC'
             },
             'end': {
                 'dateTime': self.end_date.strftime("%Y-%m-%dT%H:%M:%S+00:00"),
-                'timeZone': 'Europe/London'
+                'timeZone': 'UTC'
             },
             'isAllDay': False,
             'isOrganizer': True,
@@ -414,6 +424,17 @@ class TestCommon(HttpCase):
             for i in range(self.recurrent_events_count)
         ]
         self.env.cr.postcommit.clear()
+
+    @contextmanager
+    def mock_datetime_and_now(self, mock_dt):
+        """
+        Used when synchronization date (using env.cr.now()) is important
+        in addition to standard datetime mocks. Used mainly to detect sync
+        issues.
+        """
+        with freeze_time(mock_dt), \
+                patch.object(self.env.cr, 'now', lambda: mock_dt):
+            yield
 
     def sync_odoo_recurrences_with_outlook_feature(self):
         """

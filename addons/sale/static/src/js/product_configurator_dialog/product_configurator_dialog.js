@@ -1,8 +1,9 @@
-import { Component, onWillStart, useState, useSubEnv } from "@odoo/owl";
+import { Component, onMounted, onWillStart, onWillUnmount, useState, useSubEnv } from "@odoo/owl";
 import { Dialog } from '@web/core/dialog/dialog';
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { ProductList } from "../product_list/product_list";
+import { formatCurrency } from '@web/core/currency';
 
 export class ProductConfiguratorDialog extends Component {
     static components = { Dialog, ProductList};
@@ -23,7 +24,20 @@ export class ProductConfiguratorDialog extends Component {
         companyId: { type: Number, optional: true },
         pricelistId: { type: Number, optional: true },
         currencyId: { type: Number, optional: true },
+        selectedComboItems: {
+            type: Array,
+            element: Object,
+            shape: {
+                name: String,
+            },
+            optional: true,
+        },
         soDate: String,
+        size: {
+            type: String,
+            optional: true,
+            validate: (s) => ["sm", "md", "lg", "xl", "fs", "fullscreen"].includes(s),
+        },
         edit: { type: Boolean, optional: true },
         options: {
             type: Object,
@@ -32,6 +46,7 @@ export class ProductConfiguratorDialog extends Component {
                 canChangeVariant: { type: Boolean, optional: true },
                 showQuantity : { type: Boolean, optional: true },
                 showPrice : { type: Boolean, optional: true },
+                showPackaging: { type: Boolean, optional: true },
             },
         },
         save: Function,
@@ -62,10 +77,12 @@ export class ProductConfiguratorDialog extends Component {
             currency: this.currency,
             canChangeVariant: this.props.options?.canChangeVariant ?? true,
             showQuantity: this.props.options?.showQuantity ?? true,
+            showPackaging: this.props.options?.showPackaging ?? true,
             showPrice: this.props.options?.showPrice ?? true,
             addProduct: this._addProduct.bind(this),
             removeProduct: this._removeProduct.bind(this),
             setQuantity: this._setQuantity.bind(this),
+            setUoM: this._setUnitOfMeasure.bind(this),
             updateProductTemplateSelectedPTAV: this._updateProductTemplateSelectedPTAV.bind(this),
             updatePTAVCustomValue: this._updatePTAVCustomValue.bind(this),
             isPossibleCombination: this._isPossibleCombination,
@@ -77,6 +94,13 @@ export class ProductConfiguratorDialog extends Component {
                 optional_products,
                 currency_id,
             } = await this._loadData(this.props.edit);
+
+            // If the product configurator is opened after the combo configurator (which happens if
+            // a combo product has optional products), `_loadData` will return a single product
+            // (i.e. the combo product), which should be linked to the previously selected combo
+            // items.
+            products[0].selectedComboItems = this.props.selectedComboItems || [];
+
             this.state.products = products;
             this.state.optionalProducts = optional_products;
             for (const customPtav of this.props.customPtavs) {
@@ -90,6 +114,26 @@ export class ProductConfiguratorDialog extends Component {
             // Use the currency id retrieved from the server if none was provided in the props.
             this.currency.id ??= currency_id;
         });
+
+        onMounted(() => this.env.bus.trigger("FORM-CONTROLLER:FORM-IN-DIALOG:ADD"));
+        onWillUnmount(() => this.env.bus.trigger("FORM-CONTROLLER:FORM-IN-DIALOG:REMOVE"));
+    }
+
+    get totalMessage() {
+        return _t("Total: %s", this.getFormattedTotal());
+    }
+
+    /**
+    * Return the total of the product in the list, in the currency of the `sale.order`.
+    *
+    * @return {String} - The sum of all items in the list, in the currency of the `sale.order`.
+    */
+    getFormattedTotal() {
+        const total = (this.state.products || []).reduce(
+            (sum, product) => sum + product.price * product.quantity,
+            0
+        );
+        return formatCurrency(total, this.currency.id);
     }
 
     //--------------------------------------------------------------------------
@@ -107,6 +151,7 @@ export class ProductConfiguratorDialog extends Component {
             pricelist_id: this.props.pricelistId,
             ptav_ids: this.props.ptavIds,
             only_main_product: onlyMainProduct,
+            show_packaging: this.env.showPackaging,
             ...this._getAdditionalRpcParams(),
         });
     }
@@ -118,14 +163,14 @@ export class ProductConfiguratorDialog extends Component {
         });
     }
 
-    async _updateCombination(product, quantity) {
+    async _updateCombination(product, quantity, uomId) {
         return rpc(this.updateCombinationUrl, {
             product_template_id: product.product_tmpl_id,
             ptav_ids: this._getCombination(product),
             currency_id: this.currency.id,
             so_date: this.props.soDate,
             quantity: quantity,
-            product_uom_id: this.props.productUOMId,
+            product_uom_id: uomId,
             company_id: this.props.companyId,
             pricelist_id: this.props.pricelistId,
             ...this._getAdditionalRpcParams(),
@@ -222,10 +267,42 @@ export class ProductConfiguratorDialog extends Component {
         if (product.quantity === quantity) {
             return false;
         }
-        const { price } = await this._updateCombination(product, quantity);
         product.quantity = quantity;
+        const { price } = await this._updateCombination(product, quantity, product.uom.id);
         product.price = parseFloat(price);
+
         return true;
+    }
+
+    /**
+     * Set the uom of the product to a given value.
+     *
+     * @param {Number} productTmplId - The product template id, as a `product.template` id.
+     * @param {Number} uomId - The new uom of the product, as an `uom.uom` id.
+     *
+     * @return {Boolean} - Whether the uom was updated.
+     */
+    async _setUnitOfMeasure(productTmplId, uomId) {
+        const product = this._findProduct(productTmplId);
+        if (product.uom.id === uomId) {
+            return false;
+        }
+        const combination = await this._updateCombination(product, product.quantity, uomId);
+        this._handleUnitOfMeasureUpdate(product, combination, uomId);
+
+        return true;
+    }
+
+    /**
+     * Apply the update after changing the product uom.
+     *
+     * @param {Object} product - The product for which the uom was changed.
+     * @param {Object} combination - The result of the `_updateCombination`.
+     * @param {Number} uomId - The new uom of the product, as an `uom.uom` id.
+     */
+    _handleUnitOfMeasureUpdate(product, combination, uomId) {
+        product.price = parseFloat(combination.price);
+        product.uom = product.available_uoms.find((uom) => uom.id === uomId);
     }
 
     /**
@@ -251,7 +328,7 @@ export class ProductConfiguratorDialog extends Component {
         }
         this._checkExclusions(product);
         if (this._isPossibleCombination(product)) {
-            const updatedValues = await this._updateCombination(product, product.quantity);
+            const updatedValues = await this._updateCombination(product, product.quantity, product.uom.id);
             Object.assign(product, updatedValues);
             // When a combination should exist but was deleted from the database, it should not be
             // selectable and considered as an exclusion.

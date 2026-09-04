@@ -1,24 +1,42 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* resource
-# 
+# * resource
+#
 # Translators:
-# Wil Odoo, 2024
-# Rasareeyar Lappiam, 2024
-# 
+# Martin Trigaux, 2022
+# Wichanon Jamwutthipreecha, 2022
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Nusara Boonma <nuboo@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Rasareeyar Lappiam, 2024\n"
-"Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-05 22:26+0000\n"
+"Last-Translator: Nusara Boonma <nuboo@odoo.com>\n"
+"Language-Team: Thai <https://translate.odoo.com/projects/odoo-19/resource/"
+"th/>\n"
+"Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: th\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_tree
+msgid "# Work Resources"
+msgstr "# ทรัพยากรในการทำงาน"
+
+#. module: resource
+#. odoo-python
+#: code:addons/resource/models/resource_calendar_attendance.py:0
+msgid ""
+"%(att)s is a break attendance, You should not have such record on duration "
+"based calendar"
+msgstr ""
 
 #. module: resource
 #. odoo-python
@@ -29,18 +47,33 @@ msgstr "%s (สำเนา)"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "2 Week's Calendar"
+msgstr ""
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "<span class=\"ms-1\">%</span>"
+msgstr ""
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "<span class=\"ms-2\">hours/day</span>"
+msgstr ""
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "<span class=\"ms-2\">hours/week</span>"
+msgstr ""
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
 msgid "<span class=\"o_stat_text\">Time Off</span>"
 msgstr "<span class=\"o_stat_text\">การลา</span>"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
-msgid "<span class=\"o_stat_text\">Work Resources</span>"
-msgstr "<span class=\"o_stat_text\">ทรัพยากรการทำงาน</span>"
-
-#. module: resource
-#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
-msgid "<span> hours/week</span>"
-msgstr "<span>ชั่วโมง/สัปดาห์</span>"
+msgid "<span>hours/week</span>"
+msgstr ""
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__active
@@ -67,8 +100,7 @@ msgid ""
 "Are you sure you want to switch to a 1-week calendar? All work entries will "
 "be lost."
 msgstr ""
-"คุณแน่ใจหรือไม่ว่าต้องการเปลี่ยนไปใช้ปฏิทินแบบ 1 สัปดาห์ "
-"รายการงานทั้งหมดจะหายไป"
+"คุณแน่ใจหรือไม่ว่าต้องการเปลี่ยนไปใช้ปฏิทินแบบ 1 สัปดาห์ รายการงานทั้งหมดจะหายไป"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
@@ -76,8 +108,13 @@ msgid ""
 "Are you sure you want to switch to a 2-week calendar? All work entries will "
 "be lost."
 msgstr ""
-"คุณแน่ใจหรือไม่ว่าต้องการเปลี่ยนไปใช้ปฏิทินแบบ 2 สัปดาห์ "
-"รายการงานทั้งหมดจะหายไป"
+"คุณแน่ใจหรือไม่ว่าต้องการเปลี่ยนไปใช้ปฏิทินแบบ 2 สัปดาห์ รายการงานทั้งหมดจะหายไป"
+
+#. module: resource
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__duration_based
+#: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__duration_based
+msgid "Attendance based on duration"
+msgstr ""
 
 #. module: resource
 #. odoo-python
@@ -102,6 +139,11 @@ msgid ""
 msgstr "ชั่วโมงเฉลี่ยต่อวันที่ทรัพยากรควรจะทำงานกับปฏิทินนี้"
 
 #. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Avg"
+msgstr "เฉลี่ย"
+
+#. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__day_period__lunch
 msgid "Break"
 msgstr "เบรก"
@@ -111,6 +153,15 @@ msgstr "เบรก"
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__two_weeks_calendar
 msgid "Calendar in 2 weeks mode"
 msgstr "ปฏิทินในโหมด 2 สัปดาห์"
+
+#. module: resource
+#: model:ir.model.fields,help:resource.field_resource_calendar__schedule_type
+msgid ""
+"Choose which level of definition you want to define on your Schedule\n"
+"- Flexible : Define an amount of hours to work on the week.\n"
+"- Fully Fixed : define the days, periods and the start & end time for each "
+"period of the day"
+msgstr ""
 
 #. module: resource
 #: model:ir.actions.act_window,name:resource.resource_calendar_closing_days
@@ -133,9 +184,9 @@ msgid "Company"
 msgstr "บริษัท"
 
 #. module: resource
-#: model:ir.model.fields,field_description:resource.field_resource_calendar__full_time_required_hours
-msgid "Company Full Time"
-msgstr "บริษัทเต็มเวลา"
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Confirm"
+msgstr "ยืนยัน"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__create_uid
@@ -175,6 +226,11 @@ msgid "Default Working Hours"
 msgstr "ชั่วโมงการทำงานเริ่มต้น"
 
 #. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Define Amount of Hours per day"
+msgstr ""
+
+#. module: resource
 #: model:ir.model.fields,help:resource.field_res_users__resource_calendar_id
 #: model:ir.model.fields,help:resource.field_resource_mixin__resource_calendar_id
 #: model:ir.model.fields,help:resource.field_resource_resource__calendar_id
@@ -182,8 +238,8 @@ msgid ""
 "Define the working schedule of the resource. If not set, the resource will "
 "have fully flexible working hours."
 msgstr ""
-"กำหนดตารางการทำงานของทรัพยากร หากไม่ได้กำหนดไว้ "
-"ทรัพยากรจะมีชั่วโมงการทำงานที่ยืดหยุ่นได้เต็มที่"
+"กำหนดตารางการทำงานของทรัพยากร หากไม่ได้กำหนดไว้ ทรัพยากรจะมีชั่วโมงการทำงานที่ยืดหยุ่นได้เต็"
+"มที่"
 
 #. module: resource
 #: model_terms:ir.actions.act_window,help:resource.action_resource_calendar_form
@@ -194,9 +250,12 @@ msgstr ""
 "กำหนดชั่วโมงทำงานและตารางเวลาที่สามารถกำหนดให้กับสมาชิกโปรเจ็กต์ของคุณได้"
 
 #. module: resource
+#: model:ir.model.fields,field_description:resource.field_res_company__display_name
+#: model:ir.model.fields,field_description:resource.field_res_users__display_name
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__display_name
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__display_name
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves__display_name
+#: model:ir.model.fields,field_description:resource.field_resource_mixin__display_name
 #: model:ir.model.fields,field_description:resource.field_resource_resource__display_name
 msgid "Display Name"
 msgstr "แสดงชื่อ"
@@ -227,7 +286,6 @@ msgid "Email"
 msgstr "อีเมล"
 
 #. module: resource
-#: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__date_to
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves__date_to
 msgid "End Date"
 msgstr "วันที่สิ้นสุด"
@@ -243,8 +301,7 @@ msgid ""
 "External user with limited access, created only for the purpose of sharing "
 "data."
 msgstr ""
-"ผู้ใช้ภายนอกที่มีการจำกัดการเข้าถึง "
-"สร้างขึ้นเพื่อวัตถุประสงค์ในการแบ่งปันข้อมูลเท่านั้น"
+"ผู้ใช้ภายนอกที่มีการจำกัดการเข้าถึง สร้างขึ้นเพื่อวัตถุประสงค์ในการแบ่งปันข้อมูลเท่านั้น"
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__week_type__0
@@ -256,6 +313,12 @@ msgstr "อันดับแรก"
 #: code:addons/resource/models/resource_calendar_attendance.py:0
 msgid "First week"
 msgstr "สัปดาห์แรก"
+
+#. module: resource
+#: model:ir.model.fields.selection,name:resource.selection__resource_calendar__schedule_type__flexible
+#: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_search
+msgid "Flexible"
+msgstr "ยืดหยุ่นได้"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__flexible_hours
@@ -286,6 +349,21 @@ msgid "Friday Morning"
 msgstr "ช่วงเช้าวันศุกร์"
 
 #. module: resource
+#: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__day_period__full_day
+msgid "Full Day"
+msgstr ""
+
+#. module: resource
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__full_time_required_hours
+msgid "Full Time Equivalent"
+msgstr ""
+
+#. module: resource
+#: model:ir.model.fields.selection,name:resource.selection__resource_calendar__schedule_type__fully_fixed
+msgid "Fully Fixed"
+msgstr ""
+
+#. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_resource_form
 msgid "Fully Flexible"
 msgstr "มีความยืดหยุ่นเต็มที่"
@@ -301,18 +379,12 @@ msgid "Global Time Off"
 msgstr "การลาหยุดสากล"
 
 #. module: resource
-#: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_leaves_search
-#: model_terms:ir.ui.view,arch_db:resource.view_resource_resource_search
-msgid "Group By"
-msgstr "กลุ่มโดย"
-
-#. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_attendance_form
 msgid "Hours"
 msgstr "ชั่วโมง"
 
 #. module: resource
-#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__hours_per_week
 msgid "Hours per Week"
 msgstr "ชั่วโมงต่อสัปดาห์"
 
@@ -323,12 +395,22 @@ msgid "Human"
 msgstr "มนุษย์"
 
 #. module: resource
+#: model:ir.model.fields,field_description:resource.field_res_company__id
+#: model:ir.model.fields,field_description:resource.field_res_users__id
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__id
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__id
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves__id
+#: model:ir.model.fields,field_description:resource.field_resource_mixin__id
 #: model:ir.model.fields,field_description:resource.field_resource_resource__id
 msgid "ID"
 msgstr "ไอดี"
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid ""
+"If checked, the working schedule will be based on an amount of hours "
+"(defined for each day) and not a start & end time anymore.Do you confirm ?"
+msgstr ""
 
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar_leaves__resource_id
@@ -336,8 +418,8 @@ msgid ""
 "If empty, this is a generic time off for the company. If a resource is set, "
 "the time off is only for this resource"
 msgstr ""
-"หากว่างเปล่า แสดงว่าเป็นวันหยุดทั่วไปของบริษัท หากมีการตั้งค่าทรัพยากร "
-"การลาหยุดจะมีไว้สำหรับทรัพยากรนี้เท่านั้น"
+"หากว่างเปล่า แสดงว่าเป็นวันหยุดทั่วไปของบริษัท หากมีการตั้งค่าทรัพยากร การลาหยุดจะมีไว้สำหรับทรัพ"
+"ยากรนี้เท่านั้น"
 
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_resource__active
@@ -345,8 +427,7 @@ msgid ""
 "If the active field is set to False, it will allow you to hide the resource "
 "record without removing it."
 msgstr ""
-"หากฟิลด์ที่ใช้งานอยู่ถูกตั้งค่าเป็น เท็จ "
-"ฟิลด์นี้จะอนุญาตให้คุณซ่อนการบันทึกทรัพยากรโดยไม่ต้องลบออก"
+"หากฟิลด์ที่ใช้งานอยู่ถูกตั้งค่าเป็น เท็จ ฟิลด์นี้จะอนุญาตให้คุณซ่อนการบันทึกทรัพยากรโดยไม่ต้องลบออก"
 
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar__active
@@ -354,8 +435,14 @@ msgid ""
 "If the active field is set to false, it will allow you to hide the Working "
 "Time without removing it."
 msgstr ""
-"หากฟิลด์ที่ใช้งานอยู่ถูกตั้งค่าเป็น False "
-"จะช่วยให้คุณสามารถซ่อนเวลาทำงานได้โดยไม่ต้องลบออก"
+"หากฟิลด์ที่ใช้งานอยู่ถูกตั้งค่าเป็น False จะช่วยให้คุณสามารถซ่อนเวลาทำงานได้โดยไม่ต้องลบออก"
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid ""
+"If unchecked, the working schedule will be based on a defined start and end "
+"hours.Do you confirm ?"
+msgstr ""
 
 #. module: resource
 #. odoo-python
@@ -363,6 +450,11 @@ msgstr ""
 msgid ""
 "In a calendar with 2 weeks mode, all periods need to be in the sections."
 msgstr "ในปฏิทินที่มีโหมด 2 สัปดาห์ ทุกช่วงเวลาจะต้องอยู่ในส่วนต่างๆ"
+
+#. module: resource
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__is_fulltime
+msgid "Is Full Time"
+msgstr "เป็นเต็มเวลา"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__write_uid
@@ -424,14 +516,18 @@ msgstr "ชื่อ"
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar__full_time_required_hours
 msgid ""
-"Number of hours to work on the company schedule to be considered as "
-"fulltime."
+"Number of hours to work on the company schedule to be considered as fulltime."
 msgstr "จำนวนชั่วโมงทำงานในบริษัทที่กำหนดให้ถือเป็นงานเต็มเวลา"
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_leaves__time_type__other
 msgid "Other"
 msgstr "อื่น ๆ"
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_search
+msgid "Partial working schedules"
+msgstr ""
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_leaves_search
@@ -442,6 +538,12 @@ msgstr "ช่วงเวลา"
 #: model:ir.model.fields,field_description:resource.field_resource_resource__phone
 msgid "Phone"
 msgstr "โทรศัพท์"
+
+#. module: resource
+#. odoo-python
+#: code:addons/resource/models/resource_calendar.py:0
+msgid "Provided datetimes needs to be timezoned"
+msgstr ""
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves__name
@@ -456,7 +558,11 @@ msgid "Related user name for the resource to manage its access."
 msgstr "ชื่อผู้ใช้ที่เกี่ยวข้องสำหรับทรัพยากรเพื่อจัดการการเข้าถึง"
 
 #. module: resource
-#: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__resource_id
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Required Full Time"
+msgstr ""
+
+#. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves__resource_id
 #: model:ir.model.fields,field_description:resource.field_resource_mixin__resource_id
 #: model:ir.ui.menu,name:resource.menu_resource_config
@@ -516,13 +622,23 @@ msgid ""
 "in a specific project phase. You can also set their efficiency level and "
 "workload based on their weekly working hours."
 msgstr ""
-"ทรัพยากรช่วยให้คุณสร้างและจัดการทรัพยากรที่ควรเกี่ยวข้องกับระยะโปรเจ็กต์เฉพาะได้"
-" คุณยังสามารถกำหนดระดับประสิทธิภาพและปริมาณงานตามเวลาทำงานรายสัปดาห์ได้"
+"ทรัพยากรช่วยให้คุณสร้างและจัดการทรัพยากรที่ควรเกี่ยวข้องกับระยะโปรเจ็กต์เฉพาะได้ คุณยังสามารถกำ"
+"หนดระดับประสิทธิภาพและปริมาณงานตามเวลาทำงานรายสัปดาห์ได้"
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__5
 msgid "Saturday"
 msgstr "วันเสาร์"
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_tree
+msgid "Schedule Total Time"
+msgstr ""
+
+#. module: resource
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__schedule_type
+msgid "Schedule Type"
+msgstr ""
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_resource_search
@@ -586,11 +702,6 @@ msgstr ""
 "ค่าเฉพาะของ 24:00 จะถูกตีความว่าเป็น 23:59:59.999999"
 
 #. module: resource
-#: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__date_from
-msgid "Starting Date"
-msgstr "วันที่เริ่ม"
-
-#. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_leaves_search
 msgid "Starting Date of Time Off"
 msgstr "วันที่เริ่มต้นของระบบการลา"
@@ -602,13 +713,28 @@ msgstr "วันอาทิตย์"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
-msgid "Switch to 1 week calendar"
-msgstr "เปลี่ยนเป็นปฏิทินแบบ 1 สัปดาห์"
+msgid "Switch"
+msgstr "สลับ"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
-msgid "Switch to 2 weeks calendar"
-msgstr "เปลี่ยนเป็นปฏิทินแบบ 2 สัปดาห์"
+msgid "Switch to 1-week calendar"
+msgstr ""
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Switch to 2-weeks calendar"
+msgstr ""
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Switch to Duration based attendance"
+msgstr ""
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Switch to fixed attendance"
+msgstr ""
 
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar_attendance__display_type
@@ -619,11 +745,16 @@ msgstr "ฟิลด์เทคนิคสำหรับ UX เป้าห�
 #. odoo-python
 #: code:addons/resource/models/resource_calendar.py:0
 msgid ""
-"The current week (from %(first_day)s to %(last_day)s) corresponds to week "
-"number %(number)s."
+"The current week (from %(first_day)s to %(last_day)s) corresponds to %"
+"(number)s week."
 msgstr ""
-"สัปดาห์ปัจจุบัน (ตั้งแต่ %(first_day)s ถึง %(last_day)s) "
-"สอดคล้องกับหมายเลขสัปดาห์ %(number)s"
+
+#. module: resource
+#: model:ir.model.fields,help:resource.field_resource_calendar__duration_based
+#: model:ir.model.fields,help:resource.field_resource_calendar_attendance__duration_based
+msgid ""
+"The hours will be centered around 12:00 to cover the duration for the day"
+msgstr ""
 
 #. module: resource
 #. odoo-python
@@ -648,10 +779,9 @@ msgid ""
 "the efficiency factor is 200%, however the expected duration will be 30 "
 "minutes."
 msgstr ""
-"ฟิลด์นี้ใช้เพื่อคำนวณระยะเวลาที่คาดไว้ของคำสั่งงานที่ศูนย์งานนี้ "
-"ตัวอย่างเช่น หากคำสั่งงานใช้เวลาหนึ่งชั่วโมงและปัจจัยด้านประสิทธิภาพคือ 100%"
-" ระยะเวลาที่คาดไว้จะเป็นหนึ่งชั่วโมง หากปัจจัยด้านประสิทธิภาพเท่ากับ 200% "
-"อย่างไรก็ตาม ระยะเวลาที่คาดไว้จะเท่ากับ 30 นาที"
+"ฟิลด์นี้ใช้เพื่อคำนวณระยะเวลาที่คาดไว้ของคำสั่งงานที่ศูนย์งานนี้ ตัวอย่างเช่น หากคำสั่งงานใช้เวลาหนึ่งชั่"
+"วโมงและปัจจัยด้านประสิทธิภาพคือ 100% ระยะเวลาที่คาดไว้จะเป็นหนึ่งชั่วโมง หากปัจจัยด้านประสิทธิภา"
+"พเท่ากับ 200% อย่างไรก็ตาม ระยะเวลาที่คาดไว้จะเท่ากับ 30 นาที"
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__3
@@ -711,6 +841,11 @@ msgid "Timezone offset"
 msgstr "โซนเวลาชดเชย"
 
 #. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Total"
+msgstr "รวม"
+
+#. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__1
 msgid "Tuesday"
 msgstr "วันอังคาร"
@@ -747,6 +882,12 @@ msgid "User"
 msgstr "ผู้ใช้"
 
 #. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+#: model_terms:ir.ui.view,arch_db:resource.resource_resource_form
+msgid "Visible to all"
+msgstr "มองเห็นได้ทุกคน"
+
+#. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__2
 msgid "Wednesday"
 msgstr "วันพุธ"
@@ -770,6 +911,16 @@ msgid "Wednesday Morning"
 msgstr "ช่วงเช้าวันพุธ"
 
 #. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Week 1 Working Hours"
+msgstr ""
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Week 2 Working Hours"
+msgstr ""
+
+#. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__week_type
 msgid "Week Number"
 msgstr "หมายเลขสัปดาห์"
@@ -780,14 +931,13 @@ msgid ""
 "When enabled, it will allow employees to work flexibly, without relying on "
 "the company's working schedule (working hours)."
 msgstr ""
-"เมื่อเปิดใช้งานแล้ว จะช่วยให้พนักงานทำงานได้อย่างยืดหยุ่น "
-"โดยไม่ต้องพึ่งพาตารางการทำงานของบริษัท (เวลาทำงาน)"
+"เมื่อเปิดใช้งานแล้ว จะช่วยให้พนักงานทำงานได้อย่างยืดหยุ่น โดยไม่ต้องพึ่งพาตารางการทำงานของบริษั"
+"ท (เวลาทำงาน)"
 
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar_leaves__time_type
 msgid ""
-"Whether this should be computed as a time off or as work time (eg: "
-"formation)"
+"Whether this should be computed as a time off or as work time (eg: formation)"
 msgstr "ไม่ว่าสิ่งนี้ควรคำนวณเป็นเวลาลางานหรือเป็นเวลาทำงาน (เช่น รูปแบบ)"
 
 #. module: resource
@@ -796,9 +946,32 @@ msgid "Work Detail"
 msgstr "รายละเอียดงาน"
 
 #. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Work Resources"
+msgstr ""
+
+#. module: resource
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__work_resources_count
+msgid "Work Resources count"
+msgstr ""
+
+#. module: resource
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__work_time_rate
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Work Time Rate"
+msgstr "อัตราเวลาทำงาน"
+
+#. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__hour_from
 msgid "Work from"
 msgstr "ทำงานจาก"
+
+#. module: resource
+#: model:ir.model.fields,help:resource.field_resource_calendar__work_time_rate
+msgid ""
+"Work time rate versus full time working schedule, should be between 0 and "
+"100 %."
+msgstr "อัตราเวลาทำงานเทียบกับตารางการทำงานเต็มเวลาควรอยู่ระหว่าง 0 ถึง 100%"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__hour_to
@@ -838,6 +1011,16 @@ msgid "Working Time"
 msgstr "เวลาทำงาน"
 
 #. module: resource
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__attendance_ids_1st_week
+msgid "Working Time 1st Week"
+msgstr ""
+
+#. module: resource
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__attendance_ids_2nd_week
+msgid "Working Time 2nd Week"
+msgstr ""
+
+#. module: resource
 #. odoo-python
 #: code:addons/resource/models/resource_calendar.py:0
 msgid "You can't delete section between weeks."
@@ -846,8 +1029,14 @@ msgstr "คุณไม่สามารถลบส่วนระหว่า
 #. module: resource
 #. odoo-python
 #: code:addons/resource/models/resource_calendar.py:0
-msgid "first"
-msgstr "แรก"
+msgid "even"
+msgstr ""
+
+#. module: resource
+#. odoo-python
+#: code:addons/resource/models/resource_calendar.py:0
+msgid "odd"
+msgstr ""
 
 #. module: resource
 #. odoo-python
@@ -857,12 +1046,15 @@ msgstr "สัปดาห์อื่น"
 
 #. module: resource
 #. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
-msgid "second"
-msgstr "วินาที"
-
-#. module: resource
-#. odoo-python
 #: code:addons/resource/models/resource_calendar_attendance.py:0
 msgid "this week"
 msgstr "สัปดาห์นี้"
+
+#~ msgid "Group By"
+#~ msgstr "กลุ่มโดย"
+
+#~ msgid "Starting Date"
+#~ msgstr "วันที่เริ่ม"
+
+#~ msgid "Working Times"
+#~ msgstr "เวลาทำงาน"

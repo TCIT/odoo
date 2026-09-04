@@ -1,49 +1,39 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* purchase_requisition
-# 
+# * purchase_requisition
+#
 # Translators:
-# eriiikgt, 2024
-# Susanna Pujol, 2024
-# Sandra Franch <sandra.franch@upc.edu>, 2024
-# jabiri7, 2024
-# Iván Infantes Castarnado, 2024
-# Óscar Fonseca <tecnico@pyming.com>, 2024
-# Albert Parera, 2024
-# Josep Anton Belchi, 2024
-# Cristian Cruz, 2024
-# Martin Trigaux, 2024
-# Quim - coopdevs <quim.rebull@coopdevs.org>, 2024
-# Manel Fernandez Ramirez <manelfera@outlook.com>, 2024
-# marcescu, 2024
-# Ivan Espinola, 2024
-# Arnau Ros, 2024
-# Xavier, 2024
-# Noemi Pla, 2025
-# 
+# eriiikgt, 2022
+# RGB Consulting <odoo@rgbconsulting.com>, 2022
+# Carles Antoli <carlesantoli@hotmail.com>, 2022
+# Susanna Pujol, 2022
+# Sandra Franch <sandra.franch@upc.edu>, 2022
+# marcescu, 2022
+# jabelchi, 2022
+# Martin Trigaux, 2022
+# Harcogourmet, 2022
+# Manel Fernandez Ramirez <manelfera@outlook.com>, 2022
+# Quim - eccit <quim@eccit.com>, 2022
+# Óscar Fonseca <tecnico@extreme-micro.com>, 2023
+# Ivan Espinola, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Noemi Pla, 2025\n"
-"Language-Team: Catalan (https://app.transifex.com/odoo/teams/41243/ca/)\n"
+"POT-Creation-Date: 2026-04-10 18:39+0000\n"
+"PO-Revision-Date: 2026-08-02 11:44+0000\n"
+"Last-Translator: \"Noemi Pla Garcia (nopl)\" <nopl@odoo.com>\n"
+"Language-Team: Catalan <https://translate.odoo.com/projects/odoo-19/"
+"purchase_requisition/ca/>\n"
+"Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ca\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "$50"
-msgstr "$50"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "$500"
-msgstr ""
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: purchase_requisition
 #: model:ir.actions.report,print_report_name:purchase_requisition.action_report_purchase_requisitions
@@ -51,34 +41,19 @@ msgid "'Purchase Agreement - %s' % (object.name)"
 msgstr "'Acord de compra - %s' % (object.name)"
 
 #. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "02/16/2024"
-msgstr ""
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "12/25/2024"
-msgstr ""
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "2023-09-15"
-msgstr ""
-
-#. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "<span><strong>From</strong></span>"
-msgstr ""
+msgstr "<span><strong>De</strong></span>"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "<span><strong>to</strong></span>"
-msgstr ""
+msgstr "<span><strong>to</strong></span>"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "<strong>Contact:</strong><br/>"
-msgstr ""
+msgstr "<strong>Contacte:</strong><br/>"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
@@ -119,6 +94,7 @@ msgstr "Icona de tipus d'activitat"
 #: model:ir.model.fields,field_description:purchase_requisition.field_product_supplierinfo__purchase_requisition_id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__requisition_id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__name
+#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_search_inherit
 msgid "Agreement"
 msgstr "Acord"
 
@@ -148,6 +124,12 @@ msgstr "PO alternatius"
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_form_inherit
 msgid "Alternative Purchase Order"
 msgstr "Ordre alternatiu de compra"
+
+#. module: purchase_requisition
+#. odoo-python
+#: code:addons/purchase_requisition/wizard/purchase_requisition_create_alternative.py:0
+msgid "Alternative Purchase Orders"
+msgstr ""
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_requisition_alternative_warning_form
@@ -229,17 +211,12 @@ msgid "Cancelled by the agreement associated to this quotation."
 msgstr "Cancel·lat per l'acord associat a aquest pressupost."
 
 #. module: purchase_requisition
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__product_uom_category_id
-msgid "Category"
-msgstr "Categoria"
-
-#. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_line_compare_tree
 msgid "Choose"
 msgstr "Tria"
 
 #. module: purchase_requisition
-#: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__partner_id
+#: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__partner_ids
 msgid "Choose a vendor for alternative PO"
 msgstr "Trieu un proveïdor per al PO alternatiu"
 
@@ -316,15 +293,6 @@ msgid "Confirmed"
 msgstr "Confirmat"
 
 #. module: purchase_requisition
-#: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_line__product_uom_category_id
-msgid ""
-"Conversion between Units of Measure can only occur if they belong to the "
-"same category. The conversion will be made based on the ratios."
-msgstr ""
-"La conversió entre les unitats de mesura només és possible si pertanyen a la"
-" mateixa categoria. La conversió es basarà en les ràtios establertes."
-
-#. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__copy_products
 msgid "Copy Products"
 msgstr "Copia productes"
@@ -338,9 +306,12 @@ msgstr "Crea una alternativa"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_form_inherit
 msgid ""
-"Create a call for tender by adding alternative requests for quotation to different vendors.\n"
-"                            Make your choice by selecting the best combination of lead time, OTD and/or total amount.\n"
-"                            By comparing product lines you can also decide to order some products from one vendor and others from another vendor."
+"Create a call for tender by adding alternative requests for quotation to "
+"different vendors.                                 Make your choice by "
+"selecting the best combination of lead time, OTD and/or total "
+"amount.                                 By comparing product lines you can "
+"also decide to order some products from one vendor and others from another "
+"vendor."
 msgstr ""
 
 #. module: purchase_requisition
@@ -366,11 +337,6 @@ msgstr "Creat per"
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__create_date
 msgid "Created on"
 msgstr "Creat el"
-
-#. module: purchase_requisition
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__creation_blocked
-msgid "Creation Blocked"
-msgstr "Creació bloquejada"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__currency_id
@@ -399,11 +365,16 @@ msgid "Discard"
 msgstr "Descartar"
 
 #. module: purchase_requisition
+#: model:ir.model.fields,field_description:purchase_requisition.field_product_product__display_name
+#: model:ir.model.fields,field_description:purchase_requisition.field_product_supplierinfo__display_name
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_group__display_name
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_line__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_alternative_warning__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__display_name
+#: model:ir.model.fields,field_description:purchase_requisition.field_res_config_settings__display_name
 msgid "Display Name"
 msgstr "Nom mostrat"
 
@@ -460,11 +431,14 @@ msgstr "Icona Font Awesome p.e. fa-tasks"
 #: model_terms:ir.actions.act_window,help:purchase_requisition.action_purchase_requisition
 msgid ""
 "For a blanket order, you can record an agreement for a specific period\n"
-"            (e.g. a year) and you order products within this agreement to benefit\n"
+"            (e.g. a year) and you order products within this agreement to "
+"benefit\n"
 "            from the negotiated prices."
 msgstr ""
-"Per a una comanda general, podeu registrar un acord per a un període específic\n"
-"            (p. ex. un any) i vostè demana productes dins d'aquest acord per beneficiar-se\n"
+"Per a una comanda general, podeu registrar un acord per a un període "
+"específic\n"
+"            (p. ex. un any) i vostè demana productes dins d'aquest acord per "
+"beneficiar-se\n"
 "            dels preus negociats."
 
 #. module: purchase_requisition
@@ -473,28 +447,21 @@ msgid "Future Activities"
 msgstr "Activitats futures"
 
 #. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
-msgid "Group By"
-msgstr "Agrupar per"
-
-#. module: purchase_requisition
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__has_alternatives
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_kpis_tree_inherit_purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_tree_inherit_purchase_requisition
-msgid "Has Alternatives"
-msgstr "Té alternatives"
-
-#. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__has_message
 msgid "Has Message"
 msgstr "Té un missatge"
 
 #. module: purchase_requisition
+#: model:ir.model.fields,field_description:purchase_requisition.field_product_product__id
+#: model:ir.model.fields,field_description:purchase_requisition.field_product_supplierinfo__id
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_group__id
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_line__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_alternative_warning__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__id
+#: model:ir.model.fields,field_description:purchase_requisition.field_res_config_settings__id
 msgid "ID"
 msgstr "ID"
 
@@ -511,8 +478,7 @@ msgstr "Icona que indica una activitat d'excepció."
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr ""
-"Si està marcat, hi ha nous missatges que requereixen la vostra atenció."
+msgstr "Si està marcat, hi ha nous missatges que requereixen la vostra atenció."
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__message_has_error
@@ -521,24 +487,10 @@ msgid "If checked, some messages have a delivery error."
 msgstr "Si està marcat, alguns missatges tenen un error d'entrega."
 
 #. module: purchase_requisition
-#: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__creation_blocked
-msgid ""
-"If the chosen vendor or if any of the products in the original PO have a "
-"blocking warning then we prevent creation of alternative PO. This is because"
-" normally these fields are cleared w/warning message within form view, but "
-"we cannot recreate that in this case."
-msgstr ""
-"Si el proveïdor triat o qualsevol dels productes del PO original tenen un "
-"avís de bloqueig, llavors s'evita la creació d'un PO alternatiu. Això es deu"
-" al fet que normalment aquests camps s'eliminen amb el missatge d'avís en la"
-" vista de formulari, però no podem recrear-ho en aquest cas."
-
-#. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__copy_products
 msgid ""
 "If this is checked, the product quantities of the original PO will be copied"
-msgstr ""
-"Si està marcada, es copiaran les quantitats de producte del PO original"
+msgstr "Si està marcada, es copiaran les quantitats de producte del PO original"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__message_is_follower
@@ -576,7 +528,7 @@ msgstr "Activitats endarrerides"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.res_config_settings_view_form_purchase_requisition
 msgid "Link RFQs together and compare them"
-msgstr ""
+msgstr "Vincula les sol·licituds de pressupost i compara-les"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_form_inherit
@@ -586,7 +538,7 @@ msgstr "Enllaç a l'RfQ existent"
 #. module: purchase_requisition
 #: model:res.groups,name:purchase_requisition.group_purchase_alternatives
 msgid "Manage Purchase Alternatives"
-msgstr ""
+msgstr "Gestionar les alternatives de compra"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__message_has_error
@@ -602,6 +554,11 @@ msgstr "Missatges"
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "Mitchell Admin"
 msgstr "Mitchell Admin"
+
+#. module: purchase_requisition
+#: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
+msgid "My Activities"
+msgstr "Les meves activitats"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__my_activity_date_deadline
@@ -729,11 +686,6 @@ msgid "Product"
 msgstr "Producte"
 
 #. module: purchase_requisition
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__product_uom_id
-msgid "Product Unit of Measure"
-msgstr "Unitat de mesura del producte"
-
-#. module: purchase_requisition
 #: model:ir.model,name:purchase_requisition.model_product_product
 msgid "Product Variant"
 msgstr "Variant de producte"
@@ -771,7 +723,7 @@ msgstr "Acords de compra"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_res_config_settings__group_purchase_alternatives
 msgid "Purchase Alternatives"
-msgstr ""
+msgstr "Alternatives de compra"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__purchase_group_id
@@ -797,11 +749,6 @@ msgstr "Línies de comanda de compra"
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__purchase_ids
 msgid "Purchase Orders"
 msgstr "Comandes de compra"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_search_inherit
-msgid "Purchase Orders with requisition"
-msgstr "Comandes de compra amb requisa"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
@@ -877,11 +824,6 @@ msgid "Request for Quotations"
 msgstr "Sol·licitud de citacions"
 
 #. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_search_inherit
-msgid "Requisition"
-msgstr "Requisició"
-
-#. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "Reset to Draft"
 msgstr "Restablir com a esborrany"
@@ -903,9 +845,9 @@ msgstr "Cerca acords de compra"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
-msgid "Show all records which has next action date is before today"
+msgid "Show all records whose next activity date is past"
 msgstr ""
-"Mostra tots els registres en que la data de següent acció és abans d'avui"
+"Mostrar tots els registres amb data de pròxima activitat anterior a l'actual"
 
 #. module: purchase_requisition
 #. odoo-python
@@ -919,13 +861,12 @@ msgstr "Alguns no netejats"
 msgid ""
 "Some quantities were not cleared because their status is not a RFQ status."
 msgstr ""
-"Algunes quantitats no es van esborrar perquè el seu estat no és un estat "
-"RFQ."
+"Algunes quantitats no es van esborrar perquè el seu estat no és un estat RFQ."
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__date_start
 msgid "Start Date"
-msgstr "Data inicial"
+msgstr "Data d'inici"
 
 #. module: purchase_requisition
 #: model_terms:ir.actions.act_window,help:purchase_requisition.action_purchase_requisition
@@ -970,24 +911,12 @@ msgstr "Model tècnic per a agrupar el PO per a la licitació"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "Terms and Conditions"
-msgstr "Termes i condicions "
+msgstr "Termes i condicions"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__origin_po_id
 msgid "The original PO that this alternative PO is being created for."
 msgstr "El PO original pel qual s'està creant aquest PO alternatiu."
-
-#. module: purchase_requisition
-#. odoo-python
-#: code:addons/purchase_requisition/wizard/purchase_requisition_create_alternative.py:0
-msgid ""
-"The vendor you have selected or at least one of the products you are copying"
-" from the original order has a blocking warning on it and cannot be selected"
-" to create an alternative."
-msgstr ""
-"El proveïdor que heu seleccionat o almenys un dels productes que esteu "
-"copiant de la comanda original té un avís de bloqueig i no es pot "
-"seleccionar per crear una alternativa."
 
 #. module: purchase_requisition
 #. odoo-python
@@ -1002,14 +931,8 @@ msgid ""
 "There is already an open blanket order for this supplier. We suggest you "
 "complete this open blanket order, instead of creating a new one."
 msgstr ""
-"Ja hi ha una comanda de manta oberta per a aquest proveïdor. Us suggerim que"
-" completeu aquesta comanda oberta, en lloc de crear-ne una de nova."
-
-#. module: purchase_requisition
-#. odoo-python
-#: code:addons/purchase_requisition/wizard/purchase_requisition_create_alternative.py:0
-msgid "This is a blocking warning!\n"
-msgstr "Això és un avís de bloqueig!\n"
+"Ja hi ha una comanda de manta oberta per a aquest proveïdor. Us suggerim que "
+"completeu aquesta comanda oberta, en lloc de crear-ne una de nova."
 
 #. module: purchase_requisition
 #. odoo-python
@@ -1017,7 +940,8 @@ msgstr "Això és un avís de bloqueig!\n"
 msgid ""
 "To close this purchase requisition, cancel related Requests for Quotation.\n"
 "\n"
-"Imagine the mess if someone confirms these duplicates: double the order, double the trouble :)"
+"Imagine the mess if someone confirms these duplicates: double the order, "
+"double the trouble :)"
 msgstr ""
 
 #. module: purchase_requisition
@@ -1037,6 +961,7 @@ msgid "Type of the exception activity on record."
 msgstr "Tipus d'activitat d'excepció registrada."
 
 #. module: purchase_requisition
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__product_uom_id
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "Unit"
 msgstr "Unitat de venda"
@@ -1048,16 +973,11 @@ msgid "Unit Price"
 msgstr "Preu un."
 
 #. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
-msgid "UoM"
-msgstr "UdM"
-
-#. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__vendor_id
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__partner_id
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__partner_ids
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_line_compare_tree
 msgid "Vendor"
-msgstr "Proveïdor "
+msgstr "Proveïdor"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__purchase_warn_msg
@@ -1107,15 +1027,6 @@ msgid "What about the alternative Requests for Quotations?"
 msgstr ""
 
 #. module: purchase_requisition
-#: model:ir.model.fields,help:purchase_requisition.field_purchase_order__has_alternatives
-msgid ""
-"Whether or not this purchase order is linked to another purchase order as an"
-" alternative."
-msgstr ""
-"Si aquesta comanda de compra està vinculada o no a una altra comanda de "
-"compra com a alternativa."
-
-#. module: purchase_requisition
 #: model:ir.model,name:purchase_requisition.model_purchase_requisition_alternative_warning
 msgid "Wizard in case PO still has open alternative requests for quotation"
 msgstr ""
@@ -1157,8 +1068,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/purchase_requisition/models/purchase_requisition.py:0
 msgid ""
-"You cannot confirm agreement '%(agreement)s' because it does not contain any"
-" product lines."
+"You cannot confirm agreement '%(agreement)s' because it does not contain any "
+"product lines."
 msgstr ""
 
 #. module: purchase_requisition
@@ -1173,3 +1084,268 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "e.g. PO0025"
 msgstr "p. ex. PO0025"
+
+#~ msgid "$50"
+#~ msgstr "$50"
+
+#~ msgid "$500"
+#~ msgstr "500 €"
+
+#~ msgid "02/16/2024"
+#~ msgstr "16/02/2024"
+
+#~ msgid "12/25/2024"
+#~ msgstr "25/12/2024"
+
+#~ msgid "2023-09-15"
+#~ msgstr "15-09-2023"
+
+#~ msgid "<strong>Agreement Deadline:</strong><br/>"
+#~ msgstr "<strong>Agreement Deadline:</strong><br/>"
+
+#~ msgid "<strong>Date</strong>"
+#~ msgstr "<strong>Data</strong>"
+
+#~ msgid "<strong>Description</strong>"
+#~ msgstr "<strong>Descripció</strong>"
+
+#~ msgid "<strong>Product UoM</strong>"
+#~ msgstr "<strong>UoM de producte</strong>"
+
+#~ msgid "<strong>Qty</strong>"
+#~ msgstr "<strong>Unt.</strong>"
+
+#~ msgid "<strong>Reference </strong>"
+#~ msgstr "<strong>Referència </strong>"
+
+#~ msgid "<strong>Scheduled Date</strong>"
+#~ msgstr "<strong>Data planificada</strong>"
+
+#~ msgid "<strong>Scheduled Ordering Date:</strong><br/>"
+#~ msgstr "<strong>Data de comanda prevista:</strong><br/>"
+
+#~ msgid "<strong>Source:</strong><br/>"
+#~ msgstr "<strong>Font:</strong><br/>"
+
+#~ msgid "<strong>Vendor </strong>"
+#~ msgstr "<strong>Proveïdor </strong>"
+
+#~ msgid "Agreement Deadline"
+#~ msgstr "Termini de l'acord"
+
+#~ msgid "Agreement Selection Type"
+#~ msgstr "Tipus de selecció d'acord"
+
+#~ msgid "Alternative Po Count"
+#~ msgstr "Comptador Po alternatiu"
+
+#~ msgid "Bid Selection"
+#~ msgstr "Selecció d'ofertes"
+
+#~ msgid "Category"
+#~ msgstr "Categoria"
+
+#~ msgid ""
+#~ "Conversion between Units of Measure can only occur if they belong to the "
+#~ "same category. The conversion will be made based on the ratios."
+#~ msgstr ""
+#~ "La conversió entre les unitats de mesura només és possible si pertanyen a "
+#~ "la mateixa categoria. La conversió es basarà en les ràtios establertes."
+
+#~ msgid ""
+#~ "Create a call for tender by adding alternative request for quotations to "
+#~ "different vendors.\n"
+#~ "                            Make your choice by selecting the best "
+#~ "combination of lead time, OTD and/or total amount.\n"
+#~ "                            By comparing product lines you can also "
+#~ "decide to order some products from one vendor and others from another "
+#~ "vendor."
+#~ msgstr ""
+#~ "Creeu una licitació afegint una petició alternativa de citacions a "
+#~ "diferents proveïdors.\n"
+#~ "                            Feu la vostra elecció seleccionant la millor "
+#~ "combinació de temps de lliurament, OTD i/o import total.\n"
+#~ "                            Comparant les línies de productes també podeu "
+#~ "decidir ordenar alguns productes d'un proveïdor i altres d'un altre "
+#~ "proveïdor."
+
+#~ msgid "Creation Blocked"
+#~ msgstr "Creació bloquejada"
+
+#~ msgid "Custom Description"
+#~ msgstr "Descripció personalitzada"
+
+#~ msgid "Data for new quotations"
+#~ msgstr "Dades per a noves cotitzacions"
+
+#~ msgid "Delivery Date"
+#~ msgstr "Data de lliurament"
+
+#~ msgid "Do not create RfQ lines automatically"
+#~ msgstr "No crear línies RfQ automàticament"
+
+#~ msgid "Group By"
+#~ msgstr "Agrupar per"
+
+#~ msgid "Has Alternatives"
+#~ msgstr "Té alternatives"
+
+#~ msgid ""
+#~ "If the chosen vendor or if any of the products in the original PO have a "
+#~ "blocking warning then we prevent creation of alternative PO. This is "
+#~ "because normally these fields are cleared w/warning message within form "
+#~ "view, but we cannot recreate that in this case."
+#~ msgstr ""
+#~ "Si el proveïdor triat o qualsevol dels productes del PO original tenen un "
+#~ "avís de bloqueig, llavors s'evita la creació d'un PO alternatiu. Això es "
+#~ "deu al fet que normalment aquests camps s'eliminen amb el missatge d'avís "
+#~ "en la vista de formulari, però no podem recrear-ho en aquest cas."
+
+#~ msgid "In negotiation"
+#~ msgstr "En la negociació"
+
+#~ msgid "Lines"
+#~ msgstr "Línies"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Nombre de missatges que requereixen una acció"
+
+#~ msgid "Ongoing"
+#~ msgstr "En marxa"
+
+#~ msgid "Ordered Quantities"
+#~ msgstr "Quantitats ordenades"
+
+#~ msgid "Price Unit"
+#~ msgstr "Unitat de preu"
+
+#~ msgid "Product Unit of Measure"
+#~ msgstr "Unitat de mesura del producte"
+
+#~ msgid "Purchase Agreement Types"
+#~ msgstr "Tipus d'acord de compra"
+
+#~ msgid "Purchase Orders with requisition"
+#~ msgstr "Comandes de compra amb requisa"
+
+#~ msgid "Purchase Requisition Type"
+#~ msgstr "Tipus de compra de compra"
+
+#~ msgid "Quantities"
+#~ msgstr "Quantitats"
+
+#~ msgid "Reference:"
+#~ msgstr "Referència:"
+
+#~ msgid "Requests for Quotation Details"
+#~ msgstr "Sol·licituds de detalls de pressupost"
+
+#~ msgid "Requisition"
+#~ msgstr "Requisició"
+
+#~ msgid "Scheduled Date"
+#~ msgstr "Data programada"
+
+#~ msgid "Select multiple RFQ (non-exclusive)"
+#~ msgstr "Selecciona múltiples RFQ (no exclusius)"
+
+#~ msgid "Select only one RFQ (exclusive)"
+#~ msgstr "Selecciona només un RFQ (exclusiu)"
+
+#~ msgid ""
+#~ "Select only one RFQ (exclusive):  when a purchase order is confirmed, "
+#~ "cancel the remaining purchase order.\n"
+#~ "\n"
+#~ "                    Select multiple RFQ (non-exclusive): allows multiple "
+#~ "purchase orders. On confirmation of a purchase order it does not cancel "
+#~ "the remaining orders"
+#~ msgstr ""
+#~ "Seleccioneu només un RFQ (exclusiu): quan es confirmi una comanda de "
+#~ "compra, cancel·leu la comanda de compra restant.\n"
+#~ "\n"
+#~ "                    Selecciona múltiples RFQ (no exclusius): permet "
+#~ "múltiples comandes de compra. En confirmar una ordre de compra no "
+#~ "cancel·la les comandes restants"
+
+#~ msgid "Sequence"
+#~ msgstr "Seqüència"
+
+#~ msgid ""
+#~ "Set active to false to hide the Purchase Agreement Types without removing "
+#~ "it."
+#~ msgstr ""
+#~ "Activeu-ho per a ocultar els tipus d'acord de compra sense eliminar-lo."
+
+#~ msgid "Set quantities manually"
+#~ msgstr "Estableix les quantitats manualment"
+
+#~ msgid "Show all records which has next action date is before today"
+#~ msgstr ""
+#~ "Mostra tots els registres en que la data de següent acció és abans d'avui"
+
+#~ msgid "Source Document"
+#~ msgstr "Document d'origen"
+
+#~ msgid "State Blanket Order"
+#~ msgstr "Ordre dels estats en blanc"
+
+#~ msgid ""
+#~ "The expected and scheduled delivery date where all the products are "
+#~ "received"
+#~ msgstr ""
+#~ "La data d'entrega prevista i programada on es reben tots els productes"
+
+#~ msgid ""
+#~ "The vendor you have selected or at least one of the products you are "
+#~ "copying from the original order has a blocking warning on it and cannot "
+#~ "be selected to create an alternative."
+#~ msgstr ""
+#~ "El proveïdor que heu seleccionat o almenys un dels productes que esteu "
+#~ "copiant de la comanda original té un avís de bloqueig i no es pot "
+#~ "seleccionar per crear una alternativa."
+
+#~ msgid "This is a blocking warning!\n"
+#~ msgstr "Això és un avís de bloqueig!\n"
+
+#~ msgid "UoM"
+#~ msgstr "UdM"
+
+#~ msgid "Use lines of agreement"
+#~ msgstr "Utilitza línies d'acord"
+
+#~ msgid "Use quantities of agreement"
+#~ msgstr "Utilitza quantitats d'acord"
+
+#~ msgid "Validate"
+#~ msgstr "Validar"
+
+#~ msgid ""
+#~ "Whether or not this purchase order is linked to another purchase order as "
+#~ "an alternative."
+#~ msgstr ""
+#~ "Si aquesta comanda de compra està vinculada o no a una altra comanda de "
+#~ "compra com a alternativa."
+
+#~ msgid "You cannot confirm agreement '%s' because there is no product line."
+#~ msgstr ""
+#~ "No podeu confirmar l'acord «%s» perquè no hi ha cap línia de producte."
+
+#~ msgid "You cannot confirm the blanket order without price."
+#~ msgstr "No podeu confirmar la comanda en blanc sense preu."
+
+#~ msgid "You cannot confirm the blanket order without quantity."
+#~ msgstr "No podeu confirmar l'ordre de manta sense quantitat."
+
+#~ msgid ""
+#~ "You have to cancel or validate every RfQ before closing the purchase "
+#~ "requisition."
+#~ msgstr ""
+#~ "Heu de cancel·lar o validar cada RfQ abans de tancar la sol·licitud de "
+#~ "compra."
+
+#~ msgid ""
+#~ "alternative request for quotations are still open, do you want to cancel "
+#~ "them?"
+#~ msgstr ""
+#~ "Encara hi ha una petició alternativa per a les cites, voleu cancel·lar-"
+#~ "les?"

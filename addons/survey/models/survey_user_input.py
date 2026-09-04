@@ -14,9 +14,9 @@ from odoo.tools import float_is_zero
 _logger = logging.getLogger(__name__)
 
 
-class SurveyUserInput(models.Model):
+class SurveyUser_Input(models.Model):
     """ Metadata for a set of one user's answers to a particular survey """
-    _name = "survey.user_input"
+    _name = 'survey.user_input'
     _description = "Survey User Input"
     _rec_name = "survey_id"
     _order = "create_date desc"
@@ -28,6 +28,7 @@ class SurveyUserInput(models.Model):
     start_datetime = fields.Datetime('Start date and time', readonly=True)
     end_datetime = fields.Datetime('End date and time', readonly=True)
     deadline = fields.Datetime('Deadline', help="Datetime until customer can open the survey and submit answers")
+    lang_id = fields.Many2one('res.lang', string='Language')
     state = fields.Selection([
         ('new', 'New'),
         ('in_progress', 'In Progress'),
@@ -51,15 +52,16 @@ class SurveyUserInput(models.Model):
     predefined_question_ids = fields.Many2many('survey.question', string='Predefined Questions', readonly=True)
     scoring_percentage = fields.Float("Score (%)", compute="_compute_scoring_values", store=True, compute_sudo=True)  # stored for perf reasons
     scoring_total = fields.Float("Total Score", compute="_compute_scoring_values", store=True, compute_sudo=True, digits=(10, 2))  # stored for perf reasons
-    scoring_success = fields.Boolean('Quizz Passed', compute='_compute_scoring_success', store=True, compute_sudo=True)  # stored for perf reasons
+    scoring_success = fields.Boolean('Quiz Passed', compute='_compute_scoring_success', store=True, compute_sudo=True)  # stored for perf reasons
     survey_first_submitted = fields.Boolean(string='Survey First Submitted')
     # live sessions
     is_session_answer = fields.Boolean('Is in a Session', help="Is that user input part of a survey session or not.")
     question_time_limit_reached = fields.Boolean("Question Time Limit Reached", compute='_compute_question_time_limit_reached')
 
-    _sql_constraints = [
-        ('unique_token', 'UNIQUE (access_token)', 'An access token must be unique!'),
-    ]
+    _unique_token = models.Constraint(
+        'UNIQUE (access_token)',
+        'An access token must be unique!',
+    )
 
     @api.depends('user_input_line_ids.answer_score', 'user_input_line_ids.question_id', 'predefined_question_ids.answer_score')
     def _compute_scoring_values(self):
@@ -169,7 +171,7 @@ class SurveyUserInput(models.Model):
                 suvey_id = vals.get('survey_id', self.env.context.get('default_survey_id'))
                 survey = self.env['survey.survey'].browse(suvey_id)
                 vals['predefined_question_ids'] = [(6, 0, survey._prepare_user_input_predefined_questions().ids)]
-        return super(SurveyUserInput, self).create(vals_list)
+        return super().create(vals_list)
 
     # ------------------------------------------------------------
     # ACTIONS / BUSINESS
@@ -193,11 +195,14 @@ class SurveyUserInput(models.Model):
     def action_print_answers(self):
         """ Open the website page with the survey form """
         self.ensure_one()
+        url = self.env['ir.http']._url_for(
+            '/survey/print/%s?answer_token=%s' % (self.survey_id.access_token, self.access_token),
+            self.lang_id.code or None)
         return {
             'type': 'ir.actions.act_url',
             'name': "View Answers",
             'target': 'self',
-            'url': '/survey/print/%s?answer_token=%s' % (self.survey_id.access_token, self.access_token)
+            'url': url,
         }
 
     def action_redirect_to_attempts(self):
@@ -312,18 +317,12 @@ class SurveyUserInput(models.Model):
         if not (isinstance(answers, list)):
             answers = [answers]
 
-        if not answers:
+        if not answers and not (comment and question.comment_count_as_answer):
             # add a False answer to force saving a skipped line
             # this will make this question correctly considered as skipped in statistics
             answers = [False]
 
-        vals_list = []
-
-        if question.question_type == 'simple_choice':
-            if not question.comment_count_as_answer or not question.comments_allowed or not comment:
-                vals_list = [self._get_line_answer_values(question, answer, 'suggestion') for answer in answers]
-        elif question.question_type == 'multiple_choice':
-            vals_list = [self._get_line_answer_values(question, answer, 'suggestion') for answer in answers]
+        vals_list = [self._get_line_answer_values(question, answer, 'suggestion') for answer in answers]
 
         if comment:
             vals_list.append(self._get_line_comment_values(question, comment))
@@ -669,16 +668,6 @@ class SurveyUserInput(models.Model):
     # MESSAGING
     # ------------------------------------------------------------
 
-    def _message_get_suggested_recipients(self):
-        recipients = super()._message_get_suggested_recipients()
-        if self.partner_id:
-            self._message_add_suggested_recipient(
-                recipients,
-                partner=self.partner_id,
-                reason=_('Survey Participant')
-            )
-        return recipients
-
     def _notify_new_participation_subscribers(self):
         subtype_id = self.env.ref('survey.mt_survey_survey_user_input_completed', raise_if_not_found=False)
         if not self.ids or not subtype_id:
@@ -701,7 +690,7 @@ class SurveyUserInput(models.Model):
             user_input.message_post(author_id=author_id, body=body, subtype_xmlid='survey.mt_survey_user_input_completed')
 
 
-class SurveyUserInputLine(models.Model):
+class SurveyUser_InputLine(models.Model):
     _name = 'survey.user_input.line'
     _description = 'Survey User Input Line'
     _rec_name = 'user_input_id'
@@ -713,6 +702,7 @@ class SurveyUserInputLine(models.Model):
     question_id = fields.Many2one('survey.question', string='Question', ondelete='cascade', required=True, index=True)
     page_id = fields.Many2one(related='question_id.page_id', string="Section", readonly=False)
     question_sequence = fields.Integer('Sequence', related='question_id.sequence', store=True)
+    lang_id = fields.Many2one('res.lang', related="user_input_id.lang_id")
     # answer
     skipped = fields.Boolean('Skipped')
     answer_type = fields.Selection([
@@ -732,8 +722,8 @@ class SurveyUserInputLine(models.Model):
     suggested_answer_id = fields.Many2one('survey.question.answer', string="Suggested answer")
     matrix_row_id = fields.Many2one('survey.question.answer', string="Row answer")
     # scoring
-    answer_score = fields.Float('Score')
-    answer_is_correct = fields.Boolean('Correct')
+    answer_score = fields.Float('Score', compute='_compute_answer_score', precompute=True, store=True)
+    answer_is_correct = fields.Boolean('Correct', compute='_compute_answer_score', precompute=True, store=True)
 
     @api.depends(
         'answer_type', 'value_text_box', 'value_numerical_box',
@@ -751,7 +741,7 @@ class SurveyUserInputLine(models.Model):
             elif line.answer_type == 'date':
                 line.display_name = fields.Date.to_string(line.value_date)
             elif line.answer_type == 'datetime':
-                line.display_name = fields.Datetime.to_string(line.value_datetime)
+                line.display_name = fields.Datetime.to_string(fields.Datetime.context_timestamp(self.env.user, line.value_datetime))
             elif line.answer_type == 'scale':
                 line.display_name = line.value_scale
             elif line.answer_type == 'suggestion':
@@ -762,6 +752,69 @@ class SurveyUserInputLine(models.Model):
 
             if not line.display_name:
                 line.display_name = _('Skipped')
+
+    @api.depends('answer_type', 'value_text_box', 'value_numerical_box', 'value_date', 'value_datetime',
+                 'suggested_answer_id', 'user_input_id')
+    def _compute_answer_score(self):
+        """ Get values for: answer_is_correct and associated answer_score.
+
+        Calculates whether an answer_is_correct and its score based on 'answer_type' and
+        corresponding question. Handles choice (answer_type == 'suggestion') questions
+        separately from other question types. Each selected choice answer is handled as an
+        individual answer.
+
+        If score depends on the speed of the answer, it is adjusted as follows:
+         - If the user answers in less than 2 seconds, they receive 100% of the possible points.
+         - If user answers after that, they receive 50% of the possible points + the remaining
+            50% scaled by the time limit and time taken to answer [i.e. a minimum of 50% of the
+            possible points is given to all correct answers]
+
+        Example of updated values:
+            * {'answer_is_correct': False, 'answer_score': 0} (default)
+            * {'answer_is_correct': True, 'answer_score': 2.0}
+        """
+        for line in self:
+            answer_is_correct, answer_score = False, 0
+            if line.answer_type:
+                # record selected suggested choice answer_score (can be: pos, neg, or 0)
+                if line.question_id.question_type in ['simple_choice', 'multiple_choice']:
+                    if line.answer_type == 'suggestion' and line.suggested_answer_id:
+                        answer_score = line.suggested_answer_id.answer_score
+                        answer_is_correct = line.suggested_answer_id.is_correct
+                # for all other scored question cases, record question answer_score (can be: pos or 0)
+                elif line.question_id.question_type in ['date', 'datetime', 'numerical_box']:
+                    answer = line[f'value_{line.answer_type}']
+                    if line.answer_type == 'numerical_box':
+                        answer = float(answer)
+                    elif line.answer_type == 'date':
+                        answer = fields.Date.from_string(answer)
+                    elif line.answer_type == 'datetime':
+                        answer = fields.Datetime.from_string(answer)
+                    if answer and answer == line.question_id[f'answer_{line.answer_type}']:
+                        answer_is_correct = True
+                        answer_score = line.question_id.answer_score
+
+            # Session speed rating
+            if (
+                answer_score > 0
+                and line.user_input_id.survey_id.session_speed_rating
+                and line.user_input_id.is_session_answer
+                and line.question_id.is_time_limited
+            ):
+                max_score_delay = 2
+                time_limit = line.question_id.time_limit
+                now = fields.Datetime.now()
+                seconds_to_answer = (now - line.user_input_id.survey_id.session_question_start_time).total_seconds()
+                question_remaining_time = time_limit - seconds_to_answer
+                # if answered within the max_score_delay => leave score as is
+                if question_remaining_time < 0 or line.question_id != line.user_input_id.survey_id.session_question_id:
+                    answer_score /= 2
+                elif seconds_to_answer > max_score_delay:  # linear decrease in score after 2 sec
+                    score_proportion = (time_limit - seconds_to_answer) / (time_limit - max_score_delay)
+                    answer_score = (answer_score / 2) * (1 + score_proportion)
+
+            line.answer_is_correct = answer_is_correct
+            line.answer_score = answer_score
 
     @api.constrains('skipped', 'answer_type')
     def _check_answer_type_skipped(self):
@@ -785,30 +838,6 @@ class SurveyUserInputLine(models.Model):
             if field_name and not line[field_name]:
                 raise ValidationError(_('The answer must be in the right type'))
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        for vals in vals_list:
-            if not vals.get('answer_score'):
-                score_vals = self._get_answer_score_values(vals)
-                vals.update(score_vals)
-        return super(SurveyUserInputLine, self).create(vals_list)
-
-    def write(self, vals):
-        res = True
-        for line in self:
-            vals_copy = {**vals}
-            getter_params = {
-                'user_input_id': line.user_input_id.id,
-                'answer_type': line.answer_type,
-                'question_id': line.question_id.id,
-                **vals_copy
-            }
-            if not vals_copy.get('answer_score'):
-                score_vals = self._get_answer_score_values(getter_params, compute_speed_score=False)
-                vals_copy.update(score_vals)
-            res = super(SurveyUserInputLine, line).write(vals_copy) and res
-        return res
-
     def _get_answer_matching_domain(self):
         self.ensure_one()
         if self.answer_type in ('char_box', 'text_box', 'numerical_box', 'scale', 'date', 'datetime'):
@@ -831,82 +860,6 @@ class SurveyUserInputLine(models.Model):
             return ['&', ('question_id', '=', self.question_id.id), (value_field[self.answer_type], operators[self.answer_type], self._get_answer_value())]
         elif self.answer_type == 'suggestion':
             return self.suggested_answer_id._get_answer_matching_domain(self.matrix_row_id.id if self.matrix_row_id else False)
-
-    @api.model
-    def _get_answer_score_values(self, vals, compute_speed_score=True):
-        """ Get values for: answer_is_correct and associated answer_score.
-
-        Requires vals to contain 'answer_type', 'question_id', and 'user_input_id'.
-        Depending on 'answer_type' additional value of 'suggested_answer_id' may also be
-        required.
-
-        Calculates whether an answer_is_correct and its score based on 'answer_type' and
-        corresponding question. Handles choice (answer_type == 'suggestion') questions
-        separately from other question types. Each selected choice answer is handled as an
-        individual answer.
-
-        If score depends on the speed of the answer, it is adjusted as follows:
-         - If the user answers in less than 2 seconds, they receive 100% of the possible points.
-         - If user answers after that, they receive 50% of the possible points + the remaining
-            50% scaled by the time limit and time taken to answer [i.e. a minimum of 50% of the
-            possible points is given to all correct answers]
-
-        Example of returned values:
-            * {'answer_is_correct': False, 'answer_score': 0} (default)
-            * {'answer_is_correct': True, 'answer_score': 2.0}
-        """
-        user_input_id = vals.get('user_input_id')
-        answer_type = vals.get('answer_type')
-        question_id = vals.get('question_id')
-        if not question_id:
-            raise ValueError(_('Computing score requires a question in arguments.'))
-        question = self.env['survey.question'].browse(int(question_id))
-
-        # default and non-scored questions
-        answer_is_correct = False
-        answer_score = 0
-
-        # record selected suggested choice answer_score (can be: pos, neg, or 0)
-        if question.question_type in ['simple_choice', 'multiple_choice']:
-            if answer_type == 'suggestion':
-                suggested_answer_id = vals.get('suggested_answer_id')
-                if suggested_answer_id:
-                    question_answer = self.env['survey.question.answer'].browse(int(suggested_answer_id))
-                    answer_score = question_answer.answer_score
-                    answer_is_correct = question_answer.is_correct
-        # for all other scored question cases, record question answer_score (can be: pos or 0)
-        elif question.question_type in ['date', 'datetime', 'numerical_box']:
-            answer = vals.get('value_%s' % answer_type)
-            if answer_type == 'numerical_box':
-                answer = float(answer)
-            elif answer_type == 'date':
-                answer = fields.Date.from_string(answer)
-            elif answer_type == 'datetime':
-                answer = fields.Datetime.from_string(answer)
-            if answer and answer == question['answer_%s' % answer_type]:
-                answer_is_correct = True
-                answer_score = question.answer_score
-
-        if compute_speed_score and answer_score > 0:
-            user_input = self.env['survey.user_input'].browse(user_input_id)
-            session_speed_rating = user_input.exists() and user_input.is_session_answer and user_input.survey_id.session_speed_rating
-            if session_speed_rating and question.is_time_limited:
-                max_score_delay = 2
-                time_limit = question.time_limit
-                now = fields.Datetime.now()
-                seconds_to_answer = (now - user_input.survey_id.session_question_start_time).total_seconds()
-                question_remaining_time = time_limit - seconds_to_answer
-                # if answered within the max_score_delay => leave score as is
-                if question_remaining_time < 0:  # if no time left
-                    answer_score /= 2
-                elif seconds_to_answer > max_score_delay:  # linear decrease in score after 2 sec
-                    score_proportion = (time_limit - seconds_to_answer) / (time_limit - max_score_delay)
-                    answer_score = (answer_score / 2) * (1 + score_proportion)
-
-        return {
-            'answer_is_correct': answer_is_correct,
-            'answer_score': answer_score
-        }
 
     def _get_answer_value(self):
         self.ensure_one()

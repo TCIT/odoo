@@ -19,22 +19,22 @@ class TestAllocationRights(TestHrHolidaysCommon):
         cls.lt_validation_hr = cls.env['hr.leave.type'].create({
             'name': 'Validation = HR',
             'allocation_validation_type': 'hr',
-            'requires_allocation': 'yes',
-            'employee_requests': 'yes',
+            'requires_allocation': True,
+            'employee_requests': True,
         })
 
         cls.lt_validation_manager = cls.env['hr.leave.type'].create({
             'name': 'Validation = manager',
             'allocation_validation_type': 'manager',
-            'requires_allocation': 'yes',
-            'employee_requests': 'yes',
+            'requires_allocation': True,
+            'employee_requests': True,
         })
 
         cls.lt_allocation_no_validation = cls.env['hr.leave.type'].create({
             'name': 'Validation = user',
             'allocation_validation_type': 'no_validation',
-            'requires_allocation': 'yes',
-            'employee_requests': 'yes',
+            'requires_allocation': True,
+            'employee_requests': True,
         })
 
     def request_allocation(self, user, values={}):
@@ -57,7 +57,7 @@ class TestAccessRightsSimpleUser(TestAllocationRights):
         }
         allocation = self.request_allocation(self.user_employee.id, values)
         with self.assertRaises(UserError):
-            allocation.action_validate()
+            allocation.action_approve()
 
     def test_simple_user_request_allocation_no_validation(self):
         """ A simple user can request and automatically validate an allocation with no validation """
@@ -113,7 +113,7 @@ class TestAccessRightsEmployeeManager(TestAllocationRights):
             'holiday_status_id': self.lt_validation_manager.id,
         }
         allocation = self.request_allocation(self.user_employee.id, values)
-        allocation.action_validate()
+        allocation.action_approve()
         self.assertEqual(allocation.state, 'validate', "The allocation should be validated")
 
     def test_manager_refuse_request_allocation(self):
@@ -134,18 +134,19 @@ class TestAccessRightsEmployeeManager(TestAllocationRights):
         }
         allocation = self.request_allocation(self.user_employee.id, values)
         with self.assertRaises(UserError):
-            allocation.action_validate()
+            allocation.action_approve()
+
 
 class TestAccessRightsHolidayUser(TestAllocationRights):
 
     def test_holiday_user_request_allocation(self):
-        """ A holiday user can request and approve an allocation for any employee """
+        """ A holiday user can request and approve an allocation for any internal employee """
         values = {
             'employee_id': self.employee_emp.id,
             'holiday_status_id': self.lt_validation_hr.id,
         }
         allocation = self.request_allocation(self.user_hruser.id, values)
-        allocation.action_validate()
+        allocation.action_approve()
         self.assertEqual(allocation.state, 'validate', "It should have been validated")
 
     def test_holiday_user_cannot_approve_own(self):
@@ -156,7 +157,26 @@ class TestAccessRightsHolidayUser(TestAllocationRights):
         }
         allocation = self.request_allocation(self.user_hruser.id, values)
         with self.assertRaises(UserError):
-            allocation.action_validate()
+            allocation.action_approve()
+
+    def test_holiday_user_cannot_approve_external_company(self):
+        """A holidy user can validate but not approve allocations for employees in external company"""
+
+        self.user_hruser.write({
+        'company_ids': [(6, 0, [self.company.id, self.external_company.id])],
+        })
+
+        values = {
+            'employee_id': self.employee_external.id,
+            'holiday_status_id': self.lt_validation_hr.id,
+        }
+        allocation = self.request_allocation(self.user_hruser.id, values).with_company(self.external_company.id)
+        self.assertEqual(allocation.can_validate, True)
+        self.assertEqual(allocation.can_approve, False)
+
+        self.assertEqual(allocation.state, 'confirm')
+        allocation.action_approve()
+        self.assertEqual(allocation.state, 'validate')
 
 
 class TestAccessRightsHolidayManager(TestAllocationRights):
@@ -168,7 +188,7 @@ class TestAccessRightsHolidayManager(TestAllocationRights):
             'holiday_status_id': self.lt_validation_manager.id,
         }
         allocation = self.request_allocation(self.user_hrmanager.id, values)
-        allocation.action_validate()
+        allocation.action_approve()
         self.assertEqual(allocation.state, 'validate', "It should have been validated")
 
     def test_holiday_manager_refuse_validated(self):
@@ -178,7 +198,7 @@ class TestAccessRightsHolidayManager(TestAllocationRights):
             'holiday_status_id': self.lt_validation_manager.id,
         }
         allocation = self.request_allocation(self.user_hrmanager.id, values)
-        allocation.action_validate()
+        allocation.action_approve()
         self.assertEqual(allocation.state, 'validate', "It should have been validated")
         allocation.action_refuse()
         self.assertEqual(allocation.state, 'refuse', "It should have been refused")

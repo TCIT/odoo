@@ -17,7 +17,7 @@
         <field name="inherit_id" ref="resource.resource_calendar_leave_form"/>
         <field name="arch" type="xml">
             <field name="name" position="after">
-                <field name="holiday_id"/>
+                <field name="holiday_id" options="{'no_quick_create': True}"/>
             </field>
         </field>
     </record>
@@ -35,6 +35,7 @@
             <xpath expr="//field[@name='name']" position="attributes">
                 <attribute name="string">Name</attribute>
                 <attribute name="required">1</attribute>
+                <attribute name="placeholder">e.g. New Year's Day</attribute>
             </xpath>
             <xpath expr="//field[@name='resource_id']" position="attributes">
                 <attribute name="column_invisible">1</attribute>
@@ -43,18 +44,21 @@
                 <field name="company_id" column_invisible="True"/>
                 <xpath expr="//field[@name='calendar_id']" position="move"/>
             </xpath>
+            <xpath expr="//field[@name='calendar_id']" position="attributes">
+                <attribute name="placeholder">All Schedules</attribute>
+            </xpath>
         </field>
     </record>
 
     <record id="resource_calendar_global_leaves_action_from_calendar" model="ir.actions.act_window">
-        <field name="name">Resource Time Off</field>
+        <field name="name">Public Holidays</field>
         <field name="res_model">resource.calendar.leaves</field>
         <field name="view_mode">list</field>
         <field name="view_id" ref="resource_calendar_leaves_tree_inherit"/>
-        <field name="domain">['&amp;', ('resource_id', '=', False), ('calendar_id', 'in', (active_id, False))]</field>
+        <field name="domain">[('resource_id', '=', False)]</field>
         <field name="context">{
             'default_calendar_id': active_id,
-            'search_default_filter_date': True}</field>
+            'search_default_calendar_id': active_id}</field>
         <field name="search_view_id" ref="hr_holidays.resource_calendar_leaves_view_search_inherit"/>
     </record>
 
@@ -68,10 +72,7 @@
                                 icon="fa-sun-o" class="oe_stat_button">
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_text">
-                            <field name="associated_leaves_count"/> Public
-                        </span>
-                        <span class="o_stat_text">
-                            Time Off
+                            <field name="associated_leaves_count" string="Public Holidays" widget="statinfo"/>
                         </span>
                     </div>
                 </button>
@@ -85,7 +86,25 @@
         <field name="view_mode">list,form</field>
         <field name="domain">[('resource_id', '=', False)]</field>
         <field name="view_id" ref="resource_calendar_leaves_tree_inherit"/>
-        <field name="context">{
-            'search_default_filter_date': True}</field>
+        <field name="context">{'search_default_filter_date': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                No Public Holidays yet!
+            </p>
+            <p>
+                Public Holidays are non-working days that don't impact employees' balances
+            </p>
+        </field>
+    </record>
+
+    <record id="resource_calendar_view_tree" model="ir.ui.view">
+        <field name="name">resource.calendar.view.list.inherit.hr.holidays</field>
+        <field name="model">resource.calendar</field>
+        <field name="inherit_id" ref="resource.view_resource_calendar_tree"/>
+        <field name="arch" type="xml">
+            <field name="work_resources_count" position="after">
+                <field name="associated_leaves_count" string="# Public Holidays" optional="hide"/>
+            </field>
+        </field>
     </record>
 </odoo>

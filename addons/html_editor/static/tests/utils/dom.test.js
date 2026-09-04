@@ -1,14 +1,17 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { setupEditor } from "../_helpers/editor";
+import { setupEditor, testEditor } from "../_helpers/editor";
 import {
     cleanTextNode,
     fillEmpty,
+    removeInvisibleWhitespace,
+    makeContentsInline,
     splitTextNode,
     wrapInlinesInBlocks,
 } from "@html_editor/utils/dom";
 import { getContent } from "../_helpers/selection";
 import { parseHTML } from "@html_editor/utils/html";
 import { unformat } from "../_helpers/format";
+import { queryOne } from "@odoo/hoot-dom";
 
 describe("splitAroundUntil", () => {
     test("should split a slice of text from its inline ancestry (1)", async () => {
@@ -21,7 +24,7 @@ describe("splitAroundUntil", () => {
         splitTextNode(cd, 1);
         const d = cd;
         const result = editor.shared.split.splitAroundUntil(d, p.childNodes[1]);
-        expect(result.tagName === "FONT").toBe(true);
+        expect(result.tagName).toBe("FONT");
         expect(p.outerHTML).toBe(
             "<p>a<font>b<span>c</span></font><font><span>d</span></font><font><span>e</span>f</font>g</p>"
         );
@@ -44,7 +47,7 @@ describe("splitAroundUntil", () => {
             [d, d.nextSibling.nextSibling],
             p.childNodes[1]
         );
-        expect(result.tagName === "FONT").toBe(true);
+        expect(result.tagName).toBe("FONT");
         expect(p.outerHTML).toBe(
             "<p>a<font>b<span>c</span></font><font><span>def</span></font><font><span>g</span>h</font>i</p>"
         );
@@ -56,7 +59,8 @@ describe("splitAroundUntil", () => {
         const font = p.querySelector("font");
         const cde = p.querySelector("span").firstChild;
         const result = editor.shared.split.splitAroundUntil(cde, font);
-        expect(result.tagName === "FONT" && result !== font).toBe(true);
+        expect(result.tagName).toBe("FONT");
+        expect(result).not.toBe(font);
         expect(p.outerHTML).toBe(
             "<p>a<font>b</font><font><span>cde</span></font><font>f</font>g</p>"
         );
@@ -67,8 +71,97 @@ describe("splitAroundUntil", () => {
         const [p] = el.childNodes;
         const bcd = p.querySelector("span").firstChild;
         const result = editor.shared.split.splitAroundUntil(bcd, p.childNodes[1]);
-        expect(result === p.childNodes[1]).toBe(true);
+        expect(result).toBe(p.childNodes[1]);
         expect(p.outerHTML).toBe("<p>a<font><span>bcd</span></font>e</p>");
+    });
+
+    test("should split when node is first child of inline ancestry (1)", async () => {
+        const { editor, el } = await setupEditor("<p>a<font>b<span>cde</span>f</font>g</p>");
+        const [p] = el.childNodes;
+        const cde = p.childNodes[1].childNodes[1].firstChild;
+        splitTextNode(cde, 2);
+        const cd = cde.previousSibling;
+        const result = editor.shared.split.splitAroundUntil(cd, p.childNodes[1]);
+        expect(result.tagName).toBe("FONT");
+        expect(p.outerHTML).toBe(
+            "<p>a<font>b</font><font><span>cd</span></font><font><span>e</span>f</font>g</p>"
+        );
+    });
+
+    test("should split when node is first child of inline ancestry (2)", async () => {
+        const { editor, el } = await setupEditor("<p>a<font><span>bcd</span></font>e</p>");
+        const [p] = el.childNodes;
+        const bcd = p.childNodes[1].childNodes[0].firstChild;
+        splitTextNode(bcd, 2);
+        const bc = bcd.previousSibling;
+        const result = editor.shared.split.splitAroundUntil(bc, p.childNodes[1]);
+        expect(result.tagName).toBe("FONT");
+        expect(p.outerHTML).toBe(
+            "<p>a<font><span>bc</span></font><font><span>d</span></font>e</p>"
+        );
+    });
+
+    test("should split when node is first child of inline ancestry (3)", async () => {
+        const { editor, el } = await setupEditor("<p>a<font>b<span>cde</span></font>f</p>");
+        const [p] = el.childNodes;
+        const cde = p.childNodes[1].childNodes[1].firstChild;
+        splitTextNode(cde, 2);
+        const cd = cde.previousSibling;
+        const result = editor.shared.split.splitAroundUntil(cd, p.childNodes[1]);
+        expect(result.tagName).toBe("FONT");
+        expect(p.outerHTML).toBe(
+            "<p>a<font>b</font><font><span>cd</span></font><font><span>e</span></font>f</p>"
+        );
+    });
+
+    test("should split when node is last child of inline ancestry (1)", async () => {
+        const { editor, el } = await setupEditor("<p>a<font>b<span>cde</span>f</font>g</p>");
+        const [p] = el.childNodes;
+        const cde = p.childNodes[1].childNodes[1].firstChild;
+        splitTextNode(cde, 2);
+        const result = editor.shared.split.splitAroundUntil(cde, p.childNodes[1]);
+        expect(result.tagName).toBe("FONT");
+        expect(p.outerHTML).toBe(
+            "<p>a<font>b<span>cd</span></font><font><span>e</span></font><font>f</font>g</p>"
+        );
+    });
+
+    test("should split when node is last child of inline ancestry (2)", async () => {
+        const { editor, el } = await setupEditor("<p>a<font><span>bcd</span></font>e</p>");
+        const [p] = el.childNodes;
+        const bcd = p.childNodes[1].childNodes[0].firstChild;
+        splitTextNode(bcd, 2);
+        const result = editor.shared.split.splitAroundUntil(bcd, p.childNodes[1]);
+        expect(result.tagName).toBe("FONT");
+        expect(p.outerHTML).toBe(
+            "<p>a<font><span>bc</span></font><font><span>d</span></font>e</p>"
+        );
+    });
+
+    test("should split when node is last child of inline ancestry (3)", async () => {
+        const { editor, el } = await setupEditor("<p>a<font><span>bcd</span>e</font>f</p>");
+        const [p] = el.childNodes;
+        const bcd = p.childNodes[1].childNodes[0].firstChild;
+        splitTextNode(bcd, 2);
+        const result = editor.shared.split.splitAroundUntil(bcd, p.childNodes[1]);
+        expect(result.tagName).toBe("FONT");
+        expect(p.outerHTML).toBe(
+            "<p>a<font><span>bc</span></font><font><span>d</span></font><font>e</font>f</p>"
+        );
+    });
+
+    test("should split a multi-node inline range near end of ancestry", async () => {
+        const { editor, el } = await setupEditor(
+            "<p>a<font>b<strong>cde</strong>fgh<u>ijk</u>l</font>m</p>"
+        );
+        const [p] = el.childNodes;
+        const cde = queryOne("strong").firstChild;
+        const ijk = queryOne("u").firstChild;
+        const result = editor.shared.split.splitAroundUntil([cde, ijk], p.childNodes[1]);
+        expect(result.tagName).toBe("FONT");
+        expect(p.outerHTML).toBe(
+            "<p>a<font>b</font><font><strong>cde</strong>fgh<u>ijk</u></font><font>l</font>m</p>"
+        );
     });
 });
 
@@ -114,6 +207,58 @@ describe("cleanTextNode", () => {
         cleanTextNode(el.querySelector("p").firstChild, "\uFEFF", cursors);
         cursors.restore();
         expect(getContent(el)).toBe("<p>te[]xt</p>");
+    });
+});
+
+describe("makeContentsInline", () => {
+    test("should unwrap P", async () => {
+        const container = document.createElement("fake-container");
+        container.innerHTML = "<p>text</p>";
+        makeContentsInline(container);
+        expect(container.innerHTML).toBe("text");
+    });
+    test("should unwrap DIV", async () => {
+        const container = document.createElement("fake-container");
+        container.innerHTML = "<div>text</div>";
+        makeContentsInline(container);
+        expect(container.innerHTML).toBe("text");
+    });
+    test("should unwrap P in DIV", async () => {
+        const container = document.createElement("fake-container");
+        container.innerHTML = "<div><p>text</p></div>";
+        makeContentsInline(container);
+        expect(container.innerHTML).toBe("text");
+    });
+    test("should not unwrap inline", async () => {
+        const container = document.createElement("fake-container");
+        container.innerHTML = "<strong>text</strong>";
+        makeContentsInline(container);
+        expect(container.innerHTML).toBe("<strong>text</strong>");
+    });
+    test("should unwrap multiple Ps and insert BR between", async () => {
+        const container = document.createElement("fake-container");
+        container.innerHTML = "<p>text1</p><p>text2</p>";
+        makeContentsInline(container);
+        expect(container.innerHTML).toBe("text1<br>text2");
+    });
+    test("should unwrap multiple Ps in multiple DIVs and insert BR between", async () => {
+        const container = document.createElement("fake-container");
+        container.innerHTML =
+            "<div><p>text1</p><p>text2</p><div><div><p>text3</p><p>text4</p><div>";
+        makeContentsInline(container);
+        expect(container.innerHTML).toBe("text1<br>text2<br>text3<br>text4");
+    });
+    test("should preserve inline elements when unwrapping P", async () => {
+        const container = document.createElement("fake-container");
+        container.innerHTML = "<p><strong>text1</strong><u>text2</u></p>";
+        makeContentsInline(container);
+        expect(container.innerHTML).toBe("<strong>text1</strong><u>text2</u>");
+    });
+    test("should preserve inline elements when unwrapping P in DIV", async () => {
+        const container = document.createElement("fake-container");
+        container.innerHTML = "<div><p><strong>text1</strong><u>text2</u></p><div>";
+        makeContentsInline(container);
+        expect(container.innerHTML).toBe("<strong>text1</strong><u>text2</u>");
     });
 });
 
@@ -210,13 +355,15 @@ describe("wrapInlinesInBlocks", () => {
         // element).
         expect(getContent(el)).toBe(
             unformat(`
+                <p data-selection-placeholder=""><br></p>
                 <div>
                     <div contenteditable="false" style="display: inline;">inline</div>[]
                 </div>
-                <div class="o-paragraph"><br></div>
+                <p data-selection-placeholder=""><br></p>
                 <div>
                     <div contenteditable="false" style="display: inline;">inline</div>
                 </div>
+                <p data-selection-placeholder=""><br></p>
             `)
         );
     });
@@ -244,12 +391,13 @@ describe("wrapInlinesInBlocks", () => {
                 <div>
                     <div contenteditable="false" style="display: inline;">inline</div><span class="a">span</span>[]
                 </div>
-                <div class="o-paragraph"><br></div>
+                <p data-selection-placeholder=""><br></p>
                 <div>
                     text
                     <div contenteditable="false" style="display: inline;">inline</div>
                     <span class="a">span</span>
                 </div>
+                <p data-selection-placeholder=""><br></p>
             `)
         );
     });
@@ -300,9 +448,58 @@ describe("wrapInlinesInBlocks", () => {
 describe("fillEmpty", () => {
     test("should not add fill a shrunk protected block, nor add a ZWS to it", async () => {
         const { el } = await setupEditor('<div data-oe-protected="true"></div>');
-        expect(el.innerHTML).toBe('<div data-oe-protected="true" contenteditable="false"></div>');
+        expect(el.innerHTML).toBe(
+            '<p data-selection-placeholder=""><br></p><div data-oe-protected="true" contenteditable="false"></div><p data-selection-placeholder=""><br></p>'
+        );
         const div = el.firstChild;
         fillEmpty(div);
-        expect(el.innerHTML).toBe('<div data-oe-protected="true" contenteditable="false"></div>');
+        expect(el.innerHTML).toBe(
+            '<p data-selection-placeholder=""><br></p><div data-oe-protected="true" contenteditable="false"></div><p data-selection-placeholder=""><br></p>'
+        );
+    });
+    test("should not fill a block containing a canvas", async () => {
+        const { el } = await setupEditor("<div><canvas></canvas></div>");
+        expect(el.innerHTML).toBe('<div class="o-paragraph"><canvas></canvas></div>');
+        const div = el.firstChild;
+        fillEmpty(div);
+        expect(el.innerHTML).toBe('<div class="o-paragraph"><canvas></canvas></div>');
+    });
+});
+
+describe("removeInvisibleWhitespace", () => {
+    test("should remove invisible whitespace from an element and preserve the selection", async () => {
+        await testEditor({
+            contentBefore: `<p>
+                <u>
+                    abc
+                </u>
+                def
+                <span>
+                    <b>
+                        ghi
+                    </b>
+                    jkl
+                </span>
+                mno
+                <i>
+                    pqr
+                </i>
+            </p>`,
+            stepFunction: (editor) => {
+                const cursors = editor.shared.selection.preserveSelection();
+                removeInvisibleWhitespace(editor.editable.querySelector("p"), cursors);
+                cursors.restore();
+            },
+            contentAfter: `<p><u>abc</u> def<span><b> ghi</b> jkl</span> mno<i> pqr</i></p>`,
+        });
+    });
+});
+
+describe("crash fixes", () => {
+    test("inserting a br should not crash", async () => {
+        const { el, editor } = await setupEditor("<p>a[]</p>");
+        const br = document.createElement("br");
+        editor.shared.dom.insert(br);
+        expect(getContent(el)).toBe("<p>a[]</p>");
     });
 });

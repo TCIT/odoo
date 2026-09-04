@@ -17,27 +17,23 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
         product_uom_unit_round_1 = self.env.ref('uom.product_uom_unit')
         product_uom_unit_round_1.write({
             'name': 'Undivisible Units',
-            'rounding': 1.0,
         })
 
         # I create 2 products with different cost prices and configure them for real_time
         # valuation and real price costing method
         product_landed_cost_3 = self.env['product.product'].create({
             'name': "LC product 3",
+            'is_storable': True,
             'uom_id': product_uom_unit_round_1.id,
+            'categ_id': self.stock_account_product_categ.id,
         })
-        product_landed_cost_3.product_tmpl_id.categ_id.property_cost_method = 'fifo'
-        product_landed_cost_3.product_tmpl_id.categ_id.property_stock_account_input_categ_id = self.company_data['default_account_expense']
-        product_landed_cost_3.product_tmpl_id.categ_id.property_stock_account_output_categ_id = self.company_data['default_account_revenue']
 
         product_landed_cost_4 = self.env['product.product'].create({
             'name': "LC product 4",
+            'is_storable': True,
             'uom_id': product_uom_unit_round_1.id,
+            'categ_id': self.stock_account_product_categ.id,
         })
-        product_landed_cost_4.product_tmpl_id.categ_id.property_cost_method = 'fifo'
-        product_landed_cost_4.product_tmpl_id.categ_id.property_valuation = 'real_time'
-        product_landed_cost_4.product_tmpl_id.categ_id.property_stock_account_input_categ_id = self.company_data['default_account_expense']
-        product_landed_cost_4.product_tmpl_id.categ_id.property_stock_account_output_categ_id = self.company_data['default_account_revenue']
 
         picking_default_vals = self.env['stock.picking'].default_get(list(self.env['stock.picking'].fields_get()))
 
@@ -49,14 +45,12 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
                 'product_id': product_landed_cost_3.id,
                 'product_uom_qty': 13,
                 'product_uom': product_uom_unit_round_1.id,
-                'location_id': self.ref('stock.stock_location_customers'),
+                'location_id': self.ref('stock.stock_location_suppliers'),
                 'location_dest_id': self.warehouse.lot_stock_id.id,
             })],
         })
         picking_landed_cost_3 = self.env['stock.picking'].new(vals)
         picking_landed_cost_3._onchange_picking_type()
-        picking_landed_cost_3.move_ids._onchange_product_id()
-        picking_landed_cost_3.move_ids.name = 'move 3'
         vals = picking_landed_cost_3._convert_to_write(picking_landed_cost_3._cache)
         picking_landed_cost_3 = self.env['stock.picking'].create(vals)
 
@@ -67,15 +61,13 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
                 'product_id': product_landed_cost_4.id,
                 'product_uom_qty': 1,
                 'product_uom': self.ref('uom.product_uom_dozen'),
-                'location_id': self.ref('stock.stock_location_customers'),
+                'location_id': self.ref('stock.stock_location_suppliers'),
                 'location_dest_id': self.warehouse.lot_stock_id.id,
                 'price_unit': 17.00 / 12.00,
             })],
         })
         picking_landed_cost_4 = self.env['stock.picking'].new(vals)
         picking_landed_cost_4._onchange_picking_type()
-        picking_landed_cost_4.move_ids._onchange_product_id()
-        picking_landed_cost_4.move_ids.name = 'move 4'
         vals = picking_landed_cost_4._convert_to_write(picking_landed_cost_4._cache)
         picking_landed_cost_4 = self.env['stock.picking'].create(vals)
 
@@ -83,10 +75,14 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
         # I receive picking LC_pick_3, and check how many quants are created
         picking_landed_cost_3.move_ids.price_unit = 1.0
         picking_landed_cost_3.action_confirm()
-        picking_landed_cost_3.action_assign()
+        picking_landed_cost_3.move_ids.quantity = 13
+        picking_landed_cost_3.move_ids.picked = True
         picking_landed_cost_3._action_done()
 
-        virtual_interior_design = self.env['product.product'].create({'name': 'Virtual Interior Design'})
+        virtual_interior_design = self.env['product.product'].create({
+            'name': 'Virtual Interior Design',
+            'categ_id': self.env.ref('product.product_category_goods').id,
+        })
 
         # I create a landed cost for picking 3
         default_vals = self.env['stock.landed.cost'].default_get(list(self.env['stock.landed.cost'].fields_get()))
@@ -122,7 +118,8 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
         # I receive picking LC_pick_4, and check how many quants are created
         picking_landed_cost_4.move_ids.price_unit = 17.0/12.0
         picking_landed_cost_4.action_confirm()
-        picking_landed_cost_4.action_assign()
+        picking_landed_cost_4.move_ids.quantity = 1
+        picking_landed_cost_4.move_ids.picked = True
         picking_landed_cost_4._action_done()
 
         # I create a landed cost for picking 4
@@ -162,7 +159,6 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
 
         fifo_pc = self.env['product.category'].create({
             'name': 'Fifo Category',
-            'parent_id': self.env.ref("product.product_category_all").id,
             'property_valuation': 'real_time',
             'property_cost_method': 'fifo',
         })
@@ -216,36 +212,26 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
             23
             2
             10
-        At the end, the SVL value should be zero
+        At the end, the total value should be zero
         """
         self.product_a.is_storable = True
         self.product_a.categ_id.property_cost_method = 'average'
 
         stock_location = self.warehouse.lot_stock_id
-        supplier_location_id = self.ref('stock.stock_location_suppliers')
         customer_location_id = self.ref('stock.stock_location_customers')
 
-        receipts = self.env['stock.picking'].create([{
-            'picking_type_id': self.warehouse.in_type_id.id,
-            'location_id': supplier_location_id,
-            'location_dest_id': stock_location.id,
-            'move_ids': [(0, 0, {
-                'name': self.product_a.name,
-                'product_id': self.product_a.id,
-                'price_unit': price,
-                'product_uom': self.product_a.uom_id.id,
-                'product_uom_qty': qty,
-                'location_id': supplier_location_id,
-                'location_dest_id': stock_location.id,
-            })]
-        } for qty, price in [
-            (5, 5.0),
-            (5, 8.0),
-            (5, 7.0),
-            (20, 7.33),
-        ]])
-
-        receipts.action_confirm()
+        purchase_orders = self.env['purchase.order'].create([
+            {
+                'partner_id': self.partner_a.id,
+                'order_line': [Command.create({
+                    'product_id': self.product_a.id,
+                    'product_qty': qty,
+                    'price_unit': price,
+                })],
+            } for qty, price in [(5, 5.0), (5, 8.0), (5, 7.0), (20, 7.33)]
+        ])
+        purchase_orders.button_confirm()
+        receipts = purchase_orders.picking_ids
         for m in receipts.move_ids:
             m.quantity = m.product_uom_qty
         receipts.button_validate()
@@ -263,14 +249,13 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
         landed_costs.compute_landed_cost()
         landed_costs.button_validate()
 
-        self.assertEqual(self.product_a.standard_price, 7.47)
+        self.assertAlmostEqual(self.product_a.standard_price, 7.4742857)
 
         deliveries = self.env['stock.picking'].create([{
             'picking_type_id': self.warehouse.out_type_id.id,
             'location_id': stock_location.id,
             'location_dest_id': customer_location_id,
             'move_ids': [(0, 0, {
-                'name': self.product_a.name,
                 'product_id': self.product_a.id,
                 'product_uom': self.product_a.uom_id.id,
                 'product_uom_qty': qty,
@@ -284,7 +269,7 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
             m.quantity = m.product_uom_qty
         deliveries.button_validate()
 
-        self.assertEqual(self.product_a.value_svl, 0)
+        self.assertEqual(self.product_a.total_value, 0)
 
     def test_lc_cost_split_cumulative_rounding_diff(self):
         """ Ensure that the sum total difference of all rounding operations during the splitting of

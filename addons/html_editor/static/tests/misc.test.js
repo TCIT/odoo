@@ -1,7 +1,7 @@
 import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { expect, test } from "@odoo/hoot";
-import { click } from "@odoo/hoot-dom";
+import { click, tick, waitFor } from "@odoo/hoot-dom";
 import { setupEditor, testEditor } from "./_helpers/editor";
 import { getContent, setContent } from "./_helpers/selection";
 import { withSequence } from "@html_editor/utils/resource";
@@ -18,13 +18,17 @@ test("can instantiate a Editor", async () => {
 
 test("cannot reattach an editor", async () => {
     const { el, editor } = await setupEditor("<p>[]</p>", {});
-    expect(getContent(el)).toBe(`<p placeholder='Type "/" for commands' class="o-we-hint">[]</p>`);
+    expect(getContent(el)).toBe(
+        `<p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]</p>`
+    );
     expect(() => editor.attachTo(el)).toThrow("Cannot re-attach an editor");
 });
 
 test("cannot reattach a destroyed editor", async () => {
     const { el, editor } = await setupEditor("<p>[]</p>", {});
-    expect(getContent(el)).toBe(`<p placeholder='Type "/" for commands' class="o-we-hint">[]</p>`);
+    expect(getContent(el)).toBe(
+        `<p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]</p>`
+    );
     editor.destroy();
     expect(getContent(el)).toBe(`<p>[]</p>`);
     expect(() => editor.attachTo(el)).toThrow("Cannot re-attach an editor");
@@ -33,7 +37,8 @@ test("cannot reattach a destroyed editor", async () => {
 test.tags("iframe");
 test("can instantiate a Editor in an iframe", async () => {
     const { el, editor } = await setupEditor("<p>hel[lo] world</p>", { props: { iframe: true } });
-    expect("iframe").toHaveCount(1);
+    await waitFor(".o-we-toolbar");
+    expect("iframe").toHaveCount(2);
     expect(el.innerHTML).toBe(`<p>hello world</p>`);
     expect(getContent(el)).toBe(`<p>hel[lo] world</p>`);
     setContent(el, "<div>a[dddb]</div>");
@@ -44,40 +49,69 @@ test("can instantiate a Editor in an iframe", async () => {
 test("with an empty selector", async () => {
     const { el } = await setupEditor("<div>[]</div>", {});
     expect(el.innerHTML).toBe(
-        `<div class="o-paragraph o-we-hint" placeholder="Type &quot;/&quot; for commands"><br></div>`
+        `<div class="o-paragraph o-we-hint" o-we-hint-text="Type &quot;/&quot; for commands"><br></div>`
     );
     expect(getContent(el)).toBe(
-        `<div class="o-paragraph o-we-hint" placeholder='Type "/" for commands'>[]<br></div>`
+        `<div class="o-paragraph o-we-hint" o-we-hint-text='Type "/" for commands'>[]<br></div>`
     );
 });
 
 test("with a part of the selector in an empty HTMLElement", async () => {
     const { el } = await setupEditor("<div>a[bc<div>]</div></div>", {});
-    expect(el.innerHTML).toBe(`<div>abc<div class="o-paragraph"><br></div></div>`);
-    expect(getContent(el)).toBe(`<div>a[bc<div class="o-paragraph">]<br></div></div>`);
+    expect(el.innerHTML).toBe(
+        '<p data-selection-placeholder=""><br></p>' +
+            `<div>abc<div class="o-paragraph"><br></div></div>` +
+            '<p data-selection-placeholder=""><br></p>'
+    );
+    expect(getContent(el)).toBe(
+        '<p data-selection-placeholder=""><br></p>' +
+            `<div>a[bc<div class="o-paragraph">]<br></div></div>` +
+            '<p data-selection-placeholder=""><br></p>'
+    );
 });
 
 test("inverse selection", async () => {
     const { el } = await setupEditor("<div>a]bc<div>[</div></div>", {});
-    expect(el.innerHTML).toBe(`<div>abc<div class="o-paragraph"><br></div></div>`);
-    expect(getContent(el)).toBe(`<div>a]bc<div class="o-paragraph">[<br></div></div>`);
+    expect(el.innerHTML).toBe(
+        '<p data-selection-placeholder=""><br></p>' +
+            `<div>abc<div class="o-paragraph"><br></div></div>` +
+            '<p data-selection-placeholder=""><br></p>'
+    );
+    expect(getContent(el)).toBe(
+        '<p data-selection-placeholder=""><br></p>' +
+            `<div>a]bc<div class="o-paragraph">[<br></div></div>` +
+            '<p data-selection-placeholder=""><br></p>'
+    );
 });
 
 test("with an empty selector and a <br>", async () => {
     const { el } = await setupEditor("<p>[]<br></p>", {});
     expect(getContent(el)).toBe(
-        `<p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p>`
+        `<p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]<br></p>`
     );
 });
 
-test("no arrow key press or mouse click should keep selection near a contenteditable='false'", async () => {
+test("no arrow key press or mouse click should keep selection near a contenteditable='false' (1)", async () => {
     await testEditor({
         contentBefore: '[]<hr contenteditable="false">',
+        contentAfterEdit:
+            `<p data-selection-placeholder="" style="margin: 8px 0px -9px;" o-we-hint-text='Type "/" for commands' class="o-we-hint o-horizontal-caret">[]<br></p>` +
+            '<hr contenteditable="false">' +
+            '<p data-selection-placeholder="" style="margin: -9px 0px 8px;"><br></p>',
         contentAfter: "[]<hr>",
     });
+});
+
+test("no arrow key press or mouse click should keep selection near a contenteditable='false' (2)", async () => {
     await testEditor({
         contentBefore: '<hr contenteditable="false">[]',
-        contentAfter: "<hr>[]",
+        // Wait for selectionchange listener:
+        stepFunction: async () => await tick(),
+        contentAfterEdit:
+            '<p data-selection-placeholder="" style="margin: 8px 0px -9px;"><br></p>' +
+            '<hr contenteditable="false">' +
+            `<p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]<br></p>`,
+        contentAfter: "<hr><p>[]<br></p>",
     });
 });
 

@@ -32,17 +32,23 @@
 <!-- Main topbar -->
 <template id="exhibitors_topbar" name="Exhibitor Tools">
     <div class="d-flex d-print-none justify-content-end flex-wrap gap-2 w-100 mt-3">
-        <h3 class="my-0 me-auto pe-sm-4">Exhibitors</h3>
+        <h1 class="my-0 me-auto pe-sm-4 h3-fs">Exhibitors</h1>
         <form class="o_wevent_event_tags_form d-none d-lg-block" action="#" method="POST">
             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
             <div class="o_wesponsor_topbar_filters o_wevent_index_topbar_filters d-flex gap-2"/>
         </form>
         <div class="d-flex w-100 w-lg-auto">
-            <t t-set="exhibitor_search_placeholder">Search an exhibitor ...</t>
-            <t t-call="website_event.events_search_box">
-                <t t-set="_searches" t-value="searches"/>
+            <t t-call="website.website_search_box_input">
+                <t t-set="_classes" t-valuef="o_wevent_event_sponsor_searchbar_form flex-grow-1"/>
+                <t t-set="search_type" t-translation="off">sponsor</t>
                 <t t-set="action" t-value="'/event/%s/exhibitors' % (slug(event))"/>
-                <t t-set="_placeholder" t-value="exhibitor_search_placeholder"/>
+                <t t-set="display_detail" t-valuef="false"/>
+                <t t-set="search" t-value="search or searches and searches['search']"/>
+                <t t-set="placeholder">Search an exhibitor ...</t>
+                <t t-foreach="searches" t-as="item">
+                    <input t-if="item != 'search' and item_value != 'all'" type="hidden"
+                        t-att-name="item" t-att-value="item_value"/>
+                </t>
             </t>
             <button class="btn btn-light position-relative ms-2 d-lg-none"
                 data-bs-toggle="offcanvas"
@@ -202,7 +208,7 @@
 <template id="exhibitors_main" name="Exhibitors: Main Display">
     <!-- No exhibitors -->
     <div t-if="not sponsor_categories" class="col-12 text-center">
-        <div t-call="website_event.event_empty_events_svg" class="my-4"/>
+        <div class="my-4"><t t-call="website_event.event_empty_events_svg"/></div>
         <h2>No exhibitor found.</h2>
         <p t-if="search_key">We could not find any exhibitor matching your search for: <strong t-out="search_key"/>.</p>
         <p t-else="">We could not find any exhibitor at this moment.</p>
@@ -213,7 +219,7 @@
         </div>
     </div>
     <!-- Cards -->
-    <div class="col-12" t-call="website_event_exhibitor.exhibitors_display_cards"/>
+    <div class="col-12"><t t-call="website_event_exhibitor.exhibitors_display_cards"/></div>
 </template>
 
 <!-- Exhibitors: Cards-based display -->
@@ -262,8 +268,8 @@
                     <!-- Title -->
                     <h5 class="card-title d-flex align-items-start justify-content-between mt-0 mb-0">
                         <span t-field="sponsor.name" class="text-break fs-6 mb-2"/>
-                        <span t-if="sponsor.is_in_opening_hours and sponsor.chat_room_id"
-                            class="alert alert-danger mb-2 px-2 py-1 smaller lh-1">Live
+                        <span t-if="sponsor.is_in_opening_hours" class="alert alert-danger mb-2 px-2 py-1 smaller lh-1">
+                            Live
                         </span>
                     </h5>
                     <!-- Catchy sentence -->

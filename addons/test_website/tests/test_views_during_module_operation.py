@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.website.tools import MockRequest
+from odoo.addons.http_routing.tests.common import MockRequest
 from odoo.tests import standalone
 
 
@@ -70,8 +70,7 @@ def test_01_cow_views_unlink_on_module_update(env):
     # Upgrade the module
     test_website_module = env['ir.module.module'].search([('name', '=', 'test_website')])
     test_website_module.button_immediate_upgrade()
-    env.reset()     # clear the set of environments
-    env = env()     # get an environment that refers to the new registry
+    env.transaction.reset()     # clear the set of environments
 
     # Ensure generic views got removed
     view = env.ref('test_website.update_module_view_to_be_t_called', raise_if_not_found=False)
@@ -178,10 +177,22 @@ def test_02_copy_ids_views_unlink_on_module_update(env):
 
     view_website_1, view_website_2, theme_child_view = _simulate_xml_view()
 
+    old_registry = env.registry
+
     # Upgrade the module
     theme_default.button_immediate_upgrade()
-    env.reset()  # clear the set of environments
-    env = env()  # get an environment that refers to the new registry
+    env.transaction.reset()  # clear the set of environments
+
+    # Beware: records do not belong to the correct registry anymore
+    assert env.registry is not old_registry
+    # Therefore we need to re-obtain them
+    View = env['ir.ui.view']
+    ThemeView = env['theme.ir.ui.view']
+    Imd = env['ir.model.data']
+
+    website_1 = env['website'].browse(1)
+    website_2 = env['website'].browse(2)
+    theme_default = env.ref('base.module_theme_default')
 
     # Ensure the theme.ir.ui.view got removed (since there is an IMD but not
     # present in XML files)
@@ -204,8 +215,7 @@ def test_02_copy_ids_views_unlink_on_module_update(env):
     # Upgrade the module
     with MockRequest(env, website=website_1):
         theme_default.button_immediate_upgrade()
-    env.reset()  # clear the set of environments
-    env = env()  # get an environment that refers to the new registry
+    env.transaction.reset()  # clear the set of environments
 
     # Ensure the theme.ir.ui.view got removed (since there is an IMD but not
     # present in XML files)

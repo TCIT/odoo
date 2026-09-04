@@ -1,10 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     'name': 'Indian - Accounting',
-    'website': 'https://www.odoo.com/documentation/master/applications/finance/fiscal_localizations/india.html',
+    'website': 'https://www.odoo.com/documentation/latest/applications/finance/fiscal_localizations/india.html',
     'icon': '/account/static/description/l10n.png',
     'countries': ['in'],
-    'version': '2.0',
+    'version': '2.2',
     'description': """
 Indian Accounting: Chart of Account.
 ====================================
@@ -34,11 +34,23 @@ Sheet, now only Vertical format has been permitted Which is Supported By Odoo.
         'data/l10n_in_chart_data.xml',
         'data/l10n_in.port.code.csv',
         'data/res_country_state_data.xml',
+        'data/res_country_group.xml',
         'data/uom_data.xml',
         'data/res_partner_industry.xml',
         'data/account_cash_rounding.xml',
+        'data/account_tax_report_tcs_data.xml',
+        'data/account_tax_report_tds_data.xml',
+        'data/account_tax_report_tcs_it_act_25_data.xml',
+        'data/account_tax_report_tds_it_act_25_data.xml',
+        'data/account_report_data.xml',
+        'data/l10n_in.section.alert.csv',
+        'wizard/l10n_in_withhold_wizard.xml',
+        'views/l10n_in_pan_entity_views.xml',
+        'views/l10n_in_section_alert_views.xml',
+        'views/account_account_views.xml',
         'views/account_invoice_views.xml',
         'views/account_move_line_views.xml',
+        'views/account_payment_views.xml',
         'views/account_journal_views.xml',
         'views/res_config_settings_views.xml',
         'views/product_template_view.xml',
@@ -55,6 +67,7 @@ Sheet, now only Vertical format has been permitted Which is Supported By Odoo.
         'demo/demo_company.xml',
     ],
     'post_init_hook': 'post_init',
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
     'assets': {
         'web.assets_backend': [

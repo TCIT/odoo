@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
+from unittest import SkipTest
+from lxml import etree
 from odoo import Command
 from odoo.tests import freeze_time, tagged
 from odoo.addons.l10n_it_edi.tests.common import TestItEdi
@@ -175,6 +176,35 @@ class TestItEdiExport(TestItEdi):
         invoice.action_post()
         self._assert_export_invoice(invoice, 'invoice_non_latin_and_latin.xml')
 
+    def test_simplified_invoice_with_multiple_taxes_with_natura(self):
+        self.default_tax.write({'l10n_it_exempt_reason': 'N3.1'})
+        natura_tax = self.env['account.tax'].with_company(self.company).create({
+            'name': 'Exempt tax',
+            'amount_type': 'percent',
+            'amount': 4,
+        })
+
+        invoice = self.env['account.move'].with_company(self.company).create({
+            'move_type': 'out_invoice',
+            'partner_id': self.italian_partner_no_address_codice.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'line_with_multiple_taxes',
+                    'price_unit': 100.0,
+                    'tax_ids': [Command.set((self.default_tax + natura_tax).ids)],
+                }),
+            ],
+        })
+        invoice.action_post()
+
+        xml = invoice._l10n_it_edi_render_xml()
+        xml_root = etree.fromstring(xml)
+
+        natura_node = xml_root.xpath('.//DatiBeniServizi/Natura', namespaces={'p': 'http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0'})
+
+        self.assertTrue(natura_node, "The exported simplified invoice should contain a Natura node.")
+        self.assertEqual(natura_node[0].text, "N3.1")
+
     def test_invoice_below_400_codice_simplified(self):
         invoice = self.env['account.move'].with_company(self.company).create({
             'move_type': 'out_invoice',
@@ -216,7 +246,7 @@ class TestItEdiExport(TestItEdi):
         invoice.action_post()
         self._assert_export_invoice(invoice, 'invoice_total_400_VAT_simplified.xml')
 
-    def test_invoice_more_400_simplified(self):
+    def test_invoice_more_400_is_not_simplified(self):
         invoice = self.env['account.move'].with_company(self.company).create({
             'move_type': 'out_invoice',
             'invoice_date': '2022-03-24',
@@ -230,9 +260,10 @@ class TestItEdiExport(TestItEdi):
                 }),
             ],
         })
+        self.assertFalse(invoice._l10n_it_edi_is_simplified())
         self.assertEqual(['l10n_it_edi_partner_address_missing'], list(invoice._l10n_it_edi_export_data_check().keys()))
 
-    def test_invoice_non_domestic_simplified(self):
+    def test_invoice_non_domestic_is_not_simplified(self):
         invoice = self.env['account.move'].with_company(self.company).create({
             'move_type': 'out_invoice',
             'invoice_date': '2022-03-24',
@@ -246,6 +277,7 @@ class TestItEdiExport(TestItEdi):
                 }),
             ],
         })
+        self.assertFalse(invoice._l10n_it_edi_is_simplified())
         self.assertEqual(['l10n_it_edi_partner_address_missing'], list(invoice._l10n_it_edi_export_data_check().keys()))
 
     def test_bill_refund_no_reconcile(self):
@@ -323,35 +355,6 @@ class TestItEdiExport(TestItEdi):
         with self.subTest('credit note'):
             self._assert_export_invoice(credit_note, 'credit_note_negative_price.xml')
 
-        invoice = self.env['account.move'].with_company(self.company).create({
-            'move_type': 'out_invoice',
-            'invoice_date': '2022-03-24',
-            'invoice_date_due': '2022-03-24',
-            'partner_id': self.italian_partner_a.id,
-            'partner_bank_id': self.test_bank.id,
-            'invoice_line_ids': [
-                Command.create({
-                    'name': 'standard_line',
-                    'price_unit': 800.40,
-                    'tax_ids': [Command.set(self.default_tax.ids)],
-                }),
-                Command.create({
-                    'name': 'negative_line',
-                    'price_unit': -100.0,
-                    'tax_ids': [Command.set(self.default_tax.ids)],
-                }),
-                # This negative line can't be dispatched, rejeted.
-                Command.create({
-                    'name': 'negative_line_different_tax',
-                    'price_unit': -50.0,
-                    'tax_ids': [Command.set(tax_10.ids)],
-                    }),
-            ],
-        })
-        invoice.action_post()
-        with self.subTest('invoice_different_taxes'):
-            self._assert_export_invoice(invoice, 'invoice_negative_price_different_taxes.xml')
-
     def test_invoice_more_decimal_price_unit(self):
         decimal_precision_name = self.env['account.move.line']._fields['price_unit']._digits
         decimal_precision = self.env['decimal.precision'].search([('name', '=', decimal_precision_name)])
@@ -379,6 +382,7 @@ class TestItEdiExport(TestItEdi):
         self.italian_partner_a.zip = False  # invalid configuration for partner -> proforma pdf
         invoice = self.env['account.move'].with_company(self.company).create({
             'partner_id': self.italian_partner_a.id,
+            'invoice_date': '2024-03-24',
             'move_type': 'out_invoice',
             'invoice_line_ids': [
                 Command.create({
@@ -403,7 +407,7 @@ class TestItEdiExport(TestItEdi):
             'amount': 0.0,
             'amount_type': 'percent',
             'l10n_it_exempt_reason': 'N3.1',
-            'l10n_it_law_reference': 'Art. 8, c.1, lett.a - D.P.R. 633/1972',
+            'invoice_legal_notes': 'Art. 8, c.1, lett.a - D.P.R. 633/1972',
         })
 
         american_partner_b = self.env['res.partner'].create({
@@ -501,17 +505,18 @@ class TestItEdiExport(TestItEdi):
         if self.env['ir.module.module']._get('sale').state != 'installed':
             self.skipTest("sale module is not installed")
 
-        sale_order = self.env['sale.order'].with_company(self.company).create({
+        sale_order = self.env['sale.order'].with_company(self.company).sudo().create({
             'partner_id': self.italian_partner_a.id,
             'order_line': [
                 Command.create({'product_id': self.service_product.id, 'price_unit': 200.00}),
             ],
         })
+        sale_order.name = 'SO-IT0001'
         sale_order.action_confirm()
 
         for amount in (50, 100):
             self.env['account.move'].with_company(self.company).browse(
-                self.env['sale.advance.payment.inv'].create([{
+                self.env['sale.advance.payment.inv'].sudo().create([{
                     'advance_payment_method': 'fixed',
                     'fixed_amount': amount,
                     'sale_order_ids': [Command.link(sale_order.id)],
@@ -519,10 +524,307 @@ class TestItEdiExport(TestItEdi):
             ).action_post()
 
         invoice = self.env['account.move'].with_company(self.company).browse(
-            self.env['sale.advance.payment.inv'].create([{
+            self.env['sale.advance.payment.inv'].sudo().create([{
                 'advance_payment_method': 'delivered',
                 'sale_order_ids': [Command.link(sale_order.id)],
             }]).create_invoices()['res_id']
         )
         invoice.action_post()
         self._assert_export_invoice(invoice, 'test_export_invoice_with_two_downpayments.xml')
+
+    @freeze_time("2025-02-03")
+    def test_export_credit_note_on_downpayment_only_lists_origin_invoice(self):
+        """ A credit note crediting a down payment invoice directly must only reference
+            that invoice in DatiFattureCollegate, not every other move ever linked to the
+            same down payment sale order line (see 'downpayment_moves' in
+            _l10n_it_edi_export_data).
+        """
+        if self.env['ir.module.module']._get('sale').state != 'installed':
+            self.skipTest("sale module is not installed")
+
+        sale_order = self.env['sale.order'].with_company(self.company).sudo().create({  # noqa: OLS03001
+            'partner_id': self.italian_partner_a.id,
+            'order_line': [
+                Command.create({'product_id': self.service_product.id, 'price_unit': 200.00}),
+            ],
+        })
+        sale_order.action_confirm()
+
+        downpayment_invoice = self.env['account.move'].with_company(self.company).browse(
+            self.env['sale.advance.payment.inv'].sudo().create([{
+                'advance_payment_method': 'fixed',
+                'fixed_amount': 50,
+                'sale_order_ids': [Command.link(sale_order.id)],
+            }]).create_invoices()['res_id']
+        )
+        downpayment_invoice.action_post()
+
+        # Credit the down payment invoice directly, without reconciling it against
+        # anything else, so DatiFattureCollegate must fall back to reversed_entry_id.
+        credit_note = downpayment_invoice._reverse_moves()
+        credit_note.action_post()
+
+        xml = credit_note._l10n_it_edi_render_xml()
+        xml_root = etree.fromstring(xml)
+        id_documento_nodes = xml_root.xpath('.//DatiFattureCollegate/IdDocumento')
+
+        self.assertEqual(
+            [node.text for node in id_documento_nodes],
+            [downpayment_invoice.name],
+            "DatiFattureCollegate must reference only the down payment invoice this credit "
+            "note credits, not itself nor any other move sharing the down payment line.",
+        )
+
+    @freeze_time('2025-03-07')
+    def test_send_prezzo_unitario_converted_to_company_currency(self):
+        """
+        Test that the prezzo unitario is converted to the company currency when the invoice is in a foreign currency
+        """
+        usd = self.env.ref('base.USD')
+        self.env['res.currency.rate'].create({
+            'name': '2025-01-01',
+            'rate': 1.54639273,
+            'currency_id': usd.id,
+            'company_id': self.company.id,
+        })
+
+        invoice = self.init_invoice(
+            move_type='out_invoice',
+            partner=self.italian_partner_a,
+            invoice_date='2025-02-24',
+            post=True,
+            amounts=[100],
+            taxes=[self.default_tax],
+            company=self.company,
+            currency=usd,
+        )
+
+        self._assert_export_invoice(invoice, 'prezzio_unitario_converted_company_currency.xml')
+
+    def test_export_XML_lowercase_fields_and_payment_method(self):
+        partner = self.env['res.partner'].create({
+            'name': 'Alessi',
+            'l10n_it_codice_fiscale': 'Mrtmtt91d08f205j',
+            'l10n_it_pa_index': 'N8mimm9',
+            'is_company': False,
+        })
+
+        invoice = self.env['account.move'].with_company(self.company).create({
+            'move_type': 'out_invoice',
+            'invoice_date': '2022-03-24',
+            'invoice_date_due': '2022-03-24',
+            'partner_id': partner.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'line1',
+                    'price_unit': 800.40,
+                    'tax_ids': [Command.set(self.default_tax.ids)],
+                }),
+            ],
+            'l10n_it_payment_method': 'MP15',
+        })
+        invoice.action_post()
+        self._assert_export_invoice(invoice, 'invoice_lowercase_fields.xml')
+
+    def test_export_XML_product_with_multiline_description_field(self):
+        invoice = self.env['account.move'].with_company(self.company).create({
+            'move_type': 'out_invoice',
+            'invoice_date': '2022-03-24',
+            'invoice_date_due': '2022-03-24',
+            'partner_id': self.italian_partner_a.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'product_id': self.product_a.id,
+                    'name': 'High-quality ergonomic office chair.\nBreathable mesh back and cushioned seat.\nAdjustable height and lumbar support.\nSupports up to 120 kg weight capacity.\nIdeal for home and corporate workspaces.',
+                    'price_unit': 800.40,
+                    'tax_ids': [Command.set(self.default_tax.ids)],
+                }),
+            ],
+        })
+        invoice.action_post()
+        self._assert_export_invoice(invoice, 'invoice_with_multiple_product_description_fields.xml')
+
+    def test_export_invoice_with_rounding_lines_value(self):
+        """Test that invoices with rounding lines are correctly exported with exempt tax 'N2.2'."""
+        self.env['res.config.settings'].create({
+            'company_id': self.company.id,
+            'group_cash_rounding': True
+        })
+
+        cash_rounding_add_invoice_line = self.env['account.cash.rounding'].with_company(self.company).create({
+            'name': 'Rounding to 0.05',
+            'rounding': 0.05,
+            'strategy': 'add_invoice_line',
+            'profit_account_id': self.company_data_2['default_account_revenue'].id,
+            'loss_account_id': self.company_data_2['default_account_expense'].id,
+            'rounding_method': 'HALF-UP',
+        })
+
+        invoice = self.env['account.move'].with_company(self.company).create({
+            'move_type': 'out_invoice',
+            'partner_id': self.italian_partner_a.id,
+            'invoice_date': '2022-03-24',
+            'invoice_date_due': '2022-03-24',
+            'invoice_cash_rounding_id': cash_rounding_add_invoice_line.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'standard_line',
+                    'price_unit': 100.02,
+                    'tax_ids': [Command.set(self.default_tax.ids)],
+                }),
+            ]
+        })
+        invoice.action_post()
+
+        self._assert_export_invoice(invoice, 'invoice_with_rounding_line.xml')
+
+    def test_export_invoice_exclude_postdated_moves(self):
+        """Test that in case of Credit note A, originated from Invoice A but reconciled
+           with Invoice B, we consider for DatiFattureCollegate xml element only
+           documents dated not after credit note A
+        """
+        invoice_a = self.env['account.move'].with_company(self.company).create({
+            'move_type': 'out_invoice',
+            'invoice_date': '2022-03-24',
+            'invoice_date_due': '2022-03-24',
+            'partner_id': self.italian_partner_a.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': "Product A",
+                    'price_unit': 800.40,
+                    'tax_ids': [Command.set(self.default_tax.ids)],
+                })
+            ]
+        })
+        invoice_a.action_post()
+
+        credit_note = invoice_a._reverse_moves([{
+            'invoice_date': '2022-03-24',
+        }])
+        credit_note.write({
+            'invoice_line_ids': [
+                Command.clear(),
+                Command.create({
+                    'name': "Product A",
+                    'price_unit': 500.0,
+                    'tax_ids': [Command.set(self.default_tax.ids)],
+                })
+            ]
+        })
+        credit_note.action_post()
+        credit_note.line_ids.filtered(lambda l: l.account_type == 'asset_receivable').remove_move_reconcile()
+
+        invoice_b = self.env['account.move'].with_company(self.company).create({
+            'move_type': 'out_invoice',
+            'invoice_date': '2022-03-25',
+            'invoice_date_due': '2022-03-25',
+            'partner_id': self.italian_partner_a.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': "Product A",
+                    'price_unit': 600,
+                    'tax_ids': [Command.set(self.default_tax.ids)],
+                })
+            ]
+        })
+        invoice_b.action_post()
+        (invoice_b.line_ids + credit_note.line_ids).filtered(lambda line: line.account_type in ('asset_receivable')).reconcile()
+        self._assert_export_invoice(credit_note, 'invoice_exclude_postdated_moves.xml')
+
+    def test_export_XML_oss_tax(self):
+        be_partner = self.env['res.partner'].create({
+            'name': 'Alessi',
+            'vat': 'BE0477472701',
+            'country_id': self.env.ref('base.be').id,
+            'is_company': True,
+        })
+        oss_tag = self.env.ref('l10n_eu_oss.tag_oss', raise_if_not_found=False)
+        if not oss_tag:
+            raise SkipTest("l10n_eu_oss Module not installed")
+
+        oss_tax = self.env['account.tax'].create({
+            'name': 'OSS Tax',
+            'type_tax_use': 'sale',
+            'amount': 20,
+            'country_id': self.company.account_fiscal_country_id.id,
+            'company_id': self.company.id,
+            'invoice_repartition_line_ids': [
+                Command.create({'repartition_type': 'base'}),
+                Command.create({
+                    'repartition_type': 'tax',
+                    'tag_ids': [Command.set(oss_tag.ids)],
+                }),
+            ],
+        })
+
+        invoice = self.env['account.move'].with_company(self.company).create({
+            'move_type': 'out_invoice',
+            'invoice_date': '2022-03-24',
+            'invoice_date_due': '2022-03-24',
+            'partner_id': be_partner.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': "Product A",
+                    'price_unit': 100,
+                    'tax_ids': [Command.set(oss_tax.ids)],
+                })
+            ],
+        })
+        invoice.action_post()
+        self._assert_export_invoice(invoice, 'invoice_with_oss_tax.xml')
+
+    def test_export_invoice_uom_unicode_normalization(self):
+        """Test that non-standard Unicode characters (e.g. m², m³) are correctly normalized for XML invoices."""
+
+        self.product_a.uom_id = self.product_a.uom_id.copy({'name': 'm²'})
+        invoice = self._create_invoice(
+            partner_id=self.italian_partner_a,
+            post=True,
+            invoice_line_ids=[self._prepare_invoice_line(product_id=self.product_a, price_unit=800.40)],
+        )
+
+        xml = invoice._l10n_it_edi_render_xml()
+        invoice_tree = etree.fromstring(xml)
+
+        uom_nodes = invoice_tree.xpath("//*[local-name()='DettaglioLinee']/*[local-name()='UnitaMisura']")
+        self.assertEqual(uom_nodes[0].text, 'm2')
+
+    # Simplified tests ----------------------------------------------------
+    def _force_simplified(self, partner):
+        td07 = self.env['l10n_it.document.type'].search([('code', '=', 'TD07')], limit=1)
+        return self.env['account.move'].with_company(self.company).create({
+            'move_type': 'out_invoice',
+            'invoice_date': '2022-03-24',
+            'invoice_date_due': '2022-03-24',
+            'partner_id': partner.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'cheap_line',
+                    'price_unit': 100.00,
+                    'tax_ids': [Command.set(self.default_tax.ids)],
+                }),
+            ],
+            'l10n_it_document_type': td07.id,
+        })
+
+    def _get_simplified_errors(self, moves):
+        return [
+            k
+            for k, v in moves._l10n_it_edi_is_simplified_checks().items()
+            if v.get('level') in ('warning', 'error')
+        ]
+
+    def test_invoice_non_domestic_force_simplified(self):
+        """ If the user forces a simplified document type (i.e. TD07) on a non-italian partner, an error is raised """
+        invoice = self._force_simplified(self.american_partner)
+        self.assertEqual(['l10n_it_edi_move_simplified_partner'], self._get_simplified_errors(invoice))
+
+    def test_invoice_domestic_force_simplified(self):
+        """ If the user forces a simplified document type (i.e. TD07) on an italian partner, it works """
+        invoice = self._force_simplified(self.italian_partner_a)
+        self.assertEqual([], self._get_simplified_errors(invoice))
+
+    def test_invoice_pa_force_simplified(self):
+        """ If the user forces a simplified document type (i.e. TD07) on an italian PA partner, errors are raised """
+        invoice = self._force_simplified(self.italian_partner_b)
+        self.assertEqual(['l10n_it_edi_move_simplified_partner'], self._get_simplified_errors(invoice))

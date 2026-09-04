@@ -1,18 +1,17 @@
-/** @odoo-module */
-
 import { PosOrder } from "@point_of_sale/app/models/pos_order";
 import { patch } from "@web/core/utils/patch";
 
 patch(PosOrder.prototype, {
     setup() {
         super.setup(...arguments);
-
-        if (!this.uiState.lineChanges) {
-            this.uiState = {
-                ...this.uiState,
-                lineChanges: {},
-            };
-        }
+    },
+    initState() {
+        super.initState();
+        this.uiState = {
+            ...this.uiState,
+            lineChanges: this.uiState.lineChanges || {},
+            receiptReady: false,
+        };
     },
     get unsentLines() {
         return this.lines.filter(
@@ -35,10 +34,13 @@ patch(PosOrder.prototype, {
             return acc;
         }, {});
     },
+    get isTakeaway() {
+        return this.preset_id?.service_at !== "table" && this.config.use_presets;
+    },
     recomputeChanges() {
         const lines = this.lines;
         for (const line of lines) {
-            if (typeof line.id === "string") {
+            if (!line.isSynced) {
                 continue;
             }
 
@@ -60,5 +62,15 @@ patch(PosOrder.prototype, {
                 delete this.uiState.lineChanges[uuid];
             }
         }
+    },
+    serializeForORM(opts = {}) {
+        const data = super.serializeForORM(opts);
+        if (this.mobile && !data.mobile) {
+            data.mobile = this.mobile;
+        }
+        if (this.email && !data.email) {
+            data.email = this.email;
+        }
+        return data;
     },
 });

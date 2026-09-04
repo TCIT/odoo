@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
     import { changePricelist, checkPriceCart } from "@website_event_sale/../tests/tours/helpers/WebsiteEventSaleTourMethods";
 
     function checkPriceBooth(eventName, price, priceSelected) {
@@ -8,16 +6,19 @@
                 content: "Go to page Event",
                 trigger: '.nav-link:contains("Event")',
                 run: "click",
+                expectUnloadPage: true,
             },
             {
                 content: 'Open "Test Event Booths" event',
                 trigger: `h5.card-title span:contains(${eventName})`,
                 run: "click",
+                expectUnloadPage: true,
             },
             {
-                content: 'Go to "Get A Booth" page',
-                trigger: 'li.nav-item a:has(span:contains("Get A Booth"))',
+                content: 'Go to "Booth" page',
+                trigger: 'a:contains("Become exhibitor")',
                 run: "click",
+                expectUnloadPage: true,
             },
             {
                 content: 'Select the booth',

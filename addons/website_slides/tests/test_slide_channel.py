@@ -2,11 +2,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo.addons.website_slides.tests import common as slides_common
 from odoo.exceptions import UserError
-from odoo.tests.common import users
+from odoo.tests.common import HttpCase, users
 from unittest.mock import patch
 
 
-class TestSlidesManagement(slides_common.SlidesCase):
+class TestSlidesManagement(slides_common.SlidesCase, HttpCase):
 
     @users('user_officer')
     def test_get_categorized_slides(self):
@@ -41,7 +41,7 @@ class TestSlidesManagement(slides_common.SlidesCase):
             self.assertTrue(slide.active, "All slide should be archived when a channel is archived")
             self.assertTrue(slide.is_published, "All slide should be unpublished when a channel is archived")
 
-        self.channel.toggle_active()
+        self.channel.action_archive()
         self.assertFalse(self.channel.active)
         self.assertFalse(self.channel.is_published)
         # channel_partner should still NOT be marked as completed
@@ -66,6 +66,14 @@ class TestSlidesManagement(slides_common.SlidesCase):
             'visibility': 'public',
             'is_published': True,
         })
+
+        # test the behavior on both employees and portal users
+        users = self.user_emp | self.user_portal
+        channel.sudo()._action_add_members(users.partner_id)
+        memberships = self.env['slide.channel.partner'].sudo().search([('partner_id', 'in', users.partner_id.ids)])
+
+        # with no slides, next_slide_id is False for all memberships
+        self.assertFalse(memberships.next_slide_id)
 
         category_1, category_2 = self.env['slide.slide'].create([{
             'name': 'Category %s' % i,
@@ -93,10 +101,8 @@ class TestSlidesManagement(slides_common.SlidesCase):
         } for i in [3, 4]])
 
         self.assertEqual(channel.slide_content_ids, slide_1 | slide_2 | slide_3 | slide_4)
-        # test the behavior on both employees and portal users
-        users = self.user_emp | self.user_portal
-        channel.sudo()._action_add_members(users.partner_id)
-        memberships = self.env['slide.channel.partner'].sudo().search([('partner_id', 'in', users.partner_id.ids)])
+        # force recompute next slide based on added slides
+        memberships.invalidate_recordset(fnames=['next_slide_id'])
 
         for membership in memberships:
             for slide in channel.slide_content_ids:
@@ -156,6 +162,33 @@ class TestSlidesManagement(slides_common.SlidesCase):
                 for mail in created_mails)
         )
 
+    def test_merging_partners_with_course_memberships(self):
+        """ Test merging partners with course memberships """
+        course_1, course_2 = self.env['slide.channel'].create([{'name': 'Course 1'}, {'name': 'Course 2'}])
+        partner_1, partner_2, partner_3 = partners = self.env['res.partner'].create([
+            {'name': 'Partner 1', 'email': 'partner1@example.com'},
+            {'name': 'Partner 2', 'email': 'partner2@example.com'},
+            {'name': 'Partner 3', 'email': 'partner3@example.com'}])
+        partners.invalidate_recordset(fnames=['slide_channel_ids'])
+        course_1.sudo()._action_add_members(partner_1 | partner_2)
+        course_2.sudo()._action_add_members(partner_1 | partner_3)
+        wizard = self.env['base.partner.merge.automatic.wizard'].create({})
+
+        with self.assertRaises(UserError) as user_error:
+            wizard._merge([partner_1.id, partner_2.id], partner_1)
+
+        self.assertEqual(
+            user_error.exception.args[0],
+            "You cannot merge these contacts because multiple contacts are enrolled in the same courses: Course 1",
+            "Error message should appear that mentions the common courses that prevent the merge"
+        )
+
+        wizard._merge([partner_2.id, partner_3.id], partner_2)
+        self.assertFalse(partner_3.exists(), "Source partner should be deleted after merge")
+        self.assertTrue(partner_2.exists(), "Destination partner should exist after merge")
+        self.assertIn(course_1, partner_2.slide_channel_ids, "Course 1 should belong to destination partner")
+        self.assertIn(course_2, partner_2.slide_channel_ids, "Course 2 should belong to destination partner")
+
     def test_mail_completed_with_different_templates(self):
         """ When the completion email is generated, it must take into account different templates. """
 
@@ -174,7 +207,8 @@ class TestSlidesManagement(slides_common.SlidesCase):
             })],
             'completed_template_id': mail_template.id
         })
-        self.channel.completed_template_id.body_html = '<p>TestBodyTemplate</p>'
+        # sudo because creator has no rights to modify templates
+        self.channel.sudo().completed_template_id.body_html = '<p>TestBodyTemplate</p>'
 
         all_channels = self.channel | channel_2
         all_channels.sudo()._action_add_members(self.user_officer.partner_id)
@@ -233,6 +267,45 @@ class TestSlidesManagement(slides_common.SlidesCase):
             f'Impossible to send emails. Select a "Share Template" for courses {channel_without_template.name} first'
         )
 
+    @users('user_manager')
+    def test_slides_prepare_preview(self):
+        """Ensure archived slides are not used during slide preview.
+
+            1) Create a channel and category for it
+            2) Go to website > courses > Open the channel
+            3) Add content > video > Add video link > Save and publish > delete
+            4) Repeat above step
+            5) Add content > video > Add any text in video link > Save and publish
+        """
+        self.authenticate("admin", "admin")
+
+        for _ in range(2):
+            self.make_jsonrpc_request('/slides/add_slide',
+                {
+                    "channel_id": self.channel.id,
+                    "name": "Test name",
+                    "slide_category": "video",
+                    "source_type": "external",
+                    "video_url": "test",
+                    "category_id": [self.category.id],
+                }, headers={'Content-Type': 'application/json'})
+
+            self.make_jsonrpc_request('/slides/slide/archive',
+                {"slide_id": self.channel.slide_ids[-1].id}, headers={'Content-Type': 'application/json'})
+
+        self.make_jsonrpc_request(
+            '/slides/prepare_preview',
+            {
+                'channel_id': self.channel.id,
+                'slide_category': 'video',
+                'url': 'test',
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+
+        slide = self.channel.slide_ids.filtered(lambda slide: slide.name == 'memory_record_for_computed_fields')
+        self.assertFalse(slide)
+
     def test_unlink_slide_channel(self):
         self.assertTrue(self.channel.slide_content_ids.mapped('question_ids').exists(),
             "Has question(s) linked to the slides")
@@ -250,7 +323,7 @@ class TestSlidesManagement(slides_common.SlidesCase):
             return 13.37
 
         with patch(
-            'odoo.addons.website_slides.models.slide_slide.Slide._get_completion_time_pdf',
+            'odoo.addons.website_slides.models.slide_slide.SlideSlide._get_completion_time_pdf',
             new=_get_completion_time_pdf
         ):
             slides_1 = self.env['slide.slide'].create({

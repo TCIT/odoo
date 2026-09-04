@@ -1,44 +1,44 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* product
-# 
+# * product
+#
 # Translators:
-# Andre Roomet <andreroomet@gmail.com>, 2024
-# Patrick-Jordan Kiudorv, 2024
-# Helen Sulaoja <helen@avalah.ee>, 2024
-# Wanradt Koell <wanradt@gmail.com>, 2024
-# Tairi Tiimann, 2024
-# Egon Raamat <egon@avalah.ee>, 2024
-# Triine Aavik <triine@avalah.ee>, 2024
-# Mihkel avalah, 2024
-# Martin Trigaux, 2024
-# Arma Gedonsky <armagedonsky@hot.ee>, 2024
-# Eneli Õigus <enelioigus@gmail.com>, 2024
-# Stevin Lilla, 2024
-# Piia Paurson <piia@avalah.ee>, 2024
-# Oliver Ernest, 2024
-# Rivo Zängov <eraser@eraser.ee>, 2024
-# Algo Kärp <algokarp@gmail.com>, 2024
-# Martin Aavastik <martin@avalah.ee>, 2024
-# Leaanika Randmets, 2024
-# JanaAvalah, 2024
-# Anna, 2024
-# Katrin Kampura, 2024
-# Siim Raasuke, 2025
-# 
+# Wanradt Koell <wanradt@gmail.com>, 2022
+# Martin Talts <martin.t@avalah.ee>, 2022
+# Andre Roomet <andreroomet@gmail.com>, 2022
+# Egon Raamat <egon@avalah.ee>, 2022
+# Oliver Ernest, 2022
+# Gert Valdek <gert@airobot.ee>, 2022
+# Algo Kärp <algokarp@gmail.com>, 2022
+# Martin Aavastik <martin@avalah.ee>, 2022
+# Martin Trigaux, 2022
+# Triine Aavik <triine@avalah.ee>, 2022
+# Piia Paurson <piia@avalah.ee>, 2022
+# Eneli Õigus <enelioigus@gmail.com>, 2022
+# Patrick-Jordan Kiudorv, 2022
+# Arma Gedonsky <armagedonsky@hot.ee>, 2022
+# Rivo Zängov <eraser@eraser.ee>, 2022
+# Anna, 2023
+# JanaAvalah, 2023
+# Leaanika Randmets, 2023
+# Tairi Tiimann <tairi@avalah.ee>, 2025, 2026.
+# Kristina Pešehodko <kristina@avalah.ee>, 2025, 2026.
+# Odoo Translation Bot <c3p@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 13:04+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Siim Raasuke, 2025\n"
-"Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
+"POT-Creation-Date: 2026-04-10 18:39+0000\n"
+"PO-Revision-Date: 2026-08-07 04:44+0000\n"
+"Last-Translator: Tairi Tiimann <tairi@avalah.ee>\n"
+"Language-Team: Estonian <https://translate.odoo.com/projects/odoo-19/product/"
+"et/>\n"
+"Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: et\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: product
 #. odoo-python
@@ -65,38 +65,34 @@ msgid "# Products"
 msgstr "Tooted"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
-msgid "$14.00"
-msgstr "$14.00"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
-msgid "$15.00"
-msgstr "$15.00"
+#. odoo-python
+#: code:addons/product/models/product_pricelist_item.py:0
+msgid ""
+"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra "
+"fee\n"
+"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
+"(total_amount)s"
+msgstr ""
+"%(base)s millega %(discount)s %% %(discount_type)s ja %(surcharge)s "
+"lisatasu\n"
+"Näide: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
+"(total_amount)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid ""
-"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra fee\n"
-"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %(total_amount)s"
+"%(item_name)s: end date (%(end_date)s) should be after start date (%"
+"(start_date)s)"
 msgstr ""
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/product_pricelist_item.py:0
-msgid ""
-"%(item_name)s: end date (%(end_date)s) should be after start date "
-"(%(start_date)s)"
-msgstr ""
-"%(item_name)s: lõpukuupäev (%(end_date)s) peaks olema pärast alguskuupäeva "
-"(%(start_date)s)"
+"%(item_name)s: lõppkuupäev (%(end_date)s) peaks olema pärast alguskuupäeva (%"
+"(start_date)s)"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid "%(percentage)s %% %(discount_type)s on %(base)s %(extra)s"
-msgstr ""
+msgstr "%(percentage)s %% %(discount_type)s on %(base)s %(extra)s"
 
 #. module: product
 #. odoo-python
@@ -108,10 +104,11 @@ msgstr "%(percentage)s %% allahindlus hinnakirja(del) %(pricelist)s"
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid "%(percentage)s %% discount on sales price"
-msgstr "%(percentage)s %% allahindlus müügihinnale"
+msgstr "%(percentage)s %% allahindlus müügihinnal"
 
 #. module: product
 #. odoo-python
+#: code:addons/product/models/product_category.py:0
 #: code:addons/product/models/product_pricelist.py:0
 #: code:addons/product/models/product_tag.py:0
 #: code:addons/product/models/product_template.py:0
@@ -129,8 +126,8 @@ msgstr "'Tootesildid - %s' % (object.name)"
 
 #. module: product
 #: model:ir.actions.report,print_report_name:product.report_product_packaging
-msgid "'Products packaging - %s' % (object.name)"
-msgstr "'Toote pakend - %s' % (object.name)"
+msgid "'Products packaging - %s' % (object.uom_id.name)"
+msgstr "'Toote pakend - %s'% (object.uom_id.name)"
 
 #. module: product
 #. odoo-python
@@ -153,37 +150,37 @@ msgstr "- %(amount)s allahindlus"
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_product.py:0
-msgid "- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
+msgid ""
+"- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
 msgstr ""
 "- Triipkood \"%(barcode)s\" on juba määratud too(de)tele: %(product_list)s"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__create_variant
 msgid ""
-"- Instantly: All possible variants are created as soon as the attribute and its values are added to a product.\n"
-"        - Dynamically: Each variant is created only when its corresponding attributes and values are added to a sales order.\n"
+"- Instantly: All possible variants are created as soon as the attribute and "
+"its values are added to a product.\n"
+"        - Dynamically: Each variant is created only when its corresponding "
+"attributes and values are added to a sales order.\n"
 "        - Never: Variants are never created for the attribute.\n"
 "        Note: this cannot be changed once the attribute is used on a product."
 msgstr ""
 "- Kohe: kõik variatsiooni luuakse niipea kui need on tootele lisatud.\n"
-"        - Dünaamiliselt: iga variatsioon luuakse pärast vastava atribuudid ja väärtused on lisatud müügitellimusele.\n"
+"        - Dünaamiliselt: iga variatsioon luuakse pärast vastava atribuudid "
+"ja väärtused on lisatud müügitellimusele.\n"
 "        - Kunagi: Variatsioone ei looda atribuudile kunagi.\n"
-"        Märkus: niipea kui atribuuti on tootel kasutatud, ei saa antud seadistust enam muuta. "
+"        Märkus: niipea kui atribuuti on tootel kasutatud, ei saa antud "
+"seadistust enam muuta."
 
 #. module: product
-#: model:product.attribute.value,name:product.product_attribute_value_5
+#: model:product.attribute.value,name:product.pav_duration_month_1
+msgid "1 month"
+msgstr "1 kuu"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_duration_year_1
 msgid "1 year"
 msgstr "1 aasta"
-
-#. module: product
-#: model:product.attribute.value,name:product.pav_warranty
-msgid "1 year warranty extension"
-msgstr "1 aasta garantii pikendust"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
-msgid "10"
-msgstr "10"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
@@ -191,24 +188,34 @@ msgid "10 Units"
 msgstr "10 ühikut"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
-msgid "123456789012"
-msgstr "123456789012"
-
-#. module: product
 #: model:product.template,description_sale:product.product_product_4_product_template
-msgid "160x80cm, with large legs."
-msgstr "160x80cm, koos suurte jalgadega."
+msgid "160x80cm, with large legs"
+msgstr "160x80cm, koos suurte jalgadega"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_label_layout__print_format__2x7xprice
 msgid "2 x 7 with price"
-msgstr "2 x 7, koos hinnaga"
+msgstr "2 x 7 koos hinnaga"
 
 #. module: product
-#: model:product.attribute.value,name:product.product_attribute_value_6
-msgid "2 year"
+#: model:product.attribute.value,name:product.pav_duration_year_2
+msgid "2 years"
 msgstr "2 aastat"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_size_2xl
+msgid "2XL"
+msgstr "2XL"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_duration_year_3
+msgid "3 years"
+msgstr "3 aastat"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_size_3xl
+msgid "3XL"
+msgstr "3XL"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_label_layout__print_format__4x12
@@ -226,6 +233,30 @@ msgid "4 x 7 with price"
 msgstr "4 x 7, koos hinnaga"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_size_4xl
+msgid "4XL"
+msgstr "4XL"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_size_5xl
+msgid "5XL"
+msgstr "5XL"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_duration_month_6
+msgid "6 months"
+msgstr "6 kuud"
+
+#. module: product
+#: model_terms:product.template,website_description:product.product_product_4_product_template
+msgid ""
+"<a href=\"/contactus\" class=\"mb-2 btn btn-primary "
+"o_translate_inline\">Contact Us</a>"
+msgstr ""
+"<a href=\"/contactus\" class=\"mb-2 btn btn-primary o_translate_inline\">"
+"Võtke meiega ühendust</a>"
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid "<b>Tip: want to round at 9.99?</b>"
 msgstr "<b>Nõuanne: kas soovid ümardada kuni 9.99?</b>"
@@ -241,47 +272,22 @@ msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view_kanban
-msgid "<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" title=\"Currency\"/>"
-msgstr "<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" title=\"Currency\"/>"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid ""
-"<span class=\"o_stat_text\" invisible=\"pricelist_item_count == 1\">\n"
-"                                            Rules\n"
-"                                        </span>\n"
-"                                        <span class=\"o_stat_text\" invisible=\"pricelist_item_count != 1\">\n"
-"                                            Rule\n"
-"                                        </span>"
+"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" "
+"title=\"Currency\"/>"
 msgstr ""
-"<span class=\"o_stat_text\" invisible=\"pricelist_item_count == 1\">\n"
-"                                            Reeglid\n"
-"                                        </span>\n"
-"                                        <span class=\"o_stat_text\" invisible=\"pricelist_item_count != 1\">\n"
-"                                            Reegel\n"
-"                                        </span>"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_template_form_view
-msgid ""
-"<span class=\"o_stat_text\" invisible=\"pricelist_item_count == 1\">\n"
-"                                        Pricelists\n"
-"                                    </span>\n"
-"                                    <span class=\"o_stat_text\" invisible=\"pricelist_item_count != 1\">\n"
-"                                        Pricelist\n"
-"                                    </span>"
-msgstr ""
-"<span class=\"o_stat_text\" invisible=\"pricelist_item_count == 1\">\n"
-"                                        Hinnakirjad\n"
-"                                    </span>\n"
-"                                    <span class=\"o_stat_text\" invisible=\"pricelist_item_count != 1\">\n"
-"                                        Hinnakiri\n"
-"                                    </span>"
+"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" "
+"title=\"Currency\"/>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_category_form_view
 msgid "<span class=\"o_stat_text\"> Products</span>"
 msgstr "<span class=\"o_stat_text\"> Tooted</span>"
+
+#. module: product
+#: model_terms:ir.ui.view,arch_db:product.uom_uom_form_view_inherit
+msgid "<span class=\"o_stat_text\">Packaging Barcodes</span>"
+msgstr "<span class=\"o_stat_text\">Pakendi triipkood</span>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_attribute_view_form
@@ -294,30 +300,19 @@ msgid "<span>%</span>"
 msgstr "<span>%</span>"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
-msgid ""
-"<span>%</span>\n"
-"                                <span>on</span>"
-msgstr ""
-
-#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
 msgid "<span>All general settings about this product are managed on</span>"
 msgstr "<span>Kõiki selle toote üldseadeid hallatakse</span>"
 
 #. module: product
+#: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
+msgid "<span>on</span>"
+msgstr "<span>on</span>"
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
 msgid "<strong>Qty: </strong>"
 msgstr "<strong>Kogus: </strong>"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
-msgid ""
-"<strong>Save</strong> this page and come back\n"
-"                                here to set up the feature."
-msgstr ""
-"<strong>Salvesta</strong> see leht ja tule tagasi,\n"
-"                                et seadistada funktsionaalsust."
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_only_form_view
@@ -328,10 +323,10 @@ msgid ""
 msgstr ""
 "<strong>Hoiatus</strong>: uute atribuutide lisamisel või kustutamisel\n"
 "                      luuakse uuesti olemasolevad variandid, mille tõttu\n"
-"                      võivad kaduma minna toodetele tehtud kohandused.  "
+"                      võivad kaduma minna toodetele tehtud kohandused."
 
 #. module: product
-#: model:ir.model.constraint,message:product.constraint_product_packaging_barcode_uniq
+#: model:ir.model.constraint,message:product.constraint_product_uom_barcode_uniq
 msgid "A barcode can only be assigned to one packaging."
 msgstr "Vöötkoodi saab määrata ainult ühele pakendile."
 
@@ -363,13 +358,13 @@ msgstr "Kombinatsioontoode peab sisaldama vähemalt 1 kominatsiooni valikut."
 #: model:ir.model.fields,help:product.field_product_product__description_sale
 #: model:ir.model.fields,help:product.field_product_template__description_sale
 msgid ""
-"A description of the Product that you want to communicate to your customers."
-" This description will be copied to every Sales Order, Delivery Order and "
+"A description of the Product that you want to communicate to your customers. "
+"This description will be copied to every Sales Order, Delivery Order and "
 "Customer Invoice/Credit Note"
 msgstr ""
 "Toote kirjeldus, mida soovite oma klientidele edastada. See kirjeldus "
-"kopeeritakse igale müügitellimusele, saatelehele ja "
-"kliendiarvele/krediidiarvele"
+"kopeeritakse igale müügitellimusele, saatelehele ja kliendiarvele/"
+"krediidiarvele"
 
 #. module: product
 #. odoo-python
@@ -380,15 +375,31 @@ msgstr "Pakendil on juba vöötkood"
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
 msgid ""
-"A price is a set of sales prices or rules to compute the price of sales order lines based on products, product categories, dates and ordered quantities.\n"
-"            This is the perfect tool to handle several pricings, seasonal discounts, etc."
+"A price is a set of sales prices or rules to compute the price of sales "
+"order lines based on products, product categories, dates and ordered "
+"quantities.\n"
+"            This is the perfect tool to handle several pricings, seasonal "
+"discounts, etc."
 msgstr ""
-"Hind on müügihindade või reeglite kogum müügitellimuste ridade hinna arvutamiseks toodete, tootekategooriate, kuupäevade ja tellitud koguste põhjal.\n"
-"             See on hea tööriist erinevate hindade, hooajaliste allahindluste jms käsitlemiseks."
+"Hind on müügihindade või reeglite kogum müügitellimuste ridade hinna "
+"arvutamiseks toodete, tootekategooriate, kuupäevade ja tellitud koguste "
+"põhjal.\n"
+"             See on hea tööriist erinevate hindade, hooajaliste "
+"allahindluste jms käsitlemiseks."
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_packaging.py:0
+#: code:addons/product/models/product_pricelist_item.py:0
+msgid ""
+"A pricelist item with \"Other Pricelist\" as base must have a "
+"base_pricelist_id."
+msgstr ""
+"Kui hinnakirja kirje alus on „Muu hinnakiri“, peab tal olema määratud "
+"base_pricelist_id."
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_uom.py:0
 msgid "A product already uses the barcode"
 msgstr "Tootel on juba vöötkood"
 
@@ -396,7 +407,7 @@ msgstr "Tootel on juba vöötkood"
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "A sellable combo product can only contain sellable products."
-msgstr "Müüdav kombinatsiooni toode peab sisaldama müüdavaid tooteid. "
+msgstr "Müüdav kombinatsiooni toode peab sisaldama müüdavaid tooteid."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__access_token
@@ -411,7 +422,7 @@ msgstr "Acme vidin"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
 msgid "Acme Widget - Blue"
-msgstr ""
+msgstr "Acme vidin - Sinine"
 
 #. module: product
 #: model:product.template,name:product.product_template_acoustic_bloc_screens
@@ -439,7 +450,7 @@ msgstr "Vajalik toiming"
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_search_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_attribute_value_view_search
 msgid "Active"
-msgstr "Aktiivne"
+msgstr "Tegev"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_search_view
@@ -465,14 +476,14 @@ msgstr "Tegevuse erandlik kohendus"
 #: model:ir.model.fields,field_description:product.field_product_product__activity_state
 #: model:ir.model.fields,field_description:product.field_product_template__activity_state
 msgid "Activity State"
-msgstr "Tegevuse staatus"
+msgstr "Tegevuse seis"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__activity_type_icon
 #: model:ir.model.fields,field_description:product.field_product_product__activity_type_icon
 #: model:ir.model.fields,field_description:product.field_product_template__activity_type_icon
 msgid "Activity Type Icon"
-msgstr "Tegevustüübi ikoon"
+msgstr "Tegevuse liigi sümbol"
 
 #. module: product
 #. odoo-javascript
@@ -491,6 +502,11 @@ msgstr "Lisa tooteid"
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.js:0
 msgid "Add Products to pricelist report"
 msgstr "Lisa tooteid hinnakirja aruandesse"
+
+#. module: product
+#: model_terms:ir.ui.view,arch_db:product.product_template_form_view
+msgid "Add a price"
+msgstr "Lisa hind"
 
 #. module: product
 #. odoo-javascript
@@ -525,6 +541,17 @@ msgid "Add to products"
 msgstr "Lisa toodetele"
 
 #. module: product
+#: model:ir.model.fields,help:product.field_product_product__uom_ids
+#: model:ir.model.fields,help:product.field_product_template__uom_ids
+msgid "Additional packagings for this product which can be used for sales"
+msgstr "Toote lisapakendid, mida saab kasutada müügiks"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_adidas
+msgid "Adidas"
+msgstr "Adidas"
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_search
 msgid "All"
 msgstr "Kõik"
@@ -546,12 +573,9 @@ msgid "All Product Variants using this Tag"
 msgstr "Kõik tootevariandid kasutavad seda silti"
 
 #. module: product
-#. odoo-javascript
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__applied_on__3_global
-#: model_terms:ir.ui.view,arch_db:product.product_tag_form_view
 msgid "All Products"
 msgstr "Kõik tooted"
 
@@ -569,7 +593,7 @@ msgstr "Kõik riigid"
 #. odoo-python
 #: code:addons/product/controllers/product_document.py:0
 msgid "All files uploaded"
-msgstr "Kõik failid on üles laaditud"
+msgstr "Kõik failid on üles laetud"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
@@ -589,12 +613,18 @@ msgid "Allow customers to set their own value"
 msgstr "Anna klientidele luba oma väärtuse määramiseks"
 
 #. module: product
-#: model:product.attribute.value,name:product.product_attribute_value_2
+#: model:product.attribute.value,name:product.pav_legs_aluminium
 msgid "Aluminium"
 msgstr "Alumiinium"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_brand_apple
+msgid "Apple"
+msgstr "Õun"
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_tree_view
+#: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Applied On"
 msgstr "Rakendatavus"
 
@@ -627,6 +657,11 @@ msgid "Archived"
 msgstr "Arhiveeritud"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_brand_ariel
+msgid "Ariel"
+msgstr "Ariel"
+
+#. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__sequence
 msgid "Assigns the priority to the list of product vendor."
 msgstr "Prioritiseeri tarnijate nimekirja."
@@ -638,8 +673,8 @@ msgid ""
 "At most %s quantities can be displayed simultaneously. Remove a selected "
 "quantity to add others."
 msgstr ""
-"Korraga saab kuvada kõige rohkem %s kogust. Eemalda valitud kogus, et lisada"
-" teisi."
+"Korraga saab kuvada kõige rohkem %s kogust. Eemalda valitud kogus, et lisada "
+"teisi."
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_form
@@ -704,7 +739,6 @@ msgstr "Atribuudi väärtused"
 #: model:ir.actions.act_window,name:product.attribute_action
 #: model_terms:ir.ui.view,arch_db:product.product_template_attribute_value_view_tree
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
-#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Attributes"
 msgstr "Atribuudid"
 
@@ -726,20 +760,11 @@ msgid "Back to Quotation"
 msgstr "Tagasi pakkumisele"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_packaging__barcode
 #: model:ir.model.fields,field_description:product.field_product_product__barcode
 #: model:ir.model.fields,field_description:product.field_product_template__barcode
+#: model:ir.model.fields,field_description:product.field_product_uom__barcode
 msgid "Barcode"
 msgstr "Triipkood"
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_packaging__barcode
-msgid ""
-"Barcode used for packaging identification. Scan this packaging barcode from "
-"a transfer in the Barcode app to move all the contained units"
-msgstr ""
-"Pakendi tuvastamiseks kasutatav vöötkood. Kõigi sisalduvate üksuste "
-"teisaldamiseks skanneerige see pakendi vöötkood oma triipkoodi Appis."
 
 #. module: product
 #. odoo-python
@@ -752,6 +777,11 @@ msgstr ""
 "Juba määratud vöötkood(id):\n"
 "\n"
 "%s"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_uom_uom__product_uom_ids
+msgid "Barcodes"
+msgstr "Triipkoodid"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__base
@@ -782,9 +812,39 @@ msgid "Basic Pricelists"
 msgstr "Põhihinnakirjad"
 
 #. module: product
-#: model:product.attribute.value,name:product.product_attribute_value_4
+#: model:product.attribute.value,name:product.pav_color_beige
+msgid "Beige"
+msgstr "Beež"
+
+#. module: product
+#: model:product.template,description_sale:product.consu_delivery_02_product_template
+msgid "Big table seats 10–12 for team discussions"
+msgstr "Meeskonna aruteludeks suure lauaistmed 10-12 tk"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_black
 msgid "Black"
 msgstr "Must"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_blue
+msgid "Blue"
+msgstr "Sinine"
+
+#. module: product
+#: model:product.template,description_sale:product.product_product_7_product_template
+msgid "Blue plastic bin for flexible office storage"
+msgstr "Sinine plastist prügikast paindlikkuse kontoriruumi"
+
+#. module: product
+#: model:product.attribute,name:product.pa_brand
+msgid "Brand"
+msgstr "Kaubamärk"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_brown
+msgid "Brown"
+msgstr "Pruun"
 
 #. module: product
 #. odoo-javascript
@@ -814,6 +874,17 @@ msgid "Cancel"
 msgstr "Tühista"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_brand_canon
+msgid "Canon"
+msgstr "Canon"
+
+#. module: product
+#: model:ir.actions.act_window,name:product.product_category_action_form
+#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
+msgid "Categories"
+msgstr "Tootekategooriad"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__categ_id
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__display_applied_on__2_product_category
 #: model_terms:ir.ui.view,arch_db:product.product_category_form_view
@@ -828,6 +899,21 @@ msgid "Category: %s"
 msgstr "Kategooria: %s"
 
 #. module: product
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+#: code:addons/product/models/product_template.py:0
+msgid ""
+"Changing the unit of measure for your product will apply a conversion 1 %"
+"(old_uom_name)s = 1 %(new_uom_name)s.\n"
+"All existing records (Sales orders, Purchase orders, etc.) using this "
+"product will be updated by replacing the unit name."
+msgstr ""
+"Muutes toote mõõtühikut, konverteeritakse kõik ühikud järgnevalt: 1 %"
+"(old_uom_name)s = 1%(new_uom_name)s.\n"
+"Kõik seda toodet sisaldavad olemasolevad kanded (Müügitellimused, "
+"ostutellimused jne) uuendatakse, asendades mõõtühiku nime."
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__checksum
 msgid "Checksum/SHA1"
 msgstr "Kontrollsumma/SHA1"
@@ -838,19 +924,14 @@ msgid "Child Categories"
 msgstr "Alamkategooriad"
 
 #. module: product
-#: model:ir.actions.act_window,name:product.action_open_label_layout
-msgid "Choose Labels Layout"
-msgstr "Vali sildi kujundus"
-
-#. module: product
 #: model:ir.model,name:product.model_product_label_layout
 msgid "Choose the sheet layout to print the labels"
 msgstr "Valige siltide printimiseks lehe paigutus"
 
 #. module: product
-#: model:product.attribute.value,name:product.pav_cleaning_kit
-msgid "Cleaning kit"
-msgstr "Puhastuskomplekt"
+#: model:product.attribute.value,name:product.pav_brand_cocacola
+msgid "Coca-Cola"
+msgstr "Coca-Cola"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
@@ -858,11 +939,16 @@ msgid "Codes"
 msgstr "Koodid"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_brand_colgate
+msgid "Colgate"
+msgstr "Colgate"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__html_color
 #: model:ir.model.fields,field_description:product.field_product_tag__color
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__color
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__display_type__color
-#: model:product.attribute,name:product.product_attribute_2
+#: model:product.attribute,name:product.pa_color
 msgid "Color"
 msgstr "Värv"
 
@@ -893,7 +979,7 @@ msgstr "Kombo"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_combo_view_form
 msgid "Combo Choice"
-msgstr "Kombinatsiooni valikud"
+msgstr "Kombo valik"
 
 #. module: product
 #: model:ir.actions.act_window,name:product.product_combo_action
@@ -917,7 +1003,7 @@ msgstr "Kombinatsiooni hind"
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "Combo products can't have attributes."
-msgstr ""
+msgstr "Kombinatsioonil ei saa olla atribuute."
 
 #. module: product
 #. odoo-python
@@ -930,6 +1016,11 @@ msgstr ""
 "kaupa."
 
 #. module: product
+#: model:product.template,description_sale:product.product_delivery_01_product_template
+msgid "Comfortable yellow chair for daily work"
+msgstr "Mugav kollane tool igapäevaseks tööks"
+
+#. module: product
 #: model:ir.model,name:product.model_res_company
 msgid "Companies"
 msgstr "Ettevõtted"
@@ -938,12 +1029,12 @@ msgstr "Ettevõtted"
 #: model:ir.model.fields,field_description:product.field_product_combo__company_id
 #: model:ir.model.fields,field_description:product.field_product_combo_item__company_id
 #: model:ir.model.fields,field_description:product.field_product_document__company_id
-#: model:ir.model.fields,field_description:product.field_product_packaging__company_id
 #: model:ir.model.fields,field_description:product.field_product_pricelist__company_id
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__company_id
 #: model:ir.model.fields,field_description:product.field_product_product__company_id
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__company_id
 #: model:ir.model.fields,field_description:product.field_product_template__company_id
+#: model:ir.model.fields,field_description:product.field_product_uom__company_id
 msgid "Company"
 msgstr "Ettevõte"
 
@@ -968,11 +1059,6 @@ msgid "Conference Chair"
 msgstr "Konverentsitool"
 
 #. module: product
-#: model:product.template,description_sale:product.consu_delivery_02_product_template
-msgid "Conference room table"
-msgstr "Konverentsiruumi laud"
-
-#. module: product
 #: model:ir.model,name:product.model_res_config_settings
 msgid "Config Settings"
 msgstr "Seadistused"
@@ -983,10 +1069,9 @@ msgid "Configure"
 msgstr "Seadista"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_label_layout_form
 #: model_terms:ir.ui.view,arch_db:product.update_product_attribute_value_form
 msgid "Confirm"
-msgstr "Kinnitage"
+msgstr "Kinnita"
 
 #. module: product
 #: model:ir.model,name:product.model_res_partner
@@ -994,34 +1079,9 @@ msgid "Contact"
 msgstr "Kontakt"
 
 #. module: product
-#: model_terms:product.template,website_description:product.product_product_4_product_template
-msgid "Contact Us"
-msgstr "Võta meiega ühendust"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_packaging__qty
-msgid "Contained Quantity"
-msgstr "Sisaldab kogust"
-
-#. module: product
-#: model:ir.model.constraint,message:product.constraint_product_packaging_positive_qty
-msgid "Contained Quantity should be positive."
-msgstr "Sisalduv kogus peaks olema positiivne."
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_packaging_form_view
-msgid "Contained quantity"
-msgstr "Sisaldab kogust"
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_product__uom_category_id
-#: model:ir.model.fields,help:product.field_product_template__uom_category_id
-msgid ""
-"Conversion between Units of Measure can only occur if they belong to the "
-"same category. The conversion will be made based on the ratios."
-msgstr ""
-"Ühikute vaheline konversioon on võimalik ainult siis, kui ühikud kuuluvad "
-"samasse kategooriasse. Konverteerimist tehakse määrade järgi."
+#: model:ir.model.fields,field_description:product.field_product_label_layout__custom_quantity
+msgid "Copies"
+msgstr "Koopiad"
 
 #. module: product
 #: model:product.template,name:product.product_product_13_product_template
@@ -1055,6 +1115,16 @@ msgstr "Riikide grupp"
 #: model:ir.model.fields,field_description:product.field_product_pricelist__country_group_ids
 msgid "Country Groups"
 msgstr "Riikide rühmad"
+
+#. module: product
+#: model:res.groups,name:product.group_product_manager
+msgid "Create"
+msgstr "Loo"
+
+#. module: product
+#: model:ir.model,website_form_label:product.model_res_partner
+msgid "Create a Customer"
+msgstr "Lisa klient"
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
@@ -1095,7 +1165,6 @@ msgstr "Loo tellimus"
 #: model:ir.model.fields,field_description:product.field_product_combo_item__create_uid
 #: model:ir.model.fields,field_description:product.field_product_document__create_uid
 #: model:ir.model.fields,field_description:product.field_product_label_layout__create_uid
-#: model:ir.model.fields,field_description:product.field_product_packaging__create_uid
 #: model:ir.model.fields,field_description:product.field_product_pricelist__create_uid
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__create_uid
 #: model:ir.model.fields,field_description:product.field_product_product__create_uid
@@ -1105,6 +1174,7 @@ msgstr "Loo tellimus"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_exclusion__create_uid
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__create_uid
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__create_uid
+#: model:ir.model.fields,field_description:product.field_product_uom__create_uid
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__create_uid
 msgid "Created by"
 msgstr "Loonud"
@@ -1118,7 +1188,6 @@ msgstr "Loonud"
 #: model:ir.model.fields,field_description:product.field_product_combo_item__create_date
 #: model:ir.model.fields,field_description:product.field_product_document__create_date
 #: model:ir.model.fields,field_description:product.field_product_label_layout__create_date
-#: model:ir.model.fields,field_description:product.field_product_packaging__create_date
 #: model:ir.model.fields,field_description:product.field_product_pricelist__create_date
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__create_date
 #: model:ir.model.fields,field_description:product.field_product_product__create_date
@@ -1128,9 +1197,10 @@ msgstr "Loonud"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_exclusion__create_date
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__create_date
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__create_date
+#: model:ir.model.fields,field_description:product.field_product_uom__create_date
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__create_date
 msgid "Created on"
-msgstr "Loodud"
+msgstr "Loomise kuupäev"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_form
@@ -1139,13 +1209,13 @@ msgstr "Loomine"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_volume_volume_in_cubic_feet__1
-msgid "Cubic Feet"
-msgstr "Kuupjalad"
+msgid "Cubic Feet (ft³)"
+msgstr "Kuupjalad (ft³)"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_volume_volume_in_cubic_feet__0
-msgid "Cubic Meters"
-msgstr "Kuupmeetrid"
+msgid "Cubic Meters (m³)"
+msgstr "Kuupmeetrid (m³)"
 
 #. module: product
 #: model:ir.model,name:product.model_res_currency
@@ -1161,9 +1231,11 @@ msgid "Currency"
 msgstr "Valuuta"
 
 #. module: product
-#: model:product.attribute.value,name:product.fabric_attribute_custom
+#: model:product.attribute.value,name:product.pav_custom
+#: model:product.attribute.value,name:product.pav_legs_custom
+#: model:product.attribute.value,name:product.pav_length_custom
 msgid "Custom"
-msgstr "Kohandatud veebileht"
+msgstr "Kohandatud"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__custom_value
@@ -1181,14 +1253,19 @@ msgid "Customizable Desk"
 msgstr "Kohandatav töölaud"
 
 #. module: product
+#: model:product.attribute,name:product.pa_customization
+msgid "Customization"
+msgstr "Kohandamine"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_cyan
+msgid "Cyan"
+msgstr "Tsüaan"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__db_datas
 msgid "Database Data"
 msgstr "Andmebaasi andmed"
-
-#. module: product
-#: model:ir.model,name:product.model_decimal_precision
-msgid "Decimal Precision"
-msgstr "Kümnendkoha täpsus"
 
 #. module: product
 #. odoo-python
@@ -1207,22 +1284,10 @@ msgid "Default Extra Price Changed"
 msgstr "Vaikimisi lisahind muutus"
 
 #. module: product
-#: model:ir.model.fields,help:product.field_product_packaging__product_uom_id
 #: model:ir.model.fields,help:product.field_product_product__uom_id
 #: model:ir.model.fields,help:product.field_product_template__uom_id
 msgid "Default unit of measure used for all stock operations."
 msgstr "Vaikimisi mõõtühikut kasutatakse kõigis laooperatsioonides."
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_product__uom_po_id
-#: model:ir.model.fields,help:product.field_product_supplierinfo__product_uom
-#: model:ir.model.fields,help:product.field_product_template__uom_po_id
-msgid ""
-"Default unit of measure used for purchase orders. It must be in the same "
-"category as the default unit of measure."
-msgstr ""
-"Ostutellimuste jaoks kasutatav mõõtühik. See peab kuuluma samasse "
-"kategooriasse vaike mõõtühikuga."
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_tag_action
@@ -1247,9 +1312,9 @@ msgid "Delete"
 msgstr "Kustuta"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_supplierinfo__delay
-msgid "Delivery Lead Time"
-msgstr "Tarneaeg"
+#: model:product.attribute.value,name:product.pav_brand_dell
+msgid "Dell"
+msgstr "Dell"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__description
@@ -1257,6 +1322,11 @@ msgstr "Tarneaeg"
 #: model:ir.model.fields,field_description:product.field_product_template__description
 msgid "Description"
 msgstr "Kirjeldus"
+
+#. module: product
+#: model:product.template,description_sale:product.product_order_01_product_template
+msgid "Design and plan smart offices with ease"
+msgstr "Kujunda ja planeeri kergesti nutikaid kontoreid"
 
 #. module: product
 #: model:product.template,name:product.product_product_3_product_template
@@ -1280,8 +1350,8 @@ msgstr "Ekraaniga lauaalus"
 
 #. module: product
 #: model:product.template,description_sale:product.product_product_3_product_template
-msgid "Desk combination, black-brown: chair + desk + drawer."
-msgstr "Lauakombinatsioon, must-pruun: tool+laud+sahtel."
+msgid "Desk combination, black-brown: chair + desk + drawer"
+msgstr "Lauakombinatsioon, must-pruun: tool+laud+sahtel"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__sequence
@@ -1316,15 +1386,16 @@ msgid "Display Applied On"
 msgstr "Kuva rakendatud"
 
 #. module: product
+#: model:ir.model.fields,field_description:product.field_ir_attachment__display_name
 #: model:ir.model.fields,field_description:product.field_product_attribute__display_name
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__display_name
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__display_name
+#: model:ir.model.fields,field_description:product.field_product_catalog_mixin__display_name
 #: model:ir.model.fields,field_description:product.field_product_category__display_name
 #: model:ir.model.fields,field_description:product.field_product_combo__display_name
 #: model:ir.model.fields,field_description:product.field_product_combo_item__display_name
 #: model:ir.model.fields,field_description:product.field_product_document__display_name
 #: model:ir.model.fields,field_description:product.field_product_label_layout__display_name
-#: model:ir.model.fields,field_description:product.field_product_packaging__display_name
 #: model:ir.model.fields,field_description:product.field_product_pricelist__display_name
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__display_name
 #: model:ir.model.fields,field_description:product.field_product_product__display_name
@@ -1334,9 +1405,22 @@ msgstr "Kuva rakendatud"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_exclusion__display_name
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__display_name
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__display_name
+#: model:ir.model.fields,field_description:product.field_product_uom__display_name
+#: model:ir.model.fields,field_description:product.field_report_product_report_pricelist__display_name
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel2x7__display_name
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel4x12__display_name
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel4x12noprice__display_name
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel4x7__display_name
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel_dymo__display_name
+#: model:ir.model.fields,field_description:product.field_res_company__display_name
+#: model:ir.model.fields,field_description:product.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:product.field_res_country_group__display_name
+#: model:ir.model.fields,field_description:product.field_res_currency__display_name
+#: model:ir.model.fields,field_description:product.field_res_partner__display_name
+#: model:ir.model.fields,field_description:product.field_uom_uom__display_name
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__display_name
 msgid "Display Name"
-msgstr "Kuvatav nimi"
+msgstr "Näidatav nimi"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__display_type
@@ -1371,6 +1455,11 @@ msgid "Documents of this variant"
 msgstr "Selle variatsiooni dokumendid"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_brand_dove
+msgid "Dove"
+msgstr "Dove"
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_kanban
 msgid "Download"
 msgstr "Laadi alla"
@@ -1393,11 +1482,22 @@ msgstr "Must kummut"
 
 #. module: product
 #: model_terms:product.template,description:product.product_product_27_product_template
-msgid "Drawer with two routing possiblities."
-msgstr "Kahe marsruudivõimalusega sahtel."
+msgid "Drawer with two routing possiblities"
+msgstr "Kahe marsruudivõimalusega sahtel"
 
 #. module: product
-#: model:product.attribute,name:product.product_attribute_3
+#: model:product.attribute.value,name:product.pav_options_drawers
+msgid "Drawers"
+msgstr "Sahtlid"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+msgid "Duplicate values in attribute values are not allowed: %s"
+msgstr ""
+
+#. module: product
+#: model:product.attribute,name:product.pa_duration
 msgid "Duration"
 msgstr "Kestus"
 
@@ -1410,6 +1510,11 @@ msgstr "Dymo"
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__create_variant__dynamic
 msgid "Dynamically"
 msgstr "Dünaamiliselt"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_dyson
+msgid "Dyson"
+msgstr "Dyson"
 
 #. module: product
 #: model:ir.model.constraint,message:product.constraint_product_template_attribute_value_attribute_value_unique
@@ -1485,11 +1590,6 @@ msgid "Extra Info"
 msgstr "Lisainfo"
 
 #. module: product
-#: model:product.attribute,name:product.pa_extra_options
-msgid "Extra Options"
-msgstr "Lisavalikud"
-
-#. module: product
 #: model:ir.model.fields,field_description:product.field_product_combo_item__extra_price
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__price_extra
 msgid "Extra Price"
@@ -1498,14 +1598,14 @@ msgstr "Lisahind"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_template_attribute_value__price_extra
 msgid ""
-"Extra price for the variant with this attribute value on sale price. eg. 200"
-" price extra, 1000 + 200 = 1200."
+"Extra price for the variant with this attribute value on sale price. eg. 200 "
+"price extra, 1000 + 200 = 1200."
 msgstr ""
 "Selle atribuudi väärtusega variandi lisahind müügihinnal. nt. 200 lisatasu, "
 "1000 + 200 = 1200."
 
 #. module: product
-#: model:product.attribute,name:product.fabric_attribute
+#: model:product.attribute,name:product.pa_fabric
 msgid "Fabric"
 msgstr "Kangas"
 
@@ -1537,6 +1637,11 @@ msgid "File Size"
 msgstr "Faili suurus"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_options_file_cabinets
+msgid "File cabinets"
+msgstr "Toimikukapid"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__fixed_price
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__compute_price__fixed
 msgid "Fixed Price"
@@ -1561,7 +1666,7 @@ msgstr "Jälgijad"
 #: model:ir.model.fields,field_description:product.field_product_product__message_partner_ids
 #: model:ir.model.fields,field_description:product.field_product_template__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "Jälgijad(Partnerid)"
+msgstr "Jälgijad (partnerid)"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist__activity_type_icon
@@ -1573,10 +1678,12 @@ msgstr "Font awesome icon nt. fa-tasks"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__min_quantity
 msgid ""
-"For the rule to apply, bought/sold quantity must be greater than or equal to the minimum quantity specified in this field.\n"
+"For the rule to apply, bought/sold quantity must be greater than or equal to "
+"the minimum quantity specified in this field.\n"
 "Expressed in the default unit of measure of the product."
 msgstr ""
-"Reegli rakendumiseks peab ostetud/müüdud kogus olema sellel väljal määratud miinimumkogusest suurem või sellega võrdne.\n"
+"Reegli rakendumiseks peab ostetud/müüdud kogus olema sellel väljal määratud "
+"miinimumkogusest suurem või sellega võrdne.\n"
 "Väljendatakse toote vaikimisi mõõtühikus."
 
 #. module: product
@@ -1593,11 +1700,6 @@ msgstr "Valem"
 #: model:product.template,name:product.consu_delivery_03_product_template
 msgid "Four Person Desk"
 msgstr "4-inimese laud"
-
-#. module: product
-#: model:product.template,description_sale:product.consu_delivery_03_product_template
-msgid "Four person modern office workstation"
-msgstr "Moderne 4-inimese töökoht"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__is_custom
@@ -1621,21 +1723,25 @@ msgid "General Information"
 msgstr "Üldine info"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
-msgid "Get product pictures using Barcode"
-msgstr "Hangi tootepilte vöötkoodi abil"
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_product__packaging_ids
-#: model:ir.model.fields,help:product.field_product_template__packaging_ids
-msgid "Gives the different ways to package the same product."
-msgstr "Annab sama toote pakkimiseks erinevaid võimalusi."
+#: model:product.attribute.value,name:product.pav_brand_gillette
+msgid "Gillette"
+msgstr "Gillette"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__sequence
 #: model:ir.model.fields,help:product.field_product_template__sequence
 msgid "Gives the sequence order when displaying a product list"
 msgstr "Annab tootenimekirja kuvamisel toodete järjestuse"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_fabric_glass
+msgid "Glass"
+msgstr "Klaas"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_gold
+msgid "Gold"
+msgstr "Kuld"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
@@ -1656,21 +1762,24 @@ msgid ""
 "Goods are tangible materials and merchandise you provide.\n"
 "A service is a non-material product you provide."
 msgstr ""
-"Kaupade all mõistetakse käegakatsutavaid materjale ja kaupu, mida te pakute."
-" Teenus on mittefüüsiline toode, mida te pakute."
+"Kaupade all mõistetakse käegakatsutavaid materjale ja kaupu, mida te pakute. "
+"\n"
+"Teenus on mittefüüsiline toode, mida te pakute."
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
-msgid "Google Images"
-msgstr "Google pildid"
+#: model:product.attribute.value,name:product.pav_color_gray
+msgid "Gray"
+msgstr "Hall"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_view_search
-#: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_search_view
-#: model_terms:ir.ui.view,arch_db:product.product_template_search_view
-#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
-msgid "Group By"
-msgstr "Rühmitamine"
+#: model:product.attribute.value,name:product.pav_color_green
+msgid "Green"
+msgstr "Roheline"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_h_m
+msgid "H&M"
+msgstr "H&M"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__html_color
@@ -1686,6 +1795,21 @@ msgid "Has Message"
 msgstr "On sõnum"
 
 #. module: product
+#: model:ir.model.fields,field_description:product.field_product_document__has_thumbnail
+msgid "Has Thumbnail"
+msgstr "On pisipilt"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_head_shoulders
+msgid "Head & Shoulders"
+msgstr "Head & Shoulders"
+
+#. module: product
+#: model:product.attribute,name:product.pa_height
+msgid "Height"
+msgstr "Kõrgus"
+
+#. module: product
 #: model:ir.model.fields,help:product.field_product_attribute_value__html_color
 #: model:ir.model.fields,help:product.field_product_template_attribute_value__html_color
 msgid ""
@@ -1694,6 +1818,11 @@ msgid ""
 msgstr ""
 "Siin saate määrata konkreetse HTML-i värviindeksi (nt #ff0000), et kuvada "
 "värv, kui atribuudi tüüp on \"Värv\"."
+
+#. module: product
+#: model:product.template,description_sale:product.product_product_12_product_template
+msgid "High-back office chair with great support"
+msgstr "Kõrge seljatoega kontoritool, mis pakub suurepärast tuge"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_form
@@ -1706,15 +1835,16 @@ msgid "Hotel Accommodation"
 msgstr "Majutus hotellis"
 
 #. module: product
+#: model:ir.model.fields,field_description:product.field_ir_attachment__id
 #: model:ir.model.fields,field_description:product.field_product_attribute__id
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__id
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__id
+#: model:ir.model.fields,field_description:product.field_product_catalog_mixin__id
 #: model:ir.model.fields,field_description:product.field_product_category__id
 #: model:ir.model.fields,field_description:product.field_product_combo__id
 #: model:ir.model.fields,field_description:product.field_product_combo_item__id
 #: model:ir.model.fields,field_description:product.field_product_document__id
 #: model:ir.model.fields,field_description:product.field_product_label_layout__id
-#: model:ir.model.fields,field_description:product.field_product_packaging__id
 #: model:ir.model.fields,field_description:product.field_product_pricelist__id
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__id
 #: model:ir.model.fields,field_description:product.field_product_product__id
@@ -1724,6 +1854,19 @@ msgstr "Majutus hotellis"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_exclusion__id
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__id
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__id
+#: model:ir.model.fields,field_description:product.field_product_uom__id
+#: model:ir.model.fields,field_description:product.field_report_product_report_pricelist__id
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel2x7__id
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel4x12__id
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel4x12noprice__id
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel4x7__id
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel_dymo__id
+#: model:ir.model.fields,field_description:product.field_res_company__id
+#: model:ir.model.fields,field_description:product.field_res_config_settings__id
+#: model:ir.model.fields,field_description:product.field_res_country_group__id
+#: model:ir.model.fields,field_description:product.field_res_currency__id
+#: model:ir.model.fields,field_description:product.field_res_partner__id
+#: model:ir.model.fields,field_description:product.field_uom_uom__id
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__id
 msgid "ID"
 msgstr "ID"
@@ -1733,7 +1876,7 @@ msgstr "ID"
 #: model:ir.model.fields,field_description:product.field_product_product__activity_exception_icon
 #: model:ir.model.fields,field_description:product.field_product_template__activity_exception_icon
 msgid "Icon"
-msgstr "sümbolit."
+msgstr "Ikoon"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist__activity_exception_icon
@@ -1748,7 +1891,7 @@ msgstr "Ikoon, mis näitab erandi tegevust."
 #: model:ir.model.fields,help:product.field_product_product__message_needaction
 #: model:ir.model.fields,help:product.field_product_template__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "Kui kontrollitud, siis uued sõnumid nõuavad Teie tähelepanu."
+msgstr "Kui märgitud, siis uued sõnumid nõuavad Su tähelepanu."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_category__message_has_error
@@ -1756,7 +1899,7 @@ msgstr "Kui kontrollitud, siis uued sõnumid nõuavad Teie tähelepanu."
 #: model:ir.model.fields,help:product.field_product_product__message_has_error
 #: model:ir.model.fields,help:product.field_product_template__message_has_error
 msgid "If checked, some messages have a delivery error."
-msgstr "Kui valitud, on mõningate sõnumitel saatmiserror"
+msgstr "Kui valitud, on mõningatel sõnumitel saatmiserror."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__product_id
@@ -1770,7 +1913,7 @@ msgstr ""
 #: model:ir.model.fields,help:product.field_product_attribute__active
 msgid ""
 "If unchecked, it will allow you to hide the attribute without removing it."
-msgstr "Kui märkimata, on võimalik atribuuti peita ilma seda kustutamata. "
+msgstr "Kui märkimata, on võimalik atribuuti peita ilma seda kustutamata."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist__active
@@ -1786,13 +1929,15 @@ msgstr ""
 msgid ""
 "If unchecked, it will allow you to hide the product without removing it."
 msgstr ""
-"Märkimata jätmise korral võimaldab see toodet peita ilma seda eemaldamata. "
+"Märkimata jätmise korral võimaldab see toodet peita ilma seda eemaldamata."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__image
 #: model:ir.model.fields,field_description:product.field_product_product__image_1920
+#: model:ir.model.fields,field_description:product.field_product_tag__image
 #: model:ir.model.fields,field_description:product.field_product_template__image_1920
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__image
+#: model:ir.model.fields.selection,name:product.selection__product_attribute__display_type__image
 msgid "Image"
 msgstr "Pilt"
 
@@ -1862,7 +2007,7 @@ msgstr "Impordi mall tarnija hinnakirjade jaoks"
 #: model_terms:ir.ui.view,arch_db:product.product_attribute_search
 #: model_terms:ir.ui.view,arch_db:product.product_template_attribute_value_view_search
 msgid "Inactive"
-msgstr "Passiivne"
+msgstr "Mitteaktiivne"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__index_content
@@ -1882,7 +2027,7 @@ msgstr "Koheselt"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Internal Notes"
-msgstr "Sisesed märkmed"
+msgstr "Ettevõttesisesed märkmed"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__default_code
@@ -1907,12 +2052,28 @@ msgid "Inventory"
 msgstr "Ladu"
 
 #. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__is_dynamically_created
+#: model:ir.model.fields,field_description:product.field_product_template__is_dynamically_created
+msgid "Is Dynamically Created"
+msgstr "On loodud dünaamiliselt"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_category__message_is_follower
 #: model:ir.model.fields,field_description:product.field_product_pricelist__message_is_follower
 #: model:ir.model.fields,field_description:product.field_product_product__message_is_follower
 #: model:ir.model.fields,field_description:product.field_product_template__message_is_follower
 msgid "Is Follower"
-msgstr "On jälgija"
+msgstr "Jälgija"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__is_in_selected_section_of_order
+msgid "Is In Selected Section Of Order"
+msgstr "Asub valitud tootejaotises"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_pricelist_item__is_pricelist_required
+msgid "Is Pricelist Required"
+msgstr "Hinnakiri on nõutud"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__is_product_variant
@@ -1936,9 +2097,38 @@ msgid "Is public document"
 msgstr "On avalik dokument"
 
 #. module: product
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+msgid ""
+"It is not possible to import different values for the same attribute: %s"
+msgstr ""
+
+#. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_weight_in_lbs__0
-msgid "Kilograms"
-msgstr "Kilogrammid"
+msgid "Kilograms (kg)"
+msgstr "Kilogrammid (kg)"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_size_l
+msgid "L"
+msgstr ""
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_loreal
+msgid "L'Oréal"
+msgstr "L'Oréal"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_LG
+msgid "LG"
+msgstr "LG"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+#: code:addons/product/models/product_template.py:0
+msgid "Labels cannot be printed for products of service type"
+msgstr "Teenuse tüübiga toodetele ei saa printida silte"
 
 #. module: product
 #: model:product.template,name:product.product_product_6_product_template
@@ -1964,7 +2154,6 @@ msgstr "Suur nõupidamiseruumi laud"
 #: model:ir.model.fields,field_description:product.field_product_combo_item__write_uid
 #: model:ir.model.fields,field_description:product.field_product_document__write_uid
 #: model:ir.model.fields,field_description:product.field_product_label_layout__write_uid
-#: model:ir.model.fields,field_description:product.field_product_packaging__write_uid
 #: model:ir.model.fields,field_description:product.field_product_pricelist__write_uid
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__write_uid
 #: model:ir.model.fields,field_description:product.field_product_product__write_uid
@@ -1974,9 +2163,10 @@ msgstr "Suur nõupidamiseruumi laud"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_exclusion__write_uid
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__write_uid
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__write_uid
+#: model:ir.model.fields,field_description:product.field_product_uom__write_uid
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__write_uid
 msgid "Last Updated by"
-msgstr "Viimati uuendatud"
+msgstr "Viimati uuendas"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__write_date
@@ -1987,7 +2177,6 @@ msgstr "Viimati uuendatud"
 #: model:ir.model.fields,field_description:product.field_product_combo_item__write_date
 #: model:ir.model.fields,field_description:product.field_product_document__write_date
 #: model:ir.model.fields,field_description:product.field_product_label_layout__write_date
-#: model:ir.model.fields,field_description:product.field_product_packaging__write_date
 #: model:ir.model.fields,field_description:product.field_product_pricelist__write_date
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__write_date
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__write_date
@@ -1996,6 +2185,7 @@ msgstr "Viimati uuendatud"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_exclusion__write_date
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__write_date
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__write_date
+#: model:ir.model.fields,field_description:product.field_product_uom__write_date
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__write_date
 msgid "Last Updated on"
 msgstr "Viimati uuendatud"
@@ -2004,6 +2194,11 @@ msgstr "Viimati uuendatud"
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 msgid "Late Activities"
 msgstr "Hilinenud tegevused"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_supplierinfo__delay
+msgid "Lead Time"
+msgstr "Tarneaeg"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__delay
@@ -2017,20 +2212,50 @@ msgstr ""
 "arvutamiseks."
 
 #. module: product
-#: model:product.attribute.value,name:product.fabric_attribute_leather
+#: model:product.attribute.value,name:product.pav_fabric_leather
 msgid "Leather"
 msgstr "Nahk"
 
 #. module: product
-#: model:product.attribute,name:product.product_attribute_1
+#: model:product.template,description_sale:product.product_product_13_product_template
+msgid "Left-sided workspace with storage"
+msgstr "Vasakpoolne töökoht panipaigaga"
+
+#. module: product
+#: model:product.attribute,name:product.pa_legs
 msgid "Legs"
 msgstr "Jalad"
+
+#. module: product
+#: model:product.attribute,name:product.pa_length
+msgid "Length"
+msgstr "Pikkus"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_lenovo
+msgid "Lenovo"
+msgstr "Lenovo"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_levis
+msgid "Levi's"
+msgstr "Levi's"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_fabric_linen
+msgid "Linen"
+msgstr "Lina"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__attribute_line_ids
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__pav_attribute_line_ids
 msgid "Lines"
 msgstr "Read"
+
+#. module: product
+#: model:ir.model,name:product.model_product_uom
+msgid "Link between products and their UoMs"
+msgstr "Toodete ja mõõtühikute vaheline seos"
 
 #. module: product
 #: model:product.template,name:product.product_product_local_delivery_product_template
@@ -2058,18 +2283,18 @@ msgstr ""
 "Hinnapakkumise saamiseks võtke meiega ühendust."
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_size_m
+msgid "M"
+msgstr ""
+
+#. module: product
 #: model:ir.model.fields,help:product.field_product_template_attribute_value__exclude_for
 msgid ""
-"Make this attribute value not compatible with other values of the product or"
-" some attribute values of optional and accessory products."
+"Make this attribute value not compatible with other values of the product or "
+"some attribute values of optional and accessory products."
 msgstr ""
 "Muutke see atribuudi väärtus mitteühilduvaks toote muude väärtustega või "
 "mõne valikuliste ja lisatoodete atribuudiväärtustega."
-
-#. module: product
-#: model:res.groups,name:product.group_stock_packaging
-msgid "Manage Product Packaging"
-msgstr "Hallake toote pakendeid"
 
 #. module: product
 #: model:res.groups,name:product.group_product_variant
@@ -2088,6 +2313,11 @@ msgid "Markup"
 msgstr "Juurdehindlus"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_color_maroon
+msgid "Maroon"
+msgstr "Punakaspruun"
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid "Max. Margin"
 msgstr "Maks. marginaal"
@@ -2096,6 +2326,11 @@ msgstr "Maks. marginaal"
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__price_max_margin
 msgid "Max. Price Margin"
 msgstr "Maks. hinnamarginaal"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_maybelline
+msgid "Maybelline"
+msgstr "Maybelline"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__message
@@ -2108,7 +2343,7 @@ msgstr "Sõnum"
 #: model:ir.model.fields,field_description:product.field_product_product__message_has_error
 #: model:ir.model.fields,field_description:product.field_product_template__message_has_error
 msgid "Message Delivery error"
-msgstr "Sõnumi saatmise veateade"
+msgstr "Sõnumi edastamise veateade"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_category__message_ids
@@ -2116,12 +2351,17 @@ msgstr "Sõnumi saatmise veateade"
 #: model:ir.model.fields,field_description:product.field_product_product__message_ids
 #: model:ir.model.fields,field_description:product.field_product_template__message_ids
 msgid "Messages"
-msgstr "Sõnum"
+msgstr "Sõnumid"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_fabric_metal
+msgid "Metal"
+msgstr "Metall"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__mimetype
 msgid "Mime Type"
-msgstr "Failitüüp"
+msgstr "Mime tüüp"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
@@ -2144,6 +2384,11 @@ msgid "Min. Quantity"
 msgstr "Min. kogus"
 
 #. module: product
+#: model:product.template,description_sale:product.product_product_8_product_template
+msgid "Minimalist wooden desk for executive use"
+msgstr "Minimalistlik puidust töölaud juhtivtöötajale"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__mode
 msgid "Mode"
 msgstr "Mudel"
@@ -2154,6 +2399,11 @@ msgid "Monitor Stand"
 msgstr "Monitori alus"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_brand_montblanc
+msgid "Montblanc"
+msgstr "Montblanc"
+
+#. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__display_type__multi
 msgid "Multi-checkbox"
 msgstr "Mitu valikut"
@@ -2162,7 +2412,12 @@ msgstr "Mitu valikut"
 #: model:ir.model.constraint,message:product.constraint_product_attribute_check_multi_checkbox_no_variant
 msgid ""
 "Multi-checkbox display type is not compatible with the creation of variants"
-msgstr "Mitme valikuga kuva tüüp ei ole sobilik variatsioonide loomisele."
+msgstr "Mitme valikuga kuva tüüp ei ole sobilik variatsioonide loomisele"
+
+#. module: product
+#: model_terms:ir.ui.view,arch_db:product.product_template_search_view
+msgid "My Activities"
+msgstr "Minu tegevused"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__my_activity_date_deadline
@@ -2184,6 +2439,16 @@ msgid "Name"
 msgstr "Nimi"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_color_navy
+msgid "Navy"
+msgstr "Meresinine"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_nestle
+msgid "Nestlé"
+msgstr "Nestlé"
+
+#. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__create_variant__no_variant
 msgid "Never"
 msgstr "Mitte kunagi"
@@ -2193,6 +2458,11 @@ msgstr "Mitte kunagi"
 #: code:addons/product/models/product_pricelist.py:0
 msgid "New"
 msgstr "Uus"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_new_balance
+msgid "New Balance"
+msgstr "New Balance"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__activity_calendar_event_id
@@ -2206,7 +2476,7 @@ msgstr "Järgmine tegevus kalendris"
 #: model:ir.model.fields,field_description:product.field_product_product__activity_date_deadline
 #: model:ir.model.fields,field_description:product.field_product_template__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Järgmise tegevuse tähtaeg"
+msgstr "Järgmise tegevuse kuupäev"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__activity_summary
@@ -2221,6 +2491,21 @@ msgstr "Järgmise tegevuse kokkuvõte"
 #: model:ir.model.fields,field_description:product.field_product_template__activity_type_id
 msgid "Next Activity Type"
 msgstr "Järgmise tegevuse tüüp"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_nike
+msgid "Nike"
+msgstr "Nike"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_nikon
+msgid "Nikon"
+msgstr "Nikon"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_nivea
+msgid "Nivea"
+msgstr "Nivea"
 
 #. module: product
 #. odoo-python
@@ -2242,7 +2527,7 @@ msgstr "Tooteid ei leitud."
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "No products found in the report"
-msgstr "Aruandes ei ole ühtegi toodet"
+msgstr "Aruandes ei leitud ühtegi toodet"
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_supplierinfo_type_action
@@ -2254,6 +2539,11 @@ msgstr "Tarnija hinnakirja ei leitud"
 #: code:addons/product/static/src/js/product_attribute_value_list.js:0
 msgid "No, keep it"
 msgstr "Ei, jäta alles"
+
+#. module: product
+#: model:product.template,description_sale:product.product_template_acoustic_bloc_screens
+msgid "Noise-reducing panels for open spaces"
+msgstr "Mürasummutavd paneelid avatud töökeskkonnale"
 
 #. module: product
 #. odoo-python
@@ -2278,7 +2568,7 @@ msgstr "Seotud toodete arv"
 #: model:ir.model.fields,field_description:product.field_product_product__message_needaction_counter
 #: model:ir.model.fields,field_description:product.field_product_template__message_needaction_counter
 msgid "Number of Actions"
-msgstr "Tegevuste arv"
+msgstr "Toimingute arv"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_category__message_has_error_counter
@@ -2286,7 +2576,7 @@ msgstr "Tegevuste arv"
 #: model:ir.model.fields,field_description:product.field_product_product__message_has_error_counter
 #: model:ir.model.fields,field_description:product.field_product_template__message_has_error_counter
 msgid "Number of errors"
-msgstr "Vigade arv"
+msgstr "Veateadete arv"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_category__message_needaction_counter
@@ -2302,13 +2592,7 @@ msgstr "Tegevust nõudvate sõnumite arv"
 #: model:ir.model.fields,help:product.field_product_product__message_has_error_counter
 #: model:ir.model.fields,help:product.field_product_template__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "Veateatega sõnumite arv"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_product__pricelist_item_count
-#: model:ir.model.fields,field_description:product.field_product_template__pricelist_item_count
-msgid "Number of price rules"
-msgstr "Hinnareeglite arv"
+msgstr "Kohaletoimetamise veateatega sõnumite arv"
 
 #. module: product
 #: model:product.template,name:product.product_delivery_01_product_template
@@ -2336,24 +2620,34 @@ msgid "Office Lamp"
 msgstr "Kontorilamp"
 
 #. module: product
-#. odoo-python
-#: code:addons/product/models/product_template_attribute_line.py:0
-msgid ""
-"On the product %(product)s you cannot associate the value %(value)s with the"
-" attribute %(attribute)s because they do not match."
-msgstr ""
-"Toote %(product)s väärtust %(value)s ei saa siduda atribuudiga "
-"%(attribute)s, sest need ei kattu."
+#: model:product.attribute.value,name:product.pav_brand_olay
+msgid "Olay"
+msgstr "Olay"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_olive
+msgid "Olive"
+msgstr "Oliiv"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"On the product %(product)s you cannot transform the attribute "
-"%(attribute_src)s into the attribute %(attribute_dest)s."
+"On the product %(product)s you cannot associate the value %(value)s with the "
+"attribute %(attribute)s because they do not match."
 msgstr ""
-"Toote %(product)s atribuuti %(attribute_src)s ei saa muuta atrbuudiks "
-"%(attribute_dest)s."
+"Toote %(product)s väärtust %(value)s ei saa siduda atribuudiga %(attribute)"
+"s, sest need ei kattu."
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_template_attribute_line.py:0
+msgid ""
+"On the product %(product)s you cannot transform the attribute %"
+"(attribute_src)s into the attribute %(attribute_dest)s."
+msgstr ""
+"Toote %(product)s atribuuti %(attribute_src)s ei saa muuta atrbuudiks %"
+"(attribute_dest)s."
 
 #. module: product
 #. odoo-javascript
@@ -2363,6 +2657,22 @@ msgstr ""
 "Oih! '%(fileName)s' ei laadinud üles, kuna selle formaat ei ole lubatud."
 
 #. module: product
+#: model:ir.model.fields,field_description:product.field_product_combo_item__product_id
+#: model:product.attribute,name:product.pa_options
+msgid "Options"
+msgstr "Variandid"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_oral_b
+msgid "Oral-B"
+msgstr "Oral-B"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_orange
+msgid "Orange"
+msgstr "Oranž"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__original_id
 msgid "Original (unoptimized, unresized) attachment"
 msgstr "Algne (optimiseerimata, muutmata suurusega) manus"
@@ -2370,7 +2680,7 @@ msgstr "Algne (optimiseerimata, muutmata suurusega) manus"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_combo_item__lst_price
 msgid "Original Price"
-msgstr "Originaal hind"
+msgstr "Originaalhind"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__base_pricelist_id
@@ -2382,7 +2692,12 @@ msgstr "Muu hinnakiri"
 #. module: product
 #: model:product.template,name:product.product_template_dining_table
 msgid "Outdoor dining table"
-msgstr "Väline söögilaud"
+msgstr "Õue söögilaud"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_options_overhead_shelves
+msgid "Overhead shelves"
+msgstr "Ülemised riiulid"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
@@ -2390,12 +2705,32 @@ msgid "Package Type A"
 msgstr "Pakendi tüüp A"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_packaging_form_view
-#: model_terms:ir.ui.view,arch_db:product.product_packaging_tree_view
-#: model_terms:ir.ui.view,arch_db:product.product_template_form_view
-#: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
-msgid "Packaging"
-msgstr "Pakend"
+#. odoo-python
+#: code:addons/product/models/uom_uom.py:0
+#: model_terms:ir.ui.view,arch_db:product.product_uom_list_view
+msgid "Packaging Barcodes"
+msgstr "Pakendi triipkood"
+
+#. module: product
+#: model:ir.actions.report,name:product.report_product_packaging
+msgid "Packaging Barcodes (PDF)"
+msgstr "Pakendi triipkood (PDF)"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__uom_ids
+#: model:ir.model.fields,field_description:product.field_product_template__uom_ids
+msgid "Packagings"
+msgstr "Pakendid"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_panasonic
+msgid "Panasonic"
+msgstr "Panasonic"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_pantene
+msgid "Pantene"
+msgstr "Pantene"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_category__parent_id
@@ -2413,9 +2748,19 @@ msgid "Pedal Bin"
 msgstr "Prügikast"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_brand_pepsi
+msgid "Pepsi"
+msgstr "Pepsi"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__percent_price
 msgid "Percentage Price"
 msgstr "Protsent hinnast"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_philips
+msgid "Philips"
+msgstr "Philips"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__display_type__pills
@@ -2423,9 +2768,9 @@ msgid "Pills"
 msgstr "Tabletid"
 
 #. module: product
-#: model:product.attribute.value,name:product.fabric_attribute_plastic
-msgid "Plastic"
-msgstr "Plastik"
+#: model:product.attribute.value,name:product.pav_color_pink
+msgid "Pink"
+msgstr "Roosa"
 
 #. module: product
 #. odoo-javascript
@@ -2474,8 +2819,8 @@ msgstr "Palun täpsustage tootevariant, mille puhul seda reeglit rakendada"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_weight_in_lbs__1
-msgid "Pounds"
-msgstr "Naelad"
+msgid "Pounds (lb)"
+msgstr "Naelad (lb)"
 
 #. module: product
 #: model_terms:product.template,website_description:product.product_product_4_product_template
@@ -2488,10 +2833,8 @@ msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__price
-#: model:ir.model.fields,field_description:product.field_product_supplierinfo__price
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_tree_view_from_product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
-#: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_tree_view
 msgid "Price"
 msgstr "Hind"
 
@@ -2506,12 +2849,8 @@ msgid "Price Rounding"
 msgstr "Hinnaümardus"
 
 #. module: product
-#. odoo-python
-#: code:addons/product/models/product_product.py:0
-#: code:addons/product/models/product_template.py:0
 #: model:ir.actions.act_window,name:product.product_pricelist_item_action
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_tree_view
-#: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
 msgid "Price Rules"
 msgstr "Hinnareeglid"
 
@@ -2541,7 +2880,6 @@ msgstr "Hind:"
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__pricelist_id
 #: model:ir.model.fields,field_description:product.field_res_partner__property_product_pricelist
 #: model:ir.model.fields,field_description:product.field_res_users__property_product_pricelist
-#: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_tree_view_from_product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_view_search
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
@@ -2582,6 +2920,8 @@ msgstr "Hinnakirja reegel"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__item_ids
+#: model:ir.model.fields,field_description:product.field_product_product__pricelist_rule_ids
+#: model:ir.model.fields,field_description:product.field_product_template__pricelist_rule_ids
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_tree_view_from_product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
 msgid "Pricelist Rules"
@@ -2592,47 +2932,50 @@ msgstr "Hinnakirja reeglid"
 #: model:ir.model.fields,field_description:product.field_res_config_settings__group_product_pricelist
 #: model:ir.model.fields,field_description:product.field_res_country_group__pricelist_ids
 msgid "Pricelists"
-msgstr "Hinnakiri"
+msgstr "Hinnakirjad"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.view_partner_property_form
-msgid "Pricelists are managed on"
-msgstr "Hinnakirju haldab"
+#: model_terms:ir.ui.view,arch_db:product.product_template_form_view
+msgid "Prices"
+msgstr "Hinnad"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
 msgid "Pricing"
-msgstr "Hinnastamine"
+msgstr "Hinnakujundus"
 
 #. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
+#: model_terms:ir.ui.view,arch_db:product.product_label_layout_form
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
 msgid "Print"
 msgstr "Prindi"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_product_tree_view
-#: model_terms:ir.ui.view,arch_db:product.product_template_form_view
-#: model_terms:ir.ui.view,arch_db:product.product_template_tree_view
-#: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
+#: model:ir.actions.act_window,name:product.action_open_label_layout
+#: model:ir.actions.server,name:product.action_product_print_labels
+#: model:ir.actions.server,name:product.action_product_template_print_labels
 msgid "Print Labels"
 msgstr "Prindi sildid"
+
+#. module: product
+#: model:product.template,description_sale:product.product_product_24_product_template
+msgid "Private pod with desk and chair"
+msgstr "Privaatne kabiin laua ja tooliga"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/controllers/pricelist_report.py:0
 #: model:ir.model,name:product.model_product_template
-#: model:ir.model.fields,field_description:product.field_product_combo_item__product_id
 #: model:ir.model.fields,field_description:product.field_product_label_layout__product_ids
-#: model:ir.model.fields,field_description:product.field_product_packaging__product_id
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_tmpl_id
 #: model:ir.model.fields,field_description:product.field_product_product__product_variant_id
 #: model:ir.model.fields,field_description:product.field_product_template__product_variant_id
+#: model:ir.model.fields,field_description:product.field_product_uom__product_id
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__applied_on__1_product
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__display_applied_on__1_product
 #: model_terms:ir.ui.view,arch_db:product.product_kanban_view
-#: model_terms:ir.ui.view,arch_db:product.product_packaging_search_view
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_view_search
 #: model_terms:ir.ui.view,arch_db:product.product_search_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
@@ -2682,11 +3025,10 @@ msgid "Product Catalog Mixin"
 msgstr "Tootekataloogi mixin"
 
 #. module: product
-#: model:ir.actions.act_window,name:product.product_category_action_form
 #: model_terms:ir.ui.view,arch_db:product.product_category_list_view
 #: model_terms:ir.ui.view,arch_db:product.product_category_search_view
 msgid "Product Categories"
-msgstr "Toote kategooriad"
+msgstr "Tootekategooriad"
 
 #. module: product
 #: model:ir.model,name:product.model_product_category
@@ -2697,7 +3039,7 @@ msgstr "Toote kategooriad"
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 #: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Product Category"
-msgstr "Toote kategooria"
+msgstr "Tootekategooria"
 
 #. module: product
 #: model:ir.model,name:product.model_product_combo
@@ -2707,18 +3049,13 @@ msgstr "Toote kombo"
 #. module: product
 #: model:ir.model,name:product.model_product_combo_item
 msgid "Product Combo Item"
-msgstr "Toote komboelemendid"
+msgstr "Toote komboelement"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_combo__combo_item_count
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__product_count
 msgid "Product Count"
 msgstr "Toote arv"
-
-#. module: product
-#: model:res.groups,name:product.group_product_manager
-msgid "Product Creation"
-msgstr "Toote loomine"
 
 #. module: product
 #: model:ir.model,name:product.model_product_document
@@ -2728,27 +3065,27 @@ msgstr "Tootedokument"
 #. module: product
 #: model:ir.actions.report,name:product.report_product_template_label_dymo
 msgid "Product Label (PDF)"
-msgstr "Toote silt (PDF)"
+msgstr "Tootesilt (PDF)"
 
 #. module: product
 #: model:ir.actions.report,name:product.report_product_template_label_2x7
 msgid "Product Label 2x7 (PDF)"
-msgstr "Toote silt 2x7 (PDF)"
+msgstr "Tootesilt 2x7 (PDF)"
 
 #. module: product
 #: model:ir.actions.report,name:product.report_product_template_label_4x12
 msgid "Product Label 4x12 (PDF)"
-msgstr "Toote silt 4x12 (PDF)"
+msgstr "Tootesilt 4x12 (PDF)"
 
 #. module: product
 #: model:ir.actions.report,name:product.report_product_template_label_4x12_noprice
 msgid "Product Label 4x12 No Price (PDF)"
-msgstr "Toote silt 4x12 ilma hinnata (PDF)"
+msgstr "Tootesilt 4x12 ilma hinnata (PDF)"
 
 #. module: product
 #: model:ir.actions.report,name:product.report_product_template_label_4x7
 msgid "Product Label 4x7 (PDF)"
-msgstr "Toote silt 4x7 (PDF)"
+msgstr "Tootesilt 4x7 (PDF)"
 
 #. module: product
 #: model:ir.model,name:product.model_report_product_report_producttemplatelabel_dymo
@@ -2758,22 +3095,22 @@ msgstr "Tootesiltide aruanne"
 #. module: product
 #: model:ir.model,name:product.model_report_product_report_producttemplatelabel2x7
 msgid "Product Label Report 2x7"
-msgstr "Toote sildi aruanne 2x7"
+msgstr "Tootesildi aruanne 2x7"
 
 #. module: product
 #: model:ir.model,name:product.model_report_product_report_producttemplatelabel4x12
 msgid "Product Label Report 4x12"
-msgstr "Toote sildi aruanne 4x12"
+msgstr "Tootesildi aruanne 4x12"
 
 #. module: product
 #: model:ir.model,name:product.model_report_product_report_producttemplatelabel4x12noprice
 msgid "Product Label Report 4x12 No Price"
-msgstr "Toote siltide aruanne 4x12 ilma hinnata"
+msgstr "Tootesildi aruanne 4x12 ilma hinnata"
 
 #. module: product
 #: model:ir.model,name:product.model_report_product_report_producttemplatelabel4x7
 msgid "Product Label Report 4x7"
-msgstr "Toote sildi aruanne 4x7"
+msgstr "Tootesildi aruanne 4x7"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_product_view_form_normalized
@@ -2783,33 +3120,8 @@ msgid "Product Name"
 msgstr "Toote nimi"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_product__packaging_ids
-#: model:ir.model.fields,field_description:product.field_product_template__packaging_ids
-msgid "Product Packages"
-msgstr "Toote pakendid"
-
-#. module: product
-#: model:ir.model,name:product.model_product_packaging
-#: model:ir.model.fields,field_description:product.field_product_packaging__name
-#: model_terms:ir.ui.view,arch_db:product.product_packaging_form_view
-msgid "Product Packaging"
-msgstr "Toote pakend"
-
-#. module: product
-#: model:ir.actions.report,name:product.report_product_packaging
-msgid "Product Packaging (PDF)"
-msgstr "Tootepakend (PDF)"
-
-#. module: product
-#: model:ir.actions.act_window,name:product.action_packaging_view
-#: model:ir.model.fields,field_description:product.field_res_config_settings__group_stock_packaging
-#: model_terms:ir.ui.view,arch_db:product.product_packaging_search_view
-#: model_terms:ir.ui.view,arch_db:product.product_packaging_tree_view
-msgid "Product Packagings"
-msgstr "Tootepakendid"
-
-#. module: product
 #: model:ir.model.fields,field_description:product.field_product_category__product_properties_definition
+#: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 msgid "Product Properties"
 msgstr "Toote omadused"
 
@@ -2834,17 +3146,17 @@ msgstr "Tootesildid"
 #: model_terms:ir.ui.view,arch_db:product.product_search_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Product Template"
-msgstr "Toote mall"
+msgstr "Tootemall"
 
 #. module: product
 #: model:ir.model,name:product.model_product_template_attribute_exclusion
 msgid "Product Template Attribute Exclusion"
-msgstr "Toote malli atribuudi välistamine"
+msgstr "Tootemalli atribuudi välistamine"
 
 #. module: product
 #: model:ir.model,name:product.model_product_template_attribute_line
 msgid "Product Template Attribute Line"
-msgstr "Toote malli atribuutide rida"
+msgstr "Tootemalli atribuutide rida"
 
 #. module: product
 #: model:ir.model,name:product.model_product_template_attribute_value
@@ -2853,10 +3165,9 @@ msgstr "Tootemalli atribuudi väärtus"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_tag__product_template_ids
-#: model_terms:ir.ui.view,arch_db:product.product_tag_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_view_tree_tag
 msgid "Product Templates"
-msgstr "Toote mallid"
+msgstr "Tootemallid"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_label_layout__product_tmpl_ids
@@ -2883,6 +3194,12 @@ msgid "Product Unit of Measure"
 msgstr "Toote mõõtühik"
 
 #. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__import_attribute_values
+#: model:ir.model.fields,field_description:product.field_product_template__import_attribute_values
+msgid "Product Values"
+msgstr ""
+
+#. module: product
 #: model:ir.model,name:product.model_product_product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__product_id
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__applied_on__0_product_variant
@@ -2906,7 +3223,6 @@ msgstr "Tootevariatsiooni väärtused"
 #: model_terms:ir.ui.view,arch_db:product.product_product_tree_view
 #: model_terms:ir.ui.view,arch_db:product.product_product_view_activity
 #: model_terms:ir.ui.view,arch_db:product.product_product_view_tree_tag
-#: model_terms:ir.ui.view,arch_db:product.product_tag_form_view
 msgid "Product Variants"
 msgstr "Toote variatsioonid"
 
@@ -2924,6 +3240,7 @@ msgstr "Tootemudel pole määratletud, võtke ühendust oma administraatoriga."
 #: model:ir.actions.act_window,name:product.product_template_action_all
 #: model:ir.model.fields,field_description:product.field_product_product__product_variant_ids
 #: model:ir.model.fields,field_description:product.field_product_template__product_variant_ids
+#: model:res.groups.privilege,name:product.res_groups_privilege_product
 #: model_terms:ir.ui.view,arch_db:product.product_template_view_activity
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
 msgid "Products"
@@ -2968,15 +3285,14 @@ msgid "Properties"
 msgstr "Omadused"
 
 #. module: product
-#: model:product.attribute.value,name:product.pav_protection_kit
-msgid "Protection kit"
-msgstr ""
+#: model:product.attribute.value,name:product.pav_brand_puma
+msgid "Puma"
+msgstr "Puma"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__purchase_ok
 #: model:ir.model.fields,field_description:product.field_product_template__purchase_ok
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
-#: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 msgid "Purchase"
 msgstr "Ost"
 
@@ -2987,10 +3303,9 @@ msgid "Purchase Description"
 msgstr "Ostuselgitus"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_product__uom_po_id
-#: model:ir.model.fields,field_description:product.field_product_template__uom_po_id
-msgid "Purchase Unit"
-msgstr "Ostuühik"
+#: model:product.attribute.value,name:product.pav_color_purple
+msgid "Purple"
+msgstr "Lilla"
 
 #. module: product
 #. odoo-javascript
@@ -3004,7 +3319,6 @@ msgid "Quantities (Price)"
 msgstr "Kogused (hind)"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_label_layout__custom_quantity
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__min_qty
 msgid "Quantity"
 msgstr "Kogus"
@@ -3022,11 +3336,6 @@ msgid "Quantity already present (%s)."
 msgstr "Kogus juba olemas (%s)."
 
 #. module: product
-#: model:ir.model.fields,help:product.field_product_packaging__qty
-msgid "Quantity of products contained in the packaging."
-msgstr "Pakendis sisalduvate toodete kogus."
-
-#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Quotation Description"
 msgstr "Pakkumise kirjeldus"
@@ -3037,6 +3346,27 @@ msgid "Radio"
 msgstr "Ringidega valikud"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_brand_rayban
+msgid "Ray-Ban"
+msgstr "Ray-Ban"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_pricelist_item.py:0
+msgid "Recursive pricelist rules detected: %s"
+msgstr "Tuvastati rekursiivsed hinnakirja reeglid: %s"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_red
+msgid "Red"
+msgstr "Punane"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_reebok
+msgid "Reebok"
+msgstr "Reebok"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__code
 #: model_terms:ir.ui.view,arch_db:product.product_template_only_form_view
 msgid "Reference"
@@ -3045,8 +3375,8 @@ msgstr "Viide"
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_supplierinfo_type_action
 msgid ""
-"Register the prices requested by your vendors for each product, based on the"
-" quantity and the period."
+"Register the prices requested by your vendors for each product, based on the "
+"quantity and the period."
 msgstr ""
 "Registreerige oma tarnijatelt taotletud hinnad koguse ja perioodi alusel."
 
@@ -3110,6 +3440,16 @@ msgid "Restaurant Expenses"
 msgstr "Restorani kulud"
 
 #. module: product
+#: model:product.template,description_sale:product.product_product_5_product_template
+msgid "Right-aligned desk with storage"
+msgstr "Parempoolne töökoht panipaigaga"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_rolex
+msgid "Rolex"
+msgstr "Rolex"
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid "Round off to"
 msgstr "Ümarda kuni"
@@ -3123,6 +3463,11 @@ msgstr "Read"
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__rule_tip
 msgid "Rule Tip"
 msgstr "Reegli vihje"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_size_s
+msgid "S"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__sale_ok
@@ -3150,9 +3495,25 @@ msgid "Sales Price"
 msgstr "Müügihind"
 
 #. module: product
+#: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
+msgid "Sales Prices"
+msgstr "Müügihinnad"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__lst_price
 msgid "Sales Price"
 msgstr "Müügihind"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_samsung
+msgid "Samsung"
+msgstr "Samsung"
+
+#. module: product
+#. odoo-javascript
+#: code:addons/product/static/src/product_name_and_description/product_name_and_description.js:0
+msgid "Search a product"
+msgstr "Otsi toodet"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__display_type__select
@@ -3164,7 +3525,6 @@ msgstr "Vali"
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__sequence
 #: model:ir.model.fields,field_description:product.field_product_combo__sequence
 #: model:ir.model.fields,field_description:product.field_product_document__sequence
-#: model:ir.model.fields,field_description:product.field_product_packaging__sequence
 #: model:ir.model.fields,field_description:product.field_product_pricelist__sequence
 #: model:ir.model.fields,field_description:product.field_product_product__sequence
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__sequence
@@ -3172,7 +3532,7 @@ msgstr "Vali"
 #: model:ir.model.fields,field_description:product.field_product_template__sequence
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__sequence
 msgid "Sequence"
-msgstr "Jada"
+msgstr "Järjestus"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_template__type__service
@@ -3197,6 +3557,11 @@ msgstr ""
 "Et saada hindu, mis lõppevad 9.99, määra ümarduseks 10, lisatasu -0,01"
 
 #. module: product
+#: model:product.attribute,name:product.pa_shoe_size
+msgid "Shoes size"
+msgstr "Kingade suurus"
+
+#. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "Show Name"
@@ -3204,21 +3569,34 @@ msgstr "Näita nime"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
-msgid "Show all records which has next action date is before today"
-msgstr ""
-"Näita kõiki andmeid, mille järgmise tegevuse kuupäev on ennem tänast "
-"kuupäeva"
+msgid "Show all records whose next activity date is past"
+msgstr "Näita kõiki andmeid, mille järgmise tegevuse kuupäev on möödas"
 
 #. module: product
-#: model:product.attribute,name:product.size_attribute
+#: model:product.attribute.value,name:product.pav_color_silver
+msgid "Silver"
+msgstr "Hõbedane"
+
+#. module: product
+#: model:product.attribute,name:product.pa_size
 msgid "Size"
 msgstr "Suurus"
+
+#. module: product
+#: model:product.template,description_sale:product.product_product_9_product_template
+msgid "Soft-close pedal bin for office use"
+msgstr "Vaikselt sulguva kaanega pedaalprügikast kontorisse"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_sony
+msgid "Sony"
+msgstr "Sony"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_res_partner__specific_property_product_pricelist
 #: model:ir.model.fields,field_description:product.field_res_users__specific_property_product_pricelist
 msgid "Specific Property Product Pricelist"
-msgstr ""
+msgstr "Spetsiifiline toote hinnakirja omadus"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__categ_id
@@ -3226,9 +3604,9 @@ msgid ""
 "Specify a product category if this rule only applies to products belonging "
 "to this category or its children categories. Keep empty otherwise."
 msgstr ""
-"Määrake tootekategooria, kui see reegel kehtib ainult sellesse kategooriasse"
-" või selle alamkategooriatesse kuuluvatele toodetele. Vastasel juhul jätke "
-"väli tühjaks. "
+"Määrake tootekategooria, kui see reegel kehtib ainult sellesse kategooriasse "
+"või selle alamkategooriatesse kuuluvatele toodetele. Vastasel juhul jätke "
+"väli tühjaks."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__product_id
@@ -3237,7 +3615,7 @@ msgid ""
 "otherwise."
 msgstr ""
 "Määrake toode, kui see reegel kehtib ainult ühe toote kohta. Vastasel juhul "
-"jätke väli tühjaks. "
+"jätke väli tühjaks."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__product_tmpl_id
@@ -3303,7 +3681,7 @@ msgstr ""
 "Planeeritud: Tulevased tegevused."
 
 #. module: product
-#: model:product.attribute.value,name:product.product_attribute_value_1
+#: model:product.attribute.value,name:product.pav_legs_steel
 msgid "Steel"
 msgstr "Teras"
 
@@ -3323,6 +3701,11 @@ msgid "Supplier Pricelist"
 msgstr "Tarnija hinnakiri"
 
 #. module: product
+#: model_terms:ir.ui.view,arch_db:product.product_tag_form_view
+msgid "Tag"
+msgstr "Silt"
+
+#. module: product
 #: model:ir.model.constraint,message:product.constraint_product_tag_name_uniq
 msgid "Tag name already exists!"
 msgstr "Sildi nimi on juba loodud!"
@@ -3332,6 +3715,7 @@ msgstr "Sildi nimi on juba loodud!"
 #: model:ir.model.fields,field_description:product.field_product_template__product_tag_ids
 #: model_terms:ir.ui.view,arch_db:product.product_search_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
+#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Tags"
 msgstr "Sildid"
 
@@ -3339,6 +3723,16 @@ msgstr "Sildid"
 #: model_terms:ir.actions.act_window,help:product.product_tag_action
 msgid "Tags are used to search product for a given theme."
 msgstr "Silte kasutatakse toote otsimiseks teema järgi."
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_tan
+msgid "Tan"
+msgstr "Helepruun"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_teal
+msgid "Teal"
+msgstr "Sinakasroheline"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__template_value_ids
@@ -3361,10 +3755,10 @@ msgstr "Viide '%s' on juba olemas."
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"The attribute %(attribute)s must have at least one value for the product "
-"%(product)s."
+"The attribute %(attribute)s must have at least one value for the product %"
+"(product)s."
 msgstr ""
-"Toote %(product)s atribuudil%(attribute)s peab olema vähemalt üks väärtus."
+"Toote %(product)s atribuudil %(attribute)s peab olema vähemalt üks väärtus."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute_value__attribute_id
@@ -3376,12 +3770,10 @@ msgstr ""
 
 #. module: product
 #. odoo-python
+#: code:addons/product/models/product_product.py:0
 #: code:addons/product/models/product_template.py:0
-msgid ""
-"The default Unit of Measure and the purchase Unit of Measure must be in the "
-"same category."
-msgstr ""
-"Vaikimisi mõõtühik ja ostetav mõõtühik peavad olema samas kategoorias."
+msgid "The cost of a product can't be negative."
+msgstr "Tootekulu ei saa olla negatiivne."
 
 #. module: product
 #: model:product.template,description_sale:product.desk_organizer_product_template
@@ -3391,8 +3783,8 @@ msgid ""
 "suits you and your things best."
 msgstr ""
 "Lauakorraldaja on ideaalne kõigi väikeste asjade hoidmiseks ja kuna need 5 "
-"kasti on lahtised, saate neid paigutada ja liigutada viisil, mis sobib teile"
-" ja teie asjadele kõige paremini."
+"kasti on lahtised, saate neid paigutada ja liigutada viisil, mis sobib teile "
+"ja teie asjadele kõige paremini."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__display_type
@@ -3402,9 +3794,13 @@ msgid "The display type used in the Product Configurator."
 msgstr "Tootekonfiguraatoris kasutatav kuvatüüp."
 
 #. module: product
-#: model:ir.model.fields,help:product.field_product_packaging__sequence
-msgid "The first in the sequence is the default one."
-msgstr "The first in the sequence is the default one."
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+msgid ""
+"The exitings product has different attribute value. \"%(imported_values)s\" "
+"is not equivalent to \"%(existing_values)s\" for \"%(external_id)s\", \"%"
+"(id)s\""
+msgstr ""
 
 #. module: product
 #: model_terms:product.template,website_description:product.product_product_4_product_template
@@ -3425,8 +3821,8 @@ msgstr "Minimaalne marginaal peaks olema väiksem kui maksimaalne marginaal."
 msgid ""
 "The minimum price among the products in this combo. This value will be used "
 "to prorate the price of this combo with respect to the other combos in a "
-"combo product. This heuristic ensures that whatever product the user chooses"
-" in a combo, it will always be the same price."
+"combo product. This heuristic ensures that whatever product the user chooses "
+"in a combo, it will always be the same price."
 msgstr ""
 "Antud kombinatsiooni toodete minimaalne hind. Seda väärtust kasutatakse "
 "selle kombinatsiooni hinna proportsionaalseks jaotamiseks kombineeritud "
@@ -3438,23 +3834,21 @@ msgstr ""
 msgid ""
 "The number of products under this category (Does not consider the children "
 "categories)"
-msgstr ""
-"The number of products under this category (Does not consider the children "
-"categories)"
+msgstr "Toodete arv antud kategoorias (Ei arvesta alamkategooriaid)"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid ""
-"The number of variants to generate is above allowed limit. You should either"
-" not generate variants for each combination or generate them on demand from "
+"The number of variants to generate is above allowed limit. You should either "
+"not generate variants for each combination or generate them on demand from "
 "the sales order. To do so, open the form view of attributes and change the "
 "mode of *Create Variants*."
 msgstr ""
 "Variatsioonide arv on üle lubatud piiri. Kas ära loo iga kombinatsiooni "
 "kohta variatsiooni või loo need vastavalt müügitellimuselt tulevale "
-"nõudlusele. Selleks ava atribuudi vormivaade ja muuda variatsioonide loomise"
-" viisi."
+"nõudlusele. Selleks ava atribuudi vormivaade ja muuda variatsioonide loomise "
+"viisi."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__price
@@ -3470,25 +3864,25 @@ msgstr "Tootemall on arhiveeritud, nii et kombinatsioon pole võimalik."
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__min_qty
 msgid ""
-"The quantity to purchase from this vendor to benefit from the price, "
-"expressed in the vendor Product Unit of Measure if not any, in the default "
-"unit of measure of the product otherwise."
+"The quantity to purchase from this vendor to benefit from the unit price. If "
+"a vendor unit is set, quantity should be specified in this unit, otherwise "
+"it should be specified in the default unit of the product."
 msgstr ""
-"Sellelt tarnijalt ostetav kogus. Kogus on väljatoodud tarnija mõõtühikus või"
-" selle puudumisel toote enda mõõtühikus."
+"Sellelt tarnijalt ostetav kogus. Kogus on väljatoodud tarnija mõõtühikus või "
+"selle puudumisel toote enda mõõtühikus."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid "The rounding method must be strictly positive."
-msgstr "Ümardamise meetod peab olema positiivne."
+msgstr "Ümardamise meetod peab olema alati positiivne."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_combo_item__lst_price
 #: model:ir.model.fields,help:product.field_product_product__lst_price
 msgid ""
-"The sale price is managed from the product template. Click on the 'Configure"
-" Variants' button to set the extra attribute prices."
+"The sale price is managed from the product template. Click on the 'Configure "
+"Variants' button to set the extra attribute prices."
 msgstr ""
 "Müügihinda hallatakse tootemallist. Täiendavate atribuutide hindade "
 "määramiseks klõpsake nuppu Konfigureeri variandid."
@@ -3500,8 +3894,8 @@ msgid ""
 "The value %(value)s is not defined for the attribute %(attribute)s on the "
 "product %(product)s."
 msgstr ""
-"Väärtus %(value)s ei ole defineeritud toote %(product)satribuudile "
-"%(attribute)s."
+"Väärtus %(value)s ei ole defineeritud toote %(product)s atribuudile %"
+"(attribute)s."
 
 #. module: product
 #. odoo-python
@@ -3548,32 +3942,12 @@ msgid "This note is only for internal purposes."
 msgstr "See märkus on ette nähtud ainult ettevõttesiseseks kasutamiseks."
 
 #. module: product
-#: model:ir.model.fields,help:product.field_res_partner__property_product_pricelist
-#: model:ir.model.fields,help:product.field_res_users__property_product_pricelist
-msgid ""
-"This pricelist will be used, instead of the default one, for sales to the "
-"current partner"
-msgstr ""
-"Seda hinnakirja kasutatakse partnerile müümisel vaikimisi hinnakirja asemel"
-
-#. module: product
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid ""
 "This product is part of a combo, so its type can't be changed to \"combo\"."
 msgstr ""
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/uom_uom.py:0
-msgid ""
-"This rounding precision is higher than the Decimal Accuracy (%(digits)s digits).\n"
-"This may cause inconsistencies in computations.\n"
-"Please set a precision between %(min_precision)s and 1."
-msgstr ""
-"See ümardamise täpsus on suurem kui kümnendkoha täpsus (%s numbrit).\n"
-"See võib põhjustada arvutustes ebakõlasid.\n"
-"Palun määrake täpsus vahemikus %s kuni 1."
+"Toode on osa komplektist, seega ei saa selle tüüpi muuta tüübiks 'komplekt'."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__product_code
@@ -3594,19 +3968,29 @@ msgstr ""
 "kasutamiseks hoidke väli tühjana."
 
 #. module: product
-#: model:product.template,description_sale:product.consu_delivery_01_product_template
-msgid "Three Seater Sofa with Lounger in Steel Grey Colour"
-msgstr "Halli värvi kolmekohaline diivan koos lamamistooliga"
+#: model:ir.model.fields,field_description:product.field_product_document__thumbnail
+msgid "Thumbnail"
+msgstr "Pisipilt"
 
 #. module: product
-#: model:product.template,name:product.consu_delivery_01_product_template
-msgid "Three-Seat Sofa"
-msgstr "Kolmekohaline diivan"
+#: model:product.attribute.value,name:product.pav_brand_tide
+msgid "Tide"
+msgstr "Tide"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 msgid "Today Activities"
 msgstr "Tänased tegevused"
+
+#. module: product
+#: model:product.template,name:product.consu_delivery_01_product_template
+msgid "Two-Seat Sofa"
+msgstr "Kahekohaline diivan"
+
+#. module: product
+#: model:product.template,description_sale:product.consu_delivery_01_product_template
+msgid "Two-Seater Sofa with Oak Wood Frame"
+msgstr "Kahekohaline diivan tammepuidust raamiga"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__type
@@ -3634,53 +4018,78 @@ msgid "Unable to find report template for %s format"
 msgstr "%s vormingu aruande malli ei leitud"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_product_tree_view
-#: model_terms:ir.ui.view,arch_db:product.product_template_tree_view
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+msgid ""
+"Unable to import products with attribute value without attribute name "
+"(defined as: attribute:value): %s"
+msgstr ""
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+msgid ""
+"Unable to import products with attribute values but without name of product "
+"set"
+msgstr ""
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_underarmour
+msgid "Under Armour"
+msgstr "Under Armour"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_options_under_desk_pedestals
+msgid "Under-desk pedestals"
+msgstr "Töölauaalused"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_uniqlo
+msgid "Uniqlo"
+msgstr "Uniqlo"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__uom_id
+#: model:ir.model.fields,field_description:product.field_product_supplierinfo__product_uom_id
+#: model:ir.model.fields,field_description:product.field_product_template__uom_id
+#: model:ir.model.fields,field_description:product.field_product_uom__uom_id
 msgid "Unit"
 msgstr "Ühik"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
-msgid "Unit Price"
-msgstr "Ühikhind"
+#: model:ir.model.fields,field_description:product.field_product_product__product_uom_ids
+msgid "Unit Barcode"
+msgstr "Ühiku triipkood"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_packaging__product_uom_id
-#: model:ir.model.fields,field_description:product.field_product_product__uom_id
-#: model:ir.model.fields,field_description:product.field_product_supplierinfo__product_uom
-#: model:ir.model.fields,field_description:product.field_product_template__uom_id
-msgid "Unit of Measure"
-msgstr "Mõõtühik"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_uom
+#: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_uom_name
 #: model:ir.model.fields,field_description:product.field_product_product__uom_name
 #: model:ir.model.fields,field_description:product.field_product_template__uom_name
-msgid "Unit of Measure Name"
-msgstr "Mõõtühiku nimi"
+msgid "Unit Name"
+msgstr "Ühiku nimi"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_supplierinfo__price
+#: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
+msgid "Unit Price"
+msgstr "Ühikuhind"
 
 #. module: product
 #. odoo-javascript
-#: code:addons/product/static/src/product_catalog/order_line/order_line.xml:0
-msgid "Unit price:"
-msgstr "Ühikuhind:"
-
-#. module: product
+#: code:addons/product/static/src/product_catalog/kanban_model.js:0
 #: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
 msgid "Units"
-msgstr "tk"
+msgstr "Ühikud"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_res_config_settings__group_uom
 #: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
 msgid "Units of Measure"
 msgstr "Mõõtühikud"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_product__uom_category_id
-#: model:ir.model.fields,field_description:product.field_product_template__uom_category_id
-msgid "UoM Category"
-msgstr "Mõõtühikute kategooria"
+#: model:ir.model.fields,field_description:product.field_res_config_settings__group_uom
+msgid "Units of Measure & Packagings"
+msgstr "Mõõtühikud ja pakendid"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_attribute_view_form
@@ -3718,7 +4127,7 @@ msgstr "Lisa oma tootele faile"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Upsell & Cross-Sell"
-msgstr "Lisamüük ja ristmüük"
+msgstr "Lisamüük ja Cross-Sell"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__url
@@ -3731,7 +4140,7 @@ msgid ""
 "Use the discount rules and activate the discount settings in order to show "
 "discount to customer."
 msgstr ""
-"Kliendile allahindluse kuvamiseks aktiveeri allahindluse seaded ja kasuta "
+"Kliendile allahindluse kuvamiseks aktiveerige allahindluse seaded ja kasuta "
 "allahindlusreegleid."
 
 #. module: product
@@ -3741,8 +4150,14 @@ msgid ""
 "Use this feature to store any files you would like to share with your "
 "customers"
 msgstr ""
-"Kasuta seda funktsionaalsust, et talletada faile, mida soovid oma kliendiga "
-"jagada."
+"Kasutage seda funktsionaalsust, et talletada faile, mida soovite oma "
+"klientidega jagada"
+
+#. module: product
+#: model:ir.model.fields,help:product.field_res_partner__property_product_pricelist
+#: model:ir.model.fields,help:product.field_res_users__property_product_pricelist
+msgid "Used for sales to the current partner"
+msgstr "Kasutatakse praeguste partneritele müügiks"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__is_used_on_products
@@ -3787,12 +4202,14 @@ msgstr "Väärtuste arv"
 #: model:ir.model.fields,help:product.field_product_template__standard_price
 msgid ""
 "Value of the product (automatically computed in AVCO).\n"
-"        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).\n"
+"        Used to value the product when the purchase cost is not known (e.g. "
+"inventory adjustment).\n"
 "        Used to compute margins on sale orders."
 msgstr ""
 "Toote väärtus (AVCO puhul arvutatakse automaatselt).\n"
-"Kasutatakse toote väärtuse määramiseks, kui ostuhind ei ole teada (nt. laoseisu korrigeerimisel).\n"
-"Kasutatakse müügitellimuse marginaali arvutamisel."
+"                   Kasutatakse toote väärtuse määramiseks, kui ostuhind ei "
+"ole teada (nt. laoseisu korrigeerimisel).\n"
+"                   Kasutatakse müügitellimuse marginaali arvutamisel."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__value_ids
@@ -3885,6 +4302,11 @@ msgid "Variants"
 msgstr "Variatsioonid"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_fabric_velvet
+msgid "Velvet"
+msgstr "Samet"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__partner_id
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_search_view
@@ -3926,7 +4348,7 @@ msgstr "Tarnijad"
 #. module: product
 #: model:product.template,name:product.product_product_2_product_template
 msgid "Virtual Home Staging"
-msgstr "Virtual Home Staging"
+msgstr "Virtuaalne kodu sisekujundus"
 
 #. module: product
 #: model:product.template,name:product.product_product_1_product_template
@@ -3936,9 +4358,16 @@ msgstr "Virtuaalne sisekujundus"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_combo_view_form
+#: model_terms:ir.ui.view,arch_db:product.product_document_form
+#: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Visible to all"
 msgstr "Nähtav kõigile"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_tag__visible_to_customers
+msgid "Visible to customers"
+msgstr "Nähtav klientidele"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__voice_ids
@@ -3965,13 +4394,6 @@ msgid "Volume unit of measure label"
 msgstr "Mahu mõõtühiku silt"
 
 #. module: product
-#. odoo-python
-#: code:addons/product/models/decimal_precision.py:0
-#: code:addons/product/models/uom_uom.py:0
-msgid "Warning!"
-msgstr "Hoiatus!"
-
-#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 msgid "Warnings"
 msgstr "Hoiatused"
@@ -3979,8 +4401,8 @@ msgstr "Hoiatused"
 #. module: product
 #: model_terms:product.template,website_description:product.product_product_4_product_template
 msgid ""
-"We pay special attention to detail, which is why our desks are of a superior"
-" quality."
+"We pay special attention to detail, which is why our desks are of a superior "
+"quality."
 msgstr ""
 "Pöörame erilist tähelepanu detailidele, mistõttu on meie lauad kõrge "
 "kvaliteediga."
@@ -4004,19 +4426,52 @@ msgid "Weight unit of measure label"
 msgstr "Kaalu mõõtühiku silt"
 
 #. module: product
-#: model:product.attribute.value,name:product.product_attribute_value_3
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+#: code:addons/product/models/product_template.py:0
+msgid "What to expect ?"
+msgstr "Mida oodata sellest?"
+
+#. module: product
+#: model:ir.model.fields,help:product.field_product_tag__visible_to_customers
+msgid "Whether the tag is displayed to customers."
+msgstr "Kas silt on klientidele kuvatud."
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_whirlpool
+msgid "Whirlpool"
+msgstr "Whirlpool"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_white
 msgid "White"
 msgstr "Valge"
 
 #. module: product
-#: model:product.attribute.value,name:product.product_attribute_value_color_wood
+#: model:product.attribute.value,name:product.pav_fabric_wood
+#: model:product.attribute.value,name:product.pav_legs_wood
 msgid "Wood"
 msgstr "Puit"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__write_date
 msgid "Write Date"
-msgstr "Write Date"
+msgstr "Kirjuta kuupäev"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_size_xl
+msgid "XL"
+msgstr "XL"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_size_xs
+msgid "XS"
+msgstr "XS"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_yellow
+msgid "Yellow"
+msgstr "Kollane"
 
 #. module: product
 #. odoo-python
@@ -4025,13 +4480,13 @@ msgid ""
 "You are about to add the value \"%(attribute_value)s\" to %(product_count)s "
 "products."
 msgstr ""
-"Oled lisamas väärtust \"%(attribute_value)s\" %(product_count)s toodetele."
+"Olete lisamas väärtust \"%(attribute_value)s\" %(product_count)s toodetele."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/wizard/update_product_attribute_value.py:0
 msgid "You are about to update the extra price of %s products."
-msgstr "Oled uuendamas %s toodete lisahinda."
+msgstr "Olete uuendamas %s toodete lisahinda."
 
 #. module: product
 #. odoo-python
@@ -4040,22 +4495,8 @@ msgid ""
 "You are deactivating the pricelist feature. Every active pricelist will be "
 "archived."
 msgstr ""
-"Sa deaktiveerid hinnakirjade funktsiooni. Kõik aktiivsed hinnakirjad "
+"Te deaktiveerite hinnakirjade funktsiooni. Kõik aktiivsed hinnakirjad "
 "arhiveeritakse."
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/decimal_precision.py:0
-msgid ""
-"You are setting a Decimal Accuracy less precise than the UOMs:\n"
-"%s\n"
-"This may cause inconsistencies in computations.\n"
-"Please increase the rounding of those units of measure, or the digits of this Decimal Accuracy."
-msgstr ""
-"Olete määranud kümnendkoha täpsuse vähem täpsemaks kui UOM-id:\n"
-"%s\n"
-"See võib põhjustada arvutustes ebakõlasid.\n"
-"Palun suurendage nende mõõtühikute või selle kümnendkoha täpsuse numbrite ümardamist."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__percent_price
@@ -4066,7 +4507,7 @@ msgstr "Määrates negatiivse allahindluse, saate rakendada juurdehindlust."
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_markup
 msgid "You can apply a mark-up on the cost"
-msgstr "Kulule saab määrata juurdehindlust"
+msgstr "Määrates negatiivse allahindluse, saate rakendada juurdehindlust"
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
@@ -4092,8 +4533,7 @@ msgstr ""
 msgid ""
 "You can upload an image that will be used as the color of the attribute "
 "value."
-msgstr ""
-"Sa saad üles laadida pildi, mida kasutatakse atribuudi väärtuse värvina."
+msgstr "Saate üles laadida pildi, mida kasutatakse atribuudi väärtuse värvina."
 
 #. module: product
 #. odoo-javascript
@@ -4111,45 +4551,40 @@ msgstr ""
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_pricelist_item.py:0
-msgid ""
-"You cannot assign the Main Pricelist as Other Pricelist in PriceList Item"
-msgstr "Põhihinnakirja ei saa määrata hinnakirja artiklis Muuks hinnakirjaks"
-
-#. module: product
-#. odoo-python
 #: code:addons/product/models/product_attribute.py:0
 msgid ""
-"You cannot change the Variants Creation Mode of the attribute %(attribute)s because it is used on the following products:\n"
+"You cannot change the Variants Creation Mode of the attribute %(attribute)s "
+"because it is used on the following products:\n"
 "%(products)s"
 msgstr ""
-"Atribuudil %(attribute)s ei saa variatsiooni loomise viisi muuta, sest see on kasutusel järgneva(te)l too(de)tel:\n"
+"Atribuudil %(attribute)s ei saa variatsiooni loomise viisi muuta, sest see "
+"on kasutusel järgneva(te)l too(de)tel:\n"
 "%(products)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_attribute_value.py:0
 msgid ""
-"You cannot change the attribute of the value %(value)s because it is used on"
-" the following products: %(products)s"
+"You cannot change the attribute of the value %(value)s because it is used on "
+"the following products: %(products)s"
 msgstr ""
-"Väärtuse %(value)satribuuti ei saa muuta, sest seda kasutatakse järgnevatel "
+"Väärtuse %(value)s atribuuti ei saa muuta, sest seda kasutatakse järgnevatel "
 "toodetel: %(products)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_value.py:0
 msgid ""
-"You cannot change the product of the value %(value)s set on product "
-"%(product)s."
+"You cannot change the product of the value %(value)s set on product %"
+"(product)s."
 msgstr "Väärtuse %(value)s toodet ei saa muuta tootel %(product)s."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_value.py:0
 msgid ""
-"You cannot change the value of the value %(value)s set on product "
-"%(product)s."
+"You cannot change the value of the value %(value)s set on product %"
+"(product)s."
 msgstr "Toote %(product)s väärtust%(value)s ei saa muuta."
 
 #. module: product
@@ -4157,16 +4592,6 @@ msgstr "Toote %(product)s väärtust%(value)s ei saa muuta."
 #: code:addons/product/models/product_category.py:0
 msgid "You cannot create recursive categories."
 msgstr "Rekursiivseid kategooriaid ei saa luua."
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/decimal_precision.py:0
-msgid ""
-"You cannot define the decimal precision of 'Account' as greater than the "
-"rounding factor of the company's main currency"
-msgstr ""
-"\"Konto\" kümnendkoha täpsust ei saa määrata ettevõtte põhivaluuta "
-"ümardamistegurist suuremaks"
 
 #. module: product
 #. odoo-python
@@ -4184,25 +4609,22 @@ msgstr ""
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_category.py:0
-msgid "You cannot delete the %s product category."
-msgstr "Te ei saa tootekategooriat %s kustutada."
-
-#. module: product
-#. odoo-python
 #: code:addons/product/models/product_attribute.py:0
 msgid ""
-"You cannot delete the attribute %(attribute)s because it is used on the following products:\n"
+"You cannot delete the attribute %(attribute)s because it is used on the "
+"following products:\n"
 "%(products)s"
 msgstr ""
-"Te ei saa kustutada atribuuti %(attribute)s , sest see on kasutusel järgmistel toodetel:\n"
+"Atribuuti ei saa kustutada %(attribute)s , sest see on kasutusel järgmistel "
+"toodetel:\n"
 "%(products)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_attribute_value.py:0
 msgid ""
-"You cannot delete the value %(value)s because it is used on the following products:\n"
+"You cannot delete the value %(value)s because it is used on the following "
+"products:\n"
 "%(products)s\n"
 msgstr ""
 "Väärtust%(value)s ei saa kustutada, sest see on kasutuses too(de)tel:\n"
@@ -4210,21 +4632,13 @@ msgstr ""
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_category.py:0
-msgid ""
-"You cannot delete this product category, it is the default generic category."
-msgstr ""
-"Seda tootekategooriat ei saa kustutada, see on vaikimisi üldine kategooria."
-
-#. module: product
-#. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"You cannot move the attribute %(attribute)s from the product %(product_src)s"
-" to the product %(product_dest)s."
+"You cannot move the attribute %(attribute)s from the product %(product_src)s "
+"to the product %(product_dest)s."
 msgstr ""
-"Atribuuti%(attribute)s ei saa liigutada tootelt%(product_src)s "
-"tootele%(product_dest)s."
+"Atribuuti%(attribute)s ei saa liigutada tootelt%(product_src)s tootele%"
+"(product_dest)s."
 
 #. module: product
 #. odoo-python
@@ -4241,10 +4655,12 @@ msgstr ""
 #: code:addons/product/static/src/product_catalog/kanban_renderer.xml:0
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
-"                            whether it's a storable product, a consumable or a service."
+"                            whether it's a storable product, a consumable or "
+"a service."
 msgstr ""
-"Sa pead määratlema toote kõigele, mida sa müüd või ostad,\n"
-"                            olgu see siis ladustatav toode, tarbitav toode või teenus."
+"Peate määrama toote kõigele, mida te müüte või ostate,\n"
+"                            olgu see siis ladustatav toode, tarbitav toode "
+"või teenus."
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_normal_action
@@ -4261,38 +4677,57 @@ msgstr ""
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
 "                whether it's a storable product, a consumable or a service.\n"
-"                The product form contains information to simplify the sale process:\n"
-"                price, notes in the quotation, accounting data, procurement methods, etc."
+"                The product form contains information to simplify the sale "
+"process:\n"
+"                price, notes in the quotation, accounting data, procurement "
+"methods, etc."
 msgstr ""
 "Peate määratlema toote kõige jaoks, mida müüte või ostate,\n"
 "                 olgu see ladustatav toode, tarbekaup või teenus.\n"
 "                 Tootekaart sisaldab teavet müügiprotsessi lihtsustamiseks:\n"
-"                 hind, hinnapakkumise märkmed, raamatupidamisandmed, tanreviisid jne."
+"                 hind, hinnapakkumise märkused, raamatupidamisandmed, "
+"tanreviisid jne."
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_normal_action_sell
 msgid ""
-"You must define a product for everything you sell, whether it's a physical product,\n"
+"You must define a product for everything you sell, whether it's a physical "
+"product,\n"
 "                a consumable or a service you offer to customers.\n"
-"                The product form contains information to simplify the sale process:\n"
-"                price, notes in the quotation, accounting data, procurement methods, etc."
+"                The product form contains information to simplify the sale "
+"process:\n"
+"                price, notes in the quotation, accounting data, procurement "
+"methods, etc."
 msgstr ""
-"Peate määratlema toote kõige jaoks, mida müüte, olgu see siis füüsiline toode,\n"
+"Peate määratlema toote kõige jaoks, mida müüte, olgu see siis füüsiline "
+"toode,\n"
 "                 kulumaterjal või teenus.\n"
 "                 Tootekaart sisaldab teavet müügiprotsessi lihtsustamiseks:\n"
-"                 hind, hinnapakkumise märkmed, raamatupidamisandmed, tarneviisid jne."
+"                 hind, hinnapakkumise märkused, raamatupidamisandmed, "
+"tarneviisid jne."
 
 #. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.js:0
 msgid "You must leave at least one quantity."
-msgstr "Teil peab olema vähemalt üks kogus."
+msgstr "Peate määrama vähemalt ühe koguse."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/wizard/product_label_layout.py:0
 msgid "You need to set a positive quantity."
 msgstr "Peate määrama positiivse koguse."
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_zara
+msgid "Zara"
+msgstr "Zara"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_attribute.py:0
+msgid "attribute_id"
+msgstr "attribute_id"
 
 #. module: product
 #. odoo-javascript
@@ -4304,7 +4739,7 @@ msgstr "csv"
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_view_kanban
 msgid "days"
-msgstr "päev(a)"
+msgstr "päeva pärast"
 
 #. module: product
 #. odoo-python
@@ -4320,7 +4755,7 @@ msgstr "nt. 1234567890"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_combo_view_form
 msgid "e.g. Burger Choice"
-msgstr "Näiteks: Burgerite valik"
+msgstr "nt Burgerite valik"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_product_view_form_normalized
@@ -4341,12 +4776,18 @@ msgstr "nt. Odoo ettevõtte tellimus"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "e.g. Starter - Meal - Desert"
-msgstr "Näiteks: Eelroog - Pearoog - Magustoit"
+msgstr "nt Eelroog - Pearoog - Magustoit"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
 msgid "e.g. USD Retailers"
 msgstr "nt USD edasimüüjad"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_template_attribute_line.py:0
+msgid "id"
+msgstr "id"
 
 #. module: product
 #. odoo-python
@@ -4376,13 +4817,13 @@ msgstr "ühiku kohta"
 #: code:addons/product/models/product_product.py:0
 #: code:addons/product/models/product_template.py:0
 msgid "product"
-msgstr "toode,"
+msgstr "toode"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid "product cost"
-msgstr "Toote maksumus"
+msgstr "toote maksumus"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
@@ -4395,11 +4836,6 @@ msgstr "ümarda arvuni 10.00 ja määra lisahinnaks -0.01"
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid "sales price"
 msgstr "müügihind"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.view_partner_property_form
-msgid "the parent company"
-msgstr "ülem ettevõte"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
@@ -4416,3 +4852,478 @@ msgstr "kuni"
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "xlsx"
 msgstr "xlsx"
+
+#~ msgid "$14.00"
+#~ msgstr "$14.00"
+
+#~ msgid "$15.00"
+#~ msgstr "$15.00"
+
+#~ msgid "10"
+#~ msgstr "10"
+
+#~ msgid "100"
+#~ msgstr "100"
+
+#~ msgid "120"
+#~ msgstr "120"
+
+#~ msgid "123456789012"
+#~ msgstr "123456789012"
+
+#~ msgid "140"
+#~ msgstr "140"
+
+#~ msgid "160"
+#~ msgstr "160"
+
+#~ msgid "39"
+#~ msgstr "39"
+
+#~ msgid "40"
+#~ msgstr "40"
+
+#~ msgid "41"
+#~ msgstr "41"
+
+#~ msgid "42"
+#~ msgstr "42"
+
+#~ msgid "43"
+#~ msgstr "43"
+
+#~ msgid "45"
+#~ msgstr "45"
+
+#~ msgid "85"
+#~ msgstr "85"
+
+#~ msgid ""
+#~ "%(base)s with a %(discount)s %% discount and %(surcharge)s extra fee\n"
+#~ "Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
+#~ "(total_amount)s"
+#~ msgstr ""
+#~ "%(base)s koos %(discount)s %% allahindlusega ja %(surcharge)s ekstra "
+#~ "tasuga\n"
+#~ "Näide: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
+#~ "(total_amount)s"
+
+#~ msgid "%(percentage)s %% discount and %(price)s surcharge"
+#~ msgstr "%(percentage)s %% allahindlus ja %(price)s lisatasu"
+
+#~ msgid "%s %% discount"
+#~ msgstr "%s %% allahindlus"
+
+#~ msgid "'Products packaging - %s' % (object.name)"
+#~ msgstr "'Toote pakend - %s' % (object.name)"
+
+#~ msgid "- Barcode \"%s\" already assigned to product(s): %s"
+#~ msgstr "- Triipkood \"%s\" on juba toodetel määratud: %s"
+
+#~ msgid ""
+#~ "- Instantly: All possible variants are created as soon as the attribute "
+#~ "and its values are added to a product.\n"
+#~ "        - Dynamically: Each variant is created only when its "
+#~ "corresponding attributes and values are added to a sales order.\n"
+#~ "        - Never: Variants are never created for the attribute.\n"
+#~ "        Note: the variants creation mode cannot be changed once the "
+#~ "attribute is used on at least one product."
+#~ msgstr ""
+#~ "- Koheselt: kõik võimalikud variandid luuakse kohe, kui tootele lisatakse "
+#~ "atribuut ja selle väärtused.\n"
+#~ "         - Dünaamiliselt: iga variant luuakse ainult siis, kui selle "
+#~ "vastavad atribuudid ja väärtused lisatakse müügitellimusele.\n"
+#~ "         - Mitte kunagi: atribuudi jaoks ei looda kunagi variante.\n"
+#~ "         Märkus. Variantide loomise režiimi ei saa muuta, kui atribuuti "
+#~ "on kasutatud vähemalt ühes tootes."
+
+#~ msgid "160x80cm, with large legs."
+#~ msgstr "160x80cm, koos suurte jalgadega."
+
+#~ msgid "2 year"
+#~ msgstr "2 aastat"
+
+#~ msgid "<span class=\"o_stat_text\">Related Products</span>"
+#~ msgstr "<span class=\"o_stat_text\">Seotud tooted</span>"
+
+#~ msgid ""
+#~ "A storable product is a product for which you manage stock. The Inventory "
+#~ "app has to be installed.\n"
+#~ "A consumable product is a product for which stock is not managed.\n"
+#~ "A service is a non-material product you provide."
+#~ msgstr ""
+#~ "Ladustatav toode on toode, millel haldate laovarusid. Alla peab olema "
+#~ "laetud Lao moodul.\n"
+#~ "Tarbitav toode on toode, millel ei hallata laovarusid.\n"
+#~ "Teenus on Teie poolt pakutav mittemateriaalne toode."
+
+#~ msgid "Additional Product Tag"
+#~ msgstr "Täiendav tootesilt"
+
+#~ msgid "Advanced Pricelists"
+#~ msgstr "Täpsemad hinnakirjad"
+
+#~ msgid "Advanced price rules (discounts, formulas)"
+#~ msgstr "Täpsemad hinnareeglid (allahindlused, valemid)"
+
+#~ msgid "Allow users to input custom values for this attribute value"
+#~ msgstr "Luba kliendil määrata ise selle atribuudi väärtus"
+
+#~ msgid ""
+#~ "Allows to manage different prices based on rules per category of "
+#~ "customers.\n"
+#~ "                Example: 10% for retailers, promotion of 5 EUR on this "
+#~ "product, etc."
+#~ msgstr ""
+#~ "Võimaldab hallata erinevaid hindu vastavalt kliendikategooria "
+#~ "reeglitele.\n"
+#~ "                 Näide: 10% jaemüüjatele, allahindlus 5 EUR jne."
+
+#~ msgid "Applicable On"
+#~ msgstr "Rakendatavus"
+
+#~ msgid "Availability"
+#~ msgstr "Saadavus"
+
+#~ msgid ""
+#~ "Barcode used for packaging identification. Scan this packaging barcode "
+#~ "from a transfer in the Barcode app to move all the contained units"
+#~ msgstr ""
+#~ "Pakendi tuvastamiseks kasutatav vöötkood. Kõigi sisalduvate üksuste "
+#~ "teisaldamiseks skanneerige see pakendi vöötkood oma triipkoodi Appis."
+
+#~ msgid "Can be Purchased"
+#~ msgstr "Ostetav toode"
+
+#~ msgid "Can be Sold"
+#~ msgstr "Müüdav toode"
+
+#~ msgid "Choose Labels Layout"
+#~ msgstr "Valige siltide paigutus"
+
+#~ msgid "Computation"
+#~ msgstr "Arvutus"
+
+#~ msgid "Conditions"
+#~ msgstr "Tingimused"
+
+#~ msgid "Conference room table"
+#~ msgstr "Konverentsiruumi laud"
+
+#~ msgid "Configuration"
+#~ msgstr "Seadistus"
+
+#~ msgid "Consumable"
+#~ msgstr "Tarbitav toode"
+
+#~ msgid ""
+#~ "Consumables are physical products for which you don't manage the "
+#~ "inventory level: they are always available."
+#~ msgstr ""
+#~ "Tarbekaubad on füüsilised tooted, mille varusid te ei halda: need on "
+#~ "alati saadaval."
+
+#~ msgid "Contact Us"
+#~ msgstr "Võta meiega ühendust"
+
+#~ msgid "Contained Quantity"
+#~ msgstr "Sisaldab kogust"
+
+#~ msgid "Contained Quantity should be positive."
+#~ msgstr "Sisalduv kogus peaks olema positiivne."
+
+#~ msgid "Contained quantity"
+#~ msgstr "Sisaldab kogust"
+
+#~ msgid "Cubic Feet"
+#~ msgstr "Kuupjalad"
+
+#~ msgid "Cubic Meters"
+#~ msgstr "Kuupmeetrid"
+
+#~ msgid "Decimal Precision"
+#~ msgstr "Kümnendkoha täpsus"
+
+#~ msgid ""
+#~ "Default unit of measure used for purchase orders. It must be in the same "
+#~ "category as the default unit of measure."
+#~ msgstr ""
+#~ "Ostutellimuste jaoks kasutatav mõõtühik. See peab kuuluma samasse "
+#~ "kategooriasse vaike mõõtühikuga."
+
+#~ msgid "Delivery Lead Time"
+#~ msgstr "Tarneaeg"
+
+#~ msgid "Desk combination, black-brown: chair + desk + drawer."
+#~ msgstr "Lauakombinatsioon, must-pruun: tool+laud+sahtel."
+
+#~ msgid "Discount Policy"
+#~ msgstr "Allahindluse poliitika"
+
+#~ msgid "Discount included in the price"
+#~ msgstr "Allahindlus sisaldub hinnas"
+
+#~ msgid "Discount on lines"
+#~ msgstr "Ridade allahindlus"
+
+#~ msgid "Discounts"
+#~ msgstr "Soodustused"
+
+#~ msgid "Display Pricelist"
+#~ msgstr "Kuvatav hinnakiri"
+
+#~ msgid "Drawer with two routing possiblities."
+#~ msgstr "Kahe marsruudivõimalusega sahtel."
+
+#~ msgid "Four person modern office workstation"
+#~ msgstr "Moderne 4-inimese töökoht"
+
+#~ msgid "Generate Pricelist Report"
+#~ msgstr "Genereeri hinnakirja aruanne"
+
+#~ msgid "Get product pictures using Barcode"
+#~ msgstr "Hangi tootepilte vöötkoodi abil"
+
+#~ msgid "Gives the different ways to package the same product."
+#~ msgstr "Annab sama toote pakkimiseks erinevaid võimalusi."
+
+#~ msgid "Google Images"
+#~ msgstr "Google pildid"
+
+#~ msgid "Group By"
+#~ msgstr "Grupeeri"
+
+#~ msgid "Is custom value"
+#~ msgstr "On kohandatud väärtus"
+
+#~ msgid "Kilograms"
+#~ msgstr "Kilogrammid"
+
+#~ msgid "Manage Product Packaging"
+#~ msgstr "Hallake toote pakendeid"
+
+#~ msgid "Multiple prices per product"
+#~ msgstr "Mitu müügihinda toote kohta"
+
+#~ msgid ""
+#~ "Multiple prices: Pricelists with fixed price rules by product,\n"
+#~ "Advanced rules: enables advanced price rules for pricelists."
+#~ msgstr ""
+#~ "Mitu müügihinda: fikseeritud hinnareeglitega hinnakirjad toodete kaupa,\n"
+#~ "Täpsemad hinnareeglid: lubab hinnakirjade jaoks määrata täpsemaid "
+#~ "hinnareegleid."
+
+#~ msgid "Never (option)"
+#~ msgstr "Mitte kunagi"
+
+#~ msgid "Normal"
+#~ msgstr "Tavaline"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Tegutsemist nõudvate sõnumite arv"
+
+#~ msgid "Number of price rules"
+#~ msgstr "Hinnareeglite arv"
+
+#~ msgid "Packaging"
+#~ msgstr "Pakend"
+
+#~ msgid "Pounds"
+#~ msgstr "Naelad"
+
+#~ msgid "Price Computation"
+#~ msgstr "Hinnaarvutus"
+
+#~ msgid "Price Surcharge"
+#~ msgstr "Hinna lisamaks"
+
+#~ msgid "Pricelist:"
+#~ msgstr "Hinnakiri:"
+
+#~ msgid "Pricelists Method"
+#~ msgstr "HInnakirjade meetod"
+
+#~ msgid "Pricelists are managed on"
+#~ msgstr "Hinnakirju haldab"
+
+#~ msgid "Product Packages"
+#~ msgstr "Toote pakendid"
+
+#~ msgid "Product Packaging"
+#~ msgstr "Toote pakend"
+
+#~ msgid "Product Packaging (PDF)"
+#~ msgstr "Tootepakend (PDF)"
+
+#~ msgid "Product Packagings"
+#~ msgstr "Tootepakendid"
+
+#~ msgid "Product Product"
+#~ msgstr "Toode"
+
+#~ msgid "Product Template Tags"
+#~ msgstr "Tootemalli sildid"
+
+#~ msgid "Product: %s"
+#~ msgstr "Toode: %s"
+
+#~ msgid "Purchase UoM"
+#~ msgstr "Ostu mõõtühik"
+
+#~ msgid "Quantity of products contained in the packaging."
+#~ msgstr "Pakendis sisalduvate toodete kogus."
+
+#~ msgid "Rounding Method"
+#~ msgstr "Ümardamise meetod"
+
+#~ msgid "Sales Grid Entry"
+#~ msgstr "Sales Grid Entry"
+
+#~ msgid ""
+#~ "Sets the price so that it is a multiple of this value.\n"
+#~ "Rounding is applied after the discount and before the surcharge.\n"
+#~ "To have prices that end in 9.99, set rounding 10, surcharge -0.01"
+#~ msgstr ""
+#~ "Määrab hinna nii, et see on selle väärtuse kordne.\n"
+#~ "Ümardmine rakendatakse peale allahindlust ja enne lisatasu.\n"
+#~ "Et saada hindu, mis lõppevad 9.99, määra ümarduseks 10, lisatasu -0,01"
+
+#~ msgid "Show all records which has next action date is before today"
+#~ msgstr ""
+#~ "Näita kõiki andmeid, mille järgmise tegevuse kuupäev on enne tänast "
+#~ "kuupäeva"
+
+#~ msgid "Show public price & discount to the customer"
+#~ msgstr "Näita avalikku hinda ja soodustust kliendile"
+
+#~ msgid "Tag Name"
+#~ msgstr "Sildi nimi"
+
+#~ msgid "The Type of this product doesn't match the Detailed Type"
+#~ msgstr "Selle toote tüüp ei vasta üksikasjalikule tüübile"
+
+#~ msgid ""
+#~ "The computed price is expressed in the default Unit of Measure of the "
+#~ "product."
+#~ msgstr "Arvutatud hinda näidatakse toote mõõtühikus."
+
+#~ msgid ""
+#~ "The default Unit of Measure and the purchase Unit of Measure must be in "
+#~ "the same category."
+#~ msgstr ""
+#~ "Vaikimisi mõõtühik ja ostetav mõõtühik peavad olema samas kategoorias."
+
+#~ msgid "The first in the sequence is the default one."
+#~ msgstr "The first in the sequence is the default one."
+
+#~ msgid ""
+#~ "The number of variants to generate is too high. You should either not "
+#~ "generate variants for each combination or generate them on demand from "
+#~ "the sales order. To do so, open the form view of attributes and change "
+#~ "the mode of *Create Variants*."
+#~ msgstr ""
+#~ "Loodavate variantide arv on liiga suur. Te ei tohiks luua iga "
+#~ "kombinatsiooni jaoks variante või genereerida neid müügitellimuse "
+#~ "nõudmisel. Selleks avage atribuutide vormivaade ja muutke valiku *Create "
+#~ "Variants* olekut."
+
+#~ msgid ""
+#~ "The quantity to purchase from this vendor to benefit from the price, "
+#~ "expressed in the vendor Product Unit of Measure if not any, in the "
+#~ "default unit of measure of the product otherwise."
+#~ msgstr ""
+#~ "Sellelt müüjalt ostetav kogus, et saada kasu hinnast, väljendatuna müüja "
+#~ "toote mõõtühikus, kui mitte, siis toote vaikemõõtühikus."
+
+#~ msgid ""
+#~ "This pricelist will be used, instead of the default one, for sales to the "
+#~ "current partner"
+#~ msgstr ""
+#~ "Seda hinnakirja kasutatakse partnerile müümisel vaikimisi hinnakirja "
+#~ "asemel"
+
+#~ msgid ""
+#~ "This rounding precision is higher than the Decimal Accuracy (%s digits).\n"
+#~ "This may cause inconsistencies in computations.\n"
+#~ "Please set a precision between %s and 1."
+#~ msgstr ""
+#~ "See ümardamise täpsus on suurem kui kümnendkoha täpsus (%s numbrit).\n"
+#~ "See võib põhjustada arvutustes ebakõlasid.\n"
+#~ "Palun määrake täpsus vahemikus %s kuni 1."
+
+#~ msgid "Three Seater Sofa with Lounger in Steel Grey Colour"
+#~ msgstr "Halli värvi kolmekohaline diivan koos lamamistooliga"
+
+#~ msgid "Three-Seat Sofa"
+#~ msgstr "Kolmekohaline diivan"
+
+#~ msgid "Unit of Measure"
+#~ msgstr "Mõõtühik"
+
+#~ msgid "Unit of Measure Name"
+#~ msgstr "Mõõtühiku nimi"
+
+#~ msgid "UoM"
+#~ msgstr "Mõõtühikud"
+
+#~ msgid "Value Price Extra"
+#~ msgstr "Väärtuste erihind"
+
+#~ msgid "Variants Creation Mode"
+#~ msgstr "Variatsioonide loomise viis"
+
+#~ msgid "Warning!"
+#~ msgstr "Hoiatus!"
+
+#~ msgid ""
+#~ "You are setting a Decimal Accuracy less precise than the UOMs:\n"
+#~ "%s\n"
+#~ "This may cause inconsistencies in computations.\n"
+#~ "Please increase the rounding of those units of measure, or the digits of "
+#~ "this Decimal Accuracy."
+#~ msgstr ""
+#~ "Olete määranud kümnendkoha täpsuse vähem täpsemaks kui UOM-id:\n"
+#~ "%s\n"
+#~ "See võib põhjustada arvutustes ebakõlasid.\n"
+#~ "Palun suurendage nende mõõtühikute või selle kümnendkoha täpsuse numbrite "
+#~ "ümardamist."
+
+#~ msgid ""
+#~ "You cannot assign the Main Pricelist as Other Pricelist in PriceList Item"
+#~ msgstr ""
+#~ "Põhihinnakirja ei saa määrata hinnakirja artiklis Muuks hinnakirjaks"
+
+#~ msgid ""
+#~ "You cannot create two values with the same name for the same attribute."
+#~ msgstr "Sama atribuudi jaoks ei saa luua kahte sama nimega väärtust."
+
+#~ msgid ""
+#~ "You cannot define the decimal precision of 'Account' as greater than the "
+#~ "rounding factor of the company's main currency"
+#~ msgstr ""
+#~ "\"Konto\" kümnendkoha täpsust ei saa määrata ettevõtte põhivaluuta "
+#~ "ümardamistegurist suuremaks"
+
+#~ msgid "You cannot delete the %s product category."
+#~ msgstr "Te ei saa tootekategooriat %s kustutada."
+
+#~ msgid ""
+#~ "You cannot delete this product category, it is the default generic "
+#~ "category."
+#~ msgstr ""
+#~ "Seda tootekategooriat ei saa kustutada, see on vaikimisi üldine "
+#~ "kategooria."
+
+#~ msgid ""
+#~ "You cannot delete those pricelist(s):\n"
+#~ "(%s)\n"
+#~ ", they are used in other pricelist(s):\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Te ei saa neid hinnakirju kustutada:\n"
+#~ "(%s)\n"
+#~ ", neid kasutatakse teistes hinnakirjades:\n"
+#~ "%s"
+
+#~ msgid "the parent company"
+#~ msgstr "ülem ettevõte"

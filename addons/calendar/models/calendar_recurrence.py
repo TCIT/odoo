@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import datetime, time
@@ -91,7 +90,7 @@ def weekday_to_field(weekday_index):
     return RRULE_WEEKDAY_TO_FIELD.get(weekday_index)
 
 
-class RecurrenceRule(models.Model):
+class CalendarRecurrence(models.Model):
     _name = 'calendar.recurrence'
     _description = 'Event Recurrence Rule'
 
@@ -122,15 +121,16 @@ class RecurrenceRule(models.Model):
     until = fields.Date('Repeat Until')
     trigger_id = fields.Many2one('ir.cron.trigger')
 
-    _sql_constraints = [
-        ('month_day',
-         "CHECK (rrule_type != 'monthly' "
-                "OR month_by != 'day' "
-                "OR day >= 1 AND day <= 31 "
-                "OR weekday in %s AND byday in %s)"
-                % (tuple(wd[0] for wd in WEEKDAY_SELECTION), tuple(bd[0] for bd in BYDAY_SELECTION)),
-         "The day must be between 1 and 31"),
-    ]
+    _month_day = models.Constraint("""CHECK (
+        rrule_type != 'monthly'
+        OR month_by != 'day'
+        OR day >= 1 AND day <= 31
+        OR weekday IN %s AND byday IN %s)""" % (
+            tuple(wd[0] for wd in WEEKDAY_SELECTION),
+            tuple(bd[0] for bd in BYDAY_SELECTION),
+        ),
+        "The day must be between 1 and 31",
+    )
 
     def _get_daily_recurrence_name(self):
         if self.end_type == 'count':
@@ -217,6 +217,11 @@ class RecurrenceRule(models.Model):
         for recurrence in self:
             if recurrence.rrule:
                 values = self._rrule_parse(recurrence.rrule, recurrence.dtstart)
+                until = values.get('until')
+                if until and until.tzinfo:
+                    # UNTIL=...Z is parsed as an aware UTC datetime; convert it to the
+                    # recurrence timezone so the stored date is the right local boundary day.
+                    values['until'] = until.astimezone(recurrence._get_timezone())
                 recurrence.with_context(dont_notify=True).write(values)
 
     def _reconcile_events(self, ranges):
@@ -594,12 +599,45 @@ class RecurrenceRule(models.Model):
             rrule_params['byweekday'] = weekdays
             rrule_params['wkst'] = self._get_lang_week_start()
 
+        # Limit the number of years to avoid creating recurrent events for up to hundreds of years
+        limit_years = int(self.env['ir.config_parameter'].sudo().get_param('calendar.max_recurrence_years', 15))
         if self.end_type == 'count':  # e.g. stop after X occurence
             rrule_params['count'] = min(self.count, MAX_RECURRENT_EVENT)
         elif self.end_type == 'forever':
-            rrule_params['count'] = MAX_RECURRENT_EVENT
+            if freq == 'yearly':
+                rrule_params['count'] = min(limit_years, MAX_RECURRENT_EVENT)
+            elif freq == 'monthly':
+                rrule_params['count'] = min(limit_years * 12, MAX_RECURRENT_EVENT)
+            elif freq == 'weekly':
+                # A weekly recurrence yields one occurrence per selected weekday,
+                # every `interval` weeks. Keep the horizon bounded by `limit_years`
+                # (like yearly/monthly) instead of always generating the hard cap.
+                # ~52 weeks per standard year (365 // 7).
+                weekdays = len(self._get_week_days())  # always >= 1 for weekly (validated above)
+                weeks = limit_years * 365 // 7
+                rrule_params['count'] = min(weeks * weekdays // max(self.interval, 1),
+                                            MAX_RECURRENT_EVENT)
+            else:  # daily
+                rrule_params['count'] = min(limit_years * 365 // max(self.interval, 1),
+                                            MAX_RECURRENT_EVENT)
         elif self.end_type == 'end_date':  # e.g. stop after 12/10/2020
             rrule_params['until'] = datetime.combine(self.until, time.max)
         return rrule.rrule(
             freq_to_rrule(freq), **rrule_params
+        )
+
+    def _is_event_over(self):
+        """Check if all events in this recurrence are in the past.
+        :return: True if all events are over, False otherwise
+        """
+        self.ensure_one()
+        if not self.calendar_event_ids:
+            return False
+
+        now = fields.Datetime.now()
+        today = fields.Date.today()
+
+        return all(
+            (event.stop_date < today if event.allday else event.stop < now)
+            for event in self.calendar_event_ids
         )

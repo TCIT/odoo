@@ -3,7 +3,7 @@
 from odoo import api, fields, models
 
 
-class PagePropertiesBase(models.TransientModel):
+class WebsitePagePropertiesBase(models.TransientModel):
     _name = 'website.page.properties.base'
     _description = "Page Properties Base"
 
@@ -19,13 +19,23 @@ class PagePropertiesBase(models.TransientModel):
     def _selection_target_model_id(self):
         return [(model.model, model.name) for model in self.env['ir.model'].sudo().search([])]
 
+    def _get_menu_domain(self, url=None):
+        self.ensure_one()
+        target = self.target_model_id
+        domain = [('website_id', '=', self.website_id.id)]
+        url_to_check = url or self.url
+        # For website pages, rely primarily on page_id as it stays stable
+        # across URL changes. Fall back to URL for non-page targets.
+        if target and target._name == 'website.page' and target.id:
+            domain += ['|', ('page_id', '=', target.id), ('url', '=', url_to_check)]
+        else:
+            domain += [('url', '=', url_to_check)]
+        return domain
+
     @api.depends('url', 'website_id')
     def _compute_menu_ids(self):
         for record in self:
-            record.menu_ids = self.env['website.menu'].search([
-                ('website_id', '=', record.website_id.id),
-                ('url', '=', record.url),
-            ])
+            record.menu_ids = self.env['website.menu'].search(record._get_menu_domain())
 
     @api.depends('menu_ids')
     def _compute_is_in_menu(self):
@@ -34,19 +44,22 @@ class PagePropertiesBase(models.TransientModel):
 
     def _inverse_is_in_menu(self):
         self.ensure_one()
+        target = self.target_model_id
         if self.is_in_menu:
             if not self.menu_ids:
-                target = self.target_model_id
                 self.env['website.menu'].create({
-                    'name': self.target_model_id.name,
+                    'name': target.name,
                     'url': self.url,
                     'parent_id': self.website_id.menu_id.id,
                     'website_id': self.website_id.id,
-                    'page_id': target.id if target._name == 'website.page' else False,
+                    'page_id': target.id if (target and target._name == 'website.page') else False,
                 })
-        elif self.menu_ids:
-            # If the page is no longer in menu, that menu has to be removed
-            self.menu_ids.unlink()
+        else:
+            # If the page is no longer in menu, remove any relevant menu even
+            # if `menu_ids` is empty due to URL changes in the same save.
+            menus = self.menu_ids or self.env['website.menu'].search(self._get_menu_domain())
+            if menus:
+                menus.unlink()
 
     @api.depends('url', 'website_id.homepage_url')
     def _compute_is_homepage(self):
@@ -106,11 +119,11 @@ class PagePropertiesBase(models.TransientModel):
                 if self.is_published:
                     # Publish
                     target.visibility = ''
-                    target.groups_id -= self._get_ir_ui_view_unpublish_group()
+                    target.group_ids -= self._get_ir_ui_view_unpublish_group()
                 else:
                     # Unpublish
                     target.visibility = 'restricted_group'
-                    target.groups_id += self._get_ir_ui_view_unpublish_group()
+                    target.group_ids += self._get_ir_ui_view_unpublish_group()
                 self.env.registry.clear_cache('templates')
         elif 'is_published' in target._fields:
             target.is_published = self.is_published
@@ -121,14 +134,14 @@ class PagePropertiesBase(models.TransientModel):
     def _is_ir_ui_view_unpublished(self, view):
         view.ensure_one()
         return (view.visibility == 'restricted_group' and
-                self._get_ir_ui_view_unpublish_group() in view.groups_id)
+                self._get_ir_ui_view_unpublish_group() in view.group_ids.all_implied_ids)
 
     def _is_ir_ui_view_published(self, view):
         view.ensure_one()
         return not view.visibility
 
 
-class PageProperties(models.TransientModel):
+class WebsitePageProperties(models.TransientModel):
     _name = 'website.page.properties'
     _description = "Page Properties"
     _inherit = [
@@ -142,7 +155,7 @@ class PageProperties(models.TransientModel):
     website_indexed = fields.Boolean(related='target_model_id.website_indexed', readonly=False)
     visibility = fields.Selection(related='target_model_id.visibility', readonly=False)
     visibility_password_display = fields.Char(related='target_model_id.visibility_password_display', readonly=False)
-    groups_id = fields.Many2many(related='target_model_id.groups_id', readonly=False)
+    group_ids = fields.Many2many(related='target_model_id.group_ids', readonly=False)
     is_new_page_template = fields.Boolean(related='target_model_id.is_new_page_template', readonly=False)
 
     old_url = fields.Char()

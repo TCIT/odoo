@@ -4,7 +4,7 @@
 from odoo import api, fields, models
 
 
-class PosConfig(models.Model):
+class PosPayment(models.Model):
     _inherit = 'pos.payment'
 
     def _update_payment_line_for_tip(self, tip_amount):

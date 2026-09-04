@@ -4,7 +4,7 @@
 from odoo import fields, models, api
 
 
-class ResPartnerMondialRelay(models.Model):
+class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     is_mondialrelay = fields.Boolean(compute='_compute_is_mondialrelay')
@@ -42,3 +42,6 @@ class ResPartnerMondialRelay(models.Model):
         if self.is_mondialrelay:
             return "delivery_mondialrelay/static/src/img/truck_mr.png"
         return super()._avatar_get_placeholder_path()
+
+    def _can_be_edited_by_current_customer(self, **kwargs):
+        return super()._can_be_edited_by_current_customer(**kwargs) and not self.is_mondialrelay

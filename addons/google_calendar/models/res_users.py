@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
@@ -8,12 +7,14 @@ from odoo import api, fields, models, Command
 from odoo.addons.google_calendar.utils.google_calendar import GoogleCalendarService, InvalidSyncToken
 from odoo.addons.google_calendar.models.google_sync import google_calendar_token
 from odoo.addons.google_account.models import google_service
+from odoo.exceptions import LockError
 from odoo.loglevels import exception_to_unicode
 from odoo.tools import str2bool
 
 _logger = logging.getLogger(__name__)
 
-class User(models.Model):
+
+class ResUsers(models.Model):
     _inherit = 'res.users'
 
     google_calendar_rtoken = fields.Char(related='res_users_settings_id.google_calendar_rtoken', groups="base.group_system")
@@ -51,9 +52,12 @@ class User(models.Model):
     def _sync_google_calendar(self, calendar_service: GoogleCalendarService):
         self.ensure_one()
         results = self._sync_request(calendar_service)
-        if not results or (not results.get('events') and not self._check_pending_odoo_records()):
+        if not results:
             return False
         events, default_reminders, full_sync = results.values()
+        events = self._sync_google_calendar_filter_remote_events(events)
+        if not events and not self._check_pending_odoo_records():
+            return False
         # Google -> Odoo
         send_updates = not full_sync
         events.clear_type_ambiguity(self.env)
@@ -81,6 +85,12 @@ class User(models.Model):
 
         return bool(results) and (bool(events | synced_events) or bool(recurrences | synced_recurrences))
 
+    def _sync_google_calendar_filter_remote_events(self, google_events):
+        """Filter out events coming from google which should not be synced into odoo."""
+        # Birthday events appear in a separate virtual calendar in the UI of google calendar which can be confusing.
+        # They require special handling and are not very useful in business flows so they are ignored for now.
+        return google_events.filter(lambda google_event: google_event.eventType != 'birthday')
+
     def _sync_single_event(self, calendar_service: GoogleCalendarService, odoo_event, event_id):
         self.ensure_one()
         results = self._sync_request(calendar_service, event_id)
@@ -100,8 +110,10 @@ class User(models.Model):
             return False
         # don't attempt to sync when another sync is already in progress, as we wouldn't be
         # able to commit the transaction anyway (row is locked)
-        self.env.cr.execute("""SELECT id FROM res_users WHERE id = %s FOR NO KEY UPDATE SKIP LOCKED""", [self.id])
-        if not self.env.cr.rowcount:
+        self.ensure_one()
+        try:
+            self.lock_for_update(allow_referencing=True)
+        except LockError:
             _logger.info("skipping calendar sync, locked user %s", self.login)
             return False
 
@@ -128,7 +140,12 @@ class User(models.Model):
     @api.model
     def _sync_all_google_calendar(self):
         """ Cron job """
-        users = self.env['res.users'].sudo().search([('google_calendar_rtoken', '!=', False), ('google_synchronization_stopped', '=', False)])
+        domain = [('google_calendar_rtoken', '!=', False), ('google_synchronization_stopped', '=', False)]
+        # google_calendar_token_validity is not stored on res.users
+        if not self:
+            users = self.env['res.users'].sudo().search(domain).sorted('google_calendar_token_validity')
+        else:
+            users = self.filtered_domain(domain).sorted('google_calendar_token_validity')
         google = GoogleCalendarService(self.env['google.service'])
         for user in users:
             _logger.info("Calendar Synchro - Starting synchronization for %s", user)
@@ -184,4 +201,18 @@ class User(models.Model):
             if sync_status == 'sync_active' and not self.sudo().google_calendar_rtoken:
                 sync_status = 'sync_stopped'
         res['google_calendar'] = sync_status
+        return res
+
+    def _has_any_active_synchronization(self):
+        """
+        Check if synchronization is active for Google Calendar.
+        This function retrieves the synchronization status from the user's environment
+        and checks if the Google Calendar synchronization is active.
+
+        :return: Action to delete the event
+        """
+        sync_status = self.check_synchronization_status()
+        res = super()._has_any_active_synchronization()
+        if sync_status.get('google_calendar') == 'sync_active':
+            return True
         return res

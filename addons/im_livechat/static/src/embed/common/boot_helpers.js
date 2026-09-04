@@ -1,8 +1,8 @@
 import { url } from "@web/core/utils/urls";
 
-async function loadFont(name, url) {
-    await document.fonts.ready;
-    if ([...document.fonts].some(({ family }) => family === name)) {
+async function loadFont(name, url, targetDocument) {
+    await targetDocument.fonts.ready;
+    if ([...targetDocument.fonts].some(({ family }) => family === name)) {
         // Font already loaded.
         return;
     }
@@ -27,9 +27,21 @@ async function loadFont(name, url) {
         link.addEventListener("load", res);
         link.addEventListener("error", rej);
     });
-    document.head.appendChild(link);
-    document.head.appendChild(style);
+    targetDocument.head.appendChild(link);
+    targetDocument.head.appendChild(style);
     return loadPromise;
+}
+
+function loadStyle(target) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = url("/im_livechat/assets_embed.css");
+    const stylesLoadedPromise = new Promise((res, rej) => {
+        link.addEventListener("load", res);
+        link.addEventListener("error", rej);
+    });
+    target.appendChild(link);
+    return stylesLoadedPromise;
 }
 
 /**
@@ -42,8 +54,18 @@ export function makeRoot(target) {
     root.setAttribute("id", `o-livechat-root-${luxon.DateTime.now().ts + Math.random()}`);
     root.style.zIndex = "calc(9e999)";
     root.style.position = "relative";
+    root.style.display = "block";
     target.appendChild(root);
     return root;
+}
+
+export async function loadAssets(styleTarget) {
+    const document = styleTarget.ownerDocument;
+    await Promise.all([
+        loadStyle(styleTarget),
+        loadFont("FontAwesome", url("/im_livechat/font-awesome"), document),
+        loadFont("odoo_ui_icons", url("/im_livechat/odoo_ui_icons"), document),
+    ]);
 }
 
 /**
@@ -54,19 +76,7 @@ export function makeRoot(target) {
  * @returns {ShadowRoot}
  */
 export async function makeShadow(root) {
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = url("/im_livechat/assets_embed.css");
-    const stylesLoadedPromise = new Promise((res, rej) => {
-        link.addEventListener("load", res);
-        link.addEventListener("error", rej);
-    });
     const shadow = root.attachShadow({ mode: "open" });
-    shadow.appendChild(link);
-    await Promise.all([
-        stylesLoadedPromise,
-        loadFont("FontAwesome", url("/im_livechat/font-awesome")),
-        loadFont("odoo_ui_icons", url("/im_livechat/odoo_ui_icons")),
-    ]);
+    await loadAssets(shadow);
     return shadow;
 }

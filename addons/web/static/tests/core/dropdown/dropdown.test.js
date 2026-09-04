@@ -12,11 +12,18 @@ import {
     resize,
 } from "@odoo/hoot-dom";
 import { Deferred, animationFrame, runAllTimers, tick } from "@odoo/hoot-mock";
-import { Component, onMounted, onPatched, useState, xml } from "@odoo/owl";
+import { Component, onMounted, onPatched, useRef, useState, xml } from "@odoo/owl";
 
-import { makeMockEnv } from "@web/../tests/_framework/env_test_helpers";
 import { getPickerCell } from "@web/../tests/core/datetime/datetime_test_helpers";
-import { defineParams, mountWithCleanup, patchWithCleanup } from "@web/../tests/web_test_helpers";
+import {
+    contains,
+    defineParams,
+    getMockEnv,
+    makeMockEnv,
+    mockService,
+    mountWithCleanup,
+    patchWithCleanup,
+} from "@web/../tests/web_test_helpers";
 import { DateTimeInput } from "@web/core/datetime/datetime_input";
 import { Dialog } from "@web/core/dialog/dialog";
 import { CheckboxItem } from "@web/core/dropdown/checkbox_item";
@@ -64,6 +71,19 @@ class MultiLevelDropdown extends Component {
                         </Dropdown>
                     </t>
                 </Dropdown>
+            </t>
+        </Dropdown>
+    `;
+}
+
+class NoBottomSheetDropdown extends Component {
+    static components = { Dropdown, DropdownItem };
+    static props = [];
+    static template = xml`
+        <Dropdown t-props="dropdownProps" bottomSheet="false">
+            <button>Dropdown</button>
+            <t t-set-slot="content">
+                <DropdownItem class="'item-a'">Item A</DropdownItem>
             </t>
         </Dropdown>
     `;
@@ -119,7 +139,11 @@ test("can be toggled", async () => {
     expect(DROPDOWN_MENU).toHaveAttribute("role", "menu");
     expect(DROPDOWN_TOGGLE).toHaveAttribute("aria-expanded", "true");
 
-    await click(DROPDOWN_TOGGLE);
+    if (getMockEnv().isSmall) {
+        await click(".o_bottom_sheet_handle_bar");
+    } else {
+        await click(DROPDOWN_TOGGLE);
+    }
     await animationFrame();
     expect(DROPDOWN_MENU).toHaveCount(0);
     expect(DROPDOWN_TOGGLE).toHaveAttribute("aria-expanded", "false");
@@ -145,9 +169,54 @@ test("close on outside click", async () => {
     await animationFrame();
     expect(DROPDOWN_MENU).toHaveCount(1);
 
-    await click("div.outside");
+    if (getMockEnv().isSmall) {
+        await click(".o_bottom_sheet_backdrop");
+    } else {
+        await click("div.outside");
+    }
     await animationFrame();
     expect(DROPDOWN_MENU).toHaveCount(0);
+});
+
+test("close on outside click in shadow dom", async () => {
+    const shadowRootId = "o-shadow-root-id";
+    class DropdownInShadowDom extends Component {
+        static components = { SimpleDropdown };
+        static props = [];
+        static template = xml`<div><SimpleDropdown/></div>`;
+    }
+
+    class ShadowDom extends Component {
+        static components = { Dropdown, DropdownItem };
+        static props = [];
+        static template = xml`<div class="shadow-root" t-ref="shadow-root-ref" id="${shadowRootId}" />`;
+        setup() {
+            const shadowRootRef = useRef("shadow-root-ref");
+            onMounted(() => {
+                const shadowBody = shadowRootRef.el.attachShadow({ mode: "open" });
+                mountWithCleanup(DropdownInShadowDom, { env: this.env, target: shadowBody });
+            });
+        }
+    }
+
+    await mountWithCleanup(ShadowDom, {
+        componentEnv: { rootId: shadowRootId },
+        containerEnv: { rootId: shadowRootId },
+        noMainContainer: true,
+    });
+
+    const shadowBody = queryOne(".shadow-root").shadowRoot;
+    await contains(DROPDOWN_TOGGLE, { root: shadowBody }).click();
+    await animationFrame();
+    expect(queryAll(DROPDOWN_MENU, { root: shadowBody })).toHaveCount(1);
+
+    if (getMockEnv().isSmall) {
+        await click(".o_bottom_sheet_backdrop", { root: shadowBody });
+    } else {
+        await click(".outside", { root: shadowBody });
+    }
+    await animationFrame();
+    expect(queryAll(DROPDOWN_MENU, { root: shadowBody })).toHaveCount(0);
 });
 
 test("close on item selection", async () => {
@@ -480,6 +549,7 @@ test("'o-dropdown-caret' class adds a caret", async () => {
     expect(getContent(".third")).toBe("none");
 });
 
+test.tags("desktop");
 test("direction class set to default when closed", async () => {
     await resize({ height: 600 });
 
@@ -712,12 +782,21 @@ test("don't close dropdown outside the active element", async () => {
     await animationFrame();
 
     expect(DROPDOWN_MENU).toHaveCount(2);
+    if (getMockEnv().isSmall) {
+        await click(".o_bottom_sheet_backdrop");
+    } else {
+        await click(".outside-dialog");
+    }
     await click(".outside-dialog");
     await animationFrame();
     expect(".modal-dialog").toHaveCount(1);
     expect(DROPDOWN_MENU).toHaveCount(1);
 
-    await click(".modal-dialog .btn-primary");
+    if (getMockEnv().isSmall) {
+        await click(".modal-dialog .oi-arrow-left");
+    } else {
+        await click(".modal-dialog .btn-close");
+    }
     await animationFrame();
     expect(".modal-dialog").toHaveCount(0);
     expect(DROPDOWN_MENU).toHaveCount(1);
@@ -825,7 +904,11 @@ test("Dropdown in dialog in dropdown, first dropdown should stay open when click
     expect(DROPDOWN_MENU).toHaveCount(2);
 
     // Click outside dropdown inside dialog => only first dropdown should be open
-    await click(".inside-dialog");
+    if (getMockEnv().isSmall) {
+        await click(".o_bottom_sheet_backdrop");
+    } else {
+        await click(".inside-dialog");
+    }
     await animationFrame();
     expect(DROPDOWN_MENU).toHaveCount(1);
 });
@@ -876,7 +959,15 @@ test("multi-level dropdown: close on outside click", async () => {
     await animationFrame();
 
     expect(DROPDOWN_MENU).toHaveCount(3);
-    await click("div.outside");
+    if (getMockEnv().isSmall) {
+        await click(".o_bottom_sheet_backdrop");
+        await animationFrame();
+        await click(".o_bottom_sheet_backdrop");
+        await animationFrame();
+        await click(".o_bottom_sheet_backdrop");
+    } else {
+        await click("div.outside");
+    }
     await animationFrame();
     expect(DROPDOWN_MENU).toHaveCount(0);
 });
@@ -1226,6 +1317,7 @@ test("multi-level dropdown: keynav when rtl direction", async () => {
     }
 });
 
+test.tags("desktop");
 test("multi-level dropdown: submenu keeps position when patched", async () => {
     expect.assertions(6);
 
@@ -1344,7 +1436,7 @@ test("multi-level dropdown: mouseentering a dropdown item should close any subdr
 });
 
 test.tags("desktop");
-test("multi-level dropdown: unsubscribe all keynav when root close", async () => {
+test("multi-level dropdown: unsubscribe all keynav when root destroyed", async () => {
     class Parent extends Component {
         static components = { Dropdown };
         static props = [];
@@ -1393,8 +1485,8 @@ test("multi-level dropdown: unsubscribe all keynav when root close", async () =>
         keySet.clear();
     }
 
-    const env = await makeMockEnv();
-    patchWithCleanup(env.services.hotkey, {
+    await makeMockEnv();
+    mockService("hotkey", {
         add(key) {
             const remove = super.add(...arguments);
             registeredHotkeys.add(key);
@@ -1405,7 +1497,7 @@ test("multi-level dropdown: unsubscribe all keynav when root close", async () =>
         },
     });
 
-    await mountWithCleanup(Parent, { env });
+    await mountWithCleanup(Parent);
     expect(DROPDOWN_MENU).toHaveCount(0);
     expect(registeredHotkeys.size).toBe(0);
 
@@ -1423,7 +1515,6 @@ test("multi-level dropdown: unsubscribe all keynav when root close", async () =>
     await hover(".third");
     await animationFrame();
     expect(DROPDOWN_MENU).toHaveCount(3);
-    checkKeys(registeredHotkeys);
 
     // Close third
     await press("escape");
@@ -1443,14 +1534,24 @@ test("multi-level dropdown: unsubscribe all keynav when root close", async () =>
     // Close third, second and first
     await press("escape");
     await animationFrame();
-    checkKeys(removedHotkeys);
 
     await press("escape");
     await animationFrame();
+    // Third dropdown is completely destroyed => check for removed keys
     checkKeys(removedHotkeys);
 
     await press("escape");
     await animationFrame();
     expect(DROPDOWN_MENU).toHaveCount(0);
+    // Second dropdown is completely destroyed => check for removed keys
     checkKeys(removedHotkeys);
+});
+
+test.tags("mobile");
+test("dropdown: no BottomSheet", async () => {
+    await mountWithCleanup(NoBottomSheetDropdown);
+    await click(DROPDOWN_TOGGLE);
+    await animationFrame();
+    expect(DROPDOWN_MENU).toHaveCount(1);
+    expect(".o_bottom_sheet").toHaveCount(0);
 });

@@ -41,22 +41,27 @@ class Partner extends models.Model {
         { id: 2, display_name: "Second record" },
     ];
     _views = {
-        "form,false": `
+        form: /* xml */ `
             <form>
                 <group>
                     <field name="display_name"/>
                 </group>
-            </form>`,
-        "kanban,false": `
+            </form>
+        `,
+        "kanban,1": /* xml */ `
             <kanban>
                 <templates>
                     <t t-name="card">
                         <field name="display_name"/>
                     </t>
                 </templates>
-            </kanban>`,
-        "list,false": `<list><field name="display_name"/></list>`,
-        "search,false": `<search/>`,
+            </kanban>
+        `,
+        list: /* xml */ `
+            <list>
+                <field name="display_name" />
+            </list>
+        `,
     };
 }
 
@@ -111,7 +116,7 @@ test("can display client actions in Dialog and close the dialog", async () => {
 
     expect(".modal .test_client_action").toHaveCount(1);
     expect(".modal-title").toHaveText("Dialog Test");
-    await contains(".modal footer .btn.btn-primary").click();
+    await contains(".modal .btn-close").click();
     expect(".modal .test_client_action").toHaveCount(0);
 });
 
@@ -142,6 +147,20 @@ test("can display client actions in Dialog, then as main destroys Dialog", async
 
     expect(".test_client_action").toHaveCount(1);
     expect(".modal .test_client_action").toHaveCount(0);
+});
+
+test("dialog no header", async () => {
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction({
+        name: "Dialog Test",
+        target: "new",
+        tag: "__test__client__action__",
+        type: "ir.actions.client",
+        context: { header: false },
+    });
+
+    expect(".modal .test_client_action").toHaveCount(1);
+    expect(".modal-title").toHaveCount(0);
 });
 
 test("soft_reload will refresh data", async () => {
@@ -273,6 +292,31 @@ test("ClientAction receives arbitrary props from doAction", async () => {
     });
 });
 
+test("ClientAction with extractProps", async () => {
+    defineActions([
+        {
+            id: 128,
+            name: "My Client Action",
+            tag: "SomeClientAction",
+            type: "ir.actions.client",
+            params: {
+                my_prop: "coucou",
+            },
+        },
+    ]);
+    class ClientAction extends Component {
+        static template = xml`<div class="my_client_action" t-esc="props.myProp"/>`;
+        static props = ["*"];
+        static extractProps(action) {
+            return { myProp: action.params.my_prop };
+        }
+    }
+    actionRegistry.add("SomeClientAction", ClientAction);
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(128);
+    expect(".my_client_action").toHaveText("coucou");
+});
+
 test("test display_notification client action", async () => {
     await mountWithCleanup(WebClient);
     await getService("action").doAction(1);
@@ -282,14 +326,12 @@ test("test display_notification client action", async () => {
         type: "ir.actions.client",
         tag: "display_notification",
         params: {
-            title: "title",
             message: "message",
             sticky: true,
         },
     });
     await animationFrame(); // wait for the notification to be displayed
     expect(".o_notification_manager .o_notification").toHaveCount(1);
-    expect(".o_notification_manager .o_notification .o_notification_title").toHaveText("title");
     expect(".o_notification_manager .o_notification .o_notification_content").toHaveText("message");
     expect(".o_kanban_view").toHaveCount(1);
     await contains(".o_notification_close").click();
@@ -305,7 +347,6 @@ test("test display_notification client action with links", async () => {
         type: "ir.actions.client",
         tag: "display_notification",
         params: {
-            title: "title",
             message: "message %s <R&D>",
             sticky: true,
             links: [
@@ -318,7 +359,6 @@ test("test display_notification client action with links", async () => {
     });
     await animationFrame(); // wait for the notification to be displayed
     expect(".o_notification_manager .o_notification").toHaveCount(1);
-    expect(".o_notification_manager .o_notification .o_notification_title").toHaveText("title");
     expect(".o_notification_manager .o_notification .o_notification_content").toHaveText(
         "message test <R&D> <R&D>"
     );
@@ -457,4 +497,60 @@ test("test home client action", async () => {
     await runAllTimers();
     await animationFrame();
     expect.verifySteps(["/web/webclient/version_info", "assign /"]);
+});
+
+test("test display_exception client action", async () => {
+    expect.errors(1);
+    await mountWithCleanup(WebClient);
+    getService("action").doAction({
+        type: "ir.actions.client",
+        tag: "display_exception",
+        params: {
+            code: 0,
+            message: "Odoo Server Error",
+            data: {
+                name: `odoo.exceptions.UserError`,
+                debug: "traceback",
+                arguments: [],
+                context: {},
+                message: "This is an error",
+            },
+        },
+    });
+    await animationFrame();
+    expect(".o_dialog").toHaveCount(1);
+    expect("header .modal-title").toHaveText("Invalid Operation");
+    expect.verifyErrors([/RPC_ERROR/]);
+});
+
+test("discarded dialogs has special=true in onClose params", async () => {
+    Partner._views = {
+        form: /* xml */ `
+            <form>
+                <footer>
+                    <button class="btn-secondary" special="cancel" data-hotkey="x"/>
+                </footer>
+            </form>
+        `,
+    };
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(
+        {
+            name: "Partners",
+            res_model: "partner",
+            views: [[false, "form"]],
+            target: "new",
+            type: "ir.actions.act_window",
+        },
+        {
+            onClose: (params) => {
+                expect.step(`special:${params?.special}`);
+            },
+        }
+    );
+
+    await contains(".modal footer .btn[special=cancel]").click();
+    expect(".modal .test_client_action").toHaveCount(0);
+    expect.verifySteps(["special:true"]);
 });

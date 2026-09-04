@@ -1,31 +1,36 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* hr_skills
-# 
+# * hr_skills
+#
 # Translators:
-# 敬雲 林 <chingyun@yuanchih-consult.com>, 2024
-# Wil Odoo, 2024
-# Tony Ng, 2024
-# 
+# Wil Odoo, 2025
+# Tony Ng, 2025
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Tony Ng (ngto)" <ngto@odoo.com>, 2025, 2026.
+# Ho Pak Wai <wai@users.noreply.translate.odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~18.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Tony Ng, 2024\n"
-"Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
+"POT-Creation-Date: 2026-04-10 18:38+0000\n"
+"PO-Revision-Date: 2026-08-03 03:31+0000\n"
+"Last-Translator: Ho Pak Wai <wai@users.noreply.translate.odoo.com>\n"
+"Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
+"projects/odoo-19/hr_skills/zh_Hant/>\n"
+"Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: hr_skills
 #. odoo-python
 #: code:addons/hr_skills/models/hr_skill_type.py:0
-msgid "%s (copy)"
-msgstr "%s (副本)"
+msgid "%(skill_type_name)s (copy)"
+msgstr ""
 
 #. module: hr_skills
 #: model:ir.actions.report,print_report_name:hr_skills.action_report_employee_cv
@@ -33,19 +38,13 @@ msgid "'CV - %s' % (object.name)"
 msgstr "'履歷 - %s' % (object.name)"
 
 #. module: hr_skills
-#: model_terms:ir.ui.view,arch_db:hr_skills.report_employee_cv_sidepanel
-msgid "+1234567890"
-msgstr "+1234567890"
-
-#. module: hr_skills
-#: model_terms:ir.ui.view,arch_db:hr_skills.report_employee_cv_main_panel
-msgid "2022"
-msgstr "2022"
-
-#. module: hr_skills
-#: model_terms:ir.ui.view,arch_db:hr_skills.report_employee_cv_main_panel
-msgid "2023"
-msgstr "2023"
+#: model_terms:ir.ui.view,arch_db:hr_skills.resume_line_view_form
+msgid ""
+"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
+"title=\"Arrow\"/>"
+msgstr ""
+"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"箭嘴圖示\" title=\"箭"
+"嘴\"/>"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_7
@@ -55,11 +54,11 @@ msgstr "用於增量遊戲的 2D/3D 地圖生成器。"
 #. module: hr_skills
 #. odoo-javascript
 #: code:addons/hr_skills/static/src/fields/skills_one2many/skills_one2many.xml:0
-#: code:addons/hr_skills/static/src/xml/resume_templates.xml:0
 msgid "ADD"
 msgstr "添加"
 
 #. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_certification_report__active
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_report__active
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill_type__active
 msgid "Active"
@@ -141,6 +140,11 @@ msgid "Arroyo Ltd"
 msgstr "Arroyo Ltd"
 
 #. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__avatar_128
+msgid "Avatar 128"
+msgstr "頭像 128"
+
+#. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_chs_avoca_primary_school
 msgid "Avoca Primary School"
 msgstr "Avoca Primary School"
@@ -186,6 +190,11 @@ msgid "Burtho Inc."
 msgstr "Burtho Inc."
 
 #. module: hr_skills
+#: model:hr.skill,name:hr_skills.hr_skill_csharp
+msgid "C#"
+msgstr ""
+
+#. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_c
 msgid "C/C++"
 msgstr "C / C++"
@@ -194,12 +203,6 @@ msgstr "C / C++"
 #: model:hr.skill,name:hr_skills.hr_skill_cms
 msgid "CMS"
 msgstr "內容管理系統 CMS"
-
-#. module: hr_skills
-#. odoo-javascript
-#: code:addons/hr_skills/static/src/xml/resume_templates.xml:0
-msgid "CREATE A NEW ENTRY"
-msgstr "建立新項目"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_css
@@ -222,6 +225,58 @@ msgid "Careers information officer"
 msgstr "就業資訊主任"
 
 #. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.employee_skill_view_form
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_job_skill_view_form
+msgid "Category"
+msgstr "類別"
+
+#. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__certificate_file
+msgid "Certificate"
+msgstr "證書"
+
+#. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__certificate_filename
+msgid "Certificate Filename"
+msgstr ""
+
+#. module: hr_skills
+#: model:ir.actions.act_window,name:hr_skills.hr_employee_certification_report_action
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee__certification_ids
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_public__certification_ids
+#: model:ir.model.fields,field_description:hr_skills.field_hr_skill_type__is_certification
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_certification_report_view_list
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_certification_report_view_search
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_public_view_form_inherit
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_view_list
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_view_search
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_view_form
+msgid "Certification"
+msgstr "認證"
+
+#. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_certification_report_view_list
+msgid "Certification Level"
+msgstr "認證等級"
+
+#. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_certification_report_view_list
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_certification_report_view_search
+msgid "Certification Type"
+msgstr "認證類型"
+
+#. module: hr_skills
+#: model:hr.skill.type,name:hr_skills.hr_skill_type_certifications
+#: model:ir.actions.act_window,name:hr_skills.action_hr_employee_skill_certification
+#: model:ir.ui.menu,name:hr_skills.hr_certification_menu
+#: model:ir.ui.menu,name:hr_skills.hr_employee_certification_report_menu
+#: model:mail.activity.type,name:hr_skills.mail_activity_data_upload_certification
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_public_view_form_inherit
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_view_form
+msgid "Certifications"
+msgstr "認證"
+
+#. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_fpi_chavez_group
 msgid "Chavez Group"
 msgstr "Chavez Group"
@@ -242,11 +297,6 @@ msgid "Claremont College"
 msgstr "Claremont College"
 
 #. module: hr_skills
-#: model:ir.model.fields.selection,name:hr_skills.selection__hr_resume_line__display_type__classic
-msgid "Classic"
-msgstr "經典"
-
-#. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_cloud_computing
 msgid "Cloud computing"
 msgstr "雲端運算"
@@ -257,7 +307,12 @@ msgid "Cole Ltd"
 msgstr "Cole Ltd"
 
 #. module: hr_skills
+#. odoo-javascript
+#: code:addons/hr_skills/static/src/fields/formatted_date/formatted_date.js:0
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill__color
+#: model:ir.model.fields,field_description:hr_skills.field_hr_individual_skill_mixin__color
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job_skill__color
+#: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__color
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill__color
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill_type__color
 msgid "Color"
@@ -275,7 +330,9 @@ msgid "Communication"
 msgstr "溝通"
 
 #. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_certification_report__company_id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_report__company_id
+#: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__company_id
 msgid "Company"
 msgstr "公司"
 
@@ -300,6 +357,27 @@ msgid "Copywriter, advertising"
 msgstr "文案撰稿人 － 廣告"
 
 #. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__is_course
+#: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line_type__is_course
+msgid "Course"
+msgstr "菜品"
+
+#. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__course_type
+msgid "Course Type"
+msgstr "課程類型"
+
+#. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_resume_line_type_tree_view
+msgid "Course?"
+msgstr ""
+
+#. module: hr_skills
+#: model:ir.ui.menu,name:hr_skills.menu_learnings_training_attendances_courses
+msgid "Courses"
+msgstr "菜品"
+
+#. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_ngh_craigmore_south_junior_primary_school
 msgid "Craigmore South Junior Primary School"
 msgstr "Craigmore South Junior Primary School"
@@ -307,19 +385,19 @@ msgstr "Craigmore South Junior Primary School"
 #. module: hr_skills
 #. odoo-javascript
 #: code:addons/hr_skills/static/src/fields/resume_one2many/resume_one2many.xml:0
-msgid "Create a new entry"
-msgstr "建立新記項"
+msgid "Create Resume Lines"
+msgstr "建立履歷資料行"
 
 #. module: hr_skills
 #. odoo-javascript
 #: code:addons/hr_skills/static/src/fields/skills_one2many/skills_one2many.xml:0
-msgid "Create new Skills"
-msgstr "建立新技能"
+msgid "Create Skills"
+msgstr "建立技能"
 
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_cv_wizard__create_uid
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill__create_uid
-#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_log__create_uid
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job_skill__create_uid
 #: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__create_uid
 #: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line_type__create_uid
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill__create_uid
@@ -331,7 +409,7 @@ msgstr "建立人員"
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_cv_wizard__create_date
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill__create_date
-#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_log__create_date
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job_skill__create_date
 #: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__create_date
 #: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line_type__create_date
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill__create_date
@@ -352,9 +430,29 @@ msgstr "批判思考"
 
 #. module: hr_skills
 #. odoo-javascript
+#: code:addons/hr_skills/static/src/components/internal_resume_lines/internal_resume_one2many.xml:0
 #: code:addons/hr_skills/static/src/fields/resume_one2many/resume_one2many.xml:0
 msgid "Current"
 msgstr "目前"
+
+#. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee__current_employee_skill_ids
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_public__current_employee_skill_ids
+msgid "Current Employee Skill"
+msgstr "員工目前技能"
+
+#. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job__current_job_skill_ids
+msgid "Current Job Skill"
+msgstr ""
+
+#. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_certification_report_view_list
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_certification_report_view_pivot
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_report_view_graph
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_report_view_pivot
+msgid "Current Level"
+msgstr "目前等級"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_jep_davis_sanchez_and_miller
@@ -387,8 +485,10 @@ msgid "Database Management"
 msgstr "資料庫管理"
 
 #. module: hr_skills
-#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_log__date
-#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_log_view_search
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_history_report__date
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_history_report_view_search
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_resume_line_list_view
+#: model_terms:ir.ui.view,arch_db:hr_skills.resume_line_view_form
 msgid "Date"
 msgstr "日期"
 
@@ -419,6 +519,12 @@ msgid "Davis, Sanchez and Miller"
 msgstr "Davis, Sanchez and Miller"
 
 #. module: hr_skills
+#. odoo-javascript
+#: code:addons/hr_skills/static/src/fields/formatted_date/formatted_date.js:0
+msgid "Day Format"
+msgstr "日子格式"
+
+#. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_decision_making
 msgid "Decision-Making"
 msgstr "決策能力"
@@ -439,8 +545,10 @@ msgid "Demo Company Name"
 msgstr "範例公司名稱"
 
 #. module: hr_skills
-#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_log__department_id
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_certification_report__department_id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_report__department_id
+#: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__department_id
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_certification_report_view_search
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_report_view_search
 msgid "Department"
 msgstr "部門"
@@ -472,26 +580,38 @@ msgid "Discard"
 msgstr "捨棄"
 
 #. module: hr_skills
-#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_type_view_form
-msgid "Display"
-msgstr "顯示"
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee__display_certification_page
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_public__display_certification_page
+msgid "Display Certification Page"
+msgstr ""
 
 #. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee__display_name
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_certification_report__display_name
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_cv_wizard__display_name
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_public__display_name
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill__display_name
-#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_log__display_name
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_history_report__display_name
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_report__display_name
+#: model:ir.model.fields,field_description:hr_skills.field_hr_individual_skill_mixin__display_name
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job__display_name
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job_skill__display_name
 #: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__display_name
 #: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line_type__display_name
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill__display_name
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill_level__display_name
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill_type__display_name
+#: model:ir.model.fields,field_description:hr_skills.field_report_hr_skills_report_employee_cv__display_name
+#: model:ir.model.fields,field_description:hr_skills.field_resource_resource__display_name
 msgid "Display Name"
 msgstr "顯示名稱"
 
 #. module: hr_skills
-#: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__display_type
-msgid "Display Type"
-msgstr "顯示類型"
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill__display_warning_message
+#: model:ir.model.fields,field_description:hr_skills.field_hr_individual_skill_mixin__display_warning_message
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job_skill__display_warning_message
+msgid "Display Warning Message"
+msgstr "顯示警告訊息"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_django
@@ -504,6 +624,7 @@ msgid "Douglas, Thompson and Conner"
 msgstr "Douglas, Thompson and Conner"
 
 #. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__duration
 #: model_terms:ir.ui.view,arch_db:hr_skills.resume_line_view_form
 msgid "Duration"
 msgstr "時長"
@@ -526,24 +647,27 @@ msgstr "Elphinstone Primary School"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_email
 msgid "Email Marketing"
-msgstr "電郵市場行銷"
+msgstr "電郵推廣"
 
 #. module: hr_skills
 #: model:ir.model,name:hr_skills.model_hr_employee
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_certification_report__employee_id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_cv_wizard__employee_ids
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill__employee_id
-#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_log__employee_id
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_history_report__employee_id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_report__employee_id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__employee_id
-#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_log_view_search
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_certification_report_view_search
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_report_view_search
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_view_search
+#: model_terms:ir.ui.view,arch_db:hr_skills.resume_line_view_form_inherit
 msgid "Employee"
 msgstr "員工"
 
 #. module: hr_skills
-#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_report__display_name
-msgid "Employee Name"
-msgstr "員工姓名"
+#: model:ir.model,name:hr_skills.model_hr_employee_certification_report
+msgid "Employee Certification Report"
+msgstr "員工認證報告"
 
 #. module: hr_skills
 #: model:ir.actions.report,name:hr_skills.action_report_employee_cv
@@ -552,24 +676,10 @@ msgid "Employee Resume"
 msgstr "員工履歷"
 
 #. module: hr_skills
-#: model:ir.actions.act_window,name:hr_skills.hr_employee_skill_report_action
-msgid "Employee Skills"
-msgstr "員工技能"
-
-#. module: hr_skills
+#: model:ir.model,name:hr_skills.model_hr_employee_skill_history_report
 #: model:ir.model,name:hr_skills.model_hr_employee_skill_report
 msgid "Employee Skills Report"
 msgstr "員工技能報告"
-
-#. module: hr_skills
-#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_report_view_search
-msgid "Employees with Skills"
-msgstr "有技能的員工"
-
-#. module: hr_skills
-#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_report_view_search
-msgid "Employees without Skills"
-msgstr "沒有技能的員工"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_line_admin_5
@@ -613,7 +723,9 @@ msgid ""
 "Enter your finance data and the app tries to forecast what will be your "
 "future incomes/expenses. The application uses machine learning to train "
 "itself."
-msgstr "輸入您的財務數據，應用程式就會嘗試預測您未來的收入/支出。該應用程式使用機器學習來進行訓練。"
+msgstr ""
+"輸入您的財務數據，應用程式就會嘗試預測您未來的收入/支出。該應用程式使用機器學"
+"習來進行訓練。"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_qdp_evans_cooper_and_white
@@ -621,10 +733,35 @@ msgid "Evans, Cooper and White"
 msgstr "Evans, Cooper and White"
 
 #. module: hr_skills
-#: model:hr.resume.line.type,name:hr_skills.resume_type_experience
+#: model_terms:ir.ui.view,arch_db:hr_skills.view_hr_job_form
+msgid "Expected Skills"
+msgstr "期望技能"
+
+#. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.report_employee_cv_main_panel
 msgid "Experience"
 msgstr "經驗"
+
+#. module: hr_skills
+#. odoo-javascript
+#: code:addons/hr_skills/static/src/components/internal_resume_lines/internal_resume_one2many.xml:0
+msgid "Experience -"
+msgstr ""
+
+#. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_certification_report_view_search
+msgid "Expired Certification"
+msgstr "認證已過期"
+
+#. module: hr_skills
+#: model:ir.model.fields.selection,name:hr_skills.selection__hr_resume_line__course_type__external
+msgid "External"
+msgstr "外部"
+
+#. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__external_url
+msgid "External URL"
+msgstr "外部網址"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_jep_cole_ltd
@@ -652,6 +789,11 @@ msgid "Fluent"
 msgstr "流利"
 
 #. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.resume_line_view_form
+msgid "Forever"
+msgstr "永遠"
+
+#. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_jgo_fox_and_sons
 msgid "Fox and Sons"
 msgstr "Fox and Sons"
@@ -665,6 +807,13 @@ msgstr "Freeman, Williams and Berger"
 #: model:hr.skill,name:hr_skills.hr_skill_french
 msgid "French"
 msgstr "法文"
+
+#. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_public_view_form_inherit
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_view_list
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_view_form
+msgid "From"
+msgstr "由"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_jgo_galilee_catholic_school
@@ -729,16 +878,6 @@ msgid "Greene-Orr"
 msgstr "Greene-Orr"
 
 #. module: hr_skills
-#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_log_view_search
-msgid "Group By"
-msgstr "分組依據"
-
-#. module: hr_skills
-#: model_terms:ir.ui.view,arch_db:hr_skills.hr_skill_view_search
-msgid "Group By..."
-msgstr "分組依據..."
-
-#. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_html
 msgid "HTML"
 msgstr "HTML"
@@ -759,6 +898,7 @@ msgid "Harrington Park Public School"
 msgstr "Harrington Park Public School"
 
 #. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_certification_report__has_department_manager_access
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_report__has_department_manager_access
 msgid "Has Department Manager Access"
 msgstr "擁有部門經理存取權限"
@@ -804,15 +944,23 @@ msgid "Human resources officer"
 msgstr "人力資源職員"
 
 #. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee__id
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_certification_report__id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_cv_wizard__id
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_public__id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill__id
-#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_log__id
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_history_report__id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_report__id
+#: model:ir.model.fields,field_description:hr_skills.field_hr_individual_skill_mixin__id
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job__id
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job_skill__id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line_type__id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill__id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill_level__id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill_type__id
+#: model:ir.model.fields,field_description:hr_skills.field_report_hr_skills_report_employee_cv__id
+#: model:ir.model.fields,field_description:hr_skills.field_resource_resource__id
 msgid "ID"
 msgstr "識別號"
 
@@ -872,6 +1020,12 @@ msgid ""
 msgstr "如果啟用欄位設定為未啟用，它將允許您隱藏資源記錄而不刪除它."
 
 #. module: hr_skills
+#. odoo-javascript
+#: code:addons/hr_skills/static/src/fields/formatted_date/formatted_date.js:0
+msgid "Indefinite"
+msgstr "無限期"
+
+#. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_indonesian
 msgid "Indonesian"
 msgstr "印尼文"
@@ -917,30 +1071,52 @@ msgid "Jewellery designer"
 msgstr "珠寶設計師"
 
 #. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_report__job_id
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job_skill__job_id
+msgid "Job"
+msgstr "工作"
+
+#. module: hr_skills
+#: model:ir.model,name:hr_skills.model_hr_job
+msgid "Job Position"
+msgstr "工作職稱"
+
+#. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_4
 msgid ""
 "Job position: Development team leader\n"
-"- Supported technical operations with investigating and correcting varied production support issues (Java, Perl, Shell scripts, SQL).\n"
-"- Led quality assurance planning for multiple concurrent projects relative to overall system architecture or trading system changes/new developments.\n"
-"- Configured and released business critical alpha and risk models using MATLAB and SQL with inputs from Portfolio Managers."
+"- Supported technical operations with investigating and correcting varied "
+"production support issues (Java, Perl, Shell scripts, SQL).\n"
+"- Led quality assurance planning for multiple concurrent projects relative "
+"to overall system architecture or trading system changes/new developments.\n"
+"- Configured and released business critical alpha and risk models using "
+"MATLAB and SQL with inputs from Portfolio Managers."
 msgstr ""
 "職位：開發團隊經理\n"
 "- 支持技術操作，調查和糾正各種生產支持問題（Java，Perl，Shell 腳本，SQL）。\n"
 "- 在整體系統架構或交易系統變化/新開發方面，領導多個併發項目的質量保證計劃。\n"
-"- 使用MATLAB和SQL配置和發佈基於業務的關鍵alpha和風險模型，並根據投資組合經理提供的輸入進行操作。"
+"- 使用MATLAB和SQL配置和發佈基於業務的關鍵alpha和風險模型，並根據投資組合經理"
+"提供的輸入進行操作。"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_3
 msgid ""
 "Job position: Product manager\n"
-"- Coordinated and managed software deployment across five system environments from development to production.\n"
+"- Coordinated and managed software deployment across five system "
+"environments from development to production.\n"
 "- Developed stored procedures to assist Java level programming efforts.\n"
-"- Developed multiple renewable energy plant architectures, both commercial installations and defense-related."
+"- Developed multiple renewable energy plant architectures, both commercial "
+"installations and defense-related."
 msgstr ""
 "職位：產品經理\n"
 "- 協調和管理從開發到生產的五個系統環境的軟件部署。\n"
 "- 開發存儲過程，協助 Java 級編程工作。\n"
 "- 開發多個可再生能源工廠架構，包括商業設施和國防相關設施。"
+
+#. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_report_view_search
+msgid "Jobs"
+msgstr "職位空缺"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_fme_johnson_shaw_and_carroll
@@ -986,7 +1162,7 @@ msgstr "語言"
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_cv_wizard__write_uid
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill__write_uid
-#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_log__write_uid
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job_skill__write_uid
 #: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__write_uid
 #: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line_type__write_uid
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill__write_uid
@@ -998,7 +1174,7 @@ msgstr "最後更新者"
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_cv_wizard__write_date
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill__write_date
-#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_log__write_date
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job_skill__write_date
 #: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__write_date
 #: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line_type__write_date
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill__write_date
@@ -1018,6 +1194,11 @@ msgid "Leadership"
 msgstr "領導能力"
 
 #. module: hr_skills
+#: model:ir.ui.menu,name:hr_skills.hr_skill_learning_menu
+msgid "Learning"
+msgstr "學習"
+
+#. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_vad_gallegos_little_and_walters
 msgid "Lecturer, higher education"
 msgstr "講師 － 高等教育"
@@ -1028,6 +1209,8 @@ msgid "Leinster School"
 msgstr "Leinster School"
 
 #. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_certification_report__level_progress
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_history_report__level_progress
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_report__level_progress
 msgid "Level Progress"
 msgstr "等級進度"
@@ -1037,6 +1220,14 @@ msgstr "等級進度"
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_type_view_form
 msgid "Levels"
 msgstr "等級"
+
+#. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill__levels_count
+#: model:ir.model.fields,field_description:hr_skills.field_hr_individual_skill_mixin__levels_count
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job_skill__levels_count
+#: model:ir.model.fields,field_description:hr_skills.field_hr_skill_type__levels_count
+msgid "Levels Count"
+msgstr "等級數目"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_fme_lewis_group
@@ -1057,11 +1248,6 @@ msgstr "詞典編纂者"
 #: model:hr.resume.line,name:hr_skills.employee_resume_lur_lindenow_primary_school
 msgid "Lindenow Primary School"
 msgstr "Lindenow Primary School"
-
-#. module: hr_skills
-#: model:ir.ui.menu,name:hr_skills.hr_resume_line_type_menu
-msgid "Line Types"
-msgstr "資料行類型"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_vad_loganmartin
@@ -1116,7 +1302,7 @@ msgstr "Marc Demo"
 #. module: hr_skills
 #: model:hr.skill.type,name:hr_skills.hr_skill_type_marketing
 msgid "Marketing"
-msgstr "市場推廣"
+msgstr "推廣"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_jgo_martin_stanley_and_duncan
@@ -1127,7 +1313,8 @@ msgstr "Martin, Stanley and Duncan"
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_1
 msgid ""
 "Master in Electrical engineering\n"
-"            Master thesis: Better grid management and control through machine learning"
+"            Master thesis: Better grid management and control through "
+"machine learning"
 msgstr ""
 "電力工程碩士\n"
 "            碩士論文： 通過機器學習改善電網管理和控制"
@@ -1168,6 +1355,12 @@ msgid "Mobile app development"
 msgstr "流動應用程式開發"
 
 #. module: hr_skills
+#. odoo-javascript
+#: code:addons/hr_skills/static/src/fields/formatted_date/formatted_date.js:0
+msgid "Month Format"
+msgstr "月份格式"
+
+#. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_jog_douglas_thompson_and_conner
 msgid "Music therapist"
 msgstr "音樂治療師"
@@ -1197,10 +1390,15 @@ msgid "Network administration"
 msgstr "網絡管理"
 
 #. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_view_list
+msgid "New"
+msgstr "新增"
+
+#. module: hr_skills
 #. odoo-javascript
 #: code:addons/hr_skills/static/src/fields/resume_one2many/resume_one2many.js:0
-msgid "New Resume line"
-msgstr "新增履歷資料行"
+msgid "New Resume Line"
+msgstr ""
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_nosql
@@ -1216,6 +1414,24 @@ msgstr "Northern Bay P-12 College"
 #: model:hr.resume.line,name:hr_skills.employee_resume_hne_nortonsilva
 msgid "Norton-Silva"
 msgstr "Norton-Silva"
+
+#. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_resume_line_list_view
+msgid "Number of Hours"
+msgstr "工時數"
+
+#. module: hr_skills
+#: model:ir.model.fields,help:hr_skills.field_hr_employee_skill__levels_count
+#: model:ir.model.fields,help:hr_skills.field_hr_individual_skill_mixin__levels_count
+#: model:ir.model.fields,help:hr_skills.field_hr_job_skill__levels_count
+#: model:ir.model.fields,help:hr_skills.field_hr_skill_type__levels_count
+msgid "Number of levels linked to this skill type"
+msgstr "連結至此技能類型的等級數目"
+
+#. module: hr_skills
+#: model:hr.skill,name:hr_skills.hr_skill_type_certifications_odoo
+msgid "Odoo"
+msgstr "Odoo"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_line_admin_4
@@ -1239,6 +1455,11 @@ msgstr "組織能力"
 #: code:addons/hr_skills/static/src/views/skills_list_renderer.js:0
 msgid "Other"
 msgstr "其他"
+
+#. module: hr_skills
+#: model:hr.resume.line.type,name:hr_skills.resume_type_experience
+msgid "Other Experience"
+msgstr ""
 
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_cv_wizard__show_others
@@ -1358,7 +1579,8 @@ msgstr "程式語言"
 
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill__level_progress
-#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_log__level_progress
+#: model:ir.model.fields,field_description:hr_skills.field_hr_individual_skill_mixin__level_progress
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job_skill__level_progress
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill_level__level_progress
 msgid "Progress"
 msgstr "專案進度"
@@ -1375,7 +1597,8 @@ msgstr "進度列"
 
 #. module: hr_skills
 #: model:ir.model.fields,help:hr_skills.field_hr_employee_skill__level_progress
-#: model:ir.model.fields,help:hr_skills.field_hr_employee_skill_log__level_progress
+#: model:ir.model.fields,help:hr_skills.field_hr_individual_skill_mixin__level_progress
+#: model:ir.model.fields,help:hr_skills.field_hr_job_skill__level_progress
 #: model:ir.model.fields,help:hr_skills.field_hr_skill_level__level_progress
 msgid "Progress from zero knowledge (0%) to fully mastered (100%)."
 msgstr "由尚未掌握(0%) 到達人等級 (100%)"
@@ -1389,6 +1612,11 @@ msgstr "進度應該是在0至100之間的數字。"
 #: model:hr.skill,name:hr_skills.hr_skill_project_management
 msgid "Project Management"
 msgstr "專案項目管理"
+
+#. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__resume_line_properties
+msgid "Properties"
+msgstr "屬性"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_mit_robinson_crawford_and_norman
@@ -1422,6 +1650,12 @@ msgid "Python"
 msgstr "Python"
 
 #. module: hr_skills
+#: model:hr.skill,name:hr_skills.hr_skill_r
+#, fuzzy
+msgid "R"
+msgstr "R"
+
+#. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_sql
 msgid "RDMS"
 msgstr "RDMS 關聯式資料庫管理系統"
@@ -1452,7 +1686,6 @@ msgstr "資源"
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_public_view_search
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_view_form
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_view_search
-#: model_terms:ir.ui.view,arch_db:hr_skills.res_users_view_form
 #: model_terms:ir.ui.view,arch_db:hr_skills.resume_line_view_form
 msgid "Resume"
 msgstr "重新開始"
@@ -1464,9 +1697,19 @@ msgid "Resume %s"
 msgstr "履歷 %s"
 
 #. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.view_resume_lines_filter
+msgid "Resume Lines"
+msgstr ""
+
+#. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_resume_line_list_view
+msgid "Resume Section"
+msgstr ""
+
+#. module: hr_skills
 #: model:ir.actions.act_window,name:hr_skills.hr_resume_type_action
-msgid "Resume Line Types"
-msgstr "履歷資料行類型"
+msgid "Resume Sections"
+msgstr ""
 
 #. module: hr_skills
 #: model:ir.model,name:hr_skills.model_hr_resume_line
@@ -1476,7 +1719,6 @@ msgstr "員工的履歷資料行"
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee__resume_line_ids
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_public__resume_line_ids
-#: model:ir.model.fields,field_description:hr_skills.field_res_users__resume_line_ids
 msgid "Resume lines"
 msgstr "履歷資料行"
 
@@ -1547,9 +1789,9 @@ msgid "Science writer"
 msgstr "科普作家"
 
 #. module: hr_skills
-#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_log_view_search
-msgid "Search Logs"
-msgstr "搜尋日誌"
+#: model:hr.skill,name:hr_skills.hr_skill_type_certifications_scrum_master
+msgid "Scrum Master"
+msgstr "Scrum Master"
 
 #. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_skill_view_search
@@ -1572,6 +1814,16 @@ msgid "Secretary, company"
 msgstr "秘書 － 公司秘書"
 
 #. module: hr_skills
+#: model:ir.ui.menu,name:hr_skills.hr_resume_line_type_menu
+msgid "Sections"
+msgstr "分節"
+
+#. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line_type__resume_line_type_properties_definition
+msgid "Sections Properties"
+msgstr ""
+
+#. module: hr_skills
 #. odoo-javascript
 #: code:addons/hr_skills/static/src/fields/form_view_one2many/form_view_one2many.xml:0
 msgid "Select & Close"
@@ -1585,13 +1837,14 @@ msgstr "選擇並新增"
 
 #. module: hr_skills
 #. odoo-javascript
-#: code:addons/hr_skills/static/src/fields/skills_one2many/skills_one2many.js:0
+#: code:addons/hr_skills/static/src/fields/one2many_tags_skills/one2many_tags_skills.js:0
 msgid "Select Skills"
 msgstr "請選擇技能"
 
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line_type__sequence
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill__sequence
+#: model:ir.model.fields,field_description:hr_skills.field_hr_skill_type__sequence
 msgid "Sequence"
 msgstr "序列號"
 
@@ -1613,10 +1866,14 @@ msgstr "Simmons-Wilcox"
 #. module: hr_skills
 #: model:ir.model,name:hr_skills.model_hr_skill
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee__skill_ids
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_certification_report__skill_id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill__skill_id
-#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_log__skill_id
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_history_report__skill_id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_report__skill_id
-#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_log_view_search
+#: model:ir.model.fields,field_description:hr_skills.field_hr_individual_skill_mixin__skill_id
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job__skill_ids
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job_skill__skill_id
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_history_report_view_search
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_report_view_search
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_skill_view_search
 msgid "Skill"
@@ -1624,16 +1881,17 @@ msgstr "技能"
 
 #. module: hr_skills
 #: model:ir.actions.act_window,name:hr_skills.action_hr_employee_skill_log_department
-#: model:ir.actions.act_window,name:hr_skills.action_hr_employee_skill_log_employee
 #: model:ir.actions.server,name:hr_skills.action_open_skills_log_department
 msgid "Skill History Report"
 msgstr "技能歷史報告"
 
 #. module: hr_skills
 #: model:ir.model,name:hr_skills.model_hr_skill_level
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_certification_report__skill_level
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill__skill_level_id
-#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_log__skill_level_id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_report__skill_level
+#: model:ir.model.fields,field_description:hr_skills.field_hr_individual_skill_mixin__skill_level_id
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job_skill__skill_level_id
 #: model_terms:ir.ui.view,arch_db:hr_skills.employee_skill_level_view_form
 msgid "Skill Level"
 msgstr "技能級別"
@@ -1646,12 +1904,15 @@ msgstr "技能級別"
 
 #. module: hr_skills
 #: model:ir.model,name:hr_skills.model_hr_skill_type
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_certification_report__skill_type_id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill__skill_type_id
-#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_log__skill_type_id
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_history_report__skill_type_id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill_report__skill_type_id
+#: model:ir.model.fields,field_description:hr_skills.field_hr_individual_skill_mixin__skill_type_id
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job_skill__skill_type_id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill__skill_type_id
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill_level__skill_type_id
-#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_log_view_search
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_history_report_view_search
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_report_view_search
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_type_view_form
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_skill_view_search
@@ -1667,36 +1928,49 @@ msgid "Skill Types"
 msgstr "技能類型"
 
 #. module: hr_skills
+#: model:ir.model,name:hr_skills.model_hr_individual_skill_mixin
+msgid "Skill level"
+msgstr "技能等級"
+
+#. module: hr_skills
 #: model:ir.model,name:hr_skills.model_hr_employee_skill
-msgid "Skill level for an employee"
-msgstr "員工的技能水準"
+msgid "Skill level for employee"
+msgstr "員工技能等級"
 
 #. module: hr_skills
 #. odoo-javascript
 #: code:addons/hr_skills/static/src/components/avatar_card_resource/avatar_card_resource_popover.xml:0
-#: code:addons/hr_skills/static/src/fields/skills_one2many/skills_one2many.xml:0
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee__employee_skill_ids
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_cv_wizard__show_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_employee_public__employee_skill_ids
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job__job_skill_ids
 #: model:ir.model.fields,field_description:hr_skills.field_hr_skill_type__skill_ids
-#: model:ir.model.fields,field_description:hr_skills.field_res_users__employee_skill_ids
 #: model:ir.model.fields,field_description:hr_skills.field_resource_resource__employee_skill_ids
 #: model:ir.ui.menu,name:hr_skills.hr_employee_skill_report_menu
 #: model_terms:ir.ui.view,arch_db:hr_skills.employee_skill_view_form
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_type_view_form
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_job_skill_view_form
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_skill_view_form
 #: model_terms:ir.ui.view,arch_db:hr_skills.report_employee_cv_main_panel
 msgid "Skills"
 msgstr "技能"
 
 #. module: hr_skills
-#: model:ir.model,name:hr_skills.model_hr_employee_skill_log
+#. odoo-javascript
+#: code:addons/hr_skills/static/src/fields/skills_one2many/skills_one2many.xml:0
+msgid "Skills & Certifications"
+msgstr ""
+
+#. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_department_view_kanban
-#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_log_view_graph_department
-#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_log_view_graph_employee
-#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_log_view_tree
 msgid "Skills History"
 msgstr "技能歷史"
+
+#. module: hr_skills
+#: model:ir.actions.act_window,name:hr_skills.hr_employee_skill_report_action
+#: model:ir.ui.menu,name:hr_skills.hr_employee_skill_inventory_report_menu
+msgid "Skills Inventory"
+msgstr "技能清單"
 
 #. module: hr_skills
 #. odoo-javascript
@@ -1705,9 +1979,15 @@ msgid "Skills Report"
 msgstr "技能報告"
 
 #. module: hr_skills
-#: model:hr.resume.line.type,name:hr_skills.resume_type_social_media
-msgid "Social Media"
-msgstr "社交媒體"
+#: model:ir.model,name:hr_skills.model_hr_job_skill
+msgid "Skills for job positions"
+msgstr ""
+
+#. module: hr_skills
+#: model:ir.actions.server,name:hr_skills.hr_job_skills_cron_add_certification_activity_to_employees_ir_actions_server
+msgid ""
+"Skills: Add an activity to employees with missing or expiring certifications"
+msgstr ""
 
 #. module: hr_skills
 #: model:hr.skill.type,name:hr_skills.hr_skill_type_softskill
@@ -1801,19 +2081,55 @@ msgid "Teamwork"
 msgstr "團隊合作能力"
 
 #. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_skill_level__technical_is_new_default
+msgid "Technical Is New Default"
+msgstr "技術知識已是新的預設技能"
+
+#. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_telugu
 msgid "Telugu"
 msgstr "泰盧固文"
 
 #. module: hr_skills
-#. odoo-python
-#: code:addons/hr_skills/models/hr_employee_skill.py:0
-msgid "The skill %(name)s and skill type %(type)s doesn't match"
-msgstr "技能 %(name)s 和技能類型 %(type)s 不匹配"
+#: model_terms:ir.ui.view,arch_db:hr_skills.employee_skill_view_form
+msgid "The end date must be after the start date."
+msgstr "結束日期必須後於開始日期。"
 
 #. module: hr_skills
 #. odoo-python
-#: code:addons/hr_skills/models/hr_employee_skill.py:0
+#: code:addons/hr_skills/models/hr_individual_skill_mixin.py:0
+msgid ""
+"The following skills can't be created as they overlap or exactly match "
+"existing skills:\n"
+"%(collisions)s"
+msgstr ""
+"未能建立以下技能，因與現有技能重疊或完全相同：\n"
+"%(collisions)s"
+
+#. module: hr_skills
+#. odoo-python
+#: code:addons/hr_skills/models/hr_individual_skill_mixin.py:0
+msgid ""
+"The following skills have their valid stop date prior to their valid start "
+"date:\n"
+msgstr "以下技能的有效期結束日期，早於其開始日期：\n"
+
+#. module: hr_skills
+#. odoo-python
+#: code:addons/hr_skills/models/hr_skill_type.py:0
+msgid ""
+"The following skills type must contain at least one skill and one level: %s"
+msgstr "以下技能類型，必須有最少一項技能及一個級別：%s"
+
+#. module: hr_skills
+#. odoo-python
+#: code:addons/hr_skills/models/hr_individual_skill_mixin.py:0
+msgid "The skill %(name)s and skill type %(type)s don't match"
+msgstr "技能 %(name)s 與技能類型 %(type)s 不相符"
+
+#. module: hr_skills
+#. odoo-python
+#: code:addons/hr_skills/models/hr_individual_skill_mixin.py:0
 msgid "The skill level %(level)s is not valid for skill type: %(type)s"
 msgstr "技能級別 %(level)s 對技能類型無效：%(type)s"
 
@@ -1829,19 +2145,24 @@ msgstr "治療師 － 言語及語言治療師"
 
 #. module: hr_skills
 #. odoo-javascript
-#: code:addons/hr_skills/static/src/fields/resume_one2many/resume_one2many.xml:0
-msgid ""
-"There are no resume lines on this employee.\n"
-"                        Why not add a new one?"
-msgstr ""
-"此員工未有履歷資料行。\n"
-"                        何不試試新增一行？"
+#: code:addons/hr_skills/static/src/components/internal_resume_lines/internal_resume_one2many.xml:0
+msgid "There are no resume lines on this employee."
+msgstr "此員工沒有履歷資料行。"
 
 #. module: hr_skills
 #. odoo-javascript
 #: code:addons/hr_skills/static/src/fields/skills_one2many/skills_one2many.xml:0
 msgid "There are no skills defined in the library."
 msgstr "圖書館中沒有技能定義。"
+
+#. module: hr_skills
+#: model_terms:ir.actions.act_window,help:hr_skills.hr_employee_certification_report_action
+msgid ""
+"This report will give you an overview of the certification per Employee.\n"
+"                Create them in configuration and add them on the Employee."
+msgstr ""
+"此報告提供每位員工的認證概況。\n"
+"                你可在配置頁面建立不同認證，並將認證加入至員工記錄。"
 
 #. module: hr_skills
 #: model_terms:ir.actions.act_window,help:hr_skills.hr_employee_skill_report_action
@@ -1874,6 +2195,14 @@ msgid "Title"
 msgstr "稱謂"
 
 #. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.employee_skill_view_form
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_public_view_form_inherit
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_view_list
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_view_form
+msgid "To"
+msgstr "至"
+
+#. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_jgo_tottenham_central_school
 msgid "Tottenham Central School"
 msgstr "Tottenham Central School"
@@ -1882,6 +2211,22 @@ msgstr "Tottenham Central School"
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_jod_wilson_ltd
 msgid "Trade union research officer"
 msgstr "工會研究職員"
+
+#. module: hr_skills
+#: model:hr.resume.line.type,name:hr_skills.resume_type_training
+msgid "Training"
+msgstr "培訓"
+
+#. module: hr_skills
+#: model:ir.actions.act_window,name:hr_skills.hr_resume_lines_training_action
+#: model:ir.ui.menu,name:hr_skills.menu_learnings_training_attendances
+msgid "Training Attendances"
+msgstr "培訓出席記錄"
+
+#. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_resume_line_list_view
+msgid "Training Title"
+msgstr "培訓標題"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_jep_trinity_college
@@ -1894,22 +2239,14 @@ msgid "Turkish"
 msgstr "土耳其文"
 
 #. module: hr_skills
-#: model:ir.model.constraint,message:hr_skills.constraint_hr_employee_skill__unique_skill
-msgid "Two levels for the same skill is not allowed"
-msgstr "不允許為同一技能提供兩個級別"
-
-#. module: hr_skills
-#: model:ir.model.constraint,message:hr_skills.constraint_hr_employee_skill_log__unique_skill_log
-msgid "Two levels for the same skill on the same day is not allowed"
-msgstr "不允許在同一天對同一技能設置兩個級別"
-
-#. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_stw_tyndale_christian_school
 msgid "Tyndale Christian School"
 msgstr "Tyndale Christian School"
 
 #. module: hr_skills
 #: model:ir.model.fields,field_description:hr_skills.field_hr_resume_line__line_type_id
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_view_search
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_resume_line_list_view
 msgid "Type"
 msgstr "類型"
 
@@ -1934,14 +2271,44 @@ msgid "Université Libre de Bruxelles - Polytechnique"
 msgstr "Université Libre de Bruxelles - Polytechnique (布魯塞爾自由大學 - 理工學院)"
 
 #. module: hr_skills
+#. odoo-javascript
+#: code:addons/hr_skills/static/src/fields/skills_one2many/skills_one2many.js:0
+msgid "Update Skills"
+msgstr "更新技能"
+
+#. module: hr_skills
+#: model:mail.activity.type,summary:hr_skills.mail_activity_data_upload_certification
+msgid "Upload a certification"
+msgstr "上載認證"
+
+#. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_urdu
 msgid "Urdu"
 msgstr "烏爾都文"
 
 #. module: hr_skills
-#: model:ir.model,name:hr_skills.model_res_users
-msgid "User"
-msgstr "使用者"
+#: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_view_search
+msgid "Valid certification"
+msgstr "有效認證"
+
+#. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.employee_skill_view_form
+msgid "Validity"
+msgstr "驗證"
+
+#. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill__valid_from
+#: model:ir.model.fields,field_description:hr_skills.field_hr_individual_skill_mixin__valid_from
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job_skill__valid_from
+msgid "Validity Start"
+msgstr "有效起始"
+
+#. module: hr_skills
+#: model:ir.model.fields,field_description:hr_skills.field_hr_employee_skill__valid_to
+#: model:ir.model.fields,field_description:hr_skills.field_hr_individual_skill_mixin__valid_to
+#: model:ir.model.fields,field_description:hr_skills.field_hr_job_skill__valid_to
+msgid "Validity Stop"
+msgstr "有效結束"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_virtualization_containerization
@@ -1967,12 +2334,6 @@ msgstr "White-Bell"
 #: model:hr.resume.line,name:hr_skills.employee_resume_stw_whitsunday_anglican_school
 msgid "Whitsunday Anglican School"
 msgstr "Whitsunday Anglican School"
-
-#. module: hr_skills
-#. odoo-javascript
-#: code:addons/hr_skills/static/src/fields/skills_one2many/skills_one2many.xml:0
-msgid "Why not try adding some ?"
-msgstr "為什麼不加入一些呢？"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_jth_wilkinson_plc
@@ -2016,9 +2377,21 @@ msgstr "Wycheproof P-12 College"
 
 #. module: hr_skills
 #. odoo-javascript
+#: code:addons/hr_skills/static/src/fields/formatted_date/formatted_date.js:0
+msgid "Year Format"
+msgstr "年份格式"
+
+#. module: hr_skills
+#. odoo-javascript
 #: code:addons/hr_skills/static/src/fields/skills_one2many/skills_one2many.xml:0
 msgid "You can add skills from our library to the employee profile."
 msgstr "您可以將我們資料庫中的技能添加到員工檔案中。"
+
+#. module: hr_skills
+#. odoo-python
+#: code:addons/hr_skills/models/hr_employee.py:0
+msgid "You cannot access the resume of this employee."
+msgstr ""
 
 #. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.report_employee_cv_sidepanel
@@ -2036,6 +2409,110 @@ msgid "e.g. Odoo Inc."
 msgstr "例如 odoo公司"
 
 #. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.resume_line_view_form
+msgid "e.g. https://duolingo.com/course/xyz"
+msgstr ""
+
+#. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.resume_line_view_form
+msgid "hours"
+msgstr "小時"
+
+#. module: hr_skills
+#. odoo-javascript
+#: code:addons/hr_skills/static/src/fields/resume_one2many/resume_one2many.xml:0
+msgid "hours)"
+msgstr ""
+
+#. module: hr_skills
+#: model:ir.model.fields,help:hr_skills.field_hr_employee_skill__is_certification
+#: model:ir.model.fields,help:hr_skills.field_hr_individual_skill_mixin__is_certification
+#: model:ir.model.fields,help:hr_skills.field_hr_job_skill__is_certification
+#: model:ir.model.fields,help:hr_skills.field_hr_skill_type__is_certification
+msgid "if checked the skill type become a certification type"
+msgstr "若勾選，技能類型會成為認證類型"
+
+#. module: hr_skills
+#: model_terms:ir.ui.view,arch_db:hr_skills.employee_skill_view_form
+msgid "indefinite"
+msgstr "無限期"
+
+#. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.report_employee_cv_sidepanel
 msgid "www.demo.com"
 msgstr "www.demo.com"
+
+#. module: hr_skills
+#. odoo-python
+#: code:addons/hr_skills/models/hr_individual_skill_mixin.py:0
+msgid "• %(skill_name)s from %(valid_from)s to %(valid_to)s"
+msgstr "• %(skill_name)s，由 %(valid_from)s 至 %(valid_to)s"
+
+#~ msgid "+1234567890"
+#~ msgstr "+1234567890"
+
+#~ msgid "2022"
+#~ msgstr "2022"
+
+#~ msgid "2023"
+#~ msgstr "2023"
+
+#~ msgid "%s (copy)"
+#~ msgstr "%s (副本)"
+
+#~ msgid "CREATE A NEW ENTRY"
+#~ msgstr "建立新項目"
+
+#~ msgid "Classic"
+#~ msgstr "經典"
+
+#~ msgid "Display"
+#~ msgstr "顯示"
+
+#~ msgid "Display Type"
+#~ msgstr "顯示類型"
+
+#~ msgid "Employee Skills"
+#~ msgstr "員工技能"
+
+#~ msgid "Employees with Skills"
+#~ msgstr "有技能的員工"
+
+#~ msgid "Employees without Skills"
+#~ msgstr "沒有技能的員工"
+
+#~ msgid "Group By"
+#~ msgstr "分組依據"
+
+#~ msgid "Group By..."
+#~ msgstr "分組依據⋯"
+
+#~ msgid "Line Types"
+#~ msgstr "資料行類型"
+
+#~ msgid "New Resume line"
+#~ msgstr "新增履歷資料行"
+
+#~ msgid "Resume Line Types"
+#~ msgstr "履歷資料行類型"
+
+#~ msgid "Search Logs"
+#~ msgstr "搜尋日誌"
+
+#~ msgid "Skill level for an employee"
+#~ msgstr "員工的技能水準"
+
+#~ msgid "Social Media"
+#~ msgstr "社交媒體"
+
+#~ msgid "The skill %(name)s and skill type %(type)s doesn't match"
+#~ msgstr "技能 %(name)s 和技能類型 %(type)s 不匹配"
+
+#~ msgid "Two levels for the same skill is not allowed"
+#~ msgstr "不允許為同一技能提供兩個級別"
+
+#~ msgid "Two levels for the same skill on the same day is not allowed"
+#~ msgstr "不允許在同一天對同一技能設置兩個級別"
+
+#~ msgid "User"
+#~ msgstr "使用者"

@@ -13,7 +13,7 @@ MAP_REPAIR_LINE_TYPE_TO_MOVE_LOCATIONS_FROM_REPAIR = {
 class StockMove(models.Model):
     _inherit = 'stock.move'
 
-    repair_id = fields.Many2one('repair.order', check_company=True)
+    repair_id = fields.Many2one('repair.order', check_company=True, index='btree_not_null', copy=False, ondelete='cascade')
     repair_line_type = fields.Selection([
         ('add', 'Add'),
         ('remove', 'Remove'),
@@ -37,7 +37,19 @@ class StockMove(models.Model):
                 remaining_moves -= move
         return super(StockMove, remaining_moves)._compute_picking_type_id()
 
-    @api.depends('repair_id', 'repair_id.location_dest_id')
+    @api.depends('repair_id.location_id', 'repair_line_type')
+    def _compute_location_id(self):
+        ids_to_super = set()
+        for move in self:
+            if move.repair_id and move.repair_line_type:
+                move.location_id = move.repair_id[
+                    MAP_REPAIR_LINE_TYPE_TO_MOVE_LOCATIONS_FROM_REPAIR[move.repair_line_type]['location_id']
+                ]
+            else:
+                ids_to_super.add(move.id)
+        return super(StockMove, self.browse(ids_to_super))._compute_location_id()
+
+    @api.depends('repair_id.location_dest_id', 'repair_line_type')
     def _compute_location_dest_id(self):
         ids_to_super = set()
         for move in self:
@@ -48,6 +60,15 @@ class StockMove(models.Model):
             else:
                 ids_to_super.add(move.id)
         return super(StockMove, self.browse(ids_to_super))._compute_location_dest_id()
+
+    @api.depends('repair_id.name')
+    def _compute_reference(self):
+        moves_with_reference = set()
+        for move in self:
+            if move.repair_id and move.repair_id.name:
+                move.reference = move.repair_id.name
+                moves_with_reference.add(move.id)
+        super(StockMove, self - self.env['stock.move'].browse(moves_with_reference))._compute_reference()
 
     def copy_data(self, default=None):
         default = dict(default or {})
@@ -72,19 +93,13 @@ class StockMove(models.Model):
             if not vals.get('repair_id') or 'repair_line_type' not in vals:
                 continue
             repair_id = self.env['repair.order'].browse([vals['repair_id']])
-            vals['name'] = repair_id.name
-            src_location, dest_location = self._get_repair_locations(vals['repair_line_type'], repair_id)
-            if not vals.get('location_id'):
-                vals['location_id'] = src_location.id
-            if not vals.get('location_dest_id'):
-                vals['location_dest_id'] = dest_location.id
+            vals['origin'] = repair_id.name
         moves = super().create(vals_list)
         repair_moves = self.env['stock.move']
         for move in moves:
             if not move.repair_id:
                 continue
-            move.group_id = move.repair_id.procurement_group_id.id
-            move.origin = move.name
+            move.reference_ids = [Command.link(r.id) for r in move.repair_id.reference_ids]
             move.picking_type_id = move.repair_id.picking_type_id.id
             repair_moves |= move
         no_repair_moves = moves - repair_moves
@@ -106,8 +121,6 @@ class StockMove(models.Model):
             if not move.repair_id:
                 continue
             # checks vals update
-            if 'repair_line_type' in vals or 'picking_type_id' in vals and move.repair_line_type:
-                move.location_id, move.location_dest_id = move._get_repair_locations(move.repair_line_type)
             if not move.sale_line_id and 'sale_line_id' not in vals and move.repair_line_type == 'add':
                 moves_to_create_so_line |= move
             if move.sale_line_id and ('repair_line_type' in vals or 'product_uom_qty' in vals):
@@ -126,6 +139,23 @@ class StockMove(models.Model):
         self._clean_repair_sale_order_line()
         return super()._action_cancel()
 
+    def _prepare_repair_so_line_vals(self):
+        self.ensure_one()
+        product_qty = self.product_uom_qty if self.repair_id.state != 'done' else self.quantity
+        vals = {
+            'order_id': self.repair_id.sale_order_id.id,
+            'product_id': self.product_id.id,
+            'product_uom_qty': product_qty,  # When relying only on so_line compute method, the sol quantity is only updated on next sol creation
+            'product_uom_id': self.product_uom.id,
+            'move_ids': [Command.link(self.id)],
+            'qty_delivered': self.quantity if self.state == 'done' else 0.0,
+        }
+        if self.repair_id.under_warranty:
+            vals['price_unit'] = 0.0
+        elif self.price_unit:
+            vals['price_unit'] = self.price_unit
+        return vals
+
     def _create_repair_sale_order_line(self):
         if not self:
             return
@@ -133,19 +163,7 @@ class StockMove(models.Model):
         for move in self:
             if move.sale_line_id or move.repair_line_type != 'add' or not move.repair_id.sale_order_id:
                 continue
-            product_qty = move.product_uom_qty if move.repair_id.state != 'done' else move.quantity
-            so_line_vals.append({
-                'order_id': move.repair_id.sale_order_id.id,
-                'product_id': move.product_id.id,
-                'product_uom_qty': product_qty, # When relying only on so_line compute method, the sol quantity is only updated on next sol creation
-                'product_uom': move.product_uom.id,
-                'move_ids': [Command.link(move.id)],
-                'qty_delivered': move.quantity if move.state == 'done' else 0.0,
-            })
-            if move.repair_id.under_warranty:
-                so_line_vals[-1]['price_unit'] = 0.0
-            elif move.price_unit:
-                so_line_vals[-1]['price_unit'] = move.price_unit
+            so_line_vals.append(move._prepare_repair_so_line_vals())
 
         self.env['sale.order.line'].create(so_line_vals)
 

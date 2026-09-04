@@ -13,7 +13,7 @@ from odoo.tools.translate import html_translate
 MOST_USED_TAGS_COUNT = 5  # Number of tags to track as "most used" to display on frontend
 
 
-class Forum(models.Model):
+class ForumForum(models.Model):
     _name = 'forum.forum'
     _description = 'Forum'
     _inherit = [
@@ -30,9 +30,9 @@ class Forum(models.Model):
         return Markup("""
                 <h2 class="display-3-fs" style="text-align: center;clear-both;font-weight: bold;">%(message_intro)s</h2>
                 <div class="text-white">
-                    <p class="lead o_default_snippet_text" style="text-align: center;">%(message_post)s</p>
+                    <p class="lead" style="text-align: center;">%(message_post)s</p>
                     <p style="text-align: center;">
-                        <a class="btn btn-primary forum_register_url" href="/web/login">%(register_text)s</a>
+                        <a class="btn btn-primary forum_register_url o_translate_inline" href="/web/login">%(register_text)s</a>
                         <button type="button" class="btn btn-light js_close_intro" aria-label="Dismiss message">
                             %(hide_text)s
                         </button>
@@ -68,7 +68,6 @@ class Forum(models.Model):
         'Guidelines', translate=html_translate,
         sanitize=True, sanitize_overridable=True)
     description = fields.Text('Description', translate=True)
-    teaser = fields.Text('Teaser', compute='_compute_teaser', store=True)
     welcome_message = fields.Html(
         'Welcome Message', translate=html_translate,
         default=_get_default_welcome_message,
@@ -189,11 +188,6 @@ class Forum(models.Model):
             forum.tag_most_used_ids = self.env['forum.tag'].browse(forum_tags[forum.id]['most_used_ids'])
             forum.tag_unused_ids = self.env['forum.tag'].browse(forum_tags[forum.id]['unused_ids'])
 
-    @api.depends('description')
-    def _compute_teaser(self):
-        for forum in self:
-            forum.teaser = textwrap.shorten(forum.description, width=180, placeholder='...') if forum.description else ""
-
     @api.depends('post_ids')
     def _compute_last_post_id(self):
         last_forums_posts = self.env['forum.post']._read_group(
@@ -251,7 +245,7 @@ class Forum(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         forums = super(
-            Forum,
+            ForumForum,
             self.with_context(mail_create_nolog=True, mail_create_nosubscribe=True)
         ).create(vals_list)
         self.env['website'].sudo()._update_forum_count()

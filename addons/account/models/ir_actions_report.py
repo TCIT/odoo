@@ -5,7 +5,6 @@ from zlib import error as zlib_error
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.tools import pdf
-from odoo.tools.pdf import PdfReadError, PdfStreamError
 
 
 class IrActionsReport(models.Model):
@@ -28,14 +27,14 @@ class IrActionsReport(models.Model):
 
         collected_streams = OrderedDict()
         for invoice in invoices:
-            attachment = invoice.message_main_attachment_id
+            attachment = self._prepare_local_attachments(invoice.message_main_attachment_id.sudo())
             if attachment:
                 stream = pdf.to_pdf_stream(attachment)
-                if stream:
+                if stream and attachment.res_model:
                     record = self.env[attachment.res_model].browse(attachment.res_id)
                     try:
                         stream = pdf.add_banner(stream, record.name or '', logo=True)
-                    except (ValueError, PdfStreamError, PdfReadError, TypeError, zlib_error, NotImplementedError):
+                    except (ValueError, pdf.PdfReadError, TypeError, zlib_error, NotImplementedError, pdf.DependencyError, ArithmeticError):
                         record._message_log(body=_(
                             "There was an error when trying to add the banner to the original PDF.\n"
                             "Please make sure the source file is valid."
@@ -48,7 +47,7 @@ class IrActionsReport(models.Model):
 
     def _is_invoice_report(self, report_ref):
         report = self._get_report(report_ref)
-        return report.is_invoice_report or report.report_name == 'account.report_invoice'
+        return (report.is_invoice_report and report.model == 'account.move') or report.report_name == 'account.report_invoice'
 
     def _get_splitted_report(self, report_ref, content, report_type):
         if report_type == 'html':
@@ -78,7 +77,7 @@ class IrActionsReport(models.Model):
     def _unlink_except_master_tags(self):
         master_xmlids = [
             "account_invoices",
-            "action_account_original_vendor_bill"
+            "action_account_original_vendor_bill",
             "account_invoices_without_payment",
             "action_report_journal",
             "action_report_payment_receipt",

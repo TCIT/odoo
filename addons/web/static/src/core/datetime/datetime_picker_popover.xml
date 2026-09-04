@@ -3,27 +3,23 @@
     <t t-name="web.DateTimePickerPopover">
         <DateTimePicker t-props="props.pickerProps">
             <t t-set-slot="buttons">
-                <t t-if="isDateTimeRange">
+                <div class="o_datetime_buttons d-flex gap-2">
                     <button
-                        class="o_apply btn btn-primary btn-sm h-100 w-100 w-md-auto d-flex align-items-center justify-content-center gap-1"
+                        class="btn btn-sm btn-secondary"
+                        title="Clear"
+                        tabindex="-1"
+                        t-on-click="props.pickerProps.onReset"
+                    >
+                        <i class="fa fa-eraser" />
+                    </button>
+                    <button
+                        class="btn btn-sm btn-primary"
                         tabindex="-1"
                         t-on-click="props.close"
                     >
-                        <i class="fa fa-check" />
                         <span>Apply</span>
                     </button>
-                </t>
-            </t>
-            <t t-set-slot="bottom_left">
-                <t t-if="isDateTimeRange">
-                    <button
-                        class="btn btn-secondary btn-sm h-100 w-100 w-md-auto d-flex align-items-center justify-content-center"
-                        tabindex="-1"
-                        t-on-click="props.close"
-                    >
-                        <span>Close</span>
-                    </button>
-                </t>
+                </div>
             </t>
         </DateTimePicker>
     </t>

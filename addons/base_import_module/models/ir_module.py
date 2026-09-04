@@ -1,26 +1,31 @@
-# -*- coding: utf-8 -*-
 import ast
 import base64
+import io
 import json
 import logging
 import lxml
 import os
 import pathlib
-import requests
 import sys
+import traceback
 import zipfile
+from babel.messages import extract
 from collections import defaultdict
 from io import BytesIO
 from os.path import join as opj
 
 from odoo import api, fields, models, _
 from odoo.exceptions import AccessDenied, AccessError, UserError
+from odoo.fields import Domain
 from odoo.http import request
-from odoo.modules.module import adapt_version, MANIFEST_NAMES
-from odoo.osv.expression import is_leaf
+from odoo.modules.module import MANIFEST_NAMES, Manifest
 from odoo.release import major_version
-from odoo.tools import convert_csv_import, convert_sql_import, convert_xml_import, exception_to_unicode
-from odoo.tools import file_open, file_open_temporary_directory, ormcache
+from odoo.tools import SQL, convert_file
+from odoo.tools import file_open, file_path, file_open_temporary_directory, ormcache
+from odoo.tools.misc import OrderedSet, topological_sort
+from odoo.tools.translate import JAVASCRIPT_TRANSLATION_COMMENT, CodeTranslations, TranslationImporter, get_base_langs
+
+from odoo.addons.base.models.ir_asset import is_wildcard_glob
 
 _logger = logging.getLogger(__name__)
 
@@ -28,7 +33,7 @@ APPS_URL = "https://apps.odoo.com"
 MAX_FILE_SIZE = 100 * 1024 * 1024  # in megabytes
 
 
-class IrModule(models.Model):
+class IrModuleModule(models.Model):
     _inherit = "ir.module.module"
 
     imported = fields.Boolean(string="Imported Module")
@@ -37,16 +42,51 @@ class IrModule(models.Model):
         ('industries', 'Industries'),
     ], default='official')
 
+    @api.model
+    @ormcache(cache='stable')
+    def _get_imported_module_names(self):
+        return OrderedSet(self.sudo().search_fetch([('imported', '=', True), ('state', '=', 'installed')], ['name']).mapped('name'))
+
     def _get_modules_to_load_domain(self):
         # imported modules are not expected to be loaded as regular modules
         return super()._get_modules_to_load_domain() + [('imported', '=', False)]
+
+    @api.model
+    def _load_module_terms(self, modules, langs, overwrite=False):
+        super()._load_module_terms(modules, langs, overwrite=overwrite)
+
+        translation_importer = TranslationImporter(self.env.cr, verbose=False)
+        IrAttachment = self.env['ir.attachment']
+
+        for module in modules:
+            if Manifest.for_addon(module, display_warning=False):
+                continue
+            for lang in langs:
+                for lang_ in get_base_langs(lang):
+                    # Translations for imported data modules only works with imported po files
+                    attachment = IrAttachment.sudo().search([
+                        ('name', '=', f"{module}_{lang_}.po"),
+                        ('url', '=', f"/{module}/i18n/{lang_}.po"),
+                        ('type', '=', 'binary'),
+                    ], limit=1)
+                    if attachment.raw:
+                        try:
+                            with io.BytesIO(attachment.raw) as fileobj:
+                                fileobj.name = attachment.name
+                                translation_importer.load(fileobj, 'po', lang, module=module)
+                        except Exception:   # noqa: BLE001
+                            _logger.warning('module %s: failed to load translation attachment %s for language %s', module, attachment.name, lang)
+                if lang != 'en_US' and lang not in translation_importer.imported_langs:
+                    _logger.info('module %s: no translation for language %s', module, lang)
+
+        translation_importer.save(overwrite=overwrite)
 
     @api.depends('name')
     def _get_latest_version(self):
         imported_modules = self.filtered(lambda m: m.imported and m.latest_version)
         for module in imported_modules:
             module.installed_version = module.latest_version
-        super(IrModule, self - imported_modules)._get_latest_version()
+        super(IrModuleModule, self - imported_modules)._get_latest_version()
 
     @api.depends('icon')
     def _get_icon_image(self):
@@ -74,22 +114,21 @@ class IrModule(models.Model):
         known_mods_names = {m.name: m for m in known_mods}
         installed_mods = [m.name for m in known_mods if m.state == 'installed']
 
-        terp = {}
-        manifest_path = next((opj(path, name) for name in MANIFEST_NAMES if os.path.exists(opj(path, name))), None)
-        if manifest_path:
-            with file_open(manifest_path, 'rb', env=self.env) as f:
-                terp.update(ast.literal_eval(f.read().decode()))
+        terp = Manifest._from_path(path, env=self.env)
         if not terp:
             return False
-        if not terp.get('icon'):
-            icon_path = 'static/description/icon.png'
-            module_icon = module if os.path.exists(opj(path, icon_path)) else 'base'
-            terp['icon'] = opj('/', module_icon, icon_path)
         values = self.get_values_from_terp(terp)
-        if 'version' in terp:
-            values['latest_version'] = adapt_version(terp['version'])
+        try:
+            icon_path = terp.raw_value('icon') or opj(terp.name, 'static/description/icon.png')
+            file_path(icon_path, env=self.env, check_exists=True)
+            values['icon'] = '/' + icon_path
+        except OSError:
+            pass  # keep the default icon
+        values['latest_version'] = terp.version
         if self.env.context.get('data_module'):
             values['module_type'] = 'industries'
+        if with_demo:
+            values['demo'] = True
 
         unmet_dependencies = set(terp.get('depends', [])).difference(installed_mods)
 
@@ -117,7 +156,7 @@ class IrModule(models.Model):
         for pattern in terp.get('cloc_exclude', []):
             exclude_list.update(str(p.relative_to(base_dir)) for p in base_dir.glob(pattern) if p.is_file())
 
-        kind_of_files = ['data', 'init_xml', 'update_xml']
+        kind_of_files = ['data', 'init_xml']
         if with_demo:
             kind_of_files.append('demo')
         for kind in kind_of_files:
@@ -127,35 +166,26 @@ class IrModule(models.Model):
                     _logger.info("module %s: skip unsupported file %s", module, filename)
                     continue
                 _logger.info("module %s: loading %s", module, filename)
-                noupdate = False
-                if ext == '.csv' and kind in ('init', 'init_xml'):
-                    noupdate = True
+                noupdate = ext == '.csv' and kind == 'init_xml'
                 pathname = opj(path, filename)
                 idref = {}
-                with file_open(pathname, 'rb', env=self.env) as fp:
-                    if ext == '.csv':
-                        convert_csv_import(self.env, module, pathname, fp.read(), idref, mode, noupdate)
-                    elif ext == '.sql':
-                        convert_sql_import(self.env, fp)
-                    elif ext == '.xml':
-                        convert_xml_import(self.env, module, fp, idref, mode, noupdate)
-                        if filename in exclude_list:
-                            for key, value in idref.items():
-                                xml_id = f"{module}.{key}" if '.' not in key else key
-                                name = xml_id.replace('.', '_')
-                                if self.env.ref(f"__cloc_exclude__.{name}", raise_if_not_found=False):
-                                    continue
-                                self.env['ir.model.data'].create([{
-                                    'name': name,
-                                    'model': self.env['ir.model.data']._xmlid_lookup(xml_id)[0],
-                                    'module': "__cloc_exclude__",
-                                    'res_id': value,
-                                }])
+                convert_file(self.env, module, filename, idref, mode, noupdate, pathname=pathname)
+                if filename in exclude_list:
+                    for xml_id, rec_id in idref.items():
+                        name = xml_id.replace('.', '_')
+                        if self.env.ref(f"__cloc_exclude__.{name}", raise_if_not_found=False):
+                            continue
+                        self.env['ir.model.data'].create([{
+                            'name': name,
+                            'model': self.env['ir.model.data']._xmlid_lookup(xml_id)[0],
+                            'module': "__cloc_exclude__",
+                            'res_id': rec_id,
+                        }])
 
         path_static = opj(path, 'static')
         IrAttachment = self.env['ir.attachment']
         if os.path.isdir(path_static):
-            for root, dirs, files in os.walk(path_static):
+            for root, _dirs, files in os.walk(path_static):
                 for static_file in files:
                     full_path = opj(root, static_file)
                     with file_open(full_path, 'rb', env=self.env) as fp:
@@ -194,6 +224,37 @@ class IrModule(models.Model):
                                 'res_id': attachment.id,
                             })
 
+        # store translation files as attachments to allow loading translations for webclient
+        path_lang = opj(path, 'i18n')
+        if os.path.isdir(path_lang):
+            for entry in os.scandir(path_lang):
+                if not entry.is_file() or not entry.name.endswith('.po'):
+                    # we don't support sub-directories in i18n
+                    continue
+                with file_open(entry.path, 'rb', env=self.env) as fp:
+                    raw = fp.read()
+                lang = entry.name.split('.')[0]
+                # store as binary ir.attachment
+                values = {
+                    'name': f'{module}_{lang}.po',
+                    'url': f'/{module}/i18n/{lang}.po',
+                    'res_model': 'ir.module.module',
+                    'res_id': mod.id,
+                    'type': 'binary',
+                    'raw': raw,
+                }
+                attachment = IrAttachment.sudo().search([('url', '=', values['url']), ('type', '=', 'binary'), ('name', '=', values['name'])])
+                if attachment:
+                    attachment.write(values)
+                else:
+                    attachment = IrAttachment.create(values)
+                    self.env['ir.model.data'].create({
+                        'name': f'attachment_{module}_{lang}'.replace('.', '_').replace(' ', '_'),
+                        'model': 'ir.attachment',
+                        'module': module,
+                        'res_id': attachment.id,
+                    })
+
         IrAsset = self.env['ir.asset']
         assets_vals = []
 
@@ -201,6 +262,10 @@ class IrModule(models.Model):
         for bundle, commands in terp.get('assets', {}).items():
             for command in commands:
                 directive, target, path = IrAsset._process_command(command)
+                if is_wildcard_glob(path):
+                    raise UserError(_(
+                        "The assets path in the manifest of imported module '%(module_name)s' "
+                        "cannot contain glob wildcards (e.g., *, **).", module_name=module))
                 path = path if path.startswith('/') else '/' + path # Ensures a '/' at the start
                 assets_vals.append({
                     'name': f'{module}.{bundle}.{path}',
@@ -237,7 +302,6 @@ class IrModule(models.Model):
             [module],
             [lang for lang, _name in self.env['res.lang'].get_installed()],
             overwrite=True,
-            imported_module=True,
         )
 
         if ('knowledge.article' in self.env
@@ -268,25 +332,23 @@ class IrModule(models.Model):
 
         module_names = []
         with zipfile.ZipFile(module_file, "r") as z:
-            for zf in z.filelist:
+            for zf in z.infolist():
                 if zf.file_size > MAX_FILE_SIZE:
                     raise UserError(_("File '%s' exceed maximum allowed file size", zf.filename))
 
             with file_open_temporary_directory(self.env) as module_dir:
-                manifest_files = [
-                    file
-                    for file in z.filelist
+                manifest_files = sorted(
+                    (file.filename.split('/')[0], file)
+                    for file in z.infolist()
                     if file.filename.count('/') == 1
                     and file.filename.split('/')[1] in MANIFEST_NAMES
-                ]
+                )
                 module_data_files = defaultdict(list)
-                for manifest in manifest_files:
-                    manifest_path = z.extract(manifest, module_dir)
-                    mod_name = manifest.filename.split('/')[0]
-                    try:
-                        with file_open(manifest_path, 'rb', env=self.env) as f:
-                            terp = ast.literal_eval(f.read().decode())
-                    except Exception:
+                dependencies = defaultdict(list)
+                for mod_name, manifest in manifest_files:
+                    _manifest_path = z.extract(manifest, module_dir)
+                    terp = Manifest._from_path(opj(module_dir, mod_name), env=self.env)
+                    if not terp:
                         continue
                     files_to_import = terp.get('data', []) + terp.get('init_xml', []) + terp.get('update_xml', [])
                     if with_demo:
@@ -295,7 +357,17 @@ class IrModule(models.Model):
                         if os.path.splitext(filename)[1].lower() not in ('.xml', '.csv', '.sql'):
                             continue
                         module_data_files[mod_name].append('%s/%s' % (mod_name, filename))
-                for file in z.filelist:
+                    dependencies[mod_name] = terp.get('depends', [])
+
+                dirs = {d for d in os.listdir(module_dir) if os.path.isdir(opj(module_dir, d))}
+                sorted_dirs = topological_sort(dependencies)
+                if wrong_modules := dirs.difference(sorted_dirs):
+                    raise UserError(_(
+                        "No manifest found in '%(modules)s'. Can't import the zip file.",
+                        modules=", ".join(wrong_modules)
+                    ))
+
+                for file in z.infolist():
                     filename = file.filename
                     mod_name = filename.split('/')[0]
                     is_data_file = filename in module_data_files[mod_name]
@@ -304,8 +376,7 @@ class IrModule(models.Model):
                     if is_data_file or is_static or is_translation:
                         z.extract(file, module_dir)
 
-                dirs = [d for d in os.listdir(module_dir) if os.path.isdir(opj(module_dir, d))]
-                for mod_name in dirs:
+                for mod_name in sorted_dirs:
                     module_names.append(mod_name)
                     try:
                         # assert mod_name.startswith('theme_')
@@ -314,8 +385,8 @@ class IrModule(models.Model):
                     except Exception as e:
                         raise UserError(_(
                             "Error while importing module '%(module)s'.\n\n %(error_message)s \n\n",
-                            module=mod_name, error_message=exception_to_unicode(e),
-                        ))
+                            module=mod_name, error_message=traceback.format_exc(),
+                        )) from e
         return "", module_names
 
     def module_uninstall(self):
@@ -330,12 +401,6 @@ class IrModule(models.Model):
         res = super().module_uninstall()
         if modules_to_delete:
             deleted_modules_names = modules_to_delete.mapped('name')
-            assets_data = self.env['ir.model.data'].search([
-                ('model', '=', 'ir.asset'),
-                ('module', 'in', deleted_modules_names),
-            ])
-            assets = self.env['ir.asset'].search([('id', 'in', assets_data.mapped('res_id'))])
-            assets.unlink()
             _logger.info("deleting imported modules upon uninstallation: %s",
                          ", ".join(deleted_modules_names))
             modules_to_delete.unlink()
@@ -345,10 +410,10 @@ class IrModule(models.Model):
     def web_search_read(self, domain, specification, offset=0, limit=None, order=None, count_limit=None):
         if _domain_asks_for_industries(domain):
             fields_name = list(specification.keys())
-            modules_list = self._get_modules_from_apps(fields_name, 'industries', False, domain, offset=offset, limit=limit)
+            modules_list = self._get_modules_from_apps(fields_name, 'industries', False, domain, offset=offset)
             return {
-                'length': len(modules_list),
-                'records': modules_list,
+                'length': len(modules_list) + offset,
+                'records': modules_list[:(limit or 80)],
             }
         else:
             return super().web_search_read(domain, specification, offset=offset, limit=limit, order=order, count_limit=count_limit)
@@ -376,10 +441,13 @@ class IrModule(models.Model):
     def _get_modules_from_apps(self, fields, module_type, module_name, domain=None, limit=None, offset=None):
         if 'name' not in fields:
             fields = fields + ['name']
+        domain_obj = Domain(domain or []).optimize(self)
+        fields_from_domain = {cond.field_expr for cond in domain_obj.iter_conditions()}
+        fields_to_ask = list(set(fields) | fields_from_domain)
         payload = {
             'params': {
                 'series': major_version,
-                'module_fields': fields,
+                'module_fields': fields_to_ask,
                 'module_type': module_type,
                 'module_name': module_name,
                 'domain': domain,
@@ -387,35 +455,50 @@ class IrModule(models.Model):
                 'offset': offset,
             }
         }
+        import requests  # noqa: PLC0415
         try:
             resp = self._call_apps(json.dumps(payload))
             resp.raise_for_status()
-            modules_list = resp.json().get('result', [])
-            for mod in modules_list:
-                module_name = mod['name']
-                existing_mod = self.search([('name', '=', module_name), ('state', '=', 'installed')])
-                mod['id'] = existing_mod.id if existing_mod else -1
-                if 'icon' in fields:
-                    mod['icon'] = f"{APPS_URL}{mod['icon']}"
-                if 'state' in fields:
-                    if existing_mod:
-                        mod['state'] = 'installed'
-                    else:
-                        mod['state'] = 'uninstalled'
-                if 'module_type' in fields:
-                    mod['module_type'] = module_type
-                if 'website' in fields:
-                    mod['website'] = f"{APPS_URL}/apps/modules/{major_version}/{module_name}/"
-            return modules_list
         except requests.exceptions.HTTPError:
             raise UserError(_('The list of industry applications cannot be fetched. Please try again later'))
         except requests.exceptions.ConnectionError:
             raise UserError(_('Connection to %s failed The list of industry modules cannot be fetched') % APPS_URL)
 
+        modules_list = resp.json().get('result', [])
+        existing_modules = self.search_fetch(
+            [('name', 'in', [mod['name'] for mod in modules_list])], ['name']
+        )
+        existing_module_names = set(existing_modules.mapped('name'))
+        all_modules = existing_modules
+        appstore_ids = {}
+        for mod in modules_list:
+            module_name = mod['name']
+            if module_name in existing_module_names:
+                continue
+            mod['icon'] = f"{APPS_URL}{mod.get('icon')}"
+            mod['state'] = 'uninstalled'
+            mod['module_type'] = module_type
+            mod['website'] = f"{APPS_URL}/apps/modules/{major_version}/{module_name}/"
+            appstore_ids[mod['name']] = mod['id']
+            all_modules += self.env['ir.module.module'].new(mod)
+
+        # removes category from the domain, since it does not work (categories are different) and
+        # was already applied on appstore call
+        domain_without_category = domain_obj.map_conditions(
+            lambda c: Domain.TRUE if c.field_expr == 'category_id' else c
+        )
+        results = all_modules.filtered_domain(domain_without_category).read(fields)
+        for r in results:
+            # need to handle some fields that are not defined with new()
+            r['id'] = r['id'] if r['id'] in all_modules.ids else -appstore_ids[r['name']]
+            r['icon_image'] = mod.get('icon_image')
+        return results
+
     @api.model
     @ormcache('payload')
     def _call_apps(self, payload):
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+        import requests  # noqa: PLC0415
         return requests.post(
                 f"{APPS_URL}/loempia/listdatamodules",
                 data=payload,
@@ -426,9 +509,10 @@ class IrModule(models.Model):
     @api.model
     @ormcache()
     def _get_industry_categories_from_apps(self):
+        import requests  # noqa: PLC0415
         try:
             resp = requests.post(
-                f"{APPS_URL}/loempia/listindustrycategory",
+                f"{APPS_URL}/loempia/listindustrycategory/{major_version}",
                 json={'params': {}},
                 timeout=5.0,
             )
@@ -439,10 +523,17 @@ class IrModule(models.Model):
         except requests.exceptions.ConnectionError:
             return []
 
+    def button_upgrade(self):
+        res = super().button_upgrade()
+        # revert states for imported modules since they cannot be upgraded
+        self.search([('imported', '=', True), ('state', '=', 'to upgrade')]).state = 'installed'
+        return res
+
     def button_immediate_install_app(self):
         if not self.env.is_admin():
             raise AccessDenied()
         module_name = self.env.context.get('module_name')
+        import requests  # noqa: PLC0415
         try:
             resp = requests.get(
                 f"{APPS_URL}/loempia/download/data_app/{module_name}/{major_version}",
@@ -502,10 +593,11 @@ class IrModule(models.Model):
         with zipfile.ZipFile(BytesIO(zip_data), "r") as z:
             manifest_files = [
                 file
-                for file in z.filelist
+                for file in z.infolist()
                 if file.filename.count('/') == 1
                 and file.filename.split('/')[1] in MANIFEST_NAMES
             ]
+            modules_in_zip = {manifest.filename.split('/')[0] for manifest in manifest_files}
             for manifest_file in manifest_files:
                 if manifest_file.file_size > MAX_FILE_SIZE:
                     raise UserError(_("File '%s' exceed maximum allowed file size", manifest_file.filename))
@@ -514,7 +606,7 @@ class IrModule(models.Model):
                         terp = ast.literal_eval(manifest.read().decode())
                 except Exception:
                     continue
-                unmet_dependencies = set(terp.get('depends', [])).difference(installed_mods)
+                unmet_dependencies = set(terp.get('depends', [])).difference(installed_mods, modules_in_zip)
                 dependencies_to_install |= known_mods.filtered(lambda m: m.name in unmet_dependencies)
                 not_found_modules |= set(
                     mod for mod in unmet_dependencies if mod not in dependencies_to_install.mapped('name')
@@ -531,14 +623,104 @@ class IrModule(models.Model):
             }
         return super().search_panel_select_range(field_name, **kwargs)
 
+    @api.model
+    @ormcache('module', 'lang', cache='stable')
+    def _get_imported_module_translations_for_webclient(self, module, lang):
+        if not lang:
+            lang = self.env.context.get("lang") or 'en_US'
+        IrAttachment = self.env['ir.attachment']
+
+        def filter_func(row):
+            return row.get('value') and JAVASCRIPT_TRANSLATION_COMMENT in row['comments']
+
+        translations = {}
+        for lang_ in get_base_langs(lang):
+            attachment = IrAttachment.sudo().search([
+                ('name', '=', f"{module}_{lang_}.po"),
+                ('url', '=', f"/{module}/i18n/{lang_}.po"),
+                ('res_model', '=', 'ir.module.module'),
+                ('res_id', '=', self._get_id(module)),
+                ('type', '=', 'binary'),
+            ], limit=1)
+            if attachment.raw:
+                try:
+                    with io.BytesIO(attachment.raw) as fileobj:
+                        fileobj.name = attachment.name
+                        webclient_translations = CodeTranslations._read_code_translations_file(fileobj, filter_func)
+                        translations.update(webclient_translations)
+                except Exception:  # noqa: BLE001
+                    _logger.warning('module %s: failed to load translation attachment %s for language %s', module, attachment.name, lang)
+
+        return {
+            'messages': tuple({
+                'id': src,
+                'string': value,
+            } for src, value in translations.items())
+        }
+
+    @api.model
+    def _extract_resource_attachment_translations(self, module, lang):
+        yield from super()._extract_resource_attachment_translations(module, lang)
+        if not self._get(module).imported:
+            return
+        self.env['ir.model.data'].flush_model()
+        IrAttachment = self.env['ir.attachment']
+        IrAttachment.flush_model()
+        module_ = module.replace('_', r'\_')
+        ids = [r[0] for r in self.env.execute_query(SQL(
+            """
+                SELECT ia.id
+                FROM ir_attachment ia
+                JOIN ir_model_data imd
+                ON ia.id = imd.res_id
+                AND imd.model = 'ir.attachment'
+                AND imd.module = %(module)s
+                AND ia.res_model = 'ir.ui.view'
+                AND ia.res_field IS NULL
+                AND ia.res_id IS NULL
+                AND (ia.url ilike %(js_pattern)s or ia.url ilike %(xml_pattern)s)
+                AND ia.type = 'binary'
+                ORDER BY ia.url
+            """,
+            module=module,
+            js_pattern=f'/{module_}/static/src/%.js',
+            xml_pattern=f'/{module_}/static/src/%.xml',
+        ))]
+        attachments = IrAttachment.browse(OrderedSet(ids))
+        if not attachments:
+            return
+        translations = self._get_imported_module_translations_for_webclient(module, lang)
+        translations = {tran['id']: tran['string'] for tran in translations['messages']}
+        for attachment in attachments.filtered('raw'):
+            display_path = f'addons{attachment.url}'
+            if attachment.url.endswith('js'):
+                extract_method = 'odoo.tools.babel:extract_javascript'
+                extract_keywords = {'_t': None}
+            else:
+                extract_method = 'odoo.tools.translate:babel_extract_qweb'
+                extract_keywords = {}
+            try:
+                with io.BytesIO(attachment.raw) as fileobj:
+                    for extracted in extract.extract(extract_method, fileobj, keywords=extract_keywords):
+                        lineno, message, comments = extracted[:3]
+                        value = translations.get(message, '')
+                        # (module, ttype, name, res_id, source, comments, record_id, value)
+                        yield (module, 'code', display_path, lineno, message, comments + [JAVASCRIPT_TRANSLATION_COMMENT], None, value)
+            except Exception:  # noqa: BLE001
+                _logger.exception("Failed to extract terms from attachment with url %s", attachment.url)
+
 
 def _domain_asks_for_industries(domain):
-    for dom in domain:
-        if is_leaf(dom) and dom[0] == 'module_type':
-            if dom[2] == 'industries':
-                if dom[1] != '=':
-                    raise UserError('%r is an unsupported leaf' % (dom,))
-                return True
+    for condition in Domain(domain).iter_conditions():
+        if condition.field_expr == 'module_type':
+            if condition.operator == '=':
+                if condition.value == 'industries':
+                    return True
+            elif condition.operator == 'in' and len(condition.value) == 1:
+                if 'industries' in condition.value:
+                    return True
+            else:
+                raise UserError(f'Unsupported domain condition {condition!r}')  # pylint: disable=missing-gettext
     return False
 
 

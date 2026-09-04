@@ -5,7 +5,6 @@ from collections import namedtuple
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError, RedirectWarning
-from odoo.tools import format_list
 from odoo.tools.translate import _, LazyTranslate
 
 _lt = LazyTranslate(__name__)
@@ -15,15 +14,14 @@ ROUTE_NAMES = {
     'one_step': _lt('Receive in 1 step (stock)'),
     'two_steps': _lt('Receive in 2 steps (input + stock)'),
     'three_steps': _lt('Receive in 3 steps (input + quality + stock)'),
-    'crossdock': _lt('Cross-Dock'),
     'ship_only': _lt('Deliver in 1 step (ship)'),
     'pick_ship': _lt('Deliver in 2 steps (pick + ship)'),
     'pick_pack_ship': _lt('Deliver in 3 steps (pick + pack + ship)'),
 }
 
 
-class Warehouse(models.Model):
-    _name = "stock.warehouse"
+class StockWarehouse(models.Model):
+    _name = 'stock.warehouse'
     _description = "Warehouse"
     _order = 'sequence,id'
     _check_company_auto = True
@@ -44,7 +42,7 @@ class Warehouse(models.Model):
     view_location_id = fields.Many2one(
         'stock.location', 'View Location',
         domain="[('usage', '=', 'view'), ('company_id', '=', company_id)]",
-        required=True, check_company=True)
+        required=True, check_company=True, index=True)
     lot_stock_id = fields.Many2one(
         'stock.location', 'Location Stock',
         domain="[('usage', '=', 'internal'), ('company_id', '=', company_id)]",
@@ -80,7 +78,6 @@ class Warehouse(models.Model):
     qc_type_id = fields.Many2one('stock.picking.type', 'Quality Control Type', check_company=True, copy=False)
     store_type_id = fields.Many2one('stock.picking.type', 'Storage Type', check_company=True, copy=False)
     xdock_type_id = fields.Many2one('stock.picking.type', 'Cross Dock Type', check_company=True, copy=False)
-    crossdock_route_id = fields.Many2one('stock.route', 'Crossdock Route', ondelete='restrict', copy=False)
     reception_route_id = fields.Many2one('stock.route', 'Receipt Route', ondelete='restrict', copy=False)
     delivery_route_id = fields.Many2one('stock.route', 'Delivery Route', ondelete='restrict', copy=False)
     resupply_wh_ids = fields.Many2many(
@@ -91,10 +88,14 @@ class Warehouse(models.Model):
         help="Routes will be created for these resupply warehouses and you can select them on products and product categories", copy=False)
     sequence = fields.Integer(default=10,
         help="Gives the sequence of this line when displaying the warehouses.")
-    _sql_constraints = [
-        ('warehouse_name_uniq', 'unique(name, company_id)', 'The name of the warehouse must be unique per company!'),
-        ('warehouse_code_uniq', 'unique(code, company_id)', 'The short name of the warehouse must be unique per company!'),
-    ]
+    _warehouse_name_uniq = models.Constraint(
+        'unique(name, company_id)',
+        'The name of the warehouse must be unique per company!',
+    )
+    _warehouse_code_uniq = models.Constraint(
+        'unique(code, company_id)',
+        'The short name of the warehouse must be unique per company!',
+    )
 
     @api.onchange('company_id')
     def _onchange_company_id(self):
@@ -121,8 +122,7 @@ class Warehouse(models.Model):
                 if 'partner_id' not in vals:
                     vals['partner_id'] = company.partner_id.id
             # create view location for warehouse then create all locations
-            loc_vals = {'name': vals.get('code'), 'usage': 'view',
-                        'location_id': self.env.ref('stock.stock_location_locations').id}
+            loc_vals = {'name': vals.get('code'), 'usage': 'view'}
             if vals.get('company_id'):
                 loc_vals['company_id'] = vals.get('company_id')
             vals['view_location_id'] = self.env['stock.location'].create(loc_vals).id
@@ -165,10 +165,12 @@ class Warehouse(models.Model):
 
     @api.model
     def _warehouse_redirect_warning(self):
+        if not self.env.registry.ready:  # don't raise warning during module installation
+            return
         warehouse_action = self.env.ref('stock.action_warehouse_form')
         msg = _('Please create a warehouse for company %s.', self.env.company.display_name)
         if not self.env.user.has_group('stock.group_stock_manager'):
-            raise UserError('Please contact your administrator to configure your warehouse.')
+            raise UserError(self.env._('Please contact your administrator to configure your warehouse.'))
         raise RedirectWarning(msg, warehouse_action.id, _('Go to Warehouses'))
 
     def copy_data(self, default=None):
@@ -244,7 +246,7 @@ class Warehouse(models.Model):
                 if move_ids:
                     raise UserError(_(
                         'You still have ongoing operations for operation types %(operations)s in warehouse %(warehouse)s',
-                        operations=format_list(self.env, move_ids.mapped('picking_type_id.name')),
+                        operations=move_ids.mapped('picking_type_id.name'),
                         warehouse=warehouse.name,
                     ))
                 else:
@@ -258,7 +260,7 @@ class Warehouse(models.Model):
                 if picking_type_using_locations:
                     raise UserError(_(
                         '%(operations)s have default source or destination locations within warehouse %(warehouse)s, therefore you cannot archive it.',
-                        operations=format_list(self.env, picking_type_using_locations.mapped('name')),
+                        operations=picking_type_using_locations.mapped('name'),
                         warehouse=warehouse.name,
                     ))
                 warehouse.view_location_id.write({'active': vals['active']})
@@ -296,8 +298,7 @@ class Warehouse(models.Model):
                         ('supplier_wh_id', 'in', to_add.ids),
                         ('active', '=', False)
                     ])
-                    if existing_routes:
-                        existing_routes.toggle_active()
+                    existing_routes.action_unarchive()
                     remaining_to_add = to_add - existing_routes.supplier_wh_id
                     if remaining_to_add:
                         warehouse.create_resupply_routes(remaining_to_add)
@@ -307,7 +308,7 @@ class Warehouse(models.Model):
                         ('supplier_wh_id', 'in', to_remove.ids),
                         ('active', '=', True)
                     ])
-                    to_disable_route_ids.toggle_active()
+                    to_disable_route_ids.action_archive()
 
         if 'active' in vals:
             self._check_multiwarehouse_group()
@@ -327,7 +328,7 @@ class Warehouse(models.Model):
             group_stock_multi_locations = self.env.ref('stock.group_stock_multi_locations')
             if max_count <= 1 and group_stock_multi_warehouses in group_user.implied_ids:
                 group_user.write({'implied_ids': [(3, group_stock_multi_warehouses.id)]})
-                group_stock_multi_warehouses.write({'users': [(3, user.id) for user in group_user.users]})
+                group_stock_multi_warehouses.write({'user_ids': [(3, user.id) for user in group_user.all_user_ids]})
             if max_count > 1 and group_stock_multi_warehouses not in group_user.implied_ids:
                 if group_stock_multi_locations not in group_user.implied_ids:
                     self.env['res.config.settings'].create({
@@ -375,7 +376,7 @@ class Warehouse(models.Model):
 
         for picking_type, values in data.items():
             if self[picking_type]:
-                self[picking_type].sudo().sequence_id.write(sequence_data[picking_type])
+                self[picking_type].sudo().sequence_id.write({'company_id': self.company_id.id})
                 self[picking_type].write(values)
             else:
                 data[picking_type].update(create_data[picking_type])
@@ -412,7 +413,7 @@ class Warehouse(models.Model):
         """ return a route record set from an xml_id or its name. """
         data_route = route = self.env.ref(xml_id, raise_if_not_found=False)
         company = self.company_id[:1] or self.env.company
-        if not route or (route.company_id and route.company_id != company):
+        if not route or (route.sudo().company_id and route.sudo().company_id != company):
             route = self.env['stock.route'].with_context(active_test=False).search([
                 ('name', 'like', route_name), ('company_id', 'in', [False, company.id])
             ], order='company_id', limit=1)
@@ -420,7 +421,7 @@ class Warehouse(models.Model):
             if raise_if_not_found:
                 raise UserError(_('Can\'t find any generic route %s.', route_name))
             elif data_route and create:
-                route = data_route.copy({'name': data_route.name, 'company_id': company.id, 'rule_ids': False})
+                route = data_route.copy({'name': route_name, 'company_id': company.id, 'rule_ids': False})
         return route
 
     def _get_global_route_rules_values(self):
@@ -472,7 +473,7 @@ class Warehouse(models.Model):
     def _create_or_update_route(self):
         """ Create or update the warehouse's routes.
         _get_routes_values method return a dict with:
-            - route field name (e.g: crossdock_route_id).
+            - route field name (e.g: delivery_route_id).
             - field that trigger an update on the route (key 'depends').
             - routing_key used in order to find rules contained in the route.
             - create values.
@@ -489,6 +490,7 @@ class Warehouse(models.Model):
         (_find_existing_rule_or_create method is responsible for this part).
         """
         # Create routes and active/create their related rules.
+        self.ensure_one()
         routes = []
         rules_dict = self.get_rules_dict()
         for route_field, route_data in self._get_routes_values().items():
@@ -549,7 +551,7 @@ class Warehouse(models.Model):
                     'warehouse_selectable': True,
                     'product_selectable': False,
                     'company_id': self.company_id.id,
-                    'sequence': 9,
+                    'sequence': 50,
                 },
                 'rules_values': {
                     'active': True,
@@ -568,28 +570,13 @@ class Warehouse(models.Model):
                     'warehouse_selectable': True,
                     'product_selectable': False,
                     'company_id': self.company_id.id,
-                    'sequence': 10,
+                    'sequence': 60,
                 },
                 'rules_values': {
                     'active': True,
                     'propagate_carrier': True
                 }
             },
-            'crossdock_route_id': {
-                'routing_key': 'crossdock',
-                'depends': ['delivery_steps', 'reception_steps'],
-                'route_update_values': {
-                    'name': self._format_routename(route_type='crossdock'),
-                    'active': self.reception_steps != 'one_step' and self.delivery_steps != 'ship_only'
-                },
-                'route_create_values': {
-                    'product_selectable': False,
-                    'product_categ_selectable': False,
-                    'active': self.delivery_steps != 'ship_only' and self.reception_steps != 'one_step',
-                    'company_id': self.company_id.id,
-                    'sequence': 20,
-                },
-            }
         }
 
     def _get_receive_routes_values(self, installed_depends):
@@ -687,26 +674,6 @@ class Warehouse(models.Model):
         }
         return sub_locations
 
-    @api.model
-    def _get_warehouse_id_from_context(self):
-        """
-        Helper method used to extract a single id from the context.
-
-        The `warehouse_id` dummy field of the `product.template` model is meant to
-        to be used in the `product_template_search_form_view_stock` search view in
-        order to add a `warehouse` context key. That key can therefore be any of
-        the following types: Int, String, List(Int?, String?).
-        """
-        context_warehouse = self.env.context.get('warehouse_id', False)
-        if context_warehouse:
-            if isinstance(context_warehouse, int):
-                return context_warehouse
-            elif isinstance(context_warehouse, list):
-                relevant_context = list(filter(lambda key: isinstance(key, int), context_warehouse))
-                if relevant_context:
-                    return relevant_context[0]
-        return False
-
     def _valid_barcode(self, barcode, company_id):
         location = self.env['stock.location'].with_context(active_test=False).search([
             ('barcode', '=', barcode),
@@ -765,7 +732,7 @@ class Warehouse(models.Model):
                     values={'route_id': inter_wh_route.id})
             pull_rules_list += self._get_supply_pull_rules_values(
                 [self.Routing(transit_location, self.lot_stock_id, self.in_type_id, 'pull')],
-                values={'route_id': inter_wh_route.id, 'propagate_warehouse_id': supplier_wh.id})
+                values={'route_id': inter_wh_route.id})
             for pull_rule_vals in pull_rules_list:
                 Rule.create(pull_rule_vals)
 
@@ -811,9 +778,6 @@ class Warehouse(models.Model):
                     self.Routing(supplier_loc, warehouse.lot_stock_id, warehouse.in_type_id, 'pull'),
                     self.Routing(warehouse.wh_input_stock_loc_id, warehouse.wh_qc_stock_loc_id, warehouse.qc_type_id, 'push'),
                     self.Routing(warehouse.wh_qc_stock_loc_id, warehouse.lot_stock_id, warehouse.store_type_id, 'push')],
-                'crossdock': [
-                    self.Routing(supplier_loc, customer_loc, warehouse.in_type_id, 'pull'),
-                    self.Routing(warehouse.wh_input_stock_loc_id, warehouse.wh_output_stock_loc_id, warehouse.xdock_type_id, 'push')],
                 'ship_only': [self.Routing(warehouse.lot_stock_id, customer_loc, warehouse.out_type_id, 'pull')],
                 'pick_ship': [
                     self.Routing(warehouse.lot_stock_id, customer_loc, warehouse.pick_type_id, 'pull'),
@@ -840,7 +804,6 @@ class Warehouse(models.Model):
             'three_steps': [
                 self.Routing(self.wh_input_stock_loc_id, self.wh_qc_stock_loc_id, self.qc_type_id, 'push'),
                 self.Routing(self.wh_qc_stock_loc_id, self.lot_stock_id, self.store_type_id, 'push')],
-            'crossdock': [self.Routing(self.wh_input_stock_loc_id, self.wh_output_stock_loc_id, self.xdock_type_id, 'push')],
         }
 
     def _get_inter_warehouse_route_values(self, supplier_warehouse):
@@ -1179,7 +1142,6 @@ class Warehouse(models.Model):
             name = self._get_route_name(route_type)
         return '%s: %s' % (self.name, name)
 
-    @api.returns('self')
     def _get_all_routes(self):
         routes = self.mapped('route_ids') | self.mapped('mto_pull_id').mapped('route_id')
         routes |= self.env["stock.route"].with_context(active_test=False).search([('supplied_wh_id', 'in', self.ids)])
@@ -1195,7 +1157,7 @@ class Warehouse(models.Model):
             'view_id': False,
             'view_mode': 'list,form',
             'limit': 20,
-            'context': dict(self._context, default_warehouse_selectable=True, default_warehouse_ids=self.ids)
+            'context': dict(self.env.context, default_warehouse_selectable=True, default_warehouse_ids=self.ids)
         }
 
     def get_current_warehouses(self):

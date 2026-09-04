@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { registry } from '@web/core/registry';
 
 import { ExpenseDashboard } from '../components/expense_dashboard';
@@ -27,14 +25,12 @@ export class ExpenseDashboardKanbanRenderer extends ExpenseKanbanRenderer {
 
 registry.category('views').add('hr_expense_kanban', {
     ...kanbanView,
-    buttonTemplate: 'hr_expense.KanbanButtons',
     Controller: ExpenseKanbanController,
     Renderer: ExpenseKanbanRenderer,
 });
 
 registry.category('views').add('hr_expense_dashboard_kanban', {
     ...kanbanView,
-    buttonTemplate: 'hr_expense.KanbanButtons',
     Controller: ExpenseKanbanController,
     Renderer: ExpenseDashboardKanbanRenderer,
 });

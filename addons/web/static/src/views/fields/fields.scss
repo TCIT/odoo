@@ -14,7 +14,7 @@
 // but bootstrap contextual classes do not work on input/textarea, so we have to
 // explicitely set their color to the one of their parent
 .o_field_widget {
-    input, textarea, select {
+    input, textarea, select, button.o_input {
         color: inherit;
     }
 }
@@ -255,7 +255,7 @@
                 cursor: pointer;
             }
         }
-        @include media-breakpoint-down(sm, $o-extra-grid-breakpoints) {
+        @include media-breakpoint-down(sm) {
             .o_form_image_controls{
                 position: initial;
                 opacity: 1;

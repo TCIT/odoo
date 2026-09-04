@@ -1,27 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* product_matrix
-# 
+# * product_matrix
+#
 # Translators:
-# Cécile Collart <cco@odoo.com>, 2024
-# Rune Restad, 2024
-# Martin Trigaux, 2024
-# Marius Stedjan <marius@stedjan.com>, 2024
-# Jorunn D. Newth, 2024
-# 
+# Jorunn D. Newth, 2022
+# Martin Trigaux, 2022
+# Marius Stedjan <marius@stedjan.com>, 2022
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Jorunn D. Newth, 2024\n"
-"Language-Team: Norwegian Bokmål (https://app.transifex.com/odoo/teams/41243/nb/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 16:49+0000\n"
+"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"Language-Team: Norwegian Bokmål <https://translate.odoo.com/projects/odoo-19/"
+"product_matrix/nb_NO/>\n"
+"Language: nb\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: nb\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: product_matrix
 #: model_terms:ir.ui.view,arch_db:product_matrix.matrix
@@ -34,11 +34,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:product_matrix.matrix
 msgid "<strong>Product matrix block</strong>"
 msgstr ""
-
-#. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_color_1
-msgid "Blue"
-msgstr "Blå"
 
 #. module: product_matrix
 #: model_terms:ir.ui.view,arch_db:product_matrix.matrix
@@ -69,14 +64,16 @@ msgid "Discard"
 msgstr "Avbryt"
 
 #. module: product_matrix
-#: model:product.attribute,name:product_matrix.product_attribute_gender
-msgid "Gender"
-msgstr "Kjønn"
+#: model:ir.model.fields,field_description:product_matrix.field_product_template__display_name
+#: model:ir.model.fields,field_description:product_matrix.field_product_template_attribute_value__display_name
+msgid "Display Name"
+msgstr "Visningsnavn"
 
 #. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_m
-msgid "Men"
-msgstr ""
+#: model:ir.model.fields,field_description:product_matrix.field_product_template__id
+#: model:ir.model.fields,field_description:product_matrix.field_product_template_attribute_value__id
+msgid "ID"
+msgstr "ID"
 
 #. module: product_matrix
 #: model:product.template,name:product_matrix.matrix_product_template_shirt
@@ -90,11 +87,6 @@ msgid "Not available"
 msgstr "Ikke tilgjengelig"
 
 #. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_color_2
-msgid "Pink"
-msgstr ""
-
-#. module: product_matrix
 #: model:ir.model,name:product_matrix.model_product_template
 msgid "Product"
 msgstr "Produkt"
@@ -105,19 +97,9 @@ msgid "Product Template Attribute Value"
 msgstr "Attributtverdi for Produktmal"
 
 #. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_color_4
-msgid "Rainbow"
-msgstr ""
-
-#. module: product_matrix
 #: model:product.template,description_sale:product_matrix.matrix_product_template_shirt
 msgid "Show your company love around you =)."
 msgstr ""
-
-#. module: product_matrix
-#: model:product.attribute,name:product_matrix.product_attribute_size
-msgid "Size"
-msgstr "Størrelse"
 
 #. module: product_matrix
 #: model_terms:ir.ui.view,arch_db:product_matrix.matrix
@@ -131,22 +113,14 @@ msgstr ""
 msgid "Variant price"
 msgstr ""
 
-#. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_w
-msgid "Women"
-msgstr ""
+#~ msgid "Blue"
+#~ msgstr "Blå"
 
-#. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_size_xl
-msgid "XL"
-msgstr ""
+#~ msgid "Gender"
+#~ msgstr "Kjønn"
 
-#. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_size_xs
-msgid "XS"
-msgstr ""
+#~ msgid "Size"
+#~ msgstr "Størrelse"
 
-#. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_color_3
-msgid "Yellow"
-msgstr "Gul"
+#~ msgid "Yellow"
+#~ msgstr "Gul"

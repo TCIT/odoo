@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 
 var imageSelector = '#o-carousel-product .carousel-item.active img';
@@ -12,8 +10,9 @@ registry.category("web_tour.tours").add('shop_zoom', {
     steps: () => [
     {
         content: "select " + imageName,
-        trigger: `.oe_product_cart a:contains(/^${imageName}$/)`,
+        trigger: `.oe_product_cart a:text(${imageName})`,
         run: "click",
+        expectUnloadPage: true,
     },
     {
         content: "click on the image",
@@ -31,7 +30,7 @@ registry.category("web_tour.tours").add('shop_zoom', {
     },
     {
         content: "change variant",
-        trigger: `input[data-attribute_name='Beautiful Color'][data-value_name='${nameGreen}']:not(:visible)`,
+        trigger: `input[data-attribute-name='Beautiful Color'][data-value-name='${nameGreen}']:not(:visible)`,
         run: 'click',
     },
     {
@@ -49,3 +48,22 @@ registry.category("web_tour.tours").add('shop_zoom', {
         trigger: '.o_wsale_image_viewer',
     },
 ]});
+
+registry.category("web_tour.tours").add("website_sale.zoom_grid_image_order", {
+    steps: () => [
+        {
+            content: "check that the product page is in grid layout",
+            trigger: "#o-grid-product",
+        },
+        {
+            content: "open the image viewer from the third image in visual order",
+            trigger:
+                ".o_wsale_product_page_grid_column:nth-child(2) .product_detail_img[alt='image 3']",
+            run: "click",
+        },
+        {
+            content: "verify that the viewer opens at the third position (matching visual order)",
+            trigger: ".o_wsale_image_viewer_carousel li:nth-child(3).active",
+        },
+    ],
+});

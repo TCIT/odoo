@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import namedtuple
+from lxml import etree
 
 from odoo import Command, fields
 from odoo.tests import tagged
@@ -47,11 +48,11 @@ class TestItEdiReverseCharge(TestItEdi):
             'amount_type': 'percent',
             'type_tax_use': 'purchase',
             'invoice_repartition_line_ids': cls.repartition_lines(
-                cls.RepartitionLine(100, 'base', ('+03', '+vj9')),
-                cls.RepartitionLine(100, 'tax', ('+5v',)),
-                cls.RepartitionLine(-100, 'tax', ('-4v',))),
+                cls.RepartitionLine(100, 'base', ('03', 'vj9')),
+                cls.RepartitionLine(100, 'tax', ('5v',)),
+                cls.RepartitionLine(-100, 'tax', ('4v',))),
             'refund_repartition_line_ids': cls.repartition_lines(
-                cls.RepartitionLine(100, 'base', ('-03', '-vj9')),
+                cls.RepartitionLine(100, 'base', ('03', 'vj9')),
                 cls.RepartitionLine(100, 'tax', False),
                 cls.RepartitionLine(-100, 'tax', False)),
         }
@@ -64,11 +65,11 @@ class TestItEdiReverseCharge(TestItEdi):
             **tax_data,
             'name': 'Tax 4% purchase Reverse Charge, in Italy',
             'invoice_repartition_line_ids': cls.repartition_lines(
-                cls.RepartitionLine(100, 'base', ('+03', '+vj3')),
-                cls.RepartitionLine(100, 'tax', ('+5v',)),
-                cls.RepartitionLine(-100, 'tax', ('-4v',))),
+                cls.RepartitionLine(100, 'base', ('03', 'vj3')),
+                cls.RepartitionLine(100, 'tax', ('5v',)),
+                cls.RepartitionLine(-100, 'tax', ('4v',))),
             'refund_repartition_line_ids': cls.repartition_lines(
-                cls.RepartitionLine(100, 'base', ('-03', '-vj3')),
+                cls.RepartitionLine(100, 'base', ('03', 'vj3')),
                 cls.RepartitionLine(100, 'tax', False),
                 cls.RepartitionLine(-100, 'tax', False)),
         })
@@ -80,11 +81,11 @@ class TestItEdiReverseCharge(TestItEdi):
             'name': '22% purchase RC Construction Subcontractors',
             'amount': 22.0,
             'invoice_repartition_line_ids': cls.repartition_lines(
-                cls.RepartitionLine(100, 'base', ('+03', '+vj12')),
-                cls.RepartitionLine(100, 'tax', ('+5v',)),
-                cls.RepartitionLine(-100, 'tax', ('-4v',))),
+                cls.RepartitionLine(100, 'base', ('03', 'vj12')),
+                cls.RepartitionLine(100, 'tax', ('5v',)),
+                cls.RepartitionLine(-100, 'tax', ('4v',))),
             'refund_repartition_line_ids': cls.repartition_lines(
-                cls.RepartitionLine(100, 'base', ('-03', '-vj12')),
+                cls.RepartitionLine(100, 'base', ('03', 'vj12')),
                 cls.RepartitionLine(100, 'tax', False),
                 cls.RepartitionLine(-100, 'tax', False)),
         })
@@ -103,7 +104,7 @@ class TestItEdiReverseCharge(TestItEdi):
             'amount': 0.0,
             'amount_type': 'percent',
             'l10n_it_exempt_reason': 'N1',
-            'l10n_it_law_reference': 'test',
+            'invoice_legal_notes': 'test',
         })
 
         # Export tax 0% Internal Reverse Charge
@@ -114,7 +115,7 @@ class TestItEdiReverseCharge(TestItEdi):
             'amount': 0.0,
             'amount_type': 'percent',
             'l10n_it_exempt_reason': 'N6.3',
-            'l10n_it_law_reference': 'test',
+            'invoice_legal_notes': 'test',
         })
 
     def test_invoice_external_reverse_charge(self):
@@ -166,6 +167,7 @@ class TestItEdiReverseCharge(TestItEdi):
             'move_type': 'in_invoice',
             'invoice_date': '2022-03-24',
             'invoice_date_due': '2022-03-24',
+            'date': '2022-04-01',
             'partner_id': self.french_partner.id,
             'partner_bank_id': self.test_bank.id,
             'invoice_line_ids': [
@@ -186,6 +188,7 @@ class TestItEdiReverseCharge(TestItEdi):
         credit_note = self.env['account.move'].with_company(self.company).create({
             'invoice_date': '2022-03-24',
             'invoice_date_due': '2022-03-24',
+            'date': '2022-04-01',
             'move_type': 'in_refund',
             'partner_id': self.french_partner.id,
             'invoice_line_ids': [
@@ -213,6 +216,7 @@ class TestItEdiReverseCharge(TestItEdi):
             'move_type': 'in_invoice',
             'invoice_date': '2022-03-24',
             'invoice_date_due': '2022-03-24',
+            'date': '2022-04-01',
             'partner_id': self.french_partner.id,
             'partner_bank_id': self.test_bank.id,
             'invoice_line_ids': [
@@ -237,6 +241,7 @@ class TestItEdiReverseCharge(TestItEdi):
         bill = self.env['account.move'].with_company(self.company).create({
             'move_type': 'in_invoice',
             'invoice_date': '2022-03-24',
+            'date': '2022-04-01',
             'invoice_date_due': '2022-03-24',
             'partner_id': self.san_marino_partner.id,
             'partner_bank_id': self.test_bank.id,
@@ -285,4 +290,113 @@ class TestItEdiReverseCharge(TestItEdi):
             self.assertEqual(len(line.tax_ids), 1)
             rc_tax = line.tax_ids[0]
             self.assertEqual(rc_tax.amount, 22.0)
-            self.assertTrue('+vj12' in rc_tax.invoice_repartition_line_ids[0].tag_ids.mapped("name"))
+            self.assertTrue('vj12' in rc_tax.invoice_repartition_line_ids[0].tag_ids.mapped("name"))
+
+    def test_credit_note_export_document_type(self):
+        """Test that manually setting document type will be kept into account when exporting xml"""
+        # Partner -----------
+        self.eu_partner = self.env['res.partner'].create({
+            'name': 'Alessi',
+            'vat': 'FR15437982937',
+            'country_id': self.env.ref('base.fr').id,
+            'street': 'Street test',
+            'zip': '12345',
+            'city': 'Test',
+            'is_company': True
+        })
+
+        dt_18 = self.env.ref('l10n_it_edi.l10n_it_document_type_18')
+
+        bill = self.env['account.move'].with_company(self.company).create({
+            'move_type': 'in_invoice',
+            'invoice_date': '2022-03-24',
+            'invoice_date_due': '2022-03-24',
+            'date': '2022-04-01',
+            'partner_id': self.eu_partner.id,
+            'l10n_it_document_type': dt_18.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': "Product A",
+                    'product_id': self.product_a.id,
+                    'price_unit': 800.40,
+                    'tax_ids': [Command.set(self.purchase_tax_22p.ids)],
+                }),
+            ],
+        })
+        bill.action_post()
+
+        reversal_wizard = self.env['account.move.reversal'].with_context(active_model='account.move', active_ids=bill.ids).create({
+            'reason': 'test',
+            'journal_id': bill.journal_id.id,
+            'date': '2022-04-01',
+        })
+        reversal = reversal_wizard.refund_moves()
+        credit_note = self.env['account.move'].browse(reversal['res_id'])
+        credit_note.write({'l10n_it_document_type': dt_18.id})
+        credit_note.action_post()
+
+        self._assert_export_invoice(credit_note, 'credit_note_export_document_type.xml')
+
+    def test_self_invoice_ref_in_linked_invoices(self):
+        """Test that the vendor invoice reference for a self-invoice (reverse charge, e.g. TD17-TD19)
+        is exported under DatiFattureCollegate, not DatiOrdineAcquisto.
+        """
+        bill = self.env['account.move'].with_company(self.company).create({
+            'move_type': 'in_invoice',
+            'invoice_date': '2022-03-24',
+            'invoice_date_due': '2022-03-24',
+            'date': '2022-04-01',
+            'partner_id': self.french_partner.id,
+            'ref': 'FT00001',
+            'invoice_line_ids': [
+                Command.create({
+                    'name': "Product A",
+                    'product_id': self.product_a.id,
+                    'price_unit': 800.40,
+                    'tax_ids': [Command.set(self.purchase_tax_22p.ids)],
+                }),
+            ],
+        })
+        bill.action_post()
+        self.assertTrue(bill.l10n_it_edi_is_self_invoice)
+
+        xml = bill._l10n_it_edi_render_xml()
+        invoice_tree = etree.fromstring(xml)
+        linked_ref = invoice_tree.xpath("//*[local-name()='DatiFattureCollegate']/*[local-name()='IdDocumento']/text()")
+        self.assertIn('FT00001', linked_ref)
+
+    def test_credit_note_linked_invoice_uses_vendor_ref(self):
+        """Test that a credit note created from a vendor bill reports the
+        supplier's own invoice reference in DatiFattureCollegate/IdDocumento.
+        """
+        bill = self.env['account.move'].with_company(self.company).create({
+            'move_type': 'in_invoice',
+            'invoice_date': '2022-03-24',
+            'invoice_date_due': '2022-03-24',
+            'date': '2022-04-01',
+            'partner_id': self.italian_partner_a.id,
+            'ref': 'FT00001',
+            'invoice_line_ids': [
+                Command.create({
+                    'name': "Product A",
+                    'product_id': self.product_a.id,
+                    'price_unit': 800.40,
+                    'tax_ids': [Command.set(self.default_tax.ids)],
+                }),
+            ],
+        })
+        bill.action_post()
+
+        reversal_wizard = self.env['account.move.reversal'].with_context(active_model='account.move', active_ids=bill.ids).create({
+            'reason': 'test',
+            'journal_id': bill.journal_id.id,
+            'date': '2022-04-01',
+        })
+        reversal = reversal_wizard.refund_moves()
+        credit_note = self.env['account.move'].browse(reversal['res_id'])
+        credit_note.action_post()
+
+        xml = credit_note._l10n_it_edi_render_xml()
+        invoice_tree = etree.fromstring(xml)
+        linked_ids = invoice_tree.xpath("//*[local-name()='DatiFattureCollegate']/*[local-name()='IdDocumento']/text()")
+        self.assertIn(bill.ref, linked_ids)

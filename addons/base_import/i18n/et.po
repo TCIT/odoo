@@ -1,41 +1,43 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* base_import
-# 
+# * base_import
+#
 # Translators:
-# Mihkel avalah, 2024
-# Siim Raasuke, 2024
-# Martin Trigaux, 2024
-# Leaanika Randmets, 2024
-# Aveli Kannel <aveli@avalah.ee>, 2024
-# Oliver Ernest, 2024
-# Triine Aavik <triine@avalah.ee>, 2024
-# Anna, 2024
-# Piia Paurson <piia@avalah.ee>, 2024
-# Arma Gedonsky <armagedonsky@hot.ee>, 2024
-# JanaAvalah, 2025
-# Eneli Õigus <enelioigus@gmail.com>, 2025
-# Stevin Lilla, 2025
-# 
+# Helen Sulaoja <helen@avalah.ee>, 2022
+# Andre Roomet <andreroomet@gmail.com>, 2022
+# Aveli Kannel <aveli@avalah.ee>, 2022
+# Algo Kärp <algokarp@gmail.com>, 2022
+# Oliver Ernest, 2022
+# Martin Trigaux, 2022
+# Piia Paurson <piia@avalah.ee>, 2022
+# Triine Aavik <triine@avalah.ee>, 2022
+# Arma Gedonsky <armagedonsky@hot.ee>, 2022
+# Eneli Õigus <enelioigus@gmail.com>, 2022
+# Anna, 2023
+# JanaAvalah, 2023
+# Leaanika Randmets, 2023
+# Kristina Pešehodko <kristina@avalah.ee>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:48+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Stevin Lilla, 2025\n"
-"Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 13:57+0000\n"
+"Last-Translator: Kristina Pešehodko <kristina@avalah.ee>\n"
+"Language-Team: Estonian <https://translate.odoo.com/projects/odoo-19/"
+"base_import/et/>\n"
+"Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: et\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.js:0
 msgid "%(number)s file(s) selected"
-msgstr ""
+msgstr "%(number)s fail(id) valitud"
 
 #. module: base_import
 #. odoo-python
@@ -47,13 +49,13 @@ msgstr "%(property_string)s (%(parent_name)s)"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "%s at multiple rows"
-msgstr ""
+msgstr "%s mitmel real"
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.js:0
 msgid "%s records successfully imported"
-msgstr "%s kirjet edukalt imporditud"
+msgstr "%s kirjed edukalt imporditud"
 
 #. module: base_import
 #. odoo-javascript
@@ -62,6 +64,8 @@ msgid ""
 "A single column was found in the file, this often means the file separator "
 "is incorrect."
 msgstr ""
+"Failist leiti ainult üks veerg, see tihti tähendab, et faili eraldaja on "
+"vale."
 
 #. module: base_import
 #. odoo-javascript
@@ -81,6 +85,8 @@ msgstr "Edasijõudnu"
 msgid ""
 "After each batch import, this delay is applied to avoid unthrottled calls"
 msgstr ""
+"Pärast iga partii importi rakendatakse see viivitus, et vältida piiranguteta "
+"päringuid"
 
 #. module: base_import
 #. odoo-javascript
@@ -93,8 +99,8 @@ msgstr "Luba sobitamine alamväljadega"
 #: code:addons/base_import/static/src/import_model.js:0
 msgid ""
 "An unknown issue occurred during import (possibly lost connection, data "
-"limit exceeded or memory limits exceeded). Please retry in case the issue is"
-" transient. If the issue still occurs, try to split the file rather than "
+"limit exceeded or memory limits exceeded). Please retry in case the issue is "
+"transient. If the issue still occurs, try to split the file rather than "
 "import it at once."
 msgstr ""
 "Importimise ajal ilmnes tundmatu probleem (võimalik, et ühendus katkes, "
@@ -104,7 +110,7 @@ msgstr ""
 #. module: base_import
 #: model:ir.model,name:base_import.model_base
 msgid "Base"
-msgstr "Baas"
+msgstr "Alus"
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_import
@@ -120,13 +126,13 @@ msgstr "Baasimpordi kaardistamine"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_progress/import_data_progress.xml:0
 msgid "Batch"
-msgstr "Koond"
+msgstr "Partii"
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 msgid "Batch Import"
-msgstr "Koondi import"
+msgstr "Partii import"
 
 #. module: base_import
 #. odoo-javascript
@@ -138,7 +144,7 @@ msgstr "Koguse limiit"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.xml:0
 msgid "But, you can also use .csv files"
-msgstr ""
+msgstr "Aga võite kasutada ka .csv faile"
 
 #. module: base_import
 #. odoo-javascript
@@ -150,24 +156,22 @@ msgstr "Tühista"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "Click 'Resume' to proceed with the import, resuming at line %s."
-msgstr ""
+msgstr "Klõpsa “Jätka”, et importi jätkata, alates reast %s."
 
 #. module: base_import
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid "Column %(column)s contains incorrect values (value: %(value)s)"
-msgstr ""
-"Veerg %(column)s sisaldab mittekorrektseid väärtusi (väärtus: %(value)s)"
+msgstr "Veerg %(column)s sisaldab valesid väärtusi (väärtus: %(value)s)"
 
 #. module: base_import
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"Column %(column)s contains incorrect values. Error in line %(line)d: "
-"%(error)s"
+"Column %(column)s contains incorrect values. Error in line %(line)d: %"
+"(error)s"
 msgstr ""
-"Veeg %(column)s sisaldab mittekorrektseid väärtusi. Viga real %(line)d: "
-"%(error)s"
+"Veeg %(column)s sisaldab valesid väärtusi. Viga real %(line)d: %(error)s"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__column_name
@@ -190,8 +194,7 @@ msgstr "Kommentaarid"
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"Could not retrieve URL: %(url)s [%(field_name)s: L%(line_number)d]: "
-"%(error)s"
+"Could not retrieve URL: %(url)s [%(field_name)s: L%(line_number)d]: %(error)s"
 msgstr ""
 "URL-i ei saanud tuua: %(url)s [%(field_name)s: L%(line_number)d]: %(error)s"
 
@@ -211,13 +214,13 @@ msgstr "Loonud"
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__create_date
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__create_date
 msgid "Created on"
-msgstr "Loodud"
+msgstr "Loomise kuupäev"
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 msgid "Data to import"
-msgstr ""
+msgstr "Andmed importimiseks"
 
 #. module: base_import
 #. odoo-python
@@ -229,7 +232,7 @@ msgstr "Andmebaasi ID"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "Date Format:"
-msgstr "Kuupäeva formaat"
+msgstr "Kuupäeva formaat:"
 
 #. module: base_import
 #. odoo-javascript
@@ -247,19 +250,20 @@ msgstr "Kümnendkohtade eraldaja:"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "Defines how many megabytes can be imported in each batch import"
-msgstr ""
+msgstr "Määratleb, mitu megabaiti saab importida ühe partii impordi jooksul"
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 msgid "Delay after each batch"
-msgstr ""
+msgstr "Viivitus peale igat partiid"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__display_name
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__display_name
+#: model:ir.model.fields,field_description:base_import.field_res_users__display_name
 msgid "Display Name"
-msgstr "Kuvatav nimi"
+msgstr "Näidatav nimi"
 
 #. module: base_import
 #. odoo-javascript
@@ -272,13 +276,13 @@ msgstr "Punkt"
 #: code:addons/base_import/static/src/import_action/import_action.xml:0
 #: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 msgid "Download"
-msgstr "Laadi alla"
+msgstr "Laadige alla"
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.xml:0
 msgid "Drop or upload a file to import"
-msgstr ""
+msgstr "Lohista või laadi fail importimiseks"
 
 #. module: base_import
 #. odoo-javascript
@@ -296,23 +300,26 @@ msgstr "Viga kuupäeva liigendamisel [%(field)s:L%(line)d]: %(error)s"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "Error at row %(row)s: \"%(error)s\""
-msgstr ""
+msgstr "Viga real %(row)s: \"%(error)s\""
 
 #. module: base_import
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
 "Error while importing records: Text Delimiter should be a single character."
-msgstr ""
+msgstr "Viga kirjete importimisel: Teksti eraldaja peab olema üksik sümbol."
 
 #. module: base_import
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
 "Error while importing records: all rows should be of the same size, but the "
-"title row has %(title_row_entries)d entries while the first row has "
-"%(first_row_entries)d. You may need to change the separator character."
+"title row has %(title_row_entries)d entries while the first row has %"
+"(first_row_entries)d. You may need to change the separator character."
 msgstr ""
+"Viga kirjete importimisel: kõik read peaksid olema sama pikkusega, kuid "
+"pealkirjarida sisaldab %(title_row_entries)d kirjet, samas kui esimene rida "
+"sisaldab %(first_row_entries)d kirjet. Võib-olla on vaja muuta eraldusmärki."
 
 #. module: base_import
 #. odoo-javascript
@@ -337,6 +344,12 @@ msgstr "Soovitatud on Exceli failid, kuna vormindamine on automaatne."
 #: code:addons/base_import/models/base_import.py:0
 msgid "External ID"
 msgstr "Väline ID"
+
+#. module: base_import
+#. odoo-python
+#: code:addons/base_import/models/base_import.py:0
+msgid "Field '%(field)s' does not accept date/time values."
+msgstr "Väli '%(field)s' ei aktsepteeri kuupäeva/aja väärtusi."
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__field_name
@@ -373,14 +386,13 @@ msgstr "Faili suurus ületab määratud maksimumi (%s baiti)"
 #. module: base_import
 #: model:ir.model.fields,help:base_import.field_base_import_import__file
 msgid "File to check and/or import, raw binary (not base64)"
-msgstr ""
-"Kontrollimist ja/või importimist vajav fail, raw binary (mitte base64)"
+msgstr "Kontrollimist ja/või importimist vajav fail, raw binary (mitte base64)"
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 msgid "Files to import"
-msgstr ""
+msgstr "Failid importimiseks"
 
 #. module: base_import
 #. odoo-javascript
@@ -404,8 +416,8 @@ msgstr "Vormindamine"
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"Found invalid image data, images should be imported as either URLs or "
-"base64-encoded data."
+"Found invalid image data, images should be imported as either URLs or base64-"
+"encoded data."
 msgstr ""
 "Leiti kehtetuid pildiandmeid, kujutised tuleks importida kas URL-ide või "
 "base64-kodeeringuga andmetena."
@@ -431,6 +443,7 @@ msgstr "Siin on faili algus, mida meil ei õnnestunud importida:"
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__id
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__id
+#: model:ir.model.fields,field_description:base_import.field_res_users__id
 msgid "ID"
 msgstr "ID"
 
@@ -444,7 +457,8 @@ msgid ""
 "                    simpler especially when the file has many columns."
 msgstr ""
 "Kui fail sisaldab\n"
-"                     veergude nimesid, võib Odoo proovida automaatset tuvastamist\n"
+"                     veergude nimesid, võib Odoo proovida automaatset "
+"tuvastamist\n"
 "                     veerule vastava väljaga. See muudab impordi\n"
 "                     lihtsamaks, eriti kui failis on palju veerge."
 
@@ -495,13 +509,19 @@ msgstr "Impordifailil pole sisu või see on rikutud"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
 msgid "Import preview failed due to: \""
-msgstr ""
+msgstr "Impordi eelvaade ebaõnnestus selle tõttu: \""
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_records/import_records.xml:0
 msgid "Import records"
 msgstr "Impordi andmed"
+
+#. module: base_import
+#. odoo-javascript
+#: code:addons/base_import/static/src/import_action/import_action.js:0
+msgid "Imported records"
+msgstr "Imporditud andmed"
 
 #. module: base_import
 #. odoo-javascript
@@ -516,6 +536,8 @@ msgid ""
 "Invalid cell format at row %(row)s, column %(col)s: %(cell_value)s, with "
 "format: %(cell_format)s, as (%(format_type)s) formats are not supported."
 msgstr ""
+"Vale lahtrivorming reas %(row)s, veerus %(col)s: %(cell_value)s, formaadis: %"
+"(cell_format)s, kui (%(format_type)s) vormingud ei ole toetatud."
 
 #. module: base_import
 #. odoo-python
@@ -527,7 +549,7 @@ msgstr "Vale lahtri väärtus real %(row)s, veerg %(col)s: %(cell_value)s"
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__write_uid
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__write_uid
 msgid "Last Updated by"
-msgstr "Viimati uuendatud"
+msgstr "Viimati uuendas"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__write_date
@@ -539,7 +561,7 @@ msgstr "Viimati uuendatud"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.xml:0
 msgid "Load Data File"
-msgstr ""
+msgstr "Andmefaili laadimine"
 
 #. module: base_import
 #. odoo-javascript
@@ -557,7 +579,7 @@ msgstr "Laadimine..."
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 msgid "Max size per batch"
-msgstr ""
+msgstr "Partii maksimaalne suurus"
 
 #. module: base_import
 #. odoo-javascript
@@ -592,13 +614,13 @@ msgstr "Eraldaja puudub"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.js:0
 msgid "No file selected"
-msgstr ""
+msgstr "Ühtegi faili ei ole valitud"
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_column_error/import_data_column_error.xml:0
 msgid "No matching records found for the following name"
-msgstr ""
+msgstr "Sellele nimele ei leitud ühtegi vastet"
 
 #. module: base_import
 #. odoo-javascript
@@ -610,13 +632,13 @@ msgstr "Odoo väli"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.js:0
 msgid "Please upload a single file."
-msgstr ""
+msgstr "Palun laadige üles üksik fail."
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.js:0
 msgid "Please upload an Excel (.xls or .xlsx) or .csv file to import."
-msgstr ""
+msgstr "Palun laadige üles Exceli (.xls or .xlsx) või .csv fail importimiseks."
 
 #. module: base_import
 #. odoo-javascript
@@ -657,13 +679,13 @@ msgstr "Res mudel"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.xml:0
 msgid "Resume"
-msgstr "CV"
+msgstr "Jätka"
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
 msgid "Search a field..."
-msgstr "Otsi väli..."
+msgstr "Otsi välja..."
 
 #. module: base_import
 #. odoo-javascript
@@ -777,7 +799,7 @@ msgstr "Testimine"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "Text Delimiter:"
-msgstr "Teksti eraldaja"
+msgstr "Teksti eraldaja:"
 
 #. module: base_import
 #. odoo-javascript
@@ -792,6 +814,22 @@ msgid "The file will be imported by batches"
 msgstr "Fail imporditakse koonditena"
 
 #. module: base_import
+#. odoo-python
+#: code:addons/base_import/models/base_import.py:0
+msgid ""
+"There was an issue decoding the file using encoding “%s”.\n"
+"This encoding was automatically detected."
+msgstr ""
+
+#. module: base_import
+#. odoo-python
+#: code:addons/base_import/models/base_import.py:0
+msgid ""
+"There was an issue decoding the file using encoding “%s”.\n"
+"This encoding was manually selected."
+msgstr ""
+
+#. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "This column will be concatenated in field"
@@ -801,19 +839,19 @@ msgstr "See veerg ühendatakse väljale"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "Thousands Separator:"
-msgstr "Tuhande eraldaja"
+msgstr "Tuhandete eraldaja:"
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "To import multiple values, separate them by a comma."
-msgstr ""
+msgstr "Mitme väärtuse importimiseks eralda neid komaga."
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
 msgid "To import, select a field..."
-msgstr "Vali väli importimiseks"
+msgstr "Vali väli importimiseks..."
 
 #. module: base_import
 #. odoo-javascript
@@ -824,10 +862,11 @@ msgstr "Jälgi impordi käigus ajalugu"
 #. module: base_import
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
-msgid "Unable to load \"{extension}\" file: requires Python module \"{modname}\""
+msgid ""
+"Unable to load \"{extension}\" file: requires Python module \"{modname}\""
 msgstr ""
-"Faili \"{extension}\" laadimine ei õnnestu: nõuab Pythoni moodulit "
-"\"{modname}\""
+"Faili \"{extension}\" laadimine ei õnnestu: nõuab Pythoni moodulit \""
+"{modname}\""
 
 #. module: base_import
 #. odoo-python
@@ -848,32 +887,39 @@ msgstr "Pealkirjata"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.xml:0
 msgid "Upload Data File"
-msgstr ""
+msgstr "Andmefaili üleslaadimine"
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 msgid "Upload your files"
-msgstr ""
+msgstr "Lae üles enda faile"
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid ""
 "Use HH for hours in a 24h system, use II in conjonction with 'p' for a 12h "
-"system. You can use a custom format in addition to the suggestions provided."
-" Leave empty to let Odoo guess the format (recommended)"
+"system. You can use a custom format in addition to the suggestions provided. "
+"Leave empty to let Odoo guess the format (recommended)"
 msgstr ""
+"Kasutage HH tundide jaoks 24-tunnises süsteemi, kasuta II koos ‘p’-ga 12-"
+"tunnises süsteemi. Lisaks antud soovitustele võite kasutada ka kohandatud "
+"vormingut. Jätake tühjaks, et Odoo saaks vormingu ise määrata (soovitatav)"
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid ""
-"Use YYYY to represent the year, MM for the month and DD for the day. Include"
-" separators such as a dot, forward slash or dash. You can use a custom "
-"format in addition to the suggestions provided. Leave empty to let Odoo "
-"guess the format (recommended)"
+"Use YYYY to represent the year, MM for the month and DD for the day. Include "
+"separators such as a dot, forward slash or dash. You can use a custom format "
+"in addition to the suggestions provided. Leave empty to let Odoo guess the "
+"format (recommended)"
 msgstr ""
+"Kasutage YYYY aasta esitamiseks, MM kuu ja DD päeva jaoks. Lisage eraldajad, "
+"näiteks punkt, kaldkriips või sidekriips. Lisaks antud soovitustele võite "
+"kasutada ka kohandatud vormingut. Jätke tühjaks, et Odoo saaks vormingu ise "
+"määrata (soovitatav)"
 
 #. module: base_import
 #. odoo-javascript
@@ -906,7 +952,7 @@ msgstr "Kui väärtust ei saa sobitada:"
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"You can not import images via URL, check with your administrator or support "
+"You can not import file via URL, check with your administrator or support "
 "for the reason."
 msgstr ""
 "Pilte ei saa URL-i kaudu importida, probleemi lahendamiseks pöörduge "
@@ -972,3 +1018,40 @@ msgstr "sekundid"
 #: code:addons/base_import/models/base_import.py:0
 msgid "unknown error code %s"
 msgstr "tundmatu veakood %s"
+
+#~ msgid "Column %s contains incorrect values (value: %s)"
+#~ msgstr "Veerg %s sisaldab mittekorrektseid väärtusi (väärtus: %s)"
+
+#~ msgid "Column %s contains incorrect values. Error in line %d: %s"
+#~ msgstr "Veeg %s sisaldab mittekorrektseid väärtusi. Viga real %d: %s"
+
+#~ msgid "Error Parsing Date [%s:L%d]: %s"
+#~ msgstr "Viga kuupäeva liigendamisel [%s:L%d]: %s"
+
+#~ msgid ""
+#~ "Import timed out. Please retry. If you still encounter this issue, the "
+#~ "file may be too big for the system's configuration, try to split it "
+#~ "(import less records per file)."
+#~ msgstr ""
+#~ "Import aegus, palun proovge uuesti. Kui probleem siiski jätkub, võib fail "
+#~ "olla liiga suur. Proovige see osadeks jagada (importige faili kohta vähem "
+#~ "kirjeid)."
+
+#~ msgid "Imported file"
+#~ msgstr "Imporditud fail"
+
+#~ msgid "Load File"
+#~ msgstr "Lae fail"
+
+#~ msgid "Upload File"
+#~ msgstr "Laadi fail üles"
+
+#~ msgid "Upload an Excel or CSV file to import"
+#~ msgstr "Lae importimiseks üles Exceli või CSV-fail"
+
+#~ msgid ""
+#~ "You can not import images via URL, check with your administrator or "
+#~ "support for the reason."
+#~ msgstr ""
+#~ "Pilte ei saa URL-i kaudu importida, probleemi lahendamiseks pöörduge "
+#~ "administraatori või tugiteenuste poole."

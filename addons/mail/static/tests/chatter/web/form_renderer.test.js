@@ -3,13 +3,15 @@ import {
     click,
     contains,
     defineMailModels,
+    insertText,
     openFormView,
     patchUiSize,
     scroll,
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
-import { describe, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
+import { mockService, serverState } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
 defineMailModels();
@@ -28,13 +30,11 @@ test.skip("Form view not scrolled when switching record", async () => {
             display_name: "Partner 2",
         },
     ]);
-    const messages = [...Array(60).keys()].map((id) => {
-        return {
-            body: "not empty",
-            model: "res.partner",
-            res_id: id < 29 ? partnerId_1 : partnerId_2,
-        };
-    });
+    const messages = [...Array(60).keys()].map((id) => ({
+        body: "not empty",
+        model: "res.partner",
+        res_id: id < 29 ? partnerId_1 : partnerId_2,
+    }));
     pyEnv["mail.message"].create(messages);
     patchUiSize({ size: SIZES.LG });
     await start();
@@ -105,12 +105,12 @@ test("Attachments that have been unlinked from server should be visually unlinke
     await contains("button[aria-label='Attach files']", { text: "1" });
 });
 
-test("read more/less links are not duplicated when switching from read to edit mode", async () => {
+test("ellipsis button is not duplicated when switching from read to edit mode", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({});
     pyEnv["mail.message"].create({
         author_id: partnerId,
-        // "data-o-mail-quote" added by server is intended to be compacted in read more/less blocks
+        // "data-o-mail-quote" added by server is intended to be compacted in ellipsis block
         body: `
             <div>
                 Dear Joel Willis,<br>
@@ -118,9 +118,9 @@ test("read more/less links are not duplicated when switching from read to edit m
                 If you have any questions, please let us know.
                 <br><br>
                 Thank you,<br>
-                <span data-o-mail-quote="1">-- <br data-o-mail-quote="1">
+                <div data-o-mail-quote="1">-- <br data-o-mail-quote="1">
                     System
-                </span>
+                </div>
             </div>`,
         model: "res.partner",
         res_id: partnerId,
@@ -137,62 +137,23 @@ test("read more/less links are not duplicated when switching from read to edit m
     });
     await contains(".o-mail-Chatter");
     await contains(".o-mail-Message");
-    await contains(".o-mail-read-more-less");
+    await contains(".o-mail-ellipsis");
 });
 
-test("read more links becomes read less after being clicked", async () => {
-    const pyEnv = await startServer();
-    const partnerId = pyEnv["res.partner"].create({});
-    pyEnv["mail.message"].create([
-        {
-            author_id: partnerId,
-            // "data-o-mail-quote" added by server is intended to be compacted in read more/less blocks
-            body: `
-                <div>
-                    Dear Joel Willis,<br>
-                    Thank you for your enquiry.<br>
-                    If you have any questions, please let us know.
-                    <br><br>
-                    Thank you,<br>
-                    <span data-o-mail-quote="1">-- <br data-o-mail-quote="1">
-                        System
-                    </span>
-                </div>`,
-            model: "res.partner",
-            res_id: partnerId,
-        },
-    ]);
-    await start();
-    await openFormView("res.partner", partnerId, {
-        arch: `
-            <form string="Partners">
-                <sheet>
-                    <field name="name"/>
-                </sheet>
-                <chatter/>
-            </form>`,
-    });
-    await contains(".o-mail-Chatter");
-    await contains(".o-mail-Message");
-    await contains(".o-mail-read-more-less", { text: "Read More" });
-    await click(".o-mail-read-more-less");
-    await contains(".o-mail-read-more-less", { text: "Read Less" });
-});
-
-test("[TECHNICAL] unfolded read more/less links should not fold on message click besides those button links", async () => {
+test("[TECHNICAL] unfolded ellipsis button should not fold on message click besides that button", async () => {
     // message click triggers a re-render. Before writing of this test, the
-    // insertion of read more/less links were done during render. This meant
-    // any re-render would re-insert the read more/less links. If some button
-    // links were unfolded, any re-render would fold them again.
+    // insertion of ellipsis button were done during render. This meant
+    // any re-render would re-insert the ellipsis button. If some buttons
+    // were unfolded, any re-render would fold them again.
     //
     // This previous behavior is undesirable, and results to bothersome UX
     // such as inability to copy/paste unfolded message content due to click
-    // from text selection automatically folding all read more/less links.
+    // from text selection automatically folding all ellipsis buttons.
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ display_name: "Someone" });
     pyEnv["mail.message"].create({
         author_id: partnerId,
-        // "data-o-mail-quote" added by server is intended to be compacted in read more/less blocks
+        // "data-o-mail-quote" added by server is intended to be compacted in ellipsis block
         body: `
             <div>
                 Dear Joel Willis,<br>
@@ -217,19 +178,19 @@ test("[TECHNICAL] unfolded read more/less links should not fold on message click
                 <chatter/>
             </form>`,
     });
-    await contains(".o-mail-read-more-less", { text: "Read More" });
-    await click(".o-mail-read-more-less");
-    await contains(".o-mail-read-more-less", { text: "Read Less" });
+    expect(".o-mail-Message-body span").toHaveCount(0);
+    await click(".o-mail-ellipsis");
+    expect(".o-mail-Message-body span").toHaveText("--\nSystem");
     await click(".o-mail-Message");
-    await contains(".o-mail-read-more-less", { text: "Read Less" });
+    expect(".o-mail-Message-body span").toHaveCount(1);
 });
 
-test("read more/less links on message of type notification", async () => {
+test("ellipsis button on message of type notification", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({});
     pyEnv["mail.message"].create({
         author_id: partnerId,
-        // "data-o-mail-quote" enables read more/less blocks
+        // "data-o-mail-quote" enables ellipsis block
         body: `
             <div>
                 Dear Joel Willis,<br>
@@ -255,5 +216,51 @@ test("read more/less links on message of type notification", async () => {
                 <chatter/>
             </form>`,
     });
-    await contains(".o-mail-Message a", { text: "Read More" });
+    await contains(".o-mail-ellipsis");
+});
+
+test("read more/less should appear only once for the signature", async () => {
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({});
+
+    mockService("action", {
+        doAction(action, { onClose }) {
+            if (action.name === "Compose Email") {
+                // Simulate message post of full composer
+                pyEnv["mail.message"].create({
+                    body: action.context.default_body.toString(),
+                    model: action.context.default_model,
+                    res_id: action.context.default_res_ids[0],
+                });
+                return onClose(undefined);
+            }
+            return super.doAction(...arguments);
+        },
+    });
+
+    // Yes you can get this kind of signature by playing with the html editor
+    pyEnv["res.users"].write(serverState.userId, {
+        signature: `
+            <div>
+                <span data-o-mail-quote="1">
+                    --
+                </span>
+            </div>
+            <div data-o-mail-quote="1">
+                Signature !
+            </div>
+            <div>
+                <br data-o-mail-quote="1">
+            </div>
+        `,
+    });
+
+    await start();
+    await openFormView("res.partner", partnerId);
+    await contains(".o-mail-Chatter");
+    await click(".o-mail-Chatter-sendMessage");
+    await insertText(".o-mail-Composer-input", "Example Body");
+    await click("[name='open-full-composer']");
+    await contains(".o-mail-Message-body", { text: "Example Body", count: 1 });
+    expect(".o-mail-Message .o-signature-container button.o-mail-ellipsis").toHaveCount(1);
 });

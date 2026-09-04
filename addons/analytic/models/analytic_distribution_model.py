@@ -8,7 +8,7 @@ from odoo.exceptions import UserError
 
 class AccountAnalyticDistributionModel(models.Model):
     _name = 'account.analytic.distribution.model'
-    _inherit = 'analytic.mixin'
+    _inherit = ['analytic.mixin']
     _description = 'Analytic Distribution Model'
     _rec_name = 'create_date'
     _order = 'sequence, id desc'
@@ -61,15 +61,18 @@ class AccountAnalyticDistributionModel(models.Model):
     def _get_distribution(self, vals):
         """ Returns the combined distribution from all matching models based on the vals dict provided
             This method should be called to prefill analytic distribution field on several models """
-        applicable_models = self._get_applicable_models(vals)
+        applicable_models = self._get_applicable_models({k: v for k, v in vals.items() if k != 'related_root_plan_ids'})
 
         res = {}
-        applied_plans = self.env['account.analytic.plan']
+        applied_plans = vals.get('related_root_plan_ids', self.env['account.analytic.plan'])
         for model in applicable_models:
             # ignore model if it contains an account having a root plan that was already applied
-            if not applied_plans & model.distribution_analytic_account_ids.root_plan_id:
-                res |= model.analytic_distribution or {}
-                applied_plans += model.distribution_analytic_account_ids.root_plan_id
+            current_plans = model.distribution_analytic_account_ids.root_plan_id
+            if current_plans and not applied_plans & current_plans:
+                applied_plans += current_plans
+                res = self._merge_distribution(res, model.analytic_distribution | {
+                    '__update__': current_plans.mapped(lambda p: p._column_name()),
+                })
         return res
 
     @api.model
@@ -94,15 +97,3 @@ class AccountAnalyticDistributionModel(models.Model):
             return [(fname, 'in', value)]
         else:
             return [(fname, 'in', [value, False])]
-
-    # Dead method, removed in master
-    def action_read_distribution_model(self):
-        self.ensure_one()
-        return {
-            'name': self.display_name,
-            'type': 'ir.actions.act_window',
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'account.analytic.distribution.model',
-            'res_id': self.id,
-        }

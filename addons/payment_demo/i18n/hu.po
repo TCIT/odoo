@@ -1,28 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* payment_demo
-# 
-# Translators:
-# Ákos Nagy <akos.nagy@oregional.hu>, 2024
-# Tamás Németh <ntomasz81@gmail.com>, 2024
-# Gergő Kertész <gergo.kertesz@maxflow.hu>, 2024
-# gezza <geza.nagy@oregional.hu>, 2024
-# Martin Trigaux, 2024
-# krnkris, 2024
-# 
+# * payment_demo
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# Sarbó Gergely <sarbo.gergely@gmail.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: krnkris, 2024\n"
-"Language-Team: Hungarian (https://app.transifex.com/odoo/teams/41243/hu/)\n"
+"POT-Creation-Date: 2026-04-03 18:39+0000\n"
+"PO-Revision-Date: 2026-08-07 23:32+0000\n"
+"Last-Translator: Sarbó Gergely <sarbo.gergely@gmail.com>\n"
+"Language-Team: Hungarian <https://translate.odoo.com/projects/odoo-19/"
+"payment_demo/hu/>\n"
+"Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: hu\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: payment_demo
 #: model_terms:ir.ui.view,arch_db:payment_demo.payment_details
@@ -34,7 +30,8 @@ msgid ""
 "                    <option value=\"pending\" title=\"Payment processing\">\n"
 "                        Pending\n"
 "                    </option>\n"
-"                    <option value=\"cancel\" title=\"Payment cancelled by customer\">\n"
+"                    <option value=\"cancel\" title=\"Payment cancelled by "
+"customer\">\n"
 "                        Cancelled\n"
 "                    </option>\n"
 "                    <option value=\"error\" title=\"Processing error\">\n"
@@ -61,7 +58,7 @@ msgstr ""
 #. module: payment_demo
 #: model_terms:ir.ui.view,arch_db:payment_demo.express_inline_form
 msgid "<small><b>Street and Number</b></small>"
-msgstr ""
+msgstr "<small><b>Utca és házszám</b></small>"
 
 #. module: payment_demo
 #: model_terms:ir.ui.view,arch_db:payment_demo.express_inline_form
@@ -91,6 +88,11 @@ msgstr ""
 #. module: payment_demo
 #: model_terms:ir.ui.view,arch_db:payment_demo.payment_transaction_form
 msgid "Authorize"
+msgstr ""
+
+#. module: payment_demo
+#: model_terms:ir.ui.view,arch_db:payment_demo.express_inline_form
+msgid "Belgium"
 msgstr ""
 
 #. module: payment_demo
@@ -154,20 +156,28 @@ msgid "Demo providers should never be enabled."
 msgstr ""
 
 #. module: payment_demo
+#: model:ir.model.fields,field_description:payment_demo.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:payment_demo.field_payment_token__display_name
+#: model:ir.model.fields,field_description:payment_demo.field_payment_transaction__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: payment_demo
 #: model:ir.model.fields.selection,name:payment_demo.selection__payment_token__demo_simulated_state__error
 msgid "Error"
 msgstr "Hiba"
 
 #. module: payment_demo
-#. odoo-javascript
-#: code:addons/payment_demo/static/src/js/express_checkout_form.js:0
-msgid "No delivery method is available."
+#: model:ir.model.fields,field_description:payment_demo.field_payment_provider__id
+#: model:ir.model.fields,field_description:payment_demo.field_payment_token__id
+#: model:ir.model.fields,field_description:payment_demo.field_payment_transaction__id
+msgid "ID"
 msgstr ""
 
 #. module: payment_demo
-#. odoo-python
-#: code:addons/payment_demo/models/payment_transaction.py:0
-msgid "No transaction found matching reference %s."
+#. odoo-javascript
+#: code:addons/payment_demo/static/src/interactions/express_checkout.js:0
+msgid "No delivery method is available."
 msgstr ""
 
 #. module: payment_demo
@@ -197,7 +207,7 @@ msgstr "Fizetési tranzakció"
 
 #. module: payment_demo
 #. odoo-javascript
-#: code:addons/payment_demo/static/src/js/payment_demo_mixin.js:0
+#: code:addons/payment_demo/static/src/interactions/payment_demo_mixin.js:0
 msgid "Payment processing failed"
 msgstr ""
 
@@ -209,8 +219,8 @@ msgstr ""
 #. module: payment_demo
 #: model_terms:ir.ui.view,arch_db:payment_demo.token_inline_form
 msgid ""
-"Payments made with this payment method will be automatically "
-"<b>cancelled</b>."
+"Payments made with this payment method will be automatically <b>cancelled</"
+"b>."
 msgstr ""
 
 #. module: payment_demo
@@ -221,14 +231,20 @@ msgstr ""
 #. module: payment_demo
 #: model_terms:ir.ui.view,arch_db:payment_demo.token_inline_form
 msgid ""
-"Payments made with this payment method will simulate a processing "
-"<b>error</b>."
+"Payments made with this payment method will simulate a processing <b>error</"
+"b>."
 msgstr ""
 
 #. module: payment_demo
 #: model:ir.model.fields.selection,name:payment_demo.selection__payment_token__demo_simulated_state__pending
 msgid "Pending"
 msgstr "Függő"
+
+#. module: payment_demo
+#. odoo-python
+#: code:addons/payment_demo/controllers/portal.py:0
+msgid "Provider %s is not properly configured."
+msgstr ""
 
 #. module: payment_demo
 #: model_terms:ir.ui.view,arch_db:payment_demo.payment_transaction_form
@@ -256,19 +272,13 @@ msgid "The technical code of this payment provider."
 msgstr ""
 
 #. module: payment_demo
-#. odoo-python
-#: code:addons/payment_demo/models/payment_transaction.py:0
-msgid "The transaction is not linked to a token."
-msgstr ""
-
-#. module: payment_demo
 #: model_terms:ir.ui.view,arch_db:payment_demo.express_checkout_form
 msgid "Unpublished"
 msgstr "Nem közzétett"
 
 #. module: payment_demo
 #. odoo-javascript
-#: code:addons/payment_demo/static/src/js/express_checkout_form.js:0
+#: code:addons/payment_demo/static/src/interactions/express_checkout.js:0
 msgid "Validation Error"
 msgstr "Érvényesítési hiba"
 

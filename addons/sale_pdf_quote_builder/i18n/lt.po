@@ -1,35 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* sale_pdf_quote_builder
-# 
-# Translators:
-# grupoda2 <dmitrijus.ivanovas@gmail.com>, 2024
-# Audrius Palenskis <audrius.palenskis@gmail.com>, 2024
-# Arunas V. <arunas@devoro.com>, 2024
-# Anatolij, 2024
-# Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2024
-# Paulius Sladkevičius <paulius@versada.eu>, 2024
-# Jonas Zinkevicius <jozi@odoo.com>, 2024
-# Nerijus, 2024
-# UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2024
-# digitouch UAB <digitouchagencyeur@gmail.com>, 2024
-# Antanas Muliuolis <an.muliuolis@gmail.com>, 2024
-# Linas Versada <linaskrisiukenas@gmail.com>, 2024
-# Martin Trigaux, 2024
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:40+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Martin Trigaux, 2024\n"
-"Language-Team: Lithuanian (https://app.transifex.com/odoo/teams/41243/lt/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-02 16:38+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Lithuanian <https://translate.odoo.com/projects/odoo-19/"
+"sale_pdf_quote_builder/lt/>\n"
+"Language: lt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: lt\n"
-"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);\n"
+"Plural-Forms: nplurals=3; plural=(n % 10 == 1 && (n % 100 < 11 || n % 100 > "
+"19)) ? 0 : ((n % 10 >= 2 && n % 10 <= 9 && (n % 100 < 11 || n % 100 > 19)) ? "
+"1 : 2);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: sale_pdf_quote_builder
 #: model:ir.actions.report,print_report_name:sale_pdf_quote_builder.action_report_saleorder_raw
@@ -37,8 +26,11 @@ msgid ""
 "(object.state in ('draft', 'sent') and 'Quotation - %s' % (object.name)) or "
 "'Order - %s' % (object.name)"
 msgstr ""
-"(object.state in ('draft', 'sent') and 'Quotation - %s' % (object.name)) or "
-"'Order - %s' % (object.name)"
+
+#. module: sale_pdf_quote_builder
+#: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.sale_order_template_form
+msgid "<i class=\"fa fa-arrow-right\"/> Link to the demo video"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
@@ -54,77 +46,92 @@ msgstr ""
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_pdf_form_field.py:0
 msgid ""
-"A form field set as used in product documents can't be linked to a quotation"
-" document."
+"A form field set as used in product documents can't be linked to a quotation "
+"document."
 msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_pdf_form_field.py:0
 msgid ""
-"A form field set as used in quotation documents can't be linked to a product"
-" document."
+"A form field set as used in quotation documents can't be linked to a product "
+"document."
 msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__access_token
 msgid "Access Token"
-msgstr "Prieigos raktas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__active
 msgid "Active"
-msgstr "Aktyvus"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__add_by_default
+#: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
+msgid "Add By Default"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
 msgid "All"
-msgstr "Visi"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/controllers/quotation_document.py:0
 msgid "All files uploaded"
-msgstr "Visi failai buvo įkelti"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,help:sale_pdf_quote_builder.field_product_document__attached_on_sale
 msgid ""
 "Allows you to share the document with your customers within a sale.\n"
-"Leave it empty if you don't want to share this document with sales customer.\n"
-"On quote: the document will be sent to and accessible by customers at any time.\n"
+"Leave it empty if you don't want to share this document with sales "
+"customer.\n"
+"On quote: the document will be sent to and accessible by customers at any "
+"time.\n"
 "e.g. this option can be useful to share Product description files.\n"
-"On order confirmation: the document will be sent to and accessible by customers.\n"
-"e.g. this option can be useful to share User Manual or digital content bought on ecommerce. \n"
-"Inside quote: The document will be included in the pdf of the quotation and sale order between the header pages and the quote table. "
+"On order confirmation: the document will be sent to and accessible by "
+"customers.\n"
+"e.g. this option can be useful to share User Manual or digital content "
+"bought on ecommerce. \n"
+"Inside quote: The document will be included in the pdf of the quotation and "
+"sale order between the header pages and the quote table. "
 msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
 msgid "Archived"
-msgstr "Archyvuotas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
 msgid "Attached To"
-msgstr "Prisegtas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__local_url
 msgid "Attachment URL"
-msgstr "Prisegtuko URL"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order__available_product_document_ids
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order_line__available_product_document_ids
 msgid "Available Product Documents"
 msgstr ""
 
 #. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order__available_quotation_document_ids
+msgid "Available Quotation Documents"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__checksum
 msgid "Checksum/SHA1"
-msgstr "Kontrolinės sumos / SHA1"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-javascript
@@ -135,7 +142,7 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__company_id
 msgid "Company"
-msgstr "Įmonė"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.product_document_form
@@ -152,18 +159,18 @@ msgstr ""
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__create_uid
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__create_uid
 msgid "Created by"
-msgstr "Sukūrė"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__create_date
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__create_date
 msgid "Created on"
-msgstr "Sukurta"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
 msgid "Creation"
-msgstr "Sukurta"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search
@@ -178,23 +185,28 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__db_datas
 msgid "Database Data"
-msgstr "Duomenų bazės duomenys"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
 msgid "Delete"
-msgstr "Trinti"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__description
 msgid "Description"
-msgstr "Aprašymas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_ir_actions_report__display_name
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__display_name
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__display_name
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order__display_name
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order_line__display_name
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order_template__display_name
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__display_name
 msgid "Display Name"
-msgstr "Rodomas pavadinimas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__document_type
@@ -210,7 +222,7 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
 msgid "Download"
-msgstr "Atsisiųsti"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.sale_order_template_form
@@ -220,12 +232,12 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
 msgid "Edit"
-msgstr "Redaguoti"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__datas
 msgid "File Content (base64)"
-msgstr "Filo turinys (base64)"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__raw
@@ -235,14 +247,14 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__file_size
 msgid "File Size"
-msgstr "Failo dydis"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_order.py:0
 #: model:ir.model.fields.selection,name:sale_pdf_quote_builder.selection__quotation_document__document_type__footer
 msgid "Footer"
-msgstr "Poraštė"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__name
@@ -273,16 +285,16 @@ msgid "Form fields of inside quotation documents."
 msgstr ""
 
 #. module: sale_pdf_quote_builder
-#: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
-msgid "Group By"
-msgstr "Grupuoti pagal"
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__has_thumbnail
+msgid "Has Thumbnail"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_order.py:0
 #: model:ir.model.fields.selection,name:sale_pdf_quote_builder.selection__quotation_document__document_type__header
 msgid "Header"
-msgstr "Antraštė"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields.selection,name:sale_pdf_quote_builder.selection__sale_pdf_form_field__document_type__quotation_document
@@ -305,13 +317,24 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
 msgid "History"
-msgstr "Istorija"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_ir_actions_report__id
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__id
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__id
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order__id
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order_line__id
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order_template__id
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__id
 msgid "ID"
-msgstr "ID"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
+#: model:ir.model.fields,help:sale_pdf_quote_builder.field_quotation_document__add_by_default
+msgid ""
+"If checked, this header or footer will be added by default on new quotes."
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,help:sale_pdf_quote_builder.field_quotation_document__active
@@ -338,7 +361,7 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__index_content
 msgid "Indexed Content"
-msgstr "Indeksuotas turinys"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields.selection,name:sale_pdf_quote_builder.selection__product_document__attached_on_sale__inside
@@ -377,7 +400,7 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__public
 msgid "Is public document"
-msgstr "Yra viešas dokumentas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
@@ -390,19 +413,19 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__key
 msgid "Key"
-msgstr "Raktas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__write_uid
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__write_uid
 msgid "Last Updated by"
-msgstr "Paskutinį kartą atnaujino"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__write_date
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__write_date
 msgid "Last Updated on"
-msgstr "Paskutinį kartą atnaujinta"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
@@ -412,18 +435,18 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__mimetype
 msgid "Mime Type"
-msgstr "MIME tipas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__name
 msgid "Name"
-msgstr "Pavadinimas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/ir_actions_report.py:0
 msgid "No"
-msgstr "Ne"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
@@ -445,7 +468,7 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__path
 msgid "Path"
-msgstr "Kelias"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.actions.act_window,help:sale_pdf_quote_builder.quotation_document_action
@@ -465,7 +488,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_order.py:0
 msgid "Product"
-msgstr "Produktas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model,name:sale_pdf_quote_builder.model_product_document
@@ -482,17 +505,22 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.sale_order_template_form
 msgid ""
-"Provide header pages and footer pages to compose an attractive quotation with more information\n"
-"                        about your company, your products and you services. <br/>\n"
-"                        The pdf of your quotes will be built by putting together header pages, product descriptions,\n"
-"                        details of the quote and then the footer pages. <br/>\n"
-"                        If empty, it will use those define in the company settings. <br/>"
+"Provide header pages and footer pages to compose an attractive quotation "
+"with more information\n"
+"                        about your company, your products and you services. "
+"<br/>\n"
+"                        The pdf of your quotes will be built by putting "
+"together header pages, product descriptions,\n"
+"                        details of the quote and then the footer pages. <br/"
+">\n"
+"                        If empty, it will use those define in the company "
+"settings. <br/>"
 msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.actions.report,name:sale_pdf_quote_builder.action_report_saleorder_raw
 msgid "Quotation / Order"
-msgstr "Komercinis pasiūlymas / Užsakymas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
@@ -508,12 +536,12 @@ msgstr ""
 #: model:ir.model,name:sale_pdf_quote_builder.model_sale_order_template
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
 msgid "Quotation Template"
-msgstr "Komercinio pasiūlymo šablonas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__quotation_template_ids
 msgid "Quotation Templates"
-msgstr "Komercinio pasiūlymo šablonai"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model,name:sale_pdf_quote_builder.model_quotation_document
@@ -527,9 +555,14 @@ msgid "Quote Builder"
 msgstr ""
 
 #. module: sale_pdf_quote_builder
+#: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.sale_order_template_form
+msgid "Quote Builder Demo Video"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__ir_attachment_id
 msgid "Related attachment"
-msgstr "Susijęs priedas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model,name:sale_pdf_quote_builder.model_ir_actions_report
@@ -539,22 +572,22 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__res_field
 msgid "Resource Field"
-msgstr "Išteklių laukas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__res_id
 msgid "Resource ID"
-msgstr "Išteklių ID"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__res_model
 msgid "Resource Model"
-msgstr "Išteklių modelis"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__res_name
 msgid "Resource Name"
-msgstr "Išteklių pavadinimas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__attached_on_sale
@@ -569,22 +602,22 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model,name:sale_pdf_quote_builder.model_sale_order
 msgid "Sales Order"
-msgstr "Pardavimo užsakymas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model,name:sale_pdf_quote_builder.model_sale_order_line
 msgid "Sales Order Line"
-msgstr "Pardavimo užsakymo eilutė"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__sequence
 msgid "Sequence"
-msgstr "Seka"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__store_fname
 msgid "Stored Filename"
-msgstr "Saugomas failo pavadinimas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
@@ -614,7 +647,7 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__theme_template_id
 msgid "Theme Template"
-msgstr "Temos šablonas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search
@@ -622,9 +655,14 @@ msgid "This document"
 msgstr ""
 
 #. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__thumbnail
+msgid "Thumbnail"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__type
 msgid "Type"
-msgstr "Tipas"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.actions.act_window,help:sale_pdf_quote_builder.quotation_document_action
@@ -634,7 +672,7 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__url
 msgid "Url"
-msgstr "URL"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
@@ -649,7 +687,7 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__website_id
 msgid "Website"
-msgstr "Svetainė"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
@@ -661,7 +699,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/ir_actions_report.py:0
 msgid "Yes"
-msgstr "Taip"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,help:sale_pdf_quote_builder.field_quotation_document__type
@@ -669,10 +707,8 @@ msgid ""
 "You can either upload a file from your computer or copy/paste an internet "
 "link to your file."
 msgstr ""
-"Jūs galite arba įkelti failą iš savo kompiuterio, arba nukopijuoti / įdėti "
-"internetinę nuorodą į savo failą."
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
 msgid "on"
-msgstr "nuo"
+msgstr ""

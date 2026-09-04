@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import exceptions
-from odoo.addons.sales_team.tests.common import TestSalesCommon
 from odoo.tests.common import users
 from odoo.tools import mute_logger
+
+from odoo.addons.sales_team.tests.common import TestSalesCommon
 
 
 class TestMembership(TestSalesCommon):
@@ -18,6 +18,12 @@ class TestMembership(TestSalesCommon):
             'sequence': 10,
         })
         cls.env['ir.config_parameter'].set_param('sales_team.membership_multi', True)
+
+    def test_archive_user_archives_team_member(self):
+        """Test that archiving a user also archives their linked team member."""
+        self.assertTrue(self.sales_team_1_m1.active)
+        self.user_sales_leads.action_archive()
+        self.assertFalse(self.sales_team_1_m1.active)
 
     @users('user_sales_manager')
     def test_fields(self):
@@ -52,7 +58,7 @@ class TestMembership(TestSalesCommon):
         self.assertEqual(sales_team_1.member_ids, self.user_admin)
 
         # create a new user on the fly, just for testing
-        self.user_sales_manager.write({'groups_id': [(4, self.env.ref('base.group_system').id)]})
+        self.user_sales_manager.write({'group_ids': [(4, self.env.ref('base.group_system').id)]})
         new_team.write({'member_ids': [(0, 0, {
             'name': 'Marty OnTheMCFly',
             'login': 'mcfly@test.example.com',
@@ -60,7 +66,7 @@ class TestMembership(TestSalesCommon):
         new_user = self.env['res.users'].search([('login', '=', 'mcfly@test.example.com')])
         self.assertTrue(len(new_user))
         self.assertEqual(new_team.member_ids, self.env.user | self.user_sales_leads | new_user)
-        self.user_sales_manager.write({'groups_id': [(3, self.env.ref('base.group_system').id)]})
+        self.user_sales_manager.write({'group_ids': [(3, self.env.ref('base.group_system').id)]})
 
         self.env.flush_all()
         memberships = self.env['crm.team.member'].with_context(active_test=False).search([('user_id', '=', self.user_sales_leads.id)])
@@ -95,7 +101,7 @@ class TestMembership(TestSalesCommon):
         self.assertEqual(sales_team_1.member_ids, self.user_sales_leads | self.user_admin)
 
         # create a new user on the fly, just for testing
-        self.user_sales_manager.write({'groups_id': [(4, self.env.ref('base.group_system').id)]})
+        self.user_sales_manager.write({'group_ids': [(4, self.env.ref('base.group_system').id)]})
         new_team.write({'member_ids': [(0, 0, {
             'name': 'Marty OnTheMCFly',
             'login': 'mcfly@test.example.com',
@@ -103,7 +109,7 @@ class TestMembership(TestSalesCommon):
         new_user = self.env['res.users'].search([('login', '=', 'mcfly@test.example.com')])
         self.assertTrue(len(new_user))
         self.assertEqual(new_team.member_ids, self.env.user | self.user_sales_leads | new_user)
-        self.user_sales_manager.write({'groups_id': [(3, self.env.ref('base.group_system').id)]})
+        self.user_sales_manager.write({'group_ids': [(3, self.env.ref('base.group_system').id)]})
         self.env.flush_all()
 
         # still avoid duplicated team / user entries
@@ -153,19 +159,19 @@ class TestMembership(TestSalesCommon):
         self.assertEqual(sales_team_1.member_ids, self.user_admin | self.user_sales_leads)
 
         # activate another team membership: previous team membership should be de activated
-        new_nt.toggle_active()
+        new_nt.action_unarchive()
         self.assertTrue(new_nt.active)
         self.assertFalse(old_st_1.active)
         self.assertFalse(new_st_1.active)
         # activate another team membership: previous team membership should be de activated
-        old_st_1.toggle_active()
+        old_st_1.action_unarchive()
         self.assertFalse(new_nt.active)
         self.assertTrue(old_st_1.active)
         self.assertFalse(new_st_1.active)
 
         # try to activate duplicate memberships again, which should trigger issues
         with self.assertRaises(exceptions.UserError):
-            new_st_1.toggle_active()
+            new_st_1.action_unarchive()
 
     @users('user_sales_manager')
     def test_memberships_multi(self):
@@ -211,7 +217,7 @@ class TestMembership(TestSalesCommon):
 
         # try to activate duplicate memberships again, which should trigger issues
         with self.assertRaises(exceptions.UserError):
-            old_st_1.toggle_active()
+            old_st_1.action_unarchive()
 
     @users('user_sales_manager')
     def test_memberships_sync(self):

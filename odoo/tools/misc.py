@@ -29,7 +29,7 @@ from collections import defaultdict
 from collections.abc import Iterable, Iterator, Mapping, MutableMapping, MutableSet, Reversible
 from contextlib import ContextDecorator, contextmanager
 from difflib import HtmlDiff
-from functools import reduce, wraps
+from functools import lru_cache, reduce, wraps
 from itertools import islice, groupby as itergroupby
 from operator import itemgetter
 
@@ -39,8 +39,6 @@ import markupsafe
 import pytz
 from lxml import etree, objectify
 
-import odoo
-import odoo.addons
 # get_encodings, ustr and exception_to_unicode were originally from tools.misc.
 # There are moved to loglevels until we refactor tools.
 from odoo.loglevels import exception_to_unicode, get_encodings, ustr  # noqa: F401
@@ -65,6 +63,7 @@ __all__ = [
     'NON_BREAKING_SPACE',
     'SKIPPED_ELEMENT_TYPES',
     'DotDict',
+    'LastOrderedSet',
     'OrderedSet',
     'Reverse',
     'babel_locale_parse',
@@ -108,6 +107,7 @@ __all__ = [
     'topological_sort',
     'unique',
     'ustr',
+    'real_time',
 ]
 
 _logger = logging.getLogger(__name__)
@@ -123,6 +123,9 @@ default_parser.set_element_class_lookup(objectify.ObjectifyElementClassLookup())
 objectify.set_default_parser(default_parser)
 
 NON_BREAKING_SPACE = u'\N{NO-BREAK SPACE}'
+
+# ensure we have a non patched time for query times when using freezegun
+real_time = time.time.__call__  # type: ignore
 
 
 class Sentinel(enum.Enum):
@@ -142,9 +145,10 @@ def find_in_path(name):
         path.append(config['bin_path'])
     return which(name, path=os.pathsep.join(path))
 
-#----------------------------------------------------------
+# ----------------------------------------------------------
 # Postgres subprocesses
-#----------------------------------------------------------
+# ----------------------------------------------------------
+
 
 def find_pg_tool(name):
     path = None
@@ -152,8 +156,9 @@ def find_pg_tool(name):
         path = config['pg_path']
     try:
         return which(name, path=path)
-    except IOError:
+    except OSError:
         raise Exception('Command `%s` not found.' % name)
+
 
 def exec_pg_environ():
     """
@@ -165,17 +170,21 @@ def exec_pg_environ():
     postgres user password in the PGPASSWORD environment variable or in a
     special .pgpass file.
 
-    See also http://www.postgresql.org/docs/8.4/static/libpq-envars.html
+    See also https://www.postgresql.org/docs/current/libpq-envars.html
     """
     env = os.environ.copy()
-    if odoo.tools.config['db_host']:
-        env['PGHOST'] = odoo.tools.config['db_host']
-    if odoo.tools.config['db_port']:
-        env['PGPORT'] = str(odoo.tools.config['db_port'])
-    if odoo.tools.config['db_user']:
-        env['PGUSER'] = odoo.tools.config['db_user']
-    if odoo.tools.config['db_password']:
-        env['PGPASSWORD'] = odoo.tools.config['db_password']
+    if config['db_host']:
+        env['PGHOST'] = config['db_host']
+    if config['db_port']:
+        env['PGPORT'] = str(config['db_port'])
+    if config['db_user']:
+        env['PGUSER'] = config['db_user']
+    if config['db_password']:
+        env['PGPASSWORD'] = config['db_password']
+    if config['db_app_name']:
+        env['PGAPPNAME'] = config['db_app_name'].replace('{pid}', f'env{os.getpid()}')[:63]
+    if config['db_sslmode']:
+        env['PGSSLMODE'] = config['db_sslmode']
     return env
 
 
@@ -184,7 +193,7 @@ def exec_pg_environ():
 # ----------------------------------------------------------
 
 
-def file_path(file_path: str, filter_ext: tuple[str, ...] = ('',), env: Environment | None = None) -> str:
+def file_path(file_path: str, filter_ext: tuple[str, ...] = ('',), env: Environment | None = None, *, check_exists: bool = True) -> str:
     """Verify that a file exists under a known `addons_path` directory and return its full path.
 
     Examples::
@@ -197,13 +206,12 @@ def file_path(file_path: str, filter_ext: tuple[str, ...] = ('',), env: Environm
     :param list[str] filter_ext: optional list of supported extensions (lowercase, with leading dot)
     :param env: optional environment, required for a file path within a temporary directory
         created using `file_open_temporary_directory()`
+    :param check_exists: check that the file exists (default: True)
     :return: the absolute path to the file
     :raise FileNotFoundError: if the file is not found under the known `addons_path` directories
     :raise ValueError: if the file doesn't have one of the supported extensions (`filter_ext`)
     """
-    root_path = os.path.abspath(config['root_path'])
-    temporary_paths = env.transaction._Transaction__file_open_tmp_paths if env else ()
-    addons_paths = [*odoo.addons.__path__, root_path, *temporary_paths]
+    import odoo.addons  # noqa: PLC0415
     is_abs = os.path.isabs(file_path)
     normalized_path = os.path.normpath(os.path.normcase(file_path))
 
@@ -212,15 +220,31 @@ def file_path(file_path: str, filter_ext: tuple[str, ...] = ('',), env: Environm
 
     # ignore leading 'addons/' if present, it's the final component of root_path, but
     # may sometimes be included in relative paths
-    if normalized_path.startswith('addons' + os.sep):
-        normalized_path = normalized_path[7:]
+    normalized_path = normalized_path.removeprefix('addons' + os.sep)
+
+    # if path is relative and represents a loaded module, accept only the
+    # __path__ for that module; otherwise, search in all accepted paths
+    file_path_split = normalized_path.split(os.path.sep)
+    if not is_abs and (module := sys.modules.get(f'odoo.addons.{file_path_split[0]}')):
+        addons_paths = list(map(os.path.dirname, module.__path__))
+    else:
+        root_path = os.path.abspath(config.root_path)
+        temporary_paths = env.transaction._Transaction__file_open_tmp_paths if env else []
+        addons_paths = [*odoo.addons.__path__, root_path, *temporary_paths]
 
     for addons_dir in addons_paths:
         # final path sep required to avoid partial match
         parent_path = os.path.normpath(os.path.normcase(addons_dir)) + os.sep
-        fpath = (normalized_path if is_abs else
-                 os.path.normpath(os.path.normcase(os.path.join(parent_path, normalized_path))))
-        if fpath.startswith(parent_path) and os.path.exists(fpath):
+        if is_abs:
+            fpath = normalized_path
+        else:
+            fpath = os.path.normpath(os.path.join(parent_path, normalized_path))
+        if fpath.startswith(parent_path) and (
+            # we check existence when asked or we have multiple paths to check
+            # (there is one possibility for absolute paths)
+            (not check_exists and (is_abs or len(addons_paths) == 1))
+            or os.path.exists(fpath)
+        ):
             return fpath
 
     raise FileNotFoundError("File not found: " + file_path)
@@ -245,18 +269,20 @@ def file_open(name: str, mode: str = "r", filter_ext: tuple[str, ...] = (), env:
     :raise FileNotFoundError: if the file is not found under the known `addons_path` directories
     :raise ValueError: if the file doesn't have one of the supported extensions (`filter_ext`)
     """
-    path = file_path(name, filter_ext=filter_ext, env=env)
-    if os.path.isfile(path):
-        if 'b' not in mode:
-            # Force encoding for text mode, as system locale could affect default encoding,
-            # even with the latest Python 3 versions.
-            # Note: This is not covered by a unit test, due to the platform dependency.
-            #       For testing purposes you should be able to force a non-UTF8 encoding with:
-            #         `sudo locale-gen fr_FR; LC_ALL=fr_FR.iso8859-1 python3 ...'
-            # See also PEP-540, although we can't rely on that at the moment.
-            return open(path, mode, encoding="utf-8")
-        return open(path, mode)
-    raise FileNotFoundError("Not a file: " + name)
+    path = file_path(name, filter_ext=filter_ext, env=env, check_exists=False)
+    encoding = None
+    if 'b' not in mode:
+        # Force encoding for text mode, as system locale could affect default encoding,
+        # even with the latest Python 3 versions.
+        # Note: This is not covered by a unit test, due to the platform dependency.
+        #       For testing purposes you should be able to force a non-UTF8 encoding with:
+        #         `sudo locale-gen fr_FR; LC_ALL=fr_FR.iso8859-1 python3 ...'
+        # See also PEP-540, although we can't rely on that at the moment.
+        encoding = "utf-8"
+    if any(m in mode for m in ('w', 'x', 'a')) and not os.path.isfile(path):
+        # Don't let create new files
+        raise FileNotFoundError(f"Not a file: {path}")
+    return open(path, mode, encoding=encoding)
 
 
 @contextmanager
@@ -279,13 +305,12 @@ def file_open_temporary_directory(env: Environment):
     :param env: environment for which the temporary directory is created.
     :return: the absolute path to the created temporary directory
     """
-    assert not env.transaction._Transaction__file_open_tmp_paths, 'Reentrancy is not implemented for this method'
     with tempfile.TemporaryDirectory() as module_dir:
         try:
-            env.transaction._Transaction__file_open_tmp_paths = (module_dir,)
+            env.transaction._Transaction__file_open_tmp_paths.append(module_dir)
             yield module_dir
         finally:
-            env.transaction._Transaction__file_open_tmp_paths = ()
+            env.transaction._Transaction__file_open_tmp_paths.remove(module_dir)
 
 
 #----------------------------------------------------------
@@ -417,52 +442,11 @@ def merge_sequences(*iterables: Iterable[T]) -> list[T]:
     return topological_sort(deps)
 
 
-try:
-    import xlwt
-
-    # add some sanitization to respect the excel sheet name restrictions
-    # as the sheet name is often translatable, can not control the input
-    class PatchedWorkbook(xlwt.Workbook):
-        def add_sheet(self, name, cell_overwrite_ok=False):
-            # invalid Excel character: []:*?/\
-            name = re.sub(r'[\[\]:*?/\\]', '', name)
-
-            # maximum size is 31 characters
-            name = name[:31]
-            return super(PatchedWorkbook, self).add_sheet(name, cell_overwrite_ok=cell_overwrite_ok)
-
-    xlwt.Workbook = PatchedWorkbook
-
-except ImportError:
-    xlwt = None
-
-try:
-    import xlsxwriter
-
-    # add some sanitization to respect the excel sheet name restrictions
-    # as the sheet name is often translatable, can not control the input
-    class PatchedXlsxWorkbook(xlsxwriter.Workbook):
-
-        # TODO when xlsxwriter bump to 0.9.8, add worksheet_class=None parameter instead of kw
-        def add_worksheet(self, name=None, **kw):
-            if name:
-                # invalid Excel character: []:*?/\
-                name = re.sub(r'[\[\]:*?/\\]', '', name)
-
-                # maximum size is 31 characters
-                name = name[:31]
-            return super(PatchedXlsxWorkbook, self).add_worksheet(name, **kw)
-
-    xlsxwriter.Workbook = PatchedXlsxWorkbook
-
-except ImportError:
-    xlsxwriter = None
-
-
 def get_iso_codes(lang: str) -> str:
     if lang.find('_') != -1:
-        if lang.split('_')[0] == lang.split('_')[1].lower():
-            lang = lang.split('_')[0]
+        lang_items = lang.split('_')
+        if lang_items[0] == lang_items[1].lower():
+            lang = lang_items[0]
     return lang
 
 
@@ -608,10 +592,12 @@ POSIX_TO_LDML = {
     'B': 'MMMM',
     #'c': '',
     'd': 'dd',
+    '-d': 'd',
     'H': 'HH',
     'I': 'hh',
     'j': 'DDD',
     'm': 'MM',
+    '-m': 'M',
     'M': 'mm',
     'p': 'a',
     'S': 'ss',
@@ -636,6 +622,7 @@ def posix_to_ldml(fmt: str, locale: babel.Locale) -> str:
     """
     buf = []
     pc = False
+    minus = False
     quoted = []
 
     for c in fmt:
@@ -656,7 +643,13 @@ def posix_to_ldml(fmt: str, locale: babel.Locale) -> str:
                 buf.append(locale.date_formats['short'].pattern)
             elif c == 'X': # time format, seems to include seconds. short does not
                 buf.append(locale.time_formats['medium'].pattern)
+            elif c == '-':
+                minus = True
+                continue
             else: # look up format char in static mapping
+                if minus:
+                    c = '-' + c
+                    minus = False
                 buf.append(POSIX_TO_LDML[c])
             pc = False
         elif c == '%':
@@ -820,12 +813,22 @@ class lower_logging(logging.Handler):
             record.levelname = f'_{record.levelname}'
             record.levelno = self.to_level
             self.had_error_log = True
-            record.args = tuple(arg.replace('Traceback (most recent call last):', '_Traceback_ (most recent call last):') if isinstance(arg, str) else arg for arg in record.args)
+            if MungedTracebackLogRecord.__base__ is logging.LogRecord:
+                MungedTracebackLogRecord.__bases__ = (record.__class__,)
+            record.__class__ = MungedTracebackLogRecord
 
         if logging.getLogger(record.name).isEnabledFor(record.levelno):
             for handler in self.old_handlers:
                 if handler.level <= record.levelno:
                     handler.emit(record)
+
+
+class MungedTracebackLogRecord(logging.LogRecord):
+    def getMessage(self):
+        return super().getMessage().replace(
+            'Traceback (most recent call last):',
+            '_Traceback_ (most recent call last):',
+        )
 
 
 def stripped_sys_argv(*strip_args):
@@ -905,7 +908,7 @@ def dumpstacks(sig=None, frame=None, thread_idents=None, log_level=logging.INFO)
             perf_t0 = thread_info.get('perf_t0')
             remaining_time = None
             if query_time is not None and perf_t0:
-                remaining_time = '%.3f' % (time.time() - perf_t0 - query_time)
+                remaining_time = '%.3f' % (real_time() - perf_t0 - query_time)
                 query_time = '%.3f' % query_time
             # qc:query_count qt:query_time pt:python_time (aka remaining time)
             code.append("\n# Thread: %s (db:%s) (uid:%s) (url:%s) (qc:%s qt:%s pt:%s)" %
@@ -919,6 +922,7 @@ def dumpstacks(sig=None, frame=None, thread_idents=None, log_level=logging.INFO)
             for line in extract_stack(stack):
                 code.append(line)
 
+    import odoo  # eventd
     if odoo.evented:
         # code from http://stackoverflow.com/questions/12510648/in-gevent-how-can-i-dump-stack-traces-of-all-running-greenlets
         import gc
@@ -1054,7 +1058,7 @@ class OrderedSet(MutableSet[T], typing.Generic[T]):
     """ A set collection that remembers the elements first insertion order. """
     __slots__ = ['_map']
 
-    def __init__(self, elems=()):
+    def __init__(self, elems: Iterable[T] = ()):
         self._map: dict[T, None] = dict.fromkeys(elems)
 
     def __contains__(self, elem):
@@ -1085,12 +1089,22 @@ class OrderedSet(MutableSet[T], typing.Generic[T]):
     def intersection(self, *others):
         return reduce(OrderedSet.__and__, others, self)
 
+    def copy(self):
+        new_set = OrderedSet()
+        new_set._map = self._map.copy()  # Atomic dict copy
+        return new_set
+
 
 class LastOrderedSet(OrderedSet[T], typing.Generic[T]):
     """ A set collection that remembers the elements last insertion order. """
     def add(self, elem):
         self.discard(elem)
         super().add(elem)
+
+    def copy(self):
+        new_set = LastOrderedSet()
+        new_set._map = self._map.copy()  # Atomic dict copy
+        return new_set
 
 
 class Callbacks:
@@ -1165,6 +1179,9 @@ class Callbacks:
         """ Remove all callbacks and data from self. """
         self._funcs.clear()
         self.data.clear()
+
+    def __len__(self) -> int:
+        return len(self._funcs)
 
 
 class ReversedIterable(Reversible[T], typing.Generic[T]):
@@ -1309,6 +1326,7 @@ def get_lang(env: Environment, lang_code: str | None = None) -> LangData:
     return env['res.lang']._get_data(code=lang)
 
 
+@lru_cache
 def babel_locale_parse(lang_code: str | None) -> babel.Locale:
     if lang_code:
         try:
@@ -1326,32 +1344,29 @@ def formatLang(
     value: float | typing.Literal[''],
     digits: int = 2,
     grouping: bool = True,
-    monetary: bool | Sentinel = SENTINEL,
     dp: str | None = None,
-    currency_obj=None,
+    currency_obj: typing.Any | None = None,
     rounding_method: typing.Literal['HALF-UP', 'HALF-DOWN', 'HALF-EVEN', "UP", "DOWN"] = 'HALF-EVEN',
     rounding_unit: typing.Literal['decimals', 'units', 'thousands', 'lakhs', 'millions'] = 'decimals',
 ) -> str:
     """
     This function will format a number `value` to the appropriate format of the language used.
 
-    :param Object env: The environment.
-    :param float value: The value to be formatted.
-    :param int digits: The number of decimals digits.
-    :param bool grouping: Usage of language grouping or not.
-    :param bool monetary: Usage of thousands separator or not.
-        .. deprecated:: 13.0
-    :param str dp: Name of the decimals precision to be used. This will override ``digits``
+    :param env: The environment.
+    :param value: The value to be formatted.
+    :param digits: The number of decimals digits.
+    :param grouping: Usage of language grouping or not.
+    :param dp: Name of the decimals precision to be used. This will override ``digits``
                    and ``currency_obj`` precision.
-    :param Object currency_obj: Currency to be used. This will override ``digits`` precision.
-    :param str rounding_method: The rounding method to be used:
+    :param currency_obj: Currency to be used. This will override ``digits`` precision.
+    :param rounding_method: The rounding method to be used:
         **'HALF-UP'** will round to the closest number with ties going away from zero,
         **'HALF-DOWN'** will round to the closest number with ties going towards zero,
         **'HALF_EVEN'** will round to the closest number with ties going to the closest
         even number,
         **'UP'** will always round away from 0,
         **'DOWN'** will always round towards 0.
-    :param str rounding_unit: The rounding unit to be used:
+    :param rounding_unit: The rounding unit to be used:
         **decimals** will round to decimals with ``digits`` or ``dp`` precision,
         **units** will round to units without any decimals,
         **thousands** will round to thousands without any decimals,
@@ -1359,10 +1374,7 @@ def formatLang(
         **millions** will round to millions without any decimals.
 
     :returns: The value formatted.
-    :rtype: str
     """
-    if monetary is not SENTINEL:
-        warnings.warn("monetary argument deprecated since 13.0", DeprecationWarning, 2)
     # We don't want to return 0
     if value == '':
         return ''
@@ -1417,18 +1429,19 @@ def format_date(
     """
     if not value:
         return ''
+    from odoo.fields import Datetime  # noqa: PLC0415
     if isinstance(value, str):
         if len(value) < DATE_LENGTH:
             return ''
         if len(value) > DATE_LENGTH:
             # a datetime, convert to correct timezone
-            value = odoo.fields.Datetime.from_string(value)
-            value = odoo.fields.Datetime.context_timestamp(env['res.lang'], value)
+            value = Datetime.from_string(value)
+            value = Datetime.context_timestamp(env['res.lang'], value)
         else:
-            value = odoo.fields.Datetime.from_string(value)
+            value = Datetime.from_string(value)
     elif isinstance(value, datetime.datetime) and not value.tzinfo:
         # a datetime, convert to correct timezone
-        value = odoo.fields.Datetime.context_timestamp(env['res.lang'], value)
+        value = Datetime.context_timestamp(env['res.lang'], value)
 
     lang = get_lang(env, lang_code)
     locale = babel_locale_parse(lang.code)
@@ -1471,14 +1484,16 @@ def format_datetime(
     :param env:
     :param str|datetime value: naive datetime to format either in string or in datetime
     :param str tz: name of the timezone  in which the given datetime should be localized
-    :param str dt_format: one of “full”, “long”, “medium”, or “short”, or a custom date/time pattern compatible with `babel` lib
+    :param str dt_format: “medium”, or “short” to use res.lang format with or without the
+        seconds. Or a custom date/time pattern compatible with `babel` lib
     :param str lang_code: ISO code of the language to use to render the given datetime
     :rtype: str
     """
     if not value:
         return ''
     if isinstance(value, str):
-        timestamp = odoo.fields.Datetime.from_string(value)
+        from odoo.fields import Datetime  # noqa: PLC0415
+        timestamp = Datetime.from_string(value)
     else:
         timestamp = value
 
@@ -1493,16 +1508,17 @@ def format_datetime(
     lang = get_lang(env, lang_code)
 
     locale = babel_locale_parse(lang.code or lang_code)  # lang can be inactive, so `lang`is empty
-    if not dt_format:
+    if not dt_format or dt_format == 'medium':
         date_format = posix_to_ldml(lang.date_format, locale=locale)
         time_format = posix_to_ldml(lang.time_format, locale=locale)
+        dt_format = '%s %s' % (date_format, time_format)
+    elif dt_format == 'short':
+        date_format = posix_to_ldml(lang.date_format, locale=locale)
+        time_format = posix_to_ldml(lang.time_format.replace(':%S', ''), locale=locale)
         dt_format = '%s %s' % (date_format, time_format)
 
     # Babel allows to format datetime in a specific language without change locale
     # So month 1 = January in English, and janvier in French
-    # Be aware that the default value for format is 'medium', instead of 'short'
-    #     medium:  Jan 5, 2016, 10:20:31 PM |   5 janv. 2016 22:20:31
-    #     short:   1/5/16, 10:20 PM         |   5/01/16 22:20
     # Formatting available here : http://babel.pocoo.org/en/latest/dates.html#date-fields
     return babel.dates.format_datetime(localized_datetime, dt_format, locale=locale)
 
@@ -1518,9 +1534,10 @@ def format_time(
 
         :param env:
         :param value: the time to format
-        :type value: `datetime.time` instance. Could be timezoned to display tzinfo according to format (e.i.: 'full' format)
+        :type value: `datetime.time` instance. Could be timezoned to display tzinfo according to format
         :param tz: name of the timezone  in which the given datetime should be localized
-        :param time_format: one of “full”, “long”, “medium”, or “short”, or a custom time pattern
+        :param str time_format: “medium”, or “short” to use res.lang format with or without the
+            seconds. Or a custom time pattern compatible with `babel` lib
         :param lang_code: ISO
 
         :rtype str
@@ -1532,7 +1549,8 @@ def format_time(
         localized_time = value
     else:
         if isinstance(value, str):
-            value = odoo.fields.Datetime.from_string(value)
+            from odoo.fields import Datetime  # noqa: PLC0415
+            value = Datetime.from_string(value)
         assert isinstance(value, datetime.datetime)
         tz_name = tz or env.user.tz or 'UTC'
         utc_datetime = pytz.utc.localize(value, is_dst=False)
@@ -1544,8 +1562,10 @@ def format_time(
 
     lang = get_lang(env, lang_code)
     locale = babel_locale_parse(lang.code)
-    if not time_format:
+    if not time_format or time_format == 'medium':
         time_format = posix_to_ldml(lang.time_format, locale=locale)
+    elif time_format == 'short':
+        time_format = posix_to_ldml(lang.time_format.replace(':%S', ''), locale=locale)
 
     return babel.dates.format_time(localized_time, format=time_format, locale=locale)
 
@@ -1612,12 +1632,15 @@ def format_decimalized_amount(amount: float, currency=None) -> str:
     return "%s %s" % (formated_amount, currency.symbol or '')
 
 
-def format_amount(env: Environment, amount: float, currency, lang_code: str | None = None) -> str:
+def format_amount(env: Environment, amount: float, currency, lang_code: str | None = None, trailing_zeroes: bool = True) -> str:
     fmt = "%.{0}f".format(currency.decimal_places)
     lang = env['res.lang'].browse(get_lang(env, lang_code).id)
 
     formatted_amount = lang.format(fmt, currency.round(amount), grouping=True)\
         .replace(r' ', u'\N{NO-BREAK SPACE}').replace(r'-', u'-\N{ZERO WIDTH NO-BREAK SPACE}')
+
+    if not trailing_zeroes:
+        formatted_amount = re.sub(fr'{re.escape(lang.decimal_point)}?0+$', '', formatted_amount)
 
     pre = post = u''
     if currency.position == 'before':
@@ -1666,25 +1689,22 @@ class ReadonlyDict(Mapping[K, T], typing.Generic[K, T]):
           data.update({'baz', 'xyz'}) # raises exception
           dict.update(data, {'baz': 'xyz'}) # raises exception
     """
+    __slots__ = ('_data__',)
+
     def __init__(self, data):
-        self.__data = dict(data)
+        self._data__ = dict(data)
 
     def __contains__(self, key: K):
-        return key in self.__data
+        return key in self._data__
 
     def __getitem__(self, key: K) -> T:
-        try:
-            return self.__data[key]
-        except KeyError:
-            if hasattr(type(self), "__missing__"):
-                return self.__missing__(key)
-            raise
+        return self._data__[key]
 
     def __len__(self):
-        return len(self.__data)
+        return len(self._data__)
 
     def __iter__(self):
-        return iter(self.__data)
+        return iter(self._data__)
 
 
 class DotDict(dict):
@@ -1715,7 +1735,7 @@ def get_diff(data_from, data_to, custom_style=False, dark_color_scheme=False):
         For the table to fit the modal width, some custom style is needed.
         """
         to_append = {
-            'diff_header': 'bg-600 text-center align-top px-2',
+            'diff_header': 'bg-600 text-light text-center align-top px-2',
             'diff_next': 'd-none',
         }
         for old, new in to_append.items():
@@ -1733,6 +1753,7 @@ def get_diff(data_from, data_to, custom_style=False, dark_color_scheme=False):
                 table.diff { width: 100%%; }
                 table.diff th.diff_header { width: 50%%; }
                 table.diff td.diff_header { white-space: nowrap; }
+                table.diff td.diff_header + td { width: 50%%; }
                 table.diff td { word-break: break-all; vertical-align: top; }
                 table.diff .diff_chg, table.diff .diff_sub, table.diff .diff_add {
                     display: inline-block;
@@ -1757,7 +1778,7 @@ def get_diff(data_from, data_to, custom_style=False, dark_color_scheme=False):
     return handle_style(diff, custom_style, dark_color_scheme)
 
 
-def hmac(env, scope, message, hash_function=hashlib.sha256):
+def hmac(env, scope, message, hash_function=hashlib.sha256, *, secret=None):
     """Compute HMAC with `database.secret` config parameter as key.
 
     :param env: sudo environment to use for retrieving config parameter
@@ -1765,20 +1786,30 @@ def hmac(env, scope, message, hash_function=hashlib.sha256):
     :param scope: scope of the authentication, to have different signature for the same
         message in different usage
     :param hash_function: hash function to use for HMAC (default: SHA-256)
+    :param secret: secret used for sign, falls back to database.secret when no explicit secret is provided
     """
     if not scope:
         raise ValueError('Non-empty scope required')
 
-    secret = env['ir.config_parameter'].get_param('database.secret')
+    if secret is None:
+        secret = env['ir.config_parameter'].get_param('database.secret')
+    if isinstance(secret, str):
+        secret = secret.encode()
+
+    if not isinstance(secret, bytes):
+        raise TypeError("secret must be a str or bytes")
+    if not secret:
+        raise ValueError("Non-empty secret required")
+
     message = repr((scope, message))
     return hmac_lib.new(
-        secret.encode(),
+        secret,
         message.encode(),
         hash_function,
     ).hexdigest()
 
 
-def hash_sign(env, scope, message_values, expiration=None, expiration_hours=None):
+def hash_sign(env, scope, message_values, expiration=None, expiration_hours=None, *, secret=None):
     """ Generate an urlsafe payload signed with the HMAC signature for an iterable set of data.
     This feature is very similar to JWT, but in a more generic implementation that is inline with out previous hmac implementation.
 
@@ -1788,6 +1819,7 @@ def hash_sign(env, scope, message_values, expiration=None, expiration_hours=None
     :param message_values: values to be encoded inside the payload
     :param expiration: optional, a datetime or timedelta
     :param expiration_hours: optional, a int representing a number of hours before expiration. Cannot be set at the same time as expiration
+    :param secret: secret used for sign, falls back to database.secret when no explicit secret is provided
     :return: the payload that can be used as a token
     """
     assert not (expiration and expiration_hours)
@@ -1800,18 +1832,19 @@ def hash_sign(env, scope, message_values, expiration=None, expiration_hours=None
             expiration = datetime.datetime.now() + expiration
     expiration_timestamp = 0 if not expiration else int(expiration.timestamp())
     message_strings = json.dumps(message_values)
-    hash_value = hmac(env, scope, f'1:{message_strings}:{expiration_timestamp}', hash_function=hashlib.sha256)
+    hash_value = hmac(env, scope, f'1:{message_strings}:{expiration_timestamp}', hash_function=hashlib.sha256, secret=secret)
     token = b"\x01" + expiration_timestamp.to_bytes(8, 'little') + bytes.fromhex(hash_value) + message_strings.encode()
     return base64.urlsafe_b64encode(token).decode().rstrip('=')
 
 
-def verify_hash_signed(env, scope, payload):
+def verify_hash_signed(env, scope, payload, *, secret=None):
     """ Verify and extract data from a given urlsafe  payload generated with hash_sign()
 
     :param env: sudo environment to use for retrieving config parameter
     :param scope: scope of the authentication, to have different signature for the same
         message in different usage
     :param payload: the token to verify
+    :param secret: secret used to verify signature, falls back to database.secret when no explicit secret is provided
     :return: The payload_values if the check was successful, None otherwise.
     """
 
@@ -1822,7 +1855,7 @@ def verify_hash_signed(env, scope, payload):
 
     expiration_value, hash_value, message = token[1:9], token[9:41].hex(), token[41:].decode()
     expiration_value = int.from_bytes(expiration_value, byteorder='little')
-    hash_value_expected = hmac(env, scope, f'1:{message}:{expiration_value}', hash_function=hashlib.sha256)
+    hash_value_expected = hmac(env, scope, f'1:{message}:{expiration_value}', hash_function=hashlib.sha256, secret=secret)
 
     if consteq(hash_value, hash_value_expected) and (expiration_value == 0 or datetime.datetime.now().timestamp() < expiration_value):
         message_values = json.loads(message)
@@ -1830,9 +1863,9 @@ def verify_hash_signed(env, scope, payload):
     return None
 
 
-def limited_field_access_token(record, field_name, timestamp=None):
-    """Generate a token granting access to the given record and field_name from
-    the binary routes (/web/content or /web/image).
+def limited_field_access_token(record, field_name, timestamp=None, *, scope):
+    """Generate a token granting access to the given record and field_name in
+    the given scope.
 
     The validitiy of the token is determined by the timestamp parameter.
     When it is not specified, a timestamp is automatically generated with a
@@ -1846,6 +1879,9 @@ def limited_field_access_token(record, field_name, timestamp=None):
     :type record: class:`odoo.models.Model`
     :param field_name: the field name of record to generate the token for
     :type field_name: str
+    :param scope: scope of the authentication, to have different signature for the same
+        record/field in different usage
+    :type scope: str
     :param timestamp: expiration timestamp of the token, or None to generate one
     :type timestamp: int, optional
     :return: the token, which includes the timestamp in hex format
@@ -1859,11 +1895,11 @@ def limited_field_access_token(record, field_name, timestamp=None):
         adler32_max = 4294967295
         jitter = two_weeks * zlib.adler32(unique_str.encode()) // adler32_max
         timestamp = hex(start_of_period + 2 * two_weeks + jitter)
-    token = hmac(record.env(su=True), "binary", (record._name, record.id, field_name, timestamp))
+    token = hmac(record.env(su=True), scope, (record._name, record.id, field_name, timestamp))
     return f"{token}o{timestamp}"
 
 
-def verify_limited_field_access_token(record, field_name, access_token):
+def verify_limited_field_access_token(record, field_name, access_token, *, scope):
     """Verify the given access_token grants access to field_name of record.
     In particular, the token must have the right format, must be valid for the
     given record, and must not have expired.
@@ -1874,24 +1910,58 @@ def verify_limited_field_access_token(record, field_name, access_token):
     :type field_name: str
     :param access_token: the access token to verify
     :type access_token: str
+    :param scope: scope of the authentication, to have different signature for the same
+        record/field in different usage
     :return: whether the token is valid for the record/field_name combination at
         the current date and time
     :rtype: bool
     """
     *_, timestamp = access_token.rsplit("o", 1)
     return consteq(
-        access_token, limited_field_access_token(record, field_name, timestamp)
+        access_token, limited_field_access_token(record, field_name, timestamp, scope=scope)
     ) and datetime.datetime.now() < datetime.datetime.fromtimestamp(int(timestamp, 16))
 
 
-ADDRESS_REGEX = re.compile(r'^(.*?)(\s[0-9][0-9\S]*)?(?: - (.+))?$', flags=re.DOTALL)
+ADDRESS_REGEXES = [
+    # Same as regex bellow, but match if the building number is at the start of the string
+    re.compile(r'''^
+        (?P<building_number>[0-9][a-zA-Z0-9/-]*)[,\s]+
+        (?P<street>.*?)
+        # We want to capture the door number after the last comma of the string, as we could
+        # have commas in the street name
+        (?:\s*[-,/]\s*(?P<door_number>(?=.*\d)(?:(?!\s*,\s*|\s+-\s+).)+))?
+    $''', flags=re.DOTALL | re.VERBOSE),
+    # Match addresses where building number is between street name and door number
+    re.compile(r'''^
+        # Non greedy match on street name, so it will stops as soon as it faces a digit
+        (?P<street>.*?)\s*
+        # We will use this comma for a condition later
+        (?P<comma>,)?\s*
+        # Match the building number, it must starts with a digit, and it stops when facing
+        # a blank space, a comma or end of string
+        (?P<building_number>[0-9][a-zA-Z0-9/-]*)?
+        # If we didn't capture a comma in the comma group, we do a positive lookahead to check
+        # if we have a door number after
+        (?(comma)|(?=\s+[,-/]|\s*$))
+        # Door number group has to starts with '-', ',' or '/'
+        (?:\s*[-,/]\s*(?P<door_number>(?=.*\d)(?:(?!\s*,\s*|\s+-\s+).)+))?
+    ''', flags=re.DOTALL | re.VERBOSE),
+]
 def street_split(street):
-    match = ADDRESS_REGEX.match(street or '')
-    results = match.groups('') if match else ('', '', '')
+    for regex in ADDRESS_REGEXES:
+        match = regex.match(street or '')
+        results = match.groupdict() if match else {}
+        if results:
+            return {
+                'street_name': (results.get('street') or '').strip(),
+                'street_number': (results.get('building_number') or '').strip(),
+                'street_number2': (results.get('door_number') or '').strip(),
+            }
+
     return {
-        'street_name': results[0].strip(),
-        'street_number': results[1].strip(),
-        'street_number2': results[2],
+        'street_name': '',
+        'street_number': '',
+        'street_number2': '',
     }
 
 
@@ -1932,13 +2002,10 @@ def format_frame(frame) -> str:
 
 def named_to_positional_printf(string: str, args: Mapping) -> tuple[str, tuple]:
     """ Convert a named printf-style format string with its arguments to an
-    equivalent positional format string with its arguments. This implementation
-    does not support escaped ``%`` characters (``"%%"``).
+    equivalent positional format string with its arguments.
     """
-    if '%%' in string:
-        raise ValueError(f"Unsupported escaped '%' in format string {string!r}")
     pargs = _PrintfArgs(args)
-    return string % pargs, tuple(pargs.values)
+    return string.replace('%%', '%%%%') % pargs, tuple(pargs.values)
 
 
 class _PrintfArgs:

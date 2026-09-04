@@ -1,5 +1,5 @@
 import { useService } from "@web/core/utils/hooks";
-import { pick } from "@web/core/utils/objects";
+import { isObject, pick } from "@web/core/utils/objects";
 import { RelationalModel } from "@web/model/relational_model/relational_model";
 import { getFieldsSpec } from "@web/model/relational_model/utils";
 import { Component, xml, onWillStart, onWillUpdateProps, useState } from "@odoo/owl";
@@ -13,7 +13,8 @@ class StandaloneRelationalModel extends RelationalModel {
             const config = this._getNextConfig(this.config, params);
             this.root = this._createRoot(config, data);
             this.config = config;
-            return;
+            this.hooks.onRootLoaded(this.root);
+            return Promise.resolve();
         }
         return super.load(params);
     }
@@ -34,17 +35,12 @@ class _Record extends Component {
                 activeFields,
                 resId: this.props.info.resId,
                 mode: this.props.info.mode,
+                context: this.props.info.context,
             },
-            hooks: {
-                onRecordSaved: this.props.info.onRecordSaved || (() => {}),
-                onWillSaveRecord: this.props.info.onWillSaveRecord || (() => {}),
-                onRecordChanged: this.props.info.onRecordChanged || (() => {}),
-            },
+            hooks: this.props.info.hooks,
         };
         const modelServices = Object.fromEntries(
-            StandaloneRelationalModel.services.map((servName) => {
-                return [servName, useService(servName)];
-            })
+            StandaloneRelationalModel.services.map((servName) => [servName, useService(servName)])
         );
         modelServices.orm = this.orm;
         this.model = useState(new StandaloneRelationalModel(this.env, modelParams, modelServices));
@@ -108,6 +104,21 @@ class _Record extends Component {
                             id: values[fieldName][0],
                             display_name: values[fieldName][1],
                         };
+                    } else if (isObject(values[fieldName])) {
+                        if (values[fieldName].display_name === undefined) {
+                            const prom = loadDisplayName(values[fieldName].id);
+                            prom.then((displayName) => {
+                                values[fieldName] = {
+                                    id: values[fieldName].id,
+                                    display_name: displayName,
+                                };
+                            });
+                            proms.push(prom);
+                        }
+                        values[fieldName] = {
+                            id: values[fieldName].id,
+                            display_name: values[fieldName].display_name,
+                        };
                     }
                 }
                 await Promise.all(proms);
@@ -117,10 +128,11 @@ class _Record extends Component {
         onWillStart(async () => {
             if (this.props.values) {
                 const values = await prepareLoadWithValues(this.props.values);
-                return this.model.load({ values });
+                await this.model.load({ values });
             } else {
-                return this.model.load();
+                await this.model.load();
             }
+            this.model.whenReady.resolve();
         });
         onWillUpdateProps(async (nextProps) => {
             const params = {};
@@ -162,22 +174,30 @@ export class Record extends Component {
         "resId?",
         "mode?",
         "values?",
-        "onRecordChanged?",
-        "onRecordSaved?",
-        "onWillSaveRecord?",
+        "context?",
+        "hooks?",
     ];
+    static defaultProps = {
+        context: {},
+    };
     setup() {
-        if (this.props.fields) {
-            this.fields = this.props.fields;
+        const { activeFields, fieldNames, fields, resModel } = this.props;
+        if (!activeFields && !fieldNames) {
+            throw Error(
+                `Record props should have either a "activeFields" key or a "fieldNames" key`
+            );
+        }
+        if (!fields && (!fieldNames || !resModel)) {
+            throw Error(
+                `Record props should have either a "fields" key or a "fieldNames" and a "resModel" key`
+            );
+        }
+        if (fields) {
+            this.fields = fields;
         } else {
-            const orm = useService("orm");
+            const fieldService = useService("field");
             onWillStart(async () => {
-                this.fields = await orm.call(
-                    this.props.resModel,
-                    "fields_get",
-                    [this.props.fieldNames],
-                    {}
-                );
+                this.fields = await fieldService.loadFields(resModel, { fieldNames });
             });
         }
     }

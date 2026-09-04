@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from odoo import exceptions
 from odoo.addons.iap.tools import iap_tools
-from odoo.addons.iap.models.iap_enrich_api import IapEnrichAPI
+from odoo.addons.iap.models.iap_enrich_api import IapEnrichApi
 from odoo.tests import common
 
 
@@ -49,11 +49,8 @@ class MockIAPEnrich(common.TransactionCase):
                         result[str(lead_id)].update(email_data[email])
                 return result
 
-        try:
-            with patch.object(IapEnrichAPI, '_contact_iap', side_effect=_contact_iap) as contact_iap_mock:
-                yield
-        finally:
-            pass
+        with patch.object(IapEnrichApi, '_contact_iap', side_effect=_contact_iap):
+            yield
 
     @classmethod
     def _init_iap_mock(cls):
@@ -135,6 +132,34 @@ class MockIAPEnrich(common.TransactionCase):
             'state_name': self.de_state_st.name,
             'country_code': self.base_de.code,
             'country_name': self.base_de.name,
+        }
+
+    def _get_iap_dnb_company_data(self, base_name, service=None, add_values=None):
+        return {
+            'city': 'Mönchengladbach',
+            'country_code': self.base_de.code,
+            'domain': '%s.de' % base_name,
+            'duns': '123456789',
+            'employees': 314,
+            'entity_type': 'private',
+            'industry_code': 'J',
+            'name': '%s GmbH' % base_name,
+            'phone': '4930499193937',
+            'state_code': self.de_state_st.code,
+            'street': 'Mennrather Str. 123456',
+            'unspsc_codes': [
+                [541512, 'Computer Systems Design Services'],
+                [518210, 'Computing Infrastructure Providers, Data Processing, Web Hosting, and Related Services'],
+                [541611, 'Administrative Management and General Management Consulting Services'],
+                [87429902, 'Business management consultant'],
+                [73790200, 'Computer related consulting services'],
+                [73749902, 'Data processing service'],
+                [51, 'Data Processing']
+            ],
+            'vat': '7LRA8',
+            'website': '%s.de' % base_name,
+            'estimated_annual_revenue': '10M USD',
+            'zip': '41179'
         }
 
     def _get_iap_contact_data(self, base_name, service=None, add_values=None):

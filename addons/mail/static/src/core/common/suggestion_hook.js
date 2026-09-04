@@ -1,19 +1,56 @@
+import { isContentEditable, isTextNode } from "@html_editor/utils/dom_info";
+import { rightPos } from "@html_editor/utils/position";
+import {
+    generatePartnerMentionElement,
+    generateRoleMentionElement,
+    generateSpecialMentionElement,
+    generateThreadMentionElement,
+} from "@mail/utils/common/format";
 import { status, useComponent, useEffect, useState } from "@odoo/owl";
 import { ConnectionAbortedError } from "@web/core/network/rpc";
 import { useService } from "@web/core/utils/hooks";
 import { useDebounced } from "@web/core/utils/timing";
 
-class UseSuggestion {
+/**
+ * @typedef {Object} Option
+ * @property {string} [buttonClass]
+ * @property {string} [classList]
+ * @property {number} [group]
+ * @property {string} [label]
+ * @property {string} [optionTemplate]
+ * @property {string} [title]
+ * @property {boolean} [unselectable]
+ * @property {import("models").ResRole} [role]
+ * @property {import("models").ResPartner} [partner]
+ * @property {import("models").Thread} [thread]
+ * @property {import("models").CannedResponse} [cannedResponse]
+ * @property {import("@web/core/emoji_picker/emoji_picker").Emoji} [emoji]
+ * @property {string} [help]
+ * @property {string} [source]
+ */
+
+/**
+ * @typedef {import("models").ResPartner
+ *   | import("models").ResRole
+ *   | import("models").Thread
+ *   | import("models").CannedResponse
+ *   | import("@web/core/emoji_picker/emoji_picker").Emoji
+ *   | import("@mail/core/common/store_service").SpecialMention} Suggestion
+ */
+
+export const DELAY_FETCH = 250;
+
+export class UseSuggestion {
     constructor(comp) {
         this.comp = comp;
-        this.fetchSuggestions = useDebounced(this.fetchSuggestions.bind(this), 250);
+        this.fetchSuggestions = useDebounced(this.fetchSuggestions.bind(this), DELAY_FETCH);
         useEffect(
             () => {
                 this.update();
                 if (this.search.position === undefined || !this.search.delimiter) {
                     return; // nothing else to fetch
                 }
-                if (this.composer.store.self.type !== "partner") {
+                if (!this.composer.store.self_partner) {
                     return; // guests cannot access fetch suggestion method
                 }
                 if (
@@ -30,7 +67,12 @@ class UseSuggestion {
             () => {
                 this.detect();
             },
-            () => [this.composer.selection.start, this.composer.selection.end, this.composer.text]
+            () => [
+                this.composer.selection.start,
+                this.composer.selection.end,
+                this.composer.composerText,
+                this.composer.composerHtml,
+            ]
         );
     }
     /** @type {import("@mail/core/common/composer").Composer} */
@@ -60,6 +102,7 @@ class UseSuggestion {
     clearRawMentions() {
         this.composer.mentionedChannels.length = 0;
         this.composer.mentionedPartners.length = 0;
+        this.composer.mentionedRoles.length = 0;
     }
     clearCannedResponses() {
         this.composer.cannedResponses = [];
@@ -73,8 +116,27 @@ class UseSuggestion {
         this.state.items = undefined;
     }
     detect() {
-        const { start, end } = this.composer.selection;
-        const text = this.composer.text;
+        let start = 0;
+        let end = 0;
+        let text = "";
+        if (this.comp.composerService.htmlEnabled) {
+            const selection = this.comp.editor.shared.selection.getEditableSelection();
+            if (
+                !isTextNode(selection.startContainer) ||
+                !isContentEditable(selection.startContainer) ||
+                !selection.isCollapsed
+            ) {
+                this.clearSearch();
+                return;
+            }
+            start = selection.startOffset;
+            end = selection.endOffset;
+            text = selection.anchorNode.textContent;
+        } else {
+            start = this.composer.selection.start;
+            end = this.composer.selection.end;
+            text = this.composer.composerText;
+        }
         if (start !== end) {
             // avoid interfering with multi-char selection
             this.clearSearch();
@@ -100,19 +162,33 @@ class UseSuggestion {
         if (this.search.position !== undefined && this.search.position < start) {
             candidatePositions.push(this.search.position);
         }
-        const supportedDelimiters = this.suggestionService.getSupportedDelimiters(this.thread);
+        const supportedDelimiters = this.suggestionService.getSupportedDelimiters(
+            this.thread,
+            this.comp.env
+        );
         for (const candidatePosition of candidatePositions) {
             if (candidatePosition < 0 || candidatePosition >= text.length) {
                 continue;
             }
-            const candidateChar = text[candidatePosition];
-            if (
-                !supportedDelimiters.find(
-                    ([delimiter, allowedPosition]) =>
-                        delimiter === candidateChar &&
-                        (allowedPosition === undefined || allowedPosition === candidatePosition)
-                )
-            ) {
+
+            const findAppropriateDelimiter = () => {
+                let goodCandidate;
+                for (const [delimiter, allowedPosition, minCharCountAfter] of supportedDelimiters) {
+                    if (
+                        text.substring(candidatePosition).startsWith(delimiter) && // delimiter is used
+                        (allowedPosition === undefined || allowedPosition === candidatePosition) && // delimiter is allowed position
+                        (minCharCountAfter === undefined ||
+                            start - candidatePosition - delimiter.length + 1 > minCharCountAfter) && // delimiter is allowed (enough custom char typed after)
+                        (!goodCandidate || delimiter.length > goodCandidate) // delimiter is more specific
+                    ) {
+                        goodCandidate = delimiter;
+                    }
+                }
+                return goodCandidate;
+            };
+
+            const candidateDelimiter = findAppropriateDelimiter();
+            if (!candidateDelimiter) {
                 continue;
             }
             const charBeforeCandidate = text[candidatePosition - 1];
@@ -120,9 +196,9 @@ class UseSuggestion {
                 continue;
             }
             Object.assign(this.search, {
-                delimiter: candidateChar,
+                delimiter: candidateDelimiter,
                 position: candidatePosition,
-                term: text.substring(candidatePosition + 1, start),
+                term: text.substring(candidatePosition + candidateDelimiter.length, start),
             });
             this.state.count++;
             return;
@@ -130,37 +206,50 @@ class UseSuggestion {
         this.clearSearch();
     }
     get thread() {
-        return this.composer.thread || this.composer.message.thread;
+        return this.composer.thread || this.composer.message?.thread;
     }
     insert(option) {
-        const position = this.composer.selection.start;
-        const text = this.composer.text;
-        let before = text.substring(0, this.search.position + 1);
-        let after = text.substring(position, text.length);
-        if (this.search.delimiter === ":") {
-            before = text.substring(0, this.search.position);
-            after = text.substring(position, text.length);
+        let position = this.search.position + 1;
+        if (
+            [":", "::"].includes(this.search.delimiter) ||
+            (this.comp.composerService.htmlEnabled && this.search.delimiter !== "/")
+        ) {
+            position = this.search.position;
+        }
+        if (this.comp.composerService.htmlEnabled) {
+            const { startContainer, endContainer, endOffset } =
+                this.comp.editor.shared.selection.getEditableSelection();
+            this.comp.editor.shared.selection.setSelection({
+                anchorNode: startContainer,
+                anchorOffset: position,
+                focusNode: endContainer,
+                focusOffset: endOffset,
+            });
         }
         if (option.partner) {
-            this.composer.mentionedPartners.add({
-                id: option.partner.id,
-                type: "partner",
-            });
-        }
-        if (option.thread) {
-            this.composer.mentionedChannels.add({
-                model: "discuss.channel",
-                id: option.thread.id,
-            });
-        }
-        if (option.cannedResponse) {
+            this.composer.mentionedPartners.add({ id: option.partner.id });
+        } else if (option.role) {
+            this.composer.mentionedRoles.add(option.role);
+        } else if (option.thread) {
+            this.composer.mentionedChannels.add({ model: "discuss.channel", id: option.thread.id });
+        } else if (option.cannedResponse) {
             this.composer.cannedResponses.push(option.cannedResponse);
         }
-        this.clearSearch();
-        this.composer.text = before + option.label + " " + after;
-        this.composer.selection.start = before.length + option.label.length + 1;
-        this.composer.selection.end = before.length + option.label.length + 1;
-        this.composer.forceCursorMove = true;
+        if (this.comp.composerService.htmlEnabled) {
+            const inlineElement = makeMentionFromOption(option, { thread: this.thread });
+            this.comp.editor.shared.dom.insert(inlineElement);
+            const [anchorNode, anchorOffset] = rightPos(inlineElement);
+            this.comp.editor.shared.selection.setSelection({ anchorNode, anchorOffset });
+            this.comp.editor.shared.dom.insert("\u00A0");
+            this.comp.editor.shared.history.addStep();
+        } else {
+            // remove the user-typed search delimiter
+            this.composer.composerText =
+                this.composer.composerText.substring(0, position) +
+                this.composer.composerText.substring(this.composer.selection.end);
+            this.clearSearch();
+            this.composer.insertText(`${option.label} `, position);
+        }
     }
     update() {
         if (!this.search.delimiter) {
@@ -168,7 +257,6 @@ class UseSuggestion {
         }
         const { type, suggestions } = this.suggestionService.searchSuggestions(this.search, {
             thread: this.thread,
-            sort: true,
         });
         if (!suggestions.length) {
             this.state.items = undefined;
@@ -182,6 +270,9 @@ class UseSuggestion {
     }
 
     async fetchSuggestions() {
+        if (!this.thread || status(this.comp) === "destroyed") {
+            return;
+        }
         let resetFetchingState = true;
         try {
             this.abortController?.abort();
@@ -203,7 +294,7 @@ class UseSuggestion {
                 this.state.isFetching = false;
             }
         }
-        if (status(this.comp) === "destroyed") {
+        if (!this.thread || status(this.comp) === "destroyed") {
             return;
         }
         this.update();
@@ -219,4 +310,111 @@ class UseSuggestion {
 
 export function useSuggestion() {
     return new UseSuggestion(useComponent());
+}
+
+/**
+ * Maps raw suggestion records to navigable list option objects for all suggestion types.
+ *
+ * @param {string} type
+ * @param {Suggestion[]} suggestions
+ * @param {Object} [params]
+ * @param {import("models").Thread} [params.thread] The thread where the suggestion is being
+ *   composed. Used e.g. to resolve partner display names in context and stored on the resulting
+ *   Option so that consumers (insertion handlers, mention templates) can access it.
+ * @returns {{ optionTemplate?: string, options: Option[] }}
+ */
+export function mapSuggestionsToOptions(type, suggestions, { thread } = {}) {
+    const classList = "o-mail-Composer-suggestion";
+    switch (type) {
+        case "Partner":
+            return {
+                optionTemplate: "mail.Composer.suggestionPartner",
+                options: suggestions.map((suggestion) => {
+                    if (suggestion.isSpecial) {
+                        return {
+                            ...suggestion,
+                            group: 1,
+                            optionTemplate: "mail.Composer.suggestionSpecial",
+                            classList,
+                        };
+                    }
+                    if (suggestion?.Model?.getName?.() === "res.role") {
+                        return {
+                            label: suggestion.name,
+                            role: suggestion,
+                            thread,
+                            optionTemplate: "mail.Composer.suggestionRole",
+                            classList,
+                        };
+                    }
+                    return {
+                        label: thread?.getPersonaName(suggestion) ?? suggestion.name,
+                        partner: suggestion,
+                        thread,
+                        classList,
+                    };
+                }),
+            };
+        case "Thread":
+            return {
+                optionTemplate: "mail.Composer.suggestionThread",
+                options: suggestions.map((suggestion) => ({
+                    label: suggestion.fullNameWithParent,
+                    thread: suggestion,
+                    classList,
+                })),
+            };
+        case "ChannelCommand":
+            return {
+                optionTemplate: "mail.Composer.suggestionChannelCommand",
+                options: suggestions.map((suggestion) => ({
+                    label: suggestion.name,
+                    help: suggestion.help,
+                    classList,
+                })),
+            };
+        case "mail.canned.response":
+            return {
+                optionTemplate: "mail.Composer.suggestionCannedResponse",
+                options: suggestions.map((suggestion) => ({
+                    cannedResponse: suggestion,
+                    label: suggestion.substitution,
+                    source: suggestion.source,
+                    title: suggestion.substitution,
+                    classList,
+                })),
+            };
+        case "emoji":
+            return {
+                optionTemplate: "mail.Composer.suggestionEmoji",
+                options: suggestions.map((suggestion) => ({
+                    emoji: suggestion,
+                    label: suggestion.codepoints,
+                })),
+            };
+        default:
+            return { options: [] };
+    }
+}
+
+/**
+ * @param {Option} option
+ * @param {Object} [params]
+ * @param {import("models").Thread} [params.thread] The thread being viewed by the
+ *   user, needed to generate mention links that point back to the right record.
+ */
+export function makeMentionFromOption(option, { thread } = {}) {
+    let inlineElement;
+    if (option.partner) {
+        inlineElement = generatePartnerMentionElement(option.partner, thread);
+    } else if (option.isSpecial) {
+        inlineElement = generateSpecialMentionElement(option.label);
+    } else if (option.role) {
+        inlineElement = generateRoleMentionElement(option.role);
+    } else if (option.thread) {
+        inlineElement = generateThreadMentionElement(option.thread);
+    } else {
+        inlineElement = document.createTextNode(option.label);
+    }
+    return inlineElement;
 }

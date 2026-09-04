@@ -27,7 +27,7 @@
                             <field name="mrp_production_id" column_invisible="parent.mrp_production_count == 1" force_save="1"/>
                             <field name="consumption" column_invisible="True" force_save="1"/>
                             <field name="product_id" force_save="1"/>
-                            <field name="product_uom_id" groups="uom.group_uom" force_save="1"/>
+                            <field name="product_uom_id" groups="uom.group_uom" force_save="1" widget="many2one_uom"/>
                             <field name="product_expected_qty_uom" force_save="1"/>
                             <field name="product_consumed_qty_uom" force_save="1"/>
                         </list>
@@ -37,7 +37,7 @@
                             groups="mrp.group_mrp_manager" invisible="consumption != 'strict'"
                             colspan="1" type="object" class="btn-primary"/>
                         <button name="action_confirm" string="Confirm" invisible="consumption == 'strict'" data-hotkey="q"
-                            colspan="1" type="object" class="btn-primary"/>
+                            colspan="1" type="object" class="btn-primary" barcode_trigger="NEXT"/>
                         <button name="action_set_qty" string="Set Quantities &amp; Validate" colspan="1" type="object" class="btn-secondary" invisible="'is_subcontracting_portal' in context"/>
                         <button name="action_cancel" string="Discard" data-hotkey="x"
                             colspan="1" type="object" class="btn-secondary"/>

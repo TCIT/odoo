@@ -24,7 +24,7 @@
                             <img src="/web/image/website.s_faq_horizontal_default_image_1" class="img img-fluid rounded" style="width: 100% !important" alt=""/>
                             <p><br/>The first step in the onboarding process is <b>account creation</b>. This involves signing up on our platform using your email address or social media accounts. Once you’ve created an account, you will receive a confirmation email with a link to activate your account. Upon activation, you’ll be prompted to complete your profile, which includes setting up your preferences, adding any necessary payment information, and selecting the initial features or modules you wish to use.</p>
                             <p>Next, you will be introduced to our <b>setup wizard</b>, which is designed to guide you through the basic configuration of the platform. The wizard will help you configure essential settings such as language, time zone, and notifications.</p>
-                            <p><a href="#">Read More <i class="fa fa-angle-right" role="img"/></a></p>
+                            <p><a class="o_translate_inline" href="#">Read More <i class="fa fa-angle-right" role="img"/></a></p>
                         </span>
                     </article>
                 </div>
@@ -43,7 +43,7 @@
                                 <canvas height="0"/>
                             </div>
                             <!-- Graph's preview: removed automatically on drop  -->
-                            <img src="/website/static/src/img/snippets_previews/s_faq_horizontal_2_preview.jpg" class="s_dialog_preview w-100" alt=""/>
+                            <img src="/website/static/src/img/snippets_previews/s_faq_horizontal_2_preview.webp" class="s_dialog_preview w-100" alt=""/>
                             <!-- ==============================================  -->
                             <p><br/>Users can participate in beta testing programs, providing feedback on upcoming releases and influencing the future direction of the platform. By staying current with updates, you can take advantage of the latest tools and features, ensuring your business remains competitive and efficient.</p>
                         </span>
@@ -61,7 +61,7 @@
                             <p>Our support team is available 24/7 to assist with any issues or questions you may have, ensuring that help is always within reach.</p>
                             <p>Additionally, we offer a comprehensive knowledge base, including detailed documentation, video tutorials, and community forums where you can connect with other users and share insights.</p>
                             <p>We also provide regular updates and new features based on user feedback, ensuring that our platform continues to evolve to meet your needs.</p>
-                            <p><a href="#" class="btn btn-secondary">Documentation</a></p>
+                            <p><a href="#" class="btn btn-secondary o_translate_inline">Documentation</a></p>
                         </span>
                     </article>
                 </div>
@@ -69,30 +69,5 @@
         </div>
     </section>
 </template>
-
-<template id="s_faq_horizontal_options" inherit_id="website.snippet_options">
-    <xpath expr="//t[@t-call='website.snippet_options_background_options']" position="before">
-        <div data-js="faqHorizontalMultipleItems" data-selector=".s_faq_horizontal">
-            <we-row string="Topics">
-                <we-button data-add-item=""
-                        data-item=".s_faq_horizontal_entry:last"
-                        data-select-item="true"
-                        data-apply-to="> :has(.s_faq_horizontal_entry)"
-                        data-no-preview="true"
-                        class="o_we_bg_success">
-                    Add New
-                </we-button>
-            </we-row>
-        </div>
-
-        <div data-js="sizing_y" data-selector=".s_faq_horizontal .s_faq_horizontal_entry"/>
-    </xpath>
-</template>
-
-<record id="website.s_faq_horizontal_000_js" model="ir.asset">
-    <field name="name">Faq Horizontal 000 JS</field>
-    <field name="bundle">web.assets_frontend</field>
-    <field name="path">website/static/src/snippets/s_faq_horizontal/000.js</field>
-</record>
 
 </odoo>

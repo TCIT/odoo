@@ -90,7 +90,7 @@ class TestPoSMultipleReceivableAccounts(TestPoSCommon):
             self.assertAlmostEqual(orders_total, self.pos_session.total_payments_amount, msg='Total order amount should be equal to the total payment amount.')
 
             # check if there is one invoiced order
-            self.assertEqual(len(self.pos_session.order_ids.filtered(lambda order: order.state == 'invoiced')), 1, 'There should only be one invoiced order.')
+            self.assertEqual(len(self.pos_session.order_ids.filtered(lambda order: order.account_move)), 1, 'There should only be one invoiced order.')
 
         self._run_test({
             'payment_methods': self.cash_pm1 | self.bank_pm1,
@@ -106,7 +106,7 @@ class TestPoSMultipleReceivableAccounts(TestPoSCommon):
                         'line_ids_predicate': lambda line: line.account_id in self.other_sale_account | self.sales_account | self.other_receivable_account,
                         'line_ids': [
                             {'account_id': self.other_sale_account.id, 'partner_id': self.other_customer.id, 'debit': 0, 'credit': 90.86, 'reconciled': False},
-                            {'account_id': self.sales_account.id, 'partner_id': self.other_customer.id, 'debit': 0, 'credit': 140.86, 'reconciled': False},
+                            {'account_id': self.sales_account.id, 'partner_id': self.other_customer.id, 'debit': 0, 'credit': 140.87, 'reconciled': False},
                             {'account_id': self.other_receivable_account.id, 'partner_id': self.other_customer.id, 'debit': 264.76, 'credit': 0, 'reconciled': True},
                         ]
                     },
@@ -124,10 +124,10 @@ class TestPoSMultipleReceivableAccounts(TestPoSCommon):
                 'session_journal_entry': {
                     'line_ids': [
                         {'account_id': self.tax_received_account.id, 'partner_id': False, 'debit': 0, 'credit': 31.26, 'reconciled': False},
-                        {'account_id': self.tax_received_account.id, 'partner_id': False, 'debit': 0, 'credit': 55.43, 'reconciled': False},
+                        {'account_id': self.tax_received_account.id, 'partner_id': False, 'debit': 0, 'credit': 55.44, 'reconciled': False},
                         {'account_id': self.sales_account.id, 'partner_id': False, 'debit': 0, 'credit': 164.85, 'reconciled': False},
                         {'account_id': self.other_sale_account.id, 'partner_id': False, 'debit': 0, 'credit': 272.59, 'reconciled': False},
-                        {'account_id': self.sales_account.id, 'partner_id': False, 'debit': 0, 'credit': 281.73, 'reconciled': False},
+                        {'account_id': self.sales_account.id, 'partner_id': False, 'debit': 0, 'credit': 281.72, 'reconciled': False},
                         {'account_id': self.bank_pm1.receivable_account_id.id, 'partner_id': False, 'debit': 423.51, 'credit': 0, 'reconciled': True},
                         {'account_id': self.cash_pm1.receivable_account_id.id, 'partner_id': False, 'debit': 647.11, 'credit': 0, 'reconciled': True},
                         {'account_id': self.pos_receivable_account.id, 'partner_id': False, 'debit': 0, 'credit': 264.76, 'reconciled': True},
@@ -192,7 +192,7 @@ class TestPoSMultipleReceivableAccounts(TestPoSCommon):
             self.assertAlmostEqual(orders_total, self.pos_session.total_payments_amount, msg='Total order amount should be equal to the total payment amount.')
 
             # check if there is one invoiced order
-            self.assertEqual(len(self.pos_session.order_ids.filtered(lambda order: order.state == 'invoiced')), 3, 'All orders should be invoiced.')
+            self.assertEqual(len(self.pos_session.order_ids.filtered(lambda order: order.account_move)), 3, 'All orders should be invoiced.')
 
         self._run_test({
             'payment_methods': self.cash_pm1 | self.bank_pm1,
@@ -209,7 +209,7 @@ class TestPoSMultipleReceivableAccounts(TestPoSCommon):
                         'line_ids': [
                             {'account_id': self.sales_account.id, 'partner_id': self.other_customer.id, 'debit': 0, 'credit': 109.90, 'reconciled': False},
                             {'account_id': self.other_sale_account.id, 'partner_id': self.other_customer.id, 'debit': 0, 'credit': 181.73, 'reconciled': False},
-                            {'account_id': self.sales_account.id, 'partner_id': self.other_customer.id, 'debit': 0, 'credit': 281.73, 'reconciled': False},
+                            {'account_id': self.sales_account.id, 'partner_id': self.other_customer.id, 'debit': 0, 'credit': 281.72, 'reconciled': False},
                             {'account_id': self.other_receivable_account.id, 'partner_id': self.other_customer.id, 'debit': 647.11, 'credit': 0, 'reconciled': True},
                         ]
                     },
@@ -245,7 +245,7 @@ class TestPoSMultipleReceivableAccounts(TestPoSCommon):
                         'line_ids_predicate': lambda line: line.account_id in self.other_sale_account | self.sales_account | self.other_receivable_account,
                         'line_ids': [
                             {'account_id': self.other_sale_account.id, 'partner_id': self.other_customer.id, 'debit': 0, 'credit': 90.86, 'reconciled': False},
-                            {'account_id': self.sales_account.id, 'partner_id': self.other_customer.id, 'debit': 0, 'credit': 140.86, 'reconciled': False},
+                            {'account_id': self.sales_account.id, 'partner_id': self.other_customer.id, 'debit': 0, 'credit': 140.87, 'reconciled': False},
                             {'account_id': self.other_receivable_account.id, 'partner_id': self.other_customer.id, 'debit': 264.76, 'credit': 0, 'reconciled': True},
                         ]
                     },

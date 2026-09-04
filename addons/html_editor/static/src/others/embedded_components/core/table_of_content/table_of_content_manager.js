@@ -1,4 +1,5 @@
 import { batched, reactive } from "@odoo/owl";
+import { closestScrollableY, scrollTo } from "@web/core/utils/scrolling";
 
 export const HEADINGS = ["H1", "H2", "H3", "H4", "H5", "H6"];
 
@@ -40,7 +41,27 @@ export class TableOfContentManager {
             return;
         }
         const { target } = heading;
-        target.scrollIntoView({ behavior: "smooth" });
+        let offset = 0;
+        const scrollable = closestScrollableY(target);
+        if (scrollable) {
+            for (const el of scrollable.children) {
+                const { position, top, height } = getComputedStyle(el);
+                if (position === "sticky" && parseInt(top) === 0) {
+                    offset = Math.max(offset, parseInt(height));
+                }
+            }
+
+            // calculate offset to scroll heading near 1/3 of the screen
+            const { top, bottom } = scrollable.getBoundingClientRect();
+            const scrollableOffset = (bottom - top) / 3;
+            // change offset based on scroll direction
+            const { top: targetTop } = target.getBoundingClientRect();
+            offset = top > targetTop ? -scrollableOffset - offset : scrollableOffset * 2;
+            scrollTo(target, { behavior: "smooth", offset: offset }).then(() => {
+                // Scroll again in case we actually went downwards.
+                scrollTo(target, { behavior: "smooth" });
+            });
+        }
         target.classList.add("o_embedded_toc_header_highlight");
         window.setTimeout(() => {
             target.classList.remove("o_embedded_toc_header_highlight");
@@ -48,40 +69,19 @@ export class TableOfContentManager {
     }
 
     updateStructure() {
-        let currentDepthByTag = {};
-        let previousTag;
-        let previousDepth = -1;
         const container = this.getContainerEl();
         if (!container) {
             return;
         }
+        const tagDepthStack = [];
         this.structure.headings = this.fetchValidHeadings(container).map((heading) => {
-            let depth = HEADINGS.indexOf(heading.tagName);
-            if (depth !== previousDepth && heading.tagName === previousTag) {
-                depth = previousDepth;
-            } else if (depth > previousDepth) {
-                if (heading.tagName !== previousTag && HEADINGS.indexOf(previousTag) < depth) {
-                    depth = previousDepth + 1;
-                } else {
-                    depth = previousDepth;
-                }
-            } else if (depth < previousDepth) {
-                if (currentDepthByTag.hasOwnProperty(heading.tagName)) {
-                    depth = currentDepthByTag[heading.tagName];
-                }
+            while (tagDepthStack.at(-1) >= heading.tagName) {
+                tagDepthStack.pop();
             }
-
-            previousTag = heading.tagName;
-            previousDepth = depth;
-
-            // going back to 0 depth, wipe-out the 'currentDepthByTag'
-            if (depth === 0) {
-                currentDepthByTag = {};
-            }
-            currentDepthByTag[heading.tagName] = depth;
-
+            const depth = tagDepthStack.length;
+            tagDepthStack.push(heading.tagName);
             return {
-                depth: depth,
+                depth,
                 name: heading.innerText,
                 target: heading,
             };

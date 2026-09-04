@@ -2,15 +2,12 @@
 <odoo>
     <t t-name="hr_skills.SkillsListRenderer" t-inherit-mode="primary" t-inherit="web.ListRenderer">
         <xpath expr="//table" position="attributes">
-            <attribute name="t-attf-class" add="mb-1 {{ !isEditable ? 'cursor-default' : '' }} {{ !showTable ? 'd-none' : ''}} o_skill_table" separator=" "/>
-        </xpath>
-        <xpath expr="//thead" position="attributes">
-            <attribute name="style">visibility: collapse;</attribute>
+            <attribute name="t-attf-class" add="mb-1 {{ !isEditable ? 'cursor-default' : '' }} {{ !showTable ? 'd-none' : ''}} o_skill_table overflow-hidden" separator=" "/>
         </xpath>
         <xpath expr="//table" position="before">
-            <div name="skills_header" class="text-uppercase fw-bolder small ms-3" style="margin-top: 2rem; box-shadow: 0 1px 0 #e6e6e6">
-                Skills
-                <a t-if="!isEmpty &amp;&amp; showTimeline" t-on-click="openSkillsReport" class="float-end me-3 cursor-pointer">
+            <div name="skills_header" class="skills_header text-uppercase small fw-bolder py-2 mt-4" t-att-class="{'o_horizontal_separator': !showTable }">
+                Skills &amp; Certifications
+                <a t-if="!isEmpty &amp;&amp; showTimeline" t-on-click="openSkillsReport" class="float-end cursor-pointer">
                     <span class="fa fa-line-chart me-1"/>
                     Timeline
                 </a>
@@ -19,29 +16,27 @@
         <xpath expr="//table" position="after">
             <t t-if="!showTable">
                 <t t-if="!anySkills">
-                    <div name="no_skills" class="ms-3 mt-3">
-                        <p>
-                            There are no skills defined in the library.<br/>
-                            Why not try adding some ?
+                    <div name="no_skills" class="skills_helper">
+                        <p class="mt-2">
+                            There are no skills defined in the library.
                         </p>
                         <button t-on-click="skillTypesAction"
-                            class="btn btn-secondary ms-4 mt-3 text-center"
+                            class="btn btn-secondary align-self-center"
                             role="button" t-if="isEditable">
-                            Create new Skills
+                            Create Skills
                         </button>
                     </div>
                 </t>
                 <t t-else="">
-                    <div name="skills_available" class="ms-3 mt-3">
-                        <p class="mt-3">You can add skills from our library to the employee profile.<br/>
-                        If skills are missing, they can be created by an HR officer.</p>
-                        <div class="ms-5">
-                             <button t-on-click="props.onAdd"
-                                class="btn btn-secondary ms-4 mt-3 text-center"
-                                role="button" t-if="isEditable">
-                                Pick a skill from the list
-                            </button>
-                        </div>
+                    <div name="skills_available" class="skills_helper text-muted fst-italic">
+                        <p class="mt-2">You can add skills from our library to the employee profile.<br/>
+                            If skills are missing, they can be created by an HR officer.
+                        </p>
+                        <button t-on-click="props.onAdd"
+                            class="btn btn-secondary align-self-center"
+                            role="button" t-if="isEditable">
+                            Pick a skill from the list
+                        </button>
                     </div>
                 </t>
             </t>
@@ -54,7 +49,7 @@
                 <th tabindex="-1" class="o_group_name" t-att-colspan="colspan">
                     <div class="d-flex justify-content-between align-items-center">
                         <span t-esc="skill_group[1].name"/>
-                        <button class="btn btn-secondary btn-sm"
+                        <button id="add_button" class="btn btn-secondary btn-sm"
                             t-if="isEditable"
                             t-on-click="() => props.onAdd({ context: { default_skill_type_id: skill_group[1].id }})"
                             role="button">ADD</button>

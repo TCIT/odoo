@@ -38,7 +38,7 @@ class TestKarmaTrackingCommon(common.TransactionCase):
     @classmethod
     def _create_trackings(cls, user, karma, steps, track_date, days_delta=1):
         old_value = user.karma
-        for step in range(steps):
+        for _step in range(steps):
             new_value = old_value + karma
             cls.env['gamification.karma.tracking'].create([{
                 'user_id': user.id,
@@ -49,6 +49,36 @@ class TestKarmaTrackingCommon(common.TransactionCase):
             }])
             old_value = new_value
             track_date = track_date + relativedelta(days=days_delta)
+
+    def test_get_user_ids_ranked_by_karma(self):
+        """Test the optimized raw SQL ranking method with various timeframes and pagination."""
+        self._create_trackings(self.test_user, 20, 2, self.test_date, days_delta=30)
+        self._create_trackings(self.test_user_2, 10, 20, self.test_date, days_delta=2)
+        domain = [("id", "in", (self.test_user.id, self.test_user_2.id))]
+
+        # All-time: test_user_2 (200) > test_user (40)
+        user_ids = self.env["res.users"]._get_user_ids_ranked_by_karma(domain)
+        self.assertEqual(user_ids, [self.test_user_2.id, self.test_user.id])
+
+        # Before specific date: test_user (20) > test_user_2 (10)
+        user_ids = self.env["res.users"]._get_user_ids_ranked_by_karma(
+            domain, to_date=self.test_date + relativedelta(day=2)
+        )
+        self.assertEqual(user_ids, [self.test_user.id, self.test_user_2.id])
+
+        # After specific date: test_user_2 (50) > test_user (20)
+        user_ids = self.env["res.users"]._get_user_ids_ranked_by_karma(
+            domain, from_date=self.test_date + relativedelta(months=1, day=1)
+        )
+        self.assertEqual(user_ids, [self.test_user_2.id, self.test_user.id])
+
+        # Limit: Returns only the top overall user (test_user_2 with 200)
+        user_ids = self.env["res.users"]._get_user_ids_ranked_by_karma(domain, limit=1)
+        self.assertEqual(user_ids, [self.test_user_2.id])
+
+        # Offset: Skips the top user, returns the 2nd overall user (test_user with 40)
+        user_ids = self.env["res.users"]._get_user_ids_ranked_by_karma(domain, limit=1, offset=1)
+        self.assertEqual(user_ids, [self.test_user.id])
 
     def test_computation_gain(self):
         self._create_trackings(self.test_user, 20, 2, self.test_date, days_delta=30)
@@ -101,7 +131,7 @@ class TestKarmaTrackingCommon(common.TransactionCase):
         self.assertEqual(self.test_user.karma, 40)
         self.assertEqual(self.test_user_2.karma, 200)
 
-        with self.assertQueryCount(8), patch.object(type(self.env['res.users']), 'write') as patched_user_write:
+        with self.assertQueryCount(7), patch.object(self.registry['res.users'], 'write') as patched_user_write:
             Tracking._consolidate_cron()
 
         # consolidation should not change user karma
@@ -196,7 +226,7 @@ class TestKarmaTrackingCommon(common.TransactionCase):
         self.assertEqual(current_user_trackings[-1].old_value, base_test_user_karma)
 
     def test_user_as_erp_manager(self):
-        self.test_user.write({'groups_id': [
+        self.test_user.write({'group_ids': [
             (4, self.env.ref('base.group_partner_manager').id),
             (4, self.env.ref('base.group_erp_manager').id)
         ]})
@@ -220,7 +250,7 @@ class TestKarmaTrackingCommon(common.TransactionCase):
         self.assertIn(str(self.test_user_2.id), trackings[1].reason)
 
     def test_user_tracking(self):
-        self.test_user.write({'groups_id': [
+        self.test_user.write({'group_ids': [
             (4, self.env.ref('base.group_partner_manager').id),
             (4, self.env.ref('base.group_system').id)
         ]})
@@ -264,7 +294,7 @@ class TestKarmaTrackingCommon(common.TransactionCase):
         last_tracking_3 = self.test_user_2.karma_tracking_ids[-1]
 
         users = (user | self.test_user | self.test_user_2).with_user(self.test_user)
-        with self.assertQueryCount(11):
+        with self.assertQueryCount(8):
             users.karma = 100
 
         tracking_1 = user.karma_tracking_ids[-1]
@@ -383,7 +413,7 @@ class TestComputeRankCommon(common.TransactionCase):
             nonlocal number_of_users
             number_of_users = len(_self & self.users)
 
-        patch_bulk = patch('odoo.addons.gamification.models.res_users.Users._recompute_rank', _patched_recompute_rank)
+        patch_bulk = patch('odoo.addons.gamification.models.res_users.ResUsers._recompute_rank', _patched_recompute_rank)
         self.startPatcher(patch_bulk)
         self.rank_3.karma_min = 700
         self.assertEqual(number_of_users, 7, "Should just recompute for the 7 users between 500 and 700")
@@ -394,7 +424,7 @@ class TestComputeRankCommon(common.TransactionCase):
         def _patched_check_in_bulk(*args, **kwargs):
             raise
 
-        patch_bulk = patch('odoo.addons.gamification.models.res_users.Users._recompute_rank_bulk', _patched_check_in_bulk)
+        patch_bulk = patch('odoo.addons.gamification.models.res_users.ResUsers._recompute_rank_bulk', _patched_check_in_bulk)
         self.startPatcher(patch_bulk)
 
         # call on 5 users should not trigger the bulk function

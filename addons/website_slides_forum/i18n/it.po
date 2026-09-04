@@ -1,31 +1,45 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_slides_forum
-# 
+# * website_slides_forum
+#
 # Translators:
-# Wil Odoo, 2024
-# Marianna Ciofani, 2024
-# 
+# Martin Trigaux, 2022
+# Sergio Zanchetta <primes2h@gmail.com>, 2023
+# Marianna Ciofani, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Marianna Ciofani (cima)" <cima@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Marianna Ciofani, 2024\n"
-"Language-Team: Italian (https://app.transifex.com/odoo/teams/41243/it/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-02 19:12+0000\n"
+"Last-Translator: \"Marianna Ciofani (cima)\" <cima@odoo.com>\n"
+"Language-Team: Italian <https://translate.odoo.com/projects/odoo-19/"
+"website_slides_forum/it/>\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: it\n"
-"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
+"0) ? 1 : 2);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid "(The above section was adapted from Stackoverflow’s FAQ.)"
+msgstr "(La sezione soprastante è stata adattata dalle FAQ di Stack Overflow.)"
+
+#. module: website_slides_forum
+#: model_terms:forum.forum,welcome_message:website_slides_forum.forum_forum_demo_channel_0
+#: model_terms:forum.forum,welcome_message:website_slides_forum.forum_forum_demo_channel_2
+msgid ""
+"<a class=\"btn btn-primary forum_register_url o_translate_inline\" href=\"/"
+"web/login\">Sign up</a>"
 msgstr ""
-"(La sezione soprastante è stata adattata dalle FAQ di Stack Overflow.)"
+"<a class=\"btn btn-primary forum_register_url o_translate_inline\" href=\"/"
+"web/login\">Registrati</a>"
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
@@ -63,8 +77,8 @@ msgstr ""
 msgid ""
 "<b>Answers should not start debates</b> This community Q&amp;A is not a "
 "discussion group. Please avoid holding debates in your answers as they tend "
-"to dilute the essence of questions and answers. For brief discussions please"
-" use commenting facility."
+"to dilute the essence of questions and answers. For brief discussions please "
+"use commenting facility."
 msgstr ""
 "<b>Le risposte non devono avviare dibattiti</b>. Questa comunità D&R non è "
 "un gruppo di discussione. Evitare di alimentare dibattiti nelle risposte, "
@@ -77,8 +91,8 @@ msgstr ""
 msgid ""
 "<b>Answers shouldn't just point to other Questions</b>. Instead add a "
 "question comment indication \"Possible duplicate of...\". However, it's ok "
-"to include links to other questions or answers providing relevant additional"
-" information."
+"to include links to other questions or answers providing relevant additional "
+"information."
 msgstr ""
 "<b>Le risposte non devono solo fare riferimento ad altre domande</b>. "
 "Aggiungere invece un commento alla domanda indicando \"Possibile duplicato "
@@ -89,22 +103,22 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
-"<b>Answers shouldn't just point to other questions</b>.Instead add a comment"
-" indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
+"<b>Answers shouldn't just point to other questions</b>.Instead add a comment "
+"indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
 "include links to other questions or answers providing relevant additional "
 "information."
 msgstr ""
 "<b>Le risposte non devono solo fare riferimento ad altre domande</b>. "
-"Aggiungere invece un commento indicando <i>\"Possibile duplicato "
-"di...\"</i>. Tuttavia, è corretto inserire link ad altre domande o risposte "
-"fornendo informazioni aggiuntive rilevanti."
+"Aggiungere invece un commento indicando <i>\"Possibile duplicato di...\"</i>"
+". Tuttavia, è corretto inserire link ad altre domande o risposte fornendo "
+"informazioni aggiuntive rilevanti."
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
-"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the"
-" solution description text in your answer, even if it's just a copy/paste. "
+"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the "
+"solution description text in your answer, even if it's just a copy/paste. "
 "Links are welcome, but should be complementary to answer, referring sources "
 "or additional reading."
 msgstr ""
@@ -118,19 +132,19 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
 "<b>Before you ask - please make sure to search for a similar question.</b> "
-"You can search questions by their title or tags. It’s also OK to answer your"
-" own question."
+"You can search questions by their title or tags. It’s also OK to answer your "
+"own question."
 msgstr ""
 "<b>Prima di chiedere, effettuare una ricerca tra le domande simili.</b> È "
-"possibile ricercare per titoli o per etichette. È corretto anche rispondere "
-"alle proprie domande."
+"possibile ricercare per titoli o tag. È corretto anche rispondere alle "
+"proprie domande."
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
-"<b>Please avoid asking questions that are too subjective and "
-"argumentative</b> or not relevant to this community."
+"<b>Please avoid asking questions that are too subjective and argumentative</"
+"b> or not relevant to this community."
 msgstr ""
 "<b>Evitare le domande troppo soggettive o argomentative</b>, oppure non "
 "rilevanti per questa comunità."
@@ -141,14 +155,16 @@ msgid ""
 "<i class=\"fa fa-comments\"/><span class=\"ms-1 d-none d-md-inline-"
 "block\">Forum</span>"
 msgstr ""
-"<i class=\"fa fa-comments\"/><span class=\"ms-1 d-none d-md-inline-"
-"block\">Forum</span>"
+"<i class=\"fa fa-comments\"/><span class=\"ms-1 d-none d-md-inline-block\">"
+"Forum</span>"
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
-msgid "<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
-msgstr "<span class=\"flex-grow-1\">Che tipo di domande è possibile fare?</span>"
+msgid ""
+"<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
+msgstr ""
+"<span class=\"flex-grow-1\">Che tipo di domande è possibile fare?</span>"
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
@@ -167,8 +183,8 @@ msgstr "<span class=\"flex-grow-1\">Cosa dovrei evitare nelle domande?</span>"
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
-"<span class=\"flex-grow-1\">Why can other people edit my "
-"questions/answers?</span>"
+"<span class=\"flex-grow-1\">Why can other people edit my questions/answers?</"
+"span>"
 msgstr ""
 "<span class=\"flex-grow-1\">Perché altre persone possono modificare le mie "
 "domande/risposte?</span>"
@@ -220,13 +236,19 @@ msgstr "Crea un forum"
 #: model_terms:forum.forum,welcome_message:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,welcome_message:website_slides_forum.forum_forum_demo_channel_2
 msgid "Dismiss"
-msgstr "Scarta"
+msgstr "Ignora"
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,welcome_message:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,welcome_message:website_slides_forum.forum_forum_demo_channel_2
 msgid "Dismiss message"
 msgstr "Ignora messaggio"
+
+#. module: website_slides_forum
+#: model:ir.model.fields,field_description:website_slides_forum.field_forum_forum__display_name
+#: model:ir.model.fields,field_description:website_slides_forum.field_slide_channel__display_name
+msgid "Display Name"
+msgstr "Nome visualizzato"
 
 #. module: website_slides_forum
 #: model:ir.model.fields,help:website_slides_forum.field_forum_forum__slide_channel_ids
@@ -244,13 +266,13 @@ msgid ""
 "accumulated for a question or answer per day. The table given at the end "
 "explains reputation point requirements for each type of moderation task."
 msgstr ""
-"Ad esempio, se poni una domanda interessante o dai una risposta utile, il "
-"tuo  contributo riceverà voti a favore. Tuttavia, se la risposta è "
-"fuorviante riceverà voti a sfavore. Ogni voto in favore genererà 10 punti, "
-"ogni voto a sfavore comporterà una perdita di 2 punti. Per ogni domanda o "
-"risposta, ogni giorno possono essere accumulati un massimo di 200 punti. La "
-"tabella alla fine spiega i requisiti per i punti di reputazione, per ogni "
-"tipo di attività di moderazione."
+"Ad esempio, se poni una domanda interessante o fornisci una risposta utile, "
+"il tuo contributo verrà votato positivamente. Se invece la risposta è "
+"fuorviante, otterrà un voto negativo. Ciascun voto a favore genera 10 punti, "
+"quelli  contrari tolgono 2 punti. Per una singola domanda o risposta possono "
+"essere accumulati un massimo di 200 punti al giorno. La tabella riportata in "
+"fondo illustra i punti reputazione necessari per ciascun tipo di attività di "
+"moderazione."
 
 #. module: website_slides_forum
 #: model:ir.model,name:website_slides_forum.model_forum_forum
@@ -261,11 +283,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_slides_forum.website_slides_forum_channel_inherit_view_form
 msgid "Forum"
 msgstr "Forum"
-
-#. module: website_slides_forum
-#: model_terms:ir.ui.view,arch_db:website_slides_forum.snippet_options
-msgid "Forum Page"
-msgstr "Pagina forum"
 
 #. module: website_slides_forum
 #: model:ir.actions.act_window,name:website_slides_forum.forum_post_action_channel
@@ -297,6 +314,12 @@ msgid "Here a table with the privileges and the karma level"
 msgstr "Qui una tabella con privilegi e livello del karma"
 
 #. module: website_slides_forum
+#: model:ir.model.fields,field_description:website_slides_forum.field_forum_forum__id
+#: model:ir.model.fields,field_description:website_slides_forum.field_slide_channel__id
+msgid "ID"
+msgstr "ID"
+
+#. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid "If this approach is not for you, please respect the community."
@@ -307,16 +330,16 @@ msgstr "Se questo approccio non fa per te, rispetta la comunità."
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
 "If you fit in one of these example or if your motivation for asking the "
-"question is “I would like to participate in a discussion about ______”, then"
-" you should not be asking here but on our mailing lists. However, if your "
+"question is “I would like to participate in a discussion about ______”, then "
+"you should not be asking here but on our mailing lists. However, if your "
 "motivation is “I would like others to explain ______ to me”, then you are "
 "probably OK."
 msgstr ""
 "Se l'idea di partenza corrisponde a uno di questi esempi o il motivo della "
-"domanda è \"Vorrei partecipare a una discussione su ______”, è meglio che la"
-" richiesta venga fatta nelle nostre mailing list. Tuttavia, se la "
-"motivazione è “Vorrei che gli altri mi spiegassero ______”, questo è "
-"probabilmente il posto giusto."
+"domanda è \"Vorrei partecipare a una discussione su ______”, è meglio che la "
+"richiesta venga fatta nelle nostre mailing list. Tuttavia, se la motivazione "
+"è “Vorrei che gli altri mi spiegassero ______”, questo è probabilmente il "
+"posto giusto."
 
 #. module: website_slides_forum
 #: model:ir.model.fields,field_description:website_slides_forum.field_forum_forum__image_1920
@@ -355,7 +378,8 @@ msgid "Posts"
 msgstr "Messaggi"
 
 #. module: website_slides_forum
-#: model_terms:ir.ui.view,arch_db:website_slides_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_slides_forum/static/src/website_builder/slides_forum_page_option.xml:0
 msgid "Separate Courses"
 msgstr "Separa corsi"
 
@@ -375,10 +399,10 @@ msgid "Show Course To"
 msgstr "Mostra corso a"
 
 #. module: website_slides_forum
-#: model_terms:forum.forum,welcome_message:website_slides_forum.forum_forum_demo_channel_0
-#: model_terms:forum.forum,welcome_message:website_slides_forum.forum_forum_demo_channel_2
-msgid "Sign up"
-msgstr "Registrati"
+#. odoo-javascript
+#: code:addons/website_slides_forum/static/src/website_builder/slides_forum_page_option_plugin.js:0
+msgid "Slides Forum Snippet Options"
+msgstr "Opzioni snippet forum diapositive"
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
@@ -394,16 +418,16 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
-"Therefore questions and answers can be edited like wiki pages by experienced"
-" users of this site in order to improve the overall quality of the knowledge"
-" base content. Such privileges are granted based on user karma level: you "
+"Therefore questions and answers can be edited like wiki pages by experienced "
+"users of this site in order to improve the overall quality of the knowledge "
+"base content. Such privileges are granted based on user karma level: you "
 "will be able to do the same once your karma gets high enough."
 msgstr ""
 "Pertanto le domande e le risposte possono essere modificate, come pagine "
-"wiki, da utenti esperti di questo sito per migliorare la qualità complessiva"
-" dei contenuti per questa base di conoscenze. Tali privilegi sono concessi "
-"in base al livello di karma dell'utente, con un livello sufficiente si "
-"potranno ottenere gli stessi vantaggi."
+"wiki, da utenti esperti di questo sito per migliorare la qualità complessiva "
+"dei contenuti per questa base di conoscenze. Tali privilegi sono concessi in "
+"base al livello di karma dell'utente, con un livello sufficiente si potranno "
+"ottenere gli stessi vantaggi."
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
@@ -446,22 +470,21 @@ msgid ""
 "are gradually assigned to the users based on those points."
 msgstr ""
 "Quando una domanda o una risposta ottiene un voto positivo, l'utente che "
-"l'ha pubblicata guadagna alcuni punti chiamati \"punti karma\". È una misura"
-" approssimativa della fiducia riposta dalla comunità in questa persona e "
+"l'ha pubblicata guadagna alcuni punti chiamati \"punti karma\". È una misura "
+"approssimativa della fiducia riposta dalla comunità in questa persona e "
 "servono anche per assegnare in modo graduale varie attività di moderazione."
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
-"You should only ask practical, answerable questions based on actual problems"
-" that you face. Chatty, open-ended questions diminish the usefulness of this"
-" site and push other questions off the front page."
+"You should only ask practical, answerable questions based on actual problems "
+"that you face. Chatty, open-ended questions diminish the usefulness of this "
+"site and push other questions off the front page."
 msgstr ""
 "Dovrebbero essere poste solo domande pratiche a cui è possibile dare una "
 "risposta in base ai problemi riscontrati. Domande discorsive e inconcludenti"
-"  diminuiscono l'utilità del sito e tolgono altre domande dalla prima "
-"pagina."
+"  diminuiscono l'utilità del sito e tolgono altre domande dalla prima pagina."
 
 #. module: website_slides_forum
 #: model_terms:ir.ui.view,arch_db:website_slides_forum.forum_forum_view_form
@@ -518,8 +541,8 @@ msgid ""
 "there is no actual problem to be solved: “I’m curious if other people feel "
 "like I do.”"
 msgstr ""
-"non ci sono reali problemi da risolvere: “Sono curioso di sapere se altri la"
-" pensano come me.”"
+"non ci sono reali problemi da risolvere: “Sono curioso di sapere se altri la "
+"pensano come me.”"
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
@@ -528,8 +551,7 @@ msgid ""
 "we are being asked an open-ended, hypothetical question: “What if ______ "
 "happened?”"
 msgstr ""
-"viene posta una domanda aperta e ipotetica: “Che cosa accadrebbe se ______ "
-"?”"
+"viene posta una domanda aperta e ipotetica: “Che cosa accadrebbe se ______ ?”"
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
@@ -548,3 +570,53 @@ msgid ""
 msgstr ""
 "la risposta è fornita insieme alla domanda, e si attendono ulteriori "
 "risposte: “Io uso_____ per ______, voi cosa usate”?"
+
+#~ msgid "<b>What kinds of questions can I ask here?</b>"
+#~ msgstr "<b>Che tipo di domande è possibile fare?</b>"
+
+#~ msgid "<b>What should I avoid in my answers?</b>"
+#~ msgstr "<b>Cosa deve essere evitato nelle risposte?</b>"
+
+#~ msgid "<b>What should I avoid in my questions?</b>"
+#~ msgstr "<b>Cosa deve essere evitato nelle domande?</b>"
+
+#~ msgid "<b>Why can other people edit my questions/answers?</b>"
+#~ msgstr ""
+#~ "<b>Perché altre persone possono modificare le mie domande/risposte?</b>"
+
+#~ msgid "<i class=\"fa fa-home\"/> Course"
+#~ msgstr "<i class=\"fa fa-home\"/> Corso"
+
+#~ msgid "Check our Courses <i class=\"oi oi-chevron-right\"/>"
+#~ msgstr "Dai uno sguardo ai nostri corsi <i class=\"oi oi-chevron-right\"/>"
+
+#~ msgid "Courses Discussions"
+#~ msgstr "Discussioni sui corsi"
+
+#~ msgid "Description"
+#~ msgstr "Descrizione"
+
+#~ msgid "Forum Page"
+#~ msgstr "Pagina forum"
+
+#~ msgid "Hide Intro"
+#~ msgstr "Nascondi introduzione"
+
+#~ msgid "Register"
+#~ msgstr "Registrati"
+
+#~ msgid "Reviews"
+#~ msgstr "Recensioni"
+
+#~ msgid "See all Courses"
+#~ msgstr "Vedi tutti i corsi"
+
+#~ msgid ""
+#~ "This community is for professionals and enthusiasts of our products and "
+#~ "services.<br>Share and discuss the best content and new marketing ideas, "
+#~ "build your professional profile and become a better marketer together."
+#~ msgstr ""
+#~ "Questa community è per professionisti ed entusiasti dei nostri prodotti e "
+#~ "servizi.<br>Condividi e discuti i migliori contenuti e le nuove idee di "
+#~ "marketing, crea il tuo profilo personale e diventa insieme a noi un "
+#~ "promotore migliore."

@@ -1,45 +1,54 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* web_tour
-# 
+# * web_tour
+#
 # Translators:
-# Wil Odoo, 2024
-# Junko Augias, 2024
-# 
+# Martin Trigaux, 2022
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Junko Augias (juau)" <juau@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~14.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:49+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Junko Augias, 2024\n"
-"Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
+"POT-Creation-Date: 2026-04-10 18:40+0000\n"
+"PO-Revision-Date: 2026-08-02 16:58+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-19/"
+"web_tour/ja/>\n"
+"Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ja\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 msgid "(recording keyboard)"
-msgstr "(レコーディングキーボード)"
+msgstr "(キーボード入力を記録中)"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 msgid "(run:"
 msgstr "(実施:"
 
 #. module: web_tour
 #: model:ir.model.constraint,message:web_tour.constraint_web_tour_tour_uniq_name
 msgid "A tour already exists with this name . Tour's name must be unique!"
-msgstr "すでに同名のツアーが存在します。ツアー名は一意でにして下さい。"
+msgstr "すでに同名のツアーが存在します。ツアー名は一意にして下さい!"
+
+#. module: web_tour
+#: model:ir.model.fields.selection,name:web_tour.selection__web_tour_tour_step__tooltip_position__bottom
+msgid "Bottom"
+msgstr "下"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_utils.js:0
+#: code:addons/web_tour/static/src/tour_utils.js:0
 msgid "Click the top left corner to navigate across apps."
 msgstr "左上の角をクリックすると、アプリ間を移動できます。"
 
@@ -67,17 +76,19 @@ msgstr "カスタム"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.js:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.js:0
 msgid "Custom tour '%s' couldn't be saved!"
 msgstr "カスタムツアー '%s' を保存できませんでした!"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.js:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.js:0
 msgid "Custom tour '%s' has been added."
 msgstr "カスタムツアー '%s' が追加されました。"
 
 #. module: web_tour
+#: model:ir.model.fields,field_description:web_tour.field_ir_http__display_name
+#: model:ir.model.fields,field_description:web_tour.field_res_users__display_name
 #: model:ir.model.fields,field_description:web_tour.field_web_tour_tour__display_name
 #: model:ir.model.fields,field_description:web_tour.field_web_tour_tour_step__display_name
 msgid "Display Name"
@@ -94,6 +105,8 @@ msgid "HTTP Routing"
 msgstr "HTTPルーティング"
 
 #. module: web_tour
+#: model:ir.model.fields,field_description:web_tour.field_ir_http__id
+#: model:ir.model.fields,field_description:web_tour.field_res_users__id
 #: model:ir.model.fields,field_description:web_tour.field_web_tour_tour__id
 #: model:ir.model.fields,field_description:web_tour.field_web_tour_tour_step__id
 msgid "ID"
@@ -123,13 +136,13 @@ msgstr "名称"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 msgid "Name:"
 msgstr "名称:"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_service.js:0
+#: code:addons/web_tour/static/src/js/onboarding_item.xml:0
 #: code:addons/web_tour/static/src/widgets/tour_start.xml:0
 #: model:ir.model.fields,field_description:web_tour.field_res_users__tour_enabled
 msgid "Onboarding"
@@ -147,7 +160,7 @@ msgstr "レインボーマンメッセージ..."
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 #: code:addons/web_tour/static/src/views/tour_controller.xml:0
 msgid "Record"
 msgstr "レコード"
@@ -159,25 +172,42 @@ msgid "Record Tour"
 msgstr "ツアーを録画"
 
 #. module: web_tour
+#: model:ir.model.fields.selection,name:web_tour.selection__web_tour_tour_step__tooltip_position__right
+msgid "Right"
+msgstr "右"
+
+#. module: web_tour
 #: model:ir.model.fields,field_description:web_tour.field_web_tour_tour_step__run
 msgid "Run"
 msgstr "実行"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 msgid "Save"
 msgstr "保存"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_pointer_state.js:0
+#: code:addons/web_tour/static/src/js/tour_pointer/tour_pointer_state.js:0
 msgid "Scroll down to reach the next step."
 msgstr "スクロールダウンして次のステップに進みます。"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_pointer_state.js:0
+#: code:addons/web_tour/static/src/js/tour_pointer/tour_pointer_state.js:0
+msgid "Scroll left to reach the next step."
+msgstr "次のステップに進むには左にスクロールします。"
+
+#. module: web_tour
+#. odoo-javascript
+#: code:addons/web_tour/static/src/js/tour_pointer/tour_pointer_state.js:0
+msgid "Scroll right to reach the next step."
+msgstr "右スクロールして次のステップに進みます。"
+
+#. module: web_tour
+#. odoo-javascript
+#: code:addons/web_tour/static/src/js/tour_pointer/tour_pointer_state.js:0
 msgid "Scroll up to reach the next step."
 msgstr "スクロールアップして次のステップに進みます。"
 
@@ -210,16 +240,22 @@ msgstr "ステップ"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 #: model_terms:ir.ui.view,arch_db:web_tour.tour_form
 msgid "Steps"
 msgstr "ステップ"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 msgid "Steps:"
 msgstr "ステップ:"
+
+#. module: web_tour
+#. odoo-javascript
+#: code:addons/web_tour/static/src/js/tour_pointer/tour_pointer.xml:0
+msgid "Stop Tour"
+msgstr "ツアーを停止"
 
 #. module: web_tour
 #. odoo-javascript
@@ -237,6 +273,16 @@ msgstr "テスト"
 #: model_terms:ir.ui.view,arch_db:web_tour.tour_search
 msgid "Tip"
 msgstr "チップ"
+
+#. module: web_tour
+#: model:ir.model.fields,field_description:web_tour.field_web_tour_tour_step__tooltip_position
+msgid "Tooltip Position"
+msgstr "ツールチップ位置"
+
+#. module: web_tour
+#: model:ir.model.fields.selection,name:web_tour.selection__web_tour_tour_step__tooltip_position__top
+msgid "Top"
+msgstr "トップ"
 
 #. module: web_tour
 #: model:ir.model.fields,field_description:web_tour.field_web_tour_tour_step__tour_id
@@ -262,14 +308,14 @@ msgstr "トリガー"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 msgid "Url:"
 msgstr "Url:"
 
 #. module: web_tour
 #: model:ir.model,name:web_tour.model_res_users
 msgid "User"
-msgstr "ユーザ"
+msgstr "ユーザー"
 
 #. module: web_tour
 #: model:ir.model.fields,field_description:web_tour.field_web_tour_tour__user_consumed_ids
@@ -282,13 +328,51 @@ msgid "e.g. My_Tour"
 msgstr "例: My_Tour"
 
 #. module: web_tour
+#: model:ir.model.fields.selection,name:web_tour.selection__web_tour_tour_step__tooltip_position__left
+msgid "left"
+msgstr "左"
+
+#. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 msgid "name_of_the_tour"
 msgstr "name_of_the_tour"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
+msgid "n°"
+msgstr ""
+
+#. module: web_tour
+#. odoo-javascript
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 msgid "trigger"
 msgstr "トリガ"
+
+#~ msgid ""
+#~ "<strong><b>Good job!</b> You went through all steps of this tour.</strong>"
+#~ msgstr ""
+#~ "<strong><b>Good job!</b> あなたはこのツアーのすべてのステップを通過しまし"
+#~ "た。</strong>"
+
+#~ msgid "Consumed by"
+#~ msgstr "使用履歴"
+
+#~ msgid "Disable Tours"
+#~ msgstr "ツアーを無効化"
+
+#~ msgid "Path"
+#~ msgstr "パス"
+
+#~ msgid "Start"
+#~ msgstr "開始"
+
+#~ msgid "Start tour"
+#~ msgstr "ツアー開始"
+
+#~ msgid "Test"
+#~ msgstr "インポートテスト"
+
+#~ msgid "Tour name"
+#~ msgstr "ツアー名"

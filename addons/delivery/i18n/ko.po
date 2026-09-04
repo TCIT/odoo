@@ -1,24 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* delivery
-# 
+# * delivery
+#
 # Translators:
-# Wil Odoo, 2024
-# Daye Jeong, 2024
-# 
+# Martin Trigaux, 2022
+# JH CHOI <hwangtog@gmail.com>, 2022
+# Sarah Park, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Kwanghee Park (kwpa)" <kwpa@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 13:03+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Daye Jeong, 2024\n"
-"Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-08 02:27+0000\n"
+"Last-Translator: \"Kwanghee Park (kwpa)\" <kwpa@odoo.com>\n"
+"Language-Team: Korean <https://translate.odoo.com/projects/odoo-19/delivery/"
+"ko/>\n"
+"Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ko\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: delivery
 #. odoo-python
@@ -56,14 +60,16 @@ msgid ""
 "                </p>"
 msgstr ""
 "<p class=\"o_view_nocontent\">\n"
-"                    지금 Odoo 유료버전을 구입하여 더 많은 공급자를 확보하세요.\n"
+"                    지금 Odoo 유료버전을 구입하여 더 많은 공급자를 "
+"확보하세요.\n"
 "                </p>"
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid ""
 "<span class=\"o_stat_text o_warning_text fw-bold\">Test</span>\n"
-"                                <span class=\"o_stat_text\">Environment</span>"
+"                                <span class=\"o_stat_text\">Environment</"
+"span>"
 msgstr ""
 "<span class=\"o_stat_text o_warning_text fw-bold\">테스트</span>\n"
 "                                <span class=\"o_stat_text\">환경</span>"
@@ -82,7 +88,8 @@ msgstr "<span class=\"text-success\">디버그 요청</span>"
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid ""
 "<span class=\"text-success\">Production</span>\n"
-"                                <span class=\"o_stat_text\">Environment</span>"
+"                                <span class=\"o_stat_text\">Environment</"
+"span>"
 msgstr ""
 "<span class=\"text-success\">생산</span>\n"
 "                                <span class=\"o_stat_text\">환경</span>"
@@ -98,7 +105,9 @@ msgid ""
 "A description of the delivery method that you want to communicate to your "
 "customers on the Sales Order and sales confirmation email.E.g. instructions "
 "for customers to follow."
-msgstr "판매주문 및 확인 이메일에서 고객에게 배송 방법을 설명하는 내용입니다. (예: 고객이 따라야 하는 지침 등)"
+msgstr ""
+"판매주문 및 확인 이메일에서 고객에게 배송 방법을 설명하는 내용입니다. (예: "
+"고객이 따라야 하는 지침 등)"
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__integration_level
@@ -133,6 +142,11 @@ msgid "Additional margin"
 msgstr "추가 금액"
 
 #. module: delivery
+#: model:ir.model.fields,help:delivery.field_delivery_carrier__allow_cash_on_delivery
+msgid "Allow customers to choose Cash on Delivery as their payment method."
+msgstr "고객이 결제 수단으로 수령 시 지불 방식을 선택할 수 있게 허용합니다."
+
+#. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__amount
 msgid "Amount"
 msgstr "금액"
@@ -149,6 +163,15 @@ msgstr "무료 배송 혜택을 받을 주문 금액을 회사가 사용하는 �
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_search
 msgid "Archived"
 msgstr "보관됨"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.choose_delivery_carrier_view_form
+msgid ""
+"Are you sure you want the delivery to be free for this order? You might have "
+"forgotten to compute the rates."
+msgstr ""
+"이 주문에 대해 배송료를 무료로 적용하시겠습니까? 배송료 계산을 잊으셨을 수 "
+"있습니다."
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
@@ -182,14 +205,25 @@ msgstr "운송업체"
 #. odoo-python
 #: code:addons/delivery/models/delivery_carrier.py:0
 msgid ""
-"Carrier %s cannot have the same tag in both Must Have Tags and Excluded "
-"Tags."
+"Carrier %s cannot have the same tag in both Must Have Tags and Excluded Tags."
 msgstr "운송업체 %s는 필수 태그와 제외 태그 모두에 동일한 태그를 가질 수 없습니다."
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__carrier_description
 msgid "Carrier Description"
 msgstr "운송업체 설명"
+
+#. module: delivery
+#: model:ir.model.fields.selection,name:delivery.selection__payment_provider__custom_mode__cash_on_delivery
+msgid "Cash On Delivery"
+msgstr "물품 수령 시 지불"
+
+#. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_delivery_carrier__allow_cash_on_delivery
+#: model:payment.method,name:delivery.payment_method_cash_on_delivery
+#: model:payment.provider,name:delivery.payment_provider_cod
+msgid "Cash on Delivery"
+msgstr "물품 수령 시 지불"
 
 #. module: delivery
 #. odoo-javascript
@@ -242,6 +276,11 @@ msgid "Countries"
 msgstr "국가"
 
 #. module: delivery
+#: model:ir.model,website_form_label:delivery.model_res_partner
+msgid "Create a Customer"
+msgstr "고객 만들기"
+
+#. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__create_uid
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__create_uid
 #: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__create_uid
@@ -265,6 +304,11 @@ msgid "Currency"
 msgstr "통화"
 
 #. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_payment_provider__custom_mode
+msgid "Custom Mode"
+msgstr "사용자 지정 모드"
+
+#. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__partner_id
 msgid "Customer"
 msgstr "고객"
@@ -273,12 +317,6 @@ msgstr "고객"
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__debug_logging
 msgid "Debug logging"
 msgstr "디버그 로깅"
-
-#. module: delivery
-#: model:ir.model.fields,help:delivery.field_res_partner__property_delivery_carrier_id
-#: model:ir.model.fields,help:delivery.field_res_users__property_delivery_carrier_id
-msgid "Default delivery method used in sales orders."
-msgstr "판매주문에 사용되는 기본 배송 방법입니다."
 
 #. module: delivery
 #: model_terms:ir.actions.act_window,help:delivery.action_delivery_carrier_form
@@ -318,6 +356,7 @@ msgstr "배송 방법"
 #. module: delivery
 #: model:ir.actions.act_window,name:delivery.action_delivery_carrier_form
 #: model:ir.ui.menu,name:delivery.sale_menu_action_delivery_carrier_form
+#: model_terms:ir.ui.view,arch_db:delivery.delivery_provider_module_kanban
 msgid "Delivery Methods"
 msgstr "배송 방법"
 
@@ -386,6 +425,14 @@ msgstr "취소"
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__display_name
 #: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__display_name
 #: model:ir.model.fields,field_description:delivery.field_delivery_zip_prefix__display_name
+#: model:ir.model.fields,field_description:delivery.field_ir_http__display_name
+#: model:ir.model.fields,field_description:delivery.field_ir_module_module__display_name
+#: model:ir.model.fields,field_description:delivery.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:delivery.field_payment_transaction__display_name
+#: model:ir.model.fields,field_description:delivery.field_product_category__display_name
+#: model:ir.model.fields,field_description:delivery.field_res_partner__display_name
+#: model:ir.model.fields,field_description:delivery.field_sale_order__display_name
+#: model:ir.model.fields,field_description:delivery.field_sale_order_line__display_name
 msgid "Display Name"
 msgstr "표시명"
 
@@ -420,11 +467,14 @@ msgstr "오류: 이 배송 방법은 사용할 수 없습니다."
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__invoice_policy
 msgid ""
-"Estimated Cost: the customer will be invoiced the estimated cost of the shipping.\n"
-"Real Cost: the customer will be invoiced the real cost of the shipping, the cost of theshipping will be updated on the SO after the delivery."
+"Estimated Cost: the customer will be invoiced the estimated cost of the "
+"shipping.\n"
+"Real Cost: the customer will be invoiced the real cost of the shipping, the "
+"cost of theshipping will be updated on the SO after the delivery."
 msgstr ""
 "예상 비용: 고객에게 예상 배송 비용을 청구합니다.\n"
-"실제 비용: 고객에게 실제 배송 비용을 청구하며, 배송 비용은 배송 후 판매주문서에 업데이트됩니다."
+"실제 비용: 고객에게 실제 배송 비용을 청구하며, 배송 비용은 배송 후 "
+"판매주문서에 업데이트됩니다."
 
 #. module: delivery
 #: model:ir.model.fields.selection,name:delivery.selection__delivery_carrier__invoice_policy__estimated
@@ -444,9 +494,11 @@ msgstr "선적된 실제 수량을 기준으로 송장을 작성하려면 이 �
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid ""
-"Filling this form allows you to make the shipping method available according"
-" to the content of the order or its destination."
-msgstr "이 양식을 작성하면 주문의 콘텐츠 또는 목적지에 따라 배송 방법을 사용할 수 있습니다."
+"Filling this form allows you to make the shipping method available according "
+"to the content of the order or its destination."
+msgstr ""
+"이 양식을 작성하면 주문의 콘텐츠 또는 목적지에 따라 배송 방법을 사용할 수 "
+"있습니다."
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__fixed_margin
@@ -480,15 +532,23 @@ msgid "Get Rate and Create Shipment"
 msgstr "요율 가져오기 및 적하물 작성"
 
 #. module: delivery
-#: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_search
-msgid "Group By"
-msgstr "그룹별"
+#: model:ir.model,name:delivery.model_ir_http
+msgid "HTTP Routing"
+msgstr "HTTP 라우팅"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__id
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__id
 #: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__id
 #: model:ir.model.fields,field_description:delivery.field_delivery_zip_prefix__id
+#: model:ir.model.fields,field_description:delivery.field_ir_http__id
+#: model:ir.model.fields,field_description:delivery.field_ir_module_module__id
+#: model:ir.model.fields,field_description:delivery.field_payment_provider__id
+#: model:ir.model.fields,field_description:delivery.field_payment_transaction__id
+#: model:ir.model.fields,field_description:delivery.field_product_category__id
+#: model:ir.model.fields,field_description:delivery.field_res_partner__id
+#: model:ir.model.fields,field_description:delivery.field_sale_order__id
+#: model:ir.model.fields,field_description:delivery.field_sale_order_line__id
 msgid "ID"
 msgstr "ID"
 
@@ -497,7 +557,9 @@ msgstr "ID"
 msgid ""
 "If the order total amount (shipping excluded) is above or equal to this "
 "value, the customer benefits from a free shipping"
-msgstr "주문 총액 (배송비 제외)이 이 가격 이상인 경우 고객에게 무료 배송 혜택이 제공됩니다."
+msgstr ""
+"주문 총액 (배송비 제외)이 이 가격 이상인 경우 고객에게 무료 배송 혜택이 "
+"제공됩니다."
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__max_volume
@@ -529,6 +591,12 @@ msgid "Integration Level"
 msgstr "통합 수준"
 
 #. module: delivery
+#. odoo-python
+#: code:addons/delivery/models/delivery_carrier.py:0
+msgid "Invalid source document type"
+msgstr "잘못된 원본 문서 유형"
+
+#. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__invoicing_message
 msgid "Invoicing Message"
 msgstr "송장 발행 메시지"
@@ -537,6 +605,12 @@ msgstr "송장 발행 메시지"
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__invoice_policy
 msgid "Invoicing Policy"
 msgstr "청구서 발행 기준"
+
+#. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_res_partner__is_pickup_location
+#: model:ir.model.fields,field_description:delivery.field_res_users__is_pickup_location
+msgid "Is Pickup Location"
+msgstr "픽업 위치임"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_sale_order_line__is_delivery
@@ -595,12 +669,12 @@ msgstr "지도 보기"
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__margin
 msgid "Margin"
-msgstr "이윤"
+msgstr "마진"
 
 #. module: delivery
 #: model:ir.model.constraint,message:delivery.constraint_delivery_carrier_margin_not_under_100_percent
 msgid "Margin cannot be lower than -100%"
-msgstr "이윤은 -100%보다 낮을 수 없습니다"
+msgstr "마진은 -100%보다 낮을 수 없습니다"
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
@@ -621,6 +695,11 @@ msgstr "최대 중량"
 #: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__max_value
 msgid "Maximum Value"
 msgstr "최대값"
+
+#. module: delivery
+#: model:ir.model,name:delivery.model_ir_module_module
+msgid "Module"
+msgstr "모듈"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__must_have_tag_ids
@@ -674,6 +753,22 @@ msgid "Order"
 msgstr "주문"
 
 #. module: delivery
+#: model:ir.model,name:delivery.model_payment_provider
+msgid "Payment Provider"
+msgstr "결제대행업체"
+
+#. module: delivery
+#: model:ir.model,name:delivery.model_payment_transaction
+msgid "Payment Transaction"
+msgstr "지불 거래"
+
+#. module: delivery
+#. odoo-javascript
+#: code:addons/delivery/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.js:0
+msgid "Pickup Location"
+msgstr "픽업 위치"
+
+#. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_sale_order__pickup_location_data
 msgid "Pickup Location Data"
 msgstr "픽업 위치 데이터"
@@ -701,9 +796,10 @@ msgid ""
 "i.e. '$' can be added to end of prefix to match the exact zip (e.g. '100$' "
 "will only match '100' and not '1000')"
 msgstr ""
-"이 운송업체에 적용되는 우편번호 앞자리입니다. 국가마다 다양한 우편번호 숫자 길이를 지원하기 위해 정규식을 사용하실 수 있습니다. 즉, "
-"정확하게 우편번호가 일치하도록 하려면 앞자리 뒤에 '$' 를 추가하시면 됩니다 (예: '100$'의 경우 '100'에만 일치하고 "
-"'1000'에는 일치하지 않게 됩니다)"
+"이 운송업체에 적용되는 우편번호 앞자리입니다. 국가마다 다양한 우편번호 숫자 "
+"길이를 지원하기 위해 정규식을 사용하실 수 있습니다. 즉, 정확하게 우편번호가 "
+"일치하도록 하려면 앞자리 뒤에 '$' 를 추가하시면 됩니다 (예: '100$'의 경우 "
+"'100'에만 일치하고 '1000'에는 일치하지 않게 됩니다)"
 
 #. module: delivery
 #: model:ir.model.fields.selection,name:delivery.selection__delivery_price_rule__variable__price
@@ -818,7 +914,9 @@ msgstr "선적 중량"
 msgid ""
 "Shipping insurance is a service which may reimburse senders whose parcels "
 "are lost, stolen, and/or damaged in transit."
-msgstr "운송 보험은 운송 중에 물품이 분실, 도난 및/또는 파손될 경우 발송하신 분께서 보상받으실 수 있는 서비스입니다."
+msgstr ""
+"운송 보험은 운송 중에 물품이 분실, 도난 및/또는 파손될 경우 발송하신 분께서 "
+"보상받으실 수 있는 서비스입니다."
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
@@ -826,8 +924,8 @@ msgid ""
 "Shipping method details to be included at bottom sales orders and their "
 "confirmation emails. E.g. Instructions for customers to follow."
 msgstr ""
-"하단의 판매주문서 및 관련된 확인 이메일을 포함하고 있는 배송 방법에 대한 세부 내용입니다. 예를 들어 고객이 따라야 하는 지침 "
-"등입니다."
+"하단의 판매주문서 및 관련된 확인 이메일을 포함하고 있는 배송 방법에 대한 "
+"세부 내용입니다. 예를 들어 고객이 따라야 하는 지침 등입니다."
 
 #. module: delivery
 #: model:delivery.carrier,name:delivery.free_delivery_carrier
@@ -852,18 +950,27 @@ msgid "The Poste"
 msgstr "우편 배송"
 
 #. module: delivery
+#: model_terms:payment.provider,pending_msg:delivery.payment_provider_cod
+msgid "The delivery staff will collect payment upon delivery."
+msgstr "배송 직원이 배송 시 결제 금액을 수령합니다."
+
+#. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__excluded_tag_ids
 msgid ""
 "The method is NOT available if at least one product of the order has one of "
 "these tags."
-msgstr "주문의 모든 제품에 이러한 태그 중 하나가 있는 경우 이 방법을 사용할 수 없습니다."
+msgstr ""
+"주문의 모든 제품에 이러한 태그 중 하나가 있는 경우 이 방법을 사용할 수 "
+"없습니다."
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__must_have_tag_ids
 msgid ""
-"The method is available only if at least one product of the order has one of"
-" these tags."
-msgstr "이 방법은 주문의 제품 중 하나 이상에 이러한 태그 중 하나가 있는 경우에만 사용할 수 있습니다."
+"The method is available only if at least one product of the order has one of "
+"these tags."
+msgstr ""
+"이 방법은 주문의 제품 중 하나 이상에 이러한 태그 중 하나가 있는 경우에만 "
+"사용할 수 있습니다."
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__get_return_label_from_portal
@@ -885,7 +992,7 @@ msgstr "배송 보험은 0부터 100 사이의 백분율이어야 합니다."
 #. odoo-python
 #: code:addons/delivery/models/delivery_carrier.py:0
 msgid "The shipping is free since the order amount exceeds %.2f."
-msgstr " 주문량이 %.2f를 초과하여 선적이 무료입니다."
+msgstr "주문량이 %.2f를 초과하여 선적이 무료입니다."
 
 #. module: delivery
 #. odoo-javascript
@@ -915,8 +1022,8 @@ msgid ""
 "This option adds a link for the customer in the portal to track their "
 "package easily. Use <shipmenttrackingnumber> as a placeholder in your URL."
 msgstr ""
-"이 옵션은 고객이 포털에서 패키지를 쉽게 추적할 수 있는 링크를 제공합니다. URL의 자리 표시자로 "
-"<shipmenttrackingnumber>을 사용합니다."
+"이 옵션은 고객이 포털에서 패키지를 쉽게 추적할 수 있는 링크를 제공합니다. "
+"URL의 자리 표시자로 <shipmenttrackingnumber>을 사용합니다."
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__margin
@@ -946,6 +1053,12 @@ msgid "Update shipping cost"
 msgstr "선적 비용 갱신"
 
 #. module: delivery
+#: model:ir.model.fields,help:delivery.field_res_partner__property_delivery_carrier_id
+#: model:ir.model.fields,help:delivery.field_res_users__property_delivery_carrier_id
+msgid "Used in sales orders."
+msgstr "판매 주문서에 사용됨."
+
+#. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__variable
 msgid "Variable"
 msgstr "가변"
@@ -954,6 +1067,11 @@ msgstr "가변"
 #: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__variable_factor
 msgid "Variable Factor"
 msgstr "가변 요소"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
+msgid "Visible to all"
+msgstr "모든 사람에게 표시"
 
 #. module: delivery
 #: model:ir.model.fields.selection,name:delivery.selection__delivery_price_rule__variable__volume
@@ -992,9 +1110,11 @@ msgstr "무게 단위 꼬리표"
 #. odoo-python
 #: code:addons/delivery/models/sale_order.py:0
 msgid ""
-"You can not update the shipping costs on an order where it was already invoiced!\n"
+"You can not update the shipping costs on an order where it was already "
+"invoiced!\n"
 "\n"
-"The following delivery lines (product, invoiced quantity and price) have already been processed:\n"
+"The following delivery lines (product, invoiced quantity and price) have "
+"already been processed:\n"
 "\n"
 msgstr ""
 "이미 청구서가 발행된 주문에 대해서는 배송비를 변경할 수 없습니다!\n"
@@ -1008,7 +1128,24 @@ msgstr ""
 msgid ""
 "You cannot delete the deliveries product category as it is used on the "
 "delivery carriers products."
-msgstr "배송업체 품목 카테고리는 현재 배송업체와 연결된 제품에서 사용되고 있으므로 삭제할 수 없습니다."
+msgstr ""
+"배송업체 품목 카테고리는 현재 배송업체와 연결된 제품에서 사용되고 있으므로 "
+"삭제할 수 없습니다."
+
+#. module: delivery
+#: model_terms:payment.provider,auth_msg:delivery.payment_provider_cod
+msgid "Your payment has been authorized."
+msgstr "귀하의 결제가 승인되었습니다."
+
+#. module: delivery
+#: model_terms:payment.provider,cancel_msg:delivery.payment_provider_cod
+msgid "Your payment has been cancelled."
+msgstr "귀하의 결제가 취소되었습니다."
+
+#. module: delivery
+#: model_terms:payment.provider,done_msg:delivery.payment_provider_cod
+msgid "Your payment has been processed."
+msgstr "결제가 처리되었습니다."
 
 #. module: delivery
 #. odoo-javascript
@@ -1027,6 +1164,12 @@ msgid "Zip Prefixes"
 msgstr "우편번호 앞자리"
 
 #. module: delivery
+#. odoo-python
+#: code:addons/delivery/models/payment_provider.py:0
+msgid "cash on delivery not allowed by selected delivery method"
+msgstr "선택한 배송 방법은 수령 후 결제 방식이 허용되지 않습니다."
+
+#. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid "e.g. UPS Express"
 msgstr "예: UPS Express"
@@ -1035,3 +1178,25 @@ msgstr "예: UPS Express"
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid "i.e. https://ekartlogistics.com/shipmenttrack/<shipmenttrackingnumber>"
 msgstr "예: https://ekartlogistics.com/shipmenttrack/<shipmenttrackingnumber>"
+
+#~ msgid "Default delivery method used in sales orders."
+#~ msgstr "판매 주문서는 기본적인 배송 방법을 사용합니다."
+
+#~ msgid "Delivery Rating Success"
+#~ msgstr "배송 성공율"
+
+#~ msgid "Destination Availability"
+#~ msgstr "목적지 사용 가능"
+
+#~ msgid ""
+#~ "Filling this form allows you to filter delivery carriers according to the "
+#~ "delivery address of your customer."
+#~ msgstr ""
+#~ "이 양식을 작성하면 고객의 배달 주소에 따라 운송업체를 필터링할 수 있습니"
+#~ "다."
+
+#~ msgid "Free Shipping"
+#~ msgstr "무료 배송"
+
+#~ msgid "Group By"
+#~ msgstr "그룹별"

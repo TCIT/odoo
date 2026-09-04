@@ -15,11 +15,28 @@ class StockLot(models.Model):
     use_date = fields.Datetime(string='Best before Date', compute='_compute_dates', store=True, readonly=False,
         help='This is the date on which the goods with this Serial Number start deteriorating, without being dangerous yet.')
     removal_date = fields.Datetime(string='Removal Date', compute='_compute_dates', store=True, readonly=False,
-        help='This is the date on which the goods with this Serial Number should be removed from the stock. This date will be used in FEFO removal strategy.')
+        help='This is the date on which the goods with this Serial Number should be removed from the stock and not be counted in the Fresh On Hand Stock anymore. This date will be used in FEFO removal strategy.')
     alert_date = fields.Datetime(string='Alert Date', compute='_compute_dates', store=True, readonly=False,
         help='Date to determine the expired lots and serial numbers using the filter "Expiration Alerts".')
     product_expiry_alert = fields.Boolean(compute='_compute_product_expiry_alert', help="The Expiration Date has been reached.")
     product_expiry_reminded = fields.Boolean(string="Expiry has been reminded")
+
+    @api.depends('use_expiration_date', 'expiration_date', 'alert_date')
+    @api.depends_context('formatted_display_name')
+    def _compute_display_name(self):
+        lots_to_process_ids = []
+        for lot in self:
+            if lot.env.context.get('formatted_display_name') and lot.use_expiration_date and lot.expiration_date:
+                name = f"{lot.name}"
+                if fields.Datetime.now() >= lot.expiration_date:
+                    name += self.env._("\t--Expired--")
+                elif lot.alert_date and fields.Datetime.now() >= lot.alert_date:
+                    name += self.env._("\t--Expire on %(date)s--", date=fields.Datetime.to_string(lot.expiration_date))
+                lot.display_name = name
+            else:
+                lots_to_process_ids.append(lot.id)
+        if lots_to_process_ids:
+            super(StockLot, self.env['stock.lot'].browse(lots_to_process_ids))._compute_display_name()
 
     @api.depends('expiration_date')
     def _compute_product_expiry_alert(self):
@@ -80,32 +97,11 @@ class StockLot(models.Model):
 
         for lot in alert_lots:
             lot.activity_schedule(
-                'product_expiry.mail_activity_type_alert_date_reached',
+                'mail.mail_activity_data_todo',
                 user_id=lot.product_id.with_company(lot.company_id).responsible_id.id or lot.product_id.responsible_id.id or SUPERUSER_ID,
-                note=_("The alert date has been reached for this lot/serial number")
+                note=_("The alert date has been reached for this lot/serial number"),
+                summary=_("Alert Date Reached"),
             )
         alert_lots.write({
             'product_expiry_reminded': True
         })
-
-
-class ProcurementGroup(models.Model):
-    _inherit = 'procurement.group'
-
-    @api.model
-    def _run_scheduler_tasks(self, use_new_cursor=False, company_id=False):
-        super(ProcurementGroup, self)._run_scheduler_tasks(use_new_cursor=use_new_cursor, company_id=company_id)
-        self.env['stock.lot']._alert_date_exceeded()
-        if 'scheduler_task_done' in self._context:
-            task_done = self._context.get('scheduler_task_done', {'task_done': 0})['task_done'] + 1
-            self._context['scheduler_task_done']['task_done'] = task_done
-        else:
-            task_done = self._get_scheduler_tasks_to_do()
-
-        if use_new_cursor:
-            self.env['ir.cron']._notify_progress(done=task_done, remaining=self._get_scheduler_tasks_to_do() - task_done)
-            self.env.cr.commit()
-
-    @api.model
-    def _get_scheduler_tasks_to_do(self):
-        return super()._get_scheduler_tasks_to_do() + 1

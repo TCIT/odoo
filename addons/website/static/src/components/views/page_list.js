@@ -1,20 +1,15 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
-import {PageControllerMixin} from "./page_views_mixin";
-import {PageSearchModel} from "./page_search_model";
-import {registry} from '@web/core/registry';
-import {listView} from '@web/views/list/list_view';
-import {ConfirmationDialog} from "@web/core/confirmation_dialog/confirmation_dialog";
-import {DeletePageDialog, DuplicatePageDialog} from '@website/components/dialog/page_properties';
-import {CheckboxItem} from "@web/core/dropdown/checkbox_item";
+import { usePageManager } from "./page_manager_hook";
+import { PageSearchModel } from "./page_search_model";
+import { registry } from "@web/core/registry";
+import { listView } from "@web/views/list/list_view";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DeletePageDialog, DuplicatePageDialog } from "@website/components/dialog/page_properties";
+import { useService } from "@web/core/utils/hooks";
 
-
-export class PageListController extends PageControllerMixin(listView.Controller) {
-    static template = `website.PageListView`;
+export class PageListController extends listView.Controller {
     static components = {
         ...listView.Controller.components,
-        CheckboxItem,
     };
 
     /**
@@ -22,6 +17,12 @@ export class PageListController extends PageControllerMixin(listView.Controller)
      */
     setup() {
         super.setup();
+        this.orm = useService("orm");
+        this.dialog = useService("dialog");
+        this.pageManager = usePageManager({
+            resModel: this.props.resModel,
+            createAction: this.props.context.create_action,
+        });
         if (this.props.resModel === "website.page") {
             this.archiveEnabled = false;
         }
@@ -31,7 +32,7 @@ export class PageListController extends PageControllerMixin(listView.Controller)
      * @override
      */
     onClickCreate() {
-        return this.createWebsiteContent();
+        return this.pageManager.createWebsiteContent();
     }
 
     /**
@@ -41,7 +42,7 @@ export class PageListController extends PageControllerMixin(listView.Controller)
      */
     getStaticActionMenuItems() {
         const menuItems = super.getStaticActionMenuItems();
-        if (this.props.fields.hasOwnProperty('is_published')) {
+        if (Object.prototype.hasOwnProperty.call(this.props.fields, "is_published")) {
             menuItems.publish = {
                 sequence: 15,
                 icon: "fa fa-globe",
@@ -49,7 +50,10 @@ export class PageListController extends PageControllerMixin(listView.Controller)
                 callback: async () => {
                     this.dialogService.add(ConfirmationDialog, {
                         title: _t("Publish Website Content"),
-                        body: _t("%s record(s) selected, are you sure you want to publish them all?", this.model.root.selection.length),
+                        body: _t(
+                            "%s record(s) selected, are you sure you want to publish them all?",
+                            this.model.root.selection.length
+                        ),
                         confirm: () => this.togglePublished(true),
                     });
                 },
@@ -67,7 +71,7 @@ export class PageListController extends PageControllerMixin(listView.Controller)
                 this.dialog.add(DuplicatePageDialog, {
                     pageIds: resIds,
                     onDuplicate: () => {
-                        this.model.load();
+                        this.env.searchModel.refreshFilterForAllWebsites();
                     },
                 });
             };
@@ -77,21 +81,25 @@ export class PageListController extends PageControllerMixin(listView.Controller)
 
     async onDeleteSelectedRecords() {
         const pageIds = this.model.root.selection.map((record) => record.resId);
-        const newPageTemplateRecords = await this.orm.read("website.page", pageIds, ["is_new_page_template"]);
+        const newPageTemplateRecords = await this.orm.read("website.page", pageIds, [
+            "is_new_page_template",
+        ]);
         this.dialogService.add(DeletePageDialog, {
             resIds: pageIds,
             resModel: this.props.resModel,
             onDelete: () => {
                 this.model.root.deleteRecords();
             },
-            hasNewPageTemplate: newPageTemplateRecords.some(record => record.is_new_page_template),
+            hasNewPageTemplate: newPageTemplateRecords.some(
+                (record) => record.is_new_page_template
+            ),
         });
     }
 
     async togglePublished(publish) {
-        const resIds = this.model.root.selection.map(record => record.resId);
-        await this.orm.write(this.props.resModel, resIds, {is_published: publish});
-        this.actionService.switchView('list');
+        const resIds = this.model.root.selection.map((record) => record.resId);
+        await this.orm.write(this.props.resModel, resIds, { is_published: publish });
+        this.actionService.switchView("list");
     }
 }
 

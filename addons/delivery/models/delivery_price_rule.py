@@ -1,8 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
-
 from odoo.tools import format_amount
+
 
 VARIABLE_SELECTION = [
     ('weight', "Weight"),
@@ -13,8 +13,8 @@ VARIABLE_SELECTION = [
 ]
 
 
-class PriceRule(models.Model):
-    _name = "delivery.price.rule"
+class DeliveryPriceRule(models.Model):
+    _name = 'delivery.price.rule'
     _description = "Delivery Price Rules"
     _order = 'sequence, list_price, id'
 
@@ -40,14 +40,14 @@ class PriceRule(models.Model):
 
     name = fields.Char(compute='_compute_name')
     sequence = fields.Integer(required=True, default=10)
-    carrier_id = fields.Many2one('delivery.carrier', 'Carrier', required=True, ondelete='cascade')
+    carrier_id = fields.Many2one('delivery.carrier', 'Carrier', required=True, index=True, ondelete='cascade')
     currency_id = fields.Many2one(related='carrier_id.currency_id')
 
     variable = fields.Selection(selection=VARIABLE_SELECTION, required=True, default='quantity')
     operator = fields.Selection([('==', '='), ('<=', '<='), ('<', '<'), ('>=', '>='), ('>', '>')], required=True, default='<=')
     max_value = fields.Float('Maximum Value', required=True)
-    list_base_price = fields.Float(string='Sale Base Price', digits='Product Price', required=True, default=0.0)
-    list_price = fields.Float('Sale Price', digits='Product Price', required=True, default=0.0)
+    list_base_price = fields.Float(string='Sale Base Price', min_display_digits='Product Price', required=True, default=0.0)
+    list_price = fields.Float('Sale Price', min_display_digits='Product Price', required=True, default=0.0)
     variable_factor = fields.Selection(
         selection=VARIABLE_SELECTION, string="Variable Factor", required=True, default='weight'
     )

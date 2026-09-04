@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import copy
 
 from datetime import datetime
 from freezegun import freeze_time
@@ -8,6 +9,37 @@ from unittest.mock import patch
 from odoo import exceptions
 from odoo.addons.mass_mailing.tests.common import MassMailCommon
 from odoo.tests import Form, tagged, users
+
+
+@tagged('mailing_list')
+class TestMailingContactAccess(MassMailCommon):
+
+    @users('user_marketing')
+    def test_mailing_contact_properties_access(self):
+        # Check that mailing user can edit properties on mailing contact
+        value = [{'type': 'char', 'name': 'test', 'value': 'test', 'definition_changed': True}]
+        contact = self.env['mailing.contact'].create({'properties': copy.deepcopy(value)})
+        self.assertEqual(dict(contact.properties), {'test': 'test'})
+
+        delete_value = [{'type': 'char', 'name': 'test', 'value': 'test', 'definition_deleted': True}]
+        contact = self.env['mailing.contact'].create({'properties': copy.deepcopy(delete_value)})
+        self.assertEqual(dict(contact.properties), {})
+
+        # Sanity check, mailing user can only edit the definition on partner in SUDO
+        with self.assertRaises(exceptions.AccessError):
+            self.env['res.partner'].create({'properties': copy.deepcopy(value), 'name': 'test'})
+
+        partner = self.env['res.partner'].sudo().create({'properties': copy.deepcopy(value), 'name': 'test'})
+        self.assertEqual(dict(partner.properties), {'test': 'test'})
+
+        base_definition = self.env['properties.base.definition']._get_definition_for_property_field('mailing.contact', 'properties')
+        self.assertTrue(base_definition)
+        with self.assertRaises(exceptions.AccessError):
+            base_definition.properties_field_id = self.env["ir.model.fields"].sudo()._get('res.partner', 'properties').id
+
+        partner_base_definition = self.env['properties.base.definition']._get_definition_for_property_field('res.partner', 'properties')
+        with self.assertRaises(exceptions.AccessError):
+            partner_base_definition.unlink()
 
 
 @tagged('mailing_list')
@@ -34,8 +66,12 @@ class TestMailingContactToList(MassMailCommon):
         # set mailing list and add contacts
         wizard_form.mailing_list_id = mailing
         wizard = wizard_form.save()
-        action = wizard.action_add_contacts()
-        self.assertEqual(contacts.list_ids, mailing)
+        frozen_time = datetime(2025, 1, 1, 0, 0)
+        with self.mock_datetime_and_now(frozen_time):
+            action = wizard.action_add_contacts()
+            self.assertEqual(contacts.list_ids, mailing)
+            create_dates = contacts.subscription_ids.mapped('create_date')
+            self.assertTrue(all(date == frozen_time for date in create_dates), "All create dates should be equal to frozen datetime")
         self.assertEqual(action["type"], "ir.actions.client")
         self.assertTrue(action.get("params", {}).get("next"), "Should return a notification with a next action")
         subaction = action["params"]["next"]

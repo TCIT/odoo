@@ -1,9 +1,9 @@
-import { _t } from '@web/core/l10n/translation';
-import { patch } from '@web/core/utils/patch';
 import { useSubEnv } from '@odoo/owl';
 import {
     ProductConfiguratorDialog
 } from '@sale/js/product_configurator_dialog/product_configurator_dialog';
+import { _t } from '@web/core/l10n/translation';
+import { patch } from '@web/core/utils/patch';
 
 patch(ProductConfiguratorDialog, {
     props: {
@@ -14,6 +14,7 @@ patch(ProductConfiguratorDialog, {
             shape: {
                 ...ProductConfiguratorDialog.props.options.shape,
                 isMainProductConfigurable: { type: Boolean, optional: true },
+                isBuyNow: { type: Boolean, optional: true },
             },
         },
     },
@@ -28,11 +29,7 @@ patch(ProductConfiguratorDialog.prototype, {
             this.createProductUrl = '/website_sale/product_configurator/create_product';
             this.updateCombinationUrl = '/website_sale/product_configurator/update_combination';
             this.getOptionalProductsUrl = '/website_sale/product_configurator/get_optional_products';
-            // To be translated, the title must be repeated here. Indeed, only
-            // translations of "frontend modules" are fetched in the context of
-            // website. The original definition of the title is in "sale", which
-            // is not a frontend module.
-            this.title = _t("Configure your product");
+            this.title = _t("Configure");
         }
 
         useSubEnv({
@@ -58,4 +55,23 @@ patch(ProductConfiguratorDialog.prototype, {
     showShopButtons() {
         return this.props.isFrontend && !this.props.edit;
     },
+
+    _handleUnitOfMeasureUpdate(product, combination, uomId) {
+        super._handleUnitOfMeasureUpdate(...arguments);
+        if (this.props.isFrontend && combination.strikethrough_price) {
+            product.strikethrough_price = parseFloat(combination.strikethrough_price);
+        }
+    },
+
+    get totalMessage() {
+        if (this.env.isFrontend) {
+            // To be translated, the title must be repeated here. Indeed, only
+            // translations of "frontend modules" are fetched in the context of
+            // website. The original definition of the title is in "sale", which
+            // is not a frontend module.
+            return _t("Total: %s", this.getFormattedTotal());
+        }
+        return super.totalMessage(...arguments);
+    },
+
 });

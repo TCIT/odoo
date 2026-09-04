@@ -8,7 +8,7 @@ from markupsafe import Markup
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError, UserError
-from odoo.osv import expression
+from odoo.fields import Domain
 from odoo.tools import is_html_empty, remove_accents
 
 # see rfc5322 section 3.2.3
@@ -16,11 +16,11 @@ atext = r"[a-zA-Z0-9!#$%&'*+\-/=?^_`{|}~]"
 dot_atom_text = re.compile(r"^%s+(\.%s+)*$" % (atext, atext))
 
 
-class Alias(models.Model):
+class MailAlias(models.Model):
     """A Mail Alias is a mapping of an email address with a given Odoo Document
        model. It is used by Odoo's mail gateway when processing incoming emails
        sent to the system. If the recipient address (To) of the message matches
-       a Mail Alias, the message will be either processed following the rules
+       a Mail MailAlias, the message will be either processed following the rules
        of that alias. If the message is a reply it will be attached to the
        existing discussion on the corresponding record, otherwise a new
        record of the corresponding model will be created.
@@ -31,16 +31,15 @@ class Alias(models.Model):
      """
     _name = 'mail.alias'
     _description = "Email Aliases"
+    _order = 'alias_model_id, alias_name'
     _rec_name = 'alias_name'
     _rec_names_search = ['alias_name', 'alias_domain']
-    _order = 'alias_model_id, alias_name'
 
     # email definition
     alias_name = fields.Char(
         'Alias Name', copy=False,
         help="The name of the email alias, e.g. 'jobs' if you want to catch emails for <jobs@example.odoo.com>")
     alias_full_name = fields.Char('Alias Email', compute='_compute_alias_full_name', store=True, index='btree_not_null')
-    display_name = fields.Char(string='Display Name', compute='_compute_display_name', search='_search_display_name')
     alias_domain_id = fields.Many2one(
         'mail.alias.domain', string='Alias Domain', ondelete='restrict',
         default=lambda self: self.env.company.alias_domain_id)
@@ -94,14 +93,7 @@ class Alias(models.Model):
         ], compute='_compute_alias_status', store=True,
         help='Alias status assessed on the last message received.')
 
-    def init(self):
-        """Make sure there aren't multiple records for the same name and alias
-        domain. Not in _sql_constraint because COALESCE is not supported for
-        PostgreSQL constraint. """
-        self.env.cr.execute("""
-            CREATE UNIQUE INDEX IF NOT EXISTS mail_alias_name_domain_unique
-            ON mail_alias (alias_name, COALESCE(alias_domain_id, 0))
-        """)
+    _name_domain_unique = models.UniqueIndex('(alias_name, COALESCE(alias_domain_id, 0))')
 
     @api.constrains('alias_domain_id', 'alias_force_thread_id', 'alias_parent_model_id',
                     'alias_parent_thread_id', 'alias_model_id')
@@ -111,7 +103,12 @@ class Alias(models.Model):
         domain should match the one used on the related record. """
 
         # in sudo, to be able to read alias_parent_model_id (ir.model)
-        tocheck = self.sudo().filtered(lambda domain: domain.alias_domain_id.company_ids)
+        tocheck = self.sudo().filtered(lambda alias: alias.alias_domain_id.company_ids)
+        # transient check, mainly for tests / install
+        tocheck = tocheck.filtered(lambda alias:
+            (not alias.alias_model_id.model or alias.alias_model_id.model in self.env) and
+            (not alias.alias_parent_model_id.model or alias.alias_parent_model_id.model in self.env)
+        )
         if not tocheck:
             return
 
@@ -320,12 +317,12 @@ class Alias(models.Model):
                 domain_to_names[alias_domain].append(alias_name)
 
         # matches existing alias
-        domain = expression.OR([
-            ['&', ('alias_name', 'in', alias_names), ('alias_domain_id', '=', alias_domain.id)]
+        domain = Domain.OR(
+            Domain('alias_name', 'in', alias_names) & Domain('alias_domain_id', '=', alias_domain.id)
             for alias_domain, alias_names in domain_to_names.items()
-        ])
+        )
         if domain and self:
-            domain = expression.AND([domain, [('id', 'not in', self.ids)]])
+            domain &= Domain('id', 'not in', self.ids)
         existing = self.search(domain, limit=1) if domain else self.env['mail.alias']
         if not existing:
             return
@@ -349,7 +346,7 @@ class Alias(models.Model):
                 matching_name=existing.display_name,
             )
         msg_end = _('Choose another value or change it on the other document.')
-        raise UserError(f'{msg_begin} {msg_end}')
+        raise UserError(f'{msg_begin} {msg_end}')  # pylint: disable=missing-gettext
 
     @api.model
     def _sanitize_allowed_domains(self, allowed_domains):
@@ -376,7 +373,8 @@ class Alias(models.Model):
         :param bool is_email: whether to keep a right part, otherwise only
           left part is kept;
 
-        :return str: sanitized alias name
+        :returns: sanitized alias name
+        :rtype: str
         """
         sanitized_name = name.strip() if name else ''
         if is_email:
@@ -512,8 +510,7 @@ Please try again later or contact %(company_name)s instead."""
         }, minimal_qcontext=True)
 
     def _alias_bounce_incoming_email(self, message, message_dict, set_invalid=True):
-        """Set alias status to invalid and create bounce message to the sender
-        and the alias responsible.
+        """Set alias status to invalid and create bounce message to the sender.
 
         This method must be called when a message received on the alias has
         caused an error due to the mis-configuration of the alias.
@@ -534,6 +531,4 @@ Please try again later or contact %(company_name)s instead."""
         self.env['mail.thread']._routing_create_bounce_email(
             message_dict['email_from'], body, message,
             references=message_dict['message_id'],
-            # add the alias creator as recipient if set
-            recipient_ids=self.create_uid.partner_id.ids if self.create_uid.active else [],
         )

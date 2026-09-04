@@ -1,44 +1,57 @@
 import { Plugin } from "@html_editor/plugin";
 import { baseContainerGlobalSelector } from "@html_editor/utils/base_container";
 import { closestBlock } from "@html_editor/utils/blocks";
-import { isEmptyBlock } from "@html_editor/utils/dom_info";
-import { closestElement } from "@html_editor/utils/dom_traversal";
+import { isEditorTab, isEmptyBlock } from "@html_editor/utils/dom_info";
+import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 import { omit, pick } from "@web/core/utils/objects";
+import { debounce } from "@web/core/utils/timing";
 
 /** @typedef {import("./powerbox/powerbox_plugin").PowerboxCommand} PowerboxCommand */
+/** @typedef {import("@html_editor/core/selection_plugin").EditorSelection} EditorSelection */
 
 /**
  * @typedef {Object} PowerButton
  * @property {string} commandId
  * @property {Object} [commandParams]
- * @property {string} [title] Can be inferred from the user command
+ * @property {string} [description] Can be inferred from the user command
  * @property {string} [icon] Can be inferred from the user command
+ * @property {string} [text] Mandatory if `icon` is not provided
  * @property {string} [isAvailable] Can be inferred from the user command
  */
+
 /**
+ * @typedef {((selection: EditorSelection) => boolean)[]} power_buttons_visibility_predicates
+ */
+
+/**
+ * @typedef {{ commandId: string }[]} power_buttons
+ *
  * A power button is added by referencing an existing user command.
  *
  * Example:
  *
- * resources = {
- *      user_commands: [
- *          {
- *              id: myCommand,
- *              run: myCommandFunction,
- *              title: _t("My Command"),
- *              icon: "fa-bug",
- *          },
- *      ],
- *      power_buttons: [
- *          {
- *              commandId: "myCommand",
- *              commandParams: { myParam: "myValue" },
- *              title: _t("My Power Button"), // overrides the user command's `title`
- *              // `icon` is derived from the user command
- *          }
- *      ],
- * };
+ *     resources = {
+ *          user_commands: [
+ *              {
+ *                  id: myCommand,
+ *                  run: myCommandFunction,
+ *                  description: _t("Apply my command"),
+ *                  icon: "fa-bug",
+ *              },
+ *          ],
+ *          power_buttons: [
+ *              {
+ *                  commandId: "myCommand",
+ *                  commandParams: { myParam: "myValue" },
+ *                  description: _t("Do powerfull stuff"), // overrides the user command's `description`
+ *                  // `icon` is derived from the user command
+ *              }
+ *          ],
+ *     };
  */
+
+// Below this size, the power buttons will overlap other menus.
+const MIN_WIDTH_FOR_POWER_BUTTONS = 600;
 
 export class PowerButtonsPlugin extends Plugin {
     static id = "powerButtons";
@@ -49,10 +62,13 @@ export class PowerButtonsPlugin extends Plugin {
         "localOverlay",
         "powerbox",
         "userCommand",
+        "history",
     ];
+    /** @type {import("plugins").EditorResources} */
     resources = {
         layout_geometry_change_handlers: this.updatePowerButtons.bind(this),
-        selectionchange_handlers: this.updatePowerButtons.bind(this),
+        selectionchange_handlers: this.triggerDebouncedUpdatePowerButtons.bind(this),
+        post_mount_component_handlers: this.updatePowerButtons.bind(this),
     };
 
     setup() {
@@ -60,21 +76,43 @@ export class PowerButtonsPlugin extends Plugin {
             "oe-power-buttons-overlay"
         );
         this.createPowerButtons();
+        const shouldDebounce = this.config.debouncePowerbuttons !== false;
+        if (shouldDebounce) {
+            this.debouncedUpdatePowerButtons = debounce(this.updatePowerButtons.bind(this), 30);
+        } else {
+            this.debouncedUpdatePowerButtons = this.updatePowerButtons.bind(this);
+        }
     }
 
     createPowerButtons() {
         const composePowerButton = (/**@type {PowerButton} */ item) => {
             const command = this.dependencies.userCommand.getCommand(item.commandId);
             return {
-                ...pick(command, "title", "icon", "isAvailable"),
+                ...pick(command, "description", "icon"),
                 ...omit(item, "commandId", "commandParams"),
                 run: () => command.run(item.commandParams),
+                isAvailable: (selection) =>
+                    [command.isAvailable, item.isAvailable]
+                        .filter(Boolean)
+                        .every((predicate) => predicate(selection)),
             };
         };
-        const renderButton = ({ title, icon, run }) => {
+        const renderButton = ({ description, icon, text, run }) => {
             const btn = this.document.createElement("button");
-            btn.className = `power_button btn px-2 py-1 cursor-pointer fa ${icon}`;
-            btn.title = title;
+            let className = "power_button btn px-2 py-1 cursor-pointer";
+            if (icon) {
+                const iconLibrary = icon.includes("fa-") ? "fa" : "oi";
+                className += ` ${iconLibrary} ${icon}`;
+            } else {
+                const span = this.document.createElement("span");
+                span.textContent = text;
+                span.className = "d-flex align-items-center text-nowrap";
+                span.style.height = "1em";
+                btn.append(span);
+            }
+            btn.className = className;
+            btn.title = description;
+            this.addDomListener(btn, "pointerdown", (ev) => ev.preventDefault());
             this.addDomListener(btn, "click", () => this.applyCommand(run));
             return btn;
         };
@@ -87,41 +125,59 @@ export class PowerButtonsPlugin extends Plugin {
         this.descriptionToElementMap = new Map(powerButtons.map((pb) => [pb, renderButton(pb)]));
 
         this.powerButtonsContainer = this.document.createElement("div");
-        this.powerButtonsContainer.className = `o_we_power_buttons d-flex justify-content-center d-none`;
+        this.powerButtonsContainer.className = `o_we_power_buttons d-flex justify-content-center invisible position-absolute`;
         this.powerButtonsContainer.append(...this.descriptionToElementMap.values());
         this.powerButtonsOverlay.append(this.powerButtonsContainer);
     }
 
+    triggerDebouncedUpdatePowerButtons() {
+        this.powerButtonsContainer.classList.add("invisible");
+        this.debouncedUpdatePowerButtons();
+    }
+
     updatePowerButtons() {
-        this.powerButtonsContainer.classList.add("d-none");
-        const { editableSelection, documentSelectionIsInEditable } =
+        this.powerButtonsContainer.classList.add("invisible");
+        const { documentSelection, editableSelection, currentSelectionIsInEditable } =
             this.dependencies.selection.getSelectionData();
-        if (!documentSelectionIsInEditable) {
+        if (!currentSelectionIsInEditable) {
             return;
         }
-        const block = closestBlock(editableSelection.anchorNode);
-        const element = closestElement(editableSelection.anchorNode);
+        const block = closestBlock(documentSelection.anchorNode);
+        const blockRect = block.getBoundingClientRect();
+        const editableRect = this.editable.getBoundingClientRect();
         if (
-            editableSelection.isCollapsed &&
-            element?.matches(baseContainerGlobalSelector) &&
+            documentSelection.isCollapsed &&
+            block?.matches(baseContainerGlobalSelector) &&
+            editableRect.bottom > blockRect.top &&
             isEmptyBlock(block) &&
-            !this.services.ui.isSmall &&
-            !closestElement(editableSelection.anchorNode, "td") &&
+            !descendants(block).some(isEditorTab) &&
+            this.editable.offsetWidth >= MIN_WIDTH_FOR_POWER_BUTTONS &&
+            !closestElement(documentSelection.anchorNode, "td, th, li") &&
             !block.style.textAlign &&
             this.getResource("power_buttons_visibility_predicates").every((predicate) =>
-                predicate(editableSelection)
+                predicate(documentSelection)
             )
         ) {
-            this.powerButtonsContainer.classList.remove("d-none");
-            const direction = closestElement(element, "[dir]")?.getAttribute("dir");
-            this.powerButtonsContainer.setAttribute("dir", direction);
+            const direction = closestElement(block, "[dir]")?.getAttribute("dir");
             // Hide/show buttons based on their availability.
             for (const [{ isAvailable }, buttonElement] of this.descriptionToElementMap.entries()) {
-                const shouldHide = Boolean(isAvailable && !isAvailable(editableSelection));
+                const shouldHide = Boolean(!isAvailable(editableSelection));
                 buttonElement.classList.toggle("d-none", shouldHide); // 2nd arg must be a boolean
             }
-            this.setPowerButtonsPosition(block, direction);
+            this.setPowerButtonsPosition(block, blockRect, direction);
+            this.powerButtonsContainer.classList.remove("invisible");
+            this.powerButtonsContainer.setAttribute("dir", direction);
         }
+    }
+
+    getPlaceholderWidth(block) {
+        const hintText = block.getAttribute("o-we-hint-text");
+        const cs = getComputedStyle(block);
+        const canvas = this.canvas || (this.canvas = document.createElement("canvas"));
+        const ctx = canvas.getContext("2d");
+        ctx.font = cs.font;
+        const width = ctx.measureText(hintText).width;
+        return width;
     }
 
     /**
@@ -129,25 +185,53 @@ export class PowerButtonsPlugin extends Plugin {
      * @param {HTMLElement} block
      * @param {string} direction
      */
-    setPowerButtonsPosition(block, direction) {
-        const overlayStyles = this.powerButtonsOverlay.style;
+    setPowerButtonsPosition(block, blockRect, direction) {
         // Resetting the position of the power buttons.
-        overlayStyles.top = "0px";
-        overlayStyles.left = "0px";
-        const blockRect = block.getBoundingClientRect();
-        const buttonsRect = this.powerButtonsContainer.getBoundingClientRect();
-        if (direction === "rtl") {
-            overlayStyles.left =
-                blockRect.right -
-                buttonsRect.width -
-                buttonsRect.x -
-                buttonsRect.width * 0.85 +
-                "px";
-        } else {
-            overlayStyles.left = blockRect.left - buttonsRect.x + buttonsRect.width * 0.85 + "px";
+        const overlayRect = this.powerButtonsOverlay.getBoundingClientRect();
+        let referenceRect = { top: 0, left: 0 };
+        let frameElement;
+        try {
+            frameElement = this.document.defaultView.frameElement;
+        } catch {
+            // We don't access the frameElement if we don't have access to it.
+            // (i.e. iframe origin or sandbox restriction)
         }
-        overlayStyles.top = blockRect.top - buttonsRect.top + "px";
-        overlayStyles.height = blockRect.height + "px";
+        if (frameElement) {
+            referenceRect = frameElement.getBoundingClientRect();
+        }
+        const placeholderWidth = this.getPlaceholderWidth(block);
+        let newButtonContainerLeft;
+        const editableRect = this.editable.getBoundingClientRect();
+        if (direction === "rtl") {
+            newButtonContainerLeft =
+                blockRect.right - (overlayRect.left - referenceRect.left) - placeholderWidth - 30;
+            if (newButtonContainerLeft <= 0) {
+                this.powerButtonsContainer
+                    .querySelectorAll(".power_button:not(:last-child)")
+                    .forEach((el) => el.classList.add("d-none"));
+                newButtonContainerLeft =
+                    blockRect.right -
+                    (overlayRect.left - referenceRect.left) -
+                    placeholderWidth -
+                    30;
+            }
+            this.powerButtonsContainer.style.transform = "translateX(-100%)";
+        } else {
+            this.powerButtonsContainer.style.transform = "unset";
+            newButtonContainerLeft =
+                blockRect.left - (overlayRect.left - referenceRect.left) + placeholderWidth + 30;
+            if (
+                newButtonContainerLeft + this.powerButtonsContainer.offsetWidth >
+                editableRect.right + referenceRect.left
+            ) {
+                this.powerButtonsContainer
+                    .querySelectorAll(".power_button:not(:last-child)")
+                    .forEach((el) => el.classList.add("d-none"));
+            }
+        }
+        this.powerButtonsContainer.style.left = newButtonContainerLeft + "px";
+        this.powerButtonsContainer.style.top =
+            blockRect.top - (overlayRect.top - referenceRect.top) + "px";
     }
 
     /**

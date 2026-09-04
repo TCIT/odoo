@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
@@ -8,9 +7,11 @@ import logging
 
 from dateutil.relativedelta import relativedelta
 
-from odoo import fields, models, api, _
+from odoo import fields, models, api
 from odoo.exceptions import UserError
 from odoo.http import request
+from odoo.tools.misc import str2bool
+from odoo.tools.constants import GC_UNLINK_LIMIT
 from odoo.tools.profiler import make_session
 from odoo.tools.speedscope import Speedscope
 
@@ -28,7 +29,10 @@ class IrProfile(models.Model):
 
     session = fields.Char('Session', index=True)
     name = fields.Char('Description')
-    duration = fields.Float('Duration')
+    duration = fields.Float('Duration', digits=(9, 3),
+        help="Real elapsed time")
+    cpu_duration = fields.Float('CPU Duration', digits=(9, 3),
+        help="CPU clock (not including other processes or SQL)")
 
     init_stack_trace = fields.Text('Initial stack trace', prefetch=False)
 
@@ -36,31 +40,125 @@ class IrProfile(models.Model):
     sql_count = fields.Integer('Queries Count')
     traces_async = fields.Text('Traces Async', prefetch=False)
     traces_sync = fields.Text('Traces Sync', prefetch=False)
+    others = fields.Text('others', prefetch=False)
     qweb = fields.Text('Qweb', prefetch=False)
     entry_count = fields.Integer('Entry count')
 
     speedscope = fields.Binary('Speedscope', compute='_compute_speedscope')
     speedscope_url = fields.Text('Open', compute='_compute_speedscope_url')
 
+    config_url = fields.Text('Open profiles config', compute='_compute_config_url')
+
     @api.autovacuum
     def _gc_profile(self):
         # remove profiles older than 30 days
         domain = [('create_date', '<', fields.Datetime.now() - datetime.timedelta(days=30))]
-        return self.sudo().search(domain).unlink()
+        records = self.sudo().search(domain, limit=GC_UNLINK_LIMIT)
+        records.unlink()
+        return len(records), len(records) == GC_UNLINK_LIMIT  # done, remaining
 
+    def _has_memory_traces(self):
+        """Return True if all profiles have RSS memory measurements in traces_async."""
+        for profile in self:
+            if not profile.traces_async:
+                return False
+            entries = json.loads(profile.traces_async)
+            if not entries or entries[0].get('memory') is None:
+                return False
+        return True
+
+    def _get_memory_data(self):
+        """Return baselined RSS memory data points for the chart."""
+        points = []
+        baseline = None
+        for profile in self:
+            if not profile.traces_async:
+                continue
+            for entry in json.loads(profile.traces_async):
+                mem = entry.get('memory')
+                if mem is None:
+                    continue
+                if baseline is None:
+                    baseline = mem
+                points.append({
+                    'timestamp': entry['start'],
+                    'memory': mem - baseline,
+                    'abs_memory': mem,
+                })
+        return {'points': points}
+
+    def _compute_config_url(self):
+        for profile in self:
+            profile.config_url = f'/web/profile_config/{profile.id}'
+
+    @api.depends('init_stack_trace')
     def _compute_speedscope(self):
+        # The params variable is done to control input from the user
+        # When expanding this, it should be select from an enum to input only the correct values
+        params = self._parse_params(self.env.context)
         for execution in self:
-            sp = Speedscope(init_stack_trace=json.loads(execution.init_stack_trace))
-            if execution.sql:
-                sp.add('sql', json.loads(execution.sql))
-            if execution.traces_async:
-                sp.add('frames', json.loads(execution.traces_async))
-            if execution.traces_sync:
-                sp.add('settrace', json.loads(execution.traces_sync))
+            execution.speedscope = base64.b64encode(execution._generate_speedscope(params))
 
-            result = json.dumps(sp.add_default().make())
-            execution.speedscope = base64.b64encode(result.encode('utf-8'))
+    def _default_profile_params(self):
+        has_sql = any(profile.sql for profile in self)
+        has_traces = any(profile.traces_async for profile in self)
+        has_memory = self._has_memory_traces()
+        return {
+            'combined_profile': has_sql and has_traces,
+            'sql_no_gap_profile': has_sql and not has_traces,
+            'sql_density_profile': False,
+            'frames_profile': has_traces and not has_sql,
+            'memory_profile': has_memory,
+        }
 
+    def _parse_params(self, params):
+        return {
+            'constant_time': str2bool(params.get('constant_time', False)),
+            'aggregate_sql': str2bool(params.get('aggregate_sql', False)),
+            'use_context': str2bool(params.get('use_execution_context', True)),
+            'combined_profile': str2bool(params.get('combined_profile', False)),
+            'sql_no_gap_profile': str2bool(params.get('sql_no_gap_profile', False)),
+            'sql_density_profile': str2bool(params.get('sql_density_profile', False)),
+            'frames_profile': str2bool(params.get('frames_profile', False)),
+            'memory_profile': str2bool(params.get('memory_profile', False)),
+            'profile_aggregation_mode': params.get('profile_aggregation_mode', 'tabs'),
+        }
+
+    def _generate_speedscope(self, params):
+        init_stack_trace = self[0].init_stack_trace
+        for record in self:
+            if record.init_stack_trace != init_stack_trace:
+                raise UserError(self.env._('All profiles must have the same initial stack trace to be displayed together.'))
+        sp = Speedscope(init_stack_trace=json.loads(init_stack_trace))
+        for profile in self:
+            if (params['sql_no_gap_profile'] or params['sql_density_profile'] or params['combined_profile']) and profile.sql:
+                sp.add(f'sql {profile.id}', json.loads(profile.sql))
+            if (params['frames_profile'] or params['combined_profile'] or params['memory_profile']) and profile.traces_async:
+                sp.add(f'frames {profile.id}', json.loads(profile.traces_async))
+            if params['profile_aggregation_mode'] == 'tabs':
+                profile._add_outputs(sp, f'{profile.id} {profile.name}' if len(self) > 1 else '', params)
+
+        if params['profile_aggregation_mode'] == 'temporal':
+            self._add_outputs(sp, 'all', params)
+
+        result = json.dumps(sp.make(**params))
+        return result.encode('utf-8')
+
+    def _add_outputs(self, sp, suffix, params):
+        sql = [f'sql {profile.id}' for profile in self]
+        frames = [f'frames {profile.id}' for profile in self]
+        if params['combined_profile']:
+            sp.add_output(sql + frames, display_name=f'Combined {suffix}', **params)
+        if params['sql_no_gap_profile']:
+            sp.add_output(sql, hide_gaps=True, display_name=f'Sql (no gap) {suffix}', **params)
+        if params['sql_density_profile']:
+            sp.add_output(sql, continuous=False, complete=False, display_name=f'Sql (density) {suffix}', **params)
+        if params['frames_profile']:
+            sp.add_output(frames, display_name=f'Frames {suffix}', **params)
+        if params['memory_profile']:
+            sp.add_memory_output(frames, display_name=f'Memory {suffix}', **params)
+
+    @api.depends('speedscope')
     def _compute_speedscope_url(self):
         for profile in self:
             profile.speedscope_url = f'/web/speedscope/{profile.id}'
@@ -90,7 +188,7 @@ class IrProfile(models.Model):
             limit = self._enabled_until()
             _logger.info("User %s started profiling", self.env.user.name)
             if not limit:
-                request.session.profile_session = None
+                request.session['profile_session'] = None
                 if self.env.user._is_system():
                     return {
                             'type': 'ir.actions.act_window',
@@ -99,31 +197,38 @@ class IrProfile(models.Model):
                             'target': 'new',
                             'views': [[False, 'form']],
                         }
-                raise UserError(_('Profiling is not enabled on this database. Please contact an administrator.'))
-            if not request.session.profile_session:
-                request.session.profile_session = make_session(self.env.user.name)
-                request.session.profile_expiration = limit
-                if request.session.profile_collectors is None:
-                    request.session.profile_collectors = []
-                if request.session.profile_params is None:
-                    request.session.profile_params = {}
+                raise UserError(self.env._('Profiling is not enabled on this database. Please contact an administrator.'))
+            if not request.session.get('profile_session'):
+                request.session['profile_session'] = make_session(self.env.user.name)
+                request.session['profile_expiration'] = limit
+                if request.session.get('profile_collectors') is None:
+                    request.session['profile_collectors'] = []
+                if request.session.get('profile_params') is None:
+                    request.session['profile_params'] = {}
         elif profile is not None:
-            request.session.profile_session = None
+            request.session['profile_session'] = None
 
         if collectors is not None:
-            request.session.profile_collectors = collectors
+            request.session['profile_collectors'] = collectors
 
         if params is not None:
-            request.session.profile_params = params
+            request.session['profile_params'] = params
 
         return {
-            'session': request.session.profile_session,
-            'collectors': request.session.profile_collectors,
-            'params': request.session.profile_params,
+            'session': request.session.get('profile_session'),
+            'collectors': request.session.get('profile_collectors'),
+            'params': request.session.get('profile_params'),
         }
 
+    def action_view_speedscope(self):
+        ids = ",".join(str(p.id) for p in self)
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/profile_config/{ids}',
+            'target': 'new',
+        }
 
-class EnableProfilingWizard(models.TransientModel):
+class BaseEnableProfilingWizard(models.TransientModel):
     _name = 'base.enable.profiling.wizard'
     _description = "Enable profiling for some time"
 

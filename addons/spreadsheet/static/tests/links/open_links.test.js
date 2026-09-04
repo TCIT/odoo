@@ -26,7 +26,7 @@ test("click a web link", async () => {
     const data = {
         sheets: [
             {
-                cells: { A1: { content: "[Odoo](https://odoo.com)" } },
+                cells: { A1: "[Odoo](https://odoo.com)" },
             },
         ],
     };
@@ -51,7 +51,7 @@ test("click a menu link", async () => {
     const data = {
         sheets: [
             {
-                cells: { A1: { content: "[label](odoo://ir_menu_xml_id/test_menu)" } },
+                cells: { A1: "[label](odoo://ir_menu_xml_id/test_menu)" },
             },
         ],
     };
@@ -60,6 +60,33 @@ test("click a menu link", async () => {
     expect(urlRepresentation(cell.link, model.getters)).toBe("menu with xmlid");
     openLink(cell.link, env);
     expect.verifySteps(["spreadsheet.action1"]);
+});
+
+test("middle-click a menu link", async () => {
+    mockService("action", {
+        doAction(_, options) {
+            expect.step("doAction");
+            expect(options).toEqual({
+                newWindow: true,
+            });
+            return Promise.resolve(true);
+        },
+    });
+
+    const env = await makeSpreadsheetMockEnv({ serverData: getMenuServerData() });
+    const data = {
+        sheets: [
+            {
+                cells: { A1: "[label](odoo://ir_menu_xml_id/test_menu)" },
+            },
+        ],
+    };
+
+    const model = new Model(data, { custom: { env } });
+    const cell = getEvaluatedCell(model, "A1");
+    expect(urlRepresentation(cell.link, model.getters)).toBe("menu with xmlid");
+    openLink(cell.link, env, true);
+    expect.verifySteps(["doAction"]);
 });
 
 test("click a menu link [2]", async () => {
@@ -104,8 +131,8 @@ test("Click a link containing an action xml id", async () => {
             expect(action.res_model).toBe("ir.ui.menu");
             expect(action.target).toBe("current");
             expect(action.type).toBe("ir.actions.act_window");
-            expect(action.views).toEqual([[1, "list"]]);
-            expect(action.domain).toEqual([(1, "=", 1)]);
+            expect(action.views).toEqual([[false, "list"]]);
+            expect(action.domain).toEqual([[1, "=", 1]]);
         },
     });
     const env = await makeSpreadsheetMockEnv({ serverData: getMenuServerData() });
@@ -116,7 +143,7 @@ test("Click a link containing an action xml id", async () => {
         action: {
             modelName: "ir.ui.menu",
             views: [[false, "list"]],
-            domain: [(1, "=", 1)],
+            domain: [[1, "=", 1]],
             xmlId: "spreadsheet.action1",
         },
     };

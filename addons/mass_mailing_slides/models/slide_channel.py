@@ -4,7 +4,7 @@
 from odoo import models, _
 
 
-class Course(models.Model):
+class SlideChannel(models.Model):
     _inherit = "slide.channel"
 
     def action_mass_mailing_attendees(self):

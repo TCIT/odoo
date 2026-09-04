@@ -3,6 +3,7 @@
 
 from odoo import fields, models, api
 
+
 class PosOrderLine(models.Model):
     _inherit = 'pos.order.line'
 
@@ -13,17 +14,25 @@ class PosOrderLine(models.Model):
         help="The reward associated with this line.", index='btree_not_null')
     coupon_id = fields.Many2one(
         'loyalty.card', "Coupon", ondelete='restrict',
-        help="The coupon used to claim that reward.")
+        help="The coupon used to claim that reward.", index='btree_not_null')
     reward_identifier_code = fields.Char(help="""
         Technical field used to link multiple reward lines from the same reward together.
     """)
     points_cost = fields.Float(help="How many point this reward cost on the coupon.")
 
-    def _is_not_sellable_line(self):
-        return super().is_not_sellable_line() or self.reward_id
-
     @api.model
-    def _load_pos_data_fields(self, config_id):
-        params = super()._load_pos_data_fields(config_id)
+    def _load_pos_data_fields(self, config):
+        params = super()._load_pos_data_fields(config)
         params += ['is_reward_line', 'reward_id', 'reward_identifier_code', 'points_cost', 'coupon_id']
         return params
+
+    def _has_discount(self):
+        return super()._has_discount() or (self.is_reward_line and self.reward_id.reward_type == 'discount')
+
+    def _get_discount_amount_for_report(self):
+        if self.is_reward_line:
+            return abs(self.price_subtotal_incl)
+        return super()._get_discount_amount_for_report()
+
+    def isRefund(self):
+        return super().isRefund() and not self.is_reward_line

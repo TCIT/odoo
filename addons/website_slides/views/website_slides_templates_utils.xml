@@ -5,7 +5,7 @@
 <template id='slide_share_social' name="Slides Media Share">
     <t t-if="not website_share_url">
         <t t-set="website_share_url"
-           t-value="record.website_share_url if 'website_share_url' in record else record.website_url"/>
+           t-value="record.website_share_url if 'website_share_url' in record else record.website_absolute_url"/>
     </t>
     <div class="btn-group" role="group">
         <div class="s_share">
@@ -51,13 +51,13 @@
                 </button>
             </div>
             <div class="alert alert-info d-none" role="alert">
-                <strong>Sharing is caring!</strong> Email(s) sent.
+                <strong>Sharing is caring!</strong> Your email(s) will arrive shortly.
             </div>
             <div class="alert alert-warning d-none" role="alert">Please enter valid email(s)</div>
         </div>
     </div>
     <div t-if="is_public_user" class="alert alert-info d-inline-block">
-        <p class="mb-0">Please <a t-attf-href="/odoo?redirect=#{request.httprequest.url}" class="fw-bold"> login </a> to share this
+        <p class="mb-0">Please <a t-attf-href="/odoo?redirect=#{request.httprequest.url}" class="fw-bold o_translate_inline"> login </a> to share this
         <span t-field="record.slide_category" t-if="record._name == 'slide.slide'"/>
         <span t-field="record.name" t-if="record._name == 'slide.channel'"/> by email.</p>
     </div>
@@ -70,7 +70,7 @@
         <div>
             <textarea class="form-control slide_embed_code" readonly="readonly" onClick="this.select();" t-attf-id="wslides_share_embed_id_{{record.id}}">
                 <!-- Use the external embedding URL here, see python controller '_slide_embed' method for more details. -->
-                <t t-esc="slide.embed_code_external"/>
+                <t t-out="slide.embed_code_external"/>
             </textarea>
             <button t-att-id="'share_embed_clipboard_button_id_%s' % record.id" class="btn btn-sm btn-primary o_embed_clipboard_button float-end mt-1 p-2" >
                 <i class="fa fa-clipboard"/> Copy Embed Code
@@ -118,7 +118,7 @@
 <template id="slide_share_link">
     <t t-if="not website_share_url">
         <t t-set="website_share_url"
-           t-value="record.website_share_url if 'website_share_url' in record else record.website_url"/>
+           t-value="record.website_share_url if 'website_share_url' in record else record.website_absolute_url"/>
     </t>
     <h5>Share Link</h5>
     <div class="input-group">

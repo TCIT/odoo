@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { formatFloat, formatFloatTime, formatMonetary } from "@web/views/fields/formatters";
 import { Component } from "@odoo/owl";
 
@@ -11,10 +9,7 @@ export class BomOverviewSpecialLine extends Component {
         showOptions: {
             type: Object,
             shape: {
-                availabilities: Boolean,
-                costs: Boolean,
-                operations: Boolean,
-                leadTimes: Boolean,
+                mode: String,
                 uom: Boolean,
                 attachments: Boolean,
             },
@@ -48,16 +43,8 @@ export class BomOverviewSpecialLine extends Component {
         return ["operations", "byproducts"].includes(this.props.type);
     }
 
-    get showAvailabilities() {
-        return this.props.showOptions.availabilities;
-    }
-
-    get showCosts() {
-        return this.props.showOptions.costs;
-    }
-
-    get showLeadTimes() {
-        return this.props.showOptions.leadTimes;
+    get forecastMode() {
+        return this.props.showOptions.mode == "forecast";
     }
 
     get showUom() {

@@ -1,33 +1,53 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* maintenance
-# 
+# * maintenance
+#
 # Translators:
-# Wil Odoo, 2024
-# 
+# Grzegorz Krukar <grzegorzgk1@gmail.com>, 2022
+# Mariusz, 2022
+# Piotr Cierkosz <piotr.w.cierkosz@gmail.com>, 2022
+# Zdzisław Krajewski <zdzichucb@gmail.com>, 2022
+# Piotr Strębski <strebski@gmail.com>, 2022
+# Andrzej Wiśniewski <a.wisniewski@hadron.eu.com>, 2022
+# Dawid Prus, 2022
+# Natalia Gros <nag@odoo.com>, 2022
+# Marcin Młynarczyk <mlynarczyk@gmail.com>, 2022
+# Tomasz Leppich <t.leppich@gmail.com>, 2022
+# Maja Stawicka <mjstwck@wp.pl>, 2022
+# Wojciech Warczakowski <w.warczakowski@gmail.com>, 2022
+# Judyta Kaźmierczak <judyta.kazmierczak@openglobe.pl>, 2022
+# Paweł Wodyński <pw@myodoo.pl>, 2022
+# Grzegorz Grzelak <grzegorz.grzelak@openglobe.pl>, 2022
+# Karol Rybak <karolrybak85@gmail.com>, 2022
+# Dariusz Żbikowski <darek@krokus.com.pl>, 2022
+# Piotr Szlązak <szlazakpiotr@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Daniel Koć <daniel@xn--ko-wla.pl>, 2022
+# Tadeusz Karpiński <tadeuszkarpinski@gmail.com>, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Marta (wacm)" <wacm@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Polish (https://app.transifex.com/odoo/teams/41243/pl/)\n"
+"POT-Creation-Date: 2026-01-25 18:35+0000\n"
+"PO-Revision-Date: 2026-08-03 15:38+0000\n"
+"Last-Translator: \"Marta (wacm)\" <wacm@odoo.com>\n"
+"Language-Team: Polish <https://translate.odoo.com/projects/odoo-19/"
+"maintenance/pl/>\n"
+"Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: pl\n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
+"(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
+"n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_form
 msgid "<span class=\"badge text-bg-warning float-end\">Cancelled</span>"
-msgstr ""
-
-#. module: maintenance
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_form
-msgid "<span class=\"ml8\">hours</span>"
-msgstr "<span class=\"ml8\">godziny</span>"
+msgstr "<span class=\"badge text-bg-warning float-end\">Anulowano</span>"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.maintenance_team_kanban
@@ -42,15 +62,15 @@ msgstr "<span>Wnioski</span>"
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.view_maintenance_equipment_category_kanban
 msgid "<strong>Equipment:</strong>"
-msgstr ""
+msgstr "<strong>Sprzęt:</strong>"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.view_maintenance_equipment_category_kanban
 msgid "<strong>Maintenance: </strong>"
-msgstr ""
+msgstr "<strong>Konserwacja:</strong>"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_defaults
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_defaults
 msgid ""
 "A Python dictionary that will be evaluated to provide default values when "
 "creating new records for this alias."
@@ -66,8 +86,8 @@ msgstr "Acer Laptop"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_needaction
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_needaction
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_needaction
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_needaction
 msgid "Action Needed"
 msgstr "Wymagane działanie"
 
@@ -141,47 +161,47 @@ msgid "Add a team in the maintenance request"
 msgstr "Dodaj zespół w zgłoszeniu o konserwacji"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_id
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_id
 msgid "Alias"
 msgstr "Alias"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_contact
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_contact
 msgid "Alias Contact Security"
 msgstr "Zabezpieczenie aliasu"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_domain_id
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_domain_id
 msgid "Alias Domain"
 msgstr "Domena aliasu"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_domain
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_domain
 msgid "Alias Domain Name"
 msgstr "Alias Domain Name"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_full_name
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_full_name
 msgid "Alias Email"
 msgstr "Alias Email"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_name
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_name
 msgid "Alias Name"
 msgstr "Nazwa aliasu"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_status
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_status
 msgid "Alias Status"
 msgstr "Status aliasu"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_status
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_status
 msgid "Alias status assessed on the last message received."
 msgstr "Status aliasu oceniony na podstawie ostatniej otrzymanej wiadomości."
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_model_id
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_model_id
 msgid "Aliased Model"
 msgstr "Aliasowany model"
 
@@ -231,8 +251,8 @@ msgstr "Przypisane do"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_attachment_count
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_attachment_count
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_attachment_count
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_attachment_count
 msgid "Attachment Count"
 msgstr "Liczba załączników"
 
@@ -299,7 +319,7 @@ msgstr "Firma"
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__estimated_next_failure
 #: model:ir.model.fields,help:maintenance.field_maintenance_mixin__estimated_next_failure
 msgid "Computed as Latest Failure Date + MTBF"
-msgstr "Obliczone jako data ostatniej usterki + MTBF "
+msgstr "Obliczone jako data ostatniej usterki + MTBF"
 
 #. module: maintenance
 #: model:maintenance.equipment.category,name:maintenance.equipment_computer
@@ -309,7 +329,7 @@ msgstr "Komputery"
 #. module: maintenance
 #: model:ir.model,name:maintenance.model_res_config_settings
 msgid "Config Settings"
-msgstr "Ustawienia konfiguracji"
+msgstr "Konfiguracja ustawień"
 
 #. module: maintenance
 #: model:ir.ui.menu,name:maintenance.menu_maintenance_configuration
@@ -368,14 +388,14 @@ msgid "Current Maintenance"
 msgstr "W trakcie konserwacji"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_bounced_content
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_bounced_content
 msgid "Custom Bounced Message"
 msgstr "Niestandardowa wiadomość o odbiorze"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_res_config_settings__module_maintenance_worksheet
 msgid "Custom Maintenance Worksheets"
-msgstr ""
+msgstr "Niestandardowe arkusze robocze konserwacji"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.res_config_settings_view_form
@@ -404,7 +424,7 @@ msgstr ""
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_request__close_date
 msgid "Date the maintenance was finished. "
-msgstr "Data zakończenia konserwacji."
+msgstr "Data zakończenia konserwacji. "
 
 #. module: maintenance
 #: model:ir.model.fields.selection,name:maintenance.selection__maintenance_request__repeat_unit__day
@@ -412,7 +432,7 @@ msgid "Days"
 msgstr "Dni"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_defaults
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_defaults
 msgid "Default Values"
 msgstr "Wartości domyślne"
 
@@ -431,9 +451,11 @@ msgstr "Opis"
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__display_name
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__display_name
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_mixin__display_name
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__display_name
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_stage__display_name
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_team__display_name
+#: model:ir.model.fields,field_description:maintenance.field_res_config_settings__display_name
 msgid "Display Name"
 msgstr "Nazwa wyświetlana"
 
@@ -466,19 +488,15 @@ msgid "Effective Date"
 msgstr "Data realizacji"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_email
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_category_view_form
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_email
+#: model_terms:ir.ui.view,arch_db:maintenance.maintenance_team_view_form
 msgid "Email Alias"
 msgstr "Alias adresu e-mail"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_id
-msgid ""
-"Email alias for this equipment category. New emails will automatically "
-"create a new equipment under this category."
-msgstr ""
-"Alias ​​e-mail dla tej kategorii sprzętu. Nowe e-maile automatycznie utworzą"
-" nowy sprzęt w tej kategorii."
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_id
+msgid "Email alias for this maintenance team."
+msgstr "Alias e-mail dla tego zespołu konserwacyjnego."
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__email_cc
@@ -487,7 +505,7 @@ msgid "Email cc"
 msgstr "E-mail DW"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_domain
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_domain
 msgid "Email domain e.g. 'example.com' in 'odoo@example.com'"
 msgstr "Domena e-mail, np. „example.com” w „odoo@example.com”."
 
@@ -495,6 +513,12 @@ msgstr "Domena e-mail, np. „example.com” w „odoo@example.com”."
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__repeat_until
 msgid "End Date"
 msgstr "Data końcowa"
+
+#. module: maintenance
+#. odoo-python
+#: code:addons/maintenance/models/maintenance.py:0
+msgid "End date cannot be earlier than start date."
+msgstr "Data zakończenia nie może być wcześniejsza niż data rozpoczęcia."
 
 #. module: maintenance
 #: model:ir.actions.act_window,name:maintenance.hr_equipment_action
@@ -531,7 +555,7 @@ msgstr "Kategoria wyposażenia"
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__equipment_count
 msgid "Equipment Count"
-msgstr ""
+msgstr "Liczba sprzętu"
 
 #. module: maintenance
 #: model:res.groups,name:maintenance.group_equipment_manager
@@ -546,7 +570,7 @@ msgstr "Nazwa wyposażenia"
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__equipment_properties_definition
 msgid "Equipment Properties"
-msgstr ""
+msgstr "Właściwości sprzętu"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_form
@@ -573,6 +597,11 @@ msgid "Expected Mean Time Between Failure"
 msgstr "Oczekiwany średni czas między usterkami"
 
 #. module: maintenance
+#: model:ir.model.fields,help:maintenance.field_maintenance_request__schedule_end
+msgid "Expected completion date and time of the maintenance request."
+msgstr "Przewidywana data i godzina zakończenia zgłoszenia konserwacyjnego."
+
+#. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__fold
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_stage__fold
 msgid "Folded in Maintenance Pipe"
@@ -591,17 +620,17 @@ msgstr "Śledź proces zgłoszenia i komunikuj się ze współpracownikiem."
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_follower_ids
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_follower_ids
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_follower_ids
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_follower_ids
 msgid "Followers"
-msgstr "Obserwatorzy"
+msgstr "Obserwujący"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_partner_ids
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_partner_ids
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_partner_ids
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "Obserwatorzy (partnerzy)"
+msgstr "Obserwujący (partnerzy)"
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__activity_type_icon
@@ -632,13 +661,6 @@ msgid "Google Slide Link"
 msgstr "Link Google Slide"
 
 #. module: maintenance
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_category_view_search
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_search
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_search
-msgid "Group by..."
-msgstr "Grupuj wg..."
-
-#. module: maintenance
 #: model:maintenance.equipment,name:maintenance.equipment_printer1
 msgid "HP Inkjet printer"
 msgstr "Drukarka atramentowa HP"
@@ -651,8 +673,8 @@ msgstr "Laptop HP"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__has_message
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__has_message
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__has_message
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__has_message
 msgid "Has Message"
 msgstr "Ma wiadomość"
 
@@ -669,17 +691,19 @@ msgstr "Wysoki priorytet"
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__id
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__id
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_mixin__id
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__id
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_stage__id
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_team__id
+#: model:ir.model.fields,field_description:maintenance.field_res_config_settings__id
 msgid "ID"
 msgstr "ID"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_parent_thread_id
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_parent_thread_id
 msgid ""
-"ID of the parent record holding the alias (example: project holding the task"
-" creation alias)"
+"ID of the parent record holding the alias (example: project holding the task "
+"creation alias)"
 msgstr ""
 "ID rekordu nadrzędnego zawierającego alias (np. projekt zawierający alias "
 "tworzenia zadań)"
@@ -698,21 +722,21 @@ msgstr "Ikona wskazująca na wyjątek aktywności."
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__message_needaction
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__message_needaction
 #: model:ir.model.fields,help:maintenance.field_maintenance_request__message_needaction
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__message_needaction
 msgid "If checked, new messages require your attention."
 msgstr "Jeśli zaznaczone, nowe wiadomości wymagają twojej uwagi."
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__message_has_error
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__message_has_error
 #: model:ir.model.fields,help:maintenance.field_maintenance_request__message_has_error
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__message_has_error
 msgid "If checked, some messages have a delivery error."
 msgstr ""
 "Jeśli zaznaczone, niektóre wiadomości napotkały błędy podczas doręczenia."
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_bounced_content
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_bounced_content
 msgid ""
 "If set, this content will automatically be sent out to unauthorized users "
 "instead of the default message."
@@ -749,8 +773,8 @@ msgstr "Notatki wewnętrzne"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_is_follower
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_is_follower
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_is_follower
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_is_follower
 msgid "Is Follower"
 msgstr "Jest obserwatorem"
 
@@ -795,14 +819,9 @@ msgid "Latest Failure Date"
 msgstr "Data ostatniej usterki"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_incoming_local
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_incoming_local
 msgid "Local-part based incoming detection"
 msgstr "Wykrywanie przychodzących połączeń w oparciu o części lokalne"
-
-#. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__location
-msgid "Location"
-msgstr "Miejsce"
 
 #. module: maintenance
 #: model:ir.ui.menu,name:maintenance.menu_m_reports_losses
@@ -832,6 +851,7 @@ msgstr "MTTR"
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_mixin__maintenance_ids
 #: model:ir.ui.menu,name:maintenance.menu_m_request
 #: model:ir.ui.menu,name:maintenance.menu_maintenance_title
+#: model:res.groups.privilege,name:maintenance.res_groups_privilege_maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_category_view_form
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_form
 #: model_terms:ir.ui.view,arch_db:maintenance.res_config_settings_view_form
@@ -863,12 +883,16 @@ msgstr "Kategoria sprzętu do konserwacji"
 #. module: maintenance
 #: model:ir.model,name:maintenance.model_maintenance_mixin
 msgid "Maintenance Maintained Item"
-msgstr ""
+msgstr "Konserwacja Konserwowanego przedmiotu"
 
 #. module: maintenance
 #: model:ir.model,name:maintenance.model_maintenance_request
 #: model:mail.activity.type,name:maintenance.mail_act_maintenance_request
+#: model:mail.activity.type,summary:maintenance.mail_act_maintenance_request
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_form
+#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_graph
+#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_pivot
+#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_tree
 #: model_terms:ir.ui.view,arch_db:maintenance.maintenance_request_view_activity
 msgid "Maintenance Request"
 msgstr "Zgłoszenie konserwacji"
@@ -904,12 +928,16 @@ msgstr "Utworzono Zgłoszenie konserwacji"
 #: model:ir.actions.act_window,name:maintenance.hr_equipment_request_action_from_equipment
 #: model:ir.actions.act_window,name:maintenance.hr_equipment_request_action_link
 #: model:ir.actions.act_window,name:maintenance.hr_equipment_todo_request_action_from_dashboard
-#: model:ir.actions.act_window,name:maintenance.maintenance_request_action_reports
-#: model:ir.ui.menu,name:maintenance.maintenance_request_reporting
 #: model:ir.ui.menu,name:maintenance.menu_m_request_form
 #: model_terms:ir.ui.view,arch_db:maintenance.maintenance_team_kanban
 msgid "Maintenance Requests"
 msgstr "Zgłoszenia konserwacji"
+
+#. module: maintenance
+#: model:ir.actions.act_window,name:maintenance.maintenance_request_action_reports
+#: model:ir.ui.menu,name:maintenance.maintenance_request_reporting
+msgid "Maintenance Requests Analysis"
+msgstr "Analiza zgłoszeń konserwacyjnych"
 
 #. module: maintenance
 #: model:ir.model,name:maintenance.model_maintenance_stage
@@ -942,11 +970,6 @@ msgid "Maintenance Type"
 msgstr "Rodzaj konserwacji"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__match_serial
-msgid "Match Serial"
-msgstr ""
-
-#. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_form
 msgid "Mean Time Between Failure"
 msgstr "Średni czas między usterkami"
@@ -968,15 +991,15 @@ msgstr "Średni czas naprawy"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_has_error
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_has_error
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_has_error
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_has_error
 msgid "Message Delivery error"
 msgstr "Błąd doręczenia wiadomości"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_ids
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_ids
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_ids
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_ids
 msgid "Messages"
 msgstr "Wiadomości"
 
@@ -1001,15 +1024,21 @@ msgid "Months"
 msgstr "Miesiące"
 
 #. module: maintenance
+#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_search
+#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_search
+msgid "My Activities"
+msgstr "Moje czynności"
+
+#. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__my_activity_date_deadline
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__my_activity_date_deadline
 msgid "My Activity Deadline"
-msgstr "Ostateczny terminin moich aktywności"
+msgstr "Ostateczny termin moich aktywności"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_search
 msgid "My Equipment"
-msgstr ""
+msgstr "Mój sprzęt"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_search
@@ -1038,19 +1067,19 @@ msgstr "Następna Czynność wydarzenia w kalendarzu"
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__activity_date_deadline
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Termin kolejnej czynności"
+msgstr "Termin kolejnej aktywności"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__activity_summary
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__activity_summary
 msgid "Next Activity Summary"
-msgstr "Podsumowanie kolejnej czynności"
+msgstr "Podsumowanie kolejnej aktywności"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__activity_type_id
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__activity_type_id
 msgid "Next Activity Type"
-msgstr "Typ następnej czynności"
+msgstr "Typ następnej aktywności"
 
 #. module: maintenance
 #: model:ir.model.fields.selection,name:maintenance.selection__maintenance_request__priority__2
@@ -1069,8 +1098,8 @@ msgstr "Notatki"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_needaction_counter
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_needaction_counter
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_needaction_counter
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_needaction_counter
 msgid "Number of Actions"
 msgstr "Liczba akcji"
 
@@ -1101,35 +1130,35 @@ msgstr "Liczba zgłoszeń z wysokim priorytetem"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__message_has_error_counter
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__message_has_error_counter
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__message_has_error_counter
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__message_has_error_counter
 msgid "Number of errors"
 msgstr "Liczba błędów"
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__message_needaction_counter
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__message_needaction_counter
 #: model:ir.model.fields,help:maintenance.field_maintenance_request__message_needaction_counter
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__message_needaction_counter
 msgid "Number of messages requiring action"
 msgstr "Liczba wiadomości wymagających akcji"
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__message_has_error_counter
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__message_has_error_counter
 #: model:ir.model.fields,help:maintenance.field_maintenance_request__message_has_error_counter
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__message_has_error_counter
 msgid "Number of messages with delivery error"
 msgstr "Liczba wiadomości z błędami przy doręczeniu"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_force_thread_id
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_force_thread_id
 msgid ""
 "Optional ID of a thread (record) to which all incoming messages will be "
 "attached, even if they did not reply to it. If set, this will disable the "
 "creation of new records completely."
 msgstr ""
 "Opcjonalne ID wątku (rekordu), do którego przychodzące wiadomości będą "
-"dowiązane, nawet jeśli nie są odpowiedzią na ten rekord. Jeśli ustawione, to"
-" będzie zapobiegać tworzeniu nowych rekordów."
+"dowiązane, nawet jeśli nie są odpowiedzią na ten rekord. Jeśli ustawione, to "
+"będzie zapobiegać tworzeniu nowych rekordów."
 
 #. module: maintenance
 #: model:ir.ui.menu,name:maintenance.menu_m_reports_oee
@@ -1151,20 +1180,20 @@ msgid "PDF"
 msgstr "PDF"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_parent_model_id
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_parent_model_id
 msgid "Parent Model"
 msgstr "Model nadrzędny"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_parent_thread_id
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_parent_thread_id
 msgid "Parent Record Thread ID"
 msgstr "ID wątku rekordu nadrzędnego"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_parent_model_id
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_parent_model_id
 msgid ""
-"Parent model holding the alias. The model holding the alias reference is not"
-" necessarily the model given by alias_model_id (example: project "
+"Parent model holding the alias. The model holding the alias reference is not "
+"necessarily the model given by alias_model_id (example: project "
 "(parent_model) and task (model))"
 msgstr ""
 "Model nadrzędny zawierający alias. Model zawierający odwołanie do aliasu\n"
@@ -1186,17 +1215,20 @@ msgid "Phones"
 msgstr "Telefony"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_contact
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_contact
 msgid ""
 "Policy to post a message on the document using the mailgateway.\n"
 "- everyone: everyone can post\n"
 "- partners: only authenticated partners\n"
-"- followers: only followers of the related document or members of following channels\n"
+"- followers: only followers of the related document or members of following "
+"channels\n"
 msgstr ""
-"Zasady publikowania wiadomości na dokumencie za pomocą poczty elektronicznej.\n"
+"Zasady publikowania wiadomości na dokumencie za pomocą poczty "
+"elektronicznej.\n"
 "- wszyscy: każdy może publikować\n"
 "- partnerzy: tylko uwierzytelnieni partnerzy\n"
-"- obserwatorzy: tylko następcy powiązanego dokumentu lub członkowie następujących kanałów\n"
+"- obserwatorzy: tylko następcy powiązanego dokumentu lub członkowie "
+"następujących kanałów\n"
 
 #. module: maintenance
 #: model:ir.model.fields.selection,name:maintenance.selection__maintenance_request__maintenance_type__preventive
@@ -1220,6 +1252,7 @@ msgstr "Informacja o produkcie"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__equipment_properties
+#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_search
 msgid "Properties"
 msgstr "Właściwości"
 
@@ -1239,7 +1272,7 @@ msgid "Record Colour"
 msgstr "Kolor wpisu"
 
 #. module: maintenance
-#: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_force_thread_id
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_team__alias_force_thread_id
 msgid "Record Thread ID"
 msgstr "ID wątku rekordu"
 
@@ -1312,7 +1345,7 @@ msgstr "Zgłoszone przez"
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_kanban
 msgid "Requested by:"
-msgstr ""
+msgstr "Na wniosek:"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_team__todo_request_ids
@@ -1350,6 +1383,11 @@ msgid "Scheduled Date"
 msgstr "Zaplanowana data"
 
 #. module: maintenance
+#: model:ir.model.fields,field_description:maintenance.field_maintenance_request__schedule_end
+msgid "Scheduled End"
+msgstr "Zaplanowany koniec"
+
+#. module: maintenance
 #: model:maintenance.stage,name:maintenance.stage_4
 msgid "Scrap"
 msgstr "Odpad"
@@ -1373,7 +1411,6 @@ msgstr "Sekwencja"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__serial_no
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_form
 msgid "Serial Number"
 msgstr "Numer Seryjny"
 
@@ -1392,10 +1429,8 @@ msgstr "Ustawienia"
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_search
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_search
-msgid "Show all records which has next action date is before today"
-msgstr ""
-"Pokaż wszystkie rekordy, których data kolejnej czynności przypada przed "
-"dzisiaj"
+msgid "Show all records whose next activity date is past"
+msgstr "Pokaż wszystkie zapisy, których data kolejnej aktywności wypada po"
 
 #. module: maintenance
 #: model:maintenance.equipment.category,name:maintenance.equipment_software
@@ -1484,35 +1519,42 @@ msgid "Text"
 msgstr "Tekst"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_model_id
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_model_id
 msgid ""
-"The model (Odoo Document Kind) to which this alias corresponds. Any incoming"
-" email that does not reply to an existing record will cause the creation of "
-"a new record of this model (e.g. a Project Task)"
+"The model (Odoo Document Kind) to which this alias corresponds. Any incoming "
+"email that does not reply to an existing record will cause the creation of a "
+"new record of this model (e.g. a Project Task)"
 msgstr ""
 "Model (rodzaj dokumentu Odoo), któremu odpowiada ten alias. Każda "
 "przychodząca wiadomość e-mail, która nie odpowiada istniejącemu rekordowi, "
 "spowoduje utworzenie nowego rekordu tego modelu (np. Zadanie projektu)"
 
 #. module: maintenance
-#: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_name
+#: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_name
 msgid ""
 "The name of the email alias, e.g. 'jobs' if you want to catch emails for "
 "<jobs@example.odoo.com>"
 msgstr ""
-"Nazwa aliasu e-mail, np. \"jobs\", jeśli chcesz przechwytywać wiadomości "
-"e-mail dla <jobs@example.odoo.com>"
+"Nazwa aliasu e-mail, np. \"jobs\", jeśli chcesz przechwytywać wiadomości e-"
+"mail dla <jobs@example.odoo.com>"
+
+#. module: maintenance
+#. odoo-python
+#: code:addons/maintenance/models/maintenance.py:0
+msgid "The repeat interval cannot be less than 1."
+msgstr "Interwał powtórzeń nie może być mniejszy niż 1."
 
 #. module: maintenance
 #: model:res.groups,comment:maintenance.group_equipment_manager
 msgid "The user will be able to manage equipment."
-msgstr ""
+msgstr "Użytkownik będzie mógł zarządzać sprzętem."
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__effective_date
 #: model:ir.model.fields,help:maintenance.field_maintenance_mixin__effective_date
 msgid "This date will be used to compute the Mean Time Between Failure."
 msgstr ""
+"Ta data zostanie wykorzystana do obliczenia średniego czasu między awariami."
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_search
@@ -1536,8 +1578,12 @@ msgstr "Najwyższy priorytet"
 #: model_terms:ir.actions.act_window,help:maintenance.hr_equipment_action_from_category_form
 msgid ""
 "Track equipment and link it to an employee or department.\n"
-"                You will be able to manage allocations, issues and maintenance of your equipment."
+"                You will be able to manage allocations, issues and "
+"maintenance of your equipment."
 msgstr ""
+"Śledź sprzęt i przypisuj go do pracowników lub działów.\n"
+"                Będziesz mógł zarządzać przydziałami, problemami i "
+"konserwacją sprzętu."
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__activity_exception_decoration
@@ -1579,11 +1625,6 @@ msgid "Upload your PDF file."
 msgstr "Prześlij plik PDF."
 
 #. module: maintenance
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_form
-msgid "Used in location"
-msgstr "Używane w lokalizacji"
-
-#. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__partner_id
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_search
 msgid "Vendor"
@@ -1598,6 +1639,14 @@ msgstr "Odnośnik dostawcy"
 #: model:ir.model.fields.selection,name:maintenance.selection__maintenance_request__priority__0
 msgid "Very Low"
 msgstr "Bardzo niski"
+
+#. module: maintenance
+#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_category_view_form
+#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_form
+#: model_terms:ir.ui.view,arch_db:maintenance.maintenance_team_view_form
+#: model_terms:ir.ui.view,arch_db:maintenance.maintenance_team_view_tree
+msgid "Visible to all"
+msgstr "Widoczne dla wszystkich"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__warranty_date
@@ -1618,17 +1667,19 @@ msgstr "Lata"
 #. odoo-python
 #: code:addons/maintenance/models/maintenance.py:0
 msgid ""
-"You cannot delete an equipment category containing equipment or maintenance "
-"requests."
+"You can’t delete an equipment category if some equipment or maintenance "
+"requests are linked to it."
 msgstr ""
+"Nie można usunąć kategorii sprzętu, jeśli są z nią powiązane jakieś "
+"urządzenia lub zgłoszenia konserwacyjne."
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_form
 msgid "Your instructions"
-msgstr ""
+msgstr "Twoje instrukcje"
 
 #. module: maintenance
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_category_view_form
+#: model_terms:ir.ui.view,arch_db:maintenance.maintenance_team_view_form
 msgid "alias"
 msgstr "alias"
 
@@ -1645,7 +1696,7 @@ msgstr "np. konserwacja wewnętrzna"
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_form
 msgid "e.g. LED Monitor"
-msgstr "np. monitor LED "
+msgstr "np. monitor LED"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_category_view_form
@@ -1658,13 +1709,102 @@ msgid "e.g. Screen not working"
 msgstr "np. ekran nie działa"
 
 #. module: maintenance
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_category_view_form
+#: model_terms:ir.ui.view,arch_db:maintenance.maintenance_team_view_form
 msgid "e.g. mycompany.com"
 msgstr "np. mojafirma.pl"
 
-#. module: maintenance
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_graph
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_pivot
-#: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_tree
-msgid "maintenance Request"
-msgstr "zgłoszenie konserwacji"
+#~ msgid "<b>Category:</b>"
+#~ msgstr "<b>Kategoria:</b>"
+
+#~ msgid "<b>Model Number:</b>"
+#~ msgstr "<b>Numer modelu:</b>"
+
+#~ msgid "<b>Request to:</b>"
+#~ msgstr "<b>Zgłoszenie do:</b>"
+
+#~ msgid "<b>Serial Number:</b>"
+#~ msgstr "<b>Numer seryjny:</b>"
+
+#~ msgid "<span class=\"badge text-bg-warning float-end\">Canceled</span>"
+#~ msgstr "<span class=\"badge text-bg-warning float-end\">Anulowany</span>"
+
+#~ msgid "<span class=\"ml8\">hours</span>"
+#~ msgstr "<span class=\"ml8\">godziny</span>"
+
+#~ msgid "<strong>Maintenance:</strong>"
+#~ msgstr "<strong>Konserwacja:</strong>"
+
+#~ msgid "Alias domain"
+#~ msgstr "Domena aliasu"
+
+#~ msgid ""
+#~ "Date at which the equipment became effective. This date will be used to "
+#~ "compute the Mean Time Between Failure."
+#~ msgstr ""
+#~ "Data rozpoczęcia działania sprzętu. Ta data zostanie wykorzystana do "
+#~ "obliczenia średniego czasu między awariami."
+
+#~ msgid "Date of the next preventive maintenance"
+#~ msgstr "Data następnej konserwacji zapobiegawczej"
+
+#~ msgid "Days between each preventive maintenance"
+#~ msgstr "Dni między każdą konserwacją zapobiegawczą"
+
+#~ msgid ""
+#~ "Email alias for this equipment category. New emails will automatically "
+#~ "create a new equipment under this category."
+#~ msgstr ""
+#~ "Alias ​​e-mail dla tej kategorii sprzętu. Nowe e-maile automatycznie "
+#~ "utworzą nowy sprzęt w tej kategorii."
+
+#~ msgid "Group by..."
+#~ msgstr "Grupuj wg..."
+
+#~ msgid "Location"
+#~ msgstr "Miejsce"
+
+#~ msgid "Maintenance Duration"
+#~ msgstr "Czas trwania konserwacji"
+
+#~ msgid "Maintenance Duration in hours."
+#~ msgstr "Czas trwania konserwacji w godzinach."
+
+#~ msgid "Maintenance: generate preventive maintenance requests"
+#~ msgstr "Konserwacja: generuj zgłoszenia konserwacji zapobiegawczej"
+
+#~ msgid "Next Preventive Maintenance"
+#~ msgstr "Następna konserwacja zapobiegawcza"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Liczba wiadomości wymagających akcji"
+
+#~ msgid "Preventive Maintenance - %s"
+#~ msgstr "Konserwacja zapobiegawcza - %s"
+
+#~ msgid "Preventive Maintenance Frequency"
+#~ msgstr "Częstotliwość konserwacji zapobiegawczej"
+
+#~ msgid "Show all records which has next action date is before today"
+#~ msgstr ""
+#~ "Pokaż wszystkie rekordy, których data kolejnej czynności przypada przed "
+#~ "dzisiaj"
+
+#~ msgid ""
+#~ "The owner of records created upon receiving emails on this alias. If this "
+#~ "field is not set the system will attempt to find the right owner based on "
+#~ "the sender (From) address, or will use the Administrator account if no "
+#~ "system user is found for that address."
+#~ msgstr ""
+#~ "Właściciel rekordów utworzonych z wiadomości. Jeśli pole nie będzie "
+#~ "wypełnione, to system spróbuje przypisać użytkownika na podstawie adresu "
+#~ "nadawcy. Jeśli nie znajdzie takiego użytkownika, to przypisze "
+#~ "Administratora."
+
+#~ msgid "Used in location"
+#~ msgstr "Używane w lokalizacji"
+
+#~ msgid "hours"
+#~ msgstr "godzin"
+
+#~ msgid "maintenance Request"
+#~ msgstr "zgłoszenie konserwacji"

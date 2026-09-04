@@ -35,7 +35,7 @@
                 <field name="visit_datetime"/>
                 <filter string="Pages" name="type_page" domain="[('page_id', '!=', False)]"/>
                 <filter string="Urls &amp; Pages" name="type_url" domain="[('url', '!=', False)]"/>
-                <group string="Group By">
+                <group>
                     <filter string="Visitor" name="group_by_visitor" domain="[]" context="{'group_by': 'visitor_id'}"/>
                     <filter string="Page" name="group_by_page" domain="[]" context="{'group_by': 'page_id'}"/>
                     <filter string="Url" name="group_by_url" domain="[]" context="{'group_by': 'url'}"/>
@@ -87,9 +87,8 @@
                 <field name="partner_image"/>
                 <templates>
                     <t t-name="card" class="p-0">
-                        <!-- displayed in ungrouped mode -->
                         <div class="o_kanban_detail_ungrouped row mx-0">
-                            <div class="col-lg-2 col-sm-8 col-12 py-0 my-2 my-lg-0">
+                            <div class="col-lg-2 col-sm-8 col-12 py-0 my-2">
                                 <div class="d-flex">
                                     <field t-if="record.partner_image.raw_value" name="partner_id" widget="image" options="{'preview_image': 'image_128', 'size': [54, 54]}" alt="Visitor" class="me-3"/>
                                     <img t-else=""
@@ -128,26 +127,7 @@
                                 </span>
                                 <div t-att-class="record.page_count.raw_value ? '' : 'text-muted'">Visited Pages</div>
                             </div>
-                            <div class="w_visitor_kanban_actions_ungrouped col-lg-3 col-sm-12 py-0 my-2 text-lg-end">
-                                <button name="action_send_mail" type="object"
-                                        class="btn btn-secondary" invisible="not email">
-                                        Email
-                                </button>
-                            </div>
-                        </div>
-                        <!-- displayed in grouped mode -->
-                        <div class="o_kanban_grouped p-2">
-                            <span class="fa fa-circle text-success float-end" t-if="record.is_connected.raw_value" aria-label="Online" title="Online"/>
-                            <span class="fa fa-circle text-danger float-end" t-else="" aria-label="Offline" title="Offline"/>
-                            <div class="d-flex">
-                                <field t-if="record.country_id.raw_value" name="country_flag" widget="image_url" class="o_country_flag" alt="Country"/>
-                                <field name="display_name" class="fw-bolder"/>
-                            </div>
-                            <div class="mb-2">Active <field name="time_since_last_action"/></div>
-                            <div t-if="record.page_count.raw_value">Last Page<field name="last_visited_page_id" class="float-end fw-bold"/></div>
-                            <div>Visits<field name="visit_count" class="float-end fw-bold"/></div>
-                            <div t-if="record.page_count.raw_value" id="o_page_count">Visited Pages<span class="float-end fw-bold"><field name="page_count"/></span></div>
-                            <div name="w_visitor_kanban_actions" class="d-flex gap-1">
+                            <div class="w_visitor_kanban_actions col-lg-3 col-sm-12 py-0 my-2 text-lg-end">
                                 <button name="action_send_mail" type="object"
                                         class="btn btn-secondary" invisible="not email">
                                         Email
@@ -251,14 +231,15 @@
                 <field name="country_id"/>
                 <field name="visit_count"/>
                 <field name="page_ids"/>
-                <filter string="Last 7 Days" name="filter_last_7_days" domain="[('last_connection_datetime', '&gt;', datetime.datetime.now() - datetime.timedelta(days=7))]"/>
+                <filter string="Last 7 Days" name="filter_last_7_days" domain="[('last_connection_datetime', '&gt;', '-7d')]"/>
                 <separator/>
                 <filter string="Unregistered" name="filter_type_visitor" domain="[('partner_id', '=', False)]"/>
                 <filter string="Contacts" name="filter_type_customer" domain="[('partner_id', '!=', False)]"/>
                 <separator/>
-                <filter string="Connected" name="filter_is_connected" domain="[('last_connection_datetime', '&gt;', datetime.datetime.now() - datetime.timedelta(minutes=5))]"/>
+                <!-- connected in the last 5 minutes -->
+                <filter string="Connected" name="filter_is_connected" domain="[('last_connection_datetime', '&gt;', '-5M')]"/>
                 <separator/>
-                <group string="Group By">
+                <group>
                     <filter string="Country" name="group_by_country" context="{'group_by': 'country_id'}"/>
                     <filter string="Timezone" name="group_by_timezone" context="{'group_by': 'timezone'}"/>
                     <filter string="Language" name="group_by_lang" context="{'group_by': 'lang_id'}"/>
@@ -322,6 +303,7 @@
     <record id="website_visitor_view_action" model="ir.actions.act_window">
         <field name="name">Page Views</field>
         <field name="res_model">website.track</field>
+        <field name="path">website-page-views</field>
         <field name="view_mode">list</field>
         <field name="context">{'search_default_type_url': 1, 'create': False, 'edit': False, 'copy': False}</field>
         <field name="view_ids" eval="[(5, 0, 0),

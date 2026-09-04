@@ -8,14 +8,17 @@
             <field name="model">res.users</field>
             <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='tz']" position="after">
+                <xpath expr="//field[@name='outgoing_mail_server_type']" position="after">
                     <field name="has_access_livechat" invisible="1"/>
-                    <field name="livechat_username" string="Online Chat Name"
-                        invisible="not has_access_livechat"/>
-                    <field name="livechat_lang_ids" string="Online Chat Language"
-                        invisible="not has_access_livechat"
-                        options="{'no_create': True, 'no_edit': True, 'no_quick_create': True}"
-                        widget="many2many_tags"/>
+                    <field name="livechat_username" string="Livechat Name" invisible="not has_access_livechat"/>
+                    <field name="livechat_lang_ids" string="Spoken Languages"
+                           options="{'no_create': True, 'no_edit': True, 'no_create_edit': True}"
+                           widget="many2many_tags"
+                           invisible="not has_access_livechat"/>
+                    <field name="livechat_expertise_ids" string="Expertise"
+                           widget="many2many_tags"
+                           options="{'no_create': True}"
+                           invisible="not has_access_livechat"/>
                 </xpath>
             </field>
         </record>
@@ -26,16 +29,18 @@
             <field name="model">res.users</field>
             <field name="inherit_id" ref="base.view_users_form"/>
             <field name="arch" type="xml">
-                    <xpath expr="//group[@name='messaging']" position="after">
-                        <field name="has_access_livechat" invisible="1"/>
-                        <group name="livechat" string="Livechat"
-                            invisible="not has_access_livechat">
-                            <field name="livechat_username"/>
-                            <field name="livechat_lang_ids" string="Online Chat Language"
-                                options="{'no_create': True, 'no_edit': True, 'no_quick_create': True}"
-                                widget="many2many_tags"/>
-                        </group>
-                    </xpath>
+                <xpath expr="//field[@name='outgoing_mail_server_type']" position="after">
+                    <field name="has_access_livechat" invisible="1"/>
+                    <field name="livechat_username" string="Livechat Name" invisible="not has_access_livechat"/>
+                    <field name="livechat_lang_ids" string="Spoken Languages"
+                           options="{'no_create': True, 'no_edit': True}"
+                           widget="many2many_tags"
+                           invisible="not has_access_livechat"/>
+                    <field name="livechat_expertise_ids" string="Expertise"
+                           widget="many2many_tags"
+                           options="{'no_create': True}"
+                           invisible="not has_access_livechat"/>
+                </xpath>
             </field>
         </record>
 

@@ -1,16 +1,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import base64
-
 from odoo.fields import Command
 from odoo.tests import tagged
-from odoo.tools.misc import file_open
 
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo, HttpCaseWithUserPortal
 from odoo.addons.sale.tests.product_configurator_common import TestProductConfiguratorCommon
+from odoo.addons.website.tests.common import HttpCaseWithWebsiteUser
+
 
 @tagged('post_install', '-at_install')
-class TestCustomize(HttpCaseWithUserDemo, HttpCaseWithUserPortal, TestProductConfiguratorCommon):
+class TestCustomize(HttpCaseWithUserDemo, HttpCaseWithUserPortal, TestProductConfiguratorCommon, HttpCaseWithWebsiteUser):
 
     @classmethod
     def setUpClass(cls):
@@ -59,20 +58,27 @@ class TestCustomize(HttpCaseWithUserDemo, HttpCaseWithUserPortal, TestProductCon
             else:
                 ptav.price_extra = 50.4
 
-        # Update the pricelist currency regarding env.company_id currency_id in case company has changed currency with COA installation.
-        website = cls.env['website'].get_current_website()
-        pricelist = website.pricelist_id
-        pricelist.write({'currency_id': cls.env.company.currency_id.id})
-
-    def test_01_admin_shop_customize_tour(self):
-        # Enable Variant Group
-        self.env.ref('product.group_product_variant').write({'users': [(4, self.env.ref('base.user_admin').id)]})
-        self.start_tour(self.env['website'].get_client_action_url('/shop?search=Test Product'), 'shop_customize', login="admin", timeout=120)
+        # Ensure that no pricelist is available during the test.
+        # This ensures that tours which triggers on the amounts will run properly, and that the
+        # currency will be the company currency.
+        cls.env['product.pricelist'].action_archive()
 
     def test_01_admin_shop_custom_attribute_value_tour(self):
-        # Ensure that no pricelist is available during the test.
-        # This ensures that tours which triggers on the amounts will run properly.
-        self.env['product.pricelist'].search([]).action_archive()
+        self.env.user.write(
+            {'group_ids': [Command.link(self.env.ref('product.group_product_pricelist').id)]}
+        )
+        self.env['product.pricelist'].create({
+            'name': 'Custom pricelist (TEST)',
+            'sequence': 4,
+            'item_ids': [(0, 0, {
+                'base': 'list_price',
+                'applied_on': '1_product',
+                'product_tmpl_id': self.product_product_custo_desk.id,
+                'price_discount': 20,
+                'min_quantity': 2,
+                'compute_price': 'formula'
+            })]
+        })
         self.start_tour("/", 'a_shop_custom_attribute_value', login="admin")
 
     def test_02_admin_shop_custom_attribute_value_tour(self):
@@ -216,22 +222,15 @@ class TestCustomize(HttpCaseWithUserDemo, HttpCaseWithUserPortal, TestProductCon
             product_template.attribute_line_ids.product_template_value_ids
         )
 
-    def test_06_admin_list_view_b2c(self):
-        self.env.ref('product.group_product_variant').write({'users': [(4, self.env.ref('base.user_admin').id)]})
-
-        # activate b2c
-        self.env['res.config.settings'].create({
-            'show_line_subtotals_tax_selection': 'tax_included'
-        }).execute()
-
-        self.start_tour(self.env['website'].get_client_action_url('/shop?search=Test Product'), 'shop_list_view_b2c', login="admin")
-
     def test_07_editor_shop(self):
+        self.env.user.write(
+            {'group_ids': [Command.link(self.env.ref('product.group_product_pricelist').id)]}
+        )
         self.env['product.pricelist'].create([
             {'name': 'Base Pricelist', 'selectable': True},
             {'name': 'Other Pricelist', 'selectable': True}
         ])
-        self.start_tour("/", 'shop_editor', login="admin")
+        self.start_tour("/", 'shop_editor', login="website_user")
 
     def test_08_portal_tour_archived_variant_multiple_attributes(self):
         """The goal of this test is to make sure that an archived variant with multiple
@@ -405,4 +404,21 @@ class TestCustomize(HttpCaseWithUserDemo, HttpCaseWithUserPortal, TestProductCon
             ],
         })
 
-        self.start_tour("/", 'tour_shop_multi_checkbox_single_value', login="admin")
+        self.start_tour("/", 'tour_shop_multi_checkbox_single_value', login="website_user")
+
+    def test_shop_editor_no_alternative_products_visibility(self):
+        product_no_alternative = self.env['product.template'].create({
+            'name': 'product_without_alternative',
+            'is_published': True,
+        })
+        product_with_alternative = self.env['product.template'].create({
+            'name': 'product_with_alternative',
+            'is_published': True,
+            'alternative_product_ids': product_no_alternative.ids,
+        })
+        product_no_alternative.set_sequence_top()
+        product_with_alternative.set_sequence_top()
+        self.start_tour('/', 'shop_editor_no_alternative_products_visibility_tour', login="admin")
+
+    def test_13_shop_editor_create_and_set_product_ribbon(self):
+        self.start_tour("/", 'shop_editor_create_and_set_product_ribbon', login="admin")

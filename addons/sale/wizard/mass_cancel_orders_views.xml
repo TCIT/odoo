@@ -19,8 +19,7 @@
                     Are you sure you want to cancel the selected item?
                 </div>
                 <div invisible="sale_orders_count == 1">
-                    Are you sure you want to cancel the <field name="sale_orders_count"/> selected
-                    items?
+                    So, are you sure you want to cancel these <field name="sale_orders_count"/> items?
                 </div>
                 <footer>
                     <button class="btn-primary"
@@ -40,7 +39,7 @@
         <field name="view_id" ref="mass_cancel_orders_view_form"/>
         <field name="target">new</field>
         <field name="binding_model_id" ref="model_sale_order"/>
-        <field name="binding_view_types">list</field>
+        <field name="binding_view_types">list,kanban</field>
     </record>
 
 </odoo>

@@ -1,39 +1,41 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* utm
-# 
+# * utm
+#
 # Translators:
-# MichaelHadar, 2024
-# שהאב חוסיין <shhab89@gmail.com>, 2024
-# NoaFarkash, 2024
-# Mor Kir <morki@013.net.il>, 2024
-# Lilach Gilliam <lilach.gilliam@gmail.com>, 2024
-# Martin Trigaux, 2024
-# ilan kl <ilan@qaroads.co.il>, 2024
-# Yihya Hugirat <hugirat@gmail.com>, 2024
-# yael terner, 2024
-# ZVI BLONDER <ZVIBLONDER@gmail.com>, 2024
-# Ha Ketem <haketem@gmail.com>, 2024
-# 
+# Mor Kir <morki@013.net.il>, 2022
+# שהאב חוסיין <shhab89@gmail.com>, 2022
+# Lilach Gilliam <lilach.gilliam@gmail.com>, 2022
+# NoaFarkash, 2022
+# ilan kl <ilan@qaroads.co.il>, 2022
+# Martin Trigaux, 2022
+# ZVI BLONDER <ZVIBLONDER@gmail.com>, 2022
+# Yihya Hugirat <hugirat@gmail.com>, 2022
+# Ha Ketem <haketem@gmail.com>, 2022
+# or balmas <or@laylinetech.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Yoram Lavi <yoram@digitale.co.il>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Ha Ketem <haketem@gmail.com>, 2024\n"
-"Language-Team: Hebrew (https://app.transifex.com/odoo/teams/41243/he/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-02 19:30+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Hebrew <https://translate.odoo.com/projects/odoo-19/utm/he/>\n"
+"Language: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: he\n"
-"Plural-Forms: nplurals=3; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: 2;\n"
+"Plural-Forms: nplurals=4; plural=(n == 1) ? 0 : ((n == 2) ? 1 : ((n > 10 && "
+"n % 10 == 0) ? 2 : 3));\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: utm
 #. odoo-python
 #: code:addons/utm/models/utm_source.py:0
 msgid "%(content)s (%(model_description)s created on %(create_date)s)"
-msgstr ""
+msgstr "%(content)s (%(model_description)s נוצר ב-%(create_date)s)"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__active
@@ -94,7 +96,7 @@ msgstr "קמפיין"
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__name
 msgid "Campaign Identifier"
-msgstr "שם קמפיין "
+msgstr "שם קמפיין"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__title
@@ -174,7 +176,7 @@ msgstr "צור קמפיין"
 #. module: utm
 #: model_terms:ir.actions.act_window,help:utm.action_view_utm_stage
 msgid "Create a stage for your campaigns"
-msgstr "יצירת שלבים לקמפיינים שלך"
+msgstr "יצירת במה לקמפיינים שלך"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__create_uid
@@ -203,7 +205,7 @@ msgstr "זרימה יצירתית"
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
 msgid "Delete"
-msgstr "מחיקה"
+msgstr "מחק"
 
 #. module: utm
 #. odoo-javascript
@@ -225,9 +227,12 @@ msgid "Design"
 msgstr "עיצוב"
 
 #. module: utm
+#: model:ir.model.fields,field_description:utm.field_ir_http__display_name
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__display_name
 #: model:ir.model.fields,field_description:utm.field_utm_medium__display_name
+#: model:ir.model.fields,field_description:utm.field_utm_mixin__display_name
 #: model:ir.model.fields,field_description:utm.field_utm_source__display_name
+#: model:ir.model.fields,field_description:utm.field_utm_source_mixin__display_name
 #: model:ir.model.fields,field_description:utm.field_utm_stage__display_name
 #: model:ir.model.fields,field_description:utm.field_utm_tag__display_name
 msgid "Display Name"
@@ -272,12 +277,7 @@ msgstr "איסוף נתונים"
 msgid ""
 "Gather data, build a recipient list and write content based on your "
 "Marketing target."
-msgstr "איסוף מידע, גיבוש רשימת נמענים ויצירת תוכן המכוון אל קהל היעד."
-
-#. module: utm
-#: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
-msgid "Group By"
-msgstr "קבץ לפי"
+msgstr "איסוף מידע, גיבוש רשימת נמענים ויצירת תוכן המבוסס על קהל היעד."
 
 #. module: utm
 #: model:ir.model,name:utm.model_ir_http
@@ -285,9 +285,12 @@ msgid "HTTP Routing"
 msgstr "ניתוב HTTP"
 
 #. module: utm
+#: model:ir.model.fields,field_description:utm.field_ir_http__id
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__id
 #: model:ir.model.fields,field_description:utm.field_utm_medium__id
+#: model:ir.model.fields,field_description:utm.field_utm_mixin__id
 #: model:ir.model.fields,field_description:utm.field_utm_source__id
+#: model:ir.model.fields,field_description:utm.field_utm_source_mixin__id
 #: model:ir.model.fields,field_description:utm.field_utm_stage__id
 #: model:ir.model.fields,field_description:utm.field_utm_tag__id
 msgid "ID"
@@ -446,7 +449,7 @@ msgstr "מכירה"
 #. module: utm
 #: model:utm.stage,name:utm.campaign_stage_1
 msgid "Schedule"
-msgstr "תיזמון"
+msgstr "תזמן"
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_medium_view_search
@@ -518,8 +521,8 @@ msgstr "שלבים"
 #. module: utm
 #: model_terms:ir.actions.act_window,help:utm.action_view_utm_stage
 msgid ""
-"Stages allow you to organize your workflow  (e.g. plan, design, in progress,"
-" done, …)."
+"Stages allow you to organize your workflow  (e.g. plan, design, in progress, "
+"done, …)."
 msgstr ""
 
 #. module: utm
@@ -557,13 +560,13 @@ msgstr "חודש נוכחי"
 #. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 msgid "This Week"
-msgstr "שבוע נוכחי"
+msgstr "השבוע"
 
 #. module: utm
 #: model:ir.model.fields,help:utm.field_utm_mixin__campaign_id
 msgid ""
-"This is a name that helps you keep track of your different campaign efforts,"
-" e.g. Fall_Drive, Christmas_Special"
+"This is a name that helps you keep track of your different campaign efforts, "
+"e.g. Fall_Drive, Christmas_Special"
 msgstr ""
 "זהו שם שעוזר לך לעקוב אחר מאמצי הקמפיין השונים שלך, למשל Fall_Drive, "
 "Christmas_Special"
@@ -590,8 +593,8 @@ msgstr "ממתין לאישור"
 #. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 msgid ""
-"Track incoming events (e.g. Christmas, Black Friday, ...) and publish timely"
-" content."
+"Track incoming events (e.g. Christmas, Black Friday, ...) and publish timely "
+"content."
 msgstr ""
 
 #. module: utm
@@ -636,8 +639,8 @@ msgstr ""
 #. module: utm
 #: model_terms:ir.actions.act_window,help:utm.utm_source_action
 msgid ""
-"UTM Sources track where traffic comes from  (e.g. \"May Newsletter\", \"\", "
-"...)."
+"UTM Sources track where traffic comes from  (e.g. \"May Newsletter\", "
+"\"\", ...)."
 msgstr ""
 "מקור UTM עוקב אחרי המקור של התוכן (לדוג' \"הניוזלטר של חודש מאי\", \"הפוסט "
 "של סוף החודש\", ...)."
@@ -662,6 +665,12 @@ msgstr "UTMים"
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 msgid "Use This For My Campaigns"
 msgstr "להשתמש בזה לקמפיינים שלי"
+
+#. module: utm
+#. odoo-python
+#: code:addons/utm/models/utm_source.py:0
+msgid "You cannot delete the 'Referral' UTM source record."
+msgstr ""
 
 #. module: utm
 #. odoo-python
@@ -691,3 +700,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_form_quick_create
 msgid "e.g. Black Friday"
 msgstr "לדוג' פסח"
+
+#~ msgid "Group By"
+#~ msgstr "קבץ לפי"
+
+#~ msgid ""
+#~ "UTM Mediums track the mean that was used to attract traffic (e.g. "
+#~ "\"Website\", \"Twitter\", ...)."
+#~ msgstr ""
+#~ "ערוצי UTM עוקבים אחרי הדרכים מהם הגיעה תעבורה (לדוגמא \"אתר אינטרנט\", "
+#~ "\"טוויטר\", ...)."

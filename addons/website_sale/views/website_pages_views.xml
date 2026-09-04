@@ -47,6 +47,7 @@
         <field name="arch" type="xml">
             <kanban position="attributes">
                 <attribute name="js_class">website_pages_kanban</attribute>
+                <attribute name="class" add="o_wsale_products_kanban" separator=" "/>
                 <attribute name="type">object</attribute>
                 <attribute name="action">open_website_url</attribute>
             </kanban>
@@ -72,6 +73,7 @@
     <record id="action_product_pages_list" model="ir.actions.act_window">
         <field name="name">Product Pages</field>
         <field name="res_model">product.template</field>
+        <field name="path">product-pages</field>
         <field name="view_mode">list,kanban</field>
         <field name="view_id" ref="product_pages_tree_view"/>
         <field name="view_ids" eval="[Command.clear(),

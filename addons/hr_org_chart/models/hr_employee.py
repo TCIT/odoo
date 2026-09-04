@@ -4,8 +4,8 @@
 from odoo import fields, models
 
 
-class Employee(models.Model):
-    _inherit = ["hr.employee"]
+class HrEmployee(models.Model):
+    _inherit = "hr.employee"
 
     subordinate_ids = fields.One2many('hr.employee', string='Subordinates', compute='_compute_subordinates', help="Direct and indirect subordinates",
                                       compute_sudo=True)
@@ -13,8 +13,7 @@ class Employee(models.Model):
 
 
 class HrEmployeePublic(models.Model):
-    _inherit = ["hr.employee.public"]
+    _inherit = "hr.employee.public"
 
-    subordinate_ids = fields.One2many('hr.employee.public', string='Subordinates', compute='_compute_subordinates', help="Direct and indirect subordinates",
-                                      compute_sudo=True)
-    is_subordinate = fields.Boolean(compute="_compute_is_subordinate", search="_search_is_subordinate")
+    subordinate_ids = fields.One2many(related='employee_id.subordinate_ids', compute_sudo=True)
+    is_subordinate = fields.Boolean(related='employee_id.is_subordinate')

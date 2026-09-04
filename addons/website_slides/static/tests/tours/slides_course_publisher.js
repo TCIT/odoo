@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { clickOnEditAndWaitEditMode, registerWebsitePreviewTour } from '@website/js/tours/tour_utils';
 import slidesTourTools from '@website_slides/../tests/tours/slides_tour_tools';
 
@@ -19,7 +17,7 @@ registerWebsitePreviewTour('course_publisher', {
     run: "click",
 }, {
     content: 'eLearning: click on New Course',
-    trigger: '#o_new_content_menu_choices a:contains("Course")',
+    trigger: '.o_new_content_menu_choices a:contains("Course")',
     run: "click",
 }, {
     content: 'eLearning: set name',

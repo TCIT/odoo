@@ -4,6 +4,8 @@ import {
     defineSpreadsheetActions,
     defineSpreadsheetModels,
     getPyEnv,
+    Partner,
+    Product,
 } from "@spreadsheet/../tests/helpers/data";
 
 import { selectCell, setCellContent, updatePivot } from "@spreadsheet/../tests/helpers/commands";
@@ -20,7 +22,7 @@ const { cellMenuRegistry } = spreadsheet.registries;
 onRpc("ir.model", "display_name_for", (args) => {
     const models = args.args[0];
     const pyEnv = getPyEnv();
-    const records = pyEnv["ir.model"]._records.filter((record) => models.includes(record.model));
+    const records = pyEnv["ir.model"].filter((record) => models.includes(record.model));
     return records.map((record) => ({
         model: record.model,
         display_name: record.name,
@@ -208,7 +210,7 @@ test("Can see records on PIVOT cells", async function () {
         },
     };
     mockService("action", fakeActionService);
-    const { env, model } = await createSpreadsheetWithPivot();
+    const { env, model } = await createSpreadsheetWithPivot({ pivotType: "static" });
     const firstSheetId = model.getters.getActiveSheetId();
 
     async function checkCells(cells) {
@@ -229,8 +231,14 @@ test("Can see records on PIVOT cells", async function () {
             selectCell(model, xc, "42");
             await doMenuAction(cellMenuRegistry, ["pivot_see_records"], env);
 
+            setCellContent(model, "G7", `=${xc}`);
+            selectCell(model, "G7", "42");
+            await doMenuAction(cellMenuRegistry, ["pivot_see_records"], env);
+
             expect(actions[0]).toEqual(actions[1], { message: "both actions are the same" });
-            expect.verifySteps(["doAction", "doAction"]);
+            expect(actions[0]).toEqual(actions[2], { message: "all actions are the same" });
+
+            expect.verifySteps(["doAction", "doAction", "doAction"]);
             actions.length = 0;
         }
     }
@@ -264,12 +272,12 @@ test("Can see records on PIVOT cells", async function () {
 
     // same but without the column headers
     // set the function in A3 such as the data cells matches the ones in the first sheet
-    setCellContent(model, "A3", `=PIVOT("1",,,FALSE)`, "42");
+    setCellContent(model, "A3", `=PIVOT("1",,,FALSE,,FALSE)`, "42");
     await checkCells(data_cells);
 });
 
 test("Cannot see records of pivot formula without value", async function () {
-    const { env, model } = await createSpreadsheetWithPivot();
+    const { env, model } = await createSpreadsheetWithPivot({ pivotType: "static" });
     expect(getCellFormula(model, "B3")).toBe(
         `=PIVOT.VALUE(1,"probability:avg","bar",FALSE,"foo",1)`
     );
@@ -341,10 +349,10 @@ test("See records is not visible if the pivot is not loaded, even if the cell ha
     let deferred = undefined;
     const { env, model } = await createSpreadsheetWithPivot({
         arch: /*xml*/ `
-        <pivot>
-            <field name="probability" type="measure"/>
-        </pivot>
-    `,
+            <pivot>
+                <field name="probability" type="measure"/>
+            </pivot>
+        `,
         mockRPC: async function (route, args) {
             if (deferred && args.method === "read_group" && args.model === "partner") {
                 await deferred;
@@ -359,4 +367,69 @@ test("See records is not visible if the pivot is not loaded, even if the cell ha
     deferred.resolve();
     await animationFrame();
     expect(action.isVisible(env)).toBe(true);
+});
+
+test("See records with custom pivot groups", async function () {
+    Product._records.push({ id: 200, display_name: "chair", name: "chair" });
+    Partner._records.push({ id: 200, bar: false, product_id: 200, probability: 100 });
+
+    let doActionReceivedDomain = undefined;
+    mockService("action", {
+        doAction: (actionRequest, options = {}) => {
+            expect.step("doAction");
+            doActionReceivedDomain = actionRequest.domain;
+            expect(options.viewType).toBe("list");
+        },
+    });
+
+    const { env, model, pivotId } = await createSpreadsheetWithPivot();
+    updatePivot(model, pivotId, {
+        columns: [{ fieldName: "GroupedProducts", order: "asc" }],
+        rows: [{ fieldName: "bar", order: "asc" }],
+        measures: [{ id: "probability:sum", fieldName: "probability", aggregator: "sum" }],
+        customFields: {
+            GroupedProducts: {
+                parentField: "product_id",
+                name: "GroupedProducts",
+                groups: [
+                    { name: "Group1", values: [37, 41] },
+                    { name: "Others", values: [], isOtherGroup: true },
+                ],
+            },
+        },
+    });
+    await waitForDataLoaded(model);
+
+    selectCell(model, "B1"); // "Group1" group column header
+    await doMenuAction(cellMenuRegistry, ["pivot_see_records"], env);
+    expect.verifySteps(["doAction"]);
+    expect(doActionReceivedDomain).toEqual(["|", ["product_id", "=", 37], ["product_id", "=", 41]]);
+
+    selectCell(model, "B2"); // "Probability" measure header
+    await doMenuAction(cellMenuRegistry, ["pivot_see_records"], env);
+    expect.verifySteps(["doAction"]);
+    expect(doActionReceivedDomain).toEqual(["|", ["product_id", "=", 37], ["product_id", "=", 41]]);
+
+    selectCell(model, "B4"); // Pivot value for "Group1" group and bar = true
+    await doMenuAction(cellMenuRegistry, ["pivot_see_records"], env);
+    expect.verifySteps(["doAction"]);
+    expect(doActionReceivedDomain).toEqual([
+        "|",
+        "&",
+        ["product_id", "=", 37],
+        ["bar", "=", true],
+        "&",
+        ["product_id", "=", 41],
+        ["bar", "=", true],
+    ]);
+
+    selectCell(model, "C1"); // "Others" group column header
+    await doMenuAction(cellMenuRegistry, ["pivot_see_records"], env);
+    expect.verifySteps(["doAction"]);
+    expect(doActionReceivedDomain).toEqual([["product_id", "=", 200]]);
+
+    selectCell(model, "C3"); // Pivot value for "Others" group and bar = false
+    await doMenuAction(cellMenuRegistry, ["pivot_see_records"], env);
+    expect.verifySteps(["doAction"]);
+    expect(doActionReceivedDomain).toEqual(["&", ["product_id", "=", 200], ["bar", "=", false]]);
 });

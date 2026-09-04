@@ -5,7 +5,7 @@ from odoo import _, fields, models, api
 from odoo.exceptions import UserError
 
 
-class DeliveryCarrierMondialRelay(models.Model):
+class DeliveryCarrier(models.Model):
     _inherit = 'delivery.carrier'
 
     is_mondialrelay = fields.Boolean(compute='_compute_is_mondialrelay', search='_search_is_mondialrelay')
@@ -18,11 +18,9 @@ class DeliveryCarrierMondialRelay(models.Model):
             c.is_mondialrelay = c.product_id.default_code == "MR"
 
     def _search_is_mondialrelay(self, operator, value):
-        if operator not in ('=', '!=') or not isinstance(value, bool):
-            raise UserError(_("Operation not supported"))
-        if not value:
-            operator = '!=' if operator == '=' else '='
-        return [('product_id.default_code', operator, 'MR')]
+        if operator != 'in':
+            return NotImplemented
+        return [('product_id.default_code', '=', 'MR')]
 
     def fixed_get_tracking_link(self, picking):
         if self.is_mondialrelay:

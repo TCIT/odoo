@@ -1,5 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+OAUTH_URL = 'https://razorpay.api.odoo.com/api/razorpay/1'
+
 # The currencies supported by Razorpay, in ISO 4217 format. Last updated on May 26, 2021.
 # See https://razorpay.com/docs/payments/payments/international-payments/#supported-currencies.
 # Last seen online: 16 November 2022.
@@ -113,9 +115,15 @@ DEFAULT_PAYMENT_METHOD_CODES = {
 
 # The codes of payment methods that are not recognized by the orders API.
 FALLBACK_PAYMENT_METHOD_CODES = {
-    'wallets_india',
-    'paylater_india',
     'emi_india',
+    'fpx',
+    'paylater_india',
+    'wallets_india',
+}
+
+# The codes of payment methods that require redirection back to the website
+REDIRECT_PAYMENT_METHOD_CODES = {
+    'fpx',
 }
 
 # Mapping of payment method codes to Razorpay codes.

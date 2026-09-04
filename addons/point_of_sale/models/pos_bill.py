@@ -1,17 +1,15 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.osv.expression import OR
 
 
-class Bill(models.Model):
-    _name = "pos.bill"
+class PosBill(models.Model):
+    _name = 'pos.bill'
     _order = "value"
     _description = "Coins/Bills"
     _inherit = ["pos.load.mixin"]
 
     name = fields.Char("Name")
-    value = fields.Float("Coin/Bill Value", required=True, digits=(16, 4))
-    for_all_config = fields.Boolean("For All PoS", default=True, help="If checked, this coin/bill will be available in all PoS.")
+    value = fields.Float("Value", required=True, digits=(16, 4))
     pos_config_ids = fields.Many2many("pos.config", string="Point of Sales")
 
     @api.model
@@ -24,12 +22,9 @@ class Bill(models.Model):
         return result.id, result.display_name
 
     @api.model
-    def _load_pos_data_domain(self, data):
-        return OR([
-            [('id', 'in', data['pos.config']['data'][0]['default_bill_ids']), ('for_all_config', '=', False)],
-            [('for_all_config', '=', True)]
-        ])
+    def _load_pos_data_domain(self, data, config):
+        return ['|', ('id', 'in', config.default_bill_ids.ids), ('pos_config_ids', '=', False)]
 
     @api.model
-    def _load_pos_data_fields(self, config_id):
+    def _load_pos_data_fields(self, config):
         return ['id', 'name', 'value']

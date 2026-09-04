@@ -11,16 +11,16 @@ class MrpProduction(models.Model):
         "Count of Source SO",
         compute='_compute_sale_order_count',
         groups='sales_team.group_sale_salesman')
-    sale_line_id = fields.Many2one('sale.order.line', 'Origin sale order line')
+    sale_line_id = fields.Many2one('sale.order.line', 'Origin sale order line', copy=False)
 
-    @api.depends('procurement_group_id.mrp_production_ids.move_dest_ids.group_id.sale_id')
+    @api.depends('reference_ids.sale_ids', 'sale_line_id.order_id')
     def _compute_sale_order_count(self):
         for production in self:
-            production.sale_order_count = len(production.procurement_group_id.mrp_production_ids.move_dest_ids.group_id.sale_id | production.sale_line_id.order_id)
+            production.sale_order_count = len(production.reference_ids.sale_ids | production.sale_line_id.order_id)
 
     def action_view_sale_orders(self):
         self.ensure_one()
-        sale_order_ids = self.procurement_group_id.mrp_production_ids.move_dest_ids.group_id.sale_id.ids + self.sale_line_id.order_id.ids
+        sale_order_ids = (self.reference_ids.sale_ids | self.sale_line_id.order_id).ids
         action = {
             'res_model': 'sale.order',
             'type': 'ir.actions.act_window',
@@ -47,8 +47,7 @@ class MrpProduction(models.Model):
                 ).sale_line_id = production.sale_line_id
         return res
 
-    def _post_run_manufacture(self, procurements):
-        for production, procurement in zip(self, procurements):
-            if procurement.values.get('group_id'):
-                production.procurement_group_id.sale_id = procurement.values['group_id'].sale_id
-        return super()._post_run_manufacture(procurements)
+    def _get_backorder_mo_vals(self):
+        res = super()._get_backorder_mo_vals()
+        res['sale_line_id'] = self.sale_line_id.id
+        return res

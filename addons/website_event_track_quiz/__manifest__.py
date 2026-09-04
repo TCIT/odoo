@@ -33,10 +33,10 @@
     'assets': {
         'web.assets_frontend': [
             'website_event_track_quiz/static/src/scss/event_quiz.scss',
-            'website_event_track_quiz/static/src/js/event_quiz.js',
-            'website_event_track_quiz/static/src/js/event_quiz_leaderboard.js',
+            'website_event_track_quiz/static/src/interactions/**/*',
             'website_event_track_quiz/static/src/xml/quiz_templates.xml',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

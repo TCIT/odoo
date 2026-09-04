@@ -5,7 +5,7 @@
     'summary': 'Add extra fields on addresses',
     'sequence': 19,
     'version': '1.1',
-    'category': 'Hidden',
+    'category': 'Sales/Sales',
     'description': """
 Extended Addresses Management
 =============================
@@ -21,5 +21,6 @@ It is primarily used for EDIs that might need a special city code.
         'views/res_country_view.xml',
     ],
     'depends': ['base', 'contacts'],
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

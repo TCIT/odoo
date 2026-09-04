@@ -2,10 +2,17 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
+from odoo.fields import Domain
 
 
 class ProductReplenish(models.TransientModel):
     _inherit = 'product.replenish'
+
+    @api.depends('product_id.bom_ids', 'product_id.bom_ids.product_uom_id')
+    def _compute_allowed_uom_ids(self):
+        super()._compute_allowed_uom_ids()
+        for rec in self:
+            rec.allowed_uom_ids |= rec.product_id.bom_ids.product_uom_id
 
     @api.depends('route_id')
     def _compute_date_planned(self):
@@ -32,8 +39,14 @@ class ProductReplenish(models.TransientModel):
             return date
         delay = 0
         product_tmpl_id = kwargs.get('product_tmpl_id') or self.product_tmpl_id
-        if bool(self.env['ir.config_parameter'].sudo().get_param('mrp.use_manufacturing_lead')):
-            delay += self.env.company.manufacturing_lead
         if product_tmpl_id and product_tmpl_id.bom_ids:
             delay += product_tmpl_id.bom_ids[0].produce_delay + product_tmpl_id.bom_ids[0].days_to_prepare_mo
         return fields.Datetime.add(date, days=delay)
+
+    def _get_route_domain(self, product_tmpl_id):
+        domain = super()._get_route_domain(product_tmpl_id)
+        company = product_tmpl_id.company_id or self.env.company
+        manufacture_route = self.env['stock.rule'].search([('action', '=', 'manufacture'), ('company_id', '=', company.id)]).route_id
+        if manufacture_route and product_tmpl_id.bom_ids.filtered(lambda b: b.type == 'normal'):
+            domain = Domain.OR([domain, Domain('id', 'in', manufacture_route.ids)])
+        return domain

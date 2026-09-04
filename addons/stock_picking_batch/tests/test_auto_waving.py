@@ -80,21 +80,18 @@ class TestAutoWaving(TransactionCase):
             'partner_id': cls.us_client.id,
             'move_ids': [
                 Command.create({
-                    'name': cls.product_1.name,
                     'product_id': cls.product_1.id,
                     'product_uom_qty': 3,
                     'product_uom': cls.product_1.uom_id.id,
                     'location_id': cls.child_location_1.id,
                 }),
                 Command.create({
-                    'name': cls.product_1.name,
                     'product_id': cls.product_1.id,
                     'product_uom_qty': 2,
                     'product_uom': cls.product_1.uom_id.id,
                     'location_id': cls.child_location_2.id,
                 }),
                 Command.create({
-                    'name': cls.product_2.name,
                     'product_id': cls.product_2.id,
                     'product_uom_qty': 2,
                     'product_uom': cls.product_2.uom_id.id,
@@ -108,21 +105,18 @@ class TestAutoWaving(TransactionCase):
             'partner_id': cls.be_client.id,
             'move_ids': [
                 Command.create({
-                    'name': cls.product_1.name,
                     'product_id': cls.product_1.id,
                     'product_uom_qty': 3,
                     'product_uom': cls.product_1.uom_id.id,
                     'location_id': cls.grandchild_location.id,
                 }),
                 Command.create({
-                    'name': cls.product_1.name,
                     'product_id': cls.product_1.id,
                     'product_uom_qty': 2,
                     'product_uom': cls.product_1.uom_id.id,
                     'location_id': cls.child_location_2.id,
                 }),
                 Command.create({
-                    'name': cls.product_2.name,
                     'product_id': cls.product_2.id,
                     'product_uom_qty': 2,
                     'product_uom': cls.product_2.uom_id.id,
@@ -136,21 +130,18 @@ class TestAutoWaving(TransactionCase):
             'partner_id': cls.us_client.id,
             'move_ids': [
                 Command.create({
-                    'name': cls.product_1.name,
                     'product_id': cls.product_1.id,
                     'product_uom_qty': 2,
                     'product_uom': cls.product_1.uom_id.id,
                     'location_id': cls.stock_location.id,
                 }),
                 Command.create({
-                    'name': cls.product_2.name,
                     'product_id': cls.product_2.id,
                     'product_uom_qty': 2,
                     'product_uom': cls.product_2.uom_id.id,
                     'location_id': cls.child_location_2.id,
                 }),
                 Command.create({
-                    'name': cls.product_3.name,
                     'product_id': cls.product_3.id,
                     'product_uom_qty': 3,
                     'product_uom': cls.product_3.uom_id.id,
@@ -164,7 +155,6 @@ class TestAutoWaving(TransactionCase):
             'partner_id': cls.be_client.id,
             'move_ids': [
                 Command.create({
-                    'name': cls.product_4.name,
                     'product_id': cls.product_4.id,
                     'product_uom_qty': 3,
                     'product_uom': cls.product_4.uom_id.id,
@@ -178,21 +168,18 @@ class TestAutoWaving(TransactionCase):
             'partner_id': cls.fr_client.id,
             'move_ids': [
                 Command.create({
-                    'name': cls.product_1.name,
                     'product_id': cls.product_1.id,
                     'product_uom_qty': 3,
                     'product_uom': cls.product_1.uom_id.id,
                     'location_id': cls.child_location_1.id,
                 }),
                 Command.create({
-                    'name': cls.product_1.name,
                     'product_id': cls.product_1.id,
                     'product_uom_qty': 2,
                     'product_uom': cls.product_1.uom_id.id,
                     'location_id': cls.child_location_2.id,
                 }),
                 Command.create({
-                    'name': cls.product_2.name,
                     'product_id': cls.product_2.id,
                     'product_uom_qty': 2,
                     'product_uom': cls.product_2.uom_id.id,
@@ -318,13 +305,16 @@ class TestAutoWaving(TransactionCase):
         self.assertEqual(len(wave_1.move_line_ids), 3)
         self.assertEqual(wave_1.picking_ids.partner_id, self.us_client)
         self.assertEqual(wave_1.move_line_ids.product_id, self.product_1)
-        # set quantity of a move line to 0 to check if it's correctly moved to another wave.
-        self.assertEqual(wave_1.move_line_ids.mapped('quantity'), [2.0, 3.0, 2.0])
-        modified_move_line = wave_1.move_line_ids[0]
+        # Set the quantity of the move line that is the only one in the picking to 0
+        # to check if it is correctly moved to another wave.
+        self.assertCountEqual(wave_1.move_line_ids.mapped('quantity'), [2.0, 3.0, 2.0])
+        modified_move_line = wave_1.picking_ids.filtered(lambda p: len(p.move_ids) == 1).move_line_ids
         modified_move_line.quantity = 0
-        self.assertEqual(wave_1.move_line_ids.mapped('quantity'), [0.0, 3.0, 2.0])
+        self.assertCountEqual(wave_1.move_line_ids.mapped('quantity'), [0.0, 3.0, 2.0])
         wave_1.action_done()
-        self.assertTrue(modified_move_line.batch_id.id not in [wave_1.id, False])
+        self.assertEqual(wave_1.state, 'done')
+        self.assertTrue(modified_move_line.batch_id.id)
+        self.assertNotEqual(modified_move_line.batch_id, wave_1)
 
         wave_2 = waves.filtered(lambda w: w.description == f'United States, {self.product_2.name}')
         self.assertEqual(len(wave_2), 1)
@@ -408,3 +398,43 @@ class TestAutoWaving(TransactionCase):
         self.all_pickings.action_assign()
         waves = self.env['stock.picking.batch'].search([('is_wave', '=', True)])
         self.assertEqual(len(waves), 4)
+
+    def test_auto_wave_skip_current_batch(self):
+        """ Check that validating a wave with partial quantities (one line empty, one partial)
+            correctly creates a backorder in a *new* wave, rather than attempting to merge
+            back into the current wave (which causes a UserError as it hasn't closed yet). """
+        self.picking_type_out.write({
+            'create_backorder': 'always',
+            'auto_batch': True,
+            'batch_group_by_destination': False,
+            'batch_group_by_partner': False,
+            'batch_group_by_src_loc': False,
+            'batch_group_by_dest_loc': False,
+            'wave_group_by_category': False,
+            'wave_group_by_location': False,
+            'wave_group_by_product': True,
+        })
+
+        # We specifically test Product 2 that has a line in both Picking 1 and Picking 2
+        (self.picking_1 | self.picking_2).action_assign()
+        wave_domain = [
+            ('is_wave', '=', True), ('move_line_ids.product_id', "=", self.product_2.id), ('state', '=', 'in_progress')
+        ]
+        wave = self.env['stock.picking.batch'].search(wave_domain)
+        self.assertEqual(len(wave), 1)
+        self.assertEqual(len(wave.move_line_ids), 2)
+        self.assertEqual(wave.move_line_ids.mapped('quantity'), [2, 2])
+
+        wave.move_line_ids[0].write({'quantity': 0})
+        wave.move_line_ids[1].write({'quantity': 1})
+
+        wave.action_done()
+
+        self.assertEqual(wave.state, 'done')
+
+        # Verify the backorder created a new, separate wave, with the remaining quantities
+        new_wave = self.env['stock.picking.batch'].search(wave_domain)
+        self.assertEqual(len(new_wave), 1)
+        self.assertEqual(len(new_wave.move_line_ids), 2)
+        new_wave.action_assign()
+        self.assertEqual(new_wave.move_line_ids.mapped('quantity'), [1, 2])

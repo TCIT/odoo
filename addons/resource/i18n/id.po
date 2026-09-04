@@ -1,24 +1,45 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* resource
-# 
+# * resource
+#
 # Translators:
-# Wil Odoo, 2024
-# Abe Manyo, 2024
-# 
+# Martin Trigaux, 2022
+# Abe Manyo, 2023
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Abe Manyo (abem)" <abem@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# "Nurul Aini Akrima Sabila (nuaas)" <nuaas@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Abe Manyo, 2024\n"
-"Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 13:51+0000\n"
+"Last-Translator: \"Abe Manyo (abem)\" <abem@odoo.com>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-19/"
+"resource/id/>\n"
+"Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: id\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_tree
+msgid "# Work Resources"
+msgstr "# Sumber Daya"
+
+#. module: resource
+#. odoo-python
+#: code:addons/resource/models/resource_calendar_attendance.py:0
+msgid ""
+"%(att)s is a break attendance, You should not have such record on duration "
+"based calendar"
+msgstr ""
+"%(att)s adalah tanggal absensi tidak aktif, Anda harusnya tidak memiliki "
+"rekaman kalender berdasarkan durasi"
 
 #. module: resource
 #. odoo-python
@@ -29,18 +50,33 @@ msgstr "%s (salin)"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "2 Week's Calendar"
+msgstr "Kalender 2 Minggu"
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "<span class=\"ms-1\">%</span>"
+msgstr "<span class=\"ms-1\">%</span>"
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "<span class=\"ms-2\">hours/day</span>"
+msgstr "<span class=\"ms-2\">jam/hari</span>"
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "<span class=\"ms-2\">hours/week</span>"
+msgstr "<span class=\"ms-2\">jam/minggu</span>"
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
 msgid "<span class=\"o_stat_text\">Time Off</span>"
 msgstr "<span class=\"o_stat_text\">Cuti</span>"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
-msgid "<span class=\"o_stat_text\">Work Resources</span>"
-msgstr "<span class=\"o_stat_text\">Sumber Daya Kerja</span>"
-
-#. module: resource
-#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
-msgid "<span> hours/week</span>"
-msgstr "<span> jam/minggu</span>"
+msgid "<span>hours/week</span>"
+msgstr "<span>jam/minggu</span>"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__active
@@ -80,6 +116,12 @@ msgstr ""
 "akan hilang."
 
 #. module: resource
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__duration_based
+#: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__duration_based
+msgid "Attendance based on duration"
+msgstr "Absensi berdasarkan durasi"
+
+#. module: resource
 #. odoo-python
 #: code:addons/resource/models/resource_calendar.py:0
 msgid "Attendances can't overlap."
@@ -104,6 +146,11 @@ msgstr ""
 "ini."
 
 #. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Avg"
+msgstr "Rata-rata"
+
+#. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__day_period__lunch
 msgid "Break"
 msgstr "Istirahat"
@@ -113,6 +160,19 @@ msgstr "Istirahat"
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__two_weeks_calendar
 msgid "Calendar in 2 weeks mode"
 msgstr "Kalender dalam mode 2 minggu"
+
+#. module: resource
+#: model:ir.model.fields,help:resource.field_resource_calendar__schedule_type
+msgid ""
+"Choose which level of definition you want to define on your Schedule\n"
+"- Flexible : Define an amount of hours to work on the week.\n"
+"- Fully Fixed : define the days, periods and the start & end time for each "
+"period of the day"
+msgstr ""
+"Pilih tingkat definisi mana yang Anda ingin definisikan di Jadwal Anda\n"
+"- Fleksibel : Definisikan jumlah jam kerja per minggu.\n"
+"- Sepenuhnya Diperbaiki : definisikan hari, periode dan waktu mulai & akhir "
+"untuk setiap periode hari"
 
 #. module: resource
 #: model:ir.actions.act_window,name:resource.resource_calendar_closing_days
@@ -135,9 +195,9 @@ msgid "Company"
 msgstr "Perusahaan"
 
 #. module: resource
-#: model:ir.model.fields,field_description:resource.field_resource_calendar__full_time_required_hours
-msgid "Company Full Time"
-msgstr "Full Time Perusahaan"
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Confirm"
+msgstr "Konfirmasi"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__create_uid
@@ -177,6 +237,11 @@ msgid "Default Working Hours"
 msgstr "Jam Kerja Standar"
 
 #. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Define Amount of Hours per day"
+msgstr ""
+
+#. module: resource
 #: model:ir.model.fields,help:resource.field_res_users__resource_calendar_id
 #: model:ir.model.fields,help:resource.field_resource_mixin__resource_calendar_id
 #: model:ir.model.fields,help:resource.field_resource_resource__calendar_id
@@ -193,13 +258,16 @@ msgid ""
 "Define working hours and time table that could be scheduled to your project "
 "members"
 msgstr ""
-"Tentukan jam kerja dan tabel waktu untuk dijadwalkan pada anggota proyek "
+"Tentukan jam kerja dan tabel waktu untuk dijadwalkan pada anggota project "
 "anda"
 
 #. module: resource
+#: model:ir.model.fields,field_description:resource.field_res_company__display_name
+#: model:ir.model.fields,field_description:resource.field_res_users__display_name
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__display_name
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__display_name
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves__display_name
+#: model:ir.model.fields,field_description:resource.field_resource_mixin__display_name
 #: model:ir.model.fields,field_description:resource.field_resource_resource__display_name
 msgid "Display Name"
 msgstr "Nama Tampilan"
@@ -230,7 +298,6 @@ msgid "Email"
 msgstr "Email"
 
 #. module: resource
-#: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__date_to
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves__date_to
 msgid "End Date"
 msgstr "Tanggal Berakhir"
@@ -261,9 +328,15 @@ msgid "First week"
 msgstr "Minggu pertama"
 
 #. module: resource
+#: model:ir.model.fields.selection,name:resource.selection__resource_calendar__schedule_type__flexible
+#: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_search
+msgid "Flexible"
+msgstr "Fleksibel"
+
+#. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__flexible_hours
 msgid "Flexible Hours"
-msgstr "Jam-Jam Fleksibel"
+msgstr "Jam Fleksibel"
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__4
@@ -289,6 +362,21 @@ msgid "Friday Morning"
 msgstr "Jumat Pagi"
 
 #. module: resource
+#: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__day_period__full_day
+msgid "Full Day"
+msgstr "Sehari Penuh"
+
+#. module: resource
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__full_time_required_hours
+msgid "Full Time Equivalent"
+msgstr "Setara Full Time"
+
+#. module: resource
+#: model:ir.model.fields.selection,name:resource.selection__resource_calendar__schedule_type__fully_fixed
+msgid "Fully Fixed"
+msgstr "Sepenuhnya Diperbaiki"
+
+#. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_resource_form
 msgid "Fully Flexible"
 msgstr "Sepenuhnya Fleksibel"
@@ -304,18 +392,12 @@ msgid "Global Time Off"
 msgstr "Cuti Global"
 
 #. module: resource
-#: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_leaves_search
-#: model_terms:ir.ui.view,arch_db:resource.view_resource_resource_search
-msgid "Group By"
-msgstr "Dikelompokkan berdasarkan"
-
-#. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_attendance_form
 msgid "Hours"
 msgstr "Jam"
 
 #. module: resource
-#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__hours_per_week
 msgid "Hours per Week"
 msgstr "Jam per Minggu"
 
@@ -326,12 +408,22 @@ msgid "Human"
 msgstr "Manusia"
 
 #. module: resource
+#: model:ir.model.fields,field_description:resource.field_res_company__id
+#: model:ir.model.fields,field_description:resource.field_res_users__id
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__id
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__id
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves__id
+#: model:ir.model.fields,field_description:resource.field_resource_mixin__id
 #: model:ir.model.fields,field_description:resource.field_resource_resource__id
 msgid "ID"
 msgstr "ID"
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid ""
+"If checked, the working schedule will be based on an amount of hours "
+"(defined for each day) and not a start & end time anymore.Do you confirm ?"
+msgstr ""
 
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar_leaves__resource_id
@@ -361,6 +453,13 @@ msgstr ""
 "menyembunyikan Waktu Kerja tanpa menghapusnya."
 
 #. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid ""
+"If unchecked, the working schedule will be based on a defined start and end "
+"hours.Do you confirm ?"
+msgstr ""
+
+#. module: resource
 #. odoo-python
 #: code:addons/resource/models/resource_calendar.py:0
 msgid ""
@@ -368,6 +467,11 @@ msgid ""
 msgstr ""
 "Dalam kalender dengan mode 2 minggu, semua periode harus berada dalam "
 "bagiannya."
+
+#. module: resource
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__is_fulltime
+msgid "Is Full Time"
+msgstr "Apakah Full Time"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__write_uid
@@ -429,8 +533,7 @@ msgstr "Nama"
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar__full_time_required_hours
 msgid ""
-"Number of hours to work on the company schedule to be considered as "
-"fulltime."
+"Number of hours to work on the company schedule to be considered as fulltime."
 msgstr ""
 "Jumlah jam kerja pada jadwal perusahaan agar dipertimbangkan sebagai "
 "fulltime."
@@ -441,6 +544,11 @@ msgid "Other"
 msgstr "Lainnya"
 
 #. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_search
+msgid "Partial working schedules"
+msgstr "Jadwal kerja parsial"
+
+#. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_leaves_search
 msgid "Period"
 msgstr "Periode"
@@ -449,6 +557,12 @@ msgstr "Periode"
 #: model:ir.model.fields,field_description:resource.field_resource_resource__phone
 msgid "Phone"
 msgstr "Telepon"
+
+#. module: resource
+#. odoo-python
+#: code:addons/resource/models/resource_calendar.py:0
+msgid "Provided datetimes needs to be timezoned"
+msgstr "Tanggalwaktu disediakan harus dalam zona waktu"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves__name
@@ -463,7 +577,11 @@ msgid "Related user name for the resource to manage its access."
 msgstr "Nama pengguna terkait untuk sumber daya untuk mengelola aksesnya."
 
 #. module: resource
-#: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__resource_id
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Required Full Time"
+msgstr ""
+
+#. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves__resource_id
 #: model:ir.model.fields,field_description:resource.field_resource_mixin__resource_id
 #: model:ir.ui.menu,name:resource.menu_resource_config
@@ -524,13 +642,23 @@ msgid ""
 "workload based on their weekly working hours."
 msgstr ""
 "Sumber daya memungkinkan Anda untuk membuat dan mengelola sumber daya yang "
-"harus terlibat dalam fase proyek tertentu. Anda juga dapat mengatur tingkat "
+"harus terlibat dalam fase project tertentu. Anda juga dapat mengatur tingkat "
 "efisiensi dan beban kerja berdasarkan jam kerja mingguan mereka."
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__5
 msgid "Saturday"
 msgstr "Sabtu"
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_tree
+msgid "Schedule Total Time"
+msgstr "Waktu Total Jadwal"
+
+#. module: resource
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__schedule_type
+msgid "Schedule Type"
+msgstr "Tipe Jadwal"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_resource_search
@@ -594,11 +722,6 @@ msgstr ""
 "Nilai spesifik seperti 24:00 diartikan sebagai 23:59:59.999999."
 
 #. module: resource
-#: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__date_from
-msgid "Starting Date"
-msgstr "Tanggal Mulai"
-
-#. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_leaves_search
 msgid "Starting Date of Time Off"
 msgstr "Tanggal Mulai Cuti"
@@ -610,13 +733,28 @@ msgstr "Minggu"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
-msgid "Switch to 1 week calendar"
-msgstr "Ganti ke kalender 1 minggu"
+msgid "Switch"
+msgstr "Switch"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
-msgid "Switch to 2 weeks calendar"
-msgstr "Ganti ke kalender 2 minggu"
+msgid "Switch to 1-week calendar"
+msgstr ""
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Switch to 2-weeks calendar"
+msgstr ""
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Switch to Duration based attendance"
+msgstr ""
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Switch to fixed attendance"
+msgstr ""
 
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar_attendance__display_type
@@ -627,11 +765,18 @@ msgstr "Technical field for UX purpose."
 #. odoo-python
 #: code:addons/resource/models/resource_calendar.py:0
 msgid ""
-"The current week (from %(first_day)s to %(last_day)s) corresponds to week "
-"number %(number)s."
+"The current week (from %(first_day)s to %(last_day)s) corresponds to %"
+"(number)s week."
 msgstr ""
 "Minggu saat ini (dari %(first_day)s sampai %(last_day)s) sesuai dengan "
-"minggu bulan ini %(number)s."
+"minggu %(number)s."
+
+#. module: resource
+#: model:ir.model.fields,help:resource.field_resource_calendar__duration_based
+#: model:ir.model.fields,help:resource.field_resource_calendar_attendance__duration_based
+msgid ""
+"The hours will be centered around 12:00 to cover the duration for the day"
+msgstr "Jam akan berpusat sekitar 12:00 untuk mencakup durasi hari"
 
 #. module: resource
 #. odoo-python
@@ -660,8 +805,8 @@ msgid ""
 msgstr ""
 "Field ini digunakan untuk menghitung durasi yang diharapkan pada SPK di "
 "pusat kerja ini. Contohnya, bila SPK membutuhkan satu jam dan faktor "
-"efisiensi adalah 100%, maka durasi yang diharapkan adalah 1 jam. Bila faktor"
-" efisiensi adalah 200%, durasi yang diharapkan akan menjadi 30 menit."
+"efisiensi adalah 100%, maka durasi yang diharapkan adalah 1 jam. Bila faktor "
+"efisiensi adalah 200%, durasi yang diharapkan akan menjadi 30 menit."
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__3
@@ -721,6 +866,11 @@ msgid "Timezone offset"
 msgstr "Offset timezone"
 
 #. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Total"
+msgstr "Total"
+
+#. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__1
 msgid "Tuesday"
 msgstr "Selasa"
@@ -757,6 +907,12 @@ msgid "User"
 msgstr "Pengguna"
 
 #. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+#: model_terms:ir.ui.view,arch_db:resource.resource_resource_form
+msgid "Visible to all"
+msgstr "Terlihat untuk semua"
+
+#. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__2
 msgid "Wednesday"
 msgstr "Rabu"
@@ -780,6 +936,16 @@ msgid "Wednesday Morning"
 msgstr "Rabu Pagi"
 
 #. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Week 1 Working Hours"
+msgstr ""
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Week 2 Working Hours"
+msgstr ""
+
+#. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__week_type
 msgid "Week Number"
 msgstr "Nomor Minggu"
@@ -796,8 +962,7 @@ msgstr ""
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar_leaves__time_type
 msgid ""
-"Whether this should be computed as a time off or as work time (eg: "
-"formation)"
+"Whether this should be computed as a time off or as work time (eg: formation)"
 msgstr ""
 "Apakah ini harus dihitung sebagai cuti atau jam kerja (contoh: formation)"
 
@@ -807,9 +972,33 @@ msgid "Work Detail"
 msgstr "Detail Pekerjaan"
 
 #. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Work Resources"
+msgstr "Sumber Daya Pekerjaan"
+
+#. module: resource
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__work_resources_count
+msgid "Work Resources count"
+msgstr "Jumlah Sumber Daya Kerja"
+
+#. module: resource
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__work_time_rate
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Work Time Rate"
+msgstr "Tarif Waktu Kerja"
+
+#. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__hour_from
 msgid "Work from"
 msgstr "Kerja dari"
+
+#. module: resource
+#: model:ir.model.fields,help:resource.field_resource_calendar__work_time_rate
+msgid ""
+"Work time rate versus full time working schedule, should be between 0 and "
+"100 %."
+msgstr ""
+"Tarif waktu kerja versus jadwal kerja full time, harus di antara 0 dan 100 %."
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__hour_to
@@ -849,6 +1038,16 @@ msgid "Working Time"
 msgstr "Waktu Kerja"
 
 #. module: resource
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__attendance_ids_1st_week
+msgid "Working Time 1st Week"
+msgstr "Waktu Kerja Minggu 1"
+
+#. module: resource
+#: model:ir.model.fields,field_description:resource.field_resource_calendar__attendance_ids_2nd_week
+msgid "Working Time 2nd Week"
+msgstr "Waktu Kerja Minggu 2"
+
+#. module: resource
 #. odoo-python
 #: code:addons/resource/models/resource_calendar.py:0
 msgid "You can't delete section between weeks."
@@ -857,8 +1056,14 @@ msgstr "Anda tidak dapat menghapus bagian di antara minggu."
 #. module: resource
 #. odoo-python
 #: code:addons/resource/models/resource_calendar.py:0
-msgid "first"
-msgstr "pertama"
+msgid "even"
+msgstr "genap"
+
+#. module: resource
+#. odoo-python
+#: code:addons/resource/models/resource_calendar.py:0
+msgid "odd"
+msgstr "ganjil"
 
 #. module: resource
 #. odoo-python
@@ -868,12 +1073,12 @@ msgstr "minggu lain"
 
 #. module: resource
 #. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
-msgid "second"
-msgstr "detik"
-
-#. module: resource
-#. odoo-python
 #: code:addons/resource/models/resource_calendar_attendance.py:0
 msgid "this week"
 msgstr "minggu ini"
+
+#~ msgid "Group By"
+#~ msgstr "Dikelompokkan berdasarkan"
+
+#~ msgid "Starting Date"
+#~ msgstr "Tanggal Mulai"

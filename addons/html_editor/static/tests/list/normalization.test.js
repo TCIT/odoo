@@ -98,7 +98,7 @@ describe("Inlines and blocks in list item", () => {
                 <ul>
                     <li>
                         <h1>abc</h1>
-                        <p>abc[<i>def</i></p>]
+                        <p>abc[<i>def</i>]</p>
                     </li>
                 </ul>
             `),
@@ -146,20 +146,168 @@ describe("Nested lists without class oe-nested", () => {
             contentAfter: unformat(`
                 <ul>
                     <li>abc</li>
-                    <li>def</li>
-                    <li class="oe-nested">
+                    <li>def
                         <ul>
                             <li>ghi</li>
                             <li>jkl</li>
                         </ul>
-                    </li>
-                    <li class="oe-nested">
                         <ol>
                             <li>mno</li>
                             <li>pqr</li>
                         </ol>
                     </li>
                 </ul>
+            `),
+        });
+    });
+});
+
+describe("Merge similar lists", () => {
+    test("should not merge oe-nested items with text content", async () => {
+        await testEditor({
+            contentBefore: unformat(`
+                <ol>
+                    <li class="oe-nested">abc</li>
+                    <li class="oe-nested">def</li>
+                </ol>
+            `),
+            contentAfter: unformat(`
+                <ol>
+                    <li class="oe-nested">abc</li>
+                    <li class="oe-nested">def</li>
+                </ol>
+            `),
+        });
+    });
+
+    test("should not merge oe-nested items with element and text content", async () => {
+        await testEditor({
+            contentBefore: unformat(`
+                <ol>
+                    <li class="oe-nested">
+                        <ol>
+                            <li class="oe-nested">abc</li>
+                            <li class="oe-nested">def</li>
+                        </ol>
+                    </li>
+                    <li class="oe-nested">ghi</li>
+                </ol>
+            `),
+            contentAfter: unformat(`
+                <ol>
+                    <li class="oe-nested">
+                        <ol>
+                            <li class="oe-nested">abc</li>
+                            <li class="oe-nested">def</li>
+                        </ol>
+                    </li>
+                    <li class="oe-nested">ghi</li>
+                </ol>
+            `),
+        });
+    });
+
+    test("should merge similar elements inside oe-nested", async () => {
+        await testEditor({
+            contentBefore: unformat(`
+                <ol>
+                    <li class="oe-nested">
+                        <ol>
+                            <li class="oe-nested">abc</li>
+                            <li class="oe-nested">def</li>
+                        </ol>
+                        <ol>
+                            <li class="oe-nested">ghi</li>
+                            <li class="oe-nested">jkl</li>
+                        </ol>
+                    </li>
+                </ol>
+            `),
+            contentAfter: unformat(`
+                <ol>
+                    <li class="oe-nested">
+                        <ol>
+                            <li class="oe-nested">abc</li>
+                            <li class="oe-nested">def</li>
+                            <li class="oe-nested">ghi</li>
+                            <li class="oe-nested">jkl</li>
+                        </ol>
+                    </li>
+                </ol>
+            `),
+        });
+    });
+
+    test("should not merge different elements inside oe-nested", async () => {
+        await testEditor({
+            contentBefore: unformat(`
+                <ol>
+                    <li class="oe-nested">
+                        <ol>
+                            <li class="oe-nested">abc</li>
+                            <li class="oe-nested">def</li>
+                        </ol>
+                        <ul>
+                            <li class="oe-nested">ghi</li>
+                            <li class="oe-nested">jkl</li>
+                        </ul>
+                    </li>
+                </ol>
+            `),
+            contentAfter: unformat(`
+                <ol>
+                    <li class="oe-nested">
+                        <ol>
+                            <li class="oe-nested">abc</li>
+                            <li class="oe-nested">def</li>
+                        </ol>
+                        <ul>
+                            <li class="oe-nested">ghi</li>
+                            <li class="oe-nested">jkl</li>
+                        </ul>
+                    </li>
+                </ol>
+            `),
+        });
+    });
+
+    test("should merge consecutive oe-nested items with similar elements inside", async () => {
+        await testEditor({
+            contentBefore: unformat(`
+                <ol>
+                    <li class="oe-nested">
+                        <ol>
+                            <li class="oe-nested">abc</li>
+                            <li class="oe-nested">def</li>
+                        </ol>
+                    </li>
+                    <li class="oe-nested">
+                        <ol>
+                            <li class="oe-nested">ghi</li>
+                            <li class="oe-nested">jkl</li>
+                        </ol>
+                    </li>
+                    <li class="oe-nested">
+                        <ol>
+                            <li class="oe-nested">mno</li>
+                            <li class="oe-nested">pqr</li>
+                        </ol>
+                    </li>
+                </ol>
+            `),
+            contentAfter: unformat(`
+                <ol>
+                    <li class="oe-nested">
+                        <ol>
+                            <li class="oe-nested">abc</li>
+                            <li class="oe-nested">def</li>
+                            <li class="oe-nested">ghi</li>
+                            <li class="oe-nested">jkl</li>
+                            <li class="oe-nested">mno</li>
+                            <li class="oe-nested">pqr</li>
+                        </ol>
+                    </li>
+                </ol>
             `),
         });
     });

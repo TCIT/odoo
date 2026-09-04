@@ -1,14 +1,5 @@
-import { scrollTo } from "@web/core/utils/scrolling";
-
-import {
-    Component,
-    onWillUpdateProps,
-    useEffect,
-    useExternalListener,
-    useRef,
-    useState,
-} from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
+import { Component, onWillRender, onWillUpdateProps, useEffect, useRef, useState } from "@odoo/owl";
+import { KeepLast } from "@web/core/utils/concurrency";
 
 /**
  * A notebook component that will render only the current page and allow
@@ -65,38 +56,37 @@ export class Notebook extends Component {
         className: "",
         orientation: "horizontal",
         onPageUpdate: () => {},
+        onWillActivatePage: () => {},
     };
     static props = {
         slots: { type: Object, optional: true },
         pages: { type: Object, optional: true },
         class: { optional: true },
         className: { type: String, optional: true },
-        anchors: { type: Object, optional: true },
         defaultPage: { type: String, optional: true },
         orientation: { type: String, optional: true },
         icons: { type: Object, optional: true },
         onPageUpdate: { type: Function, optional: true },
+        onWillActivatePage: { type: Function, optional: true },
     };
 
     setup() {
         this.activePane = useRef("activePane");
-        this.anchorTarget = null;
         this.pages = this.computePages(this.props);
+        this.invalidPages = new Set();
         this.state = useState({ currentPage: null });
         this.state.currentPage = this.computeActivePage(this.props.defaultPage, true);
-        useExternalListener(browser, "click", this.onAnchorClicked);
+        this.keepLastPageTransition = new KeepLast();
         useEffect(
             () => {
                 this.props.onPageUpdate(this.state.currentPage);
-                if (this.anchorTarget) {
-                    const matchingEl = this.activePane.el.querySelector(`#${this.anchorTarget}`);
-                    scrollTo(matchingEl, { isAnchor: true });
-                    this.anchorTarget = null;
-                }
                 this.activePane.el?.classList.add("show");
             },
             () => [this.state.currentPage]
         );
+        onWillRender(() => {
+            this.computeInvalidPages();
+        });
         onWillUpdateProps((nextProps) => {
             const activateDefault =
                 this.props.defaultPage !== nextProps.defaultPage || !this.defaultVisible;
@@ -114,28 +104,14 @@ export class Notebook extends Component {
         return page.Component && page;
     }
 
-    onAnchorClicked(ev) {
-        if (!this.props.anchors) {
-            return;
-        }
-        const href = ev.target.closest("a")?.getAttribute("href");
-        if (!href) {
-            return;
-        }
-        const id = href.substring(1);
-        if (this.props.anchors[id]) {
-            if (this.state.currentPage !== this.props.anchors[id].target) {
-                ev.preventDefault();
-                this.anchorTarget = id;
-                this.state.currentPage = this.props.anchors[id].target;
-            }
-        }
-    }
-
-    activatePage(pageIndex) {
+    async activatePage(pageIndex) {
         if (!this.disabledPages.includes(pageIndex) && this.state.currentPage !== pageIndex) {
-            this.activePane.el?.classList.remove("show");
-            this.state.currentPage = pageIndex;
+            const prom = (async () => this.props.onWillActivatePage(pageIndex))();
+            const canProceed = await this.keepLastPageTransition.add(prom);
+            if (canProceed !== false) {
+                this.activePane.el?.classList.remove("show");
+                this.state.currentPage = pageIndex;
+            }
         }
     }
 
@@ -190,5 +166,17 @@ export class Notebook extends Component {
         }
 
         return current;
+    }
+
+    computeInvalidPages() {
+        this.invalidPages = new Set();
+        for (const page of this.navItems) {
+            const invalid = page[1].fieldNames?.some((fieldName) =>
+                this.env.model?.root.isFieldInvalid(fieldName)
+            );
+            if (invalid) {
+                this.invalidPages.add(page[0]);
+            }
+        }
     }
 }

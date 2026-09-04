@@ -1,4 +1,3 @@
-import { Record } from "@mail/core/common/record";
 import { Store } from "@mail/core/common/store_service";
 
 import { patch } from "@web/core/utils/patch";
@@ -7,11 +6,14 @@ import { patch } from "@web/core/utils/patch";
 const storeServicePatch = {
     setup() {
         super.setup();
+        /** @type {string|undefined} */
         this.companyName;
+        /** @type {boolean|undefined} */
         this.inPublicPage;
+        /** @type {boolean|undefined} */
         this.isChannelTokenSecret;
-        this.discuss_public_thread = Record.one("Thread");
-        this.shouldDisplayWelcomeViewInitially;
+        /** @type {boolean|undefined} */
+        this.is_welcome_page_displayed;
     },
 };
 

@@ -5,15 +5,13 @@ from odoo import models, _
 from odoo.exceptions import UserError
 
 
-class Applicant(models.Model):
-
+class HrApplicant(models.Model):
     _inherit = 'hr.applicant'
 
     def website_form_input_filter(self, request, values):
-        if 'partner_name' in values:
-            applicant_job = self.env['hr.job'].sudo().search([('id', '=', values['job_id'])]).name if 'job_id' in values else False
-            name = '%s - %s' % (values['partner_name'], applicant_job) if applicant_job else _("%s's Application", values['partner_name'])
-            values.setdefault('name', name)
+        if 'partner_id' in values:
+            values.pop('email_from', None)
+            values.pop('partner_phone', None)
         if values.get('job_id'):
             job = self.env['hr.job'].browse(values.get('job_id'))
             if not job.sudo().active:

@@ -1,5 +1,5 @@
 import { expect, test } from "@odoo/hoot";
-import { press, queryAll, queryOne } from "@odoo/hoot-dom";
+import { press, queryAll, queryOne, queryFirst } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import {
     contains,
@@ -18,6 +18,7 @@ function fieldTextArea(name) {
 
 class Product extends models.Model {
     description = fields.Text();
+    name = fields.Char();
 }
 
 defineModels([Product]);
@@ -46,6 +47,30 @@ test("doesn't have a scrollbar with long content", async () => {
     });
     const textarea = queryOne(".o_field_text textarea");
     expect(textarea.clientHeight).toBe(textarea.scrollHeight);
+});
+
+test("basic rendering char field", async () => {
+    Product._fields.name = fields.Char();
+    Product._records = [{ id: 1, name: "Description\nas\ntext" }];
+    await mountView({
+        type: "form",
+        resModel: "product",
+        resId: 1,
+        arch: '<form><field name="name" widget="text"/></form>',
+    });
+    expect(".o_field_text textarea").toHaveCount(1);
+    expect(".o_field_text textarea").toHaveValue("Description\nas\ntext");
+});
+
+test("char field with widget='text' trims trailing spaces", async () => {
+    Product._fields.name = fields.Char({ trim: true });
+    await mountView({
+        type: "form",
+        resModel: "product",
+        arch: '<form><field name="name" widget="text"/></form>',
+    });
+    await fieldTextArea("name").edit("test  ");
+    expect(".o_field_text textarea").toHaveValue("test");
 });
 
 test("render following an onchange", async () => {
@@ -135,6 +160,88 @@ test("is translatable", async () => {
     expect(".modal").toHaveCount(1);
 });
 
+test("translation dialog keeps unsaved edits after dragging (for text field)", async () => {
+    Product._fields.description.translate = true;
+    Product._records = [{ id: 1, description: "Description as text" }];
+
+    serverState.multiLang = true;
+
+    onRpc("get_installed", () => [
+        ["en_US", "English"],
+        ["fr_BE", "French (Belgium)"],
+    ]);
+    onRpc("get_field_translations", () => [
+        [
+            { lang: "en_US", source: "Description as text", value: "Description as text" },
+            {
+                lang: "fr_BE",
+                source: "Description as text",
+                value: "Description sous forme de texte",
+            },
+        ],
+        { translation_type: "text", translation_show_source: false },
+    ]);
+
+    await mountView({
+        type: "form",
+        resModel: "product",
+        resId: 1,
+        arch: `<form><sheet><group><field name="description"/></group></sheet></form>`,
+    });
+
+    await contains(".o_field_text textarea").click();
+    await contains(".o_field_text .btn.o_field_translate").click();
+    expect(".modal").toHaveCount(1);
+
+    const textarea = queryFirst(".modal textarea[data-id]");
+    await contains(textarea).edit("Edited but not saved");
+    expect(textarea).toHaveValue("Edited but not saved");
+
+    await (await contains(".modal-header").drag()).drop();
+    expect(textarea).toHaveValue("Edited but not saved");
+});
+
+test("translation dialog keeps unsaved edits after dragging (for char field)", async () => {
+    Product._fields.name.translate = true;
+    Product._records = [{ id: 1, name: "Product Name" }];
+
+    serverState.multiLang = true;
+
+    onRpc("get_installed", () => [
+        ["en_US", "English"],
+        ["fr_BE", "French (Belgium)"],
+    ]);
+    onRpc("get_field_translations", () => [
+        [
+            { lang: "en_US", source: "Product Name", value: "Product Name" },
+            {
+                lang: "fr_BE",
+                source: "Product Name",
+                value: "Nom du produit",
+            },
+        ],
+        { translation_type: "char", translation_show_source: false },
+    ]);
+
+    await mountView({
+        type: "form",
+        resModel: "product",
+        resId: 1,
+        arch: `<form><sheet><group><field name="name"/></group></sheet></form>`,
+    });
+
+    await contains(".o_field_char input").click();
+    await contains(".o_field_char .btn.o_field_translate").click();
+    expect(".modal").toHaveCount(1);
+
+    const inputField = queryFirst(".modal input[data-id]");
+    await contains(inputField).edit("Edited but not saved");
+    expect(inputField).toHaveValue("Edited but not saved");
+
+    await (await contains(".modal-header").drag()).drop();
+    expect(inputField).toHaveValue("Edited but not saved");
+});
+
 test("is translatable on new record", async () => {
     Product._fields.description.translate = true;
     Product._records = [{ id: 1, description: "Description as text" }];
@@ -180,6 +287,21 @@ test("in editable list view", async () => {
     });
     await contains(".o_list_button_add").click();
     expect("textarea").toBeFocused();
+});
+
+test("placeholder_field shows as placeholder", async () => {
+    Product._fields.char = fields.Char({
+        default: "My Placeholder",
+    });
+    await mountView({
+        type: "form",
+        resModel: "product",
+        arch: `<form>
+            <field name="description" options="{'placeholder_field' : 'char'}"/>
+            <field name="char"/>
+        </form>`,
+    });
+    expect(`.o_field_text textarea`).toHaveAttribute("placeholder", "My Placeholder");
 });
 
 test.tags("desktop");

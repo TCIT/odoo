@@ -13,5 +13,6 @@
         'views/res_config_settings_view.xml',
     ],
     'depends': ['base_setup'],
-    'license': 'OEEL-1',
+    'author': 'Odoo S.A.',
+    'license': 'LGPL-3',
 }

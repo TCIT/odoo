@@ -18,7 +18,7 @@ class TestRedirect(HttpCase):
             'login': 'portal_user',
             'password': 'portal_user',
             'email': 'portal_user@mail.com',
-            'groups_id': [(6, 0, [self.env.ref('base.group_portal').id])]
+            'group_ids': [(6, 0, [self.env.ref('base.group_portal').id])]
         })
 
     def test_01_redirect_308_model_converter(self):
@@ -55,6 +55,28 @@ class TestRedirect(HttpCase):
         self.assertTrue(country_ad.name in r.text, "Ensure the controller returned the expected value (2)")
         self.assertTrue(redirect_url in r.text, "Ensure the url_for has replaced the href URL in the DOM")
 
+    def test_redirect_308_by_method_url_rewrite(self):
+        self.env['website.rewrite'].create([{
+            'name': 'Test Website Redirect',
+            'redirect_type': '308',
+            'url_from': url_from,
+            'url_to': f'{url_from}_new',
+        } for url_from in ('/get', '/post', '/get_post')])
+
+        self.env.ref('test_website.test_view').arch = '''
+            <t>
+                <a href="/get"></a><a href="/post"></a><a href="/get_post"></a>
+            </t>
+        '''
+
+        # [Public User] Open the /test_view url and ensure urls are rewritten
+        r = self.url_open('/test_view')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(
+            r.content.strip(),
+            b'<a href="/get_new"></a><a href="/post_new"></a><a href="/get_post_new"></a>'
+        )
+
     @mute_logger('odoo.http')  # mute 403 warning
     def test_02_redirect_308_RequestUID(self):
         self.env['website.rewrite'].create({
@@ -67,7 +89,7 @@ class TestRedirect(HttpCase):
         rec_published = self.env['test.model'].create({'name': 'name', 'website_published': True})
         rec_unpublished = self.env['test.model'].create({'name': 'name', 'website_published': False})
 
-        WebsiteHttp = odoo.addons.website.models.ir_http.Http
+        WebsiteHttp = odoo.addons.website.models.ir_http.IrHttp
 
         def _get_error_html(env, code, value):
             return str(code).split('_')[-1], f"CUSTOM {code}"
@@ -119,16 +141,16 @@ class TestRedirect(HttpCase):
             self.assertURLEqual(resp.headers.get('Location'), f"/test_website/308/name-{rec_unpublished.id}")
 
             resp = self.url_open(f"/test_website/308/name-{rec_unpublished.id}", allow_redirects=False)
-            self.assertEqual(resp.status_code, 403)
-            self.assertEqual(resp.text, "CUSTOM 403")
+            self.assertEqual(resp.status_code, 404)
+            self.assertEqual(resp.text, "CUSTOM 404")
 
             resp = self.url_open(f"/test_website/200/xx-{rec_unpublished.id}", allow_redirects=False)
             self.assertEqual(resp.status_code, 308)
             self.assertURLEqual(resp.headers.get('Location'), f"/test_website/308/xx-{rec_unpublished.id}")
 
             resp = self.url_open(f"/test_website/308/xx-{rec_unpublished.id}", allow_redirects=False)
-            self.assertEqual(resp.status_code, 403)
-            self.assertEqual(resp.text, "CUSTOM 403")
+            self.assertEqual(resp.status_code, 404)
+            self.assertEqual(resp.text, "CUSTOM 404")
 
             # with seo_name as slug
             rec_published.seo_name = "seo_name"
@@ -146,8 +168,8 @@ class TestRedirect(HttpCase):
             self.assertURLEqual(resp.headers.get('Location'), f"/test_website/308/xx-{rec_unpublished.id}")
 
             resp = self.url_open(f"/test_website/308/xx-{rec_unpublished.id}", allow_redirects=False)
-            self.assertEqual(resp.status_code, 403)
-            self.assertEqual(resp.text, "CUSTOM 403")
+            self.assertEqual(resp.status_code, 404)
+            self.assertEqual(resp.text, "CUSTOM 404")
 
             resp = self.url_open("/test_website/200/xx-100", allow_redirects=False)
             self.assertEqual(resp.status_code, 308)
@@ -182,10 +204,10 @@ class TestRedirect(HttpCase):
         r = self.url_open(url_rec1)
         self.assertEqual(r.status_code, 200)
 
-        # 2. Accessing unpublished record: expecting 403 by default
+        # 2. Accessing unpublished record: expecting 404 for public users
         rec1.is_published = False
         r = self.url_open(url_rec1)
-        self.assertEqual(r.status_code, 403)
+        self.assertEqual(r.status_code, 404)
 
         # 3. Accessing unpublished record with redirect to a 404: expecting 404
         redirect = self.env['website.rewrite'].create({
@@ -215,7 +237,7 @@ class TestRedirect(HttpCase):
         r = self.url_open(url_rec1)
         self.assertEqual(r.status_code, 404)
 
-        # 2. Accessing unpublished record with redirect to a 404: expecting 404
+        # 2. Accessing unexisting/unpublished record with redirect to a new url: expecting 301
         redirect = self.env['website.rewrite'].create({
             'name': 'Test 301 Redirect route unexisting record',
             'redirect_type': '301',
@@ -230,6 +252,132 @@ class TestRedirect(HttpCase):
         self.assertEqual(r.status_code, 200)
         self.assertURLEqual(r.url, redirect.url_to)
 
+    @mute_logger('odoo.http')
+    def test_06_redirect_404_unslug_record(self):
+        # 1. Accessing nonexisting record: raise 404
+        url_rec1 = '/test_website/200/an-old-slug-100000'
+        r = self.url_open(url_rec1)
+        self.assertEqual(r.status_code, 404)
+
+        redirect = self.env['website.rewrite'].create({
+            'name': 'Test 301 Redirect route nonexisting record',
+            'redirect_type': '301',
+            'url_from': '/test_website/200/100000',
+            'url_to': '/get',
+        })
+
+        # 2. Accessing nonexisting record (without exact slug matching) with redirect to a new url: expecting 301
+        r = self.url_open(url_rec1, allow_redirects=False)
+        self.assertEqual(r.status_code, 301)
+        self.assertURLEqual(r.headers.get('Location'), redirect.url_to)
+
+        r = self.url_open(url_rec1, allow_redirects=True)
+        self.assertEqual(r.status_code, 200)
+        self.assertURLEqual(r.url, redirect.url_to)
+
+    @mute_logger('odoo.http')
+    def test_07_redirect_404_unslug2slug_record(self):
+        rec_unpublished = self.env['test.model'].create({'name': 'name-unpub', 'website_published': False})
+        rec_published = self.env['test.model'].create({'name': 'name-pub', 'website_published': True})
+
+        # 1. Accessing nonexisting record: raise 404
+        url_rec1 = '/test_website/200/a-random-slug-%d' % rec_unpublished.id
+        r = self.url_open(url_rec1)
+        self.assertEqual(r.status_code, 404)
+
+        self.env['website.rewrite'].create({
+            'name': 'Test Website Redirect',
+            'redirect_type': '301',
+            'url_from': '/test_website/200/%d' % rec_unpublished.id,
+            'url_to': '/test_website/200/%d' % rec_published.id,
+        })
+
+        # 2. Accessing nonexisting record (without exact slug matching) with redirect to an unslugified url:
+        # expecting 301 to slugified record. E.g. /shop/1 => /shop/2 ==> /shop/old-prod-1 -> /shop/new-prod-2
+        r = self.url_open(url_rec1, allow_redirects=False)
+        self.assertEqual(r.status_code, 301)
+        self.assertURLEqual(r.headers.get('Location'), '/test_website/200/name-pub-%d' % rec_published.id)
+
+        r = self.url_open(url_rec1, allow_redirects=True)
+        self.assertEqual(r.status_code, 200)
+        self.assertURLEqual(r.url, '/test_website/200/name-pub-%d' % rec_published.id)
+
+    @mute_logger('odoo.http')
+    def test_08_redirect_404_unslug_translated_record(self):
+        lang_fr = self.env['res.lang']._activate_lang('fr_FR')
+        self.env['website'].search([]).language_ids = self.env.ref('base.lang_en') + lang_fr
+        rec_unpublished = self.env['test.model'].create({'name': 'name-unpub', 'website_published': False})
+        rec_published = self.env['test.model'].create({'name': 'name-pub', 'website_published': True})
+        rec_published.with_context(lang='fr_FR').name = 'nom-publié'
+
+        # 1. Accessing nonexisting record: raise 404
+        url_rec1 = '/test_website/200/another-random-slug-%d' % rec_unpublished.id
+        r = self.url_open(url_rec1)
+        self.assertEqual(r.status_code, 404)
+
+        self.env['website.rewrite'].create({
+            'name': 'Test Website Redirect',
+            'redirect_type': '301',
+            'url_from': '/test_website/200/%d' % rec_unpublished.id,
+            'url_to': '/test_website/200/%d' % rec_published.id,
+        })
+
+        # 2. Accessing nonexisting record (without exact slug matching) with redirect to an unslugified url:
+        # expecting 301 to slugified record. E.g. /shop/1 => /shop/2 ==> /shop/old-prod-1 -> /shop/new-prod-2
+        r = self.url_open(url_rec1, allow_redirects=False)
+        self.assertEqual(r.status_code, 301)
+        self.assertURLEqual(r.headers.get('Location'), '/test_website/200/name-pub-%d' % rec_published.id)
+
+        # 3. Accessing translated nonexisting record (without exact slug matching) with redirect to an unslugified url:
+        # expecting 301 to slugified record. E.g. /shop/1 => /shop/2 ==> /shop/old-prod-1 -> /shop/new-prod-2
+        r = self.url_open('/fr' + url_rec1, allow_redirects=False)
+        self.assertEqual(r.status_code, 301)
+        self.assertURLEqual(r.headers.get('Location'), '/fr/test_website/200/nom-publie-%d' % rec_published.id)
+
+        r = self.url_open('/fr' + url_rec1, allow_redirects=True)
+        self.assertEqual(r.status_code, 200)
+        self.assertURLEqual(r.url, '/fr/test_website/200/nom-publie-%d' % rec_published.id)
+
+    @mute_logger('odoo.http')
+    def test_09_redirect_absolute_url(self):
+        urlfrom = '/test_website/200/a-new-job-20019'
+        r = self.url_open(urlfrom, allow_redirects=True)
+        self.assertEqual(r.status_code, 404)
+
+        urlto = 'https://example.com/a-job'
+        self.env['website.rewrite'].create({
+            'name': 'Test Website Redirect',
+            'redirect_type': '301',
+            'url_from': urlfrom,
+            'url_to': urlto,
+        })
+
+        r = self.url_open(urlfrom, allow_redirects=False)
+        self.assertEqual(r.status_code, 301)
+        self.assertURLEqual(r.headers.get('Location'), urlto)
+
+    @mute_logger('odoo.http')
+    def test_10_redirect_unslug_multi_segment(self):
+        # A single redirect stored in the fully-unslugged form should match a
+        # slugged URL that has *several* record segments, e.g. a blog post
+        # /blog/<blog>/<post>. Every record segment must be unslugged, not only
+        # every other one, otherwise the redirect never matches.
+        url_slugged = '/test_website/200/blog-2/post-7'
+        r = self.url_open(url_slugged)
+        self.assertEqual(r.status_code, 404)
+
+        redirect = self.env['website.rewrite'].create({
+            'name': 'Test 301 Redirect multi-segment unslug',
+            'redirect_type': '301',
+            'url_from': '/test_website/200/2/7',
+            'url_to': '/get',
+        })
+
+        r = self.url_open(url_slugged, allow_redirects=False)
+        self.assertEqual(r.status_code, 301)
+        self.assertURLEqual(r.headers.get('Location'), redirect.url_to)
+
+    @mute_logger('odoo.http')
     def test_redirect_308_multiple_url_endpoint(self):
         self.env['website.rewrite'].create({
             'name': 'Test Multi URL 308',

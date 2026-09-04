@@ -1,16 +1,14 @@
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
-import { throttleForAnimation } from "@web/core/utils/timing";
 import { BlockUI } from "./block_ui";
-import { browser } from "@web/core/browser/browser";
-import { getTabableElements } from "@web/core/utils/ui";
+import { getTabableElements, isFocusable } from "@web/core/utils/ui";
 import { getActiveHotkey } from "../hotkeys/hotkey_service";
 
 import { EventBus, reactive, useEffect, useRef } from "@odoo/owl";
 
-export const SIZES = { XS: 0, VSM: 1, SM: 2, MD: 3, LG: 4, XL: 5, XXL: 6 };
+export const SIZES = { XS: 0, SM: 1, MD: 2, LG: 3, XL: 4, XXL: 5 };
 
-function getFirstAndLastTabableElements(el) {
+export function getFirstAndLastTabableElements(el) {
     const tabableEls = getTabableElements(el);
     return [tabableEls[0], tabableEls[tabableEls.length - 1]];
 }
@@ -18,7 +16,8 @@ function getFirstAndLastTabableElements(el) {
 /**
  * This hook will set the UI active element
  * when the caller component will mount/patch and
- * only if the t-reffed element has some tabable elements.
+ * only if the t-reffed element has some tabable elements
+ * or is itself focusable.
  *
  * The caller component could pass a `t-ref` value of its template
  * to delegate the UI active element to another element than itself.
@@ -39,6 +38,11 @@ export function useActiveElement(refName) {
         }
         const el = e.currentTarget;
         const [firstTabableEl, lastTabableEl] = getFirstAndLastTabableElements(el);
+        if (!firstTabableEl && !lastTabableEl) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
         switch (hotkey) {
             case "tab":
                 if (document.activeElement === lastTabableEl) {
@@ -61,7 +65,7 @@ export function useActiveElement(refName) {
         (el) => {
             if (el) {
                 const [firstTabableEl] = getFirstAndLastTabableElements(el);
-                if (!firstTabableEl) {
+                if (!firstTabableEl && !isFocusable(el)) {
                     // no tabable elements: no need to trap focus nor become the UI active element
                     return;
                 }
@@ -70,8 +74,12 @@ export function useActiveElement(refName) {
 
                 el.addEventListener("keydown", trapFocus);
 
-                if (!el.contains(document.activeElement)) {
-                    firstTabableEl.focus();
+                if (firstTabableEl) {
+                    if (!el.contains(document.activeElement)) {
+                        firstTabableEl.focus();
+                    }
+                } else if (el !== document.activeElement) {
+                    el.focus();
                 }
                 return async () => {
                     // Components are destroyed from top to bottom, meaning that this cleanup is
@@ -106,13 +114,12 @@ export function useActiveElement(refName) {
 
 // window size handling
 export const MEDIAS_BREAKPOINTS = [
-    { maxWidth: 474 },
-    { minWidth: 475, maxWidth: 575 },
+    { maxWidth: 575 },
     { minWidth: 576, maxWidth: 767 },
     { minWidth: 768, maxWidth: 991 },
     { minWidth: 992, maxWidth: 1199 },
-    { minWidth: 1200, maxWidth: 1533 },
-    { minWidth: 1534 },
+    { minWidth: 1200, maxWidth: 1399 },
+    { minWidth: 1400 },
 ];
 
 /**
@@ -134,7 +141,8 @@ export function getMediaQueryLists() {
 }
 
 // window size handling.
-const MEDIAS = getMediaQueryLists();
+let MEDIAS = getMediaQueryLists();
+let updateSizeHandler = null;
 
 export const utils = {
     getSize() {
@@ -201,6 +209,11 @@ export const uiService = {
             }
         }
 
+        if (updateSizeHandler) {
+            MEDIAS.forEach((m) => m.removeEventListener?.("change", updateSizeHandler));
+            MEDIAS = getMediaQueryLists();
+        }
+
         const ui = reactive({
             bus,
             size: utils.getSize(),
@@ -219,15 +232,14 @@ export const uiService = {
         });
 
         // listen to media query status changes
-        const updateSize = () => {
-            const prevSize = ui.size;
-            ui.size = utils.getSize();
-            if (ui.size !== prevSize) {
+        updateSizeHandler = (ev) => {
+            if (ev.matches) {
+                ui.size = MEDIAS.indexOf(ev.target);
                 ui.isSmall = utils.isSmall(ui);
                 bus.trigger("resize");
             }
         };
-        browser.addEventListener("resize", throttleForAnimation(updateSize));
+        MEDIAS.forEach((m) => m.addEventListener?.("change", updateSizeHandler));
 
         Object.defineProperty(env, "isSmall", {
             get() {

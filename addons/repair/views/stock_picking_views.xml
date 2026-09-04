@@ -5,29 +5,24 @@
         <field name="model">stock.picking.type</field>
         <field name="inherit_id" ref="stock.view_picking_type_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//group[@name='locations']" position="replace">
-                <group string="Locations" groups="stock.group_stock_multi_locations" name="locations">
-                    <field name="default_product_location_src_id" options="{'no_create': True}" invisible="code != 'repair_operation'" required="code == 'repair_operation'"/>
-                    <field name="default_product_location_dest_id" options="{'no_create': True}" invisible="code != 'repair_operation'" required="code == 'repair_operation'"/>
-                    <label for="default_location_src_id" name="default_location_src_id_label" invisible="code == 'repair_operation'"/>
-                    <label for="default_location_src_id" string="Component Source Location" invisible="code != 'repair_operation'"/>
-                    <div class="o_row" name="default_location_src_id_div">
-                        <field name="default_location_src_id" options="{'no_create': True}" required="1"/>
-                    </div>
-                    <label for="default_location_dest_id" name="default_location_dest_id_label" invisible="code == 'repair_operation'"/>
-                    <label for="default_location_dest_id" string="Component Destination Location" invisible="code != 'repair_operation'"/>
-                    <div class="o_row" name="default_location_dest_id_div">
-                        <field name="default_location_dest_id" options="{'no_create': True}" required="1"/>
-                    </div>
-                    <field name="default_remove_location_dest_id" options="{'no_create': True}" invisible="code != 'repair_operation'" required="code == 'repair_operation'"/>
-                    <field name="default_recycle_location_dest_id" options="{'no_create': True}" invisible="code != 'repair_operation'" required="code == 'repair_operation'"/>
-                </group>
+            <xpath expr="//label[@name='default_location_src_id_label']" position="before">
+                <field name="default_product_location_src_id" options="{'no_create': True}" invisible="code != 'repair_operation'" required="code == 'repair_operation'"/>
+                <field name="default_product_location_dest_id" options="{'no_create': True}" invisible="code != 'repair_operation'" required="code == 'repair_operation'"/>
             </xpath>
-            <xpath expr="//group[@name='locations']" position="after">
-                <field name="return_type_of_ids" invisible="1"/>
-                <group string="Repairs" invisible="not return_type_of_ids">
-                    <field name="is_repairable"/>
-                </group>
+            <xpath expr="//label[@name='default_location_src_id_label']" position="replace">
+                <label for="default_location_src_id" name="default_location_src_id_label" invisible="code == 'repair_operation'"/>
+                <label for="default_location_src_id" string="Component Source Location" invisible="code != 'repair_operation'"/>
+            </xpath>
+            <xpath expr="//label[@name='default_location_dest_id_label']" position="replace">
+                <label for="default_location_dest_id" name="default_location_dest_id_label" invisible="code == 'repair_operation'"/>
+                <label for="default_location_dest_id" string="Component Destination Location" invisible="code != 'repair_operation'"/>
+            </xpath>
+            <xpath expr="//div[@name='default_location_dest_id_div']" position="after">
+                <field name="default_remove_location_dest_id" options="{'no_create': True}" invisible="code != 'repair_operation'" required="code == 'repair_operation'"/>
+                <field name="default_recycle_location_dest_id" options="{'no_create': True}" invisible="code != 'repair_operation'" required="code == 'repair_operation'"/>
+            </xpath>
+            <xpath expr="//group[@name='stock_picking_type_lot']" position="attributes">
+                <attribute name="invisible">code not in ['incoming', 'outgoing', 'internal', 'repair_operation']</attribute>
             </xpath>
             <field name="create_backorder" position="attributes">
                 <attribute name="invisible">code == 'repair_operation'</attribute>
@@ -40,10 +35,6 @@
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="stock.view_picking_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//button[@name='%(stock.act_stock_return_picking)d']" position="after">
-                <field name="is_repairable" invisible="1"/>
-                <button string="Repair" name="action_repair_return" type="object" invisible="not is_repairable" data-hotkey="shift+k"/>
-            </xpath>
             <xpath expr="//button[@name='action_see_packages']" position="after">
                 <field name="repair_ids" invisible="1"/>
                 <button name="action_view_repairs" type="object"
@@ -145,5 +136,14 @@
                 </div>
             </xpath>
         </field>
+    </record>
+
+    <record id="action_create_repair_order" model="ir.actions.server">
+        <field name="name">Create Repair</field>
+        <field name="model_id" ref="repair.model_stock_picking"/>
+        <field name="binding_model_id" ref="repair.model_stock_picking"/>
+        <field name="binding_view_types">form</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_repair_return()</field>
     </record>
 </odoo>

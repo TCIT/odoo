@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.fields import Command
 from odoo.tests import Form, tagged
 
 from datetime import datetime, timedelta
@@ -25,19 +26,19 @@ class TestPurchaseOrderReport(AccountTestInvoicingCommon):
                     'name': self.product_a.name,
                     'product_id': self.product_a.id,
                     'product_qty': 1.0,
-                    'product_uom': uom_dozen.id,
+                    'product_uom_id': uom_dozen.id,
                     'price_unit': 100.0,
                     'date_planned': datetime.today(),
-                    'taxes_id': False,
+                    'tax_ids': False,
                 }),
                 (0, 0, {
                     'name': self.product_b.name,
                     'product_id': self.product_b.id,
                     'product_qty': 1.0,
-                    'product_uom': uom_dozen.id,
+                    'product_uom_id': uom_dozen.id,
                     'price_unit': 200.0,
                     'date_planned': datetime.today(),
-                    'taxes_id': False,
+                    'tax_ids': False,
                 }),
             ],
         })
@@ -118,13 +119,13 @@ class TestPurchaseOrderReport(AccountTestInvoicingCommon):
         po.button_confirm()
 
         po.flush_model()
-        report = self.env['purchase.report'].read_group(
+        report = self.env['purchase.report'].formatted_read_group(
             [('order_id', '=', po.id)],
-            ['order_id', 'delay', 'delay_pass'],
             ['order_id'],
+            ['delay:avg', 'delay_pass:avg'],
         )
-        self.assertEqual(round(report[0]['delay']), -10, msg="The PO has been confirmed 10 days in advance")
-        self.assertEqual(round(report[0]['delay_pass']), 5, msg="There are 5 days between the order date and the planned date")
+        self.assertEqual(round(report[0]['delay:avg']), -10, msg="The PO has been confirmed 10 days in advance")
+        self.assertEqual(round(report[0]['delay_pass:avg']), 5, msg="There are 5 days between the order date and the planned date")
 
     def test_02_po_report_note_section_filter(self):
         po = self.env['purchase.order'].create({
@@ -136,18 +137,18 @@ class TestPurchaseOrderReport(AccountTestInvoicingCommon):
                     'display_type': 'line_note',
                     'product_id': False,
                     'product_qty': 0.0,
-                    'product_uom': False,
+                    'product_uom_id': False,
                     'price_unit': 0.0,
-                    'taxes_id': False,
+                    'tax_ids': False,
                 }),
                 (0, 0, {
                     'name': 'This is a section',
                     'display_type': 'line_section',
                     'product_id': False,
                     'product_qty': 0.0,
-                    'product_uom': False,
+                    'product_uom_id': False,
                     'price_unit': 0.0,
-                    'taxes_id': False,
+                    'tax_ids': False,
                 }),
             ],
         })
@@ -216,10 +217,62 @@ class TestPurchaseOrderReport(AccountTestInvoicingCommon):
         })
         po.button_confirm()
         po.flush_model()
-        report = self.env['purchase.report'].read_group(
+        report = self.env['purchase.report'].formatted_read_group(
             [('product_id', '=', self.product_a.id)],
-            ['qty_ordered', 'price_average:avg'],
             ['product_id'],
+            ['qty_ordered:sum', 'price_average:avg'],
         )
-        self.assertEqual(report[0]['qty_ordered'], 11)
-        self.assertEqual(round(report[0]['price_average'], 2), 46.36)
+        self.assertEqual(report[0]['qty_ordered:sum'], 11)
+        self.assertEqual(round(report[0]['price_average:avg'], 2), 46.36)
+
+    def test_purchase_report_multi_uom(self):
+        """
+        PO:
+            - 2 Pairs of P1 @ 200
+            - 1 Dozen of P2 @ 2400
+        """
+
+        uom_units = self.env.ref('uom.product_uom_unit')
+        uom_dozens = self.env.ref('uom.product_uom_dozen')
+        uom_pairs = self.env['uom.uom'].create({
+            'name': 'Pairs',
+            'relative_factor': 2,
+            'relative_uom_id': uom_units.id,
+        })
+
+        product_01, product_02 = self.env['product.product'].create([{
+            'name': name,
+            'type': 'consu',
+            'volume': 10,
+            'weight': 10,
+            'standard_price': 200,
+            'uom_id': uom_pairs.id,
+            'purchase_method': 'purchase',
+        } for name in ['SuperProduct 01', 'SuperProduct 02']])
+
+        po = self.env['purchase.order'].create([{
+            'partner_id': self.partner_a.id,
+            'order_line': [
+                Command.create({
+                    'product_id': product_01.id,
+                    'product_qty': 2.0,
+                    'product_uom_id': uom_pairs.id,
+                    'price_unit': 200.0,
+                }),
+                Command.create({
+                    'product_id': product_02.id,
+                    'product_qty': 1.0,
+                    'product_uom_id': uom_dozens.id,
+                    'price_unit': 2400.0,
+                }),
+            ],
+        }])
+        po.button_confirm()
+
+        self.env['uom.uom'].flush_model()
+        self.env['purchase.order.line'].flush_model()
+        report = self.env['purchase.report'].search([('product_id', 'in', [product_01.id, product_02.id])], order="product_id.id")
+        self.assertRecordValues(report, [
+            {'product_id': product_01.id, 'volume': 20.0, 'weight': 20.0, 'price_average': 200.0, 'qty_to_be_billed': 2.0},
+            {'product_id': product_02.id, 'volume': 60.0, 'weight': 60.0, 'price_average': 400.0, 'qty_to_be_billed': 6.0},
+        ])

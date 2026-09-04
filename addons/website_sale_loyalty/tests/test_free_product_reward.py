@@ -1,81 +1,138 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import http
-from odoo.tests.common import HttpCase
+from odoo import Command, http
 from odoo.tests import tagged
-from odoo.addons.website.tools import MockRequest
+
+from odoo.addons.base.tests.common import HttpCaseWithUserPortal
+from odoo.addons.website_sale.tests.common import MockRequest, WebsiteSaleCommon
+from odoo.addons.website_sale_loyalty.controllers.cart import Cart
 from odoo.addons.website_sale_loyalty.controllers.main import WebsiteSale
 
+
 @tagged('post_install', '-at_install')
-class TestFreeProductReward(HttpCase):
+class TestFreeProductReward(HttpCaseWithUserPortal, WebsiteSaleCommon):
 
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
 
-        self.WebsiteSaleController = WebsiteSale()
-        self.website = self.env['website'].browse(1)
+        cls.WebsiteSaleCartController = Cart()
+        cls.WebsiteSaleController = WebsiteSale()
 
-        self.sofa = self.env['product.product'].create({
-            'name': 'Test Sofa',
-            'list_price': 2950.0,
-            'website_published': True,
-        })
+        cls.website = cls.website.with_user(cls.user_portal)
+        cls.empty_cart.partner_id = cls.partner_portal
 
-        self.carpet = self.env['product.product'].create({
-            'name': 'Test Carpet',
-            'list_price': 500.0,
-            'website_published': True,
-        })
+        cls.sofa, cls.carpet = cls.env['product.product'].create([
+            {
+                'name': "Test Sofa",
+                'list_price': 2950.0,
+                'website_published': True,
+            },
+            {
+                'name': "Test Carpet",
+                'list_price': 500.0,
+                'website_published': True,
+            },
+        ])
 
         # Disable any other program
-        self.program = self.env['loyalty.program'].search([]).write({'active': False})
+        cls.program = cls.env['loyalty.program'].search([]).write({'active': False})
 
-        self.program = self.env['loyalty.program'].create({
+        cls.program = cls.env['loyalty.program'].create({
             'name': 'Get a product for free',
             'program_type': 'promotion',
             'applies_on': 'current',
             'trigger': 'auto',
-            'rule_ids': [(0, 0, {
+            'rule_ids': [Command.create({
                 'minimum_qty': 1,
                 'minimum_amount': 0.00,
                 'reward_point_amount': 1,
                 'reward_point_mode': 'order',
-                'product_ids': self.sofa,
+                'product_ids': cls.sofa,
             })],
-            'reward_ids': [(0, 0, {
+            'reward_ids': [Command.create({
                 'reward_type': 'product',
-                'reward_product_id': self.carpet.id,
+                'reward_product_id': cls.carpet.id,
                 'reward_product_qty': 1,
                 'required_points': 1,
             })],
         })
 
-        self.steve = self.env['res.partner'].create({
-            'name': 'Steve Bucknor',
-            'email': 'steve.bucknor@example.com',
-        })
-
-        self.empty_order = self.env['sale.order'].create({
-            'partner_id': self.steve.id
-        })
-
-        installed_modules = set(self.env['ir.module.module'].search([
-            ('state', '=', 'installed'),
-        ]).mapped('name'))
-        for _ in http._generate_routing_rules(installed_modules, nodb_only=False):
+        installed_modules = cls.env['ir.module.module'].search([('state', '=', 'installed')])
+        for _ in http._generate_routing_rules(installed_modules.mapped('name'), nodb_only=False):
             pass
 
     def test_add_product_to_cart_when_it_exist_as_free_product(self):
         # This test the flow when we claim a reward in the cart page and then we
         # want to add the product again
-        order = self.empty_order
-        with MockRequest(self.env, website=self.website, sale_order_id=order.id, website_sale_current_pl=1):
-            self.WebsiteSaleController.cart_update_json(self.sofa.id, set_qty=1)
+        order = self.empty_cart
+        with MockRequest(self.website.env, website=self.website, sale_order_id=order.id):
+            self.WebsiteSaleCartController.add_to_cart(
+                product_template_id=self.sofa.product_tmpl_id,
+                product_id=self.sofa.id,
+                quantity=1,
+            )
             self.WebsiteSaleController.claim_reward(self.program.reward_ids[0].id)
-            self.WebsiteSaleController.cart_update_json(self.carpet.id, set_qty=1)
+            self.WebsiteSaleCartController.add_to_cart(
+                product_template_id=self.carpet.product_tmpl_id,
+                product_id=self.carpet.id,
+                quantity=1,
+            )
             sofa_line = order.order_line.filtered(lambda line: line.product_id.id == self.sofa.id)
             carpet_reward_line = order.order_line.filtered(lambda line: line.product_id.id == self.carpet.id and line.is_reward_line)
             carpet_line = order.order_line.filtered(lambda line: line.product_id.id == self.carpet.id and not line.is_reward_line)
             self.assertEqual(sofa_line.product_uom_qty, 1, "Should have only 1 qty of Sofa")
             self.assertEqual(carpet_reward_line.product_uom_qty, 1, "Should have only 1 qty for the carpet as reward")
             self.assertEqual(carpet_line.product_uom_qty, 1, "Should have only 1 qty for carpet as non reward")
+
+    def test_get_claimable_free_shipping(self):
+        cart = self.empty_cart
+        self.program.write({
+            'program_type': 'next_order_coupons',
+            'applies_on': 'future',
+            'coupon_ids': [
+                Command.clear(),
+                Command.create({'partner_id': cart.partner_id.id, 'points': 100}),
+            ],
+            'reward_ids': [Command.update(self.program.reward_ids.id, {
+                'reward_type': 'shipping',
+                'reward_product_id': None,
+            })],
+        })
+        coupon = self.program.coupon_ids
+
+        with MockRequest(self.website.env, website=self.website, sale_order_id=cart.id):
+            self.assertDictEqual(cart._get_claimable_and_showable_rewards(), {
+                coupon: self.program.reward_ids,
+            })
+            self.WebsiteSaleCartController.add_to_cart(
+                product_template_id=self.sofa.product_tmpl_id,
+                product_id=self.sofa.id,
+                quantity=1,
+            )
+            self.WebsiteSaleController.claim_reward(self.program.reward_ids.id, code=coupon.code)
+            self.assertTrue(cart.order_line.reward_id)
+            self.assertFalse(
+                cart._get_claimable_and_showable_rewards(),
+                "Rewards should no longer be claimable if already claimed",
+            )
+
+    def test_remove_free_product_reward(self):
+        order = self.empty_cart
+        with MockRequest(self.website.env, website=self.website, sale_order_id=order.id):
+            self.WebsiteSaleCartController.add_to_cart(
+                product_template_id=self.sofa.product_tmpl_id.id,
+                product_id=self.sofa.id,
+                quantity=1,
+            )
+            free_product_line = order.order_line.filtered(
+                lambda line: line.product_id == self.carpet and line.is_reward_line
+            )
+            self.assertTrue(free_product_line)
+
+            self.WebsiteSaleCartController.update_cart(line_id=free_product_line.id, quantity=0)
+
+            free_product_line = order.order_line.filtered(
+                lambda line: line.product_id == self.carpet and line.is_reward_line
+            )
+            self.assertFalse(free_product_line)

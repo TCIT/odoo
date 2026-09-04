@@ -13,8 +13,6 @@ class AccountChartTemplate(models.AbstractModel):
             'code_digits': '4',
             'property_account_receivable_id': 'chart_skr04_1205',
             'property_account_payable_id': 'chart_skr04_3301',
-            'property_account_expense_categ_id': 'chart_skr04_5400',
-            'property_account_income_categ_id': 'chart_skr04_4400',
         }
 
     @template('de_skr04', 'res.company')
@@ -34,6 +32,10 @@ class AccountChartTemplate(models.AbstractModel):
                 'default_cash_difference_expense_account_id': 'chart_skr04_9994',
                 'account_sale_tax_id': 'tax_ust_19_skr04',
                 'account_purchase_tax_id': 'tax_vst_19_skr04',
+                'expense_account_id': 'chart_skr04_5400',
+                'income_account_id': 'chart_skr04_4400',
+                'account_stock_journal_id': 'inventory_valuation',
+                'account_stock_valuation_id': 'chart_skr04_1000',
             },
         }
 
@@ -135,5 +137,14 @@ class AccountChartTemplate(models.AbstractModel):
                         'label': 'Loss of receivables-19%',
                     }),
                 ],
+            },
+        }
+
+    @template('de_skr04', 'account.account')
+    def _get_de_skr04_account_account(self):
+        return {
+            'chart_skr04_1000': {
+                'account_stock_expense_id': 'chart_skr04_5000',
+                'account_stock_variation_id': 'chart_skr04_5880',
             },
         }

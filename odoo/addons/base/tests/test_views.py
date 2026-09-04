@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-import ast
-import json
 import logging
 import re
 import time
+from contextlib import contextmanager
 
 from functools import partial
 from collections import defaultdict
@@ -14,7 +13,7 @@ from lxml.builder import E
 from psycopg2 import IntegrityError
 from psycopg2.extras import Json
 
-from odoo.exceptions import AccessError, ValidationError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import common, tagged
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
 from odoo.tools import mute_logger, view_validation, safe_eval
@@ -32,6 +31,7 @@ class ViewXMLID(common.TransactionCase):
         self.assertTrue(view.model_data_id)
         self.assertEqual(view.model_data_id.complete_name, 'base.view_company_form')
 
+
 class ViewCase(TransactionCaseWithUserDemo):
     def setUp(self):
         super(ViewCase, self).setUp()
@@ -48,13 +48,12 @@ class ViewCase(TransactionCaseWithUserDemo):
     def assertInvalid(self, arch, expected_message=None, name='invalid view', inherit_id=False, model='ir.ui.view'):
         with mute_logger('odoo.addons.base.models.ir_ui_view'):
             with self.assertRaises(ValidationError) as catcher:
-                with self.cr.savepoint():
-                    self.View.create({
-                        'name': name,
-                        'model': model,
-                        'inherit_id': inherit_id,
-                        'arch': arch,
-                    })
+                self.View.create({
+                    'name': name,
+                    'model': model,
+                    'inherit_id': inherit_id,
+                    'arch': arch,
+                })
         message = str(catcher.exception.args[0])
         self.assertEqual(catcher.exception.context['name'], name)
         if expected_message:
@@ -282,18 +281,18 @@ class TestViewInheritance(ViewCase):
 
     def test_no_recursion(self):
         r1 = self.makeView('R1')
-        with self.assertRaises(ValidationError), self.cr.savepoint():
+        with self.assertRaises(ValidationError):
             r1.write({'inherit_id': r1.id})
 
         r2 = self.makeView('R2', r1.id)
         r3 = self.makeView('R3', r2.id)
-        with self.assertRaises(ValidationError), self.cr.savepoint():
+        with self.assertRaises(ValidationError):
             r2.write({'inherit_id': r3.id})
 
-        with self.assertRaises(ValidationError), self.cr.savepoint():
+        with self.assertRaises(ValidationError):
             r1.write({'inherit_id': r3.id})
 
-        with self.assertRaises(ValidationError), self.cr.savepoint():
+        with self.assertRaises(ValidationError):
             r1.write({
                 'inherit_id': r1.id,
                 'arch': self.arch_for('itself', parent=True),
@@ -325,7 +324,7 @@ class TestViewInheritance(ViewCase):
         _, _, counter = get_cache_key_counter(self.env['ir.model.data']._xmlid_lookup, 'base.action_ui_view')
         hit, miss = counter.hit, counter.miss
 
-        with self.assertQueryCount(11):
+        with self.assertQueryCount(10):
             base_view = self.assertValid("""
                 <form string="View">
                     <header>
@@ -339,7 +338,7 @@ class TestViewInheritance(ViewCase):
         self.assertEqual(counter.hit, hit)
         self.assertEqual(counter.miss, miss + 2)
 
-        with self.assertQueryCount(10):
+        with self.assertQueryCount(5):
             self.assertValid("""
                 <field name="name" position="replace"/>
             """, inherit_id=base_view.id)
@@ -350,7 +349,7 @@ class TestViewInheritance(ViewCase):
         _, _, counter = get_cache_key_counter(self.env['ir.model.data']._xmlid_lookup, 'base.group_system')
         hit, miss = counter.hit, counter.miss
 
-        with self.assertQueryCount(8):
+        with self.assertQueryCount(6):
             base_view = self.assertValid("""
                 <form string="View">
                     <field name="name" groups="base.group_system"/>
@@ -361,7 +360,7 @@ class TestViewInheritance(ViewCase):
         self.assertEqual(counter.hit, hit)
         self.assertEqual(counter.miss, miss)
 
-        with self.assertQueryCount(8):
+        with self.assertQueryCount(3):
             self.assertValid("""
                 <field name="name" position="replace">
                     <field name="key" groups="base.group_system"/>
@@ -372,6 +371,254 @@ class TestViewInheritance(ViewCase):
 
     def test_no_arch(self):
         self.d1._check_xml()
+
+    def test_invalid_locators(self):
+        """ Check ir.ui.view's invalid_locators field is computed correctly."""
+        base_view_arch = """
+            <form string="View">
+                <div name="div1">
+                    <field name="id"/>
+                </div>
+            </form>
+        """
+        base_view = self.makeView('invalid_xpath_base_view', arch=base_view_arch)
+
+        child_view_arch = """
+        <data>
+            <xpath expr="//form/div[1]/div[1]" position="attributes">
+                <attribute name='string'>Invalid Div</attribute>
+            </xpath>
+            <field name="invalid_field" position="after">
+                <field name="inherit_id"/>
+            </field>
+            <xpath expr="//form/div[1]" position="inside">
+                <xpath expr="//field[@name='invalid_field']" position="move"/>
+            </xpath>
+        </data>
+        """
+
+        child_view = self.View.create({
+            'model': self.model,
+            'name': "child_view",
+            'arch': child_view_arch,
+            'inherit_id': base_view.id,
+            'priority': 10,
+            'active': False,
+        })
+
+        child_primary_no_arch = self.View.create({
+            'model': self.model,
+            'name': "child_view",
+            'inherit_id': base_view.id,
+            'priority': 18,
+            'active': False,
+        })
+
+        self.assertEqual(
+            child_view.invalid_locators,
+            [
+                {
+                    "tag": "xpath",
+                    "attrib": {"expr": "//form/div[1]/div[1]", "position": "attributes"},
+                    "sourceline": 2,
+                },
+                {
+                    'tag': 'field',
+                    'attrib': {'name': 'invalid_field', 'position': 'after'},
+                    'sourceline': 5
+                },
+                {
+                    'tag': 'xpath',
+                    'attrib': {'expr': "//field[@name='invalid_field']", 'position': 'move'},
+                    'sourceline': 9
+                }
+            ],
+        )
+
+        self.assertEqual(child_primary_no_arch.invalid_locators, False)
+
+    def test_invalid_locators_with_valid_xpath(self):
+        """ Check ir.ui.view's invalid_locators field is computed correctly."""
+        base_view_arch = """
+            <form string="View">
+                <div name="div1">
+                    <field name="id"/>
+                </div>
+            </form>
+        """
+        base_view = self.makeView('invalid_xpath_base_view', arch=base_view_arch)
+
+        child_view_arch = """
+        <data>
+            <xpath expr="//form/div[1]" position="attributes">
+                <attribute name='string'>Valid</attribute>
+            </xpath>
+            <field name="id" position="after">
+                <field name="ref_id"/>
+            </field>
+            <xpath expr="//div[hasclass('parasite')]" position="inside" >
+                <div class="fails" />
+            </xpath>
+        </data>
+        """
+
+        child_view = self.View.create({
+            'model': self.model,
+            'name': "child_view",
+            'arch': child_view_arch,
+            'inherit_id': base_view.id,
+            'priority': 10,
+            'active': False,
+        })
+
+        child_applied = self.View.create({
+            'model': self.model,
+            'name': "child_view",
+            'arch': """<data>
+                <!-- One comment: should be ignored -->
+                <field name="id" position="before">
+                    <div class="parasite" />
+                </field>
+                </data>""",
+            'inherit_id': base_view.id,
+            'priority': 10,
+            'active': True,
+        })
+
+        child_view_arch2 = """
+        <data>
+            <xpath expr="//div[hasclass('parasite')]" position="inside">
+                <div class="not_fails"/>
+            </xpath>
+            <field name="user_id" position="after">
+                <div class="fails" />
+            </field>
+        </data>
+        """
+
+        child_view2 = self.View.create({
+            'model': self.model,
+            'name': "child_view",
+            'arch': child_view_arch2,
+            'inherit_id': base_view.id,
+            'priority': 10,
+            'active': False,
+        })
+
+        child_view3 = self.View.create({
+            'model': self.model,
+            'name': "child_view",
+            'arch': """<data>
+                        <xpath expr="//div[hasclass('parasite')]" position="inside" >
+                            <div class="invalid" />
+                        </xpath>
+                    </data>""",
+            'inherit_id': base_view.id,
+            'priority': 7,
+            'active': False,
+        })
+
+        child_view4 = self.View.create({
+            'model': self.model,
+            'name': "child_view",
+            'arch': """<data>
+                        <xpath expr="//div[hasclass('parasite')]" position="inside" >
+                            <div class="valid" />
+                        </xpath>
+                    </data>""",
+            'inherit_id': child_applied.id,
+            'priority': 5,
+            'active': True,
+        })
+
+        # Assert that accessing invalid_locators does not cause database writes.
+        actual_queries = []
+        with contextmanager(lambda: self._patchExecute(actual_queries))():
+            self.assertEqual(child_applied.invalid_locators, False)
+        self.assertTrue(len(actual_queries) > 0)
+
+        re_sql_update = re.compile(r'\bupdate\b', re.IGNORECASE)
+        self.assertFalse(any(re_sql_update.search(q) for q in actual_queries))
+
+        self.assertEqual(child_view.invalid_locators, [{'tag': 'xpath', 'attrib': {'expr': "//div[hasclass('parasite')]", 'position': 'inside'}, 'sourceline': 8}])
+        self.assertEqual(child_view2.invalid_locators, [{'tag': 'field', 'attrib': {'name': 'user_id', 'position': 'after'}, 'sourceline': 5}])
+        self.assertEqual(child_view3.invalid_locators, [{'tag': 'xpath', 'attrib': {'expr': "//div[hasclass('parasite')]", 'position': 'inside'}, 'sourceline': 2}])
+        self.assertEqual(child_view4.invalid_locators, False)
+
+    def test_nested_move_invalid_locator(self):
+        """ Check ir.ui.view's invalid_locators field is computed correctly."""
+        base_view_arch = """
+            <form string="View">
+                <div name="div1">
+                    <div>
+                        <span />
+                    </div>
+                </div>
+            </form>
+        """
+        base_view = self.makeView('invalid_xpath_base_view', arch=base_view_arch)
+
+        child_view = self.View.create({
+            'model': self.model,
+            'name': "child_view",
+            'inherit_id': base_view.id,
+            'priority': 10,
+            'active': False,
+            'arch': """
+            <data>
+                <xpath expr="/form/div/div" position="replace">
+                    <xpath expr="/form/div/div/span" position="move" />
+                </xpath>
+            </data>
+            """,
+        })
+        self.assertEqual(child_view.invalid_locators, False)
+
+        child_view.arch = """
+            <data>
+                <xpath expr="/form/div/div" position="replace">
+                    <xpath expr="/form/div/div/h1" position="move" />
+                </xpath>
+            </data>"""
+        self.assertEqual(child_view.invalid_locators,
+            [{
+                'attrib': {
+                    'expr': '/form/div/div/h1',
+                    'position': 'move',
+                },
+                'sourceline': 3,
+                'tag': 'xpath',
+            }])
+
+    def test_broken_hierarchy_locators(self):
+        self.patch(self.env.registry.get("ir.ui.view"), "_check_xml", lambda self: True)
+        view = self.View.create({
+            'model': self.model,
+            'name': "child_view",
+            'arch': "<form></form>",
+            'active': True,
+        })
+        broken = self.View.create({
+            'model': self.model,
+            'inherit_id': view.id,
+            'name': "child_view",
+            'arch': """<data><xpath expr="//group" position="after"><div /></xpath></data>""",
+            'active': True,
+        })
+        not_broken = self.View.create({
+            'model': self.model,
+            'inherit_id': view.id,
+            'name': "child_view",
+            'arch': """<data><xpath expr="/form" position="inside"><div /></xpath></data>""",
+            'active': True,
+        })
+
+        self.assertEqual(broken.invalid_locators, [{
+            'attrib': {'expr': '//group', 'position': 'after'},
+            'sourceline': 1,
+            'tag': 'xpath'
+        }])
+        self.assertEqual(not_broken.invalid_locators, [{"broken_hierarchy": True}])
 
 
 class TestApplyInheritanceSpecs(ViewCase):
@@ -484,6 +731,28 @@ class TestApplyInheritanceSpecs(ViewCase):
         # applying spec to both base_arch and adv_arch is expected to give the same result
         self.View.apply_inheritance_specs(self.base_arch, spec)
         self.assertEqual(self.base_arch, expected)
+
+        self.View.apply_inheritance_specs(self.adv_arch, spec)
+        self.assertEqual(self.adv_arch, expected)
+
+    def test_replace_inner_2(self):
+        spec = E.field(
+            "TEXT 4",
+            E.xpath(position="move", expr="//field[2]"),
+            "TEXT 5",
+            E.xpath(expr="//field[@name='subtarget']", position="move"),
+            "TEXT 6",
+            name="target", position="replace", mode="inner")
+
+        expected = E.form(
+            E.field(
+                "TEXT 4",
+                E.field(name="anothersubtarget"),
+                "TEXT 5",
+                E.field(name="subtarget"),
+                "TEXT 6",
+                name="target"),
+            string="Title")
 
         self.View.apply_inheritance_specs(self.adv_arch, spec)
         self.assertEqual(self.adv_arch, expected)
@@ -759,11 +1028,6 @@ class TestApplyInheritanceMoveSpecs(ViewCase):
                 E.div(E.xpath(E.p("Content2", {'class': 'new_p'}), expr="//p", position="move"), {'class': 'wrapper'}),
             )
         )
-
-
-class TestApplyInheritedArchs(ViewCase):
-    """ Applies a sequence of modificator archs to a base view
-    """
 
 
 class TestNoModel(ViewCase):
@@ -1522,7 +1786,7 @@ class TestTemplating(ViewCase):
             'name': "Base View",
             'type': 'qweb',
             'arch': """<root>
-                <item><span t-call="foo"/></item>
+                <item><span><t t-call="foo"/></span></item>
             </root>""",
         })
 
@@ -1530,7 +1794,7 @@ class TestTemplating(ViewCase):
         arch = etree.fromstring(arch_string)
         self.View.distribute_branding(arch)
 
-        self.assertEqual(arch, E.root(E.item(E.span({'t-call': "foo"}))))
+        self.assertEqual(arch, E.root(E.item(E.span(E.t({'t-call': "foo"})))))
 
     def test_esc_no_branding(self):
         view = self.View.create({
@@ -1591,7 +1855,45 @@ class TestTemplating(ViewCase):
             " the main view's"
         )
 
+    def test_branding_remove_add_text(self):
+        view1 = self.View.create({
+            'name': "Base view",
+            'type': 'qweb',
+            'arch': """<root>
+                <item order="1">
+                    <item/>
+                </item>
+            </root>""",
+        })
+        view2 = self.View.create({
+            'name': "Extension",
+            'type': 'qweb',
+            'inherit_id': view1.id,
+            'arch': """
+            <data>
+                <xpath expr="/root/item/item" position="replace" />
+                <xpath expr="/root/item" position="inside">A<div/>B</xpath>
+            </data>
+            """
+        })
 
+        arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
+        arch = etree.fromstring(arch_string)
+        self.View.distribute_branding(arch)
+
+        expected = etree.fromstring(f"""
+        <root>
+            <item order="1">
+                A
+                <div data-oe-id="{view2.id}" data-oe-xpath="/data/xpath[2]/div" data-oe-model="ir.ui.view" data-oe-field="arch"/>
+                B
+            </item>
+        </root>
+        """)
+        self.assertEqual(arch, expected)
+
+
+@tagged('post_install', '-at_install')
 class TestViews(ViewCase):
 
     def test_nonexistent_attribute_removal(self):
@@ -1908,6 +2210,44 @@ class TestViews(ViewCase):
             arch,
             '''Field "not_a_field" does not exist in model "ir.ui.view"''',
         )
+
+    def test_invalid_type(self):
+        """Ensure invalid root tag infers an invalid type and raises ValidationError"""
+        with self.assertRaises(ValidationError):
+            self.View.create({
+                'name': 'invalid_view',
+                'arch': '<template></template>',
+                'inherit_id': False,
+            })
+
+    def test_attribute_node_with_no_name(self):
+        """Ensure that an attribute node with no name raises ValidationError"""
+        with self.assertRaises(ValidationError):
+            self.View.create({
+                'name': 'also_invalid_view',
+                'type': 'list',
+                'arch': '<attribute></attribute>',
+                'inherit_id': False,
+            })
+
+    def test_xml_editor_rejects_encoding_declaration(self):
+        """Must raise a UserError when encoding declaration is included."""
+        with self.assertRaises(UserError):
+            self.View.create({
+                'name': 'encoding_declaration_view',
+                'arch_base': "<?xml version='1.0' encoding='utf-8'?>",
+                'inherit_id': False,
+            })
+
+        view = self.assertValid("<form string='Test'></form>", name="test_xml_encoding_view")
+        for field in ("arch", "arch_base"):
+            with self.subTest(field=field):
+                original_value = view[field]
+
+                with self.assertRaises(UserError):
+                    view.write({field: "<?xml version='1.0' encoding='utf-8'?><form/>"})
+
+                self.assertXMLEqual(view[field], original_value)
 
     def test_context_in_view(self):
         arch = """
@@ -2324,7 +2664,7 @@ class TestViews(ViewCase):
                 %s
                 <searchpanel>
                     %s
-                    <field name="groups_id" select="multi" domain="[('%s', '=', %s)]" enable_counters="1"/>
+                    <field name="group_ids" select="multi" domain="[('%s', '=', %s)]" enable_counters="1"/>
                 </searchpanel>
             </search>
         """
@@ -2347,11 +2687,11 @@ class TestViews(ViewCase):
         )
         self.assertInvalid(
             arch % ('', '<field name="inherit_id"/>', 'inherit_id', 'inherit_id'),
-            """Unknown field "res.groups.inherit_id" in domain of <field name="groups_id"> ([('inherit_id', '=', inherit_id)])""",
+            """Unknown field "res.groups.inherit_id" in domain of <field name="group_ids"> ([('inherit_id', '=', inherit_id)])""",
         )
         self.assertInvalid(
             arch % ('', '<field name="inherit_id" select="multi"/>', 'view_access', 'inherit_id'),
-            """Field “inherit_id” used in domain of <field name="groups_id"> ([('view_access', '=', inherit_id)]) is present in view but is in select multi.""",
+            """Field “inherit_id” used in domain of <field name="group_ids"> ([('view_access', '=', inherit_id)]) is present in view but is in select multi.""",
         )
 
         arch = """
@@ -2374,6 +2714,28 @@ class TestViews(ViewCase):
         """
         self.assertValid(arch % 'base.group_no_one')
         self.assertWarning(arch % 'base.dummy')
+
+    def test_groups_field_removed(self):
+        view = self.View.create({
+            'name': 'valid view',
+            'model': 'ir.ui.view',
+            'arch': """
+                <form string="View">
+                    <span class="oe_inline" invisible="0 == 0">
+                        (<field name="name" groups="base.group_portal"/>)
+                    </span>
+                </form>
+            """,
+        })
+        arch = self.View.get_views([(view.id, view.type)])['views']['form']['arch']
+
+        self.assertEqual(arch, """
+                <form string="View">
+                    <span class="oe_inline" invisible="0 == 0">
+                        ()
+                    </span>
+                </form>
+            """.strip())
 
     def test_attrs_groups_behavior(self):
         view = self.View.create({
@@ -2742,7 +3104,7 @@ class TestViews(ViewCase):
             'name': 'A User',
             'login': 'a_user',
             'email': 'a@user.com',
-            'groups_id': [(4, self.env.ref('base.group_user').id)],
+            'group_ids': [(4, self.env.ref('base.group_user').id)],
         })
 
         def validate(template, field, demo=True, no_add=False):
@@ -2906,7 +3268,7 @@ class TestViews(ViewCase):
         - a `groups` attribute on the field in the Python model
         This is an edge case and it worths a unit test."""
         self.patch(self.env.registry['res.partner'].name, 'groups', 'base.group_system')
-        self.env.user.groups_id += self.env.ref('base.group_multi_company')
+        self.env.user.group_ids += self.env.ref('base.group_multi_company')
         view = self.View.create({
             'name': 'foo',
             'model': 'res.partner',
@@ -2946,7 +3308,6 @@ class TestViews(ViewCase):
         """
         self.assertInvalid(arch % 0, 'Action 0 (id: 0) does not exist for button of type action.')
         self.assertInvalid(arch % 'base.random_xmlid', 'Invalid xmlid base.random_xmlid for button of type action')
-        self.assertInvalid('<form><button type="action"/></form>', 'Button must have a name')
         self.assertInvalid('<form><button special="dummy"/></form>', "Invalid special 'dummy' in button")
         self.assertInvalid(arch % 'base.partner_root', "base.partner_root is of type res.partner, expected a subclass of ir.actions.actions")
 
@@ -3161,9 +3522,9 @@ class TestViews(ViewCase):
         # added elements should be validated
         self.assertInvalid(
             """<form position="inside">
-                <field name="groups_id" domain="[('invalid_field', '=', 'dummy')]"/>
+                <field name="group_ids" domain="[('invalid_field', '=', 'dummy')]"/>
             </form>""",
-            """Unknown field "res.groups.invalid_field" in domain of <field name="groups_id"> ([('invalid_field', '=', 'dummy')]))""",
+            """Unknown field "res.groups.invalid_field" in domain of <field name="group_ids"> ([('invalid_field', '=', 'dummy')]))""",
             inherit_id=view0.id,
         )
         view1 = self.assertValid(
@@ -3174,8 +3535,8 @@ class TestViews(ViewCase):
         )
         view2 = self.assertValid(
             """<form position="inside">
-                <field name="groups_id" domain="[('name', '=', name)]"/>
-                <label for="groups_id"/>
+                <field name="group_ids" domain="[('name', '=', name)]"/>
+                <label for="group_ids"/>
             </form>""",
             inherit_id=view1.id,
         )
@@ -3207,8 +3568,8 @@ class TestViews(ViewCase):
         # implementation does not flag the inner element to be validated, which
         # prevents to locate the corresponding element inside the arch
         self.assertValid(
-            """<field name="groups_id" position="before">
-                <label for="groups_id" position="move"/>
+            """<field name="group_ids" position="before">
+                <label for="group_ids" position="move"/>
             </field>""",
             inherit_id=view2.id,
         )
@@ -3235,7 +3596,7 @@ class TestViews(ViewCase):
         view = self.assertValid(
             """
                 <form>
-                    <field name="groups_id" class="canary"/>
+                    <field name="group_ids" class="canary"/>
                 </form>
             """
         )
@@ -3249,11 +3610,11 @@ class TestViews(ViewCase):
         self.assertEqual(view.id, view_data['id'], "The view returned should be test_views_test_view_ref")
         view_data = self.env['ir.ui.view'].with_context(form_view_ref='base.test_views_test_view_ref').get_view(view.id)
         tree = etree.fromstring(view_data['arch'])
-        field_groups_id = tree.xpath('//field[@name="groups_id"]')[0]
+        field_groups_id = tree.xpath('//field[@name="group_ids"]')[0]
         self.assertEqual(
             len(field_groups_id.xpath(".//*[@class='canary']")),
             0,
-            "The view test_views_test_view_ref should not be in the views of the many2many field groups_id"
+            "The view test_views_test_view_ref should not be in the views of the many2many field all_group_ids"
         )
 
     def test_forbidden_owl_directives_in_form(self):
@@ -3355,6 +3716,95 @@ Forbidden attribute used in arch (t-attf-data-tooltip-template)."""
 <kanban __validate__="1"><templates><t t-name="card"><t t-esc="__comp__.props.resId"/></t></templates></kanban>
 Forbidden use of `__comp__` in arch."""
         )
+
+    @mute_logger('odoo.addons.base.models.ir_ui_view')
+    def test_check_primary_when_update_siblins_inherited_tree(self):
+        # P: primary, E: extension
+        #
+        #         P1
+        #       /    \
+        #     E1      E2
+        #    /  \    /  \
+        #   E3  E4  P2  E5
+        #
+        # If we update the E4, we should check the P1 and P2 views
+        View = self.env['ir.ui.view']
+        p1 = View.create({
+            'name': 'test_view_p1',
+            'type': 'qweb',
+            'key': 'website.test_view_p1',
+            'arch_db': '''<div><p1/></div>'''
+        })
+        View.create({
+            'name': 'test_view_e1',
+            'mode': 'extension',
+            'inherit_id': p1.id,
+            'arch_db': '<div position="inside"><e1/></div>',
+            'key': 'website.test_view_e1',
+        })
+        e2 = View.create({
+            'name': 'test_view_e2',
+            'mode': 'extension',
+            'inherit_id': p1.id,
+            'arch_db': '<div position="inside"><e2/></div>',
+            'key': 'website.test_view_e2',
+        })
+        View.create({
+            'name': 'test_view_e3',
+            'mode': 'extension',
+            'inherit_id': p1.id,
+            'arch_db': '<div position="inside"><e3/></div>',
+            'key': 'website.test_view_e3',
+        })
+        e4 = View.create({
+            'name': 'test_view_e4',
+            'mode': 'extension',
+            'inherit_id': p1.id,
+            'arch_db': '<div position="inside"><e4/></div>',
+            'key': 'website.test_view_e4',
+        })
+        p2 = View.create({
+            'name': 'test_view_p2',
+            'mode': 'primary',
+            'inherit_id': e2.id,
+            'arch_db': '<e4 position="replace"><p2/></e4>',
+            'key': 'website.test_view_p2',
+            'active': False,
+        })
+        View.create({
+            'name': 'test_view_e5',
+            'mode': 'extension',
+            'inherit_id': p1.id,
+            'arch_db': '<div position="inside"><e5/></div>',
+            'key': 'website.test_view_e5',
+        })
+
+        self.assertEqual(self.env['ir.qweb']._render(p1.id), '<div><p1></p1><e1></e1><e2></e2><e3></e3><e4></e4><e5></e5></div>')
+        e4.active = False
+        self.assertEqual(self.env['ir.qweb']._render(p1.id), '<div><p1></p1><e1></e1><e2></e2><e3></e3><e5></e5></div>')
+
+        with self.assertRaises(ValidationError) as catcher:
+            p2.active = True
+        self.assertIn("Element '<e4>' cannot be located in parent view", str(catcher.exception.args[0]))
+
+        e4.active = True
+        p2.active = True
+        self.assertEqual(self.env['ir.qweb']._render(p1.id), '<div><p1></p1><e1></e1><e2></e2><e3></e3><e4></e4><e5></e5></div>')
+        self.assertEqual(self.env['ir.qweb']._render(p2.id), '<div><p1></p1><e1></e1><e2></e2><e3></e3><p2></p2><e5></e5></div>')
+
+        with self.assertRaises(ValidationError) as catcher:
+            e4.active = False
+        self.assertIn("Element '<e4>' cannot be located in parent view", str(catcher.exception.args[0]))
+
+        with self.assertRaises(ValidationError) as catcher:
+            View.create({
+                'name': 'test_view_e6',
+                'mode': 'extension',
+                'inherit_id': e2.id,
+                'arch_db': '<e4 position="replace"><e6/></e4>',
+                'key': 'website.test_view_e6',
+            })
+        self.assertIn("Element '<e4>' cannot be located in parent view", str(catcher.exception.args[0]))
 
 
 @tagged('post_install', '-at_install')
@@ -3503,6 +3953,30 @@ class TestViewTranslations(common.TransactionCase):
         self.assertIn("<i>", view.arch)
         self.assertIn("<i>", view_fr.arch_db)
         self.assertIn("<i>", view_fr.arch)
+
+    def test_no_groups_for_inherited(self):
+        parent = self.env["ir.ui.view"].create({
+            "name": "test_no_groups_for_inherited_parent",
+            "model": "ir.ui.view",
+            "arch": "<form></form>",
+        })
+
+        view = self.env["ir.ui.view"].create({
+            "name": "test_no_groups_for_inherited_child",
+            "model": "ir.ui.view",
+            "arch": "<data></data>",
+            "inherit_id": parent.id,
+            "mode": "extension",
+        })
+
+        with self.assertRaises(ValidationError):
+            view.write({'group_ids': [1]})
+
+        view.write({'mode': 'primary'})
+        view.write({'group_ids': [1]})
+
+        with self.assertRaises(ValidationError):
+            view.write({'mode': 'extension'})
 
 
 class ViewModeField(ViewCase):
@@ -4066,6 +4540,45 @@ class TestViewCombined(ViewCase):
             model=main_view.model,
         )
 
+    def test_multi_combine(self):
+        n1 = self.View.create({
+            'model': 'a',
+            'arch': '<qweb><n1/></qweb>'
+        })
+        self.View.create({
+            'model': 'a',
+            'inherit_id': n1.id,
+            'priority': 5,
+            'arch': '<xpath expr="//n1" position="after"><n2/></xpath>'
+        })
+        n3 = self.View.create({
+            'model': 'a',
+            'inherit_id': n1.id,
+            'priority': 1,
+            'arch': '<xpath expr="//n1" position="after"><n3/></xpath>'
+        })
+        n4 = self.View.create({
+            'model': 'a',
+            'inherit_id': n3.id,
+            'mode': 'primary',
+            'arch': '<xpath expr="//n1" position="after"><n4/></xpath>'
+        })
+
+        arch_a4 = self.a4.get_combined_arch()
+        arch_n4 = n4.get_combined_arch()
+        trees = (self.a4 + n4)._get_combined_archs()
+        self.assertEqual(
+            {k: etree.tostring(tree, encoding='unicode') for k, tree in zip(['a4', 'n4'], trees)},
+            {'a4': arch_a4, 'n4': arch_n4})
+
+    def test_multi_combine_with_same_ancestor(self):
+        arch_a4 = self.a4.get_combined_arch()
+        arch_c2 = self.c2.get_combined_arch()
+        trees = (self.a4 + self.c2)._get_combined_archs()
+        self.assertEqual(
+            {k: etree.tostring(tree, encoding='unicode') for k, tree in zip(['a4', 'c2'], trees)},
+            {'a4': arch_a4, 'c2': arch_c2})
+
 
 class TestOptionalViews(ViewCase):
     """
@@ -4119,7 +4632,7 @@ class TestOptionalViews(ViewCase):
         """ Change active states of v2 and v3, check that the results
         are as expected
         """
-        self.v2.toggle_active()
+        self.v2.action_archive()
         context = {'check_view_ids': self.View.search([]).ids}
         arch = self.v0.with_context(context).get_combined_arch()
         self.assertEqual(
@@ -4130,7 +4643,7 @@ class TestOptionalViews(ViewCase):
             )
         )
 
-        self.v3.toggle_active()
+        self.v3.action_unarchive()
         context = {'check_view_ids': self.View.search([]).ids}
         arch = self.v0.with_context(context).get_combined_arch()
         self.assertEqual(
@@ -4142,7 +4655,7 @@ class TestOptionalViews(ViewCase):
             )
         )
 
-        self.v2.toggle_active()
+        self.v2.action_unarchive()
         context = {'check_view_ids': self.View.search([]).ids}
         arch = self.v0.with_context(context).get_combined_arch()
         self.assertEqual(
@@ -4271,6 +4784,7 @@ class TestValidationTools(common.BaseCase):
             {'field'},
         )
 
+
 class TestAccessRights(TransactionCaseWithUserDemo):
 
     @common.users('demo')
@@ -4320,322 +4834,395 @@ class TestRenderAllViews(TransactionCaseWithUserDemo):
             count, self.env.user.name, elapsed)
 
 
-@common.tagged('post_install', '-at_install')
+@common.tagged('post_install', '-at_install', 'post_install_l10n')
 class TestInvisibleField(TransactionCaseWithUserDemo):
     def test_uncommented_invisible_field(self):
         # NEVER add new name in this list ! The new addons must add comment for all always invisible field.
         only_log_modules = (
-            'base_setup',
-            'analytic',
-            'hr_timesheet',
-            'account_asset',
             'account',
-            'calendar',
-            'account_consolidation',
-            'crm',
-            'documents',
-            'purchase',
-            'stock',
-            'hr_recruitment',
-            'event',
-            'mail',
-            'project',
-            'mrp_account',
-            'mass_mailing_event',
-            'website_event',
-            'mrp',
-            'social_facebook',
-            'product',
-            'approvals',
-            'helpdesk',
-            'hr_appraisal',
-            'mass_mailing',
-            'sale',
-            'sms',
-            'hr_holidays',
-            'social_twitter',
-            'worksheet',
-            'frontdesk',
-            'pos_enterprise',
-            'social_linkedin',
-            'account_edi',
-            'purchase_requisition',
-            'base_import_module',
-            'payment_authorize',
-            'base_automation',
-            'gamification',
-            'barcodes_gs1_nomenclature',
-            'product_expiry',
-            'mrp_product_expiry',
-            'helpdesk_fsm',
-            'data_merge',
-            'payment_demo',
-            'web',
-            'test_testing_utilities',
-            'account_edi_proxy_client',
-            'hr_expense',
-            'data_cleaning',
-            'data_recycle',
-            'survey',
-            'portal',
-            'mrp_workorder',
-            'membership',
-            'stock_barcode',
-            'point_of_sale',
-            'pos_restaurant',
-            'mrp_subcontracting',
-            'documents_account',
-            'documents_spreadsheet',
-            'helpdesk_timesheet',
-            'timesheet_grid',
-            'account_asset_fleet',
+            'account_3way_match',
             'account_accountant',
+            'account_asset',
+            'account_asset_fleet',
             'account_auto_transfer',
-            'account_online_synchronization',
+            'account_avatax',
+            'account_avatax_geolocalize',
+            'account_base_import',
             'account_batch_payment',
-            'account_accountant_batch_payment',
             'account_budget',
+            'account_check_printing',
+            'account_consolidation',
             'account_debit_note',
             'account_disallowed_expenses',
-            'account_followup',
-            'account_base_import',
-            'account_winbooks_import',
-            'account_peppol',
-            'account_sepa',
-            'account_payment',
-            'account_check_printing',
-            'account_fleet',
-            'account_invoice_extract',
-            'account_external_tax',
-            'account_3way_match',
-            'account_avatax',
-            'hr_payroll_account',
-            'account_intrastat',
-            'account_reports',
+            'account_edi',
+            'account_edi_proxy_client',
             'account_edi_ubl_cii',
-            'snailmail_account',
-            'stock_landed_costs',
+            'account_external_tax',
+            'account_fleet',
+            'account_followup',
+            'account_intrastat',
+            'account_invoice_extract',
+            'account_online_synchronization',
+            'account_payment',
+            'account_peppol',
+            'account_qr_code_emv',
+            'account_reports',
             'account_saft_import',
+            'account_sepa',
+            'account_sepa_direct_debit',
+            'account_winbooks_import',
+            'analytic',
             'appointment',
-            'website_appointment',
-            'hr_appraisal_survey',
+            'approvals',
             'approvals_purchase_stock',
-            'documents_approvals',
+            'auth_totp',
+            'barcodes_gs1_nomenclature',
+            'base_address_extended',
+            'base_automation',
+            'base_geolocalize',
+            'base_import_module',
             'base_install_request',
-            'web_studio',
-            'website_blog',
-            'im_livechat',
-            'delivery',
-            'mrp_account_enterprise',
-            'crm_iap_mine',
+            'base_setup',
+            'base_vat',
+            'calendar',
+            'crm',
             'crm_helpdesk',
-            'website_crm_partner_assign',
-            'sale_crm',
-            'event_crm',
             'crm_iap_enrich',
-            'website_crm_iap_reveal',
-            'sales_team',
+            'crm_iap_mine',
+            'data_cleaning',
+            'data_merge',
+            'data_recycle',
+            'delivery',
+            'delivery_dhl',
+            'delivery_easypost',
+            'delivery_fedex',
+            'delivery_iot',
+            'delivery_mondialrelay',
+            'delivery_sendcloud',
+            'delivery_shiprocket',
+            'delivery_starshipit',
+            'delivery_ups',
+            'delivery_ups_rest',
+            'delivery_usps',
             'digest',
-            'maintenance',
-            'event_booth',
-            'event_sale',
-            'website_event_social',
-            'website_event_twitter_wall',
-            'website_event_track',
-            'hr_expense_extract',
-            'fleet',
+            'documents',
+            'documents_account',
+            'documents_approvals',
             'documents_fleet',
-            'hr_fleet',
-            'website_forum',
-            'hr_gamification',
-            'hr_contract_salary',
+            'documents_spreadsheet',
+            'event',
+            'event_booth',
+            'event_booth_sale',
+            'event_crm',
+            'event_sale',
+            'fleet',
+            'frontdesk',
+            'gamification',
+            'helpdesk',
+            'helpdesk_account',
+            'helpdesk_fsm',
+            'helpdesk_fsm_report',
+            'helpdesk_repair',
             'helpdesk_sale',
-            'hr_recruitment_extract',
-            'hr_recruitment_survey',
-            'hr_recruitment_skills',
-            'hr_referral',
+            'helpdesk_sale_loyalty',
+            'helpdesk_sale_timesheet',
+            'helpdesk_stock',
+            'helpdesk_stock_account',
+            'helpdesk_timesheet',
+            'hr',
+            'hr_appraisal',
             'hr_appraisal_skills',
+            'hr_appraisal_survey',
             'hr_attendance',
             'hr_contract',
-            'hr_contract_sign',
-            'l10n_be_hr_payroll',
-            'hr_payroll',
-            'hr_work_entry_contract',
-            'hr',
-            'hr_skills',
-            'planning',
-            'hr_payroll_expense',
-            'website_hr_recruitment',
-            'project_timesheet_holidays',
+            'hr_contract_salary',
+            'hr_expense',
+            'hr_expense_extract',
+            'hr_fleet',
+            'hr_gamification',
+            'hr_holidays',
             'hr_holidays_attendance',
-            'hr_skills_survey',
-            'hr_work_entry',
-            'hr_recruitment_sign',
-            'iap',
-            'website_livechat',
-            'iot',
-            'quality_iot',
-            'website',
-            'knowledge',
-            'website_knowledge',
-            'loyalty',
-            'lunch',
-            'mail_group',
-            'mass_mailing_sms',
-            'mass_mailing_crm',
-            'marketing_automation_sms',
-            'mrp_maintenance',
-            'maintenance_worksheet',
-            'marketing_automation',
-            'stock_barcode_mrp',
-            'mrp_plm',
-            'mrp_mps',
-            'quality_mrp',
-            'quality_mrp_workorder',
-            'onboarding',
-            'base_address_extended',
-            'payment_adyen',
-            'payment',
-            'whatsapp_payment',
-            'pos_online_payment',
-            'hr_work_entry_holidays_enterprise',
-            'project_timesheet_forecast',
-            'pos_hr',
-            'pos_iot',
-            'privacy_lookup',
-            'stock_account',
-            'sale_renting',
-            'purchase_stock',
-            'sale_product_matrix',
-            'industry_fsm',
-            'documents_project',
-            'industry_fsm_report',
-            'project_enterprise',
-            'project_todo',
-            'purchase_product_matrix',
-            'quality_control',
-            'mrp_workorder_expiry',
-            'mrp_workorder_iot',
-            'quality_control_worksheet',
-            'quality',
-            'quality_control_iot',
-            'rating',
-            'partner_autocomplete',
-            'base_geolocalize',
-            'account_qr_code_emv',
-            'account_avatax_geolocalize',
-            'auth_signup',
-            'mail_bot_hr',
-            'hr_maintenance',
-            'resource',
-            'room',
-            'sale_loyalty',
-            'sale_purchase',
-            'sale_stock',
-            'sale_external_tax',
-            'account_avatax_sale',
-            'sale_management',
-            'account_sepa_direct_debit',
-            'sign',
-            'website_slides',
-            'snailmail',
-            'social',
-            'social_youtube',
-            'social_crm',
-            'spreadsheet_dashboard_edition',
-            'stock_picking_batch',
-            'quality_control_picking_batch',
-            'stock_barcode_picking_batch',
-            'stock_barcode_product_expiry',
-            'uom',
-            'auth_totp',
-            'utm',
-            'base_vat',
-            'website_twitter_wall',
-            'social_push_notifications',
-            'website_sms',
-            'website_studio',
-            'whatsapp',
-            'hr_skills_slides',
-            'website_payment',
-            'voip',
-            'social_instagram',
-            'payment_custom',
             'hr_hourly_cost',
-            'product_margin',
-            'hr_contract_salary_holidays',
-            'product_email_template',
-            'stock_enterprise',
+            'hr_maintenance',
+            'hr_payroll',
+            'hr_payroll_account',
+            'hr_payroll_expense',
+            'hr_recruitment',
+            'hr_recruitment_extract',
+            'hr_recruitment_sign',
+            'hr_recruitment_skills',
+            'hr_recruitment_survey',
+            'hr_referral',
+            'hr_sign',
+            'hr_skills',
+            'hr_skills_slides',
+            'hr_timesheet',
+            'hr_work_entry',
+            'hr_work_entry_holidays_enterprise',
+            'im_livechat',
+            'industry_fsm',
+            'industry_fsm_report',
+            'industry_fsm_sale',
+            'industry_fsm_sale_report',
+            'industry_fsm_stock',
+            'iot',
+            'knowledge',
+            'l10n_ae_hr_payroll',
+            'l10n_ar',
+            'l10n_ar_edi',
+            'l10n_ar_withholding',
+            'l10n_au_hr_payroll',
+            'l10n_au_hr_payroll_account',
+            'l10n_be_codabox',
+            'l10n_be_hr_contract_salary',
+            'l10n_be_hr_payroll',
+            'l10n_be_hr_payroll_dimona',
+            'l10n_be_hr_payroll_fleet',
             'l10n_be_reports',
             'l10n_be_soda',
-            'event_booth_sale',
-            'website_event_booth_exhibitor',
-            'website_customer',
-            'website_event_meet',
-            'sale_planning',
-            'sale_project',
-            'sale_subscription',
-            'sale_margin',
-            'delivery_easypost',
+            'l10n_br',
+            'l10n_br_avatax',
+            'l10n_br_edi',
+            'l10n_br_edi_stock',
+            'l10n_ch_hr_payroll',
+            'l10n_cl',
+            'l10n_cl_edi',
+            'l10n_cl_edi_exports',
+            'l10n_cl_edi_stock',
+            'l10n_cn',
+            'l10n_co_dian',
+            'l10n_co_edi',
+            'l10n_cz_reports',
+            'l10n_de_pos_cert',
+            'l10n_ec',
+            'l10n_ec_edi',
+            'l10n_ec_edi_pos',
+            'l10n_ec_edi_stock',
+            'l10n_ec_sale',
+            'l10n_eg_edi_eta',
+            'l10n_employment_hero',
+            'l10n_es_edi_facturae',
+            'l10n_es_edi_sii',
+            'l10n_es_edi_tbai',
+            'l10n_es_edi_tbai_pos',
+            'l10n_es_reports',
+            'l10n_eu_oss_reports',
+            'l10n_fr_hr_holidays',
+            'l10n_fr_hr_payroll',
+            'l10n_fr_intrastat',
+            'l10n_fr_pos_cert',
+            'l10n_fr_reports',
+            'l10n_gr_edi',
+            'l10n_hk_hr_payroll',
+            'l10n_hu_edi',
+            'l10n_id_efaktur',
+            'l10n_id_efaktur_coretax',
+            'l10n_in_hr_payroll',
+            'l10n_it_edi',
+            'l10n_it_edi_doi',
+            'l10n_it_edi_sale',
+            'l10n_it_stock_ddt',
+            'l10n_it_xml_export',
+            'l10n_jo_edi',
+            'l10n_jo_hr_payroll',
+            'l10n_jp_zengin',
+            'l10n_ke_edi_oscu',
+            'l10n_ke_edi_oscu_mrp',
+            'l10n_ke_edi_oscu_pos',
+            'l10n_ke_edi_oscu_stock',
+            'l10n_ke_edi_tremol',
+            'l10n_ke_hr_payroll',
+            'l10n_latam_check',
+            'l10n_latam_invoice_document',
+            'l10n_lu_hr_payroll',
+            'l10n_lu_reports',
+            'l10n_ma_hr_payroll',
+            'l10n_mx',
+            'l10n_mx_hr_payroll',
+            'l10n_mx_edi',
+            'l10n_mx_edi_pos',
+            'l10n_mx_edi_extended',
+            'l10n_mx_edi_stock',
+            'l10n_mx_edi_landing',
+            'l10n_mx_reports',
+            'l10n_mx_xml_polizas',
+            'l10n_my_edi',
+            'l10n_my_edi_pos',
+            'l10n_nl_reports',
+            'l10n_nz_eft',
+            'l10n_pe',
+            'l10n_pe_edi',
+            'l10n_pe_edi_stock',
+            'l10n_pe_reports',
+            'l10n_pe_reports_stock',
+            'l10n_ph',
+            'l10n_ph_check_printing',
+            'l10n_pl_reports',
+            'l10n_ro_edi_stock',
+            'l10n_ro_edi_stock_batch',
+            'l10n_ro_saft',
+            'l10n_sa_edi',
+            'l10n_sa_hr_payroll',
+            'l10n_se',
+            'l10n_se_sie4_import',
+            'l10n_tr_nilvera_edispatch',
+            'l10n_uk_bacs',
+            'l10n_uk_reports',
+            'l10n_uk_reports_cis',
+            'l10n_us_hr_payroll',
+            'l10n_us_hr_payroll_adp',
+            'l10n_uy_edi',
+            'loyalty',
+            'lunch',
+            'mail',
+            'mail_group',
+            'maintenance',
+            'maintenance_worksheet',
+            'marketing_automation',
+            'mass_mailing',
+            'mass_mailing_crm',
+            'mass_mailing_event',
+            'mass_mailing_slides',
+            'mass_mailing_sms',
+            'membership',
+            'mrp',
+            'mrp_account',
+            'mrp_account_enterprise',
+            'mrp_landed_costs',
+            'mrp_maintenance',
+            'mrp_mps',
+            'mrp_plm',
+            'mrp_product_expiry',
+            'mrp_subcontracting',
             'mrp_subcontracting_dropshipping',
-            'helpdesk_stock',
-            'delivery_sendcloud',
-            'delivery_starshipit',
-            'sale_timesheet',
-            'helpdesk_sale_timesheet',
-            'helpdesk_account',
-            'helpdesk_stock_account',
+            'mrp_workorder',
+            'onboarding',
+            'partner_autocomplete',
+            'payment',
+            'payment_adyen',
+            'payment_authorize',
+            'payment_custom',
+            'payment_demo',
+            'planning',
+            'point_of_sale',
+            'portal',
+            'pos_enterprise',
+            'pos_hr',
+            'pos_iot',
+            'pos_online_payment',
+            'pos_restaurant',
+            'privacy_lookup',
+            'product',
+            'product_email_template',
+            'product_expiry',
+            'product_margin',
+            'project',
+            'project_enterprise',
+            'project_timesheet_forecast',
+            'project_timesheet_holidays',
+            'project_todo',
+            'purchase',
+            'purchase_product_matrix',
+            'purchase_requisition',
+            'purchase_stock',
+            'quality',
+            'quality_control',
+            'quality_control_iot',
+            'quality_control_picking_batch',
+            'quality_control_worksheet',
+            'quality_iot',
+            'quality_mrp',
+            'quality_mrp_workorder',
+            'rating',
+            'repair',
+            'resource',
+            'room',
+            'sale',
             'sale_amazon',
-            'delivery_mondialrelay',
-            'stock_delivery',
-            'delivery_iot',
-            'website_sale_loyalty',
+            'sale_crm',
+            'sale_expense',
+            'sale_loyalty',
+            'sale_management',
+            'sale_margin',
+            'sale_pdf_quote_builder',
+            'sale_planning',
+            'sale_product_matrix',
+            'sale_project',
+            'sale_renting',
             'sale_renting_crm',
-            'delivery_dhl',
-            'delivery_fedex',
-            'delivery_ups',
-            'delivery_usps',
-            'delivery_ups_rest',
+            'sale_stock_renting',
+            'sale_subscription',
+            'sale_timesheet',
+            'sale_timesheet_enterprise',
+            'sales_team',
+            'sign',
+            'sms',
+            'snailmail',
+            'social',
+            'social_crm',
+            'social_facebook',
+            'social_instagram',
+            'social_linkedin',
+            'social_push_notifications',
+            'social_twitter',
+            'social_youtube',
+            'spreadsheet_dashboard_edition',
+            'spreadsheet_dashboard_sale_subscription',
+            'stock',
+            'stock_account',
+            'stock_barcode',
+            'stock_barcode_mrp',
+            'stock_barcode_picking_batch',
+            'stock_barcode_product_expiry',
+            'stock_delivery',
+            'stock_enterprise',
+            'stock_intrastat',
+            'stock_landed_costs',
+            'stock_picking_batch',
+            'survey',
+            'test_testing_utilities',
+            'timesheet_grid',
+            'utm',
+            'voip',
+            'web',
+            'web_studio',
+            'website',
+            'website_appointment',
+            'website_blog',
+            'website_crm_iap_reveal',
+            'website_crm_partner_assign',
+            'website_customer',
             'website_delivery_sendcloud',
+            'website_event',
+            'website_event_booth_exhibitor',
+            'website_event_exhibitor',
+            'website_event_social',
+            'website_event_track',
             'website_event_track_gantt',
             'website_event_track_quiz',
-            'website_event_exhibitor',
             'website_event_track_social',
-            'l10n_be_hr_payroll_fleet',
-            'industry_fsm_stock',
-            'l10n_be_hr_contract_salary',
-            'helpdesk_fsm_report',
-            'helpdesk_sale_loyalty',
+            'website_event_twitter_wall',
+            'website_forum',
             'website_helpdesk_forum',
-            'sale_expense',
-            'l10n_us_hr_payroll',
-            'documents_l10n_be_hr_payroll',
-            'l10n_be_hr_payroll_sd_worx',
-            'mrp_landed_costs',
+            'website_hr_recruitment',
+            'website_knowledge',
             'website_sale',
-            'documents_project_sale',
-            'industry_fsm_sale_report',
-            'industry_fsm_sale',
-            'sale_stock_renting',
-            'repair',
-            'pos_restaurant_appointment',
-            'pos_self_order',
-            'sale_pdf_quote_builder',
-            'website_sale_stock',
-            'partner_commission',
-            'spreadsheet_dashboard_sale_subscription',
-            'website_slides_survey',
-            'mass_mailing_slides',
+            'website_sale_loyalty',
             'website_sale_slides',
-            'delivery_shiprocket',
-            'stock_intrastat',
-            'sale_timesheet_enterprise',
-            'helpdesk_repair',
+            'website_sale_stock',
+            'website_slides',
+            'website_slides_survey',
+            'website_sms',
+            'website_studio',
+            'website_twitter_wall',
+            'whatsapp',
+            'whatsapp_payment',
+            'worksheet',
         )
 
-        modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
+        modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'installed'), ('name', 'in', only_log_modules)]).mapped('name'))
         module_log_views = defaultdict(list)
-        module_error_views = defaultdict(lambda: defaultdict(list)) 
+        module_error_views = defaultdict(lambda: defaultdict(list))
         uncommented_regexp = r'''(<field [^>]*invisible=['"](True|1)['"][^>]*>)[\s\t\n ]*(.*)'''
         views = self.env['ir.ui.view'].search([('type', 'in', ('list', 'form')), '|', ('arch_db', 'like', 'invisible=_True_'), ('arch_db', 'like', 'invisible=_1_')])
         for view in views.filtered('model_data_id'):
@@ -4702,7 +5289,7 @@ class ViewModifiers(ViewCase):
                 node = etree.fromstring(what) if isinstance(what, str) else what
             modifiers = {attr: node.attrib[attr] for attr in node.attrib if attr in ir_ui_view.VIEW_MODIFIERS}
             vnames = set()
-            for attr, expr in modifiers.items():
+            for expr in modifiers.values():
                 vnames |= view_validation.get_expression_field_names(expr) - {'id'}
             assert vnames == expected_vnames, f"{vnames!r} != {expected_vnames!r}"
 
@@ -5019,6 +5606,14 @@ class ViewModifiers(ViewCase):
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_17_attrs_groups_validation(self):
+        test_group = self.env['res.groups'].create({'name': 'test_group'})
+        self.env['ir.model.data'].create({
+            'module': 'base',
+            'name': 'test_group',
+            'model': 'res.groups',
+            'res_id': test_group.id,
+        })
+
         def validate(arch, add_field_with_groups=False, parent=False, model='ir.ui.view'):
             parent = 'parent.' if parent else ''
             view = self.assertValid(arch % {'attrs': f"""decoration-info="{parent}name == 'foo'" """}, model=model)
@@ -5083,14 +5678,14 @@ class ViewModifiers(ViewCase):
         # add missing field with needed groups
         validate("""
             <form string="View">
-                <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
+                <field name="inherit_id" groups="base.test_group" %(attrs)s/>
             </form>
-        """, add_field_with_groups="'base.group_allow_export'")
+        """, add_field_with_groups="'base.test_group'")
 
         # add missing field because the existing field group does not match
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_allow_export"/>
+                <field name="name" groups="base.test_group"/>
                 <field name="inherit_id" %(attrs)s/>
             </form>
         """, add_field_with_groups='')
@@ -5098,7 +5693,7 @@ class ViewModifiers(ViewCase):
         # Add missing field because the field name has defined groups.
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_allow_export"/>
+                <field name="name" groups="base.test_group"/>
                 <field name="inherit_children_ids">
                     <list editable="bottom">
                         <field name="inherit_id" %(attrs)s/>
@@ -5110,10 +5705,10 @@ class ViewModifiers(ViewCase):
         # Don't need to add field if the dependent field is in the same groups
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_allow_export"/>
+                <field name="name" groups="base.test_group"/>
                 <field name="inherit_children_ids">
                     <list editable="bottom">
-                        <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
+                        <field name="inherit_id" groups="base.test_group" %(attrs)s/>
                     </list>
                 </field>
             </form>
@@ -5124,7 +5719,7 @@ class ViewModifiers(ViewCase):
                 <field name="name"/>
                 <field name="inherit_children_ids">
                     <list editable="bottom">
-                        <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
+                        <field name="inherit_id" groups="base.test_group" %(attrs)s/>
                     </list>
                 </field>
             </form>
@@ -5133,22 +5728,22 @@ class ViewModifiers(ViewCase):
         validate("""
             <form string="View">
                 <field name="name"/>
-                <field name="inherit_id" %(attrs)s groups="base.group_allow_export"/>
+                <field name="inherit_id" %(attrs)s groups="base.test_group"/>
             </form>
         """, add_field_with_groups=False)
 
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_allow_export"/>
-                <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
+                <field name="name" groups="base.test_group"/>
+                <field name="inherit_id" groups="base.test_group" %(attrs)s/>
             </form>
         """, add_field_with_groups=False)
 
         validate("""
             <form string="View">
                 <field name="name" groups="base.group_portal"/>
-                <field name="name" groups="base.group_allow_export"/>
-                <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
+                <field name="name" groups="base.test_group"/>
+                <field name="inherit_id" groups="base.test_group" %(attrs)s/>
             </form>
         """, add_field_with_groups=False)
 
@@ -5156,8 +5751,8 @@ class ViewModifiers(ViewCase):
         # other field is valid.
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_allow_export"/>
-                <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
+                <field name="name" groups="base.test_group"/>
+                <field name="inherit_id" groups="base.test_group" %(attrs)s/>
                 <field name="inherit_id" groups="base.group_multi_company" %(attrs)s/>
             </form>
         """, add_field_with_groups="'base.group_multi_company'")
@@ -5165,34 +5760,34 @@ class ViewModifiers(ViewCase):
         # All situations have the field name, not need to add one as invisible.
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_allow_export"/>
+                <field name="name" groups="base.test_group"/>
                 <field name="name" groups="base.group_portal"/>
-                <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
+                <field name="inherit_id" groups="base.test_group" %(attrs)s/>
                 <field name="inherit_id" groups="base.group_portal" %(attrs)s/>
             </form>
         """, add_field_with_groups=False)
 
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_portal,base.group_allow_export"/>
-                <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
+                <field name="name" groups="base.group_portal,base.test_group"/>
+                <field name="inherit_id" groups="base.test_group" %(attrs)s/>
             </form>
         """, add_field_with_groups=False)
 
         # add the missing field to have 'name' when inherit_id is present in the view.
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_allow_export"/>
-                <field name="inherit_id" groups="base.group_multi_company,base.group_allow_export" %(attrs)s/>
+                <field name="name" groups="base.test_group"/>
+                <field name="inherit_id" groups="base.group_multi_company,base.test_group" %(attrs)s/>
             </form>
-        """, add_field_with_groups="'base.group_multi_company' | 'base.group_allow_export'")
+        """, add_field_with_groups="'base.group_multi_company' | 'base.test_group'")
 
         # Should not add the field because when 'inherit_id' is present, 'name' is present
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_allow_export"/>
+                <field name="name" groups="base.test_group"/>
                 <div groups="base.group_multi_company,base.group_system">
-                    <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
+                    <field name="inherit_id" groups="base.test_group" %(attrs)s/>
                 </div>
             </form>
         """, add_field_with_groups=False)
@@ -5221,14 +5816,14 @@ class ViewModifiers(ViewCase):
         # add missing field with the same group of the needed
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_allow_export"/>
+                <field name="name" groups="base.test_group"/>
                 <field name="inherit_id" groups="base.group_multi_company" %(attrs)s/>
             </form>
         """, add_field_with_groups="'base.group_multi_company'")
 
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_allow_export"/>
+                <field name="name" groups="base.test_group"/>
                 <field name="inherit_children_ids">
                     <list editable="bottom">
                         <field name="inherit_id" groups="base.group_multi_company" %(attrs)s/>
@@ -5239,7 +5834,7 @@ class ViewModifiers(ViewCase):
 
         validate("""
             <form string="View">
-                <group groups="base.group_allow_export">
+                <group groups="base.test_group">
                     <field name="name"/>
                 </group>
                 <field name="inherit_id" %(attrs)s/>
@@ -5248,7 +5843,7 @@ class ViewModifiers(ViewCase):
 
         validate("""
             <form string="View">
-                <group groups="base.group_allow_export">
+                <group groups="base.test_group">
                     <field name="name"/>
                     <field name="inherit_id" %(attrs)s/>
                 </group>
@@ -5257,7 +5852,7 @@ class ViewModifiers(ViewCase):
 
         validate("""
             <form string="View">
-                <group groups="base.group_allow_export">
+                <group groups="base.test_group">
                     <field name="name"/>
                     <field name="inherit_id" %(attrs)s groups="base.group_multi_currency,base.group_multi_company"/>
                 </group>
@@ -5266,10 +5861,10 @@ class ViewModifiers(ViewCase):
 
         validate("""
             <form string="View">
-                <group groups="base.group_allow_export">
+                <group groups="base.test_group">
                     <field name="name"/>
                 </group>
-                <group groups="base.group_allow_export">
+                <group groups="base.test_group">
                     <field name="inherit_id" %(attrs)s/>
                 </group>
             </form>
@@ -5281,7 +5876,7 @@ class ViewModifiers(ViewCase):
                 <group groups="base.group_erp_manager">
                     <field name="name"/>
                 </group>
-                <group groups="base.group_allow_export">
+                <group groups="base.test_group">
                     <field name="inherit_id" %(attrs)s/>
                 </group>
             </form>
@@ -5289,7 +5884,7 @@ class ViewModifiers(ViewCase):
 
         validate("""
             <form string="View">
-                <group groups="base.group_allow_export">
+                <group groups="base.test_group">
                     <field name="name"/>
                 </group>
                 <group groups="base.group_multi_company">
@@ -5300,8 +5895,8 @@ class ViewModifiers(ViewCase):
 
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_allow_export"/>
-                <field name="inherit_children_ids" groups="base.group_allow_export">
+                <field name="name" groups="base.test_group"/>
+                <field name="inherit_children_ids" groups="base.test_group">
                     <list editable="bottom">
                         <field name="inherit_id" %(attrs)s/>
                     </list>
@@ -5312,7 +5907,7 @@ class ViewModifiers(ViewCase):
         validate("""
             <form string="View">
                 <field name="name" groups="base.group_erp_manager"/>
-                <field name="inherit_children_ids" groups="base.group_allow_export">
+                <field name="inherit_children_ids" groups="base.test_group">
                     <list editable="bottom">
                         <field name="inherit_id" %(attrs)s/>
                     </list>
@@ -5322,7 +5917,7 @@ class ViewModifiers(ViewCase):
 
         validate("""
             <form string="View">
-                <field name="name" groups="base.group_allow_export"/>
+                <field name="name" groups="base.test_group"/>
                 <field name="inherit_children_ids" groups="base.group_multi_company">
                     <list editable="bottom">
                         <field name="inherit_id" %(attrs)s/>
@@ -5333,7 +5928,7 @@ class ViewModifiers(ViewCase):
 
         validate("""
             <form string="View">
-                <field name="name" groups="!base.group_allow_export"/>
+                <field name="name" groups="!base.test_group"/>
                 <field name="inherit_id" %(attrs)s/>
             </form>
         """, add_field_with_groups='')
@@ -5341,30 +5936,30 @@ class ViewModifiers(ViewCase):
         validate("""
             <form string="View">
                 <field name="name"/>
-                <field name="inherit_id" groups="!base.group_allow_export" %(attrs)s/>
+                <field name="inherit_id" groups="!base.test_group" %(attrs)s/>
             </form>
         """, add_field_with_groups=False)
 
         validate("""
             <form string="View">
-                <field name="name" groups="!base.group_allow_export"/>
-                <field name="name" groups="base.group_allow_export"/>
-                <field name="inherit_id" groups="base.group_allow_export" %(attrs)s/>
+                <field name="name" groups="!base.test_group"/>
+                <field name="name" groups="base.test_group"/>
+                <field name="inherit_id" groups="base.test_group" %(attrs)s/>
             </form>
         """, add_field_with_groups=False)
 
         validate("""
             <form string="View">
-                <field name="name" groups="!base.group_allow_export"/>
-                <field name="name" groups="base.group_allow_export"/>
-                <field name="inherit_id" groups="!base.group_allow_export" %(attrs)s/>
+                <field name="name" groups="!base.test_group"/>
+                <field name="name" groups="base.test_group"/>
+                <field name="inherit_id" groups="!base.test_group" %(attrs)s/>
             </form>
         """, add_field_with_groups=False)
 
         validate("""
             <form string="View">
-                <field name="name" groups="!base.group_allow_export"/>
-                <field name="name" groups="base.group_allow_export"/>
+                <field name="name" groups="!base.test_group"/>
+                <field name="name" groups="base.test_group"/>
                 <field name="inherit_id" groups="base.group_portal" %(attrs)s/>
             </form>
         """, add_field_with_groups=False)
@@ -5373,7 +5968,7 @@ class ViewModifiers(ViewCase):
         # negative group
         validate("""
             <form string="View">
-                <field name="name" groups="!base.group_multi_company,!base.group_allow_export"/>
+                <field name="name" groups="!base.group_multi_company,!base.test_group"/>
                 <field name="inherit_id" groups="!base.group_multi_company" %(attrs)s/>
             </form>
         """, add_field_with_groups="~'base.group_multi_company'")
@@ -5382,7 +5977,7 @@ class ViewModifiers(ViewCase):
         validate("""
             <form string="View">
                 <field name="name" groups="!base.group_multi_company"/>
-                <field name="inherit_id" groups="!base.group_multi_company,!base.group_allow_export" %(attrs)s/>
+                <field name="inherit_id" groups="!base.group_multi_company,!base.test_group" %(attrs)s/>
             </form>
         """, add_field_with_groups=False)
 
@@ -5399,7 +5994,7 @@ class ViewModifiers(ViewCase):
         # # don't need to add field, the negative group is a subset of the mandatory group
         validate("""
             <form string="View">
-                <field name="name" groups="!base.group_allow_export"/>
+                <field name="name" groups="!base.test_group"/>
                 <field name="inherit_id" groups="!base.group_user" %(attrs)s/>
             </form>
         """, add_field_with_groups=False)
@@ -5409,7 +6004,7 @@ class ViewModifiers(ViewCase):
         validate("""
             <form string="View">
                 <group groups="base.group_multi_company">
-                    <field name="name" groups="!base.group_allow_export"/>
+                    <field name="name" groups="!base.test_group"/>
                 </group>
                 <group groups="base.group_multi_company">
                     <field name="inherit_id" %(attrs)s/>
@@ -5426,7 +6021,7 @@ class ViewModifiers(ViewCase):
             </form>
         """, add_field_with_groups="~'base.group_multi_company'")
 
-        # don't need to add field (because we can see all time: !base.group_allow_export <> base.group_allow_export).
+        # don't need to add field (because we can see all time: !base.test_group <> base.test_group).
         validate("""
             <form string="View">
                 <field name="name" groups="!base.group_multi_company"/>
@@ -5441,24 +6036,24 @@ class ViewModifiers(ViewCase):
             </form>
         """, add_field_with_groups=False)
 
-        # No missing combination because '!base.group_allow_export' | 'base.group_allow_export' => *
+        # No missing combination because '!base.test_group' | 'base.test_group' => *
         validate("""
             <form string="View">
-                <field name="name" groups="!base.group_allow_export"/>
-                <field name="name" groups="base.group_allow_export"/>
+                <field name="name" groups="!base.test_group"/>
+                <field name="name" groups="base.test_group"/>
                 <field name="inherit_id" %(attrs)s groups="base.group_multi_company"/>
             </form>
         """, add_field_with_groups=False)
 
-        # No missing combination because '!base.group_allow_export' | 'base.group_allow_export' => *
+        # No missing combination because '!base.test_group' | 'base.test_group' => *
         validate("""
             <form string="View">
                 <field name="name" groups="base.group_multi_company"/>
-                <field name="name" groups="!base.group_allow_export"/>
-                <field name="name" groups="base.group_allow_export"/>
+                <field name="name" groups="!base.test_group"/>
+                <field name="name" groups="base.test_group"/>
                 <field name="inherit_id" %(attrs)s groups="base.group_multi_company"/>
-                <field name="inherit_id" %(attrs)s groups="base.group_allow_export"/>
-                <field name="inherit_id" %(attrs)s groups="!base.group_allow_export"/>
+                <field name="inherit_id" %(attrs)s groups="base.test_group"/>
+                <field name="inherit_id" %(attrs)s groups="!base.test_group"/>
                 <field name="inherit_id" %(attrs)s groups="base.group_public"/>
             </form>
         """, add_field_with_groups=False)
@@ -5512,3 +6107,20 @@ class ViewModifiers(ViewCase):
         self.assertFalse(tree.xpath('//div[@id="foo"]'))
         self.assertTrue(tree.xpath('//div[@id="bar"]'))
         self.assertFalse(tree.xpath('//div[@id="stuff"]'))
+
+    def test_create_inherit_view_with_xpath_without_expr(self):
+        """Test that creating inherited view containing <xpath> node without the 'expr' attribute."""
+
+        parent_view = self.env.ref('base.view_partner_form')
+        inherit_arch = """
+            <xpath position="replace">
+                <field name="name"/>
+            </xpath>
+        """
+
+        with self.assertRaises(ValidationError):
+            self.env['ir.ui.view'].create({
+                'name': 'test.xpath.without.expr',
+                'inherit_id': parent_view.id,
+                'arch': inherit_arch,
+            })

@@ -1,42 +1,45 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_event_booth
-# 
-# Translators:
-# Rasareeyar Lappiam, 2024
-# Wil Odoo, 2024
-# 
+# * website_event_booth
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
+"POT-Creation-Date: 2026-02-27 18:38+0000\n"
+"PO-Revision-Date: 2026-08-02 17:23+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Thai <https://translate.odoo.com/projects/odoo-19/"
+"website_event_booth/th/>\n"
+"Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: th\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
 msgid ""
-"<i class=\"fa fa-exclamation-triangle me-2\" role=\"img\" aria-label=\"Error\" title=\"Error\"/>\n"
+"<i class=\"fa fa-exclamation-triangle me-2\" role=\"img\" aria-"
+"label=\"Error\" title=\"Error\"/>\n"
 "                    <span class=\"o_wbooth_registration_error_message\"/>"
 msgstr ""
-"<i class=\"fa fa-exclamation-triangle me-2\" role=\"รูปภาพ\" aria-label=\"ข้อผิดพลาด\" title=\"ข้อผิดพลาด\"/>\n"
+"<i class=\"fa fa-exclamation-triangle me-2\" role=\"รูปภาพ\" aria-label=\"ข้อผิด"
+"พลาด\" title=\"ข้อผิดพลาด\"/>\n"
 "                    <span class=\"o_wbooth_registration_error_message\"/>"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid ""
 "<i class=\"fa fa-exclamation-triangle\"/>\n"
-"                                        <span>Sorry, several booths are now sold out. Please change your choices before validating again.</span>"
+"                                        <span>Sorry, several booths are now "
+"sold out. Please change your choices before validating again.</span>"
 msgstr ""
 "<i class=\"fa fa-exclamation-triangle\"/>\n"
-"                                        <span>ขออภัย ขณะนี้หลายบูธได้ถูกจำหน่ายหมดแล้ว โปรดเปลี่ยนตัวเลือกของคุณก่อนที่จะยืนยันอีกครั้ง</span>"
+"                                        <span>ขออภัย ขณะนี้หลายบูธได้ถูกจำหน่ายหมดแล้"
+"ว โปรดเปลี่ยนตัวเลือกของคุณก่อนที่จะยืนยันอีกครั้ง</span>"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
@@ -69,8 +72,8 @@ msgid ""
 "<span>Booth Selection</span><span class=\"fa fa-angle-right d-inline-block "
 "align-middle mx-2 mx-lg-3 opacity-75\"/>"
 msgstr ""
-"<span>การเลือกบูธ</span><span class=\"fa fa-angle-right d-inline-block "
-"align-middle mx-2 mx-lg-3 opacity-75\"/>"
+"<span>การเลือกบูธ</span><span class=\"fa fa-angle-right d-inline-block align-"
+"middle mx-2 mx-lg-3 opacity-75\"/>"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_order_progress
@@ -96,6 +99,12 @@ msgstr ""
 "                            <span> *</span>"
 
 #. module: website_event_booth
+#. odoo-python
+#: code:addons/website_event_booth/models/event_event.py:0
+msgid "Become exhibitor"
+msgstr ""
+
+#. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_type_view_form
 msgid "Booth Menu Item"
 msgstr "รายการเมนูบูธ"
@@ -113,7 +122,7 @@ msgstr "ลงทะเบียนบูธเสร็จแล้ว!"
 
 #. module: website_event_booth
 #. odoo-javascript
-#: code:addons/website_event_booth/static/src/js/booth_register.js:0
+#: code:addons/website_event_booth/static/src/interactions/booth_registration.js:0
 msgid "Booth registration failed."
 msgstr "การลงทะเบียนบูธล้มเหลว"
 
@@ -124,8 +133,11 @@ msgstr "บูธบนเว็บไซต์"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
-msgid "Check our"
-msgstr "ลองดู"
+msgid ""
+"Check our <a class=\"o_translate_inline\" href=\"/event\" title=\"List of "
+"Future Events\" aria-label=\"Link to list of future events\">list of future "
+"events</a>."
+msgstr ""
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
@@ -143,13 +155,20 @@ msgid ""
 "Contact Details<span class=\"fa fa-angle-right d-inline-block align-middle "
 "mx-2 mx-lg-3 opacity-75\"/>"
 msgstr ""
-"รายละเอียดการติดต่อ<span class=\"fa fa-angle-right d-inline-block align-"
-"middle mx-2 mx-lg-3 opacity-75\"/>"
+"รายละเอียดการติดต่อ<span class=\"fa fa-angle-right d-inline-block align-middle "
+"mx-2 mx-lg-3 opacity-75\"/>"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid "Contact Us"
 msgstr "ติดต่อเรา"
+
+#. module: website_event_booth
+#: model:ir.model.fields,field_description:website_event_booth.field_event_event__display_name
+#: model:ir.model.fields,field_description:website_event_booth.field_event_type__display_name
+#: model:ir.model.fields,field_description:website_event_booth.field_website_event_menu__display_name
+msgid "Display Name"
+msgstr "แสดงชื่อ"
 
 #. module: website_event_booth
 #: model:ir.model,name:website_event_booth.model_event_event
@@ -182,8 +201,6 @@ msgid "Exhibition Map"
 msgstr "แผนที่จัดแสดงนิทรรศการ"
 
 #. module: website_event_booth
-#. odoo-python
-#: code:addons/website_event_booth/models/event_event.py:0
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
 msgid "Get A Booth"
@@ -195,19 +212,22 @@ msgid "Go back"
 msgstr "กลับไป"
 
 #. module: website_event_booth
+#: model:ir.model.fields,field_description:website_event_booth.field_event_event__id
+#: model:ir.model.fields,field_description:website_event_booth.field_event_type__id
+#: model:ir.model.fields,field_description:website_event_booth.field_website_event_menu__id
+msgid "ID"
+msgstr "ไอดี"
+
+#. module: website_event_booth
+#. odoo-javascript
+#: code:addons/website_event_booth/static/src/interactions/booth_registration.js:0
+msgid "It looks like your email is already in our system."
+msgstr ""
+
+#. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
 msgid "It's no longer possible to book a booth."
 msgstr "ไม่สามารถจองบูธได้อีกต่อไป"
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
-msgid "Link to list of future events"
-msgstr "ลิงค์ไปยังรายการกิจกรรมในอนาคต"
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
-msgid "List of Future Events"
-msgstr "รายชื่อกิจกรรมในอนาคต"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
@@ -225,8 +245,13 @@ msgid "Phone"
 msgstr "โทรศัพท์"
 
 #. module: website_event_booth
+#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
+msgid "Please Sign In or Create an Account."
+msgstr ""
+
+#. module: website_event_booth
 #. odoo-javascript
-#: code:addons/website_event_booth/static/src/js/booth_register.js:0
+#: code:addons/website_event_booth/static/src/interactions/booth_registration.js:0
 msgid "Please fill out the form correctly."
 msgstr "กรุณากรอกแบบฟอร์มให้ถูกต้อง"
 
@@ -242,7 +267,7 @@ msgstr "ขออภัย บูธขายหมดแล้ว"
 
 #. module: website_event_booth
 #. odoo-javascript
-#: code:addons/website_event_booth/static/src/js/booth_register.js:0
+#: code:addons/website_event_booth/static/src/interactions/booth_registration.js:0
 msgid "The booth category doesn't exist."
 msgstr "ไม่มีหมวดหมู่บูธอยู่"
 
@@ -260,8 +285,3 @@ msgstr "เมนูเว็บไซต์อีเวนต์"
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid "if you have any question."
 msgstr "หากคุณมีคำถามใด ๆ"
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
-msgid "list of future events"
-msgstr "รายการอีเวนต์ในอนาคต"

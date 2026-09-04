@@ -5,7 +5,7 @@ import { delay } from "@web/core/utils/concurrency";
 import { loadJS } from "@web/core/assets";
 import { isVideoElementReady, buildZXingBarcodeDetector } from "./ZXingBarcodeDetector";
 import { CropOverlay } from "./crop_overlay";
-import { Component, onMounted, onWillStart, onWillUnmount, useRef, useState } from "@odoo/owl";
+import { Component, onMounted, onWillStart, onWillUnmount, status, useRef, useState } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { pick } from "@web/core/utils/objects";
 
@@ -24,6 +24,7 @@ export class BarcodeVideoScanner extends Component {
         onReady: { type: Function, optional: true },
         onResult: Function,
         onError: Function,
+        placeholder: { type: String, optional: true },
         delayBetweenScan: { type: Number, optional: true },
     };
     static defaultProps = {
@@ -85,7 +86,13 @@ export class BarcodeVideoScanner extends Component {
                 return;
             }
             this.videoPreviewRef.el.srcObject = this.stream;
-            await this.isVideoReady();
+            const ready = await this.isVideoReady();
+            if (!ready) {
+                return;
+            }
+            if (this.videoPreviewRef.el.paused) {
+                await this.videoPreviewRef.el.play();
+            }
             const { height, width } = getComputedStyle(this.videoPreviewRef.el);
             const divWidth = width.slice(0, -2);
             const divHeight = height.slice(0, -2);
@@ -94,6 +101,7 @@ export class BarcodeVideoScanner extends Component {
                 const [track] = tracks;
                 const settings = track.getSettings();
                 this.zoomRatio = Math.min(divWidth / settings.width, divHeight / settings.height);
+                this.addZoomSlider(track, settings);
             }
             this.detectorTimeout = setTimeout(this.detectCode.bind(this), 100);
         });
@@ -123,11 +131,15 @@ export class BarcodeVideoScanner extends Component {
         // FIXME: even if it shouldn't happened, a timeout could be useful here.
         while (!isVideoElementReady(this.videoPreviewRef.el)) {
             await delay(10);
+            if (status(this) === "destroyed"){
+                return false;
+            }
         }
         this.state.isReady = true;
         if (this.props.onReady) {
             this.props.onReady();
         }
+        return true;
     }
 
     onResize(overlayInfo) {
@@ -196,6 +208,23 @@ export class BarcodeVideoScanner extends Component {
             }
         }
         return newObject;
+    }
+
+    addZoomSlider(track, settings) {
+        const zoom = track.getCapabilities().zoom;
+        if (zoom?.min !== undefined && zoom?.max !== undefined) {
+            const inputElement = document.createElement("input");
+            inputElement.type = "range";
+            inputElement.min = zoom.min;
+            inputElement.max = zoom.max;
+            inputElement.step = zoom.step || 1;
+            inputElement.value = settings.zoom;
+            inputElement.classList.add("align-self-end", "m-5", "z-1");
+            inputElement.addEventListener("input", async (event) => {
+                await track?.applyConstraints({ advanced: [{ zoom: inputElement.value }] });
+            });
+            this.videoPreviewRef.el.parentElement.appendChild(inputElement);
+        }
     }
 }
 

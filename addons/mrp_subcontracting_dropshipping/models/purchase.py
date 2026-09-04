@@ -8,14 +8,20 @@ from odoo.exceptions import UserError
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
 
-    default_location_dest_id_is_subcontracting_loc = fields.Boolean(related='picking_type_id.default_location_dest_id.is_subcontracting_location')
+    default_location_dest_id_is_subcontracting_loc = fields.Boolean(compute='_compute_default_location_dest_id_is_subcontracting_loc')
+
+    @api.depends('picking_type_id.default_location_dest_id')
+    def _compute_default_location_dest_id_is_subcontracting_loc(self):
+        for order in self:
+            order.default_location_dest_id_is_subcontracting_loc = order.picking_type_id.default_location_dest_id.is_subcontract()
 
     @api.depends('default_location_dest_id_is_subcontracting_loc')
     def _compute_dest_address_id(self):
         dropship_subcontract_pos = self.filtered(lambda po: po.default_location_dest_id_is_subcontracting_loc)
         for order in dropship_subcontract_pos:
             subcontractor_ids = order.picking_type_id.default_location_dest_id.subcontractor_ids
-            order.dest_address_id = subcontractor_ids if len(subcontractor_ids) == 1 else False
+            if len(subcontractor_ids) == 1:
+                order.dest_address_id = subcontractor_ids
         super(PurchaseOrder, self - dropship_subcontract_pos)._compute_dest_address_id()
 
     @api.onchange('picking_type_id')

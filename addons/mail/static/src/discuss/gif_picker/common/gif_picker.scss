@@ -10,12 +10,16 @@
     }
 }
 
+.o-discuss-GifPicker-bigEmoji {
+    font-size: 5rem !important;
+    filter: grayscale(0.25);
+}
+
 .o-discuss-GifPickerCategory-img {
     object-fit: cover;
 }
 
 .o-discuss-GifPicker-noFavoritesIcon {
-    color: $yellow;
     filter: grayscale(0.25);
 }
 

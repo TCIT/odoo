@@ -1,5 +1,3 @@
-/* @odoo-module */
-
 import { TimeOffCard } from "./time_off_card";
 import { useNewAllocationRequest } from "@hr_holidays/views/hooks";
 import { useBus, useService } from "@web/core/utils/hooks";
@@ -26,16 +24,7 @@ export class TimeOffDashboard extends Component {
         });
 
         onWillStart(async () => {
-            await this.loadDashboardData();
-            const context = this.getContext();
-            this.hasAccrualAllocation = await this.orm.call(
-                "hr.leave.type",
-                "has_accrual_allocation",
-                [],
-                {
-                    context: context,
-                }
-            );
+            this.loadDashboardData();
         });
     }
 
@@ -52,22 +41,15 @@ export class TimeOffDashboard extends Component {
         if (date) {
             this.state.date = date;
         }
-        this.state.holidays = await this.orm.call(
-            "hr.leave.type",
-            "get_allocation_data_request",
-            [this.state.date, false],
-            {
-                context: context,
-            }
-        );
-        this.state.allocationRequests = await this.orm.call(
+        const dashboardData = await this.orm.call(
             "hr.employee",
-            "get_allocation_requests_amount",
-            [],
-            {
-                context: context,
-            }
-        );
+            "get_time_off_dashboard_data",
+            [this.state.date],
+            { context }
+        )
+        this.state.holidays = dashboardData['allocation_data'];
+        this.state.allocationRequests = dashboardData['allocation_request_amount'];
+        this.hasAccrualAllocation = dashboardData['has_accrual_allocation'];
     }
 
     async newAllocationRequest() {

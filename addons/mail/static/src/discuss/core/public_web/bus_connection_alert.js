@@ -1,4 +1,4 @@
-import { Component, useState } from "@odoo/owl";
+import { Component } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
@@ -11,9 +11,17 @@ export class BusConnectionAlert extends Component {
     static props = {};
 
     setup() {
-        this.busMonitoring = useState(useService("bus.monitoring_service"));
-        this.store = useState(useService("mail.store"));
+        this.busMonitoring = useService("bus.monitoring_service");
+        this.store = useService("mail.store");
     }
 }
 
-registry.category("main_components").add("bus.connection_alert", { Component: BusConnectionAlert });
+export const connectionAlertService = {
+    dependencies: ["bus.monitoring_service", "mail.store"],
+    start() {
+        registry
+            .category("main_components")
+            .add("bus.ConnectionAlert", { Component: BusConnectionAlert });
+    },
+};
+registry.category("services").add("bus.connection_alert", connectionAlertService);

@@ -4,7 +4,7 @@ from odoo import api, models
 from ..websocket import WebsocketConnectionHandler
 
 
-class Http(models.AbstractModel):
+class IrHttp(models.AbstractModel):
     _inherit = "ir.http"
 
     @api.model

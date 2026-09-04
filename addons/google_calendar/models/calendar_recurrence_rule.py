@@ -1,17 +1,18 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import re
 import logging
 
-from odoo import api, models, Command
+from odoo import api, models
+from odoo.fields import Command, Domain
 from odoo.tools import email_normalize
 
 from odoo.addons.google_calendar.utils.google_calendar import GoogleCalendarService
 
 _logger = logging.getLogger(__name__)
 
-class RecurrenceRule(models.Model):
+
+class CalendarRecurrence(models.Model):
     _name = 'calendar.recurrence'
     _inherit = ['calendar.recurrence', 'google.calendar.sync']
 
@@ -42,7 +43,7 @@ class RecurrenceRule(models.Model):
                 }]
                 event.with_user(event._get_event_user())._google_delete(google_service, event.google_id)
                 event.google_id = False
-        self.env['calendar.event'].create(vals)
+        self.env['calendar.event'].with_context(skip_contact_description=True).create(vals)
 
         self.calendar_event_ids.need_sync = False
         return detached_events
@@ -96,22 +97,29 @@ class RecurrenceRule(models.Model):
         emails = [a.get('email') for a in google_attendees]
         partners = self._get_sync_partner(emails)
         existing_attendees = self.calendar_event_ids.attendee_ids
-        for attendee in zip(emails, partners, google_attendees):
-            email = attendee[0]
-            if email in existing_attendees.mapped('email'):
+        partners_by_email = {(p.email_normalized or p.email): p for p in partners}
+        for google_attendee in google_attendees:
+            attendee_email = google_attendee.get('email')
+            attendee_email_normalized = email_normalize(attendee_email)
+            if attendee_email in existing_attendees.mapped('email'):
                 # Update existing attendees
-                existing_attendees.filtered(lambda att: att.email == email).write({'state': attendee[2].get('responseStatus')})
+                existing_attendees.filtered(lambda att: att.email == attendee_email).write({'state': google_attendee.get('responseStatus')})
             else:
                 # Create new attendees
-                if attendee[2].get('self'):
+                if google_attendee.get('self'):
                     partner = self.env.user.partner_id
-                elif attendee[1]:
-                    partner = attendee[1]
+                elif partners_by_email.get(attendee_email_normalized):
+                    partner = partners_by_email[attendee_email_normalized]
+                elif partners_by_email.get(attendee_email):
+                    partner = partners_by_email[attendee_email]
                 else:
                     continue
-                self.calendar_event_ids.write({'attendee_ids': [(0, 0, {'state': attendee[2].get('responseStatus'), 'partner_id': partner.id})]})
-                if attendee[2].get('displayName') and not partner.name:
-                    partner.name = attendee[2].get('displayName')
+                self.calendar_event_ids.write({
+                    'attendee_ids': [(0, 0, {'state': google_attendee.get('responseStatus'), 'partner_id': partner.id})],
+                    'need_sync': False,
+                })
+                if google_attendee.get('displayName') and not partner.name:
+                    partner.name = google_attendee.get('displayName')
 
         organizers_partner_ids = [event.user_id.partner_id for event in self.calendar_event_ids if event.user_id]
         for odoo_attendee_email in set(existing_attendees.mapped('email')):
@@ -173,7 +181,7 @@ class RecurrenceRule(models.Model):
             # Google reuse the event google_id to identify the recurrence in that case
             base_event = self.env['calendar.event'].search([('google_id', '=', vals['google_id'])])
             if not base_event:
-                base_event = self.env['calendar.event'].create(base_values)
+                base_event = self.env['calendar.event'].with_context(skip_contact_description=True).create(base_values)
             else:
                 # We override the base_event values because they could have been changed in Google interface
                 # The event google_id will be recalculated once the recurrence is created
@@ -184,7 +192,7 @@ class RecurrenceRule(models.Model):
             vals['event_tz'] = gevent.start.get('timeZone')
             attendee_values[base_event.id] = {'attendee_ids': base_values.get('attendee_ids')}
 
-        recurrence = super(RecurrenceRule, self.with_context(dont_notify=True))._create_from_google(gevents, vals_list)
+        recurrence = super(CalendarRecurrence, self.with_context(dont_notify=True))._create_from_google(gevents, vals_list)
         generic_values_creation = {
             rec.id: attendee_values[rec.base_event_id.id]
             for rec in recurrence if attendee_values.get(rec.base_event_id.id)
@@ -197,7 +205,7 @@ class RecurrenceRule(models.Model):
         # older versions of the module. When synced, these recurrency may come back from Google after database cleaning
         # and trigger errors as the records are not properly populated.
         # We also prevent sync of other user recurrent events.
-        return [('calendar_event_ids.user_id', '=', self.env.user.id), ('rrule', '!=', False)]
+        return Domain('calendar_event_ids.user_id', '=', self.env.user.id) & Domain('rrule', '!=', False)
 
     @api.model
     def _odoo_values(self, google_recurrence, default_reminders=()):
@@ -239,3 +247,9 @@ class RecurrenceRule(models.Model):
         if event:
             return event._get_event_user()
         return self.env.user
+
+    def _is_google_insertion_blocked(self, sender_user):
+        self.ensure_one()
+        has_base_event = self.base_event_id
+        has_different_owner = self.base_event_id.user_id and self.base_event_id.user_id != sender_user
+        return has_base_event and has_different_owner

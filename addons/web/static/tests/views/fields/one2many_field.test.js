@@ -1,5 +1,6 @@
 import { expect, getFixture, test } from "@odoo/hoot";
 import {
+    click,
     getNextFocusableElement,
     press,
     queryAll,
@@ -20,6 +21,7 @@ import {
     fields,
     getService,
     makeServerError,
+    MockServer,
     mockService,
     models,
     mountView,
@@ -359,7 +361,7 @@ test("one2many in a list x2many editable use the right context", async () => {
     });
 
     await contains(".o_field_x2many_list .o_field_x2many_list_row_add a").click();
-    await contains("[name='trululu'] input").edit("new partner");
+    await contains("[name='trululu'] input").edit("new partner", { confirm: false });
     await selectFieldDropdownItem("trululu", 'Create "new partner"');
 
     expect.verifySteps(["name_create list"]);
@@ -389,7 +391,7 @@ test("one2many in a list x2many non-editable use the right context", async () =>
     });
 
     await contains(".o_field_x2many_list .o_field_x2many_list_row_add a").click();
-    await contains("[name='trululu'] input").edit("new partner");
+    await contains("[name='trululu'] input").edit("new partner", { confirm: false });
     await selectFieldDropdownItem("trululu", 'Create "new partner"');
 
     expect.verifySteps(["name_create form"]);
@@ -477,8 +479,6 @@ test("O2M List with pager, decoration and default_order: add and cancel adding",
 
 test.tags("desktop");
 test("O2M with parented m2o and domain on parent.m2o", async () => {
-    expect.assertions(4);
-
     // Records in an o2m can have a m2o pointing to themselves.
     // In that case, a domain evaluation on that field followed by name_search
     // shouldn't send virtual_ids to the server.
@@ -493,8 +493,9 @@ test("O2M with parented m2o and domain on parent.m2o", async () => {
                 <field name="parent_id"/>
             </form>`,
     };
-    onRpc("name_search", ({ kwargs }) => {
-        expect(kwargs.args).toEqual([["id", "in", []]]);
+    onRpc("web_name_search", ({ kwargs }) => {
+        expect(kwargs.domain).toEqual([["id", "in", []]]);
+        expect.step("web_name_search");
     });
     await mountView({
         type: "form",
@@ -511,9 +512,10 @@ test("O2M with parented m2o and domain on parent.m2o", async () => {
                 </field>
             </form>`,
     });
-
     await contains(".o_field_x2many_list_row_add a").click();
     await clickFieldDropdown("parent_id");
+    // Only one web_name_search since empty search returns no result
+    expect.verifySteps(["web_name_search"]);
     await contains(".o_field_widget[name=parent_id] input").edit("ABC", { confirm: false });
     await runAllTimers();
     await clickFieldDropdownItem("parent_id", "Create and edit...");
@@ -875,8 +877,8 @@ test("one2many with date and datetime", async () => {
             </form>`,
         resId: 1,
     });
-    expect("td:eq(0)").toHaveText("01/25/2017");
-    expect("td:eq(1)").toHaveText("12/12/2016 12:55:05");
+    expect("td:eq(0)").toHaveText("Jan 25, 2017");
+    expect("td:eq(1)").toHaveText("Dec 12, 2016, 12:55 PM");
 });
 
 test("rendering with embedded one2many", async () => {
@@ -927,6 +929,67 @@ test("use the limit attribute in arch (in field o2m inline list view)", async ()
 });
 
 test.tags("desktop");
+test("delete all records in last page (in field o2m inline list view)", async () => {
+    Partner._records[0].turtles = [1, 2, 3];
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="turtles">
+                    <list limit="2">
+                        <field name="turtle_foo"/>
+                    </list>
+                </field>
+            </form>`,
+        resId: 1,
+    });
+    expect(".o_data_row").toHaveCount(2);
+    expect(".o_x2m_control_panel .o_pager").toHaveText("1-2 / 3");
+    await contains(".o_x2m_control_panel .o_pager_next").click();
+    expect(".o_data_row").toHaveCount(1);
+    await contains(".o_list_record_remove").click();
+    expect(".o_x2m_control_panel .o_pager").toHaveCount(0);
+    expect(".o_data_row").toHaveCount(2);
+    await contains(".o_form_button_cancel").click();
+    expect(".o_x2m_control_panel .o_pager").toHaveText("1-2 / 3");
+});
+
+test("delete all records then repopulate", async () => {
+    Partner._records[0].turtles = [1];
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="turtles">
+                    <list editable="bottom" default_order="turtle_int">
+                        <field name="turtle_int" widget="handle"/>
+                        <field name="turtle_foo"/>
+                    </list>
+                </field>
+            </form>`,
+        resId: 1,
+    });
+    expect(".o_data_row").toHaveCount(1);
+    await contains(".o_list_record_remove").click();
+    expect(".o_data_row").toHaveCount(0);
+    await contains(".o_field_x2many_list_row_add a").click();
+    await contains(".o_field_one2many .o_list_renderer tbody input").edit("value 1", {
+        confirm: "blur",
+    });
+    expect(".o_data_row").toHaveCount(1);
+    await contains(".o_field_x2many_list_row_add a").click();
+    await contains(".o_field_one2many .o_list_renderer tbody input").edit("value 2", {
+        confirm: "blur",
+    });
+    expect(".o_data_row").toHaveCount(2);
+    await contains("tbody tr:eq(1) .o_handle_cell").dragAndDrop("tbody tr");
+    expect(".o_data_row").toHaveCount(2);
+    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["value 2", "value 1"]);
+});
+
+test.tags("desktop");
 test("nested x2manys with inline form, but not list", async () => {
     Turtle._views = { list: `<list><field name="turtle_foo"/></list>` };
     Partner._views = {
@@ -974,7 +1037,6 @@ test("use the limit attribute in arch (in field o2m non inline list view)", asyn
                     turtle_foo: {},
                 },
                 limit: 2,
-                order: "",
             },
         });
     });
@@ -1085,15 +1147,7 @@ test("embedded one2many with handle widget", async () => {
 
     await clickSave();
 
-    expect(
-        Turtle._records.map((r) => {
-            return {
-                id: r.id,
-                turtle_foo: r.turtle_foo,
-                turtle_int: r.turtle_int,
-            };
-        })
-    ).toEqual([
+    expect(MockServer.env["turtle"].map((r) => pick(r, "id", "turtle_foo", "turtle_int"))).toEqual([
         { id: 1, turtle_foo: "yop", turtle_int: 1 },
         { id: 2, turtle_foo: "blip", turtle_int: 0 },
         { id: 3, turtle_foo: "kawa", turtle_int: 21 },
@@ -1420,7 +1474,10 @@ test("onchange for embedded one2many with handle widget (more records)", async (
     await contains('.o_list_renderer div[name="turtle_foo"] input').edit("blurp");
 
     // Drag and drop the third line in second position
-    await contains("tbody tr:eq(2) .o_handle_cell").dragAndDrop("tbody tr:eq(1)");
+    // TODO JUM: PRHOOT the events
+    const { drop, moveTo } = await contains("tbody tr:eq(2) .o_handle_cell").drag();
+    await moveTo(`tbody tr:eq(1)`);
+    await drop(document.body);
 
     // need to unselect row...
     expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["blurp", "kawa", "blip"]);
@@ -1464,9 +1521,7 @@ test("onchange with modifiers for embedded one2many on the second page", async (
         resId: 1,
     });
 
-    const getTurtleFooValues = () => {
-        return queryAllTexts(".o_data_cell.o_list_char").join("");
-    };
+    const getTurtleFooValues = () => queryAllTexts(".o_data_cell.o_list_char").join("");
 
     expect(getTurtleFooValues()).toBe("#20#21#22#23#24#25#26#27#28#29");
 
@@ -1737,7 +1792,6 @@ test("x2many fields inside x2manys are fetched after an onchange", async () => {
                     turtle_foo: {},
                 },
                 limit: 40,
-                order: "",
             },
         });
     });
@@ -1824,7 +1878,9 @@ test("onchange on one2many containing x2many in form view", async () => {
             obj.turtles = [[0, false, { turtle_foo: "new record" }]];
         },
     };
-    Partner._views = { list: '<list><field name="foo"/></list>', search: "<search></search>" };
+    Partner._views = {
+        list: '<list><field name="foo"/></list>',
+    };
 
     await mountView({
         type: "form",
@@ -1930,7 +1986,6 @@ test("onchange on one2many with x2many in list (no widget) and form view (list)"
                     },
                 },
                 limit: 40,
-                order: "",
             },
         });
     });
@@ -2133,7 +2188,6 @@ test("onchange on one2many with x2many in list (many2many_tags) and form view (l
                     },
                 },
                 limit: 40,
-                order: "",
             },
         });
     });
@@ -2403,30 +2457,30 @@ test("one2many field when using the pager", async () => {
     });
 
     expect.verifySteps(["unity read 1"]);
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(40);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(40);
 
     // move to record 2, which has 3 related records (and shouldn't contain the
     // related records of record 1 anymore)
     await contains(".o_form_view .o_control_panel .o_pager_next").click();
     expect.verifySteps(["unity read 2"]);
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(3);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(3);
 
     // move back to record 1, which should contain again its first 40 related
     // records
     await contains(".o_form_view .o_control_panel .o_pager_previous").click();
     expect.verifySteps(["unity read 1"]);
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(40);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(40);
 
     // move to the second page of the o2m: 1 RPC should have been done to fetch
     // the 2 subrecords of page 2, and those records should now be displayed
     await contains(".o_x2m_control_panel .o_pager_next").click();
     expect.verifySteps(["unity read 50,51"]);
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(2);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(2);
 
     // move to record 2 again and check that everything is correctly updated
     await contains(".o_form_view .o_control_panel .o_pager_next").click();
     expect.verifySteps(["unity read 2"]);
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(3);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(3);
 
     // move back to record 1 and move to page 2 again: all data should have
     // been correctly reloaded
@@ -2434,7 +2488,7 @@ test("one2many field when using the pager", async () => {
     expect.verifySteps(["unity read 1"]);
     await contains(".o_x2m_control_panel .o_pager_next").click();
     expect.verifySteps(["unity read 50,51"]);
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(2);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(2);
 });
 
 test("edition of one2many field with pager", async () => {
@@ -2490,7 +2544,7 @@ test("edition of one2many field with pager", async () => {
                         <templates>
                             <t t-name="card">
                                 <div>
-                                    <a t-if="!read_only_mode" type="delete" class="fa fa-times float-end delete_icon"/>
+                                    <a type="delete" class="fa fa-times float-end delete_icon"/>
                                     <field name="name"/>
                                 </div>
                             </t>
@@ -2501,7 +2555,7 @@ test("edition of one2many field with pager", async () => {
         resId: 1,
     });
 
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(40);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(40);
 
     // add a record on page one
     checkRead = true;
@@ -2512,16 +2566,20 @@ test("edition of one2many field with pager", async () => {
 
     // checks
     expect(readIDs).toBe(undefined, { message: "should not have read any record" });
-    expect(".o_kanban_record:not(.o_kanban_ghost):contains('new record')").toHaveCount(0);
+    expect(
+        ".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new):contains('new record')"
+    ).toHaveCount(0);
 
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(40);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(40);
 
     // save
     await clickSave();
 
     // delete a record on page one
     checkRead = true;
-    expect(".o_kanban_record:not(.o_kanban_ghost):eq(0)").toHaveText("relational record 10");
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new):eq(0)").toHaveText(
+        "relational record 10"
+    );
 
     await contains(".delete_icon").click(); // should remove record!!!
 
@@ -2529,7 +2587,7 @@ test("edition of one2many field with pager", async () => {
     expect(readIDs).toEqual([50], {
         message: "should have read a record (to display 40 records on page 1)",
     });
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(40);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(40);
     // save
     await clickSave();
 
@@ -2540,9 +2598,12 @@ test("edition of one2many field with pager", async () => {
     await contains(".o-kanban-button-new").click();
     await contains(".modal input").edit("new record page 1");
     await contains(".modal .modal-footer .btn-primary").click();
-    expect(".o_kanban_record:not(.o_kanban_ghost):eq(0)").toHaveText("relational record 11", {
-        message: "first record should be the one with id 11 (next checks rely on that)",
-    });
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new):eq(0)").toHaveText(
+        "relational record 11",
+        {
+            message: "first record should be the one with id 11 (next checks rely on that)",
+        }
+    );
 
     await contains(".delete_icon").click(); // should remove record!!!
     expect(readIDs).toEqual([51], {
@@ -2551,9 +2612,12 @@ test("edition of one2many field with pager", async () => {
     // add and delete a record in page 2
     await contains(".o_x2m_control_panel .o_pager_next").click();
 
-    expect(".o_kanban_record:not(.o_kanban_ghost):eq(0)").toHaveText("relational record 52", {
-        message: "first record should be the one with id 52 (next checks rely on that)",
-    });
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new):eq(0)").toHaveText(
+        "relational record 52",
+        {
+            message: "first record should be the one with id 52 (next checks rely on that)",
+        }
+    );
 
     checkRead = true;
     readIDs = undefined;
@@ -2565,9 +2629,13 @@ test("edition of one2many field with pager", async () => {
 
     expect(readIDs).toBe(undefined, { message: "should not have read any record" });
     // checks
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(5);
-    expect(".o_kanban_record:not(.o_kanban_ghost):contains('new record page 1')").toHaveCount(1);
-    expect(".o_kanban_record:not(.o_kanban_ghost):contains('new record page 2')").toHaveCount(1);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(5);
+    expect(
+        ".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new):contains('new record page 1')"
+    ).toHaveCount(1);
+    expect(
+        ".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new):contains('new record page 2')"
+    ).toHaveCount(1);
     // save
     await clickSave();
 
@@ -2626,7 +2694,7 @@ test("edition of one2many field with pager on desktop", async () => {
                         <templates>
                             <t t-name="card">
                                 <div>
-                                    <a t-if="!read_only_mode" type="delete" class="fa fa-times float-end delete_icon"/>
+                                    <a type="delete" class="fa fa-times float-end delete_icon"/>
                                     <field name="name"/>
                                 </div>
                             </t>
@@ -3060,7 +3128,6 @@ test("onchange specification complete after open sub form view not inline", asyn
                         turtle_foo: {},
                     },
                     limit: 40,
-                    order: "",
                 },
             });
         } else if (args[1].name === "test2") {
@@ -3075,12 +3142,10 @@ test("onchange specification complete after open sub form view not inline", asyn
                                 name: {},
                             },
                             limit: 40,
-                            order: "",
                         },
                         turtle_foo: {},
                     },
                     limit: 40,
-                    order: "",
                 },
             });
             return {
@@ -3466,7 +3531,7 @@ test("one2many kanban: edition", async () => {
                         <templates>
                             <t t-name="card">
                                 <div>
-                                    <a t-if="!read_only_mode" type="delete" class="fa fa-times float-end delete_icon"/>
+                                    <a type="delete" class="fa fa-times float-end delete_icon"/>
                                     <field name="name"/>
                                     <field name="color"/>
                                 </div>
@@ -3482,13 +3547,15 @@ test("one2many kanban: edition", async () => {
         resId: 1,
     });
 
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(1);
     expect(".o_kanban_record span:eq(0)").toHaveText("second record");
     expect(".o_kanban_record span:eq(1)").toHaveText("Red");
     expect(".delete_icon").toHaveCount(1);
     expect(".o_field_one2many .o-kanban-button-new").toHaveCount(1);
-    expect(".o_field_one2many .o-kanban-button-new").toHaveClass("btn-secondary");
-    expect(".o_field_one2many .o-kanban-button-new").toHaveText("Add");
+    expect(".o_field_one2many .o-kanban-button-new").toHaveClass(
+        "o_kanban_record o-kanban-button-new btn btn-link py-4"
+    );
+    expect(".o_field_one2many .o-kanban-button-new").toHaveText("Add one2many field");
 
     // edit existing subrecord
     await contains(".o_kanban_record:eq(0)").click();
@@ -3501,7 +3568,7 @@ test("one2many kanban: edition", async () => {
     await contains(".o-kanban-button-new:eq(0)").click();
     await contains(".modal .o_form_view .o_field_widget:eq(0) input").edit("new subrecord 1");
     await contains(".modal .modal-footer .btn-primary:eq(0)").click();
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(2);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(2);
     expect(".o_kanban_record:eq(1) span:eq(0)").toHaveText("new subrecord 1", {
         message: 'value of newly created subrecord should be "new subrecord 1"',
     });
@@ -3511,17 +3578,17 @@ test("one2many kanban: edition", async () => {
     await contains(".modal .modal-footer .btn-primary:eq(1)").click();
     await contains(".modal .o_form_view .o_field_widget:eq(0) input").edit("new subrecord 3");
     await contains(".modal .modal-footer .btn-primary:eq(0)").click();
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(4);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(4);
 
     // delete subrecords
     await contains(".o_kanban_record:eq(0)").click();
     expect(".modal .modal-footer .o_btn_remove").toHaveCount(1);
     await contains(".modal .modal-footer .o_btn_remove:eq(0)").click();
     expect(".o_modal").toHaveCount(0, { message: "modal should have been closed" });
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(3);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(3);
     await contains(".o_kanban_renderer .delete_icon:first():eq(0)").click();
     await contains(".o_kanban_renderer .delete_icon:first():eq(0)").click();
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(1);
     expect(".o_kanban_record span:first").toHaveText("new subrecord 3", {
         message: 'the remaining subrecord should be "new subrecord 3"',
     });
@@ -3568,7 +3635,7 @@ test("one2many kanban: create action disabled", async () => {
                         <templates>
                             <t t-name="card">
                                 <div>
-                                    <a t-if="!read_only_mode" type="delete" class="fa fa-times float-end delete_icon"/>
+                                    <a type="delete" class="fa fa-times float-end delete_icon"/>
                                     <field name="name"/>
                                 </div>
                             </t>
@@ -3627,6 +3694,56 @@ test("one2many kanban: conditional create/delete actions", async () => {
     expect(".modal .modal-footer .o_btn_remove").toHaveCount(0, {
         message: "There should not be a Remove Button as bar field is False",
     });
+});
+
+test("one2many kanban: conditional write action", async () => {
+    Partner._records[0].p = [2, 4];
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="bar"/>
+                <field name="p" options="{'write': [('bar', '=', True)]}">
+                    <kanban>
+                        <templates>
+                            <t t-name="card">
+                                <field name="name"/>
+                                <field name="bar" widget="boolean_toggle"/>
+                            </t>
+                        </templates>
+                    </kanban>
+                    <form>
+                        <field name="name"/>
+                        <field name="foo"/>
+                    </form>
+                </field>
+            </form>`,
+        resId: 1,
+    });
+
+    expect(".o_kanban_record:first span").toHaveText("second record");
+    expect(".o_field_widget[name=bar]:first input").toBeChecked();
+
+    // bar is initially true -> edit action is available
+    expect(".o_kanban_record:first .o_field_widget[name=bar] input").toBeEnabled();
+    expect(".o-kanban-button-new").toHaveCount(1); // can create
+    await contains(".o_kanban_record:first").click();
+    expect(".o_dialog .o_form_renderer").toHaveClass("o_form_editable");
+    await contains(".o_dialog .o_field_widget[name=name] input").edit("second record edited");
+    await contains(".modal .o_form_button_save").click();
+    expect(".o_kanban_record:first span").toHaveText("second record edited");
+
+    // set bar false -> edit action is no longer available
+    await contains('.o_field_widget[name="bar"] input').click();
+    expect(".o_kanban_record:first .o_field_widget[name=bar] input").not.toBeEnabled();
+    expect(".o-kanban-button-new").toHaveCount(1); // can still create
+    await contains(".o_kanban_record:first").click();
+    expect(".o_dialog .o_form_renderer").toHaveClass("o_form_readonly");
+    expect(".o_dialog .o_form_button_save").toHaveCount(0);
+    await contains(".modal .o_form_button_cancel").click();
+    expect(".o_dialog").toHaveCount(0);
 });
 
 test.tags("desktop");
@@ -4123,7 +4240,6 @@ test("save a record with not new, dirty and invalid subrecord", async () => {
                 </field>
             </form>`,
         resId: 1,
-        mode: "edit",
     });
 
     expect(".o_form_editable").toHaveCount(1);
@@ -4468,8 +4584,9 @@ test("editable o2m with onchange and required field: delete an invalid line", as
     expect.verifySteps(["get_views", "web_read"]);
     await contains(".o_data_cell").click();
     await contains(".o_field_widget[name=product_id] input").clear();
+    await runAllTimers();
     // no onchange should be done as line is invalid
-    expect.verifySteps([]);
+    expect.verifySteps(["web_name_search"]);
     await contains(".o_list_record_remove").click();
     // onchange should have been done
     expect.verifySteps(["onchange"]);
@@ -4482,16 +4599,14 @@ test("onchange in a one2many", async () => {
     });
     Partner._records[1].p = [3];
     Partner._onChanges = { p: () => {} };
-    onRpc("onchange", (args) => {
-        return {
-            value: {
-                p: [
-                    [2, 3], // delete 3
-                    [0, 0, { foo: "from onchange" }], // create new
-                ],
-            },
-        };
-    });
+    onRpc("onchange", (args) => ({
+        value: {
+            p: [
+                [2, 3], // delete 3
+                [0, 0, { foo: "from onchange" }], // create new
+            ],
+        },
+    }));
     await mountView({
         type: "form",
         resModel: "partner",
@@ -4521,15 +4636,13 @@ test("one2many, default_get and onchange (basic)", async () => {
         default: [],
     });
     Partner._onChanges = { p: () => {} };
-    onRpc("onchange", (args) => {
-        return {
-            value: {
-                p: [
-                    [0, 0, { foo: "from onchange" }], // create new
-                ],
-            },
-        };
-    });
+    onRpc("onchange", (args) => ({
+        value: {
+            p: [
+                [0, 0, { foo: "from onchange" }], // create new
+            ],
+        },
+    }));
     await mountView({
         type: "form",
         resModel: "partner",
@@ -4567,7 +4680,7 @@ test("one2many and default_get (with date)", async () => {
             </form>`,
     });
 
-    expect(".o_data_cell").toHaveText("10/08/2017");
+    expect(".o_data_cell").toHaveText("Oct 8, 2017");
 });
 
 test("one2many and onchange (with integer)", async () => {
@@ -4617,7 +4730,7 @@ test("one2many and onchange (with date)", async () => {
             </form>`,
         resId: 1,
     });
-    expect("td:eq(0)").toHaveText("01/25/2017");
+    expect("td:eq(0)").toHaveText("Jan 25, 2017");
 
     contains("td:eq(0)").click();
     await contains("td:eq(0) .o_field_date input").click();
@@ -4769,14 +4882,14 @@ test("one2many with CREATE _onChanges correctly refreshed", async () => {
     _onChangestep = 1;
     await contains('[name="turtle_int"] input').edit("10", { confirm: "blur" });
     // put the list back in non edit mode
-    contains('[name="foo"] input').click();
+    await click('[name="foo"] input');
     expect(queryAllTexts(".o_data_row")).toEqual(["first 10", "second -10"]);
 
     // trigger the second onchange
     _onChangestep = 2;
     await contains(".o_field_x2many_list tbody tr td").click();
     await contains('[name="turtle_int"] input').edit("20", { confirm: "blur" });
-    contains('[name="foo"] input').click();
+    await click('[name="foo"] input');
     expect(queryAllTexts(".o_data_row")).toEqual(["first 20", "second -20"]);
     expect(".o_field_widget").toHaveCount(delta);
 
@@ -4835,6 +4948,33 @@ test("one2many editable list with onchange keeps the order", async () => {
     });
     contains(".o_form_view").click();
     expect(queryAllTexts(".o_data_cell")).toEqual(["new", "second record", "aaa"]);
+});
+
+test("one2many list: sort and save", async () => {
+    Partner._records[0].p = [1, 2, 4];
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="int_field"/>
+                <field name="p">
+                    <list>
+                        <field name="name"/>
+                    </list>
+                </field>
+            </form>`,
+        resId: 1,
+    });
+    expect(queryAllTexts(".o_data_cell")).toEqual(["first record", "second record", "aaa"]);
+
+    await contains("th.o_column_sortable").click();
+    expect(queryAllTexts(".o_data_cell")).toEqual(["aaa", "first record", "second record"]);
+
+    await contains(".o_field_widget[name=int_field] input").edit("44");
+    await clickSave();
+    expect(queryAllTexts(".o_data_cell")).toEqual(["aaa", "first record", "second record"]);
 });
 
 test("one2many list (editable): readonly domain is evaluated", async () => {
@@ -5072,7 +5212,7 @@ test("one2many list with inline form view with context with parent key", async (
     Partner._records[0].p = [2];
     Partner._records[0].product_id = 41;
     Partner._records[1].product_id = 37;
-    onRpc("name_search", (args) => {
+    onRpc("web_name_search", (args) => {
         expect(args.kwargs.context.partner_foo).toBe("yop", {
             message: "should have correctly evaluated parent foo field",
         });
@@ -5112,7 +5252,7 @@ test("value of invisible x2many fields is correctly evaluated in context", async
 
     Partner._records[0].timmy = [12];
     Partner._records[0].p = [2, 4];
-    onRpc("name_search", (args) => {
+    onRpc("web_name_search", (args) => {
         const { p, timmy } = args.kwargs.context;
         expect(p).toEqual([2, 4]);
         expect(timmy).toEqual([12]);
@@ -5138,7 +5278,7 @@ test("one2many list, editable, with many2one and with context with parent key", 
 
     Partner._records[0].p = [2];
     Partner._records[1].product_id = 37;
-    onRpc("name_search", (args) => {
+    onRpc("web_name_search", (args) => {
         expect(args.kwargs.context.partner_foo).toBe("yop", {
             message: "should have correctly evaluated parent foo field",
         });
@@ -5724,7 +5864,7 @@ test("id field in one2many in a new record", async () => {
 });
 
 test("sub form view with a required field", async () => {
-    Partner._fields.foo = fields.Char({ default: null, required: true });
+    Partner._fields.foo = fields.Char({ required: true });
 
     await mountView({
         type: "form",
@@ -6245,6 +6385,62 @@ test("one2many with x2many in form view (but not in list view)", async () => {
 });
 
 test.tags("desktop");
+test("one2many with properties in form view but not in list view", async () => {
+    Partner._fields.definitions = fields.PropertiesDefinition();
+    Partner._records[0].definitions = [
+        {
+            name: "property_3",
+            string: "My Char 3",
+            type: "char",
+        },
+    ];
+    Turtle._fields.properties = fields.Properties({
+        string: "Properties",
+        searchable: false,
+        definition_record: "turtle_trululu",
+        definition_record_field: "definitions",
+    });
+    Turtle._records[1].turtle_trululu = 1;
+    Turtle._records[1].properties = {
+        property_3: "some property value",
+    };
+    Turtle._views.form = `
+        <form>
+            <field name="turtle_foo"/>
+            <field name="properties"/>
+            <field name="turtle_trululu"/>
+        </form>`;
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `
+            <form>
+                <group>
+                    <field name="turtles">
+                        <list>
+                            <field name="turtle_foo"/>
+                        </list>
+                    </field>
+                </group>
+            </form>`,
+        resId: 1,
+    });
+
+    // Open a record and close once.
+    await contains(".o_data_row td").click();
+    expect(".modal .o_field_widget[name=properties] input").toHaveValue("some property value");
+    await contains(".modal .modal-header .btn-close").click();
+    expect(".modal").toHaveCount(0);
+
+    // Open the same record and close again. This differs from the first time because the record has
+    // already been extended (extendRecord), and fake property fields have already been created.
+    await contains(".o_data_row td").click();
+    expect(".modal .o_field_widget[name=properties] input").toHaveValue("some property value");
+    await contains(".modal .modal-header .btn-close").click();
+    expect(".modal").toHaveCount(0);
+});
+
+test.tags("desktop");
 test("many2many list in a one2many opened by a many2one", async () => {
     expect.assertions(1);
 
@@ -6252,9 +6448,8 @@ test("many2many list in a one2many opened by a many2one", async () => {
     Partner._views = { form: '<form><field name="timmy"/></form>' };
     PartnerType._views = {
         list: '<list editable="bottom"><field name="name"/></list>',
-        search: "<search></search>",
     };
-    onRpc("/web/dataset/call_kw/partner/get_formview_id", () => false);
+    onRpc("partner", "get_formview_id", () => false);
     onRpc("web_save", (args) => {
         expect(args.args[1].timmy).toEqual([[4, 12]], {
             message: "should properly add id",
@@ -6362,7 +6557,6 @@ test("nested x2many (inline form view) and _onChanges", async () => {
                     },
                 },
                 limit: 40,
-                order: "",
             },
         });
     });
@@ -6517,10 +6711,9 @@ test("one2many field with virtual ids", async () => {
     expect(".o_field_widget .o_kanban_renderer").toHaveCount(1, {
         message: "should have one inner kanban view for the one2many field",
     });
-    expect(".o_field_widget .o_kanban_renderer .o_kanban_record:not(.o_kanban_ghost)").toHaveCount(
-        0,
-        { message: "should not have kanban records yet" }
-    );
+    expect(
+        ".o_field_widget .o_kanban_renderer .o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)"
+    ).toHaveCount(0, { message: "should not have kanban records yet" });
 
     // create a new kanban record
     await contains(".o_field_widget .o-kanban-button-new").click();
@@ -6534,15 +6727,14 @@ test("one2many field with virtual ids", async () => {
     expect(".o_field_widget .o_kanban_renderer").toHaveCount(1, {
         message: "should have one inner kanban view for the one2many field",
     });
-    expect(".o_field_widget .o_kanban_renderer .o_kanban_record:not(.o_kanban_ghost)").toHaveCount(
-        1,
-        { message: "should now have one kanban record" }
-    );
     expect(
-        ".o_field_widget .o_kanban_renderer .o_kanban_record:not(.o_kanban_ghost) .o_test_id"
+        ".o_field_widget .o_kanban_renderer .o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)"
+    ).toHaveCount(1, { message: "should now have one kanban record" });
+    expect(
+        ".o_field_widget .o_kanban_renderer .o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new) .o_test_id"
     ).toHaveText("", { message: "should not have a value for the id field" });
     expect(
-        ".o_field_widget .o_kanban_renderer .o_kanban_record:not(.o_kanban_ghost) .o_test_foo"
+        ".o_field_widget .o_kanban_renderer .o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new) .o_test_foo"
     ).toHaveText("My little Foo Value", { message: "should have a value for the foo field" });
 
     // save the view to force a create of the new record in the one2many
@@ -6550,15 +6742,14 @@ test("one2many field with virtual ids", async () => {
     expect(".o_field_widget .o_kanban_renderer").toHaveCount(1, {
         message: "should have one inner kanban view for the one2many field",
     });
-    expect(".o_field_widget .o_kanban_renderer .o_kanban_record:not(.o_kanban_ghost)").toHaveCount(
-        1,
-        { message: "should now have one kanban record" }
-    );
     expect(
-        ".o_field_widget .o_kanban_renderer .o_kanban_record:not(.o_kanban_ghost) .o_test_id"
+        ".o_field_widget .o_kanban_renderer .o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)"
+    ).toHaveCount(1, { message: "should now have one kanban record" });
+    expect(
+        ".o_field_widget .o_kanban_renderer .o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new) .o_test_id"
     ).toHaveText("5", { message: "should now have a value for the id field" });
     expect(
-        ".o_field_widget .o_kanban_renderer .o_kanban_record:not(.o_kanban_ghost) .o_test_foo"
+        ".o_field_widget .o_kanban_renderer .o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new) .o_test_foo"
     ).toHaveText("My little Foo Value", { message: "should still have a value for the foo field" });
 });
 
@@ -6607,7 +6798,8 @@ test("one2many field with virtual ids with kanban button", async () => {
 
     // 1. Define all css selector
     const oKanbanView = ".o_field_widget .o_kanban_renderer";
-    const oKanbanRecordActive = oKanbanView + " .o_kanban_record:not(.o_kanban_ghost)";
+    const oKanbanRecordActive =
+        oKanbanView + " .o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)";
     const oAllKanbanButton = oKanbanRecordActive + " button";
     const btn1 = oKanbanRecordActive + ":eq(0) button";
     const btn2 = oKanbanRecordActive + ":eq(1) button";
@@ -7015,7 +7207,7 @@ test("one2many list editable: trigger onchange when row is valid", async () => {
     expect('.o_field_widget[name="int_field"] input').toHaveValue("1", {
         message: "int_field should now be 1 (the onchange should have been done",
     });
-    expect.verifySteps(["name_search", "web_read", "onchange"]);
+    expect.verifySteps(["web_name_search", "web_read", "onchange"]);
 });
 
 test("one2many list editable: 'required' modifiers is properly working", async () => {
@@ -7131,7 +7323,7 @@ test("one2many list editable: add new line before onchange returns", async () =>
     def.resolve();
     await animationFrame();
     expect(".o_data_row").toHaveCount(2);
-    expect(".o_data_row").not.toHaveClass("o_selected_row");
+    expect(".o_data_row:first").not.toHaveClass("o_selected_row");
 });
 
 test("editable list: multiple clicks on Add an item do not create invalid rows", async () => {
@@ -7462,7 +7654,6 @@ test("one2many: onchange that returns unknown field in list, but not in form", a
                     },
                 },
                 limit: 40,
-                order: "",
             },
         });
     });
@@ -7605,11 +7796,9 @@ test("onchange on a one2many containing a one2many", async () => {
                                 name: {},
                             },
                             limit: 40,
-                            order: "",
                         },
                     },
                     limit: 40,
-                    order: "",
                 },
             });
         }
@@ -7977,8 +8166,7 @@ test("default value for nested one2manys (coming from onchange)", async () => {
 });
 
 test("display correct value after validation error", async () => {
-    expect.assertions(4);
-    expect.errors(1);
+    expect.assertions(5);
 
     function validationHandler(env, error, originalError) {
         if (originalError.data.name === "odoo.exceptions.ValidationError") {
@@ -8025,7 +8213,9 @@ test("display correct value after validation error", async () => {
     // click and edit value to 'pinky', which trigger a failed onchange
     await contains(".o_data_row .o_data_cell").click();
     await contains(".o_field_widget[name=turtle_foo] input").edit("pinky", { confirm: false });
+    expect.errors(1);
     await contains(".o_form_view").click();
+    expect.verifyErrors(["RPC_ERROR"]);
     expect(".o_data_row .o_data_cell").toHaveText("foo");
 
     // we make sure here that when we save, the values are the current
@@ -8175,18 +8365,16 @@ test("onchange on nested one2manys", async () => {
 test("one2many with multiple pages and sequence field", async () => {
     Partner._records[0].turtles = [3, 2, 1];
     Partner._onChanges.turtles = function () {};
-    onRpc("onchange", () => {
-        return {
-            value: {
-                turtles: [
-                    [2, 2],
-                    [2, 3],
-                    [4, 1, { id: 1, turtle_int: 0, turtle_foo: "yop", partner_ids: [] }],
-                    [1, 1, { turtle_foo: "from onchange" }],
-                ],
-            },
-        };
-    });
+    onRpc("onchange", () => ({
+        value: {
+            turtles: [
+                [2, 2],
+                [2, 3],
+                [4, 1, { id: 1, turtle_int: 0, turtle_foo: "yop", partner_ids: [] }],
+                [1, 1, { turtle_foo: "from onchange" }],
+            ],
+        },
+    }));
     await mountView({
         type: "form",
         resModel: "partner",
@@ -8209,18 +8397,16 @@ test("one2many with multiple pages and sequence field", async () => {
 test("one2many with multiple pages and sequence field, part2", async () => {
     Partner._records[0].turtles = [3, 2, 1];
     Partner._onChanges.turtles = function () {};
-    onRpc("onchange", () => {
-        return {
-            value: {
-                turtles: [
-                    [2, 2],
-                    [4, 1, { id: 1, turtle_int: 0, turtle_foo: "yop", partner_ids: [] }],
-                    [1, 1, { turtle_foo: "from onchange id2" }],
-                    [1, 3, { turtle_foo: "from onchange id3" }],
-                ],
-            },
-        };
-    });
+    onRpc("onchange", () => ({
+        value: {
+            turtles: [
+                [2, 2],
+                [4, 1, { id: 1, turtle_int: 0, turtle_foo: "yop", partner_ids: [] }],
+                [1, 1, { turtle_foo: "from onchange id2" }],
+                [1, 3, { turtle_foo: "from onchange id3" }],
+            ],
+        },
+    }));
     await mountView({
         type: "form",
         resModel: "partner",
@@ -8447,7 +8633,10 @@ test("one2many with sequence field and text field", async () => {
 
     expect(".ui-sortable-handle").toHaveCount(3);
 
-    await contains("tbody tr:eq(1) .o_handle_cell").dragAndDrop("tbody tr:eq(0)");
+    // TODO JUM: PRHOOT the events
+    const { drop, moveTo } = await contains("tbody tr:eq(1) .o_handle_cell").drag();
+    await moveTo("tbody tr:eq(0)");
+    await drop(document.body);
 
     // empty line has been discarded on the drag and drop)
     expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual([inputText2, inputText1]);
@@ -8905,6 +9094,208 @@ test("o2m add an action button control", async () => {
     expect.verifySteps(["do_something"]);
 });
 
+test("one2many list with custom control with invisible modifier", async () => {
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 2,
+        arch: `
+            <form>
+                <field name="bar"/>
+                <field name="p">
+                    <list>
+                        <control>
+                            <create string="A" invisible="parent.bar"/>
+                            <create string="B" invisible="not parent.bar"/>
+                            <button string="C" name="do_something" type="object" invisible="parent.bar"/>
+                            <button string="D" name="do_something" type="object" invisible="not parent.bar"/>
+                        </control>
+                        <field name="name"/>
+                    </list>
+                </field>
+            </form>`,
+    });
+
+    expect(".o_field_x2many_list_row_add a:contains(A)").toHaveCount(0);
+    expect(".o_field_x2many_list_row_add a:contains(B)").toHaveCount(1);
+    expect(".o_field_x2many_list_row_add button:contains(C)").toHaveCount(0);
+    expect(".o_field_x2many_list_row_add button:contains(D)").toHaveCount(1);
+});
+
+test("one2many list with custom control with invisible modifier using context", async () => {
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 2,
+        arch: `
+            <form>
+                <field name="bar"/>
+                <field name="p">
+                    <list>
+                        <control>
+                            <create string="A" invisible="context.get('someKey')"/>
+                            <create string="B" invisible="not context.get('someKey')"/>
+                            <button string="C" name="do_something" type="object" invisible="context.get('someKey')"/>
+                            <button string="D" name="do_something" type="object" invisible="not context.get('someKey')"/>
+                        </control>
+                        <field name="name"/>
+                    </list>
+                </field>
+            </form>`,
+        context: { someKey: true },
+    });
+
+    expect(".o_field_x2many_list_row_add a:contains(A)").toHaveCount(0);
+    expect(".o_field_x2many_list_row_add a:contains(B)").toHaveCount(1);
+    expect(".o_field_x2many_list_row_add button:contains(C)").toHaveCount(0);
+    expect(".o_field_x2many_list_row_add button:contains(D)").toHaveCount(1);
+});
+
+test("one2many kanban with custom control with invisible modifier", async () => {
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 2,
+        arch: `
+            <form>
+                <field name="bar"/>
+                <field name="p">
+                    <kanban>
+                        <control>
+                            <create string="A" invisible="parent.bar"/>
+                            <create string="B" invisible="not parent.bar"/>
+                            <button string="C" name="do_something" type="object" invisible="parent.bar"/>
+                            <button string="D" name="do_something" type="object" invisible="not parent.bar"/>
+                        </control>
+                        <templates>
+                            <t t-name="card">
+                                <field name="name"/>
+                            </t>
+                        </templates>
+                    </kanban>
+                </field>
+            </form>`,
+    });
+
+    expect(".o_cp_buttons button:contains(A)").toHaveCount(0);
+    expect(".o_cp_buttons button:contains(B)").toHaveCount(1);
+    expect(".o_cp_buttons button:contains(C)").toHaveCount(0);
+    expect(".o_cp_buttons button:contains(D)").toHaveCount(1);
+});
+
+test("one2many kanban with custom control with invisible modifier using context", async () => {
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 2,
+        arch: `
+            <form>
+                <field name="bar"/>
+                <field name="p">
+                    <kanban>
+                        <control>
+                            <create string="A" invisible="context.get('someKey')"/>
+                            <create string="B" invisible="not context.get('someKey')"/>
+                            <button string="C" name="do_something" type="object" invisible="context.get('someKey')"/>
+                            <button string="D" name="do_something" type="object" invisible="not context.get('someKey')"/>
+                        </control>
+                        <templates>
+                            <t t-name="card">
+                                <field name="name"/>
+                            </t>
+                        </templates>
+                    </kanban>
+                </field>
+            </form>`,
+        context: { someKey: true },
+    });
+
+    expect(".o_cp_buttons button:contains(A)").toHaveCount(0);
+    expect(".o_cp_buttons button:contains(B)").toHaveCount(1);
+    expect(".o_cp_buttons button:contains(C)").toHaveCount(0);
+    expect(".o_cp_buttons button:contains(D)").toHaveCount(1);
+});
+
+test("one2many list with delete control with invisible modifier", async () => {
+    Partner._records[1].p = [1, 2];
+    Partner._records[0].bar = false;
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 2,
+        arch: `
+            <form>
+                <field name="bar"/>
+                <field class="first" name="p">
+                    <list>
+                        <control>
+                            <delete invisible="parent.bar and bar"/>
+                        </control>
+                        <field name="name"/>
+                        <field name="bar"/>
+                    </list>
+                </field>
+                <field class="second" name="p">
+                    <list>
+                        <control>
+                            <delete invisible="not parent.bar"/>
+                        </control>
+                        <field name="name"/>
+                        <field name="bar"/>
+                    </list>
+                </field>
+            </form>`,
+    });
+
+    expect(".first .o_data_row").toHaveCount(2);
+    expect(".first .o_data_row:eq(0) .o_list_record_remove button").toHaveCount(1);
+    expect(".first .o_data_row:eq(1) .o_list_record_remove button").toHaveCount(0);
+    await contains(".first .o_data_row:eq(1) td.o_list_record_remove").click();
+    expect(".first .o_data_row").toHaveCount(2);
+
+    expect(".second .o_data_row").toHaveCount(2);
+    expect(".second .o_data_row .o_list_record_remove button").toHaveCount(2);
+});
+
+test("one2many kanban with delete control with invisible modifier", async () => {
+    Partner._records[1].p = [1, 2];
+    Partner._records[0].bar = false;
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 2,
+        arch: `
+            <form>
+                <field name="bar"/>
+                <field name="p">
+                    <kanban>
+                        <control>
+                            <delete invisible="parent.bar and bar"/>
+                        </control>
+                        <templates>
+                            <t t-name="card">
+                                <field name="name"/>
+                                <field name="bar"/>
+                            </t>
+                        </templates>
+                    </kanban>
+                </field>
+            </form>`,
+    });
+
+    await contains(".o_kanban_record:eq(0)").click();
+    expect(".o_dialog .o_form_view").toHaveCount(1);
+    expect(".o_dialog footer .o_btn_remove").toHaveCount(1);
+
+    await contains(".o_dialog footer .o_form_button_cancel").click();
+    await contains(".o_kanban_record:eq(1)").click();
+    expect(".o_dialog .o_form_view").toHaveCount(1);
+    expect(".o_dialog footer .o_btn_remove").toHaveCount(0);
+
+    await contains(".o_dialog .o_form_view .o_field_widget[name=bar] input").click();
+    expect(".o_dialog footer .o_btn_remove").toHaveCount(1);
+});
+
 test("o2m button with parent in context", async () => {
     onRpc("test_button", (args) => {
         expect.step("test_button");
@@ -8958,8 +9349,10 @@ test("one2many form view with action button", async () => {
     // See https://github.com/odoo/odoo/issues/24189
     mockService("action", {
         doActionButton(params) {
-            Partner._records[1].name = "new name";
-            Partner._records[1].timmy = [12];
+            for (const record of MockServer.env["partner"].browse(params.resIds)) {
+                record.name = "new name";
+                record.timmy = [12];
+            }
             params.onClose();
         },
     });
@@ -9430,6 +9823,7 @@ test("no deadlock when leaving a one2many line with uncommitted changes", async 
 });
 
 test("one2many with extra field from server not in form", async () => {
+    mockTimeZone(0);
     onRpc("web_save", (args) => {
         args.args[1].p[0][2].datetime = "2018-04-05 12:00:00";
     });
@@ -9469,7 +9863,7 @@ test("one2many with extra field from server not in form", async () => {
     // Redo asserts in RO mode after saving
     expect(".o_data_row").toHaveCount(1);
     cells = queryAll(".o_data_cell");
-    expect(cells[0]).toHaveText("04/05/2018 13:00:00");
+    expect(cells[0]).toHaveText("Apr 5, 2018, 12:00 PM");
     expect(cells[1]).toHaveText("michelangelo");
 });
 
@@ -9610,7 +10004,7 @@ test("field context is correctly passed to x2m subviews", async () => {
         resId: 1,
     });
 
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(1);
     expect(".o_kanban_record span:contains('blip')").toHaveCount(1);
 });
 
@@ -9645,18 +10039,22 @@ test("one2many kanban with widget handle", async () => {
         resId: 1,
     });
 
-    expect(queryAllTexts(".o_kanban_record:not(.o_kanban_ghost)")).toEqual(["yop", "blip", "kawa"]);
+    expect(
+        queryAllTexts(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)")
+    ).toEqual(["yop", "blip", "kawa"]);
 
     // // should not work (form in mode "readonly")
     // await contains(".o_kanban_record:eq(0)").dragAndDrop(".o_kanban_record:eq(2)");
     // expect(
-    //     queryAllTexts(".o_kanban_record:not(.o_kanban_ghost)")).toEqual(
+    //     queryAllTexts(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)")).toEqual(
     //     ["yop", "blip", "kawa"]
     // );
 
     await contains(".o_kanban_record:eq(0)").dragAndDrop(".o_kanban_record:eq(2)");
 
-    expect(queryAllTexts(".o_kanban_record:not(.o_kanban_ghost)")).toEqual(["blip", "kawa", "yop"]);
+    expect(
+        queryAllTexts(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)")
+    ).toEqual(["blip", "kawa", "yop"]);
 
     await clickSave();
 });
@@ -9894,7 +10292,7 @@ test("one2many with many2many_tags in list and list in form with a limit", async
 
     expect(".modal .o_form_view").toHaveCount(1);
     expect(".modal .o_field_widget[name=turtles] .o_data_row").toHaveCount(3);
-    expect(".modal .o_field_x2many_list .o_pager").not.toBeVisible();
+    expect(".modal .o_field_x2many_list .o_pager").not.toHaveCount();
 });
 
 test("one2many with many2many_tags in list and list in form, and onchange", async () => {
@@ -10190,11 +10588,7 @@ test("reordering embedded one2many with handle widget starting with same sequenc
     ]);
 
     await clickSave();
-    expect(
-        Turtle._records.map((r) => {
-            return { id: r.id, turtle_int: r.turtle_int };
-        })
-    ).toEqual([
+    expect(MockServer.env["turtle"].map((r) => pick(r, "id", "turtle_int"))).toEqual([
         { id: 1, turtle_int: 2 },
         { id: 2, turtle_int: 3 },
         { id: 3, turtle_int: 4 },
@@ -10345,7 +10739,6 @@ test("x2many default_order multiple fields with limit", async () => {
 test("one2many from a model that has been sorted", async () => {
     Partner._views = {
         list: `<list><field name="int_field"/></list>`,
-        search: `<search/>`,
         form: `
             <form>
                 <field name="turtles">
@@ -10905,6 +11298,12 @@ test("x2many list sorted by many2one", async () => {
     expect(queryAllTexts(".o_data_row .o_list_number")).toEqual(["2", "1", "4"], {
         message: "should have correct order (DESC)",
     });
+
+    await contains(".o_list_renderer thead th:eq(1)").click();
+
+    expect(queryAllTexts(".o_data_row .o_list_number")).toEqual(["1", "2", "4"], {
+        message: "should fall back to initial order",
+    });
 });
 
 test("one2many with extra field from server not in (inline) form", async () => {
@@ -11412,7 +11811,14 @@ test("does not crash when you parse a tree arch containing another tree arch", a
 });
 test("open a one2many record containing a one2many", async () => {
     Partner._views = {
-        [["form", 1234]]: `
+        [["form", 5]]: /* xml */ `
+            <form>
+                <field name="p" context="{ 'form_view_ref': 1234 }">
+                    <list><field name="name" /></list>
+                </field>
+            </form>
+        `,
+        [["form", 1234]]: /* xml */ `
             <form>
                 <field name="turtles" >
                     <list>
@@ -11424,10 +11830,14 @@ test("open a one2many record containing a one2many", async () => {
 
     patchWithCleanup(browser.localStorage, {
         setItem(args) {
-            expect.step(`localStorage setItem ${args}`);
+            if (["optional_fields", "debug_open_view"].some((word) => args.startsWith(word))) {
+                expect.step(`setItem: ${args}`);
+            }
         },
         getItem(args) {
-            expect.step(`localStorage getItem ${args}`);
+            if (["optional_fields", "debug_open_view"].some((word) => args.startsWith(word))) {
+                expect.step(`getItem: ${args}`);
+            }
             return null;
         },
     });
@@ -11436,29 +11846,95 @@ test("open a one2many record containing a one2many", async () => {
     rec.p = [1];
     await mountView({
         type: "form",
-        arch: `<form>
-            <field name="p" context="{ 'form_view_ref': 1234 }">
-                <list><field name="name" /></list>
-            </field>
-        </form>`,
         resModel: "partner",
         resId: 2,
+        viewId: 5,
     });
 
     expect.verifySteps([
-        "localStorage getItem pwaService.installationState",
-        "localStorage getItem optional_fields,partner,form,123456789,p,list,name",
-        "localStorage getItem debug_open_view,partner,form,123456789,p,list,name",
+        "getItem: optional_fields,partner,form,5,p,list,name",
+        "getItem: debug_open_view,partner,form,5,p,list,name",
     ]);
 
     await contains(".o_data_cell").click();
     expect(".modal .o_data_row").toHaveCount(1);
     expect.verifySteps([
-        "localStorage getItem optional_fields,partner,form,123456789,p,list,name",
-        "localStorage getItem debug_open_view,partner,form,123456789,p,list,name",
-        "localStorage getItem optional_fields,partner,form,123456789,turtles,list,name",
-        "localStorage getItem debug_open_view,partner,form,123456789,turtles,list,name",
+        "getItem: optional_fields,partner,form,5,p,list,name",
+        "getItem: debug_open_view,partner,form,5,p,list,name",
+        "getItem: optional_fields,partner,form,5,turtles,list,name",
+        "getItem: debug_open_view,partner,form,5,turtles,list,name",
     ]);
+});
+
+test("open a one2many record with optional open record displayed", async () => {
+    Partner._views = {
+        [["form", false]]: `<form>
+            <field name="p" context="{ 'form_view_ref': 1234 }">
+                <list editable="bottom"><field name="name" /></list>
+            </field>
+        </form>`,
+        [["form", 1234]]: `
+            <form>
+                <field name="name"/>
+            </form>`,
+        [["search", false]]: `<search/>`,
+    };
+    let firstLoad = true;
+
+    patchWithCleanup(localStorage, {
+        getItem(key) {
+            const value = super.getItem(...arguments);
+            if (key.startsWith("debug_open_view")) {
+                expect.step(["getItem", key, value]);
+            }
+            return value;
+        },
+        setItem(key, value) {
+            if (key.startsWith("debug_open_view")) {
+                expect.step(["setItem", key, value]);
+            }
+            super.setItem(...arguments);
+        },
+    });
+    onRpc("get_views", ({ model, method, kwargs }) => {
+        if (firstLoad) {
+            firstLoad = false;
+        } else {
+            expect(kwargs.context.form_view_ref).toBe(1234);
+            expect.step(`${model}.${method}`);
+        }
+    });
+    serverState.debug = "1";
+    const rec = Partner._records.find(({ id }) => id === 2);
+    rec.p = [1];
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction({
+        res_model: "partner",
+        type: "ir.actions.act_window",
+        views: [[false, "form"]],
+        res_id: 2,
+    });
+
+    const localStorageKey = "debug_open_view,partner,form,false,p,list,name";
+    expect.verifySteps([["getItem", localStorageKey, null]]);
+
+    expect(`td.o_list_record_open_form_view`).toHaveCount(0);
+    expect(".o_optional_columns_dropdown").toHaveCount(1);
+    await contains(".o_optional_columns_dropdown button").click();
+    expect(".o-dropdown-item:contains('View Button')").toHaveCount(1);
+    await contains(".o-dropdown-item:contains('View Button')").click();
+    expect.verifySteps([
+        ["setItem", localStorageKey, true],
+        ["getItem", localStorageKey, "true"],
+    ]);
+
+    expect(`td.o_list_record_open_form_view`).toHaveCount(1, {
+        message: "button to open form view should be present on each rows",
+    });
+
+    await contains(`td.o_list_record_open_form_view`).click();
+    expect.verifySteps(["partner.get_views"]);
 });
 
 test("if there are less than 4 lines in a one2many, empty lines must be displayed to cover the difference.", async () => {
@@ -11515,17 +11991,17 @@ test("one2many can delete a new record", async () => {
             </form>`,
         resId: 1,
     });
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(0);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(0);
 
     await contains(".o-kanban-button-new").click();
     await contains(".modal .o_form_button_save").click();
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(1);
 
-    await contains(".o_kanban_record:not(.o_kanban_ghost)").click();
+    await contains(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").click();
     expect(".modal .o_btn_remove").toHaveCount(1);
 
     await contains(".modal .o_btn_remove").click();
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(0);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(0);
 
     await clickSave();
     expect.verifySteps([]);
@@ -11626,7 +12102,6 @@ test("create a new record with an x2m invisible", async () => {
                     },
                 },
                 limit: 40,
-                order: "",
             },
         });
         return {
@@ -11798,16 +12273,16 @@ test("nested one2manys, multi page, onchange", async () => {
                 </field>
             </form>`,
         resId: 1,
-        mode: "edit",
     });
 
     await contains(".o_field_widget[name=int_field] input").edit("5", { confirm: "blur" });
     expect.verifySteps(["onchange"]);
 
     await clickSave();
-    expect(Partner._records[0].int_field).toBe(5);
-    expect(Turtle._records[1].turtle_int).toBe(5);
-    expect(Turtle._records[0].turtle_int).toBe(5);
+
+    expect(MockServer.env["partner"][0].int_field).toBe(5);
+    expect(MockServer.env["turtle"][1].turtle_int).toBe(5);
+    expect(MockServer.env["turtle"][0].turtle_int).toBe(5);
 });
 
 test("multi page, command forget for record of second page", async () => {
@@ -11914,6 +12389,70 @@ test("new record, receive more create commands than limit", async () => {
     expect(".o_x2m_control_panel .o_pager").toHaveCount(0);
 });
 
+test("existing record: receive more create commands than limit", async () => {
+    Partner._records = [
+        { id: 1, name: "Initial Record 1", p: [1, 2, 3, 4] },
+        { id: 2, name: "Initial Record 2" },
+        { id: 3, name: "Initial Record 3" },
+        { id: 4, name: "Initial Record 4" },
+    ];
+    Partner._onChanges = {
+        int_field: function (obj) {
+            if (obj.int_field === 16) {
+                obj.p = [
+                    [0, 0, { display_name: "Record 1" }],
+                    [0, 0, { display_name: "Record 2" }],
+                    [0, 0, { display_name: "Record 3" }],
+                    [0, 0, { display_name: "Record 4" }],
+                ];
+            }
+        },
+    };
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: `
+            <form>
+                <field name="int_field"/>
+                <group>
+                    <field name="p">
+                        <list limit="2">
+                            <field name="display_name"/>
+                        </list>
+                    </field>
+                </group>
+            </form>`,
+    });
+
+    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual([
+        "Initial Record 1",
+        "Initial Record 2",
+    ]);
+
+    await contains("[name=int_field] input").edit("16", { confirm: "blur" });
+
+    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual([
+        "Initial Record 1",
+        "Initial Record 2",
+        "Record 1",
+        "Record 2",
+        "Record 3",
+        "Record 4",
+    ]);
+
+    await contains(".o_data_row :text('Record 3') ~ .o_list_record_remove").click();
+
+    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual([
+        "Initial Record 1",
+        "Initial Record 2",
+        "Record 1",
+        "Record 2",
+        "Record 4",
+        "Initial Record 3",
+    ]);
+});
+
 test("active actions are passed to o2m field", async () => {
     Partner._records[0].turtles = [1, 2, 3];
 
@@ -11930,7 +12469,6 @@ test("active actions are passed to o2m field", async () => {
                 </field>
             </form>`,
         resId: 1,
-        mode: "edit",
     });
 
     expect(".o_data_row").toHaveCount(3);
@@ -11975,16 +12513,18 @@ test("kanban one2many in opened view form", async () => {
         resId: 1,
     });
     await contains(".o_data_row td[name=name]").click();
-    expect(".modal .o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
+    expect(".modal .o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(1);
     expect(".modal .o_field_x2many_kanban").toHaveClass("o-custom-class");
 
-    await contains(".modal .o_kanban_record:not(.o_kanban_ghost)").click();
-    expect(".modal .o_kanban_record:not(.o_kanban_ghost)").toBeFocused();
+    await contains(
+        ".modal .o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)"
+    ).click();
+    expect(".modal .o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toBeFocused();
 
     await press("ArrowUp");
     await animationFrame();
 
-    expect(".modal .o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
+    expect(".modal .o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(1);
 });
 
 test("kanban one2many in opened view form (with _view_ref)", async () => {
@@ -12017,16 +12557,18 @@ test("kanban one2many in opened view form (with _view_ref)", async () => {
         resId: 1,
     });
     await contains(".o_data_row td[name=name]").click();
-    expect(".modal .o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
+    expect(".modal .o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(1);
     expect(".modal .o_field_x2many_kanban").toHaveClass("o-custom-class");
 
-    await contains(".modal .o_kanban_record:not(.o_kanban_ghost)").click();
-    expect(".modal .o_kanban_record:not(.o_kanban_ghost)").toBeFocused();
+    await contains(
+        ".modal .o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)"
+    ).click();
+    expect(".modal .o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toBeFocused();
 
     await press("ArrowUp");
     await animationFrame();
 
-    expect(".modal .o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
+    expect(".modal .o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(1);
 });
 
 test("kanban one2many (with widget) in opened view form", async () => {
@@ -12052,7 +12594,7 @@ test("kanban one2many (with widget) in opened view form", async () => {
         resId: 1,
     });
 
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(1);
     expect(".o_kanban_record:eq(0)").toHaveText("first record");
 
     await contains(".o_kanban_record").click();
@@ -12218,8 +12760,7 @@ test('Add a line, click on "Save & New" with an invalid form', async () => {
     mockService("notification", {
         add: (message, params) => {
             expect.step(params.type);
-            expect(params.title).toBe("Invalid fields: ");
-            expect(message.toString()).toBe("<ul><li>Name</li></ul>");
+            expect(message).toBe("Missing required fields");
         },
     });
     await mountView({
@@ -12351,7 +12892,6 @@ test("add a row to an x2many and ask canBeRemoved twice", async () => {
     const def = new Deferred();
     Partner._views = {
         list: `<list><field name="int_field"/></list>`,
-        search: `<search/>`,
         form: `
             <form>
                 <field name="p">
@@ -12368,9 +12908,7 @@ test("add a row to an x2many and ask canBeRemoved twice", async () => {
             p: [[0, args.args[1].p[0][1], { name: "a name" }]],
         });
     });
-    onRpc("web_search_read", () => {
-        return def;
-    });
+    onRpc("web_search_read", () => def);
 
     const actions = [
         {
@@ -12461,22 +12999,20 @@ test("onchange create a record in an invisible x2many", async () => {
         foo: function () {},
     };
     Partner._records[0].p = [2];
-    onRpc("onchange", () => {
-        return {
-            value: {
-                p: [
-                    [
-                        1,
-                        2,
-                        {
-                            name: "plop",
-                            p: [[0, false, {}]],
-                        },
-                    ],
+    onRpc("onchange", () => ({
+        value: {
+            p: [
+                [
+                    1,
+                    2,
+                    {
+                        name: "plop",
+                        p: [[0, false, {}]],
+                    },
                 ],
-            },
-        };
-    });
+            ],
+        },
+    }));
     await mountView({
         type: "form",
         resModel: "partner",
@@ -12734,7 +13270,6 @@ test("one2many with default_order on id, but id not in view", async () => {
 });
 
 test("one2many causes an onchange on the parent which fails", async () => {
-    expect.errors(1);
     Partner._onChanges = {
         turtles: function () {},
     };
@@ -12759,10 +13294,12 @@ test("one2many causes an onchange on the parent which fails", async () => {
     expect(".o_field_widget[name='turtle_foo'] input").toHaveValue("blip");
 
     // onchange on parent record fails
+    expect.errors(1);
     await contains(".o_field_widget[name='turtle_foo'] input").edit("new value", {
         confirm: "blur",
     });
     await animationFrame();
+    expect.verifyErrors(["RPC_ERROR"]);
     expect(".o_data_cell[name='turtle_foo']").toHaveText("blip");
     expect(".o_error_dialog").toHaveCount(1);
 });
@@ -12862,7 +13399,7 @@ test("x2many kanban with float field in form (non inline) but not in kanban", as
     });
 
     expect(".o_field_widget[name=turtles]").toHaveCount(1);
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(2);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(2);
 
     // open the first record
     await contains(".o_kanban_record").click();
@@ -12880,7 +13417,7 @@ test("x2many kanban with float field in form (non inline) but not in kanban", as
     // toggle bar again to make the x2many visible and force kanban cards to re-render
     await contains(".o_field_widget[name=bar] input").click();
     expect(".o_field_widget[name=turtles]").toHaveCount(1);
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(2);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(2);
 });
 
 test("onchange on x2many returning an update command with only readonly fields", async () => {
@@ -13015,66 +13552,6 @@ test("onchange on x2many add and delete x2m record, returning to initial state",
     expect.verifySteps(["get_views", "web_read", "onchange", "onchange", "onchange"]);
 });
 
-test("press TAB in editable='top' create='0' one2many list with lines generated by default_get -> onchange", async () => {
-    onRpc((args) => {
-        expect.step(args.method);
-    });
-    Partner._onChanges = { p: () => {} };
-
-    onRpc("onchange", (args) => {
-        expect.step(args.method);
-        expect(args.args).toEqual([
-            [],
-            {},
-            [],
-            {
-                display_name: {},
-                p: {
-                    fields: {
-                        foo: {},
-                    },
-                    limit: 40,
-                    order: "",
-                },
-            },
-        ]);
-        return {
-            value: {
-                p: [
-                    [5], // delete all
-                    [0, 0, { foo: "fu" }], // create new
-                    [0, 0, { foo: "ber" }],
-                    [0, 0, { foo: "qux" }],
-                ],
-            },
-        };
-    });
-    await mountView({
-        type: "form",
-        resModel: "partner",
-        arch: `
-            <form>
-                <field name="p">
-                    <list editable="top" create="0">
-                        <field name="foo"/>
-                    </list>
-                </field>
-            </form>`,
-    });
-    const target = getFixture();
-    await contains('.o_data_cell[data-tooltip="ber"]').click();
-    expect(target.querySelector(".o_selected_row .o_data_cell").dataset.tooltip).toBe("ber");
-    await press("Tab");
-    await animationFrame();
-    expect(target.querySelector(".o_selected_row .o_data_cell").dataset.tooltip).toBe("qux");
-    await press("Shift+Tab");
-    await animationFrame();
-    expect(target.querySelector(".o_selected_row .o_data_cell").dataset.tooltip).toBe("ber");
-    await press("Shift+Tab");
-    expect(target.querySelector(".o_selected_row .o_data_cell").dataset.tooltip).toBe("ber");
-    expect.verifySteps(["get_views", "onchange"]);
-});
-
 test.tags("desktop");
 test("expand record in dialog", async () => {
     Turtle._views["form, false"] = `<form><field name="name"/></form>`;
@@ -13116,4 +13593,187 @@ test("expand record in dialog", async () => {
     expect(".o_dialog .modal-header .o_expand_button").toHaveCount(1);
     await contains(".o_dialog .modal-header .o_expand_button").click();
     expect.verifySteps([[4, "turtle", "ir.actions.act_window", [[false, "form"]]]]);
+});
+
+test("one2many kanban: add button kanban's card only with no control", async () => {
+    Partner._fields.control = fields.One2many({
+        string: "one2many field",
+        relation: "partner",
+        relation_field: "trululu",
+    });
+    Partner._records[0].p = [4];
+    Partner._records[0].control = [4];
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="p">
+                    <kanban>
+                        <templates>
+                            <t t-name="card">
+                                <field name="name"/>
+                            </t>
+                        </templates>
+                    </kanban>
+                </field>
+                <field name="control">
+                    <kanban>
+                        <control>
+                            <create string="Add Custom" class="myCustomClass" />
+                        </control>
+                        <templates>
+                            <t t-name="card">
+                                <field name="name"/>
+                            </t>
+                        </templates>
+                    </kanban>
+                </field>
+            </form>`,
+        resId: 1,
+    });
+
+    expect("[name='p'] .o_x2m_control_panel .o-kanban-button-new").toHaveCount(0);
+    expect("[name='p'] .o_kanban_renderer .o-kanban-button-new").toHaveCount(1);
+
+    expect("[name='control'] .o_x2m_control_panel .o-kanban-button-new").toHaveCount(0);
+    expect("[name='control'] .o_kanban_renderer .o-kanban-button-new").toHaveCount(0);
+    expect("[name='control'] .myCustomClass").toHaveText("Add Custom");
+});
+
+test("edit o2m with default_order on a field not in view", async () => {
+    Partner._records[0].turtles = [1, 2, 3];
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="turtles">
+                    <list default_order="turtle_int">
+                        <field name="turtle_foo"/>
+                        <field name="turtle_bar"/>
+                    </list>
+                    <form>
+                        <field name="turtle_foo"/>
+                    </form>
+                </field>
+            </form>`,
+        resId: 1,
+    });
+    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["yop", "blip", "kawa"]);
+
+    await contains(".o_data_row:eq(1) .o_data_cell").click();
+    await contains(".modal .o_field_widget[name=turtle_foo] input").edit("blip2");
+    await contains(".modal-footer .o_form_button_save").click();
+    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["yop", "blip2", "kawa"]);
+});
+
+test("edit o2m with default_order on a field not in view (2)", async () => {
+    Partner._records[0].turtles = [1, 2, 3];
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="turtles">
+                    <list default_order="turtle_foo,turtle_int">
+                        <field name="turtle_foo"/>
+                        <field name="turtle_bar"/>
+                    </list>
+                    <form>
+                        <field name="turtle_foo"/>
+                    </form>
+                </field>
+            </form>`,
+        resId: 1,
+    });
+    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["blip", "kawa", "yop"]);
+
+    await contains(".o_data_row:eq(1) .o_data_cell").click();
+    await contains(".modal .o_field_widget[name=turtle_foo] input").edit("kawa2");
+    await contains(".modal-footer .o_form_button_save").click();
+    expect(queryAllTexts(".o_data_cell.o_list_char")).toEqual(["blip", "kawa2", "yop"]);
+});
+
+test("one2many list with aggregates in first column", async () => {
+    Partner._records[0].turtles = [1, 2, 3];
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="turtles">
+                    <list>
+                        <field name="turtle_int" sum="My sum"/>
+                        <field name="display_name"/>
+                    </list>
+                </field>
+            </form>`,
+        resId: 1,
+    });
+
+    expect(queryAllTexts(".o_data_cell")).toEqual([
+        "0",
+        "leonardo",
+        "9",
+        "donatello",
+        "21",
+        "raphael",
+    ]);
+    expect(`tfoot td:first`).toHaveText("30");
+});
+
+test.tags("desktop");
+test("one2many list with monetary aggregates and different currencies", async () => {
+    class Currency extends models.Model {
+        _name = "res.currency";
+
+        name = fields.Char();
+        symbol = fields.Char();
+        position = fields.Selection({
+            selection: [
+                ["after", "A"],
+                ["before", "B"],
+            ],
+        });
+        inverse_rate = fields.Float();
+
+        _records = [
+            { id: 1, name: "USD", symbol: "$", position: "before", inverse_rate: 1 },
+            { id: 2, name: "EUR", symbol: "€", position: "after", inverse_rate: 0.5 },
+        ];
+    }
+    defineModels([Currency]);
+
+    Turtle._fields.amount = fields.Monetary({ currency_field: "currency", default: 100 });
+    Turtle._fields.currency = fields.Many2one({ relation: "res.currency", default: 1 });
+    Turtle._records[2].currency = 2;
+    Partner._records[0].turtles = [1, 2, 3];
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="turtles">
+                    <list>
+                        <field name="amount" sum="My sum"/>
+                        <field name="currency"/>
+                    </list>
+                </field>
+            </form>`,
+        resId: 1,
+    });
+
+    expect(queryAllTexts(".o_data_cell.o_list_number")).toEqual([
+        "$ 100.00",
+        "$ 100.00",
+        "100.00 €",
+    ]);
+    expect(`tfoot`).toHaveText("$ 250.00?");
+    await contains("tfoot span sup").hover();
+    expect(".o_multi_currency_popover").toHaveCount(1);
+    expect(".o_multi_currency_popover").toHaveText("500.00 € at $ 0.50");
 });

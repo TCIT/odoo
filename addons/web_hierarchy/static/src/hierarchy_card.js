@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { Component } from "@odoo/owl";
 
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
@@ -21,7 +19,6 @@ export class HierarchyCard extends Component {
         node: Object,
         openRecord: Function,
         archInfo: Object,
-        templates: Object,
         classNames: { type: String, optional: true },
     };
     static defaultProps = {
@@ -31,8 +28,8 @@ export class HierarchyCard extends Component {
     static Compiler = HierarchyCompiler;
 
     setup() {
-        const { templates } = this.props;
-        this.templates = useViewCompiler(this.constructor.Compiler, templates);
+        const { archInfo } = this.props;
+        this.templates = useViewCompiler(this.constructor.Compiler, archInfo.templateDocs);
         this.evaluateBooleanExpr = evaluateBooleanExpr;
     }
 
@@ -56,11 +53,11 @@ export class HierarchyCard extends Component {
         };
     }
 
-    onGlobalClick(ev) {
+    onGlobalClick(ev, newWindow) {
         if (ev.target.closest("button")) {
             return;
         }
-        this.props.openRecord(this.props.node);
+        this.props.openRecord(this.props.node, newWindow);
     }
 
     onClickArrowUp(ev) {

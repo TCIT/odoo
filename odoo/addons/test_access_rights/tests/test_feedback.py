@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-from odoo import SUPERUSER_ID, Command
+from odoo.api import SUPERUSER_ID
 from odoo.exceptions import AccessError
+from odoo.fields import Command
 from odoo.tests import TransactionCase
 from odoo.tools.misc import mute_logger
 
@@ -16,7 +16,7 @@ class Feedback(TransactionCase):
         cls.user = cls.env['res.users'].create({
             'login': 'bob',
             'name': "Bob Bobman",
-            'groups_id': [Command.set([cls.group2.id, cls.env.ref('base.group_user').id])],
+            'group_ids': [Command.set([cls.group2.id, cls.env.ref('base.group_user').id])],
         })
 
 
@@ -32,7 +32,7 @@ class TestSudo(Feedback):
             'login': 'demo2',
             'password': 'demo2',
             'partner_id': partner_demo.id,
-            'groups_id': [Command.set([self.env.ref('base.group_user').id, self.env.ref('base.group_partner_manager').id])],
+            'group_ids': [Command.set([self.env.ref('base.group_user').id, self.env.ref('base.group_partner_manager').id])],
         })
 
         # with_user(user)
@@ -163,7 +163,7 @@ class TestIRRuleFeedback(Feedback):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.env.ref('base.group_user').write({'users': [Command.link(cls.user.id)]})
+        cls.env.ref('base.group_user').write({'user_ids': [Command.link(cls.user.id)]})
         cls.model = cls.env['ir.model'].search([('model', '=', 'test_access_right.some_obj')])
         cls.record = cls.env['test_access_right.some_obj'].create({
             'val': 0,
@@ -426,6 +426,27 @@ If you really, really need access, perhaps you can win over your friendly admini
 
 Note: this might be a multi-company issue. Switching company may help - in Odoo, not in real life!""")
 
+    def test_access_error_reports_correct_rules_with_archived_record(self):
+        """ Ensure archived records do not cause unrelated rules to be reported as failing
+        """
+        self._make_rule('rule 0', '[("company_id", "in", company_ids + [False])]', global_=True, attr='read')
+        self._make_rule('rule 1', '[("val", "=", 1)]', global_=False, attr='read')
+        self.record.active = False
+        with self.debug_mode(), self.assertRaises(AccessError) as ctx:
+            _ = self.record.val
+        self.assertEqual(
+            ctx.exception.args[0],
+            """Uh-oh! Looks like you have stumbled upon some top-secret records.
+
+Sorry, %s (id=%s) doesn't have 'read' access to:
+- %s, %s (%s: %s)
+
+Blame the following rules:
+- rule 1
+
+If you really, really need access, perhaps you can win over your friendly administrator with a batch of freshly baked cookies."""
+        % (self.user.name, self.user.id, self.record._description, self.record.display_name, self.record._name, self.record.id))
+
 
 class TestFieldGroupFeedback(Feedback):
 
@@ -442,19 +463,18 @@ class TestFieldGroupFeedback(Feedback):
     @mute_logger('odoo.models')
     def test_read(self):
         self.user.write({
-            'groups_id': [Command.set([self.env.ref('base.group_user').id])],
+            'group_ids': [Command.set([self.env.ref('base.group_user').id])],
         })
         with self.debug_mode(), self.assertRaises(AccessError) as ctx:
             _ = self.record.forbidden
 
         self.assertEqual(
             ctx.exception.args[0],
-            """You do not have enough rights to access the fields "forbidden" on Object For Test Access Right (test_access_right.some_obj). Please contact your system administrator.
+            """You do not have enough rights to access the field "forbidden" on Object For Test Access Right (test_access_right.some_obj). Please contact your system administrator.
 
 Operation: read
 User: %s
-Fields:
-- forbidden (allowed for groups 'User types / Portal', 'Test Group')"""
+Groups: allowed for groups 'Role / Portal', 'Test Group'"""
     % self.user.id
         )
 
@@ -463,31 +483,28 @@ Fields:
 
         self.assertEqual(
             ctx.exception.args[0],
-            """You do not have enough rights to access the fields "forbidden3" on Object For Test Access Right (test_access_right.some_obj). Please contact your system administrator.
+            """You do not have enough rights to access the field "forbidden3" on Object For Test Access Right (test_access_right.some_obj). Please contact your system administrator.
 
 Operation: read
 User: %s
-Fields:
-- forbidden3 (always forbidden)""" % self.user.id
+Groups: always forbidden""" % self.user.id
         )
 
     @mute_logger('odoo.models')
     def test_write(self):
         self.user.write({
-            'groups_id': [Command.set([self.env.ref('base.group_user').id])],
+            'group_ids': [Command.set([self.env.ref('base.group_user').id])],
         })
         with self.debug_mode(), self.assertRaises(AccessError) as ctx:
             self.record.write({'forbidden': 1, 'forbidden2': 2})
 
         self.assertEqual(
             ctx.exception.args[0],
-            """You do not have enough rights to access the fields "forbidden,forbidden2" on Object For Test Access Right (test_access_right.some_obj). Please contact your system administrator.
+            """You do not have enough rights to access the field "forbidden" on Object For Test Access Right (test_access_right.some_obj). Please contact your system administrator.
 
 Operation: write
 User: %s
-Fields:
-- forbidden (allowed for groups 'User types / Portal', 'Test Group')
-- forbidden2 (allowed for groups 'Test Group')"""
+Groups: allowed for groups 'Role / Portal', 'Test Group'"""
     % self.user.id
         )
 

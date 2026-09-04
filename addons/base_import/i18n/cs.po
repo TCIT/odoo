@@ -1,30 +1,42 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* base_import
-# 
+# * base_import
+#
 # Translators:
-# karolína schusterová <karolina.schusterova@vdp.sk>, 2024
-# Wil Odoo, 2025
-# 
+# Damian Brencic <brencicdamian12313@gmail.com>, 2022
+# Chris, 2022
+# Jan Horzinka <jan.horzinka@centrum.cz>, 2022
+# Rastislav Brencic <rastislav.brencic@azet.sk>, 2022
+# Martin Trigaux, 2022
+# Jiří Podhorecký, 2022
+# karolína schusterová <karolina.schusterova@vdp.sk>, 2022
+# Aleš Fiala <f.ales1@seznam.cz>, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# Marek Jasanský <zahiro@ashtechnology.eu>, 2026.
+# "Marta (wacm)" <wacm@odoo.com>, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:48+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
-"Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 19:23+0000\n"
+"Last-Translator: Marek Jasanský <zahiro@ashtechnology.eu>\n"
+"Language-Team: Czech <https://translate.odoo.com/projects/odoo-19/"
+"base_import/cs/>\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
-"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
+"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n "
+"<= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.js:0
 msgid "%(number)s file(s) selected"
-msgstr ""
+msgstr "%(number)s soubor(ů) vybráno"
 
 #. module: base_import
 #. odoo-python
@@ -51,8 +63,8 @@ msgid ""
 "A single column was found in the file, this often means the file separator "
 "is incorrect."
 msgstr ""
-"V importním souboru byl nalezen jediný sloupec, to obvykle znamená nesprávný"
-" oddělovač."
+"V importním souboru byl nalezen jediný sloupec, to obvykle znamená nesprávný "
+"oddělovač."
 
 #. module: base_import
 #. odoo-javascript
@@ -84,8 +96,8 @@ msgstr "Povolit určení shody s podřízenými poli"
 #: code:addons/base_import/static/src/import_model.js:0
 msgid ""
 "An unknown issue occurred during import (possibly lost connection, data "
-"limit exceeded or memory limits exceeded). Please retry in case the issue is"
-" transient. If the issue still occurs, try to split the file rather than "
+"limit exceeded or memory limits exceeded). Please retry in case the issue is "
+"transient. If the issue still occurs, try to split the file rather than "
 "import it at once."
 msgstr ""
 "Během importu došlo k neznámému problému (pravděpodobně ztracené připojení, "
@@ -142,8 +154,7 @@ msgstr "Zrušit"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "Click 'Resume' to proceed with the import, resuming at line %s."
-msgstr ""
-"Pro provedení importu stiskněte 'Pokračovat', pokračování od řádku %s."
+msgstr "Pro provedení importu stiskněte 'Pokračovat', pokračování od řádku %s."
 
 #. module: base_import
 #. odoo-python
@@ -155,11 +166,11 @@ msgstr "Sloupec %(column)s obsahuje nesprávné hodnoty (hodnota: %(value)s)"
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"Column %(column)s contains incorrect values. Error in line %(line)d: "
-"%(error)s"
+"Column %(column)s contains incorrect values. Error in line %(line)d: %"
+"(error)s"
 msgstr ""
-"Sloupec %(column)s obsahuje nesprávné hodnoty. Chyba v řádku %(line)d: "
-"%(error)s"
+"Sloupec %(column)s obsahuje nesprávné hodnoty. Chyba v řádku %(line)d: %"
+"(error)s"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__column_name
@@ -182,11 +193,10 @@ msgstr "Komentáře"
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"Could not retrieve URL: %(url)s [%(field_name)s: L%(line_number)d]: "
-"%(error)s"
+"Could not retrieve URL: %(url)s [%(field_name)s: L%(line_number)d]: %(error)s"
 msgstr ""
-"URL se nepodařilo načíst: %(url)s [%(field_name)s: L%(line_number)d]: "
-"%(error)s"
+"URL se nepodařilo načíst: %(url)s [%(field_name)s: L%(line_number)d]: %"
+"(error)s"
 
 #. module: base_import
 #. odoo-javascript
@@ -251,8 +261,9 @@ msgstr ""
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__display_name
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__display_name
+#: model:ir.model.fields,field_description:base_import.field_res_users__display_name
 msgid "Display Name"
-msgstr "Zobrazovací název"
+msgstr "Zobrazovaný název"
 
 #. module: base_import
 #. odoo-javascript
@@ -303,12 +314,12 @@ msgstr "Chyba při importu záznamů: oddělovač textu by měl být jediný zna
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
 "Error while importing records: all rows should be of the same size, but the "
-"title row has %(title_row_entries)d entries while the first row has "
-"%(first_row_entries)d. You may need to change the separator character."
+"title row has %(title_row_entries)d entries while the first row has %"
+"(first_row_entries)d. You may need to change the separator character."
 msgstr ""
 "Chyba při importu záznamů: všechny řádky by měly stejný počet pozic, ale "
-"řádek záhlaví má %(title_row_entries)d pozic, zatímco první řádek má "
-"%(first_row_entries)d. Možná byste měli změnit znak oddělovače."
+"řádek záhlaví má %(title_row_entries)d pozic, zatímco první řádek má %"
+"(first_row_entries)d. Možná byste měli změnit znak oddělovače."
 
 #. module: base_import
 #. odoo-javascript
@@ -333,6 +344,12 @@ msgstr "Doporučujeme Excel soubory, neboť formátování je automatické."
 #: code:addons/base_import/models/base_import.py:0
 msgid "External ID"
 msgstr "Externí ID"
+
+#. module: base_import
+#. odoo-python
+#: code:addons/base_import/models/base_import.py:0
+msgid "Field '%(field)s' does not accept date/time values."
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__field_name
@@ -369,8 +386,7 @@ msgstr "Velikost souboru překračuje nakonfigurované maximum (%s bajtů)"
 #. module: base_import
 #: model:ir.model.fields,help:base_import.field_base_import_import__file
 msgid "File to check and/or import, raw binary (not base64)"
-msgstr ""
-"Soubor ke kontrole a / nebo importu, surový binární soubor (ne base64)"
+msgstr "Soubor ke kontrole a / nebo importu, surový binární soubor (ne base64)"
 
 #. module: base_import
 #. odoo-javascript
@@ -400,8 +416,8 @@ msgstr "Formátování"
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"Found invalid image data, images should be imported as either URLs or "
-"base64-encoded data."
+"Found invalid image data, images should be imported as either URLs or base64-"
+"encoded data."
 msgstr ""
 "Nalezena neplatná obrazová data, obrázky by měly být importovány buď jako "
 "adresy URL, nebo jako data kódovaná pomocí base64."
@@ -427,6 +443,7 @@ msgstr "Zde je začátek souboru, který jsme nemohli importovat:"
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__id
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__id
+#: model:ir.model.fields,field_description:base_import.field_res_users__id
 msgid "ID"
 msgstr "ID"
 
@@ -441,7 +458,8 @@ msgid ""
 msgstr ""
 "Pokud soubor obsahuje\n"
 "                    názvy sloupců, může Odoo zkusit automatickou detekci\n"
-"                    pole odpovídajícího sloupci. Díky tomu je import jednodušší,\n"
+"                    pole odpovídajícího sloupci. Díky tomu je import "
+"jednodušší,\n"
 "                    zejména pokud má soubor mnoho sloupců."
 
 #. module: base_import
@@ -498,6 +516,13 @@ msgstr "Náhled importu se nezdařil z důvodu: ''"
 #: code:addons/base_import/static/src/import_records/import_records.xml:0
 msgid "Import records"
 msgstr "Importujte záznamy"
+
+#. module: base_import
+#. odoo-javascript
+#: code:addons/base_import/static/src/import_action/import_action.js:0
+#, fuzzy
+msgid "Imported records"
+msgstr "Importované záznamy"
 
 #. module: base_import
 #. odoo-javascript
@@ -559,8 +584,9 @@ msgstr ""
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
+#, fuzzy
 msgid "Mb"
-msgstr ""
+msgstr "Mb"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__res_model
@@ -631,7 +657,7 @@ msgstr "Náhled"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_progress/import_data_progress.xml:0
 msgid "Progress bar"
-msgstr ""
+msgstr "Ukazatel průběhu"
 
 #. module: base_import
 #. odoo-javascript
@@ -789,6 +815,22 @@ msgid "The file will be imported by batches"
 msgstr "Soubor bude importován po dávkách"
 
 #. module: base_import
+#. odoo-python
+#: code:addons/base_import/models/base_import.py:0
+msgid ""
+"There was an issue decoding the file using encoding “%s”.\n"
+"This encoding was automatically detected."
+msgstr ""
+
+#. module: base_import
+#. odoo-python
+#: code:addons/base_import/models/base_import.py:0
+msgid ""
+"There was an issue decoding the file using encoding “%s”.\n"
+"This encoding was manually selected."
+msgstr ""
+
+#. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "This column will be concatenated in field"
@@ -821,7 +863,8 @@ msgstr "Sledovat historii během importu"
 #. module: base_import
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
-msgid "Unable to load \"{extension}\" file: requires Python module \"{modname}\""
+msgid ""
+"Unable to load \"{extension}\" file: requires Python module \"{modname}\""
 msgstr "Nelze načíst soubor „{extension}“: vyžaduje modul Python „{modname}“"
 
 #. module: base_import
@@ -856,8 +899,8 @@ msgstr ""
 #: code:addons/base_import/static/src/import_model.js:0
 msgid ""
 "Use HH for hours in a 24h system, use II in conjonction with 'p' for a 12h "
-"system. You can use a custom format in addition to the suggestions provided."
-" Leave empty to let Odoo guess the format (recommended)"
+"system. You can use a custom format in addition to the suggestions provided. "
+"Leave empty to let Odoo guess the format (recommended)"
 msgstr ""
 "Použijte HH pro hodiny v 24h systému, použijte II ve spojení s 'p' pro 12h "
 "systém. Kromě uvedených doporučení, můžete použít vlastní formát. Ponechte "
@@ -867,10 +910,10 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid ""
-"Use YYYY to represent the year, MM for the month and DD for the day. Include"
-" separators such as a dot, forward slash or dash. You can use a custom "
-"format in addition to the suggestions provided. Leave empty to let Odoo "
-"guess the format (recommended)"
+"Use YYYY to represent the year, MM for the month and DD for the day. Include "
+"separators such as a dot, forward slash or dash. You can use a custom format "
+"in addition to the suggestions provided. Leave empty to let Odoo guess the "
+"format (recommended)"
 msgstr ""
 "Použijte YYYY pro roky, MM pro měsíce a DD pro dny. Vložte oddělovač, např. "
 "tečku, dopředné lomítko nebo pomlčku. Kromě uvedených doporučení můžete "
@@ -906,11 +949,9 @@ msgstr "Pokud hodnotu nelze dohledat:"
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"You can not import images via URL, check with your administrator or support "
+"You can not import file via URL, check with your administrator or support "
 "for the reason."
 msgstr ""
-"Nelze importovat obrázky pomocí adresy URL, zeptejte se u správce nebo "
-"podpory."
 
 #. module: base_import
 #. odoo-javascript
@@ -972,3 +1013,34 @@ msgstr "vteřin"
 #: code:addons/base_import/models/base_import.py:0
 msgid "unknown error code %s"
 msgstr "neznámý kód chyby%s"
+
+#~ msgid "Column %s contains incorrect values (value: %s)"
+#~ msgstr "Sloupec %s obsahuje nesprávné hodnoty (hodnota: %s)"
+
+#~ msgid "Column %s contains incorrect values. Error in line %d: %s"
+#~ msgstr "Sloupec %s obsahuje nesprávné hodnoty. Chyba v řádku %d: %s"
+
+#~ msgid "Error Parsing Date [%s:L%d]: %s"
+#~ msgstr "Chyba při analýze data [%s:L%d]: %s"
+
+#~ msgid ""
+#~ "Import timed out. Please retry. If you still encounter this issue, the "
+#~ "file may be too big for the system's configuration, try to split it "
+#~ "(import less records per file)."
+#~ msgstr ""
+#~ "Import vypršel. Zkuste to prosím znovu. Pokud se stále setkáváte s tímto "
+#~ "problémem, soubor může být příliš velký pro konfiguraci systému, zkuste "
+#~ "jej rozdělit (import méně záznamů na soubor)."
+
+#~ msgid "Load File"
+#~ msgstr "Načíst soubor"
+
+#~ msgid "Upload File"
+#~ msgstr "Nahrát soubor"
+
+#~ msgid ""
+#~ "You can not import images via URL, check with your administrator or "
+#~ "support for the reason."
+#~ msgstr ""
+#~ "Nelze importovat obrázky pomocí adresy URL, zeptejte se u správce nebo "
+#~ "podpory."

@@ -1,8 +1,6 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 import { markup } from "@odoo/owl";
 
 registry.category("web_tour.tours").add('hr_recruitment_tour',{
@@ -75,7 +73,7 @@ registry.category("web_tour.tours").add('hr_recruitment_tour',{
     trigger: ".o_kanban_applicant",
 },
 {
-    trigger: ".oe_kanban_card",
+    trigger: ".o_kanban_record",
     content: markup(_t("<b>Drag this card</b>, to qualify him for a first interview.")),
     tooltipPosition: "bottom",
     run: "drag_and_drop(.o_kanban_group:eq(1))",
@@ -84,7 +82,7 @@ registry.category("web_tour.tours").add('hr_recruitment_tour',{
     trigger: ".o_kanban_applicant",
 },
 {
-    trigger: ".oe_kanban_card",
+    trigger: ".o_kanban_record",
     content: markup(_t("<b>Click to view</b> the application.")),
     tooltipPosition: "bottom",
     run: "click",

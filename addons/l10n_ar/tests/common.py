@@ -9,7 +9,7 @@ import time
 _logger = logging.getLogger(__name__)
 
 
-class TestAr(AccountTestInvoicingCommon):
+class TestArCommon(AccountTestInvoicingCommon):
 
     @classmethod
     @AccountTestInvoicingCommon.setup_chart_template('ar_ri')
@@ -69,6 +69,7 @@ class TestAr(AccountTestInvoicingCommon):
             'acc_number': '7982898111100056688080',
             'partner_id': cls.company_ri.partner_id.id,
             'company_id': cls.company_ri.id,
+            'allow_out_payment': True,
         })
 
         # ==== Partners / Customers ====
@@ -177,6 +178,37 @@ class TestAr(AccountTestInvoicingCommon):
         cls.tax_perc_iibb = cls._search_tax(cls, 'percepcion_iibb_ba')
         cls.tax_iva_exento = cls._search_tax(cls, 'iva_exento')
 
+        cls.tax_national = cls.env['account.tax'].create({
+            "name": "National Tax",
+            "description": "National Tax",
+            "amount": "4",
+            "amount_type": "percent",
+            "type_tax_use": "sale",
+            "country_id": cls.env.ref("base.ar").id,
+            "company_id": cls.company_ri.id,
+            "tax_group_id": cls.env.ref(f"account.{cls.company_ri.id}_tax_group_national_taxes").id,
+        })
+        cls.tax_internal = cls.env['account.tax'].create({
+            "name": "Internal Tax",
+            "description": "Internal Tax",
+            "amount": "3",
+            "amount_type": "percent",
+            "type_tax_use": "sale",
+            "country_id": cls.env.ref("base.ar").id,
+            "company_id": cls.company_ri.id,
+            "tax_group_id": cls.env.ref(f"account.{cls.company_ri.id}_tax_impuestos_internos").id,
+        })
+        cls.tax_other = cls.env['account.tax'].create({
+            "name": "Other Tax",
+            "description": "Other Tax",
+            "amount": "100",
+            "amount_type": "fixed",
+            "type_tax_use": "sale",
+            "country_id": cls.env.ref("base.ar").id,
+            "company_id": cls.company_ri.id,
+            "tax_group_id": cls.env.ref(f"account.{cls.company_ri.id}_tax_group_otros_impuestos").id,
+        })
+
         cls.tax_21_purchase = cls._search_tax(cls, 'iva_21', type_tax_use='purchase')
         cls.tax_no_gravado_purchase = cls._search_tax(cls, 'iva_no_gravado', type_tax_use='purchase')
 
@@ -187,7 +219,6 @@ class TestAr(AccountTestInvoicingCommon):
         cls.product_iva_21 = cls.env['product.product'].create({
             'name': 'Large Cabinet (VAT 21)',
             'uom_id': uom_unit.id,
-            'uom_po_id': uom_unit.id,
             'lst_price': 320.0,
             'standard_price': 800.0,
             'type': "consu",
@@ -197,7 +228,6 @@ class TestAr(AccountTestInvoicingCommon):
             # demo 'product_product_telefonia'
             'name': 'Telephone service (VAT 27)',
             'uom_id': uom_unit.id,
-            'uom_po_id': uom_unit.id,
             'lst_price': 130.0,
             'standard_price': 250.0,
             'type': 'service',
@@ -208,7 +238,6 @@ class TestAr(AccountTestInvoicingCommon):
             # demo 'product_product_cero'
             'name': 'Non-industrialized animals and vegetables (VAT Zero)',
             'uom_id': uom_unit.id,
-            'uom_po_id': uom_unit.id,
             'list_price': 160.0,
             'standard_price': 200.0,
             'type': 'consu',
@@ -219,7 +248,6 @@ class TestAr(AccountTestInvoicingCommon):
             # demo 'product.product_product_27'
             'name': 'Laptop Customized (VAT 10,5)',
             'uom_id': uom_unit.id,
-            'uom_po_id': uom_unit.id,
             'standard_price': 4500.0,
             'type': 'consu',
             'default_code': '10,5',
@@ -229,7 +257,6 @@ class TestAr(AccountTestInvoicingCommon):
             # demo data product.product_product_2
             'name': 'Virtual Home Staging (VAT 21)',
             'uom_id': uom_hour.id,
-            'uom_po_id': uom_hour.id,
             'list_price': 38.25,
             'standard_price': 45.5,
             'type': 'service',
@@ -240,7 +267,6 @@ class TestAr(AccountTestInvoicingCommon):
             # demo data product_product_no_gravado
             'name': 'Untaxed concepts (VAT NT)',
             'uom_id': uom_unit.id,
-            'uom_po_id': uom_unit.id,
             'list_price': 40.00,
             'standard_price': 50.0,
             'type': 'consu',
@@ -251,7 +277,6 @@ class TestAr(AccountTestInvoicingCommon):
             # product.product_product_25
             "name": "Laptop E5023 (VAT 10,5)",
             'uom_id': uom_unit.id,
-            'uom_po_id': uom_unit.id,
             "standard_price": 3280.0,
             'type': 'consu',
             'default_code': '10,5',
@@ -262,7 +287,6 @@ class TestAr(AccountTestInvoicingCommon):
             # demo product_product_exento
             'name': 'Book: Development in Odoo (VAT Exempt)',
             'uom_id': uom_unit.id,
-            'uom_po_id': uom_unit.id,
             'standard_price': 100.0,
             "list_price": 80.0,
             'type': 'consu',
@@ -274,16 +298,14 @@ class TestAr(AccountTestInvoicingCommon):
             'name': 'Service WO TAX',
             'type': 'service',
             'uom_id': uom_unit.id,
-            'uom_po_id': uom_unit.id,
-            'default_code': 'AFIP_DESPACHO',
+            'default_code': 'ARCA_DESPACHO',
         })
         cls.service_iva_no_gravado = cls.env['product.product'].create({
             # demo product_product_arancel
             'name': 'Server VAT Untaxed',
             'type': 'service',
             'uom_id': uom_unit.id,
-            'uom_po_id': uom_unit.id,
-            'default_code': 'AFIP_ARANCEL',
+            'default_code': 'ARCA_ARANCEL',
             "supplier_taxes_id": [(6, 0, (cls.tax_no_gravado_purchase).ids)],
         })
 
@@ -316,293 +338,290 @@ class TestAr(AccountTestInvoicingCommon):
         cls.demo_credit_notes = {}
         cls.demo_bills = {}
 
-    def _create_test_invoices_like_demo(self, use_current_date=True):
-        """ Create in the unit tests the same invoices created in demo data """
-        payment_term_id = self.env.ref("account.account_payment_term_end_following_month")
-        invoice_user_id = self.env.user
-        incoterm = self.env.ref("account.incoterm_EXW")
+    @classmethod
+    def _get_ar_multi_invoice_line_ids(cls):
+        return [
+            cls._prepare_invoice_line(product_id=cls.product_iva_105, price_unit=642.0, quantity=5),
+            cls._prepare_invoice_line(product_id=cls.service_iva_27, price_unit=250.0, quantity=1),
+            cls._prepare_invoice_line(product_id=cls.product_iva_105_perc, price_unit=3245.0, quantity=2),
+            cls._prepare_invoice_line(product_id=cls.product_no_gravado, price_unit=50.0, quantity=10),
+            cls._prepare_invoice_line(product_id=cls.product_iva_cero, price_unit=200.0, quantity=1),
+            cls._prepare_invoice_line(product_id=cls.product_iva_exento, price_unit=100.0, quantity=1),
+        ]
 
-        decimal_price = self.env.ref('product.decimal_price')
+    @classmethod
+    def _create_test_invoices_like_demo(cls, use_current_date=True):
+        """ Create in the unit tests the same invoices created in demo data """
+        payment_term = cls.env.ref("account.account_payment_term_end_following_month")
+        incoterm = cls.env.ref("account.incoterm_EXW")
+
+        decimal_price = cls.env.ref('product.decimal_price')
         decimal_price.digits = 4
 
-        invoices_to_create = {
+        test_invoices_map = {
             'test_invoice_1': {
                 "ref": "test_invoice_1: Invoice to gritti support service, vat 21",
-                "partner_id": self.res_partner_gritti_mono,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.res_partner_gritti_mono,
+                "invoice_payment_term_id": payment_term,
                 "move_type": "out_invoice",
                 "invoice_date": "2021-03-01",
-                "company_id": self.company_ri,
+                "company_id": cls.company_ri,
                 "invoice_line_ids": [
-                    {'product_id': self.service_iva_21}
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21),
                 ],
             },
             'test_invoice_2': {
                 "ref": "test_invoice_2: Invoice to Servicios Globales with vat 21, 27 and 10,5",
-                "partner_id": self.res_partner_servicios_globales,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.res_partner_servicios_globales,
+                "invoice_payment_term_id": payment_term,
                 "move_type": "out_invoice",
                 "invoice_date": "2021-03-05",
-                "company_id": self.company_ri,
+                "company_id": cls.company_ri,
                 "invoice_line_ids": [
-                    {'product_id': self.product_iva_105, 'price_unit': 642.0, 'quantity': 5},
-                    {'product_id': self.service_iva_27, 'price_unit': 250.0, 'quantity': 1},
-                    {'product_id': self.product_iva_105_perc, 'price_unit': 3245.0, 'quantity': 2}
+                    cls._prepare_invoice_line(product_id=cls.product_iva_105, price_unit=642.0, quantity=5),
+                    cls._prepare_invoice_line(product_id=cls.service_iva_27, price_unit=250.0, quantity=1),
+                    cls._prepare_invoice_line(product_id=cls.product_iva_105_perc, price_unit=3245.0, quantity=2),
                 ],
             },
             'test_invoice_3': {
                 "ref": "test_invoice_3: Invoice to ADHOC with vat cero and 21",
-                "partner_id": self.res_partner_adhoc,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.res_partner_adhoc,
+                "invoice_payment_term_id": payment_term,
                 "move_type": 'out_invoice',
                 "invoice_date": "2021-03-01",
-                "company_id": self.company_ri,
+                "company_id": cls.company_ri,
                 "invoice_line_ids": [
-                    {'product_id': self.product_iva_105, 'price_unit': 642.0, 'quantity': 5},
-                    {'product_id': self.product_iva_cero, 'price_unit': 200.0, 'quantity': 1}
+                    cls._prepare_invoice_line(product_id=cls.product_iva_105, price_unit=642.0, quantity=5),
+                    cls._prepare_invoice_line(product_id=cls.product_iva_cero, price_unit=200.0, quantity=1),
                 ],
             },
             'test_invoice_4': {
                 'ref': 'test_invoice_4: Invoice to ADHOC with vat exempt and 21',
-                "partner_id": self.res_partner_adhoc,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.res_partner_adhoc,
+                "invoice_payment_term_id": payment_term,
                 "move_type": 'out_invoice',
                 "invoice_date": "2021-03-01",
-                "company_id": self.company_ri,
+                "company_id": cls.company_ri,
                 "invoice_line_ids": [
-                    {'product_id': self.product_iva_105, 'price_unit': 642.0, 'quantity': 5},
-                    {'product_id': self.product_iva_exento, 'price_unit': 100.0, 'quantity': 1},
+                    cls._prepare_invoice_line(product_id=cls.product_iva_105, price_unit=642.1234, quantity=5),
+                    cls._prepare_invoice_line(product_id=cls.product_iva_exento, price_unit=100.5678, quantity=1),
                 ],
             },
             'test_invoice_5': {
                 'ref': 'test_invoice_5: Invoice to ADHOC with all type of taxes',
-                "partner_id": self.res_partner_adhoc,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.res_partner_adhoc,
+                "invoice_payment_term_id": payment_term,
                 "move_type": 'out_invoice',
                 "invoice_date": "2021-03-13",
-                "company_id": self.company_ri,
-                "invoice_line_ids": [
-                    {'product_id': self.product_iva_105, 'price_unit': 642.0, 'quantity': 5},
-                    {'product_id': self.service_iva_27, 'price_unit': 250.0, 'quantity': 1},
-                    {'product_id': self.product_iva_105_perc, 'price_unit': 3245.0, 'quantity': 2},
-                    {'product_id': self.product_no_gravado, 'price_unit': 50.0, 'quantity': 10},
-                    {'product_id': self.product_iva_cero, 'price_unit': 200.0, 'quantity': 1},
-                    {'product_id': self.product_iva_exento, 'price_unit': 100.0, 'quantity': 1}
-                ],
+                "company_id": cls.company_ri,
+                "invoice_line_ids": cls._get_ar_multi_invoice_line_ids(),
             },
             'test_invoice_6': {
                 'ref': 'test_invoice_6: Invoice to Montana Sur, fiscal position changes taxes to exempt',
-                "partner_id": self.res_partner_montana_sur,
-                "journal_id": self.sale_expo_journal_ri,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.res_partner_montana_sur,
+                "journal_id": cls.sale_expo_journal_ri,
+                "invoice_payment_term_id": payment_term,
                 "move_type": 'out_invoice',
                 "invoice_date": "2021-03-03",
-                "company_id": self.company_ri,
+                "company_id": cls.company_ri,
                 "invoice_incoterm_id": incoterm,
-                "invoice_line_ids": [
-                    {'product_id': self.product_iva_105, 'price_unit': 642.0, 'quantity': 5},
-                    {'product_id': self.service_iva_27, 'price_unit': 250.0, 'quantity': 1},
-                    {'product_id': self.product_iva_105_perc, 'price_unit': 3245.0, 'quantity': 2},
-                    {'product_id': self.product_no_gravado, 'price_unit': 50.0, 'quantity': 10},
-                    {'product_id': self.product_iva_cero, 'price_unit': 200.0, 'quantity': 1},
-                    {'product_id': self.product_iva_exento, 'price_unit': 100.0, 'quantity': 1},
-                ],
+                "invoice_line_ids": cls._get_ar_multi_invoice_line_ids(),
             },
             'test_invoice_7': {
                 'ref': 'test_invoice_7: Export invoice to Barcelona food, fiscal position changes tax to exempt (type 4 because it have services)',
-                "partner_id": self.res_partner_barcelona_food,
-                "journal_id": self.sale_expo_journal_ri,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.res_partner_barcelona_food,
+                "journal_id": cls.sale_expo_journal_ri,
+                "invoice_payment_term_id": payment_term,
                 "move_type": 'out_invoice',
                 "invoice_date": "2021-03-03",
-                "company_id": self.company_ri,
+                "company_id": cls.company_ri,
                 "invoice_incoterm_id": incoterm,
-                "invoice_line_ids": [
-                    {'product_id': self.product_iva_105, 'price_unit': 642.0, 'quantity': 5},
-                    {'product_id': self.service_iva_27, 'price_unit': 250.0, 'quantity': 1},
-                    {'product_id': self.product_iva_105_perc, 'price_unit': 3245.0, 'quantity': 2},
-                    {'product_id': self.product_no_gravado, 'price_unit': 50.0, 'quantity': 10},
-                    {'product_id': self.product_iva_cero, 'price_unit': 200.0, 'quantity': 1},
-                    {'product_id': self.product_iva_exento, 'price_unit': 100.0, 'quantity': 1},
-                ],
+                "invoice_line_ids": cls._get_ar_multi_invoice_line_ids(),
             },
             'test_invoice_8': {
                 'ref': 'test_invoice_8: Invoice to consumidor final',
-                "partner_id": self.partner_cf,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.partner_cf,
+                "invoice_payment_term_id": payment_term,
                 "move_type": 'out_invoice',
                 "invoice_date": "2021-03-13",
-                "company_id": self.company_ri,
+                "company_id": cls.company_ri,
                 "invoice_line_ids": [
-                    {'product_id': self.service_iva_21, 'price_unit': 642.0, 'quantity': 1},
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=642.0, quantity=1),
                 ],
             },
             'test_invoice_10': {
                 'ref': 'test_invoice_10; Invoice to ADHOC in USD and vat 21',
-                "partner_id": self.res_partner_adhoc,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.res_partner_adhoc,
+                "invoice_payment_term_id": payment_term,
                 "move_type": 'out_invoice',
                 "invoice_date": "2021-03-13",
-                "company_id": self.company_ri,
+                "company_id": cls.company_ri,
                 "invoice_line_ids": [
-                    {'product_id': self.product_iva_105, 'price_unit': 1000.0, 'quantity': 5},
+                    cls._prepare_invoice_line(product_id=cls.product_iva_105, price_unit=1000.0, quantity=5),
                 ],
-                "currency_id": self.env.ref("base.USD"),
+                "currency_id": cls.env.ref("base.USD"),
             },
             'test_invoice_11': {
                 'ref': 'test_invoice_11: Invoice to ADHOC with many lines in order to prove rounding error, with 4 decimals of precision for the currency and 2 decimals for the product the error apperar',
-                "partner_id": self.res_partner_adhoc,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.res_partner_adhoc,
+                "invoice_payment_term_id": payment_term,
                 "move_type": 'out_invoice',
                 "invoice_date": "2021-03-13",
-                "company_id": self.company_ri,
+                "company_id": cls.company_ri,
                 "invoice_line_ids": [
-                    {'product_id': self.service_iva_21, 'price_unit': 1.12, 'quantity': 1, 'name': 'Support Services 1'},
-                    {'product_id': self.service_iva_21, 'price_unit': 1.12, 'quantity': 1, 'name': 'Support Services 2'},
-                    {'product_id': self.service_iva_21, 'price_unit': 1.12, 'quantity': 1, 'name': 'Support Services 3'},
-                    {'product_id': self.service_iva_21, 'price_unit': 1.12, 'quantity': 1, 'name': 'Support Services 4'},
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=1.12, quantity=1, name='Support Services 1'),
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=1.12, quantity=1, name='Support Services 2'),
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=1.12, quantity=1, name='Support Services 3'),
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=1.12, quantity=1, name='Support Services 4'),
                 ],
             },
             'test_invoice_12': {
                 'ref': 'test_invoice_12: Invoice to ADHOC with many lines in order to test rounding error, it is required to use a 4 decimal precision in prodct in order to the error occur',
-                "partner_id": self.res_partner_adhoc,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.res_partner_adhoc,
+                "invoice_payment_term_id": payment_term,
                 "move_type": 'out_invoice',
                 "invoice_date": "2021-03-13",
-                "company_id": self.company_ri,
+                "company_id": cls.company_ri,
                 "invoice_line_ids": [
-                    {'product_id': self.service_iva_21, 'price_unit': 15.7076, 'quantity': 1, 'name': 'Support Services 1'},
-                    {'product_id': self.service_iva_21, 'price_unit': 5.3076, 'quantity': 2, 'name': 'Support Services 2'},
-                    {'product_id': self.service_iva_21, 'price_unit': 3.5384, 'quantity': 2, 'name': 'Support Services 3'},
-                    {'product_id': self.service_iva_21, 'price_unit': 1.6376, 'quantity': 2, 'name': 'Support Services 4'},
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=15.7076, quantity=1, name='Support Services 1'),
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=5.3076, quantity=2, name='Support Services 2'),
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=3.5384, quantity=2, name='Support Services 3'),
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=1.6376, quantity=2, name='Support Services 4'),
                 ],
             },
             'test_invoice_13': {
                 'ref': 'test_invoice_13: Invoice to ADHOC with many lines in order to test zero amount invoices y rounding error. it is required to set the product decimal precision to 4 and change 260.59 for 260.60 in order to reproduce the error',
-                "partner_id": self.res_partner_adhoc,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.res_partner_adhoc,
+                "invoice_payment_term_id": payment_term,
                 "move_type": 'out_invoice',
                 "invoice_date": "2021-03-13",
-                "company_id": self.company_ri,
+                "company_id": cls.company_ri,
                 "invoice_line_ids": [
-                    {'product_id': self.service_iva_21, 'price_unit': 24.3, 'quantity': 3, 'name': 'Support Services 1'},
-                    {'product_id': self.service_iva_21, 'price_unit': 260.59, 'quantity': 1, 'name': 'Support Services 2'},
-                    {'product_id': self.service_iva_21, 'price_unit': 48.72, 'quantity': 1, 'name': 'Support Services 3'},
-                    {'product_id': self.service_iva_21, 'price_unit': 13.666, 'quantity': 1, 'name': 'Support Services 4'},
-                    {'product_id': self.service_iva_21, 'price_unit': 11.329, 'quantity': 2, 'name': 'Support Services 5'},
-                    {'product_id': self.service_iva_21, 'price_unit': 68.9408, 'quantity': 1, 'name': 'Support Services 6'},
-                    {'product_id': self.service_iva_21, 'price_unit': 4.7881, 'quantity': 2, 'name': 'Support Services 7'},
-                    {'product_id': self.service_iva_21, 'price_unit': 12.0625, 'quantity': 2, 'name': 'Support Services 8'},
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=24.3, quantity=3, name='Support Services 1'),
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=260.59, quantity=1, name='Support Services 2'),
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=48.72, quantity=1, name='Support Services 3'),
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=13.666, quantity=1, name='Support Services 4'),
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=11.329, quantity=2, name='Support Services 5'),
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=68.9408, quantity=1, name='Support Services 6'),
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=4.7881, quantity=2, name='Support Services 7'),
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=12.0625, quantity=2, name='Support Services 8'),
                 ],
             },
             'test_invoice_14': {
                 'ref': 'test_invoice_14: Export invoice to Barcelona food, fiscal position changes tax to exempt (type 1 because only products)',
-                "partner_id": self.res_partner_barcelona_food,
-                "journal_id": self.sale_expo_journal_ri,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.res_partner_barcelona_food,
+                "journal_id": cls.sale_expo_journal_ri,
+                "invoice_payment_term_id": payment_term,
                 "move_type": 'out_invoice',
                 "invoice_date": "2021-03-20",
-                "company_id": self.company_ri,
+                "company_id": cls.company_ri,
                 "invoice_incoterm_id": incoterm,
                 "invoice_line_ids": [
-                    {'product_id': self.product_iva_105, 'price_unit': 642.0, 'quantity': 5},
+                    cls._prepare_invoice_line(product_id=cls.product_iva_105, price_unit=642.0, quantity=5),
                 ],
             },
             'test_invoice_15': {
                 'ref': 'test_invoice_15: Export invoice to Barcelona food, fiscal position changes tax to exempt (type 2 because only service)',
-                "partner_id": self.res_partner_barcelona_food,
-                "journal_id": self.sale_expo_journal_ri,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.res_partner_barcelona_food,
+                "journal_id": cls.sale_expo_journal_ri,
+                "invoice_payment_term_id": payment_term,
                 "move_type": 'out_invoice',
                 "invoice_date": "2021-03-20",
-                "company_id": self.company_ri,
+                "company_id": cls.company_ri,
                 "invoice_incoterm_id": incoterm,
                 "invoice_line_ids": [
-                    {'product_id': self.service_iva_27, 'price_unit': 250.0, 'quantity': 1},
+                    cls._prepare_invoice_line(product_id=cls.service_iva_27, price_unit=250.0, quantity=1),
                 ],
             },
             'test_invoice_16': {
                 'ref': 'test_invoice_16: Export invoice to Barcelona food, fiscal position changes tax to exempt (type 1 because it have products only, used to test refund of expo)',
-                "partner_id": self.res_partner_barcelona_food,
-                "journal_id": self.sale_expo_journal_ri,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.res_partner_barcelona_food,
+                "journal_id": cls.sale_expo_journal_ri,
+                "invoice_payment_term_id": payment_term,
                 "move_type": 'out_invoice',
                 "invoice_date": "2021-03-22",
-                "company_id": self.company_ri,
+                "company_id": cls.company_ri,
                 "invoice_incoterm_id": incoterm,
                 "invoice_line_ids": [
-                    {'product_id': self.product_iva_105, 'price_unit': 642.0, 'quantity': 5},
+                    cls._prepare_invoice_line(product_id=cls.product_iva_105, price_unit=642.0, quantity=5),
                 ],
             },
             'test_invoice_17': {
                 'ref': 'test_invoice_17: Invoice to ADHOC with 100%% of discount',
-                "partner_id": self.res_partner_adhoc,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.res_partner_adhoc,
+                "invoice_payment_term_id": payment_term,
                 "move_type": 'out_invoice',
                 "invoice_date": "2021-03-13",
-                "company_id": self.company_ri,
+                "company_id": cls.company_ri,
                 "invoice_line_ids": [
-                    {'product_id': self.service_iva_21, 'price_unit': 24.3, 'quantity': 3, 'name': 'Support Services 8', 'discount': 100},
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=24.3, quantity=3, name='Support Services 8', discount=100),
                 ],
             },
             'test_invoice_18': {
                 'ref': 'test_invoice_18: Invoice to ADHOC with 100%% of discount and with different VAT aliquots',
-                "partner_id": self.res_partner_adhoc,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.res_partner_adhoc,
+                "invoice_payment_term_id": payment_term,
                 "move_type": 'out_invoice',
                 "invoice_date": "2021-03-13",
-                "company_id": self.company_ri,
+                "company_id": cls.company_ri,
                 "invoice_line_ids": [
-                    {'product_id': self.service_iva_21, 'price_unit': 24.3, 'quantity': 3, 'name': 'Support Services 8', 'discount': 100},
-                    {'product_id': self.service_iva_27, 'price_unit': 250.0, 'quantity': 1, 'discount': 100},
-                    {'product_id': self.product_iva_105_perc, 'price_unit': 3245.0, 'quantity': 1},
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=24.3, quantity=3, name='Support Services 8', discount=100),
+                    cls._prepare_invoice_line(product_id=cls.service_iva_27, price_unit=250.0, quantity=1, discount=100),
+                    cls._prepare_invoice_line(product_id=cls.product_iva_105_perc, price_unit=3245.0, quantity=1),
                 ],
             },
             'test_invoice_19': {
                 'ref': 'test_invoice_19: Invoice to ADHOC with multiple taxes and perceptions',
-                "partner_id": self.res_partner_adhoc,
-                "invoice_payment_term_id": payment_term_id,
+                "partner_id": cls.res_partner_adhoc,
+                "invoice_payment_term_id": payment_term,
                 "move_type": 'out_invoice',
                 "invoice_date": "2021-03-13",
-                "company_id": self.company_ri,
+                "company_id": cls.company_ri,
                 "invoice_line_ids": [
-                    {'product_id': self.service_iva_21, 'price_unit': 24.3, 'quantity': 3, 'name': 'Support Services 8'},
-                    {'product_id': self.service_iva_27, 'price_unit': 250.0, 'quantity': 1},
-                    {'product_id': self.product_iva_105_perc, 'price_unit': 3245.0, 'quantity': 1},
+                    cls._prepare_invoice_line(product_id=cls.service_iva_21, price_unit=24.3, quantity=3, name='Support Services 8'),
+                    cls._prepare_invoice_line(product_id=cls.service_iva_27, price_unit=250.0, quantity=1),
+                    cls._prepare_invoice_line(product_id=cls.product_iva_105_perc, price_unit=3245.0, quantity=1),
                 ],
             }
         }
 
-        for key, values in invoices_to_create.items():
-            with Form(self.env['account.move'].with_context(default_move_type=values['move_type'])) as invoice_form:
-                invoice_form.ref = values['ref']
-                invoice_form.partner_id = values['partner_id']
-                invoice_form.invoice_payment_term_id = values['invoice_payment_term_id']
-                if not use_current_date:
+        if use_current_date:
+            for invoice_key, invoice_values in test_invoices_map.items():
+                invoice_values.pop('invoice_date')
+                cls.demo_invoices[invoice_key] = cls._create_invoice_ar(**invoice_values)
+        else:
+            for key, values in test_invoices_map.items():
+                values['invoice_line_ids'] = [line_data for _, _, line_data in values['invoice_line_ids']]
+                with Form(cls.env['account.move'].with_context(default_move_type=values['move_type'])) as invoice_form:
+                    invoice_form.ref = values['ref']
+                    invoice_form.partner_id = values['partner_id']
+                    invoice_form.invoice_payment_term_id = values['invoice_payment_term_id']
                     invoice_form.invoice_date = values['invoice_date']
-                if values.get('invoice_incoterm_id'):
-                    invoice_form.invoice_incoterm_id = values['invoice_incoterm_id']
-                for line in values['invoice_line_ids']:
-                    with invoice_form.invoice_line_ids.new() as line_form:
-                        line_form.product_id = line.get('product_id')
-                        line_form.price_unit = line.get('price_unit')
-                        line_form.quantity = line.get('quantity')
-                        if line.get('tax_ids'):
-                            line_form.tax_ids = line.get('tax_ids')
-                        line_form.name = 'xxxx'
-                        line_form.account_id = self.company_data['default_account_revenue']
-            invoice = invoice_form.save()
-            self.demo_invoices[key] = invoice
+                    if values.get('invoice_incoterm_id'):
+                        invoice_form.invoice_incoterm_id = values['invoice_incoterm_id']
+                    for line in values['invoice_line_ids']:
+                        with invoice_form.invoice_line_ids.new() as line_form:
+                            line_form.product_id = cls.env['product.product'].browse(line.get('product_id'))
+                            line_form.price_unit = line.get('price_unit')
+                            line_form.quantity = line.get('quantity')
+                            if line.get('tax_ids'):
+                                line_form.tax_ids = cls.env['account.tax'].browse(line.get('tax_ids'))
+                            line_form.name = 'xxxx'
+                            line_form.account_id = cls.company_data['default_account_revenue']
+                cls.demo_invoices[key] = invoice_form.save()
 
+    # -------------------------------------------------------------------------
     # Helpers
+    # -------------------------------------------------------------------------
 
     @classmethod
     def _get_afip_pos_system_real_name(cls):
         return {'PREPRINTED': 'II_IM'}
 
-    def _create_journal(self, afip_ws, data=None):
-        """ Create a journal of a given AFIP ws type.
-        If there is a problem because we are using a AFIP certificate that is already been in use then change the certificate and try again """
+    @classmethod
+    def _create_journal(cls, afip_ws, data=None):
+        """ Create a journal of a given ARCA ws type.
+        If there is a problem because we are using a ARCA certificate that is already been in use then change the certificate and try again """
         data = data or {}
         afip_ws = afip_ws.upper()
         pos_number = str(random.randint(0, 99999))
@@ -611,90 +630,23 @@ class TestAr(AccountTestInvoicingCommon):
         values = {'name': '%s %s' % (afip_ws.replace('WS', ''), pos_number),
                   'type': 'sale',
                   'code': pos_number,
-                  'l10n_ar_afip_pos_system': self._get_afip_pos_system_real_name().get(afip_ws),
+                  'l10n_ar_afip_pos_system': cls._get_afip_pos_system_real_name().get(afip_ws),
                   'l10n_ar_afip_pos_number': pos_number,
                   'l10n_latam_use_documents': True,
-                  'company_id': self.env.company.id,
-                  'l10n_ar_afip_pos_partner_id': self.partner_ri.id,
+                  'company_id': cls.env.company.id,
+                  'l10n_ar_afip_pos_partner_id': cls.partner_ri.id,
                   'sequence': 1}
         values.update(data)
 
-        journal = self.env['account.journal'].create(values)
-        _logger.info('Created journal %s for company %s', journal.name, self.env.company.name)
+        journal = cls.env['account.journal'].create(values)
+        _logger.info('Created journal %s for company %s', journal.name, cls.env.company.name)
         return journal
 
-    def _create_invoice(self, data=None, invoice_type='out_invoice'):
-        data = data or {}
-        with Form(self.env['account.move'].with_context(default_move_type=invoice_type)) as invoice_form:
-            invoice_form.partner_id = data.get('partner', self.partner)
-            if 'in_' not in invoice_type:
-                invoice_form.journal_id = data.get('journal', self.journal)
-
-            if data.get('document_type'):
-                invoice_form.l10n_latam_document_type_id = data.get('document_type')
-            if data.get('document_number'):
-                invoice_form.l10n_latam_document_number = data.get('document_number')
-            if data.get('incoterm'):
-                invoice_form.invoice_incoterm_id = data.get('incoterm')
-            if data.get('currency'):
-                invoice_form.currency_id = data.get('currency')
-            for line in data.get('lines', [{}]):
-                with invoice_form.invoice_line_ids.new() as invoice_line_form:
-                    invoice_line_form.display_type = line.get('display_type', 'product')
-                    if line.get('display_type') in ('line_note', 'line_section'):
-                        invoice_line_form.name = line.get('name', 'not invoice line')
-                    else:
-                        invoice_line_form.product_id = line.get('product', self.product_iva_21)
-                        invoice_line_form.quantity = line.get('quantity', 1)
-                        invoice_line_form.price_unit = line.get('price_unit', 100)
-            invoice_form.invoice_date = invoice_form.date
-        invoice = invoice_form.save()
-        return invoice
-
-    def _create_invoice_product(self, data=None):
-        data = data or {}
-        return self._create_invoice(data)
-
-    def _create_invoice_service(self, data=None):
-        data = data or {}
-        newlines = []
-        for line in data.get('lines', [{}]):
-            line.update({'product': self.service_iva_27})
-            newlines.append(line)
-        data.update({'lines': newlines})
-        return self._create_invoice(data)
-
-    def _create_invoice_product_service(self, data=None):
-        data = data or {}
-        newlines = []
-        for line in data.get('lines', [{}]):
-            line.update({'product': self.product_iva_21})
-            newlines.append(line)
-        data.update({'lines': newlines + [{'product': self.service_iva_27}]})
-        return self._create_invoice(data)
-
-    def _create_credit_note(self, invoice, data=None):
-        data = data or {}
-        refund_wizard = self.env['account.move.reversal'].with_context({'active_ids': [invoice.id], 'active_model': 'account.move'}).create({
-            'reason': data.get('reason', 'Mercadería defectuosa'),
-            'journal_id': invoice.journal_id.id})
-
-        forced_document_type = data.get('document_type')
-        if forced_document_type:
-            refund_wizard.l10n_latam_document_type_id = forced_document_type.id
-
-        res = refund_wizard.refund_moves() if data.get('refund_method', 'refund') == 'refund' else refund_wizard.modify_moves()
-        refund = self.env['account.move'].browse(res['res_id'])
-        return refund
-
-    def _create_debit_note(self, invoice, data=None):
-        data = data or {}
-        debit_note_wizard = self.env['account.debit.note'].with_context(
-            {'active_ids': [invoice.id], 'active_model': 'account.move', 'default_copy_lines': True}).create({
-                'reason': data.get('reason', 'Mercadería defectuosa')})
-        res = debit_note_wizard.create_debit()
-        debit_note = self.env['account.move'].browse(res['res_id'])
-        return debit_note
+    @classmethod
+    def _create_invoice_ar(cls, **invoice_args):
+        invoice_args.setdefault('partner_id', cls.partner)
+        invoice_args.setdefault('invoice_line_ids', [cls._prepare_invoice_line(price_unit=100, product_id=cls.product_iva_21)])
+        return cls._create_invoice(**invoice_args)
 
     def _search_tax(self, tax_type, type_tax_use='sale'):
         res = self.env['account.tax'].with_context(active_test=False).search([
@@ -713,7 +665,7 @@ class TestAr(AccountTestInvoicingCommon):
 
     def _prepare_multicurrency_values(self):
         # Enable multi currency
-        self.env.user.write({'groups_id': [(4, self.env.ref('base.group_multi_currency').id)]})
+        self.env.user.write({'group_ids': [(4, self.env.ref('base.group_multi_currency').id)]})
         # Set ARS as main currency
         self._set_today_rate(self.env.ref('base.ARS'), 1.0)
         # Set Rates for USD currency

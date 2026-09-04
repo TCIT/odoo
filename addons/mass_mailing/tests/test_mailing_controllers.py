@@ -6,7 +6,6 @@ from markupsafe import Markup
 from requests import Session, PreparedRequest, Response
 
 import datetime
-import werkzeug
 
 from odoo import tools
 from odoo.addons.mail.tests.common import mail_new_test_user
@@ -135,12 +134,12 @@ class TestMailingControllers(TestMailingControllersCommon):
         # TEST: various invalid cases
         for test_user_id, test_token, error_code in [
             (self.user_marketing.id, '', 400),  # no token
-            (self.user_marketing.id, 'zboobs', 418),  # invalid token
-            (self.env.uid, hash_token, 418),  # invalid credentials
+            (self.user_marketing.id, 'zboobs', 401),  # invalid token
+            (self.env.uid, hash_token, 401),  # invalid credentials
         ]:
             with self.subTest(test_user_id=test_user_id, test_token=test_token):
                 res = self.url_open(
-                    werkzeug.urls.url_join(
+                    tools.urls.urljoin(
                         test_mailing.get_base_url(),
                         f'mailing/report/unsubscribe?user_id={test_user_id}&token={test_token}',
                     )
@@ -150,23 +149,23 @@ class TestMailingControllers(TestMailingControllersCommon):
 
         # TEST: not mailing user
         self.user_marketing.write({
-            'groups_id': [(3, self.env.ref('mass_mailing.group_mass_mailing_user').id)],
+            'group_ids': [(3, self.env.ref('mass_mailing.group_mass_mailing_user').id)],
         })
         res = self.url_open(
-            werkzeug.urls.url_join(
+            tools.urls.urljoin(
                 test_mailing.get_base_url(),
                 f'mailing/report/unsubscribe?user_id={self.user_marketing.id}&token={hash_token}',
             )
         )
-        self.assertEqual(res.status_code, 418)
+        self.assertEqual(res.status_code, 401)
         self.assertTrue(self.env['ir.config_parameter'].sudo().get_param('mass_mailing.mass_mailing_reports'))
 
         # TEST: finally valid call
         self.user_marketing.write({
-            'groups_id': [(4, self.env.ref('mass_mailing.group_mass_mailing_user').id)],
+            'group_ids': [(4, self.env.ref('mass_mailing.group_mass_mailing_user').id)],
         })
         res = self.url_open(
-            werkzeug.urls.url_join(
+            tools.urls.urljoin(
                 test_mailing.get_base_url(),
                 f'mailing/report/unsubscribe?user_id={self.user_marketing.id}&token={hash_token}',
             )
@@ -270,14 +269,14 @@ class TestMailingControllers(TestMailingControllersCommon):
         # to run; test without and with mailing group
         self.user_marketing.write({
             'email': tools.formataddr(("Déboulonneur", "fleurus@example.com")),
-            'groups_id': [(3, self.env.ref('mass_mailing.group_mass_mailing_user').id)],
+            'group_ids': [(3, self.env.ref('mass_mailing.group_mass_mailing_user').id)],
         })
         test_mailing = self.test_mailing_on_documents.with_env(self.env)
         self.authenticate('user_marketing', 'user_marketing')
 
         # no group -> no direct access to /unsubscribe
         res = self.url_open(
-            werkzeug.urls.url_join(
+            tools.urls.urljoin(
                 test_mailing.get_base_url(),
                 f'mailing/{test_mailing.id}/unsubscribe',
             )
@@ -286,7 +285,7 @@ class TestMailingControllers(TestMailingControllersCommon):
 
         # group -> direct access to /unsubscribe should wokr
         self.user_marketing.write({
-            'groups_id': [(4, self.env.ref('mass_mailing.group_mass_mailing_user').id)],
+            'group_ids': [(4, self.env.ref('mass_mailing.group_mass_mailing_user').id)],
         })
         # launch unsubscription tour
         with freeze_time(self._reference_now):
@@ -585,22 +584,22 @@ class TestMailingControllers(TestMailingControllersCommon):
         doc_id, email_normalized = self.user_marketing.partner_id.id, self.user_marketing.email_normalized
         hash_token = test_mailing._generate_mailing_recipient_token(doc_id, email_normalized)
         self.user_marketing.write({
-            'groups_id': [(3, self.env.ref('mass_mailing.group_mass_mailing_user').id)],
+            'group_ids': [(3, self.env.ref('mass_mailing.group_mass_mailing_user').id)],
         })
         self.authenticate('user_marketing', 'user_marketing')
 
         # TEST: various invalid cases
         for test_mid, test_doc_id, test_email, test_token, error_code in [
             (test_mailing.id, doc_id, email_normalized, '', 400),  # no token
-            (test_mailing.id, doc_id, email_normalized, 'zboobs', 418),  # wrong token
-            (test_mailing.id, self.env.user.partner_id.id, email_normalized, hash_token, 418),  # mismatch
-            (test_mailing.id, doc_id, 'not.email@example.com', hash_token, 418),  # mismatch
-            (shadow_mailing.id, doc_id, email_normalized, hash_token, 418),  # valid credentials but wrong mailing_id
+            (test_mailing.id, doc_id, email_normalized, 'zboobs', 401),  # wrong token
+            (test_mailing.id, self.env.user.partner_id.id, email_normalized, hash_token, 401),  # mismatch
+            (test_mailing.id, doc_id, 'not.email@example.com', hash_token, 401),  # mismatch
+            (shadow_mailing.id, doc_id, email_normalized, hash_token, 401),  # valid credentials but wrong mailing_id
             (0, doc_id, email_normalized, hash_token, 400),  # valid credentials but missing mailing_id
         ]:
             with self.subTest(test_mid=test_mid, test_email=test_email, test_doc_id=test_doc_id, test_token=test_token):
                 res = self.url_open(
-                    werkzeug.urls.url_join(
+                    tools.urls.urljoin(
                         test_mailing.get_base_url(),
                         f'mailing/{test_mid}/view?email={test_email}&document_id={test_doc_id}&hash_token={test_token}',
                     )
@@ -609,7 +608,7 @@ class TestMailingControllers(TestMailingControllersCommon):
 
         # TEST: valid call using credentials
         res = self.url_open(
-            werkzeug.urls.url_join(
+            tools.urls.urljoin(
                 test_mailing.get_base_url(),
                 f'mailing/{test_mailing.id}/view?email={email_normalized}&document_id={doc_id}&hash_token={hash_token}',
             )
@@ -618,10 +617,10 @@ class TestMailingControllers(TestMailingControllersCommon):
 
         # TEST: invalid credentials but mailing user
         self.user_marketing.write({
-            'groups_id': [(4, self.env.ref('mass_mailing.group_mass_mailing_user').id)],
+            'group_ids': [(4, self.env.ref('mass_mailing.group_mass_mailing_user').id)],
         })
         res = self.url_open(
-            werkzeug.urls.url_join(
+            tools.urls.urljoin(
                 test_mailing.get_base_url(),
                 f'mailing/{test_mailing.id}/view',
             )
@@ -653,12 +652,13 @@ class TestMailingTracking(TestMailingControllersCommon):
         self.assertFalse(mailing_trace.open_datetime)
         self.assertEqual(mailing_trace.trace_status, 'sent')
 
-        short_link_url = werkzeug.urls.url_join(
+        short_link_url = tools.urls.urljoin(
             mail.get_base_url(),
             f'r/{link_tracker_code.code}/m/{mailing_trace.id}'
         )
         with freeze_time(self._reference_now):
-            _response = self.url_open(short_link_url)
+            response = self.url_open(short_link_url, allow_redirects=False)
+            self.assertTrue(response.headers['Location'].startswith('https://www.example.com/foo/bar?baz=qux'))
 
         self.assertEqual(link_tracker_code.link_id.count, 1)
         self.assertEqual(mailing_trace.links_click_datetime, self._reference_now)
@@ -690,7 +690,7 @@ class TestMailingTracking(TestMailingControllersCommon):
         self.assertEqual(mailing_trace.open_datetime, self._reference_now)
         self.assertEqual(mailing_trace.trace_status, 'open')
 
-        track_url = werkzeug.urls.url_join(
+        track_url = tools.urls.urljoin(
             mailing.get_base_url(),
             f'mail/track/{mail_id_int}/fake_token/blank.gif'
         )

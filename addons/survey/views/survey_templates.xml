@@ -37,29 +37,26 @@
         <xpath expr="//footer" position="after">
             <div class="py-3 m-0 p-0 text-end">
                 <div class="o_survey_progress_wrapper d-inline-block pe-1 text-start">
-                    <t t-call="survey.survey_progression"
-                        t-if="survey and survey.questions_layout != 'one_page' and answer and answer.state == 'in_progress' and (not question or not question.is_page) and not survey_form_readonly">
+                    <t t-if="survey and survey.questions_layout != 'one_page' and answer and answer.state == 'in_progress' and (not question or not question.is_page) and not survey_form_readonly">
                         <t t-if="survey.questions_layout == 'page_per_section'">
                             <t t-set="page_ids" t-value="survey.page_ids.ids"/>
                             <t t-set="page_number" t-value="page_ids.index(page.id) + (1 if survey.progression_mode == 'number' else 0)"/>
                         </t>
                         <t t-else="">
-                            <t t-if="not answer.is_session_answer and survey.questions_selection == 'random'">
-                                <t t-set="page_ids" t-value="answer.predefined_question_ids.ids"/>
-                            </t>
-                            <t t-else="">
-                                <t t-set="page_ids" t-value="survey.question_ids.ids"/>
-                            </t>
+                            <t t-if="not answer.is_session_answer and survey.questions_selection == 'random'"
+                                t-set="page_ids" t-value="answer.predefined_question_ids.ids"/>
+                            <t t-else="" t-set="page_ids" t-value="survey.question_ids.ids"/>
                             <t t-set="page_number" t-value="page_ids.index(question.id)"/>
                         </t>
+                        <t t-call="survey.survey_progression"/>
                     </t>
                 </div>
                 <div class="o_survey_brand_message float-end rounded me-3 border">
-                    <div class="px-2 py-2 d-inline-block" t-call="web.brand_promotion_message">
-                        <t t-set="_message"></t>
-                        <t t-set="_utm_medium" t-valuef="survey"/>
+                    <div class="px-2 py-2 d-inline-block">
+                        <t t-call="web.brand_promotion_message" _message.f="" _utm_medium.f="survey"/>
                     </div>
-                    <div t-if="not no_survey_navigation" class="o_survey_navigation_wrapper d-inline-block d-print-none" t-call="survey.survey_navigation">
+                    <div t-if="not no_survey_navigation" class="o_survey_navigation_wrapper d-inline-block d-print-none">
+                        <t t-call="survey.survey_navigation"/>
                     </div>
                 </div>
             </div>
@@ -80,23 +77,33 @@
     </template>
 
     <template id="survey_fill_header" name="Survey: main page header">
-        <div class="o_survey_nav pt16 mb-2">
-            <div class="container m-0 p-0">
-                <div class="row">
-                    <div  class="col-lg-10">
-                        <h1 t-if="answer.state == 'new' or survey.questions_layout != 'page_per_question'"
-                            t-esc="survey.title" class="o_survey_main_title pt-4"></h1>
-                    </div>
-                    <div class="o_survey_timer col-lg-2 pt-4">
-                        <h1 class="o_survey_timer_container timer text-end">
-                        </h1>
+        <div class="d-flex flex-wrap flex-md-nowrap justify-content-between pt16 mb-2">
+            <div t-attf-class="o_survey_nav flex-grow-1 #{'order-2 order-md-1' if languages else None}">
+                <div class="container m-0 p-0">
+                    <div class="row">
+                        <div class="col-lg-10">
+                            <t t-set="displayTitle" t-value="answer.state == 'in_progress' and survey.questions_layout != 'page_per_question'"/>
+                            <h1 t-out="survey.title" class="o_survey_main_title o_survey_main_title_fade pt-4"
+                                t-attf-class="o_survey_main_title o_survey_main_title_fade pt-4 {{'opacity-0' if not displayTitle else 'opacity-100'}}"/>
+                        </div>
+                        <div class="o_survey_timer col-lg-2 pt-4">
+                            <h1 class="o_survey_timer_container timer text-end"/>
+                        </div>
                     </div>
                 </div>
+                <div t-att-class="'o_survey_breadcrumb_container mt8' + (' d-none ' if answer.state != 'in_progress' else '')"
+                     t-if="not survey.has_conditional_questions and survey.questions_layout == 'page_per_section' and answer.state != 'done'"
+                     t-att-data-can-go-back="survey.users_can_go_back"
+                     t-att-data-pages="json.dumps(breadcrumb_pages)" />
             </div>
-            <div t-att-class="'o_survey_breadcrumb_container mt8' + (' d-none ' if answer.state != 'in_progress' else '')"
-                 t-if="not survey.has_conditional_questions and survey.questions_layout == 'page_per_section' and answer.state != 'done'"
-                t-att-data-can-go-back="survey.users_can_go_back"
-                t-att-data-pages="json.dumps(breadcrumb_pages)" />
+            <div t-if="languages" class="order-1 order-md-2">
+                <select name="lang_code"
+                        t-attf-class="form-select o_survey_lang_selector #{'d-none' if len(languages) == 1 else ''}"
+                        aria-label="Select a language">
+                    <option t-foreach="languages" t-as="language" t-att-value="language[0]" t-out="language[1]"
+                            t-att-selected="language[0] == lang_code and 'selected' or None"/>
+                </select>
+            </div>
         </div>
     </template>
 
@@ -108,7 +115,7 @@
                     if page else survey.background_image_url
                     if survey.background_image_url else False"/>
         <form role="form" method="post" t-att-name="survey.id"
-                class="d-flex flex-grow-1 align-items-center"
+                class="o_survey-fill-form d-flex flex-grow-1 align-items-center"
                 t-att-data-scoring-type="survey.scoring_type"
                 t-att-data-answer-token="answer.access_token"
                 t-att-data-survey-token="survey.access_token"
@@ -135,26 +142,13 @@
                 <t t-else="" t-call="survey.survey_fill_form_done"/>
             </div>
         </form>
-
-        <!-- Modal used to display error message, i.c.o. ajax error -->
-        <div role="dialog" class="modal fade" id="MasterTabErrorModal" >
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <header class="modal-header">
-                        <h4 class="modal-title">A problem has occurred</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </header>
-                    <main class="modal-body"><p>To take this survey, please close all other tabs on <strong class="text-danger"></strong>.</p></main>
-                    <footer class="modal-footer"><button type="button" class="btn btn-primary" data-bs-dismiss="modal">Continue here</button></footer>
-                </div>
-            </div>
-        </div>
     </template>
 
     <template id="survey_fill_form_start" name="Survey: start form content">
         <div class="wrap o_survey_start">
             <div class='mb32'>
-                <div t-field='survey.description' class="oe_no_empty pb-5 text-break"/>
+                <h1 t-out="survey.title" class="o_survey_main_title pb-2"/>
+                <div t-field='survey.description' class="oe_no_empty pb-2 text-break"/>
                 <t t-if="answer.is_session_answer">
                     <div class="fw-bold">
                         The session will begin automatically when the host starts.
@@ -188,6 +182,7 @@
             t-att-data-has-answered="bool(has_answered)"
             t-att-data-is-page-description="bool(question and question.is_page and not is_html_empty(question.description))"
             t-att-data-server-time="server_time"
+            t-att-data-survey-last-triggering-answers="survey_last_triggering_answers"
             t-att-data-timer="timer_start"
             t-att-data-time-limit-minutes="time_limit_minutes"/>
         <t t-if="survey.questions_layout == 'one_page'">
@@ -289,6 +284,7 @@
     <template id="survey_fill_form_done" name="Survey: finished">
         <div class="wrap">
             <div class="o_survey_finished mt32 mb32">
+                <h1 t-out="survey.title" class="o_survey_main_title pb-2"/>
                 <h1 class="fs-2">
                     <t t-if="survey.scoring_type != 'no_scoring'">
                         You scored <t t-out="answer.scoring_percentage"/>%
@@ -558,7 +554,7 @@
                         <span class="ms-2" t-out="question.comments_message or default_comments_message" />
                     </label>
                 </div>
-                <div t-attf-class="o_survey_comment_container mt-3 py-0 px-1 #{'d-none' if not comment_line else ''}">
+                <div t-attf-class="o_survey_comment_container mt-3 py-0 px-1 h-auto #{'d-none' if not comment_line else ''}">
                     <textarea type="text" class="form-control o_survey_question_text_box bg-transparent rounded-0 p-0"
                         t-att-disabled="None if comment_line else 'disabled'"><t t-esc="comment_line.value_char_box if comment_line else ''"/></textarea>
                 </div>
@@ -623,7 +619,7 @@
                         <span class="ms-2" t-out="question.comments_message or default_comments_message" />
                     </label>
                 </div>
-                <div t-attf-class="o_survey_comment_container mt-3 py-0 px-1 #{'d-none' if not comment_line else ''}">
+                <div t-attf-class="o_survey_comment_container mt-3 py-0 h-auto px-1 #{'d-none' if not comment_line else ''}">
                     <textarea type="text" class="form-control o_survey_question_text_box bg-transparent rounded-0 p-0"
                         t-att-disabled="None if comment_line else 'disabled'"><t t-esc="comment_line.value_char_box if comment_line else ''"/></textarea>
                 </div>
@@ -640,7 +636,8 @@
         <table class="table table-borderless o_survey_question_matrix text-white text-center mb-0"
                t-att-data-name="question.id"
                t-att-data-question-type="question.question_type"
-               t-att-data-sub-questions="question.matrix_row_ids.ids">
+               t-att-data-sub-questions="question.matrix_row_ids.ids"
+               t-att-data-is-skipped-question="is_skipped_question or None">
             <thead>
                 <tr>
                     <th> </th>
@@ -694,14 +691,14 @@
     <template id="survey_progression" name="Survey: Progression">
         <t t-if="len(page_ids) > 1 and not survey.has_conditional_questions">
             <t t-set="percentage" t-value="round(100*(page_number/len(page_ids)))"/>
-            <t t-if="survey.progression_mode == 'percent'">
-                <span class="o_survey_progress_percent" t-esc="percentage"/> % completed
-            </t>
-            <t t-else="">
-                <span class="o_survey_progress_number" t-esc="page_number"/> of <span t-esc="len(page_ids)"/>
-                <span t-if="survey.questions_layout == 'page_per_question'">answered</span>
-                <span t-else="">pages</span>
-            </t>
+            <span t-if="survey.progression_mode == 'percent'">
+                <t t-esc="percentage"/>% completed
+            </span>
+            <span t-else="">
+                <t t-esc="page_number"/> of <t t-esc="len(page_ids)"/>
+                <t t-if="survey.questions_layout == 'page_per_question'">answered</t>
+                <t t-else="">pages</t>
+            </span>
             <div class="o_survey_progress progress flex-grow-1">
                 <div class="progress-bar bg-primary" t-att-style="'width: ' + str(percentage) + '%'"/>
             </div>

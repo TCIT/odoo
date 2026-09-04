@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 {
     'name': 'Sale Loyalty',
     'summary': 'Use discounts and loyalty programs in sales orders',
@@ -29,5 +29,6 @@
         ],
     },
     'uninstall_hook': 'uninstall_hook',
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

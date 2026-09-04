@@ -1,39 +1,10 @@
-/** @odoo-module */
-import { ORM } from "@web/core/orm_service";
-import { patch } from "@web/core/utils/patch";
-
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 
 function assertEqual(actual, expected) {
     if (actual !== expected) {
         throw new Error(`Assert failed: expected: ${expected} ; got: ${actual}`);
     }
-}
-
-async function nextTick() {
-    await new Promise(setTimeout);
-    await new Promise(requestAnimationFrame);
-}
-
-function observeOrmCalls() {
-    const calls = [];
-
-    const unpatch = patch(ORM.prototype, {
-        call() {
-            const prom = super.call(...arguments);
-            calls.push([prom, arguments]);
-            return prom;
-        },
-    });
-
-    async function wait(unobserve = true) {
-        await Promise.all(calls.map((i) => i[0]));
-        if (unobserve) {
-            unpatch();
-        }
-    }
-    return wait;
 }
 
 registry.category("web_tour.tours").add("test_base_automation", {
@@ -68,9 +39,8 @@ registry.category("web_tour.tours").add("test_base_automation", {
             run: "click",
         },
         {
-            content: "Select On save",
-            trigger: ".o_form_renderer #trigger_0",
-            run: `select "on_create_or_write"`,
+            trigger: ".o_select_menu_item:contains(On create and edit)",
+            run: "click",
         },
         {
             content: "Add new action",
@@ -139,37 +109,39 @@ registry.category("web_tour.tours").add("test_base_automation_on_tag_added", {
             run: "click",
         },
         {
+            content: "Open select",
             trigger: ".o_form_renderer #trigger_0",
+            run: "click",
+        },
+        {
+            trigger: ".o_select_menu_menu",
             run() {
-                const options = Object.fromEntries(
-                    Array.from(this.anchor.querySelectorAll("option")).map((el) => [
-                        JSON.parse(el.value),
-                        el.textContent,
-                    ])
-                );
+                const options = [...this.anchor.querySelectorAll(".o_select_menu_item")].map(
+                        (el) => el.textContent
+                    );
 
                 assertEqual(
                     JSON.stringify(options),
-                    JSON.stringify({
-                        false: "",
-                        on_stage_set: "Stage is set to",
-                        on_user_set: "User is set",
-                        on_tag_set: "Tag is added",
-                        on_priority_set: "Priority is set to",
-                        on_time: "Based on date field",
-                        on_time_created: "After creation",
-                        on_time_updated: "After last update",
-                        on_create_or_write: "On save",
-                        on_unlink: "On deletion",
-                        on_change: "On UI change",
-                        on_webhook: "On webhook",
-                    })
+                    JSON.stringify([
+                        "Stage is set to",
+                        "User is set",
+                        "Tag is added",
+                        "Priority is set to",
+                        "Based on date field",
+                        "After creation",
+                        "After last update",
+                        "On create",
+                        "On create and edit",
+                        "On deletion",
+                        "On UI change",
+                        "On webhook"
+                    ])
                 );
             },
         },
         {
-            trigger: ".o_form_renderer #trigger_0",
-            run: `select "on_tag_set"`,
+            trigger: ".o_select_menu_item:contains(Tag is added)",
+            run: "click",
         },
         {
             trigger: '.o_form_renderer div[name="trg_field_ref"] input',
@@ -275,7 +247,7 @@ registry.category("web_tour.tours").add("test_base_automation_on_tag_added", {
                 );
                 assertEqual(
                     this.anchor.querySelector(".o_automation_actions").textContent,
-                    "Update NameUpdate Priority"
+                    "Update test_base_automation.projectUpdate test_base_automation.project"
                 );
             },
         },
@@ -286,7 +258,7 @@ registry.category("web_tour.tours").add("test_open_automation_from_grouped_kanba
     steps: () => [
         {
             trigger: ".o_kanban_header:contains(test tag)",
-            run: "hover && click .o_kanban_view .o_kanban_config button.dropdown-toggle",
+            run: "hover && click .o_kanban_view .o_group_config button.dropdown-toggle",
         },
         {
             trigger: ".dropdown-menu .o_column_automations",
@@ -300,8 +272,8 @@ registry.category("web_tour.tours").add("test_open_automation_from_grouped_kanba
             trigger: ".o_form_view",
             run() {
                 assertEqual(
-                    this.anchor.querySelector(".o_field_widget[name='trigger'] select").value,
-                    '"on_tag_set"'
+                    this.anchor.querySelector(".o_field_widget[name='trigger'] input").value,
+                    "Tag is added"
                 );
                 assertEqual(
                     this.anchor.querySelector(".o_field_widget[name='trg_field_ref'] input").value,
@@ -321,16 +293,12 @@ registry.category("web_tour.tours").add("test_kanban_automation_view_stage_trigg
     steps: () => [
         {
             trigger: ".o_base_automation_kanban_view",
-            async run() {
-                assertEqual(
-                    document.querySelector(".o_kanban_record .fs-2").innerText,
-                    "Test Stage"
-                );
-                assertEqual(
-                    document.querySelector(".o_kanban_record .o_tag").innerText,
-                    "Stage value"
-                );
-            },
+        },
+        {
+            trigger: ".o_kanban_record .fs-2:contains(Test Stage)",
+        },
+        {
+            trigger: ".o_kanban_record .o_tag:contains(Stage value)",
         },
     ],
 });
@@ -339,22 +307,15 @@ registry.category("web_tour.tours").add("test_kanban_automation_view_time_trigge
     steps: () => [
         {
             trigger: ".o_base_automation_kanban_view",
-            async run() {
-                assertEqual(
-                    document.querySelector(
-                        ".o_automation_base_info > div > div > span:nth-child(1)"
-                    ).innerText,
-                    "1"
-                );
-                assertEqual(
-                    document.querySelector(".o_automation_base_info .text-lowercase").innerText,
-                    "hours"
-                );
-                assertEqual(
-                    document.querySelector(".o_kanban_record .o_tag").innerText,
-                    "Last Automation (Automated Rule Test)"
-                );
-            },
+        },
+        {
+            trigger: ".o_automation_base_info > div > div > span:nth-child(1):contains(1)",
+        },
+        {
+            trigger: ".o_automation_base_info .text-lowercase:contains(hours)",
+        },
+        {
+            trigger: `.o_kanban_record .o_tag:contains("Last Automation (Automated Rule Test)")`,
         },
     ],
 });
@@ -363,14 +324,13 @@ registry.category("web_tour.tours").add("test_kanban_automation_view_time_update
     steps: () => [
         {
             trigger: ".o_base_automation_kanban_view",
+        },
+        {
+            trigger: ".o_automation_base_info > div > div > span:nth-child(1):contains(1)",
             async run() {
                 const lowercaseTexts = document.querySelectorAll(
                     ".o_automation_base_info .text-lowercase"
                 );
-                const number = document.querySelector(
-                    ".o_automation_base_info > div > div > span:nth-child(1)"
-                ).innerText;
-                assertEqual(number, "1");
                 assertEqual(lowercaseTexts.length, 2);
                 assertEqual(lowercaseTexts[0].innerText, "hours");
                 assertEqual(lowercaseTexts[1].innerText, "after last update");
@@ -383,12 +343,11 @@ registry.category("web_tour.tours").add("test_kanban_automation_view_create_acti
     steps: () => [
         {
             trigger: ".o_base_automation_kanban_view",
+        },
+        {
+            trigger: "div[name='action_server_ids']:contains(Create Contact with name NameX)",
             async run() {
-                assertEqual(
-                    document.querySelector("div[name='action_server_ids']").innerText,
-                    "Create Contact with name NameX"
-                );
-                assertEqual(document.querySelectorAll(".fa.fa-edit").length, 1);
+                assertEqual(document.querySelectorAll(".fa.fa-plus-square").length, 1);
             },
         },
     ],
@@ -398,20 +357,17 @@ registry.category("web_tour.tours").add("test_resize_kanban", {
     steps: () => [
         {
             trigger: ".o_base_automation_kanban_view",
+        },
+        {
+            trigger:
+                ".o_automation_actions:contains(Set Active To False Set Active To False Set Active To False)",
             async run() {
-                assertEqual(
-                    this.anchor.querySelector(".o_automation_actions").innerText,
-                    "Set Active To False\nSet Active To False\nSet Active To False"
-                );
                 document.body.style.setProperty("width", "500px");
                 window.dispatchEvent(new Event("resize"));
-                await nextTick();
-                await nextTick();
-                assertEqual(
-                    this.anchor.querySelector(".o_automation_actions").innerText,
-                    "Set Active To False\n2 actions"
-                );
             },
+        },
+        {
+            trigger: ".o_automation_actions:contains(Set Active To False 2 actions)",
         },
     ],
 });
@@ -424,7 +380,7 @@ registry.category("web_tour.tours").add("test_form_view_resequence_actions", {
             async run() {
                 assertEqual(
                     this.anchor.innerText,
-                    "Update Active 0\nto\nNo (False)\nUpdate Active 1\nto\nNo (False)\nUpdate Active 2\nto\nNo (False)"
+                    "Update Active 0\nUpdate Active 1\nUpdate Active 2"
                 );
             },
         },
@@ -440,7 +396,7 @@ registry.category("web_tour.tours").add("test_form_view_resequence_actions", {
             async run() {
                 assertEqual(
                     this.anchor.innerText,
-                    "Update Active 2\nto\nNo (False)\nUpdate Active 0\nto\nNo (False)\nUpdate Active 1\nto\nNo (False)"
+                    "Update Active 2\nUpdate Active 0\nUpdate Active 1"
                 );
             },
         },
@@ -462,10 +418,6 @@ registry.category("web_tour.tours").add("test_form_view_resequence_actions", {
             },
         },
         {
-            trigger: ".modal-content .o_form_renderer [name='state'] span[value*='object_write']",
-            run: "click",
-        },
-        {
             trigger: ".modal-content .o_form_renderer [name='state'] span[value*='followers']",
             run: "click",
         },
@@ -483,7 +435,6 @@ registry.category("web_tour.tours").add("test_form_view_resequence_actions", {
     ],
 });
 
-let waitOrmCalls;
 registry.category("web_tour.tours").add("test_form_view_model_id", {
     steps: () => [
         {
@@ -495,18 +446,25 @@ registry.category("web_tour.tours").add("test_form_view_model_id", {
             run: "click",
         },
         {
-            trigger: ".o_field_widget[name='trigger']",
+            trigger: ".o_field_widget[name='trigger'] input",
+            run: "click",
+        },
+        {
+            trigger: ".o_select_menu_menu",
             run() {
-                const triggerGroups = Array.from(this.anchor.querySelectorAll("optgroup"));
                 assertEqual(
-                    triggerGroups.map((el) => el.getAttribute("label")).join(" // "),
-                    "Values Updated // Timing Conditions // Custom // External"
+                    Array.from(this.anchor.querySelectorAll(".o_select_menu_group"))
+                        .map((el) => el.textContent)
+                        .join(", "),
+                    "Values Updated, Timing Conditions, Custom, External"
                 );
                 assertEqual(
-                    triggerGroups.map((el) => el.innerText).join(" // "),
-                    "User is set // Based on date fieldAfter creationAfter last update // On saveOn deletionOn UI change // On webhook"
+                    Array.from(this.anchor.querySelectorAll(".o_select_menu_item"))
+                        .map((el) => el.textContent)
+                        .join(", "),
+                    "User is set, Based on date field, After creation, After last update, On create, On create and edit, On deletion, On UI change, On webhook"
                 );
-            },
+            }
         },
         {
             trigger: ".o_field_widget[name='model_id'] input",
@@ -514,32 +472,28 @@ registry.category("web_tour.tours").add("test_form_view_model_id", {
         },
         {
             trigger: ".dropdown-menu li a:contains(test_base_automation.project)",
-            run(helpers) {
-                waitOrmCalls = observeOrmCalls();
-                helpers.click();
-                return nextTick();
-            },
+            run: "click",
         },
         {
-            trigger: "body",
-            async run() {
-                await waitOrmCalls();
-                await nextTick();
-            },
+            trigger: ".o_field_widget[name='trigger'] input",
+            run: "click",
         },
         {
-            trigger: ".o_field_widget[name='trigger']",
+            trigger: ".o_select_menu_menu",
             run() {
-                const triggerGroups = Array.from(this.anchor.querySelectorAll("optgroup"));
                 assertEqual(
-                    triggerGroups.map((el) => el.getAttribute("label")).join(" // "),
-                    "Values Updated // Timing Conditions // Custom // External"
+                    Array.from(this.anchor.querySelectorAll(".o_select_menu_group"))
+                        .map((el) => el.textContent)
+                        .join(", "),
+                    "Values Updated, Timing Conditions, Custom, External"
                 );
                 assertEqual(
-                    triggerGroups.map((el) => el.innerText).join(" // "),
-                    "Stage is set toUser is setTag is addedPriority is set to // Based on date fieldAfter creationAfter last update // On saveOn deletionOn UI change // On webhook"
+                    Array.from(this.anchor.querySelectorAll(".o_select_menu_item"))
+                        .map((el) => el.textContent)
+                        .join(", "),
+                    "Stage is set to, User is set, Tag is added, Priority is set to, Based on date field, After creation, After last update, On create, On create and edit, On deletion, On UI change, On webhook"
                 );
-            },
+            }
         },
         {
             trigger: ".o_form_button_cancel",
@@ -565,8 +519,13 @@ registry.category("web_tour.tours").add("test_form_view_custom_reference_field",
             trigger: "body:not(:has(.o_field_widget[name='trg_field_ref']))",
         },
         {
-            trigger: ".o_field_widget[name='trigger'] select",
-            run: `select "on_stage_set"`,
+            content: "Open select",
+            trigger: ".o_form_renderer #trigger_0",
+            run: "click",
+        },
+        {
+            trigger: ".o_select_menu_item:contains(Stage is set to)",
+            run: "click",
         },
         {
             trigger: ".o_field_widget[name='trg_field_ref'] input",
@@ -576,12 +535,17 @@ registry.category("web_tour.tours").add("test_form_view_custom_reference_field",
             trigger:
                 ".o_field_widget[name='trg_field_ref'] .o-autocomplete--dropdown-menu:not(:has(a .fa-spin)",
             run() {
-                assertEqual(this.anchor.innerText, "test stage\nSearch More...");
+                assertEqual(this.anchor.innerText, "test stage\nSearch more...");
             },
         },
         {
-            trigger: ".o_field_widget[name='trigger'] select",
-            run: `select "on_tag_set"`,
+            content: "Open select",
+            trigger: ".o_form_renderer #trigger_0",
+            run: "click",
+        },
+        {
+            trigger: ".o_select_menu_item:contains(Tag is added)",
+            run: "click",
         },
         {
             trigger:
@@ -595,7 +559,7 @@ registry.category("web_tour.tours").add("test_form_view_custom_reference_field",
             trigger:
                 ".o_field_widget[name='trg_field_ref'] .o-autocomplete--dropdown-menu:not(:has(a .fa-spin)",
             run() {
-                assertEqual(this.anchor.innerText, "test tag\nSearch More...");
+                assertEqual(this.anchor.innerText, "test tag\nSearch more...");
             },
         },
         {
@@ -619,11 +583,15 @@ registry.category("web_tour.tours").add("test_form_view_mail_triggers", {
             run: "click",
         },
         {
-            trigger: ".o_field_widget[name='trigger'] select",
+            trigger: ".o_field_widget[name='trigger'] input",
+            run: "click",
+        },
+        {
+            trigger: ".o_select_menu_menu",
             run() {
                 assertEqual(
-                    Array.from(this.anchor.querySelectorAll("optgroup"))
-                        .map((el) => el.label)
+                    Array.from(this.anchor.querySelectorAll(".o_select_menu_group"))
+                        .map((el) => el.textContent)
                         .join(", "),
                     "Values Updated, Timing Conditions, Custom, External"
                 );
@@ -635,29 +603,22 @@ registry.category("web_tour.tours").add("test_form_view_mail_triggers", {
         },
         {
             trigger: ".dropdown-menu li a:contains(Threaded Lead Test)",
-            run(helpers) {
-                waitOrmCalls = observeOrmCalls();
-                helpers.click();
-                return nextTick();
-            },
+            run: "click",
         },
         {
-            trigger: "body",
-            async run() {
-                await waitOrmCalls();
-                await nextTick();
-            },
+            trigger: ".o_field_widget[name='trigger'] input",
+            run: "click",
         },
         {
-            trigger: ".o_field_widget[name='trigger']",
+            trigger: ".o_select_menu_menu",
             run() {
                 assertEqual(
-                    Array.from(this.anchor.querySelectorAll("select optgroup"))
-                        .map((el) => el.label)
+                    Array.from(this.anchor.querySelectorAll(".o_select_menu_group "))
+                        .map((el) => el.textContent)
                         .join(", "),
                     "Values Updated, Email Events, Timing Conditions, Custom, External"
                 );
-            },
+            }
         },
         {
             trigger: "button.o_form_button_cancel",
@@ -685,19 +646,24 @@ registry.category("web_tour.tours").add("base_automation.on_change_rule_creation
             run: "edit ir.ui.view",
         },
         {
-            trigger: ".ui-menu-item > a:contains(/^View$/)",
+            trigger: ".ui-menu-item > a:text(View)",
             run: "click",
         },
         {
-            trigger: ".o_field_widget[name=trigger] select",
-            run: `select "on_change"`,
+            content: "Open select",
+            trigger: ".o_form_renderer #trigger_0",
+            run: "click",
+        },
+        {
+            trigger: ".o_select_menu_item:contains(On UI change)",
+            run: "click",
         },
         {
             trigger: ".o_field_widget[name=on_change_field_ids] input",
             run: "edit Active",
         },
         {
-            trigger: ".ui-menu-item > a:contains(/^Active$/)",
+            trigger: ".ui-menu-item > a:text(Active)",
             run: "click",
         },
         ...stepUtils.saveForm(),

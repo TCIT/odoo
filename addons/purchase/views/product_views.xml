@@ -59,7 +59,7 @@
                     <attribute name="groups">purchase.group_purchase_user</attribute>
                 </xpath>
                 <group name="purchase" position="before">
-                    <field name="seller_ids" context="{'default_product_tmpl_id': id, 'product_template_invisible_variant': True, 'list_view_ref':'purchase.product_supplierinfo_tree_view2'}" nolabel="1" invisible="product_variant_count &gt; 1" readonly="product_variant_count &gt; 1"/>
+                    <field name="seller_ids" context="{'default_product_tmpl_id': id, 'default_price': standard_price, 'product_template_invisible_variant': True, 'list_view_ref':'purchase.product_supplierinfo_tree_view2'}" nolabel="1" invisible="product_variant_count &gt; 1" readonly="product_variant_count &gt; 1"/>
                     <field name="variant_seller_ids" context="{'model': 'product.template', 'active_id': id, 'list_view_ref':'purchase.product_supplierinfo_tree_view2'}" nolabel="1" invisible="product_variant_count &lt;= 1" readonly="product_variant_count &lt;= 1"/>
                 </group>
                 <group name="bill" position="attributes">
@@ -71,24 +71,16 @@
                 <group name="purchase" position="inside">
                     <group col="1">
                         <group string="Purchase Description">
-                           <field name="description_purchase" nolabel="1"
+                           <field name="description_purchase" nolabel="1" colspan="2"
                                 placeholder="This note is added to purchase orders."/>
                         </group>
-                        <group string="Warning when Purchasing this Product" groups="purchase.group_warning_purchase">
-                            <field name="purchase_line_warn" nolabel="1" colspan="2"/>
-                            <field name="purchase_line_warn_msg" colspan="2" nolabel="1" placeholder="Type a message..."
-                                invisible="purchase_line_warn == 'no-message'"
-                                readonly="purchase_line_warn == 'no-message'"
-                                required="purchase_line_warn != 'no-message'"/>
+                        <group string="Warning on Purchase Orders" groups="purchase.group_warning_purchase">
+                            <field name="purchase_line_warn_msg"
+                                   placeholder="e.g. There is a newer version of this product."
+                                   nolabel="1" colspan="2"/>
                         </group>
                     </group>
                 </group>
-                <div name="options" position='inside'>
-                    <span class="d-inline-flex" invisible="type == 'combo'">
-                        <field name="purchase_ok"/>
-                        <label for="purchase_ok"/>
-                    </span>
-                </div>
             </field>
         </record>
 
@@ -98,10 +90,10 @@
             <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="arch" type="xml">
                 <field name="seller_ids" position="attributes">
-                    <attribute name="context">{'default_product_tmpl_id': product_tmpl_id, 'product_template_invisible_variant': True, 'list_view_ref':'purchase.product_product_supplierinfo_tree_view2'}</attribute>
+                    <attribute name="context">{'default_product_tmpl_id': product_tmpl_id, 'product_template_invisible_variant': True, 'default_price': standard_price, 'list_view_ref':'purchase.product_product_supplierinfo_tree_view2'}</attribute>
                 </field>
                 <field name="variant_seller_ids" position="attributes">
-                    <attribute name="context">{'model': 'product.product', 'active_id': id, 'list_view_ref':'purchase.product_product_supplierinfo_tree_view2'}</attribute>
+                    <attribute name="context">{'model': 'product.product', 'active_id': id, 'default_price': standard_price, 'list_view_ref':'purchase.product_product_supplierinfo_tree_view2'}</attribute>
                 </field>
             </field>
         </record>
@@ -118,7 +110,7 @@
                         <div class="o_field_widget o_stat_info">
                             <span class="o_stat_value d-flex gap-1">
                                 <field name="purchased_product_qty" widget="statinfo" nolabel="1" class="oe_inline"/>
-                                <field name="uom_name"  class="oe_inline"/>
+                                <field name="uom_name"  class="oe_inline" groups="uom.group_uom"/>
                             </span>
                             <span class="o_stat_text">Purchased</span>
                         </div>
@@ -139,7 +131,7 @@
                         <div class="o_field_widget o_stat_info">
                             <span class="o_stat_value d-flex gap-1">
                                 <field name="purchased_product_qty" widget="statinfo" nolabel="1" class="oe_inline"/>
-                                <field name="uom_name"  class="oe_inline"/>
+                                <field name="uom_name"  class="oe_inline" groups="uom.group_uom"/>
                             </span>
                             <span class="o_stat_text">Purchased</span>
                         </div>
@@ -153,9 +145,12 @@
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_search_view"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='categ_id']" position="after">
-                    <field string="Vendor" name="seller_ids"/>
-                </xpath>
+                <field name="categ_id" position="after">
+                    <field name="seller_ids" string="Vendor"/>
+                </field>
+                <filter name="filter_to_sell" position="after">
+                    <filter name="filter_to_purchase" string="Purchase" domain="[('purchase_ok', '=', True)]"/>
+                </filter>
             </field>
         </record>
 
@@ -166,9 +161,10 @@
             <field name="inherit_id" ref="product.product_view_kanban_catalog"/>
             <field name="mode">primary</field>
             <field name="arch" type="xml">
-                <field name="default_code" position="after">
-                    <field name="uom_po_id" invisible="1"/>
-                </field>
+                <xpath expr="//kanban" position="attributes">
+                    <attribute name="js_class">purchase_product_kanban_catalog</attribute>
+                    <attribute name="sample">1</attribute>
+                </xpath>
             </field>
         </record>
 
@@ -182,8 +178,9 @@
                     <field name="seller_ids" string="Vendor"/>
                 </xpath>
                 <xpath expr="//filter[@name='goods']" position="after">
+                    <separator/>
                     <filter string="In the Order"
-                            name="products_in_order"
+                            name="products_in_purchase_order"
                             domain="[('is_in_purchase_order', '=', True)]"/>
                 </xpath>
             </field>

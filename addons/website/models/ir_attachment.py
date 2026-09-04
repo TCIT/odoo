@@ -5,8 +5,7 @@ from odoo import fields, models, api
 _logger = logging.getLogger(__name__)
 
 
-class Attachment(models.Model):
-
+class IrAttachment(models.Model):
     _inherit = "ir.attachment"
 
     # Technical field used to resolve multiple attachments in a multi-website environment.
@@ -23,7 +22,7 @@ class Attachment(models.Model):
 
     @api.model
     def get_serving_groups(self):
-        return super(Attachment, self).get_serving_groups() + ['website.group_website_designer']
+        return super().get_serving_groups() + ['website.group_website_designer']
 
     def _get_serve_attachment(self, url, extra_domain=None, order=None):
         website = self.env['website'].get_current_website()

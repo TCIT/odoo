@@ -17,8 +17,9 @@
                 <field name="email" optional="show"/>
                 <field name="phone" optional="show"/>
                 <field name="company_name" optional="hide"/>
-                <field name="event_id" column_invisible="context.get('default_event_id')" readonly="state != 'draft'"/>
-                <field name="event_ticket_id" domain="[('event_id', '=', event_id)]" readonly="state != 'draft'"/>
+                <field name="event_id" column_invisible="context.get('default_event_id')"/>
+                <field name="event_slot_id" domain="[('event_id', '=', event_id)]"/>
+                <field name="event_ticket_id" domain="[('event_id', '=', event_id)]"/>
                 <field name="activity_ids" widget="list_activity"/>
                 <field name="state" decoration-info="state in ('draft', 'open')"
                        decoration-success="state == 'done'"
@@ -66,12 +67,16 @@
                             <field name="company_name" placeholder='e.g. "Azure Interior"'/>
                         </group>
                         <group string="Event Information" name="event">
-                            <field class="text-break" name="event_id" readonly="event_id and state != 'draft' and id"
+                            <field class="text-break" name="event_id"
                                    context="{'name_with_seats_availability': True}" options="{'no_create': True}"/>
-                            <field name="barcode" groups="base.group_no_one"/>
-                            <field name="event_ticket_id" invisible="not event_id" readonly="event_ticket_id and state != 'draft' and id"
+                            <field name="event_slot_id" invisible="not is_multi_slots" required="is_multi_slots"
                                    context="{'name_with_seats_availability': True}" options="{'no_open': True, 'no_create': True}"
                                    domain="[('event_id', '=', event_id)]"/>
+                            <field name="event_ticket_id" invisible="not event_id"
+                                   context="{'name_with_seats_availability': True, 'is_event_multi_slots': is_multi_slots}"
+                                   options="{'no_open': True, 'no_create': True}"
+                                   domain="[('event_id', '=', event_id)]"/>
+                            <field name="barcode" groups="base.group_no_one"/>
                             <field name="partner_id"/>
                             <field name="create_date" string="Registration Date" groups="base.group_no_one"/>
                             <field name="date_closed" groups="base.group_no_one"/>
@@ -88,7 +93,7 @@
                             <field name="registration_answer_ids" widget="one2many">
                                 <list editable="bottom">
                                     <field name="event_id" column_invisible="True" />
-                                    <field name="question_id" domain="[('event_id', '=', event_id)]" options="{'no_create': True}" />
+                                    <field name="question_id" domain="[('event_ids', 'in', event_id)]" options="{'no_create': True}"/>
                                     <field name="question_type" string="Type" />
                                     <field name="value_answer_id"
                                         invisible="question_type != 'simple_choice'"
@@ -100,7 +105,7 @@
                                     <field name="question_type"/>
                                     <templates>
                                         <t t-name="card" class="justify-content-between">
-                                            <field class="fw-bold fs-5" name="question_id" domain="[('event_id', '=', event_id)]"/>
+                                            <field class="fw-bold fs-5" name="question_id" domain="[('event_ids', 'in', event_id)]"/>
                                             <field name="value_answer_id"
                                                 invisible="question_type != 'simple_choice'"
                                                 domain="[('question_id', '=', question_id)]" options="{'no_create': True}"/>
@@ -129,41 +134,9 @@
                 <field name="active"/>
                 <field name="barcode"/>
                 <templates>
-                    <t t-name="event_attendees_kanban_icons_desktop">
-                        <!-- Will be removed in master -->
-                        <div class="d-none d-md-block h-100">
-                            <div id="event_attendees_kanban_icons_desktop" class="h-100 float-end p-2 d-flex align-items-end flex-column gap-1">
-                                <t t-if="record.active.raw_value">
-                                    <a class="btn btn-md btn-secondary" string="Confirm Attendance" name="action_set_done" type="object" invisible="state == 'done'"
-                                        role="button" aria-label="Confirm Attendance Button" title="Confirm Attendance">
-                                        <i class="fa fa-check" role="img"/>
-                                    </a>
-                                    <a class="btn btn-md btn-success" string="Reset To Registered" name="action_confirm" type="object" invisible="state != 'done'"
-                                        role="button" aria-label="Reset To Registered Button" title="Reset To Registered">
-                                        <i class="fa fa-check" role="img"/>
-                                    </a>
-                                </t>
-                            </div>
-                        </div>
-                    </t>
-                    <t t-name="event_attendees_kanban_icons_mobile">
-                        <!-- Will be removed in master -->
-                        <div id="event_attendees_kanban_icons_mobile" class="d-md-none d-flex align-items-end flex-column gap-1 h-100 ps-4">
-                            <t t-if="record.active.raw_value">
-                                <a class="btn btn-secondary d-flex justify-content-center align-items-center h-100 w-100"
-                                    string="Confirm Attendance" name="action_set_done" type="object" invisible="state == 'done'" role="button">
-                                    <i class="fa fa-check fa-3x" role="img" aria-label="Confirm Attendance Button" title="Confirm Attendance"/>
-                                </a>
-                                <a class="btn btn-success d-flex justify-content-center align-items-center h-100 w-100"
-                                    string="Reset To Registered" name="action_confirm" type="object" invisible="state != 'done'" role="button">
-                                    <i class="fa fa-check fa-3x" role="img" aria-label="Reset To Registered Button" title="Reset To Registered"/>
-                                </a>
-                            </t>
-                        </div>
-                    </t>
                     <t t-name="card" class="row g-0">
                         <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
-                        <div class="col-8 col-md-9">
+                        <div class="col-8">
                             <field class="d-block fw-bold fs-5" name="name"/>
                             <field name="state" widget="badge" decoration-success="state == 'done'" class="position-absolute top-0 end-0 o_event_registration_kanban_badge"/>
                             <div class="o_kanban_event_registration_event_name">
@@ -174,10 +147,14 @@
                             </span>
                             <div id="event_ticket_id">
                                 <field name="registration_properties"/>
-                                <t t-if="record.event_ticket_id.raw_value">
+                                <div t-if="record.event_slot_id.raw_value">
+                                    <i class="fa fa-calendar" title="Slot"/>
+                                    <field name="event_slot_id" class="fw-bold text-truncate ms-1"/>
+                                </div>
+                                <div t-if="record.event_ticket_id.raw_value">
                                     <i class="fa fa-ticket" title="Ticket type"/>
                                     <field name="event_ticket_id" class="fw-bold text-truncate ms-1"/>
-                                </t>
+                                </div>
                             </div>
                         </div>
                     </t>
@@ -243,19 +220,23 @@
                 <filter string="Event Start Date" name="filter_event_begin_date" date="event_begin_date"/>
                 <filter string="Attended Date" name="filter_date_closed" date="date_closed"/>
                 <separator/>
+                <filter invisible="1" string="My Activities" name="filter_activities_my"
+                    domain="[('activity_user_id', '=', uid)]"/>
+                <separator invisible="1"/>
                 <filter invisible="1" string="Late Activities" name="activities_overdue"
-                    domain="[('my_activity_date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
-                    help="Show all records which has next action date is before today"/>
+                    domain="[('my_activity_date_deadline', '&lt;', 'today')]"
+                    help="Show all records whose next activity date is past"/>
                 <filter invisible="1" string="Today Activities" name="activities_today"
-                    domain="[('my_activity_date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                    domain="[('my_activity_date_deadline', '=', 'today')]"/>
                 <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
-                    domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
-                <filter string="Last 30 days" name="filter_last_month_creation" domain="[('create_date','&gt;', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                    domain="[('my_activity_date_deadline', '&gt;', 'today')]"/>
+                <filter string="Last 30 days" name="filter_last_month_creation" domain="[('create_date','&gt;', 'today -30d')]"/>
                 <separator/>
                 <filter string="Archived" name="filter_inactive" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Group By">
+                <group>
                     <filter string="Partner" name="partner" domain="[]" context="{'group_by':'partner_id'}"/>
                     <filter string="Event" name="group_event" domain="[]" context="{'group_by':'event_id'}"/>
+                    <filter string="Slot" name="group_by_event_slot_id" context="{'group_by': 'event_slot_id'}"/>
                     <filter string="Ticket Type" name ="group_event_ticket_id" domain="[]" context="{'group_by': 'event_ticket_id'}"/>
                     <filter string="Status" name="status" domain="[]" context="{'group_by':'state'}"/>
                     <filter string="Registration Date" name="group_by_create_date_week" domain="[]" context="{'group_by': 'create_date:week'}"
@@ -268,6 +249,7 @@
                             context="{'group_by': 'utm_medium_id'}"/>
                     <filter string="Source" name="group_by_utm_source_id" domain="[]"
                             context="{'group_by': 'utm_source_id'}"/>
+                    <filter string="Properties" name="group_by_registration_properties" context="{'group_by': 'registration_properties'}"/>
                </group>
             </search>
         </field>

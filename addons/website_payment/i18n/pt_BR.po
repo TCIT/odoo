@@ -1,31 +1,39 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_payment
-# 
+# * website_payment
+#
 # Translators:
-# Wil Odoo, 2024
-# Maitê Dietze, 2024
-# 
+# Raphael Rodrigues <raphael0608@gmail.com>, 2022
+# Éder Brito <britoederr@gmail.com>, 2022
+# Marcos Rodrigues, 2022
+# Martin Trigaux, 2022
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Maitê Dietze (madi)" <madi@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Maitê Dietze, 2024\n"
-"Language-Team: Portuguese (Brazil) (https://app.transifex.com/odoo/teams/41243/pt_BR/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-08 00:16+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/odoo-"
+"19/website_payment/pt_BR/>\n"
+"Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: pt_BR\n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
+"1000000 == 0) ? 1 : 2);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
 msgid ""
 ".\n"
 "                        <br/>\n"
-"                        We appreciate your support for our organization as such.\n"
+"                        We appreciate your support for our organization as "
+"such.\n"
 "                        <br/>\n"
 "                        Regards."
 msgstr ""
@@ -71,6 +79,33 @@ msgid "<option value=\"\">Country...</option>"
 msgstr "<option value=\"\">País...</option>"
 
 #. module: website_payment
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_input
+msgid ""
+"<small class=\"text-danger d-none\" id=\"warning_message_id\">Please enter "
+"the amount to donate.</small>"
+msgstr ""
+"<small class=\"text-danger d-none\" id=\"warning_message_id\">Digite o valor "
+"a doar.</small>"
+
+#. module: website_payment
+#: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
+msgid ""
+"<span class=\"oe_inline pe-0\">\n"
+"                            Enable a payment provider to accept online "
+"payments.\n"
+"                        </span>"
+msgstr ""
+"<span class=\"oe_inline pe-0\">\n"
+"                           Habilite um provedor de pagamentos para aceitar "
+"pagamentos online.\n"
+"                        </span>"
+
+#. module: website_payment
+#: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
+msgid "<span class=\"oe_inline px-0\">or</span>"
+msgstr "<span class=\"oe_inline px-0\">ou</span>"
+
+#. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_button
 msgid "<span class=\"s_donation_currency pe-1\">$</span>"
 msgstr "<span class=\"s_donation_currency pe-1\">$</span>"
@@ -96,6 +131,18 @@ msgid "<span class=\"s_donation_currency pe-1\">$</span>50"
 msgstr "<span class=\"s_donation_currency pe-1\">$</span>50"
 
 #. module: website_payment
+#: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
+msgid "<span>Enable a payment provider to accept online payments.</span>"
+msgstr ""
+"<span>Habilite um provedor de pagamento para aceitar pagamentos on-line.</"
+"span>"
+
+#. module: website_payment
+#: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
+msgid "<span>or</span>"
+msgstr "<span>ou</span>"
+
+#. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_pay
 msgid "<strong>Warning</strong> The currency is missing or incorrect."
 msgstr "<strong>Aviso:</strong> a moeda está faltando ou é incorreta."
@@ -113,8 +160,8 @@ msgstr "Um ano de despertar cultural."
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
-msgid "Activate Payments"
-msgstr "Ativar pagamentos"
+msgid "Activate"
+msgstr "Ativar"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
@@ -123,19 +170,20 @@ msgstr "Ativar Stripe"
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/snippets/s_donation/options.js:0
+#: code:addons/website_payment/static/src/website_builder/donation_option.xml:0
+msgid "Add"
+msgstr "Adicionar"
+
+#. module: website_payment
+#. odoo-javascript
+#: code:addons/website_payment/static/src/website_builder/donation_option.xml:0
+#: code:addons/website_payment/static/src/website_builder/donation_option_plugin.js:0
 msgid "Add a description here"
 msgstr "Adicione uma descrição aqui"
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/snippets/s_donation/options.js:0
-msgid "Add new pre-filled option"
-msgstr "Adicionar nova opção preenchida"
-
-#. module: website_payment
-#. odoo-javascript
-#: code:addons/website_payment/static/src/snippets/s_donation/options.xml:0
+#: code:addons/website_payment/static/src/website_builder/donation_option.xml:0
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_button
 msgid "Amount"
 msgstr "Valor"
@@ -144,6 +192,11 @@ msgstr "Valor"
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid "Amount ("
 msgstr "Valor ("
+
+#. module: website_payment
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_input
+msgid "Amount to donate"
+msgstr "Valor a doar"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
@@ -157,7 +210,7 @@ msgstr "Cuidar de um bebê por um mês."
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/snippets/s_donation/options.xml:0
+#: code:addons/website_payment/static/src/website_builder/donation_option.xml:0
 msgid "Choose Your Amount"
 msgstr "Escolha a quantia"
 
@@ -167,14 +220,18 @@ msgid "Config Settings"
 msgstr "Configurações"
 
 #. module: website_payment
-#. odoo-python
-#: code:addons/website_payment/models/res_config_settings.py:0
-msgid "Configure %s"
-msgstr "Configurar %s"
+#: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
+msgid "Configure"
+msgstr "Configurar"
+
+#. module: website_payment
+#: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
+msgid "Configure Payment Methods"
+msgstr "Configurar formas de pagamento"
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/payment_form.js:0
+#: code:addons/website_payment/static/src/interactions/payment_form.js:0
 msgid "Country"
 msgstr "País"
 
@@ -195,10 +252,8 @@ msgstr "É necessário informar o país."
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/snippets/s_donation/options.xml:0
-#: model_terms:ir.ui.view,arch_db:website_payment.donation_input
+#: code:addons/website_payment/static/src/website_builder/donation_option.xml:0
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_button
-#: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
 msgid "Custom Amount"
 msgstr "Outra quantia"
 
@@ -208,17 +263,28 @@ msgid "Dear"
 msgstr "Prezado(a)"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
+#. odoo-javascript
+#: code:addons/website_payment/static/src/website_builder/donation_option.xml:0
 msgid "Default Amount"
 msgstr "Quantia padrão"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
+#. odoo-javascript
+#: code:addons/website_payment/static/src/website_builder/donation_option.xml:0
 msgid "Descriptions"
 msgstr "Descrições"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
+#: model:ir.model.fields,field_description:website_payment.field_account_payment__display_name
+#: model:ir.model.fields,field_description:website_payment.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:website_payment.field_payment_transaction__display_name
+#: model:ir.model.fields,field_description:website_payment.field_res_config_settings__display_name
+msgid "Display Name"
+msgstr "Exibir nome"
+
+#. module: website_payment
+#. odoo-javascript
+#: code:addons/website_payment/static/src/website_builder/donation_option.xml:0
 msgid "Display Options"
 msgstr "Exibir opções"
 
@@ -236,6 +302,7 @@ msgstr "Doe agora"
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_pay
 #: model_terms:ir.ui.view,arch_db:website_payment.snippets
 msgid "Donation"
 msgstr "Doação"
@@ -244,6 +311,12 @@ msgstr "Doação"
 #: model_terms:ir.ui.view,arch_db:website_payment.snippets
 msgid "Donation Button"
 msgstr "Botão de doação"
+
+#. module: website_payment
+#. odoo-python
+#: code:addons/website_payment/controllers/portal.py:0
+msgid "Donation Payment"
+msgstr "Pagamento de doação"
 
 #. module: website_payment
 #. odoo-python
@@ -264,7 +337,7 @@ msgstr "Notificação de doação"
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/payment_form.js:0
+#: code:addons/website_payment/static/src/interactions/payment_form.js:0
 msgid "Email"
 msgstr "E-mail"
 
@@ -278,30 +351,43 @@ msgstr ""
 "                    <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_payment
-#. odoo-javascript
-#: code:addons/website_payment/static/src/js/payment_form.js:0
-msgid "Email is invalid"
-msgstr "O e-mail é inválido"
-
-#. module: website_payment
 #. odoo-python
 #: code:addons/website_payment/controllers/portal.py:0
 msgid "Email is required."
 msgstr "É necessário informar o e-mail."
 
 #. module: website_payment
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_input
+msgid "Enter a valid number!"
+msgstr "Digite um número válido!"
+
+#. module: website_payment
+#: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
+msgid "Find a Payment Provider"
+msgstr "Encontrar um provedor de pagamentos"
+
+#. module: website_payment
+#: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
+msgid "Find another provider"
+msgstr "Encontre outro provedor"
+
+#. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/payment_form.js:0
-msgid "Field '%s' is mandatory"
-msgstr "O campo '%s' é obrigatório"
+#: code:addons/website_payment/static/src/website_builder/supported_payment_methods_option.xml:0
+msgid "Height"
+msgstr "Altura"
 
 #. module: website_payment
-#: model:ir.model.fields,field_description:website_payment.field_res_config_settings__first_provider_label
-msgid "First Provider Label"
-msgstr "Etiqueta do primeiro provedor"
+#: model:ir.model.fields,field_description:website_payment.field_account_payment__id
+#: model:ir.model.fields,field_description:website_payment.field_payment_provider__id
+#: model:ir.model.fields,field_description:website_payment.field_payment_transaction__id
+#: model:ir.model.fields,field_description:website_payment.field_res_config_settings__id
+msgid "ID"
+msgstr "ID"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
+#. odoo-javascript
+#: code:addons/website_payment/static/src/website_builder/donation_option.xml:0
 msgid "Input"
 msgstr "Entrada"
 
@@ -311,14 +397,15 @@ msgid "Is Donation"
 msgstr "É doação"
 
 #. module: website_payment
-#: model:ir.model.fields,field_description:website_payment.field_res_config_settings__is_stripe_supported_country
-msgid "Is Stripe Supported Country"
-msgstr "É um país aceito pelo Stripe"
-
-#. module: website_payment
 #: model:ir.model.fields,field_description:website_payment.field_payment_transaction__is_donation
 msgid "Is donation"
 msgstr "É doação"
+
+#. module: website_payment
+#. odoo-javascript
+#: code:addons/website_payment/static/src/website_builder/supported_payment_methods_option.xml:0
+msgid "Limit"
+msgstr "Limite"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation
@@ -326,18 +413,20 @@ msgid "Make a Donation"
 msgstr "Fazer uma doação"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
+#. odoo-javascript
+#: code:addons/website_payment/static/src/website_builder/donation_option.xml:0
 msgid "Maximum"
 msgstr "Máximo"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
+#. odoo-javascript
+#: code:addons/website_payment/static/src/website_builder/donation_option.xml:0
 msgid "Minimum"
 msgstr "Mínimo"
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/payment_form.js:0
+#: code:addons/website_payment/static/src/interactions/payment_form.js:0
 msgid "Name"
 msgstr "Nome"
 
@@ -357,8 +446,14 @@ msgid "Name is required."
 msgstr "É necessário informar o nome."
 
 #. module: website_payment
-#: model:ir.model.fields.selection,name:website_payment.selection__res_config_settings__providers_state__none
-#: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
+#. odoo-javascript
+#: code:addons/website_payment/static/src/snippets/s_supported_payment_methods/000.edit.xml:0
+msgid "No published payment methods"
+msgstr "Nenhum método de pagamento publicado"
+
+#. module: website_payment
+#. odoo-javascript
+#: code:addons/website_payment/static/src/website_builder/donation_option.xml:0
 msgid "None"
 msgstr "Nenhum"
 
@@ -371,11 +466,6 @@ msgstr "Um ano no ensino fundamental."
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_button
 msgid "One year in high school."
 msgstr "Um ano no ensino médio."
-
-#. module: website_payment
-#: model:ir.model.fields.selection,name:website_payment.selection__res_config_settings__providers_state__other_than_paypal
-msgid "Other than Paypal"
-msgstr "Sem ser Paypal"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_information
@@ -393,12 +483,6 @@ msgid "Payment Transaction"
 msgstr "Transação do pagamento"
 
 #. module: website_payment
-#. odoo-javascript
-#: code:addons/website_payment/static/src/js/payment_form.js:0
-msgid "Payment processing failed"
-msgstr "Falha no processamento do pagamento"
-
-#. module: website_payment
 #. odoo-python
 #: code:addons/website_payment/models/payment_transaction.py:0
 msgid "Payment received from donation with following details:"
@@ -406,42 +490,46 @@ msgstr "Pagamento recebido a partir de doação com as seguintes informações:"
 
 #. module: website_payment
 #: model:ir.model,name:website_payment.model_account_payment
+#: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
 msgid "Payments"
 msgstr "Pagamentos"
 
 #. module: website_payment
-#: model:ir.model.fields.selection,name:website_payment.selection__res_config_settings__providers_state__paypal_only
-msgid "Paypal Only"
-msgstr "Apenas Paypal"
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
+msgid "Please enter a valid email address."
+msgstr "Insira um e-mail válido."
+
+#. module: website_payment
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
+msgid "Please provide a name."
+msgstr "Forneça um nome."
+
+#. module: website_payment
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
+msgid "Please select a country."
+msgstr "Selecione um país."
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/snippets/s_donation/000.js:0
+#: code:addons/website_payment/static/src/snippets/s_donation/donation_snippet.js:0
 msgid "Please select or enter an amount"
 msgstr "Selecione ou insira uma quantia"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
+#. odoo-javascript
+#: code:addons/website_payment/static/src/website_builder/donation_option.xml:0
 msgid "Pre-filled Options"
 msgstr "Opções pré-preenchidas"
 
 #. module: website_payment
-#: model:ir.model.fields,field_description:website_payment.field_res_config_settings__providers_state
-msgid "Providers State"
-msgstr "Situação dos provedores"
-
-#. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
+#. odoo-javascript
+#: code:addons/website_payment/static/src/website_builder/donation_option.xml:0
 msgid "Recipient Email"
 msgstr "E-mail do destinatário"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
-msgid "Shop - Payment"
-msgstr "Loja - Pagamento"
-
-#. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
+#. odoo-javascript
+#: code:addons/website_payment/static/src/website_builder/donation_option.xml:0
 msgid "Slider"
 msgstr "Slider"
 
@@ -452,12 +540,7 @@ msgstr "Pequena ou grande, a sua contribuição é essencial."
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/payment_form.js:0
-msgid "Some information is missing to process your payment."
-msgstr "Faltam algumas informações para processar seu pagamento."
-
-#. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
+#: code:addons/website_payment/static/src/website_builder/donation_option.xml:0
 msgid "Step"
 msgstr "Passo"
 
@@ -471,13 +554,9 @@ msgstr ""
 "serviços de pagamentos."
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
-msgid ""
-"Support most payment methods; Visa, Mastercard, Maestro, Google Pay, Apple "
-"Pay, etc. as well as recurring charges."
-msgstr ""
-"Aceitar a maioria das formas de pagamento: Visa, Mastercard, Maestro, Google"
-" Pay, Apple Pay etc., bem como cobranças recorrentes."
+#: model_terms:ir.ui.view,arch_db:website_payment.snippets
+msgid "Supported Payment Methods"
+msgstr "Formas de pagamento aceitas"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
@@ -485,8 +564,13 @@ msgid "Thank you for your donation of"
 msgstr "Agradecemos pela sua doação no valor de"
 
 #. module: website_payment
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_input
+msgid "The minimum donation amount is"
+msgstr "O valor mínimo de doação é"
+
+#. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/snippets/s_donation/000.js:0
+#: code:addons/website_payment/static/src/snippets/s_donation/donation_snippet.js:0
 msgid "The minimum donation amount is %(amount)s"
 msgstr "O valor mínimo de doação é %(amount)s"
 
@@ -496,24 +580,24 @@ msgid "There is nothing to pay."
 msgstr "Não há nada a pagar."
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
-msgid "View Alternatives"
-msgstr "Ver alternativas"
+#. odoo-javascript
+#: code:addons/website_payment/static/src/snippets/s_supported_payment_methods/000.edit.xml:0
+msgid "View providers"
+msgstr "Ver provedores"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
-msgid "View other providers"
-msgstr "Ver outros provedores"
+msgid ""
+"Visa, Mastercard, Maestro, Google Pay, Apple Pay, etc. as well as recurring "
+"charges."
+msgstr ""
+"Visa, Mastercard, Maestro, Google Pay, Apple Pay, etc., bem como cobranças "
+"recorrentes."
 
 #. module: website_payment
 #: model:ir.model.fields,field_description:website_payment.field_payment_provider__website_id
 msgid "Website"
 msgstr "Site"
-
-#. module: website_payment
-#: model:mail.template,name:website_payment.mail_template_donation
-msgid "Website: Donation"
-msgstr "Site: doação"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_information
@@ -529,3 +613,69 @@ msgstr "Seu comentário"
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
 msgid "made on"
 msgstr "realizada no dia"
+
+#~ msgid ""
+#~ "<strong>No suitable payment option could be found.</strong><br/>\n"
+#~ "                                If you believe that it is an error, "
+#~ "please contact the website administrator."
+#~ msgstr ""
+#~ "<strong>Não foi possível encontrar uma opção de pagamento adequada.</"
+#~ "strong><br/>\n"
+#~ "                                Se você acredita que isso é um erro, "
+#~ "entre em contato com o administrador do site."
+
+#~ msgid "Activate Payments"
+#~ msgstr "Ativar pagamentos"
+
+#~ msgid "Add new pre-filled option"
+#~ msgstr "Adicionar nova opção preenchida"
+
+#~ msgid "Configure %s"
+#~ msgstr "Configurar %s"
+
+#~ msgid "Connect to Stripe"
+#~ msgstr "Conectar ao Stripe"
+
+#~ msgid ""
+#~ "Country\n"
+#~ "                            <span class=\"s_website_form_mark\"> *</span>"
+#~ msgstr ""
+#~ "País\n"
+#~ "                            <span class=\"s_website_form_mark\"> *</span>"
+
+#~ msgid "First Provider Label"
+#~ msgstr "Etiqueta do primeiro provedor"
+
+#~ msgid "Is Stripe Supported Country"
+#~ msgstr "É um país aceito pelo Stripe"
+
+#~ msgid "Other than Paypal"
+#~ msgstr "Sem ser Paypal"
+
+#~ msgid "Paypal Only"
+#~ msgstr "Apenas Paypal"
+
+#~ msgid "Providers State"
+#~ msgstr "Situação dos provedores"
+
+#~ msgid "Server Error"
+#~ msgstr "Erro interno do servidor"
+
+#~ msgid "Shop - Payment"
+#~ msgstr "Loja - Pagamento"
+
+#~ msgid ""
+#~ "Support most payment methods; Visa, Mastercard, Maestro, Google Pay, "
+#~ "Apple Pay, etc. as well as recurring charges."
+#~ msgstr ""
+#~ "Aceitar a maioria das formas de pagamento: Visa, Mastercard, Maestro, "
+#~ "Google Pay, Apple Pay etc., bem como cobranças recorrentes."
+
+#~ msgid "Validation Error"
+#~ msgstr "Erro de Validação"
+
+#~ msgid "View Alternatives"
+#~ msgstr "Ver alternativas"
+
+#~ msgid "View other providers"
+#~ msgstr "Ver outros provedores"

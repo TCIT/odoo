@@ -8,7 +8,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from lxml import html
 from unittest.mock import patch
-from werkzeug.urls import url_encode, url_join
+from werkzeug.urls import url_encode
 
 from odoo import SUPERUSER_ID
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo
@@ -16,7 +16,7 @@ from odoo.addons.digest.tests.common import TestDigestCommon
 from odoo.addons.mail.tests.common import MailCommon
 from odoo.tests import tagged
 from odoo.tests.common import users
-from odoo.tools import mute_logger
+from odoo.tools import mute_logger, urls
 
 
 class TestDigest(TestDigestCommon):
@@ -105,6 +105,11 @@ class TestDigest(TestDigestCommon):
             msg='This KPI is in an other company')
         self.assertEqual(self.digest_3.kpi_res_users_connected_value, 2,
             msg='This KPI has no company, should take the current one')
+
+        self.user_employee.company_ids |= self.company_2
+
+        self.assertEqual(self.digest_2.kpi_res_users_connected_value, 1,
+            msg='The employee user should be counted in the other company if in allowed companies')
 
     @users('admin')
     def test_digest_numbers(self):
@@ -326,7 +331,7 @@ class TestUnsubscribe(MailCommon, HttpCaseWithUserDemo):
             headers = literal_eval(mail.headers)
             unsubscribe_url = headers.get("List-Unsubscribe", "").strip("<>")
             self.assertTrue(unsubscribe_url)
-            self.opener.post(unsubscribe_url)
+            self.url_open(unsubscribe_url, method='POST')
 
         self.assertFalse(digest.user_ids, "Users should have been unsubscribed from digest")
 
@@ -386,9 +391,5 @@ class TestUnsubscribe(MailCommon, HttpCaseWithUserDemo):
         else:
             unsubscribe_route = "unsubscribe"
 
-        url = url_join(self.base_url, f'digest/{self.test_digest.id}/{unsubscribe_route}?{url_encode(url_params)}')
-        if method == 'GET':
-            return self.opener.get(url, timeout=10, allow_redirects=True)
-        if method == 'POST':
-            return self.opener.post(url, timeout=10, allow_redirects=True)
-        raise Exception(f'Invalid method {method}')
+        url = urls.urljoin(self.base_url, f'digest/{self.test_digest.id}/{unsubscribe_route}?{url_encode(url_params)}')
+        return self.url_open(url, timeout=10, allow_redirects=True, method=method)

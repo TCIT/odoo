@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
@@ -30,6 +28,7 @@ export class SendSMSButton extends Component {
                     default_res_id: this.props.record.resId,
                     default_number_field_name: this.props.name,
                     default_composition_mode: "comment",
+                    dialog_size: "medium",
                 },
             },
             {

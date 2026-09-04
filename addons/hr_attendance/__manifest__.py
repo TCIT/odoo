@@ -15,17 +15,21 @@ Keeps account of the attendances of the employees on the basis of the
 actions(Check in/Check out) performed by them.
        """,
     'website': 'https://www.odoo.com/app/employees',
-    'depends': ['hr', 'barcodes'],
+    'depends': ['hr', 'barcodes', 'base_geolocalize'],
     'data': [
+        'data/hr_attendance_overtime_ruleset_data.xml',
+        'data/hr_attendance_overtime_rule_data.xml',
         'data/hr_attendance_data.xml',
         'security/hr_attendance_security.xml',
+        'security/hr_attendance_overtime_ruleset_security.xml',
         'security/ir.model.access.csv',
         'views/hr_attendance_view.xml',
-        'views/hr_attendance_overtime_view.xml',
         'views/hr_department_view.xml',
         'views/hr_employee_view.xml',
+        'views/hr_employee_public_views.xml',
         'views/res_config_settings_views.xml',
-        'views/hr_attendance_kiosk_templates.xml'
+        'views/hr_attendance_kiosk_templates.xml',
+        'views/hr_attendance_overtime_rule_views.xml',
     ],
     'demo': [
         'data/hr_attendance_demo.xml'
@@ -41,8 +45,8 @@ actions(Check in/Check out) performed by them.
         'web.qunit_suite_tests': [
             'hr_attendance/static/tests/hr_attendance_mock_server.js',
         ],
-        'web.qunit_mobile_suite_tests': [
-            'hr_attendance/static/tests/hr_attendance_mock_server.js',
+        'web.assets_unit_tests': [
+            'hr_attendance/static/tests/*.test.js',
         ],
         'hr_attendance.assets_public_attendance': [
             # Define attendance variables (takes priority)
@@ -70,6 +74,7 @@ actions(Check in/Check out) performed by them.
             # Public Kiosk app and its components
             "hr_attendance/static/src/public_kiosk/**/*",
             'hr_attendance/static/src/components/**/*',
+            ('remove', 'hr_attendance/static/src/components/attendance_menu/**/*'),
 
             'hr_attendance/static/src/scss/kiosk/hr_attendance.scss',
             "web/static/src/views/fields/formatters.js",
@@ -87,6 +92,7 @@ actions(Check in/Check out) performed by them.
 
         ]
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
     'post_init_hook': 'post_init_hook',
     'uninstall_hook': 'uninstall_hook',

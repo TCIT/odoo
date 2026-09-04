@@ -1,35 +1,44 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* base_setup
-# 
+# * base_setup
+#
 # Translators:
-# Martin Trigaux, 2024
-# Anders Wallenquist <anders.wallenquist@vertel.se>, 2024
-# Mikael Åkerberg <mikael.akerberg@mariaakerberg.com>, 2024
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2024
-# Lasse L, 2024
-# Simon S, 2024
-# Martin Wilderoth <martin.wilderoth@linserv.se>, 2024
-# Jakob Krabbe <jakob.krabbe@vertel.se>, 2024
-# 
+# lasch a <bmail440@gmail.com>, 2022
+# Kristoffer Grundström <lovaren@gmail.com>, 2022
+# Anders Wallenquist <anders.wallenquist@vertel.se>, 2022
+# Martin Wilderoth <martin.wilderoth@linserv.se>, 2022
+# Chrille Hedberg <hedberg.chrille@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Jakob Krabbe <jakob.krabbe@vertel.se>, 2022, 2025, 2026.
+# Kim Asplund <kim.asplund@gmail.com>, 2022
+# Simon S, 2022
+# Mikael Åkerberg <mikael.akerberg@mariaakerberg.com>, 2023
+# Daniel Osser <danielosser@gmail.com>, 2023
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Hanna Kharraziha <hakha@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Jakob Krabbe <jakob.krabbe@vertel.se>, 2024\n"
-"Language-Team: Swedish (https://app.transifex.com/odoo/teams/41243/sv/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-07 03:26+0000\n"
+"Last-Translator: Jakob Krabbe <jakob.krabbe@vertel.se>\n"
+"Language-Team: Swedish <https://translate.odoo.com/projects/odoo-19/"
+"base_setup/sv/>\n"
+"Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: sv\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
-msgid "<span class=\"fa fa-lg fa-users\" aria-label=\"Number of active users\"/>"
-msgstr "<span class=\"fa fa-lg fa-users\" aria-label=\"Antal aktiva användare\"/>"
+msgid ""
+"<span class=\"fa fa-lg fa-users\" aria-label=\"Number of active users\"/>"
+msgstr ""
+"<span class=\"fa fa-lg fa-users\" aria-label=\"Antal aktiva användare\"/>"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -37,14 +46,16 @@ msgid ""
 "<span class=\"o_form_label\" invisible=\"active_user_count &gt; 1\">\n"
 "                                        Active User\n"
 "                                    </span>\n"
-"                                    <span class=\"o_form_label\" invisible=\"active_user_count &lt;= 1\">\n"
+"                                    <span class=\"o_form_label\" "
+"invisible=\"active_user_count &lt;= 1\">\n"
 "                                        Active Users\n"
 "                                    </span>"
 msgstr ""
 "<span class=\"o_form_label\" invisible=\"active_user_count &gt; 1\">\n"
 "                                        Aktiv användare\n"
 "                                    </span>\n"
-"                                    <span class=\"o_form_label\" invisible=\"active_user_count &lt;= 1\">\n"
+"                                    <span class=\"o_form_label\" "
+"invisible=\"active_user_count &lt;= 1\">\n"
 "                                        Aktiva användare\n"
 "                                    <span>"
 
@@ -54,7 +65,8 @@ msgid ""
 "<span class=\"o_form_label\" invisible=\"company_count &gt; 1\">\n"
 "                                        Company\n"
 "                                    </span>\n"
-"                                    <span class=\"o_form_label\" invisible=\"company_count &lt;= 1\">\n"
+"                                    <span class=\"o_form_label\" "
+"invisible=\"company_count &lt;= 1\">\n"
 "                                        Companies\n"
 "                                    </span>\n"
 "                                    <br/>"
@@ -62,7 +74,8 @@ msgstr ""
 "<span class=\"o_form_label\" invisible=\"company_count &gt; 1\">\n"
 "                                        Företag\n"
 "                                    </span>\n"
-"                                    <span class=\"o_form_label\" invisible=\"company_count &lt;= 1\">\n"
+"                                    <span class=\"o_form_label\" "
+"invisible=\"company_count &lt;= 1\">\n"
 "                                        Företag\n"
 "                                    </span>\n"
 "                                    <br/>"
@@ -73,14 +86,16 @@ msgid ""
 "<span class=\"o_form_label\" invisible=\"language_count &gt; 1\">\n"
 "                                            Language\n"
 "                                        </span>\n"
-"                                        <span class=\"o_form_label\" invisible=\"language_count &lt;= 1\">\n"
+"                                        <span class=\"o_form_label\" "
+"invisible=\"language_count &lt;= 1\">\n"
 "                                            Languages\n"
 "                                        </span>"
 msgstr ""
 "<span class=\"o_form_label\" invisible=\"language_count &gt; 1\">\n"
 "                                            Språk\n"
 "                                        </span>\n"
-"                                        <span class=\"o_form_label\" invisible=\"language_count &lt;= 1\"> \n"
+"                                        <span class=\"o_form_label\" "
+"invisible=\"language_count &lt;= 1\"> \n"
 "                                            Språk\n"
 "                                        </span> Språk"
 
@@ -105,7 +120,15 @@ msgstr ""
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid ""
-"<strong>Save</strong> this page and come back here to set up reCaptcha."
+"<strong>Save</strong> this page and come back here to set up Google Places "
+"API key"
+msgstr ""
+"<strong>Spara</strong> den här sidan och kom tillbaka hit för att "
+"konfigurera Google Places API-nyckel"
+
+#. module: base_setup
+#: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
+msgid "<strong>Save</strong> this page and come back here to set up reCaptcha."
 msgstr ""
 "<strong>Spara</strong> den här sidan och kom tillbaka hit för att ställa in "
 "reCaptcha."
@@ -129,8 +152,8 @@ msgid ""
 "API Keys allow your users to access Odoo with external tools when multi-"
 "factor authentication is enabled."
 msgstr ""
-"API-nycklar gör att dina användare kan komma åt Odoo med externa verktyg när"
-" multifaktorautentisering är aktiverad."
+"API-nycklar gör att dina användare kan komma åt Odoo med externa verktyg när "
+"multifaktorautentisering är aktiverad."
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -181,13 +204,13 @@ msgstr "Gör det möjligt att arbeta i en verksamhet med flera valutor"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
-msgid "Automatically enrich your contact base with company data"
-msgstr "Berika automatiskt din kontaktbas med företagsuppgifter"
+msgid "Autocomplete partner addresses with Google Places"
+msgstr "Komplettera partneradresser automatiskt med Google Places"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
-msgid "Automatically generate counterpart documents in recipient companies"
-msgstr "Generera automatiskt motpartsdokument i mottagande företag"
+msgid "Automatically enrich your contact base with company data"
+msgstr "Berika automatiskt din kontaktbas med företagsuppgifter"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -256,7 +279,21 @@ msgstr ""
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid "Contacts"
-msgstr "Kontaktpersoner"
+msgstr "Kontakter"
+
+#. module: base_setup
+#: model:ir.model.fields,field_description:base_setup.field_res_config_settings__company_country_group_codes
+msgid "Country Group Codes"
+msgstr "Landsgruppskoder"
+
+#. module: base_setup
+#: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
+msgid ""
+"Create corresponding in/out orders and bills when you sell/buy between your "
+"companies"
+msgstr ""
+"Skapa motsvarande in-/utorder och fakturor när du säljer/köper mellan dina "
+"företag"
 
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__report_footer
@@ -264,7 +301,6 @@ msgid "Custom Report Footer"
 msgstr "Anpassad sidfot för rapport"
 
 #. module: base_setup
-#: model:ir.model.fields,field_description:base_setup.field_res_config_settings__user_default_rights
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid "Default Access Rights"
 msgstr "Standardrättigheter"
@@ -272,8 +308,16 @@ msgstr "Standardrättigheter"
 #. module: base_setup
 #. odoo-python
 #: code:addons/base_setup/models/res_config_settings.py:0
-msgid "Default User Template not found."
-msgstr "Standardanvändarmall hittades inte."
+msgid "Default access for new users"
+msgstr "Standardåtkomst för nya användare"
+
+#. module: base_setup
+#: model:ir.model.fields,field_description:base_setup.field_ir_http__display_name
+#: model:ir.model.fields,field_description:base_setup.field_kpi_provider__display_name
+#: model:ir.model.fields,field_description:base_setup.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:base_setup.field_res_users__display_name
+msgid "Display Name"
+msgstr "Visningsnamn"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -289,6 +333,12 @@ msgstr "Dokumentmall"
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid "Edit Layout"
 msgstr "Ändra layout"
+
+#. module: base_setup
+#. odoo-python
+#: code:addons/base_setup/models/res_config_settings.py:0
+msgid "Edit new user default group"
+msgstr "Redigera ny standardanvändargrupp"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -313,7 +363,7 @@ msgstr "Text som visas i sidfoten på alla rapporter."
 #: model:ir.ui.menu,name:base_setup.menu_config
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid "General Settings"
-msgstr "Generella inställningar"
+msgstr "Allmänna inställningar"
 
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_base_geolocalize
@@ -331,14 +381,22 @@ msgid "Geolocation"
 msgstr "Geolokalisering"
 
 #. module: base_setup
-#: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_product_images
-msgid "Get product pictures using barcode"
-msgstr "Hämta produktbilder med hjälp av streckkod"
+#: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_google_address_autocomplete
+msgid "Google Address Autocomplete"
+msgstr "Google Adress Autoifyllning"
 
 #. module: base_setup
 #: model:ir.model,name:base_setup.model_ir_http
 msgid "HTTP Routing"
 msgstr "HTTP-routing"
+
+#. module: base_setup
+#: model:ir.model.fields,field_description:base_setup.field_ir_http__id
+#: model:ir.model.fields,field_description:base_setup.field_kpi_provider__id
+#: model:ir.model.fields,field_description:base_setup.field_res_config_settings__id
+#: model:ir.model.fields,field_description:base_setup.field_res_users__id
+msgid "ID"
+msgstr "ID"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -358,12 +416,17 @@ msgstr "Integrationer"
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid "Inter-Company Transactions"
-msgstr "Transaktioner mellan koncernföretag"
+msgstr "Transaktioner mellan företag"
 
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__is_root_company
 msgid "Is Root Company"
 msgstr "Företaget Is Root"
+
+#. module: base_setup
+#: model:ir.model,name:base_setup.model_kpi_provider
+msgid "KPI Provider"
+msgstr "KPI-leverantör"
 
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_auth_ldap
@@ -394,7 +457,7 @@ msgstr "Hantera API-nycklar"
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid "Manage Companies"
-msgstr "Hantera bolag"
+msgstr "Hantera företag"
 
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_account_inter_company_rules
@@ -457,6 +520,11 @@ msgid "Permissions"
 msgstr "Behörigheter"
 
 #. module: base_setup
+#: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_voip
+msgid "Phone"
+msgstr "Telefon"
+
+#. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid "Preview Document"
 msgstr "Förhandsgranska dokument"
@@ -480,6 +548,12 @@ msgstr "Skydda era formulär från spam och missbruk."
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid "Protect your forms with CF Turnstile."
 msgstr "Skydda dina formulär med CF Turnstile."
+
+#. module: base_setup
+#. odoo-javascript
+#: code:addons/base_setup/static/src/views/module_views.xml:0
+msgid "Reset Updating States"
+msgstr "Återställ uppdatering av lägen"
 
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_sms
@@ -517,8 +591,8 @@ msgid ""
 "The ISO country code in two chars. \n"
 "You can use this field for quick search."
 msgstr ""
-"ISO-landskoden med två tecken.\n"
-"Du kan använda det här fältet för snabb sökning."
+"ISO-kod med två tecken.\n"
+"Fältet används för snabbsökning."
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -568,12 +642,7 @@ msgstr "Användare"
 #. odoo-python
 #: code:addons/base_setup/models/res_config_settings.py:0
 msgid "VAT"
-msgstr "Skattenummer"
-
-#. module: base_setup
-#: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_voip
-msgid "VoIP"
-msgstr "VoIP"
+msgstr "Momsregistreringsnummer"
 
 #. module: base_setup
 #: model_terms:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -586,6 +655,39 @@ msgstr ""
 "du väljer ett objekt fylls företagsdata och logotyp i automatiskt."
 
 #. module: base_setup
+#. odoo-python
+#: code:addons/base_setup/models/res_users.py:0
+msgid "You have to install the Discuss application to use this feature."
+msgstr "Du måste installera Discuss-appen för att använda den här funktionen."
+
+#. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings__module_google_recaptcha
 msgid "reCAPTCHA"
 msgstr "reCAPTCHA"
+
+#~ msgid ""
+#~ "Automatically generate counterpart documents for orders/invoices between "
+#~ "companies"
+#~ msgstr ""
+#~ "Generera automatiskt motpartsdokument för ordrar/fakturor mellan bolag."
+
+#~ msgid "Documentation"
+#~ msgstr "Dokumentation"
+
+#~ msgid "Google Calendar"
+#~ msgstr "Google Kalender"
+
+#~ msgid "On Apple Store"
+#~ msgstr "I Apple Store"
+
+#~ msgid "On Google Play"
+#~ msgstr "I Google Play"
+
+#~ msgid "Outlook Calendar"
+#~ msgstr "Outlook Kalender"
+
+#~ msgid "Synchronize your calendar with Google Calendar"
+#~ msgstr "Synkronisera er kalender med Google Kalender"
+
+#~ msgid "Synchronize your calendar with Outlook"
+#~ msgstr "Synkronisera er kalender med Outlook"

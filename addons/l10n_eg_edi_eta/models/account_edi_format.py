@@ -2,13 +2,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 
+import base64
 import json
 import logging
 import requests
 from werkzeug.urls import url_quote
 from base64 import b64encode
+from json import JSONDecodeError
 from odoo.addons.account.tools import LegacyHTTPAdapter
-from json.decoder import JSONDecodeError
 
 from odoo import api, models, _
 from odoo.tools.float_utils import json_float_round
@@ -57,7 +58,7 @@ class AccountEdiFormat(models.Model):
         if not request_response.ok:
             try:
                 response_data = request_response.json()
-            except JSONDecodeError as ex:
+            except (JSONDecodeError, json.JSONDecodeError) as ex:
                 return {
                     'error': str(ex),
                     'blocking_level': 'error'
@@ -67,7 +68,18 @@ class AccountEdiFormat(models.Model):
                     'error': response_data.get('error'),
                     'blocking_level': 'error'
                 }
-        return {'response': request_response}
+
+        try:
+            response_data = request_response.json()
+        except JSONDecodeError:
+            response_data = {}
+
+        return {
+            'response': str(request_response),
+            'ok': request_response.ok,
+            'content': request_response.content,
+            'data': response_data,
+        }
 
     @api.model
     def _l10n_eg_edi_round(self, amount, precision_digits=5):
@@ -82,7 +94,7 @@ class AccountEdiFormat(models.Model):
         access_data = self._l10n_eg_eta_get_access_token(invoice)
         if access_data.get('error'):
             return access_data
-        invoice_json = json.loads(invoice.l10n_eg_eta_json_doc_id.raw)
+        invoice_json = json.loads(base64.b64decode(invoice.l10n_eg_eta_json_doc_file))
         request_url = '/api/v1.0/documentsubmissions'
         request_data = {
             'body': json.dumps({'documents': [invoice_json['request']]}, ensure_ascii=False, indent=4).encode('utf-8'),
@@ -91,7 +103,7 @@ class AccountEdiFormat(models.Model):
         response_data = self._l10n_eg_eta_connect_to_server(request_data, request_url, 'POST', production_enviroment=invoice.company_id.l10n_eg_production_env)
         if response_data.get('error'):
             return response_data
-        response_data = response_data.get('response').json()
+        response_data = response_data.get('data')
         if response_data.get('rejectedDocuments', False) and isinstance(response_data.get('rejectedDocuments'), list):
             return {
                 'error': str(response_data.get('rejectedDocuments')[0].get('error')),
@@ -105,8 +117,14 @@ class AccountEdiFormat(models.Model):
                 'l10n_eg_hash_key': response_data['acceptedDocuments'][0].get('hashKey'),
                 'l10n_eg_submission_number': response_data['submissionId'],
             }
-            invoice.l10n_eg_eta_json_doc_id.raw = json.dumps(invoice_json)
-            return {'attachment': invoice.l10n_eg_eta_json_doc_id}
+            invoice.l10n_eg_eta_json_doc_file = base64.b64encode(json.dumps(invoice_json).encode())
+            invoice.invalidate_recordset(fnames=['l10n_eg_eta_json_doc_file'])
+            json_doc_attachment_id = self.env['ir.attachment'].search([
+                ('res_model', '=', invoice._name),
+                ('res_id', '=', invoice.id),
+                ('res_field', '=', 'l10n_eg_eta_json_doc_file'),
+            ])
+            return {'attachment': json_doc_attachment_id}
         return {
             'error': _('an Unknown error has occurred'),
             'blocking_level': 'warning'
@@ -130,7 +148,7 @@ class AccountEdiFormat(models.Model):
         response_data = self._l10n_eg_eta_connect_to_server(request_data, request_url, 'PUT', production_enviroment=invoice.company_id.l10n_eg_production_env)
         if response_data.get('error'):
             return response_data
-        if response_data.get('response').ok:
+        if response_data.get('ok'):
             return {'success': True}
         return {
             'error': _('an Unknown error has occurred'),
@@ -150,7 +168,7 @@ class AccountEdiFormat(models.Model):
         response_data = self._l10n_eg_eta_connect_to_server(request_data, request_url, 'GET', production_enviroment=invoice.company_id.l10n_eg_production_env)
         if response_data.get('error'):
             return response_data
-        response_data = response_data.get('response').json()
+        response_data = response_data.get('data')
         document_summary = [doc for doc in response_data.get('documentSummary', []) if doc.get('uuid') == invoice.l10n_eg_uuid]
         return {'doc_data': document_summary}
 
@@ -183,7 +201,7 @@ class AccountEdiFormat(models.Model):
         response_data = self._l10n_eg_eta_connect_to_server(request_data, request_url, 'POST', is_access_token_req=True, production_enviroment=invoice.company_id.l10n_eg_production_env)
         if response_data.get('error'):
             return response_data
-        return {'access_token' : response_data.get('response').json().get('access_token')}
+        return {'access_token': response_data.get('data').get('access_token')}
 
     @api.model
     def _l10n_eg_get_eta_invoice_pdf(self, invoice):
@@ -195,12 +213,10 @@ class AccountEdiFormat(models.Model):
         response_data = self._l10n_eg_eta_connect_to_server(request_data, request_url, 'GET', production_enviroment=invoice.company_id.l10n_eg_production_env)
         if response_data.get('error'):
             return response_data
-        response_data = response_data.get('response')
-        _logger.warning('PDF Function Response %s.', response_data)
-        if response_data.ok:
-            return {'data': response_data.content}
-        else:
-            return {'error': _('PDF Document is not available')}
+        _logger.warning('PDF Function Response %s.', response_data.get('response'))
+        if response_data.get('ok'):
+            return {'data': response_data.get('content')}
+        return {'error': _('PDF Document is not available')}
 
     @api.model
     def _l10n_eg_validate_info_address(self, partner_id, issuer=False, invoice=False):
@@ -216,7 +232,7 @@ class AccountEdiFormat(models.Model):
         AccountTax = self.env['account.tax']
         base_amls = invoice.line_ids.filtered(lambda x: x.display_type == 'product')
         base_lines = [invoice._prepare_product_base_line_for_taxes_computation(x) for x in base_amls]
-        tax_amls = invoice.line_ids.filtered(lambda x: x.display_type == 'tax')
+        tax_amls = invoice.line_ids.filtered('tax_repartition_line_id')
         tax_lines = [invoice._prepare_tax_line_for_taxes_computation(x) for x in tax_amls]
         AccountTax._add_tax_details_in_base_lines(base_lines, invoice.company_id)
         AccountTax._round_base_lines_tax_details(base_lines, invoice.company_id, tax_lines=tax_lines)
@@ -224,6 +240,8 @@ class AccountEdiFormat(models.Model):
         # Tax amounts per line.
 
         def grouping_function_base_line(base_line, tax_data):
+            if not tax_data:
+                return None
             tax = tax_data['tax']
             code_split = tax.l10n_eg_eta_code.split('_')
             return {
@@ -238,14 +256,16 @@ class AccountEdiFormat(models.Model):
         # Tax amounts for the whole document.
 
         def grouping_function_global(base_line, tax_data):
+            if not tax_data:
+                return None
             tax = tax_data['tax']
             code_split = tax.l10n_eg_eta_code.split('_')
             return {
                 'tax_type': code_split[0].upper(),
             }
-            
+
         def grouping_function_total_amount(base_line, tax_data):
-            return True
+            return True if tax_data else None
 
         base_lines_aggregated_values_total_amount = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function_total_amount)
         values_per_grouping_key_total_amount = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values_total_amount)
@@ -301,7 +321,7 @@ class AccountEdiFormat(models.Model):
             discount_amount = self._l10n_eg_edi_round(price_subtotal_before_discount - abs(line.balance))
             item_code = line.product_id.l10n_eg_eta_code or line.product_id.barcode
             lines.append({
-                'description': line.product_id.display_name or line.name,
+                'description': line.name,
                 'itemType': item_code.startswith('EG') and 'EGS' or 'GS1',
                 'itemCode': item_code,
                 'unitType': line.product_uom_id.l10n_eg_unit_code_id.code,
@@ -406,11 +426,11 @@ class AccountEdiFormat(models.Model):
             errors.append(_("Please add all the required fields in the branch details"))
         if not self._l10n_eg_validate_info_address(invoice.partner_id, invoice=invoice):
             errors.append(_("Please add all the required fields in the customer details"))
-        if not all(aml.product_uom_id.l10n_eg_unit_code_id.code for aml in invoice.invoice_line_ids.filtered(lambda x: x.display_type not in ('line_note', 'line_section'))):
+        if not all(aml.product_uom_id.l10n_eg_unit_code_id.code for aml in invoice.invoice_line_ids.filtered(lambda x: x.display_type not in ('line_section', 'line_subsection', 'line_note'))):
             errors.append(_("Please make sure the invoice lines UoM codes are all set up correctly"))
-        if not all(tax.l10n_eg_eta_code for tax in invoice.invoice_line_ids.filtered(lambda x: x.display_type not in ('line_note', 'line_section')).tax_ids):
+        if not all(tax.l10n_eg_eta_code for tax in invoice.invoice_line_ids.filtered(lambda x: x.display_type not in ('line_section', 'line_subsection', 'line_note')).tax_ids):
             errors.append(_("Please make sure the invoice lines taxes all have the correct ETA tax code"))
-        if not all(aml.product_id.l10n_eg_eta_code or aml.product_id.barcode for aml in invoice.invoice_line_ids.filtered(lambda x: x.display_type not in ('line_note', 'line_section'))):
+        if not all(aml.product_id.l10n_eg_eta_code or aml.product_id.barcode for aml in invoice.invoice_line_ids.filtered(lambda x: x.display_type not in ('line_section', 'line_subsection', 'line_note'))):
             errors.append(_("Please make sure the EGS/GS1 Barcode is set correctly on all products"))
         return errors
 
@@ -419,14 +439,14 @@ class AccountEdiFormat(models.Model):
         if invoice.l10n_eg_submission_number:
             return {invoice: self._l10n_eg_get_einvoice_status(invoice)}
 
-        if not invoice.l10n_eg_eta_json_doc_id:
+        if not invoice.l10n_eg_eta_json_doc_file:
             return {
                 invoice: {
                     'error':  _("An error occured in created the ETA invoice, please retry signing"),
                     'blocking_level': 'error'
                 }
             }
-        invoice_json = json.loads(invoice.l10n_eg_eta_json_doc_id.raw)['request']
+        invoice_json = json.loads(base64.b64decode(invoice.l10n_eg_eta_json_doc_file))['request']
         if not invoice_json.get('signatures'):
             return {
                 invoice: {

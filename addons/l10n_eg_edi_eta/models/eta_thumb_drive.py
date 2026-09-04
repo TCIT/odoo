@@ -12,7 +12,7 @@ from odoo import models, fields, _
 from odoo.exceptions import ValidationError
 
 
-class EtaThumbDrive(models.Model):
+class L10n_Eg_EdiThumbDrive(models.Model):
     _name = 'l10n_eg_edi.thumb.drive'
     _description = 'Thumb drive used to sign invoices in Egypt'
 
@@ -22,9 +22,10 @@ class EtaThumbDrive(models.Model):
     pin = fields.Char('ETA USB Pin', required=True)
     access_token = fields.Char(required=True)
 
-    _sql_constraints = [
-        ('user_drive_uniq', 'unique (user_id, company_id)', 'You can only have one thumb drive per user per company!'),
-    ]
+    _user_drive_uniq = models.Constraint(
+        'unique (user_id, company_id)',
+        'You can only have one thumb drive per user per company!',
+    )
 
     def action_sign_invoices(self, invoice_ids):
         self.ensure_one()
@@ -32,8 +33,8 @@ class EtaThumbDrive(models.Model):
 
         to_sign_dict = dict()
         for invoice_id in invoice_ids:
-            eta_invoice = json.loads(invoice_id.l10n_eg_eta_json_doc_id.raw)['request']
-            signed_attrs = self._generate_signed_attrs(eta_invoice, invoice_id.l10n_eg_signing_time)
+            eta_invoice = json.loads(base64.b64decode(invoice_id.l10n_eg_eta_json_doc_file))['request']
+            signed_attrs = self._generate_signed_attrs__(eta_invoice, invoice_id.l10n_eg_signing_time)
             to_sign_dict[invoice_id.id] = base64.b64encode(signed_attrs.dump()).decode()
 
         return {
@@ -74,13 +75,13 @@ class EtaThumbDrive(models.Model):
         invoices = json.loads(invoices)
         for key, value in invoices.items():
             invoice_id = self.env['account.move'].browse(int(key))
-            eta_invoice_json = json.loads(invoice_id.l10n_eg_eta_json_doc_id.raw)
+            eta_invoice_json = json.loads(base64.b64decode(invoice_id.l10n_eg_eta_json_doc_file))
 
             signature = self._generate_cades_bes_signature(eta_invoice_json['request'], invoice_id.l10n_eg_signing_time,
                                                            base64.b64decode(value))
 
             eta_invoice_json['request']['signatures'] = [{'signatureType': 'I', 'value': signature}]
-            invoice_id.l10n_eg_eta_json_doc_id.raw = json.dumps(eta_invoice_json)
+            invoice_id.l10n_eg_eta_json_doc_file = base64.b64encode(json.dumps(eta_invoice_json).encode())
             invoice_id.l10n_eg_is_signed = True
         return True
 
@@ -108,7 +109,7 @@ class EtaThumbDrive(models.Model):
                     canonical_str.append(self._serialize_for_signing(elem))
         return ''.join(canonical_str)
 
-    def _generate_signed_attrs(self, eta_invoice, signing_time):
+    def _generate_signed_attrs__(self, eta_invoice, signing_time):
         cert = x509.Certificate.load(base64.b64decode(self.certificate))
         data = hashlib.sha256(self._serialize_for_signing(eta_invoice).encode()).digest()
         return cms.CMSAttributes([
@@ -136,7 +137,7 @@ class EtaThumbDrive(models.Model):
             }),
         ])
 
-    def _generate_signer_info(self, eta_invoice, signing_time, signature=False):
+    def _generate_signer_info__(self, eta_invoice, signing_time, signature=False):
         cert = x509.Certificate.load(base64.b64decode(self.certificate))
         signer_info = {
             'version': 'v1',
@@ -150,7 +151,7 @@ class EtaThumbDrive(models.Model):
             'signature_algorithm': algos.SignedDigestAlgorithm({
                 'algorithm': 'sha256_rsa'
             }),
-            'signed_attrs': self._generate_signed_attrs(eta_invoice, signing_time)
+            'signed_attrs': self._generate_signed_attrs__(eta_invoice, signing_time)
         }
         if signature:
             signer_info['signature'] = signature
@@ -168,7 +169,7 @@ class EtaThumbDrive(models.Model):
             },
             'certificates': [cert],
             'signer_infos': [
-                self._generate_signer_info(eta_invoice, signing_time, signature),
+                self._generate_signer_info__(eta_invoice, signing_time, signature),
             ],
         }
         content_info = cms.ContentInfo({'content_type': cms.ContentType('signed_data'), 'content': cms.SignedData(signed_data)})

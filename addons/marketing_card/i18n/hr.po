@@ -1,31 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* marketing_card
-# 
-# Translators:
-# Ivica Dimjašević <ivica.dimjasevic@storm.hr>, 2024
-# Stjepan Lovasić <stjepan.lovasic@gmail.com>, 2024
-# Kristina Palaš, 2024
-# Vladimir Olujić <olujic.vladimir@storm.hr>, 2024
-# Karolina Tonković <karolina.tonkovic@storm.hr>, 2024
-# Bole <bole@dajmi5.com>, 2024
-# Tina Milas, 2024
-# Milan Tribuson <one.mile.code@gmail.com>, 2024
-# Martin Trigaux, 2024
-# 
+# * marketing_card
+#
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~18.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-03 08:35+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Martin Trigaux, 2024\n"
-"Language-Team: Croatian (https://app.transifex.com/odoo/teams/41243/hr/)\n"
+"POT-Creation-Date: 2026-01-25 18:35+0000\n"
+"PO-Revision-Date: 2026-08-02 19:05+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Croatian <https://translate.odoo.com/projects/odoo-19/"
+"marketing_card/hr/>\n"
+"Language: hr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: hr\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: marketing_card
 #. odoo-python
@@ -42,7 +35,9 @@ msgstr ""
 
 #. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_view_kanban
-msgid "<i class=\"fa fa-fw fa-share\" aria-label=\"Shares\" role=\"img\" title=\"Shares\"/>"
+msgid ""
+"<i class=\"fa fa-fw fa-share\" aria-label=\"Shares\" role=\"img\" "
+"title=\"Shares\"/>"
 msgstr ""
 
 #. module: marketing_card
@@ -93,13 +88,13 @@ msgstr ""
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__message_needaction
 msgid "Action Needed"
-msgstr "Potrebna radnja"
+msgstr "Potrebna dodatna radnja"
 
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__active
 #: model:ir.model.fields,field_description:marketing_card.field_card_card__active
 msgid "Active"
-msgstr "Aktivno"
+msgstr "Aktivan"
 
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__activity_ids
@@ -109,7 +104,7 @@ msgstr "Aktivnosti"
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "Oznaka izuzetka aktivnosti"
+msgstr "Dekoracija iznimke aktivnosti"
 
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__activity_state
@@ -120,6 +115,14 @@ msgstr "Status aktivnosti"
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__activity_type_icon
 msgid "Activity Type Icon"
 msgstr "Ikona tipa aktivnosti"
+
+#. module: marketing_card
+#. odoo-python
+#: code:addons/marketing_card/models/card_campaign.py:0
+msgid ""
+"An error occured while rendering a card for %(record_name)s. Try again or "
+"check the server logs for more details."
+msgstr ""
 
 #. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_view_form
@@ -138,9 +141,19 @@ msgid "Attachment Count"
 msgstr "Broj priloga"
 
 #. module: marketing_card
+#: model:card.template,name:marketing_card.card_template_avatar_highlight
+msgid "Avatar Highlight"
+msgstr ""
+
+#. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__content_background
 msgid "Background"
 msgstr "Pozadina"
+
+#. module: marketing_card
+#: model:card.template,name:marketing_card.card_template_blur
+msgid "Blur"
+msgstr ""
 
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__body_html
@@ -175,7 +188,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:marketing_card.card_campaign_action
 #: model:ir.model.fields,field_description:marketing_card.field_mailing_mailing__card_campaign_id
 msgid "Card Campaign"
-msgstr ""
+msgstr "Kampanja kartica"
 
 #. module: marketing_card
 #. odoo-python
@@ -199,6 +212,12 @@ msgid "Card Layout"
 msgstr ""
 
 #. module: marketing_card
+#. odoo-python
+#: code:addons/marketing_card/models/card_campaign.py:0
+msgid "Card Preview"
+msgstr ""
+
+#. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_mailing_mailing__card_requires_sync_count
 msgid "Card Requires Sync Count"
 msgstr ""
@@ -212,11 +231,21 @@ msgstr ""
 #: model:ir.actions.act_window,name:marketing_card.card_template_action
 #: model:ir.ui.menu,name:marketing_card.cards_template_menu
 msgid "Card Template"
-msgstr ""
+msgstr "Predložak kartice"
 
 #. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.mailing_mailing_view_form_inherit_marketing_card
 msgid "Cards"
+msgstr ""
+
+#. module: marketing_card
+#: model:card.template,name:marketing_card.card_template_user_image
+msgid "Center"
+msgstr "Centar"
+
+#. module: marketing_card
+#: model:card.template,name:marketing_card.card_template_circles
+msgid "Circles"
 msgstr ""
 
 #. module: marketing_card
@@ -228,6 +257,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign_tag__color
 msgid "Color"
 msgstr "Boja"
+
+#. module: marketing_card
+#: model_terms:ir.ui.view,arch_db:marketing_card.mailing_mailing_view_form_inherit_marketing_card
+msgid "Confirm Cards Update"
+msgstr ""
 
 #. module: marketing_card
 #: model_terms:ir.actions.act_window,help:marketing_card.cards_card_action
@@ -261,9 +295,14 @@ msgid "Created on"
 msgstr "Kreirano"
 
 #. module: marketing_card
+#: model:card.template,name:marketing_card.card_template_dark
+msgid "Dark"
+msgstr "Tamno"
+
+#. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_template__default_background
 msgid "Default Background"
-msgstr ""
+msgstr "Zadana pozadina"
 
 #. module: marketing_card
 #: model:ir.model.fields,help:marketing_card.field_card_campaign__post_suggestion
@@ -280,8 +319,17 @@ msgstr "Dizajn"
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign_tag__display_name
 #: model:ir.model.fields,field_description:marketing_card.field_card_card__display_name
 #: model:ir.model.fields,field_description:marketing_card.field_card_template__display_name
+#: model:ir.model.fields,field_description:marketing_card.field_ir_model__display_name
+#: model:ir.model.fields,field_description:marketing_card.field_mail_compose_message__display_name
+#: model:ir.model.fields,field_description:marketing_card.field_mailing_mailing__display_name
+#: model:ir.model.fields,field_description:marketing_card.field_utm_source__display_name
 msgid "Display Name"
-msgstr "Naziv za prikaz"
+msgstr "Naziv"
+
+#. module: marketing_card
+#: model:card.template,name:marketing_card.card_template_drawings
+msgid "Drawings"
+msgstr ""
 
 #. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_view_form
@@ -309,11 +357,6 @@ msgid "Email composition wizard"
 msgstr "Čarobnjak za sastavljanje e-pošte"
 
 #. module: marketing_card
-#: model_terms:ir.ui.view,arch_db:marketing_card.card_card_view_search
-msgid "Filter By"
-msgstr ""
-
-#. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__message_follower_ids
 msgid "Followers"
 msgstr "Pratitelji"
@@ -321,7 +364,7 @@ msgstr "Pratitelji"
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "Pratitelji (partneri)"
+msgstr "Pratitelji (Partneri)"
 
 #. module: marketing_card
 #: model:ir.model.fields,help:marketing_card.field_card_campaign__activity_type_icon
@@ -329,10 +372,9 @@ msgid "Font awesome icon e.g. fa-tasks"
 msgstr "Font awesome ikona npr. fa-tasks"
 
 #. module: marketing_card
-#: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_view_search
-#: model_terms:ir.ui.view,arch_db:marketing_card.card_card_view_search
-msgid "Group By"
-msgstr "Grupiraj po"
+#: model:card.template,name:marketing_card.card_template_geometric
+msgid "Geometric"
+msgstr ""
 
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__has_message
@@ -347,7 +389,7 @@ msgstr "Zaglavlje"
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__content_header_color
 msgid "Header Color"
-msgstr ""
+msgstr "Boja zaglavlja"
 
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__content_header_path
@@ -357,12 +399,19 @@ msgstr ""
 #. module: marketing_card
 #. odoo-python
 #: code:addons/marketing_card/models/card_campaign.py:0
+msgid "Hello everyone"
+msgstr ""
+
+#. module: marketing_card
+#. odoo-python
+#: code:addons/marketing_card/models/card_campaign.py:0
 msgid "Help us share the news"
 msgstr ""
 
 #. module: marketing_card
-#: model:ir.module.category,description:marketing_card.module_category_marketing_card
-msgid "Helps you manage marketing card campaigns."
+#. odoo-python
+#: code:addons/marketing_card/models/card_campaign.py:0
+msgid "Here's the link to advertise your participation."
 msgstr ""
 
 #. module: marketing_card
@@ -370,6 +419,10 @@ msgstr ""
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign_tag__id
 #: model:ir.model.fields,field_description:marketing_card.field_card_card__id
 #: model:ir.model.fields,field_description:marketing_card.field_card_template__id
+#: model:ir.model.fields,field_description:marketing_card.field_ir_model__id
+#: model:ir.model.fields,field_description:marketing_card.field_mail_compose_message__id
+#: model:ir.model.fields,field_description:marketing_card.field_mailing_mailing__id
+#: model:ir.model.fields,field_description:marketing_card.field_utm_source__id
 msgid "ID"
 msgstr "ID"
 
@@ -432,7 +485,7 @@ msgstr ""
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__message_is_follower
 msgid "Is Follower"
-msgstr "Je li pratitelj"
+msgstr "Je pratitelj"
 
 #. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_view_form
@@ -458,7 +511,22 @@ msgstr "Promijenio"
 #: model:ir.model.fields,field_description:marketing_card.field_card_card__write_date
 #: model:ir.model.fields,field_description:marketing_card.field_card_template__write_date
 msgid "Last Updated on"
-msgstr "Promijenjeno"
+msgstr "Vrijeme promjene"
+
+#. module: marketing_card
+#: model:card.template,name:marketing_card.card_template_light
+msgid "Light"
+msgstr "Svijetlo"
+
+#. module: marketing_card
+#: model:card.template,name:marketing_card.card_template_lila
+msgid "Lila"
+msgstr ""
+
+#. module: marketing_card
+#: model:card.template,name:marketing_card.card_template_lines
+msgid "Lines"
+msgstr "Stavke"
 
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__link_tracker_id
@@ -476,10 +544,16 @@ msgid "Mailing Count"
 msgstr ""
 
 #. module: marketing_card
+#. odoo-python
+#: code:addons/marketing_card/models/card_campaign.py:0
+msgid "Many thanks"
+msgstr ""
+
+#. module: marketing_card
 #: model:ir.model,name:marketing_card.model_card_card
-#: model:ir.module.category,name:marketing_card.module_category_marketing_card
 #: model:ir.ui.menu,name:marketing_card.card_menu
 #: model:ir.ui.menu,name:marketing_card.marketing_card_menu_technical
+#: model:res.groups.privilege,name:marketing_card.res_groups_privilege_marketing_card
 msgid "Marketing Card"
 msgstr ""
 
@@ -537,6 +611,11 @@ msgid ""
 msgstr ""
 
 #. module: marketing_card
+#: model:ir.model,name:marketing_card.model_ir_model
+msgid "Models"
+msgstr "Modeli"
+
+#. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__my_activity_date_deadline
 msgid "My Activity Deadline"
 msgstr "Rok za moju aktivnost"
@@ -544,7 +623,7 @@ msgstr "Rok za moju aktivnost"
 #. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_view_search
 msgid "My Campaigns"
-msgstr ""
+msgstr "Moje kampanje"
 
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__name
@@ -556,12 +635,12 @@ msgstr "Naziv"
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
-msgstr "Kaldendarski događaj slijedeće aktivnosti"
+msgstr "Događaj sljedećeg kalendara aktivnosti"
 
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Rok slijedeće aktivnosti"
+msgstr "Krajnji rok slijedeće aktivnosti"
 
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__activity_summary
@@ -596,7 +675,7 @@ msgstr "Broj grešaka"
 #. module: marketing_card
 #: model:ir.model.fields,help:marketing_card.field_card_campaign__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr "Broj poruka koje zahtijevaju aktivnost"
+msgstr "Broj poruka koje zahtijevaju radnju"
 
 #. module: marketing_card
 #: model:ir.model.fields,help:marketing_card.field_card_campaign__message_has_error_counter
@@ -612,9 +691,14 @@ msgstr "Odoo"
 #: model:ir.model.fields,help:marketing_card.field_card_campaign__lang
 msgid ""
 "Optional translation language (ISO code) to select when sending out an "
-"email. If not set, the english version will be used. This should usually be "
-"a placeholder expression that provides the appropriate language, e.g. {{ "
-"object.partner_id.lang }}."
+"email. If not set, the main partner's language will be used. This should "
+"usually be a placeholder expression that provides the appropriate language, "
+"e.g. {{ object.partner_id.lang }}."
+msgstr ""
+
+#. module: marketing_card
+#: model:card.template,name:marketing_card.card_template_organic
+msgid "Organic"
 msgstr ""
 
 #. module: marketing_card
@@ -661,7 +745,7 @@ msgstr "Primarna boja"
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_template__primary_text_color
 msgid "Primary Text Color"
-msgstr ""
+msgstr "Primarna boja teksta"
 
 #. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.template_1
@@ -739,6 +823,11 @@ msgid "SMS Delivery error"
 msgstr "Greška u slanju SMSa"
 
 #. module: marketing_card
+#: model:card.template,name:marketing_card.card_template_safari
+msgid "Safari"
+msgstr ""
+
+#. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.card_card_view_search
 msgid "Search Card"
 msgstr ""
@@ -756,7 +845,7 @@ msgstr "Sekundarna boja"
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_template__secondary_text_color
 msgid "Secondary Text Color"
-msgstr ""
+msgstr "Boja sekundarnog teksta"
 
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__content_section
@@ -771,7 +860,7 @@ msgstr ""
 #. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_view_form
 msgid "Select a field"
-msgstr ""
+msgstr "Odaberite polje"
 
 #. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_preview
@@ -807,7 +896,7 @@ msgstr ""
 #. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.card_template_view_form
 msgid "Share Template"
-msgstr ""
+msgstr "Dijeli predložak"
 
 #. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_preview
@@ -880,13 +969,8 @@ msgid "Tags may not reuse existing names."
 msgstr ""
 
 #. module: marketing_card
-#: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_view_form
-msgid "Thanks for sharing, here is your reward!"
-msgstr ""
-
-#. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__reward_message
-msgid "Thanks to You Message"
+msgid "Thank You Message"
 msgstr ""
 
 #. module: marketing_card
@@ -913,16 +997,19 @@ msgid "Update"
 msgstr "Ažuriraj"
 
 #. module: marketing_card
-#: model_terms:ir.ui.view,arch_db:marketing_card.robots
-msgid ""
-"User-agent: *\n"
-"                Allow: /cards/"
+#: model_terms:ir.ui.view,arch_db:marketing_card.mailing_mailing_view_form_inherit_marketing_card
+msgid "Update Cards"
 msgstr ""
 
 #. module: marketing_card
 #: model:ir.model.fields.selection,name:marketing_card.selection__card_card__share_status__visited
 #: model_terms:ir.ui.view,arch_db:marketing_card.card_card_view_search
 msgid "Visited"
+msgstr ""
+
+#. module: marketing_card
+#: model:card.template,name:marketing_card.card_template_waves
+msgid "Waves"
 msgstr ""
 
 #. module: marketing_card
@@ -941,6 +1028,11 @@ msgid "Whether the image needs to be updated to match the campaign template."
 msgstr ""
 
 #. module: marketing_card
+#: model:card.template,name:marketing_card.card_template_world_map
+msgid "World Map"
+msgstr "Karta svijeta"
+
+#. module: marketing_card
 #. odoo-python
 #: code:addons/marketing_card/models/mailing_mailing.py:0
 msgid ""
@@ -953,11 +1045,22 @@ msgid "Your Home Page"
 msgstr ""
 
 #. module: marketing_card
+#. odoo-python
+#: code:addons/marketing_card/models/card_campaign.py:0
+msgid "Your help with this promotion would be greatly appreciated!"
+msgstr ""
+
+#. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.template_2
 #: model_terms:ir.ui.view,arch_db:marketing_card.template_3
 #: model_terms:ir.ui.view,arch_db:marketing_card.template_4
 #: model_terms:ir.ui.view,arch_db:marketing_card.template_5
 msgid "button text"
+msgstr ""
+
+#. module: marketing_card
+#: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_view_form
+msgid "e.g. \"Thanks for sharing, here is your reward!\""
 msgstr ""
 
 #. module: marketing_card

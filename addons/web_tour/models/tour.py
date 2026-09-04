@@ -3,8 +3,8 @@ import json
 import base64
 
 
-class Tour(models.Model):
-    _name = "web_tour.tour"
+class Web_TourTour(models.Model):
+    _name = 'web_tour.tour'
     _description = "Tours"
     _order = "sequence, name, id"
 
@@ -17,9 +17,10 @@ class Tour(models.Model):
     custom = fields.Boolean(string="Custom")
     user_consumed_ids = fields.Many2many("res.users")
 
-    _sql_constraints = [
-        ('uniq_name', 'unique(name)', "A tour already exists with this name . Tour's name must be unique!"),
-    ]
+    _uniq_name = models.Constraint(
+        'unique(name)',
+        "A tour already exists with this name . Tour's name must be unique!",
+    )
 
     @api.depends("name")
     def _compute_sharing_url(self):
@@ -79,22 +80,31 @@ registry.category("web_tour.tours").add("{self.name}", {{
         }
 
 
-class TourStep(models.Model):
-    _name = "web_tour.tour.step"
+class Web_TourTourStep(models.Model):
+    _name = 'web_tour.tour.step'
     _description = "Tour's step"
     _order = "sequence, id"
 
     trigger = fields.Char(required=True)
     content = fields.Char()
-    tour_id = fields.Many2one("web_tour.tour", required=True, ondelete="cascade")
+    tooltip_position = fields.Selection(selection=[
+        ["bottom", "Bottom"],
+        ["top", "Top"],
+        ["right", "Right"],
+        ["left", "left"],
+    ], default="bottom")
+    tour_id = fields.Many2one("web_tour.tour", required=True, index=True, ondelete="cascade")
     run = fields.Char()
     sequence = fields.Integer()
 
     def get_steps_json(self):
         steps = []
 
-        for step in self.read(fields=["trigger", "content", "run"]):
+        for step in self.read(fields=["trigger", "content", "run", "tooltip_position"]):
             del step["id"]
+            step["tooltipPosition"] = step["tooltip_position"]
+            del step["tooltip_position"]
+
             if not step["content"]:
                 del step["content"]
             steps.append(step)

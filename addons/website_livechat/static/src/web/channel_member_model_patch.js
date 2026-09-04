@@ -1,11 +1,13 @@
-import { ChannelMember } from "@mail/core/common/channel_member_model";
+import { ChannelMember } from "@mail/discuss/core/common/channel_member_model";
 import { patch } from "@web/core/utils/patch";
 
-patch(ChannelMember.prototype, {
+/** @type {import("models").ChannelMember} */
+const channelMemberPatch = {
     getLangName() {
-        if (this.persona.is_public && this.thread.visitor?.langName) {
-            return this.thread.visitor.langName;
+        if (this.partner_id?.is_public && this.channel_id?.livechat_visitor_id?.lang_id?.name) {
+            return this.channel_id.livechat_visitor_id.lang_id.name;
         }
         return super.getLangName();
     },
-});
+};
+patch(ChannelMember.prototype, channelMemberPatch);

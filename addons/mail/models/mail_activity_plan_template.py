@@ -3,19 +3,19 @@
 
 from dateutil.relativedelta import relativedelta
 
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 
 class MailActivityPlanTemplate(models.Model):
     _name = 'mail.activity.plan.template'
-    _order = 'sequence,id'
     _description = 'Activity plan template'
+    _order = 'sequence, id'
     _rec_name = 'summary'
 
     plan_id = fields.Many2one(
         'mail.activity.plan', string="Plan",
-        ondelete='cascade', required=True)
+        ondelete='cascade', required=True, index=True)
     res_model = fields.Selection(related="plan_id.res_model")
     company_id = fields.Many2one(related='plan_id.company_id')
     sequence = fields.Integer(default=10)
@@ -51,6 +51,9 @@ class MailActivityPlanTemplate(models.Model):
         'Assigned to',
         check_company=True, compute="_compute_responsible_id", store=True, readonly=False)
     note = fields.Html('Note', compute="_compute_note", store=True, readonly=False)
+    next_activity_ids = fields.Many2many(
+        'mail.activity.type', string='Next Activities',
+        compute='_compute_next_activity_ids', readonly=False, store=True)
 
     @api.constrains('activity_type_id', 'plan_id')
     def _check_activity_type_res_model(self):
@@ -76,6 +79,19 @@ class MailActivityPlanTemplate(models.Model):
         for template in self:
             if template.responsible_type == 'other' and not template.responsible_id:
                 raise ValidationError(_('When selecting "Default user" assignment, you must specify a responsible.'))
+
+    @api.depends('activity_type_id')
+    def _compute_next_activity_ids(self):
+        """ Update next activities only when changing activity type on template.
+        Any change on type configuration should not be propagated. """
+        for template in self:
+            activity_type = template.activity_type_id
+            if activity_type.triggered_next_type_id:
+                template.next_activity_ids = activity_type.triggered_next_type_id.ids
+            elif activity_type.suggested_next_type_ids:
+                template.next_activity_ids = activity_type.suggested_next_type_ids.ids
+            else:
+                template.next_activity_ids = False
 
     @api.depends('activity_type_id')
     def _compute_note(self):
@@ -129,10 +145,12 @@ class MailActivityPlanTemplate(models.Model):
         :param <res.user> on_demand_responsible: on demand responsible
         :param recordset applied_on_record: the record on which the activity
             will be created
-        :return dict: {'responsible': <res.user>, error: str|False}
+        :returns: {'responsible': <res.user>, error: str|False}
+        :rtype: dict
         """
         self.ensure_one()
         error = False
+        warning = False
         if self.responsible_type == 'other':
             responsible = self.responsible_id
         elif self.responsible_type == 'on_demand':
@@ -146,4 +164,5 @@ class MailActivityPlanTemplate(models.Model):
         return {
             'responsible': responsible,
             'error': error,
+            'warning': warning,
         }

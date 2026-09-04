@@ -3,7 +3,7 @@
 
 {
     'name': 'France - VAT Anti-Fraud Certification for Point of Sale (CGI 286 I-3 bis)',
-    'version': '1.0',
+    'version': '1.1',
     'category': 'Accounting/Localizations/Point of Sale',
     'description': """
 This add-on brings the technical requirements of the French regulation CGI art. 286, I. 3° bis that stipulates certain criteria concerning the inalterability, security, storage and archiving of data related to sales to private individuals (B2C).
@@ -36,9 +36,16 @@ The module adds following features:
     ],
     'post_init_hook': '_setup_inalterability',
     'assets': {
+        'web.assets_unit_tests': [
+            'l10n_fr_pos_cert/static/tests/unit/**/*',
+        ],
         'point_of_sale._assets_pos': [
             'l10n_fr_pos_cert/static/src/**/*',
         ],
+        'web.assets_tests': [
+            'l10n_fr_pos_cert/static/tests/tours/**/*',
+        ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

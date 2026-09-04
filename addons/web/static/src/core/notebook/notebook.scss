@@ -1,14 +1,15 @@
 .o_notebook {
-    --notebook-margin-x: 0;
-    --notebook-padding-x: 0;
-    --notebook-link-border-color: transparent;
-    --notebook-link-border-color-active: #{$border-color};
-    --notebook-link-border-color-hover: #{$gray-200};
-    --notebook-link-border-color-active-accent: #{$border-color};
+    --Notebook-margin-x: 0;
+    --Notebook-padding-x: 0;
+    --Notebook__link-border-color: transparent;
+    --Notebook__link-border-color--active: #{$border-color};
+    --Notebook__link-border-color--hover: #{$gray-200};
+    --Notebook__link-border-top-color--active: #{$border-color};
 
     .o_notebook_headers {
-        margin: 0 var(--notebook-margin-x, 0);
+        margin: 0 var(--Notebook-margin-x, 0);
         overflow-x: auto;
+        overflow-y: hidden;
 
         @include media-breakpoint-down(md) {
             &::-webkit-scrollbar {
@@ -18,7 +19,7 @@
     }
 
     .nav {
-        padding: 0 var(--notebook-padding-x, 0);
+        padding: 0 var(--Notebook-padding-x, 0);
         background-color: $o-view-background-color;
     }
 
@@ -35,12 +36,12 @@
     }
 
     .nav-link {
-        border-color: var(--notebook-link-border-color, transparent);
+        border-color: var(--Notebook__link-border-color, transparent);
 
         &.active {
             &, &:hover, &:focus, &:active {
-                border-color: var(--notebook-link-border-color-active);
-                border-top-color: var(--notebook-link-border-color-active-accent, var(--notebook-link-border-color-active));
+                border-color: var(--Notebook__link-border-color--active);
+                border-top-color: var(--Notebook__link-border-top-color--active, var(--Notebook__link-border-color--active));
                 border-bottom-color: $o-view-background-color;
             }
         }
@@ -49,8 +50,17 @@
             outline: none;
         }
 
+        &:focus-visible, &.active:focus-visible {
+            box-shadow: inset 0 0 $focus-ring-blur $focus-ring-width $focus-ring-color;
+        }
+
         &:hover {
-            border-color: var(--notebook-link-border-color-hover);
+            border-color: var(--Notebook__link-border-color--hover);
+        }
+
+        &.o_page_invalid {
+            color: o-text-color('danger') !important;
+            background-color: #{$o-input-invalid-bg} !important;
         }
     }
 
@@ -81,8 +91,8 @@
 
             &.active {
                 &, &:hover, &:focus, &:active {
-                    border-color: var(--notebook-link-border-color-active);
-                    border-left-color: var(--notebook-link-border-color-active-accent, var(--notebook-link-border-color-active));
+                    border-color: var(--Notebook__link-border-color--active);
+                    border-left-color: var(--Notebook__link-border-top-color--active, var(--Notebook__link-border-color--active));
                     border-right-color: $o-view-background-color;
                 }
             }
@@ -92,8 +102,8 @@
     @include media-breakpoint-down(lg) {
         .o_notebook_content .oe-toolbar {
             @include o-position-sticky($top: 0px);
-            margin-left: var(--notebook-margin-x, $o-horizontal-padding);
-            margin-right: var(--notebook-margin-x, $o-horizontal-padding);
+            margin-left: var(--Notebook-margin-x, $o-horizontal-padding);
+            margin-right: var(--Notebook-margin-x, $o-horizontal-padding);
             width: auto;
         }
     }

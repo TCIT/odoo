@@ -1,37 +1,42 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* google_calendar
-# 
+# * google_calendar
+#
 # Translators:
-# emre oktem, 2024
-# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2024
-# Levent Karakaş <levent@mektup.at>, 2024
-# Ediz Duman <neps1192@gmail.com>, 2024
-# ANIL TAN SAĞIR <anils@projetgrup.com>, 2024
-# Murat Kaplan <muratk@projetgrup.com>, 2024
-# Murat Durmuş <muratd@projetgrup.com>, 2024
-# Nadir Gazioglu <nadirgazioglu@gmail.com>, 2024
-# Umur Akın <umura@projetgrup.com>, 2024
-# Gökhan Erdoğdu <gokhan.erdogdu@mechsoft.com.tr>, 2024
-# Martin Trigaux, 2024
-# Halil, 2024
-# İlknur Gözütok, 2024
-# abc Def <hdogan1974@gmail.com>, 2024
-# Tugay Hatıl <tugayh@projetgrup.com>, 2024
-# 
+# Ediz Duman <neps1192@gmail.com>, 2022
+# ANIL TAN SAĞIR <anils@projetgrup.com>, 2022
+# Murat Durmuş <muratd@projetgrup.com>, 2022
+# Levent Karakaş <levent@mektup.at>, 2022
+# Umur Akın <umura@projetgrup.com>, 2022
+# Gökhan Erdoğdu <gokhan.erdogdu@mechsoft.com.tr>, 2022
+# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2022
+# Nadir Gazioglu <nadirgazioglu@gmail.com>, 2022
+# Ahmet Altinisik <aaltinisik@altinkaya.com.tr>, 2022
+# abc Def <hdogan1974@gmail.com>, 2022
+# Tugay Hatıl <tugayh@projetgrup.com>, 2022
+# Murat Kaplan <muratk@projetgrup.com>, 2022
+# Martin Trigaux, 2022
+# Halil, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# DeepL <noreply-mt-deepl@weblate.org>, 2025.
+# Odoo Turkish Import <dyki+tr@odoo.com>, 2025, 2026.
+# "Malaz Siddig Elsayed Abuidris (msea)" <msea@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Tugay Hatıl <tugayh@projetgrup.com>, 2024\n"
-"Language-Team: Turkish (https://app.transifex.com/odoo/teams/41243/tr/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 12:36+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-19/"
+"google_calendar/tr/>\n"
+"Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: tr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: google_calendar
 #. odoo-python
@@ -84,11 +89,15 @@ msgstr ""
 #. odoo-python
 #: code:addons/google_calendar/models/res_users_settings.py:0
 msgid ""
-"An error occurred while generating the token. Your authorization code may be"
-" invalid or has already expired [%s]. You should check your Client ID and "
-"secret on the Google APIs plateform or try to stop and restart your calendar"
-" synchronization."
+"An error occurred while generating the token. Your authorization code may be "
+"invalid or has already expired [%s]. You should check your Client ID and "
+"secret on the Google APIs plateform or try to stop and restart your calendar "
+"synchronization."
 msgstr ""
+"Token oluşturulurken bir hata meydana geldi. Yetkilendirme kodunuz geçersiz "
+"olabilir veya süresi dolmuş olabilir [%s]. Google API’ler platformunda "
+"Müşteri Kimliğinizi (Client ID) ve gizli anahtarınızı (secret) kontrol edin "
+"ya da takvim senkronizasyonunu durdurup yeniden başlatmayı deneyin."
 
 #. module: google_calendar
 #: model:ir.model,name:google_calendar.model_calendar_attendee
@@ -185,7 +194,15 @@ msgid "Discard"
 msgstr "Sil"
 
 #. module: google_calendar
+#: model:ir.model.fields,field_description:google_calendar.field_calendar_alarm_manager__display_name
+#: model:ir.model.fields,field_description:google_calendar.field_calendar_attendee__display_name
+#: model:ir.model.fields,field_description:google_calendar.field_calendar_event__display_name
+#: model:ir.model.fields,field_description:google_calendar.field_calendar_recurrence__display_name
 #: model:ir.model.fields,field_description:google_calendar.field_google_calendar_account_reset__display_name
+#: model:ir.model.fields,field_description:google_calendar.field_google_calendar_sync__display_name
+#: model:ir.model.fields,field_description:google_calendar.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:google_calendar.field_res_users__display_name
+#: model:ir.model.fields,field_description:google_calendar.field_res_users_settings__display_name
 msgid "Display Name"
 msgstr "İsim Göster"
 
@@ -194,6 +211,11 @@ msgstr "İsim Göster"
 #: code:addons/google_calendar/models/calendar.py:0
 msgid "Email"
 msgstr "E-Posta"
+
+#. module: google_calendar
+#: model:ir.model,name:google_calendar.model_calendar_alarm_manager
+msgid "Event Alarm Manager"
+msgstr "Etkinlik Alarmı Yöneticisi"
 
 #. module: google_calendar
 #: model:ir.model,name:google_calendar.model_calendar_recurrence
@@ -236,12 +258,12 @@ msgstr "Google Takvim: Senkronizasyon"
 #. module: google_calendar
 #: model:ir.model.fields.selection,name:google_calendar.selection__calendar_event__videocall_source__google_meet
 msgid "Google Meet"
-msgstr ""
+msgstr "Google Meet"
 
 #. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_res_config_settings__cal_sync_paused
 msgid "Google Synchronization Paused"
-msgstr ""
+msgstr "Google Senkronizasyonu Duraklatıldı"
 
 #. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_res_users__google_synchronization_stopped
@@ -258,10 +280,18 @@ msgstr "Google şu açıklamayı yaptı: %s"
 #. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_calendar_event__guests_readonly
 msgid "Guests Event Modification Permission"
-msgstr ""
+msgstr "Misafir Etkinlik Değişiklik İzni"
 
 #. module: google_calendar
+#: model:ir.model.fields,field_description:google_calendar.field_calendar_alarm_manager__id
+#: model:ir.model.fields,field_description:google_calendar.field_calendar_attendee__id
+#: model:ir.model.fields,field_description:google_calendar.field_calendar_event__id
+#: model:ir.model.fields,field_description:google_calendar.field_calendar_recurrence__id
 #: model:ir.model.fields,field_description:google_calendar.field_google_calendar_account_reset__id
+#: model:ir.model.fields,field_description:google_calendar.field_google_calendar_sync__id
+#: model:ir.model.fields,field_description:google_calendar.field_res_config_settings__id
+#: model:ir.model.fields,field_description:google_calendar.field_res_users__id
+#: model:ir.model.fields,field_description:google_calendar.field_res_users_settings__id
 msgid "ID"
 msgstr "ID"
 
@@ -278,12 +308,13 @@ msgstr ""
 #: model:ir.model.fields,help:google_calendar.field_res_config_settings__cal_sync_paused
 msgid "Indicates if synchronization with Google Calendar is paused or not."
 msgstr ""
+"Google Takvim ile senkronizasyonun duraklatılıp duraklatılmadığını gösterir."
 
 #. module: google_calendar
 #. odoo-python
 #: code:addons/google_calendar/models/google_sync.py:0
 msgid "It will not be synced as long at it is not updated."
-msgstr ""
+msgstr "Güncellenmediği sürece senkronize edilmeyecektir."
 
 #. module: google_calendar
 #: model:ir.model.fields,help:google_calendar.field_res_users__google_calendar_cal_id
@@ -337,7 +368,7 @@ msgstr "Bildirimler"
 #. module: google_calendar
 #: model_terms:ir.ui.view,arch_db:google_calendar.res_config_settings_view_form
 msgid "Pause Synchronization"
-msgstr ""
+msgstr "Senkronizasyonu Duraklat"
 
 #. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_res_users__google_calendar_rtoken
@@ -382,23 +413,19 @@ msgstr ""
 
 #. module: google_calendar
 #. odoo-python
-#: code:addons/google_calendar/models/res_users_settings.py:0
-msgid "The account for the Google Calendar service is not configured."
-msgstr "Google Takvim hizmetinin hesabı yapılandırılmamış."
-
-#. module: google_calendar
-#. odoo-python
 #: code:addons/google_calendar/models/calendar.py:0
 msgid ""
 "The following event can only be updated by the organizer according to the "
 "event permissions set on Google Calendar."
 msgstr ""
+"Aşağıdaki etkinlik, Google Takvim'de ayarlanan etkinlik izinlerine göre "
+"yalnızca düzenleyen tarafından güncellenebilir."
 
 #. module: google_calendar
 #. odoo-python
 #: code:addons/google_calendar/models/google_sync.py:0
 msgid "The following event could not be synced with Google Calendar."
-msgstr ""
+msgstr "Aşağıdaki etkinlik Google Takvim ile senkronize edilemedi."
 
 #. module: google_calendar
 #: model:ir.model.fields,help:google_calendar.field_google_calendar_account_reset__delete_policy
@@ -450,3 +477,39 @@ msgstr "tanımsız zaman"
 msgid ""
 "you don't seem to have permission to modify this event on Google Calendar"
 msgstr "Google Takvim'de bu etkinliği değiştirme izniniz yok gibi görünüyor"
+
+#~ msgid ""
+#~ "An error occurred while generating the token. Your authorization code may "
+#~ "be invalid or has already expired [%s]. You should check your Client ID "
+#~ "and secret on the Google APIs plateform or try to stop and restart your "
+#~ "calendar synchronisation."
+#~ msgstr ""
+#~ "Belirteç oluşturulurken bir hata oluştu. Yetkilendirme kodunuz geçersiz "
+#~ "olabilir veya süresi dolmuş olabilir [%s]. Google API'leri plakasında "
+#~ "Müşteri Kimliğinizi ve sırrınızı kontrol etmeli veya takvim "
+#~ "senkronizasyonunuzu durdurup yeniden başlatmayı denemelisiniz."
+
+#~ msgid "Google Calendar Account"
+#~ msgstr "Google Takvim Hesabı"
+
+#~ msgid "Google Calendar Account Data"
+#~ msgstr "Google Takvim Hesap Verileri"
+
+#~ msgid "Success"
+#~ msgstr "Başarılı"
+
+#~ msgid "The account for the Google Calendar service is not configured."
+#~ msgstr "Google Takvim hizmetinin hesabı yapılandırılmamış."
+
+#~ msgid "The synchronization with Google calendar was successfully stopped."
+#~ msgstr "Google takvimi ile senkronizasyon başarıyla durduruldu."
+
+#~ msgid "The user has already a google account"
+#~ msgstr "Kullanıcının zaten bir google hesabı var"
+
+#~ msgid ""
+#~ "You are about to stop the synchronization of your calendar with Google. "
+#~ "Are you sure you want to continue?"
+#~ msgstr ""
+#~ "Takviminizin Google ile senkronizasyonunu durdurmak üzeresiniz. Devam "
+#~ "etmek istediğine emin misin?"

@@ -1,32 +1,35 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* stock_picking_batch
-# 
+# * stock_picking_batch
+#
 # Translators:
-# Wil Odoo, 2024
-# Chloe Wang, 2024
-# Chill Liao <chill421@qq.com>, 2024
-# Odoo哥 <vnsoft.he@gmail.com>, 2024
-# Raymond Yu <cl_yu@hotmail.com>, 2024
-# 
+# Martin Trigaux, 2022
+# Raymond Yu <cl_yu@hotmail.com>, 2022
+# 徐 文郁, 2022
+# digitalliuzg8888, 2022
+# Jeffery CHEN <jeffery9@gmail.com>, 2022
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:24+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Raymond Yu <cl_yu@hotmail.com>, 2024\n"
-"Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/zh_CN/)\n"
+"POT-Creation-Date: 2026-07-17 17:39+0000\n"
+"PO-Revision-Date: 2026-08-02 13:10+0000\n"
+"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
+"projects/odoo-19/stock_picking_batch/zh_Hans/>\n"
+"Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "2023-08-20"
-msgstr "2023-08-20"
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "%s was removed from the batch, no quantity processed"
+msgstr "%s 已从批次中移除，没有处理任何数量"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_type_kanban_batch
@@ -47,7 +50,19 @@ msgstr ""
 msgid ""
 "<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">Batch "
 "Grouping</span>"
-msgstr "<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">批次组</span>"
+msgstr ""
+"<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">批次组</"
+"span>"
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+msgid "<span class=\"o_stat_text\">Moves</span>"
+msgstr "<span class=\"o_stat_text\">移动</span>"
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+msgid "<span class=\"o_stat_text\">Packages</span>"
+msgstr ""
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
@@ -87,7 +102,8 @@ msgstr "<strong>→</strong>"
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_lines
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this number of lines if the transfer is added to it.\n"
+"A transfer will not be automatically added to batches that will exceed this "
+"number of lines if the transfer is added to it.\n"
 "Leave this value as '0' if no line limit."
 msgstr ""
 "如果将调拨添加到超过此行数的批中，则不会自动向其添加调拨。\n"
@@ -96,7 +112,8 @@ msgstr ""
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_pickings
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this number of transfers.\n"
+"A transfer will not be automatically added to batches that will exceed this "
+"number of transfers.\n"
 "Leave this value as '0' if no transfer limit."
 msgstr ""
 "调拨将不会自动添加到超过此调拨数量的批中。\n"
@@ -249,7 +266,6 @@ msgstr "批次属性"
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
-#: code:addons/stock_picking_batch/wizard/stock_picking_to_batch.py:0
 #: model:ir.actions.report,name:stock_picking_batch.action_report_picking_batch
 #: model:ir.model,name:stock_picking_batch.model_stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move_line__batch_id
@@ -289,6 +305,30 @@ msgstr "关联到此调拨的批"
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
 msgid "Batch transfers"
 msgstr "批次调拨"
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "Batch transfers cannot be merged with wave transfers and vice versa."
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "Batch/Wave transfers have been merged into the following transfer"
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "Batch/Wave transfers with different operation types cannot be merged."
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "Batch/Wave transfers with different states cannot be merged."
+msgstr ""
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_type_kanban_batch
@@ -405,14 +445,25 @@ msgid "Destination Location"
 msgstr "目的位置"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 msgid "Detailed Operations"
 msgstr "作业详情"
 
 #. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_picking_move_tree_inherited
+msgid "Details"
+msgstr "详情"
+
+#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__display_name
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move__display_name
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move_line__display_name
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking__display_name
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__display_name
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_to_batch__display_name
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__display_name
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_warehouse__display_name
 msgid "Display Name"
 msgstr "显示名称"
 
@@ -450,11 +501,6 @@ msgid "Future Activities"
 msgstr "未来活动"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
-msgid "Group By"
-msgstr "分组方式"
-
-#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_group_by_dest_loc
 msgid "Group by Destination Location"
 msgstr "依目标位置分组"
@@ -476,8 +522,13 @@ msgstr "有消息"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__id
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move__id
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move_line__id
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking__id
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__id
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_to_batch__id
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__id
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_warehouse__id
 msgid "ID"
 msgstr "ID"
 
@@ -573,6 +624,11 @@ msgid "List of transfers associated to this batch"
 msgstr "关联到此批量操作的调拨清单"
 
 #. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+msgid "List view of detailed operations"
+msgstr "详细操作的列表视图"
+
+#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__wave_group_by_location
 msgid "Location"
 msgstr "位置"
@@ -598,6 +654,11 @@ msgid "Lot Number"
 msgstr "地段编号"
 
 #. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_move_line_tree
+msgid "Lot/Serial Number"
+msgstr "批次/序列号"
+
+#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_max_lines
 msgid "Maximum lines"
 msgstr "最大资料行"
@@ -606,6 +667,11 @@ msgstr "最大资料行"
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_max_pickings
 msgid "Maximum transfers"
 msgstr "最大调拨"
+
+#. module: stock_picking_batch
+#: model:ir.actions.server,name:stock_picking_batch.action_merge_batch_picking
+msgid "Merge"
+msgstr "合并"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_has_error
@@ -629,6 +695,11 @@ msgid "Move Lines"
 msgstr "移动明细行"
 
 #. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
+msgid "My Activities"
+msgstr "我的活动"
+
+#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__my_activity_date_deadline
 msgid "My Activity Deadline"
 msgstr "我的活动截止时间"
@@ -637,6 +708,12 @@ msgstr "我的活动截止时间"
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
 msgid "My Transfers"
 msgstr "我的调拨"
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "New"
+msgstr ""
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__activity_calendar_event_id
@@ -694,6 +771,13 @@ msgid "Package ID"
 msgstr "套餐 ID"
 
 #. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+msgid "Packages"
+msgstr ""
+
+#. module: stock_picking_batch
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
 msgid ""
@@ -714,9 +798,8 @@ msgstr "拣货类型"
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
-msgid ""
-"Please add 'Done' quantities to the batch picking to create a new pack."
-msgstr "在批量拣货上添加 '完成' 数量来创建一个新的包裹。"
+msgid "Please select at least two batch/wave transfers to merge."
+msgstr ""
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_type_kanban_batch
@@ -775,6 +858,7 @@ msgstr "权益"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_move_line_tree
 msgid "Put in Pack"
 msgstr "放入包裹"
 
@@ -797,8 +881,7 @@ msgstr "点评"
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
 msgid ""
-"Regroup multiple orders into one picking and consolidate at the packing "
-"zone."
+"Regroup multiple orders into one picking and consolidate at the packing zone."
 msgstr "将多个订单合并为一次拣选，并在包装区集中处理。"
 
 #. module: stock_picking_batch
@@ -834,13 +917,17 @@ msgstr "安排的日期"
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__scheduled_date
 msgid ""
 "Scheduled date for the transfers to be processed.\n"
-"              - If manually set then scheduled date for all transfers in batch will automatically update to this date.\n"
-"              - If not manually changed and transfers are added/removed/updated then this will be their earliest scheduled date\n"
-"                but this scheduled date will not be set for all transfers in batch."
+"              - If manually set then scheduled date for all transfers in "
+"batch will automatically update to this date.\n"
+"              - If not manually changed and transfers are added/removed/"
+"updated then this will be their earliest scheduled date\n"
+"                but this scheduled date will not be set for all transfers in "
+"batch."
 msgstr ""
 "操作调拨的计划日期。\n"
 "- 如果手动设置此批量调拨中的计划日期，将自动更新到这个日期。\n"
-"- 如果没有手动更改，并且添加/删除过调拨，那么将会是最早的计划日期，但此计划日期不会设置到该批量操作中的所有调拨上。"
+"- 如果没有手动更改，并且添加/删除过调拨，那么将会是最早的计划日期，但此计划日"
+"期不会设置到该批量操作中的所有调拨上。"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
@@ -879,8 +966,8 @@ msgstr "显示批次文本"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
-msgid "Show all records which has next action date is before today"
-msgstr "显示下一操作日期早于今天的所有记录"
+msgid "Show all records whose next activity date is past"
+msgstr "显示所有逾期未完成活动的记录"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_picking_type_form_inherit
@@ -897,8 +984,8 @@ msgstr "按定义的位置拆分传输，然后将同一位置的传输分组。
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__wave_group_by_category
 msgid ""
-"Split transfers by product category, then group transfers that have the same"
-" product category."
+"Split transfers by product category, then group transfers that have the same "
+"product category."
 msgstr "按产品类别拆分传输，然后将具有相同产品类别的传输分组。"
 
 #. module: stock_picking_batch
@@ -949,11 +1036,6 @@ msgid "Stock Move"
 msgstr "库存移动"
 
 #. module: stock_picking_batch
-#: model:ir.model,name:stock_picking_batch.model_stock_package_destination
-msgid "Stock Package Destination"
-msgstr "包裹目的地"
-
-#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__move_line_ids
 msgid "Stock move lines"
 msgstr "库存移动明细"
@@ -970,15 +1052,40 @@ msgstr "摘要:"
 
 #. module: stock_picking_batch
 #. odoo-python
+#: code:addons/stock_picking_batch/wizard/stock_picking_to_batch.py:0
+msgid "The following batch transfer has been created"
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/wizard/stock_picking_to_batch.py:0
+msgid "The following batch transfer has been updated"
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 msgid ""
-"The following transfers cannot be added to batch transfer %(batch)s. Please check their states and operation types.\n"
+"The following transfers cannot be added to batch transfer %(batch)s. Please "
+"check their states and operation types.\n"
 "\n"
 "Incompatibilities: %(incompatible_transfers)s"
 msgstr ""
 "以下转移不可加入至批量转移 %(batch)s。请检查它们的状态和操作类型。\n"
 "\n"
 "不兼容项目：%(incompatible_transfers)s"
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_move_line.py:0
+msgid "The following wave transfer has been created"
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_move_line.py:0
+msgid "The following wave transfer has been updated"
+msgstr ""
 
 #. module: stock_picking_batch
 #. odoo-python
@@ -1003,6 +1110,14 @@ msgstr "选定的调拨应属于同一个公司。"
 #: code:addons/stock_picking_batch/wizard/stock_add_to_wave.py:0
 msgid "The selected transfers should belong to the same operation type"
 msgstr "所选的调拨应属于同一个作业类型"
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid ""
+"The sequence '%(sequence)s' is misconfigured. Its prefix should end with a "
+"'/' separator."
+msgstr ""
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__is_wave
@@ -1061,12 +1176,7 @@ msgstr "记录中异常活动的类型。"
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking.py:0
 msgid "Unassigned responsible from %s"
-msgstr ""
-
-#. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "Unit of Measure"
-msgstr "计量单位"
+msgstr "已取消指派 %s 的负责人"
 
 #. module: stock_picking_batch
 #: model:ir.actions.server,name:stock_picking_batch.action_unreserve_batch_picking
@@ -1140,6 +1250,12 @@ msgstr "您不能删除已完成的批量调拨"
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "You cannot merge done or cancelled batch/wave transfers."
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 msgid "You have to set some pickings to batch."
 msgstr "您必须添加一些调拨作业到批量调拨中。"
 
@@ -1172,3 +1288,97 @@ msgstr "shipping_volume"
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__estimated_shipping_weight
 msgid "shipping_weight"
 msgstr "shipping_weight"
+
+#~ msgid "2023-08-20"
+#~ msgstr "2023-08-20"
+
+#~ msgid ""
+#~ "<span class=\"o_form_label fw-bold\" attrs=\"{'invisible':[('auto_batch', "
+#~ "'=', False)]}\">Group by</span>"
+#~ msgstr ""
+#~ "<span class=\"o_form_label fw-bold\" attrs=\"{'invisible':[('auto_batch', "
+#~ "'=', False)]}\">分组于</span>"
+
+#~ msgid "Clear quantities"
+#~ msgstr "清除数量"
+
+#~ msgid "Create a new batch transfer"
+#~ msgstr "创建新批量调拨"
+
+#~ msgid "Create a new wave transfer"
+#~ msgstr "创建一个新的波次调拨"
+
+#~ msgid "Group By"
+#~ msgstr "分组"
+
+#~ msgid "Maximum lines per batch"
+#~ msgstr "每批最多生产线数"
+
+#~ msgid "Maximum transfers per batch"
+#~ msgstr "每批最大转账数"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "需要作业消息数量"
+
+#~ msgid ""
+#~ "Please add 'Done' quantities to the batch picking to create a new pack."
+#~ msgstr "在批量拣货上添加 '完成' 数量来创建一个新的包裹。"
+
+#~ msgid "Set quantities"
+#~ msgstr "设置数量"
+
+#~ msgid "Show Clear Qty Button"
+#~ msgstr "显示清除Qty按钮"
+
+#~ msgid "Show Set Qty Button"
+#~ msgstr "显示设置数量按钮"
+
+#~ msgid "Show Validate Button"
+#~ msgstr "显示验证按钮"
+
+#~ msgid "Show all records which has next action date is before today"
+#~ msgstr "显示所有的在今天之前的下一个行动日期的记录"
+
+#~ msgid "Stock Package Destination"
+#~ msgstr "包裹目的地"
+
+#~ msgid ""
+#~ "The following transfers cannot be added to batch transfer %s. Please "
+#~ "check their states and operation types, if they aren't immediate "
+#~ "transfers.\n"
+#~ "\n"
+#~ "Incompatibilities: %s"
+#~ msgstr ""
+#~ "以下移动不能被添加到批量移动%s。请检查它们的状态和作业类型，如果它们不是即"
+#~ "时调拨。\n"
+#~ "\n"
+#~ "不兼容的情况。%s"
+
+#~ msgid ""
+#~ "The goal of the batch transfer is to group operations that may\n"
+#~ "            (needs to) be done together in order to increase their "
+#~ "efficiency.\n"
+#~ "            It may also be useful to assign jobs (one person = one batch) "
+#~ "or\n"
+#~ "            help the timing management of operations (tasks to be done at "
+#~ "1pm)."
+#~ msgstr ""
+#~ "批量调拨的目标是将可能出现的作业进行分组。\n"
+#~ "            (需要)一起做，以提高其效率。\n"
+#~ "            分配工作（一个人=一批人），也可能是有用的。\n"
+#~ "            帮助业务的时间管理（下午1点要完成的任务）。"
+
+#~ msgid ""
+#~ "The goal of the wave transfer is to group operations from different "
+#~ "transfer\n"
+#~ "                    together in order to increase their efficiency.\n"
+#~ "                    It may also be useful to assign jobs (one person = "
+#~ "one batch) or\n"
+#~ "                    help the timing management of operations (tasks to be "
+#~ "done at 1pm)."
+#~ msgstr ""
+#~ "波传输的目标是将来自不同传输的操作分组在一起，以提高它们的效率。分配工作"
+#~ "(一个人=一批)或帮助操作的时间管理(任务在下午1点完成)也可能很有用。"
+
+#~ msgid "Waves"
+#~ msgstr "波次"

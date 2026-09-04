@@ -1,41 +1,37 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_blog
-# 
+# * website_blog
+#
 # Translators:
-# דודי מלכה <Dudimalka6@gmail.com>, 2024
-# MichaelHadar, 2024
-# Fishfur A Banter <fishfurbanter@gmail.com>, 2024
-# ExcaliberX <excaliberx@gmail.com>, 2024
-# yael terner, 2024
-# NoaFarkash, 2024
-# Yihya Hugirat <hugirat@gmail.com>, 2024
-# Hed Shefer <hed@laylinetech.com>, 2024
-# Lilach Gilliam <lilach.gilliam@gmail.com>, 2024
-# Ha Ketem <haketem@gmail.com>, 2024
-# ZVI BLONDER <ZVIBLONDER@gmail.com>, 2024
-# Martin Trigaux, 2024
-# Netta Waizer, 2024
-# Mendi Soudry, 2024
-# 
+# Fishfur A Banter <fishfurbanter@gmail.com>, 2022
+# ExcaliberX <excaliberx@gmail.com>, 2022
+# Lilach Gilliam <lilach.gilliam@gmail.com>, 2022
+# דודי מלכה <Dudimalka6@gmail.com>, 2022
+# Netta Waizer, 2022
+# Yihya Hugirat <hugirat@gmail.com>, 2022
+# Martin Trigaux, 2022
+# ZVI BLONDER <ZVIBLONDER@gmail.com>, 2022
+# NoaFarkash, 2022
+# Ha Ketem <haketem@gmail.com>, 2022
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# or balmas <or@laylinetech.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Mendi Soudry, 2024\n"
-"Language-Team: Hebrew (https://app.transifex.com/odoo/teams/41243/he/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-03 02:22+0000\n"
+"Last-Translator: or balmas <or@laylinetech.com>\n"
+"Language-Team: Hebrew <https://translate.odoo.com/projects/odoo-19/"
+"website_blog/he/>\n"
+"Language: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: he\n"
-"Plural-Forms: nplurals=3; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: 2;\n"
-
-#. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.date_selector
-msgid "#{year}"
-msgstr ""
+"Plural-Forms: nplurals=4; plural=(n == 1) ? 0 : ((n == 2) ? 1 : ((n > 10 && "
+"n % 10 == 0) ? 2 : 3));\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_blog
 #. odoo-python
@@ -47,11 +43,6 @@ msgstr "%s (העתק)"
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_feed
 msgid "&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;"
 msgstr "&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;"
-
-#. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.blog_post_short
-msgid "' page header."
-msgstr "' כותרת עליונה של דף."
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_post_short
@@ -79,14 +70,14 @@ msgid ""
 "<b>Pick the brains of the experts</b>. If you are not already active in an "
 "astronomy society or club, the sales people at the telescope store will be "
 "able to guide you to the active societies in your area. Once you have "
-"connections with people who have bought telescopes, you can get advice about"
-" what works and what to avoid that is more valid than anything you will get "
+"connections with people who have bought telescopes, you can get advice about "
+"what works and what to avoid that is more valid than anything you will get "
 "from a web article or a salesperson at Wal-Mart."
 msgstr ""
 
 #. module: website_blog
 #. odoo-javascript
-#: code:addons/website_blog/static/src/js/tours/website_blog.js:0
+#: code:addons/website_blog/static/src/tours/website_blog.js:0
 msgid "<b>Publish your blog post</b> to make it visible to your visitors."
 msgstr "<b>פרסם את פוסט הבלוג שלך</b> כדי להראות אותו למבקרים שלך."
 
@@ -101,16 +92,16 @@ msgid ""
 "<b>Try before you buy.</b> This is another advantage of going on some field "
 "trips with the astronomy club. You can set aside some quality hours with "
 "people who know telescopes and have their rigs set up to examine their "
-"equipment, learn the key technical aspects, and try them out before you sink"
-" money in your own set up."
+"equipment, learn the key technical aspects, and try them out before you sink "
+"money in your own set up."
 msgstr ""
 
 #. module: website_blog
 #. odoo-javascript
-#: code:addons/website_blog/static/src/js/tours/website_blog.js:0
+#: code:addons/website_blog/static/src/tours/website_blog.js:0
 msgid ""
-"<b>Write your story here.</b> Use the top toolbar to style your text: add an"
-" image or table, set bold or italic, etc. Drag and drop building blocks for "
+"<b>Write your story here.</b> Use the top toolbar to style your text: add an "
+"image or table, set bold or italic, etc. Drag and drop building blocks for "
 "more graphical blogs."
 msgstr ""
 
@@ -124,8 +115,8 @@ msgstr ""
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_6
 msgid ""
-"<em class=\"h4 my-0\">It is critically important that you get just the right"
-" telescope.</em>"
+"<em class=\"h4 my-0\">It is critically important that you get just the right "
+"telescope.</em>"
 msgstr "<em class=\"h4 my-0\">חשוב מאוד שתקבל בדיוק את הטלסקופ הנכון.</em>"
 
 #. module: website_blog
@@ -143,7 +134,8 @@ msgstr ""
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_5
-msgid "<em class=\"h4 my-0\">There is something timeless about the cosmos.</em>"
+msgid ""
+"<em class=\"h4 my-0\">There is something timeless about the cosmos.</em>"
 msgstr "<em class=\"h4 my-0\">יש משהו נצחי בקוסמוס.</em>"
 
 #. module: website_blog
@@ -156,7 +148,7 @@ msgstr ""
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_tags_display
 msgid "<em>No tags defined</em>"
-msgstr "<em>לא הוגדרו תגיות</em>"
+msgstr "<em>לא הוגדרו תוויות</em>"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_post_complete
@@ -175,27 +167,12 @@ msgid ""
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.opt_sidebar_blog_index_follow_us
-msgid "<i class=\"fa fa-github text-github\" aria-label=\"Github\" title=\"Github\"/>"
-msgstr "<i class=\"fa fa-github text-github\" aria-label=\"Github\" title=\"Github\"/>"
-
-#. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_post_view_kanban
 msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
 msgstr "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.opt_sidebar_blog_index_follow_us
-msgid ""
-"<i class=\"fa fa-instagram text-instagram\" aria-label=\"Instagram\" "
-"title=\"Instagram\"/>"
-msgstr ""
-"<i class=\"fa fa-instagram text-instagram\" aria-label=\"Instagram\" "
-"title=\"Instagram\"/>"
-
-#. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_share_links_display
-#: model_terms:ir.ui.view,arch_db:website_blog.opt_sidebar_blog_index_follow_us
 msgid ""
 "<i class=\"fa fa-linkedin text-linkedin\" aria-label=\"LinkedIn\" "
 "title=\"LinkedIn\"/>"
@@ -204,29 +181,23 @@ msgstr ""
 "title=\"LinkedIn\"/>"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.opt_sidebar_blog_index_follow_us
-msgid "<i class=\"fa fa-rss-square\" aria-label=\"RSS\" title=\"RSS\"/>"
-msgstr "<i class=\"fa fa-rss-square\" aria-label=\"RSS\" title=\"RSS\"/>"
-
-#. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.opt_sidebar_blog_index_follow_us
-msgid "<i class=\"fa fa-tiktok text-tiktok\" aria-label=\"TikTok\" title=\"TikTok\"/>"
-msgstr ""
-
-#. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_share_links_display
-#: model_terms:ir.ui.view,arch_db:website_blog.opt_sidebar_blog_index_follow_us
 msgid "<i class=\"fa fa-twitter text-twitter\" aria-label=\"X\" title=\"X\"/>"
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.opt_sidebar_blog_index_follow_us
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_single_aside_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_single_circle_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_single_full_preview_data
 msgid ""
-"<i class=\"fa fa-youtube-play text-youtube\" aria-label=\"Youtube\" "
-"title=\"Youtube\"/>"
+"<i class=\"fa fa-user-circle-o me-2\" role=\"presentation\"/><span>Marc "
+"Demo</span> • <span>Mar 13, 2025</span> •"
 msgstr ""
-"<i class=\"fa fa-youtube-play text-youtube\" aria-label=\"Youtube\" "
-"title=\"Youtube\"/>"
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_card_preview_data
+msgid "<small class=\"text-muted\">Mar 13, 2025</small>"
+msgstr ""
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_read_next
@@ -239,7 +210,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_read_next
 msgid ""
 "<span class=\"h4 d-inline-block py-1 px-2 rounded-1 text-white\">\n"
-"                                    <i class=\"fa fa-angle-right fa-3x text-white\" aria-label=\"Read next\" title=\"Read Next\"/>\n"
+"                                    <i class=\"fa fa-angle-right fa-3x text-"
+"white\" aria-label=\"Read next\" title=\"Read Next\"/>\n"
 "                                </span>"
 msgstr ""
 
@@ -251,6 +223,31 @@ msgstr ""
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blogs_nav
 msgid "<span class=\"nav-link disabled ps-0\">Blogs:</span>"
+msgstr "<span class=\"nav-link disabled ps-0\">בלוגים:</span>"
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_single_badge_preview_data
+msgid ""
+"<span class=\"o_cc o_cc1 d-inline-flex align-items-center justify-content-"
+"center gap-3 border rounded py-2 px-3 rounded-pill\">\n"
+"                    <span class=\"badge text-bg-primary\">NEW</span>\n"
+"                    <strong>Sierra Tarahumara</strong>\n"
+"                    <span class=\"text-muted\">Marc Demo in Travel</span>\n"
+"                    <span class=\"text-primary\">Read Now <i class=\"fa fa-"
+"long-arrow-right\" role=\"presentation\"/></span>\n"
+"                </span>"
+msgstr ""
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_horizontal_preview_data
+msgid "<span class=\"text-muted\">Mar 13, 2025</span>"
+msgstr ""
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.dynamic_filter_template_blog_post_single_badge
+msgid ""
+"<span class=\"text-primary text-nowrap\">Read Now <i class=\"fa fa-long-"
+"arrow-right\"/></span>"
 msgstr ""
 
 #. module: website_blog
@@ -259,15 +256,32 @@ msgid "<span><b>Good job!</b> You went through all steps of this tour.</span>"
 msgstr "<span><b>עבודה מעולה!</b> עברת על כל השלבים של המדריך.</span>"
 
 #. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_card_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_horizontal_preview_data
+msgid ""
+"<span><i class=\"fa fa-user-circle-o me-2\" role=\"presentation\"/> Marc "
+"Demo</span>"
+msgstr ""
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_list_preview_data
+msgid ""
+"<span><i class=\"fa fa-user-circle-o me-2\" role=\"presentation\"/>Marc "
+"Demo</span>\n"
+"                    <span class=\"text-muted\"> • Mar 13, 2025</span>"
+msgstr ""
+
+#. module: website_blog
 #: model:blog.post,subtitle:website_blog.blog_post_2
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_horizontal_preview_data
 msgid "A great way to discover hidden places"
 msgstr "דרך נהדרת לגלות מקומות נסתרים"
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_1
 msgid ""
-"A holiday to the Copper Canyon promises to be an exciting mix of relaxation,"
-" culture, history, wildlife and hiking."
+"A holiday to the Copper Canyon promises to be an exciting mix of relaxation, "
+"culture, history, wildlife and hiking."
 msgstr ""
 
 #. module: website_blog
@@ -296,9 +310,8 @@ msgstr "עלינו"
 #: model_terms:blog.post,content:website_blog.blog_post_6
 msgid ""
 "Above all, <b>establish a relationship with a reputable telescope shop</b> "
-"that employs people who know their stuff. If you buy your telescope at a "
-"Wal-Mart or department store, the odds you will get the right thing are "
-"remote."
+"that employs people who know their stuff. If you buy your telescope at a Wal-"
+"Mart or department store, the odds you will get the right thing are remote."
 msgstr ""
 
 #. module: website_blog
@@ -335,9 +348,15 @@ msgid "All Blogs"
 msgstr "כל הבלוגים"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
 msgid "All blogs"
 msgstr "כל הבלוגים"
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.date_selector
+msgid "All dates"
+msgstr "כל התאריכים"
 
 #. module: website_blog
 #. odoo-python
@@ -352,22 +371,23 @@ msgstr ""
 
 #. module: website_blog
 #. odoo-javascript
-#: code:addons/website_blog/static/src/js/website_blog.js:0
+#: code:addons/website_blog/static/src/interactions/website_blog.js:0
 msgid "Amazing blog article: %(title)s! Check it live: %(url)s"
 msgstr ""
 
 #. module: website_blog
 #: model:blog.post,subtitle:website_blog.blog_post_1
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_horizontal_preview_data
 msgid "An exciting mix of relaxation, culture, history, wildlife and hiking."
 msgstr "שילוב מרגש של רגיעה, תרבות, היסטוריה, חיות בר וטיולים רגליים."
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_5
 msgid ""
-"And when all is said and done,<b> get equipped</b>. Your quest for newer and"
-" better telescopes will be a lifelong one. Let yourself get addicted to "
-"astronomy and the experience will enrich every aspect of life. It will be an"
-" addiction you never want to break."
+"And when all is said and done,<b> get equipped</b>. Your quest for newer and "
+"better telescopes will be a lifelong one. Let yourself get addicted to "
+"astronomy and the experience will enrich every aspect of life. It will be an "
+"addiction you never want to break."
 msgstr ""
 
 #. module: website_blog
@@ -379,8 +399,9 @@ msgid ""
 msgstr ""
 
 #. module: website_blog
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_page_option.xml:0
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_archive_display
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
 msgid "Archive"
 msgstr "ארכיון"
 
@@ -393,8 +414,9 @@ msgid "Archived"
 msgstr "בארכיון"
 
 #. module: website_blog
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option.xml:0
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_sidebar_blog_index_archives
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
 msgid "Archives"
 msgstr "ארכיון"
 
@@ -410,14 +432,15 @@ msgstr "מאמרים"
 
 #. module: website_blog
 #: model:blog.blog,name:website_blog.blog_blog_2
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_card_preview_data
 msgid "Astronomy"
 msgstr "אסטרונומיה"
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_5
 msgid ""
-"Astronomy clubs are lively places full of knowledgeable amateurs who love to"
-" share their knowledge with you. For the price of a coke and snacks, they "
+"Astronomy clubs are lively places full of knowledgeable amateurs who love to "
+"share their knowledge with you. For the price of a coke and snacks, they "
 "will go star gazing with you and overwhelm you with trivia and great "
 "knowledge."
 msgstr ""
@@ -439,9 +462,11 @@ msgid "Attachment Count"
 msgstr "כמות קבצים מצורפים"
 
 #. module: website_blog
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_page_option.xml:0
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option.xml:0
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__author_id
-#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_search
 msgid "Author"
 msgstr "מחבר"
@@ -504,22 +529,24 @@ msgstr ""
 #. module: website_blog
 #: model:blog.post,subtitle:website_blog.blog_post_6
 msgid "Before you make your first purchase…"
-msgstr "לפני שתבצע את הרכישה הראשונה..."
+msgstr "לפני שתבצע את הרכישה הראשונה…"
 
 #. module: website_blog
 #: model:blog.post,name:website_blog.blog_post_7
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_list_preview_data
 msgid "Beyond The Eye"
 msgstr ""
 
 #. module: website_blog
+#. odoo-javascript
 #. odoo-python
 #: code:addons/website_blog/models/website.py:0
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
 #: model:ir.model,name:website_blog.model_blog_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__blog_id
 #: model:ir.ui.menu,name:website_blog.menu_website_blog_root_global
 #: model:website.menu,name:website_blog.menu_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_blog_view_search
-#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_blog_form
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_search
 msgid "Blog"
@@ -531,7 +558,8 @@ msgid "Blog Name"
 msgstr "שם בלוג"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_page_option_plugin.js:0
 msgid "Blog Page"
 msgstr ""
 
@@ -539,6 +567,7 @@ msgstr ""
 #: model:ir.model,name:website_blog.model_blog_post
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_form
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_search
+#: model_terms:ir.ui.view,arch_db:website_blog.website_blog
 msgid "Blog Post"
 msgstr "פרסום פוסט בבלוג"
 
@@ -561,6 +590,8 @@ msgid "Blog Post Title"
 msgstr "כותרת פוסט הבלוג"
 
 #. module: website_blog
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__blog_post_ids
 #: model:ir.ui.menu,name:website_blog.menu_blog_post_pages
 #: model_terms:ir.ui.view,arch_db:website_blog.website_blog
@@ -600,9 +631,12 @@ msgid "Blog's Title"
 msgstr "כותרת הבלוג"
 
 #. module: website_blog
+#. odoo-javascript
+#. odoo-python
+#: code:addons/website_blog/controllers/main.py:0
+#: code:addons/website_blog/static/src/website_builder/blog_searchbar_option.xml:0
 #: model:ir.actions.act_window,name:website_blog.action_blog_blog
 #: model:ir.ui.menu,name:website_blog.menu_blog_global
-#: model_terms:ir.ui.view,arch_db:website_blog.blog_searchbar_input_snippet_options
 #: model_terms:ir.ui.view,arch_db:website_blog.blogs_nav
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_blog_list
 #: model_terms:ir.ui.view,arch_db:website_blog.website_blog
@@ -610,22 +644,26 @@ msgid "Blogs"
 msgstr "בלוגים"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_page_option.xml:0
 msgid "Blogs List"
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option_plugin.js:0
 msgid "Blogs Page"
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_page_option.xml:0
 msgid "Bottom"
 msgstr "תחתון"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_page_option.xml:0
 msgid "Breadcrumb"
 msgstr "פירורי לחם"
 
@@ -635,14 +673,16 @@ msgid ""
 "But how do you sift through the amazing choices on offer? And more "
 "importantly, do you really trust the photographs and descriptions of the "
 "hotels that they have awarded themselves with the motivation of getting "
-"bookings? Traveler reviews can be helpful, but you need to exercise caution."
-" They are often biased, sometimes out of date, and may not serve your "
+"bookings? Traveler reviews can be helpful, but you need to exercise caution. "
+"They are often biased, sometimes out of date, and may not serve your "
 "interests at all. How do you know that the features that are important to "
 "the reviewer are important to you?"
 msgstr ""
 
 #. module: website_blog
 #: model:blog.post,name:website_blog.blog_post_6
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_card_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_list_preview_data
 msgid "Buying A Telescope"
 msgstr "קניית טלסקופ"
 
@@ -656,16 +696,34 @@ msgstr ""
 "בפיתוח התשוקה שלך לכוכבים."
 
 #. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_list_preview_data
+msgid ""
+"Buying the right telescope to take your love of astronomy to the next level "
+"is a big next step in the development of your passion for the stars. In many "
+"ways, it is a big step from someone..."
+msgstr ""
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_card_preview_data
+msgid ""
+"Buying the right telescope to take your love of astronomy to the next level "
+"is a big next step in the development..."
+msgstr ""
+
+#. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__can_publish
 msgid "Can Publish"
 msgstr "יכול לפרסם"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option.xml:0
 msgid "Cards"
 msgstr "קלפים"
 
 #. module: website_blog
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag__category_id
 msgid "Category"
 msgstr "קטגוריה"
@@ -677,13 +735,13 @@ msgstr ""
 
 #. module: website_blog
 #. odoo-javascript
-#: code:addons/website_blog/static/src/js/tours/website_blog.js:0
+#: code:addons/website_blog/static/src/tours/website_blog.js:0
 msgid "Choose an image from the library."
 msgstr "בחר תמונה מהספריה."
 
 #. module: website_blog
 #. odoo-javascript
-#: code:addons/website_blog/static/src/js/tours/website_blog.js:0
+#: code:addons/website_blog/static/src/tours/website_blog.js:0
 msgid "Click here to add new content to your website."
 msgstr ""
 
@@ -708,19 +766,21 @@ msgid "Color"
 msgstr "צבע"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_regular_cover
+#: model_terms:ir.ui.view,arch_db:website_blog.blog_post_info
 msgid "Comment"
-msgstr "תגובה"
+msgstr "הערה"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_regular_cover
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_page_option.xml:0
+#: model_terms:ir.ui.view,arch_db:website_blog.blog_post_info
 #: model_terms:ir.ui.view,arch_db:website_blog.post_info
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
 msgid "Comments"
 msgstr "תגובות"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option.xml:0
 msgid "Comments/Views Stats"
 msgstr ""
 
@@ -746,7 +806,8 @@ msgid ""
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option.xml:0
 msgid "Cover"
 msgstr "שער"
 
@@ -773,27 +834,32 @@ msgid "Created on"
 msgstr "נוצר ב-"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
 msgid "Date"
 msgstr "תאריך"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.blog_searchbar_input_snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_searchbar_option_plugin.js:0
 msgid "Date (new to old)"
 msgstr "תאריך (חדש לישן)"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.blog_searchbar_input_snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_searchbar_option_plugin.js:0
 msgid "Date (old to new)"
 msgstr "תאריך (ישן לחדש)"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.blog_searchbar_input_snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_searchbar_option_plugin.js:0
 msgid "Description"
 msgstr "תיאור"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
 msgid "Dexter"
 msgstr ""
 
@@ -802,6 +868,8 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__display_name
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag__display_name
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag_category__display_name
+#: model:ir.model.fields,field_description:website_blog.field_website__display_name
+#: model:ir.model.fields,field_description:website_blog.field_website_snippet_filter__display_name
 msgid "Display Name"
 msgstr "שם לתצוגה"
 
@@ -827,11 +895,6 @@ msgstr "ערוך מתוך המערכת"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_post_short
-msgid "Edit the '"
-msgstr "ערוך את '"
-
-#. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.blog_post_short
 msgid "Edit the 'All Blogs' page header."
 msgstr "ערוך את הכותרת העליונה של הדף 'כל הבלוגים'."
 
@@ -841,25 +904,31 @@ msgid "Edit the 'Filter Results' page header."
 msgstr "ערוך את הכותרת העליונה של הדף 'תוצאות מסנן'."
 
 #. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.blog_post_short
+msgid "Edit the '{{0}}' page header."
+msgstr ""
+
+#. module: website_blog
 #. odoo-javascript
-#: code:addons/website_blog/static/src/js/tours/website_blog.js:0
+#: code:addons/website_blog/static/src/tours/website_blog.js:0
 msgid "Edit your title, the subtitle is optional."
 msgstr ""
 
 #. module: website_blog
 #. odoo-javascript
-#: code:addons/website_blog/static/src/js/tours/website_blog.js:0
+#: code:addons/website_blog/static/src/tours/website_blog.js:0
 msgid "Enter your post's title"
 msgstr ""
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_share_links_display
-#: model_terms:ir.ui.view,arch_db:website_blog.opt_sidebar_blog_index_follow_us
 msgid "Facebook"
 msgstr "פייסבוק"
 
 #. module: website_blog
 #: model:blog.post,subtitle:website_blog.blog_post_3
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_horizontal_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_single_circle_preview_data
 msgid "Facts you should bear in mind."
 msgstr "עובדות שכדאי לזכור."
 
@@ -867,15 +936,16 @@ msgstr "עובדות שכדאי לזכור."
 #: model_terms:blog.post,content:website_blog.blog_post_3
 msgid ""
 "Finally and most importantly, the quality hotel directory inspection team "
-"should have visited the hotel in question on a regular basis, met the staff,"
-" slept in a bedroom and tried the food. They should experience the hotel as "
+"should have visited the hotel in question on a regular basis, met the staff, "
+"slept in a bedroom and tried the food. They should experience the hotel as "
 "only a hotel guest can and it is only then that they are really in a strong "
 "position to write about the hotel."
 msgstr ""
 
 #. module: website_blog
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option.xml:0
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_sidebar_blog_index_follow_us
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
 msgid "Follow Us"
 msgstr "עקוב אחרינו"
 
@@ -892,11 +962,16 @@ msgid "Followers (Partners)"
 msgstr "עוקבים (לקוחות/ספקים)"
 
 #. module: website_blog
+#: model:ir.model.fields,field_description:website_blog.field_blog_post__footer_visible
+msgid "Footer Visible"
+msgstr "כותרת תחתונה גלויה"
+
+#. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_4
 msgid ""
 "For many of us who are city dwellers, we don’t really notice that sky up "
-"there on a routine basis. The lights of the city do a good job of disguising"
-" the amazing display that is above all of our heads all of the time."
+"there on a routine basis. The lights of the city do a good job of disguising "
+"the amazing display that is above all of our heads all of the time."
 msgstr ""
 
 #. module: website_blog
@@ -905,6 +980,14 @@ msgid ""
 "For many of us, our very first experience of learning about the celestial "
 "bodies begins when we saw our first full moon in the sky. It is truly a "
 "magnificent view even to the naked eye."
+msgstr ""
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_list_preview_data
+msgid ""
+"For many of us, our very first experience of learning about the celestial "
+"bodies begins when we saw our first full moon in the sky. It is truly a "
+"magnificent view even to the naked eye...."
 msgstr ""
 
 #. module: website_blog
@@ -917,7 +1000,8 @@ msgid ""
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option.xml:0
 msgid "Full-Width"
 msgstr "רוחב מלא"
 
@@ -942,20 +1026,21 @@ msgid "Get started"
 msgstr "התחל"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option.xml:0
 msgid "Grid"
-msgstr "סעיף"
-
-#. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_search
-msgid "Group By"
-msgstr "קבץ לפי"
+msgstr "רשת"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__has_message
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__has_message
 msgid "Has Message"
 msgstr "יש הודעה"
+
+#. module: website_blog
+#: model:ir.model.fields,field_description:website_blog.field_blog_post__header_visible
+msgid "Header Visible"
+msgstr "כותרת גלויה"
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_3
@@ -968,12 +1053,14 @@ msgid "Holiday tips"
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
 msgid "Hover Effect"
 msgstr ""
 
 #. module: website_blog
 #: model:blog.post,name:website_blog.blog_post_4
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_list_preview_data
 msgid "How To Look Up"
 msgstr ""
 
@@ -982,8 +1069,8 @@ msgstr ""
 msgid ""
 "How complex is the telescope and will you have trouble with maintenance? "
 "Network to get the answers to these and other questions. If you do your "
-"homework like this, you will find just the right telescope for this next big"
-" step in the evolution of your passion for astronomy."
+"homework like this, you will find just the right telescope for this next big "
+"step in the evolution of your passion for astronomy."
 msgstr ""
 
 #. module: website_blog
@@ -993,7 +1080,12 @@ msgstr "כמה נייד חייב הטלסקופ שלך להיות?"
 
 #. module: website_blog
 #: model:blog.post,name:website_blog.blog_post_3
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_card_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_horizontal_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_list_preview_data
 #: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_single_circle_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_single_full_preview_data
 msgid "How to choose the right hotel"
 msgstr "כיצד לבחור את המלון הנכון"
 
@@ -1002,6 +1094,8 @@ msgstr "כיצד לבחור את המלון הנכון"
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__id
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag__id
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag_category__id
+#: model:ir.model.fields,field_description:website_blog.field_website__id
+#: model:ir.model.fields,field_description:website_blog.field_website_snippet_filter__id
 msgid "ID"
 msgstr "מזהה"
 
@@ -1025,20 +1119,26 @@ msgid ""
 "If it matters that your hotel is, for example, on the beach, close to the "
 "theme park, or convenient for the airport, then location is paramount. Any "
 "decent directory should offer a location map of the hotel and its "
-"surroundings. There should be distance charts to the airport offered as well"
-" as some form of interactive map."
+"surroundings. There should be distance charts to the airport offered as well "
+"as some form of interactive map."
 msgstr ""
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_7
 msgid ""
-"If the night is clear, you can see amazing detail of the lunar surface just star gazing on in your back yard.\n"
-"Naturally, as you grow in your love of astronomy, you will find many celestial bodies fascinating. But the moon may always be our first love because is the one far away space object that has the unique distinction of flying close to the earth and upon which man has walked."
+"If the night is clear, you can see amazing detail of the lunar surface just "
+"star gazing on in your back yard.\n"
+"Naturally, as you grow in your love of astronomy, you will find many "
+"celestial bodies fascinating. But the moon may always be our first love "
+"because is the one far away space object that has the unique distinction of "
+"flying close to the earth and upon which man has walked."
 msgstr ""
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.dynamic_filter_template_blog_post_card
 #: model_terms:ir.ui.view,arch_db:website_blog.dynamic_filter_template_blog_post_horizontal
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_card_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_horizontal_preview_data
 msgid "In"
 msgstr "ב"
 
@@ -1052,7 +1152,9 @@ msgid ""
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_page_option.xml:0
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option.xml:0
 msgid "Increase Readability"
 msgstr ""
 
@@ -1077,8 +1179,8 @@ msgstr "איים"
 #: model_terms:blog.post,content:website_blog.blog_post_5
 msgid ""
 "It is great fun to start learning the constellations, how to navigate the "
-"night sky and find the planets and the famous stars. There are web sites and"
-" books galore to guide you."
+"night sky and find the planets and the famous stars. There are web sites and "
+"books galore to guide you."
 msgstr ""
 
 #. module: website_blog
@@ -1099,15 +1201,23 @@ msgid ""
 msgstr ""
 
 #. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_list_preview_data
+msgid ""
+"It is safe to say that at some point on our lives, each and every one of us "
+"has that moment when we are suddenly stunned when we come face to face with "
+"the enormity of the universe that we..."
+msgstr ""
+
+#. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_5
 msgid ""
 "It really is amazing when you think about it that just by looking up on any "
 "given night, you could see virtually hundreds of thousands of stars, star "
 "systems, planets, moons, asteroids, comets and maybe a even an occasional "
-"space shuttle might wander by. It is even more breathtaking when you realize"
-" that the sky you are looking up at is for all intents and purposes the "
-"exact same sky that our ancestors hundreds and thousands of years ago "
-"enjoyed when they just looked up."
+"space shuttle might wander by. It is even more breathtaking when you realize "
+"that the sky you are looking up at is for all intents and purposes the exact "
+"same sky that our ancestors hundreds and thousands of years ago enjoyed when "
+"they just looked up."
 msgstr ""
 
 #. module: website_blog
@@ -1128,7 +1238,7 @@ msgstr ""
 
 #. module: website_blog
 #. odoo-javascript
-#: code:addons/website_blog/static/src/js/options.js:0
+#: code:addons/website_blog/static/src/website_builder/blog_cover_properties_option.js:0
 msgid "Large"
 msgstr "גדול"
 
@@ -1159,15 +1269,17 @@ msgid "Latest Blog Posts"
 msgstr "פוסטים אחרונים"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_page_option.xml:0
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option.xml:0
 msgid "Layout"
 msgstr "עיצוב"
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_5
 msgid ""
-"Learning the background to the great discoveries in astronomy will make your"
-" moments star gazing more meaningful. It is one of the oldest sciences on "
+"Learning the background to the great discoveries in astronomy will make your "
+"moments star gazing more meaningful. It is one of the oldest sciences on "
 "earth so find out the greats of history who have looked at these stars "
 "before you."
 msgstr ""
@@ -1183,7 +1295,8 @@ msgid "LinkedIn"
 msgstr "לינקדאין"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option.xml:0
 msgid "List"
 msgstr "רשימה"
 
@@ -1202,22 +1315,34 @@ msgid "Location"
 msgstr "מיקום"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
 msgid "Marley"
 msgstr ""
 
 #. module: website_blog
 #: model:blog.post,name:website_blog.blog_post_2
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_card_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_horizontal_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_list_preview_data
 #: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_preview_data
 msgid "Maui helicopter tours"
 msgstr ""
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_2
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_list_preview_data
 msgid ""
 "Maui helicopter tours are a great way to see the island from a different "
-"perspective and have a fun adventure. If you have never been on a helicopter"
-" before, this is a great place to do it."
+"perspective and have a fun adventure. If you have never been on a helicopter "
+"before, this is a great place to do it."
+msgstr ""
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_card_preview_data
+msgid ""
+"Maui helicopter tours are a great way to see the island from a different "
+"perspective and have a fun adventure..."
 msgstr ""
 
 #. module: website_blog
@@ -1237,13 +1362,13 @@ msgstr ""
 msgid ""
 "Maui helicopter tours will allow you to see all of these sights. Make sure "
 "to take a camera or video with you when going on Maui helicopter tours to "
-"capture the beauty of the scenery and to show friends and family at home all"
-" the wonderful things you saw while on vacation."
+"capture the beauty of the scenery and to show friends and family at home all "
+"the wonderful things you saw while on vacation."
 msgstr ""
 
 #. module: website_blog
 #. odoo-javascript
-#: code:addons/website_blog/static/src/js/options.js:0
+#: code:addons/website_blog/static/src/website_builder/blog_cover_properties_option.js:0
 msgid "Medium"
 msgstr "אמצעי תקשורת"
 
@@ -1282,15 +1407,22 @@ msgstr "האי מולוקאי"
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_2
 msgid ""
-"Molokai Maui helicopter tours will take you to a different island but one that is only nine miles away and easily accessible by air. This island has a very small population with a different culture and scenery. The entire coast of the northeast is lined with cliffs and remote beaches. They are completely inaccessible by any other means of transportation than air.\n"
-"People who live on the island have never even seen this remarkable scenery unless they have taken Maui helicopter tours to view it. When the weather has been rainy and there is a lot of rainfall for he season you will see many astounding waterfalls."
+"Molokai Maui helicopter tours will take you to a different island but one "
+"that is only nine miles away and easily accessible by air. This island has a "
+"very small population with a different culture and scenery. The entire coast "
+"of the northeast is lined with cliffs and remote beaches. They are "
+"completely inaccessible by any other means of transportation than air.\n"
+"People who live on the island have never even seen this remarkable scenery "
+"unless they have taken Maui helicopter tours to view it. When the weather "
+"has been rainy and there is a lot of rainfall for he season you will see "
+"many astounding waterfalls."
 msgstr ""
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_3
 msgid ""
-"More important to the family traveler than the business traveler, you should"
-" find out just how child friendly the hotel is from the directory and make "
+"More important to the family traveler than the business traveler, you should "
+"find out just how child friendly the hotel is from the directory and make "
 "your decision from there. One thing worth looking for is whether the hotel "
 "offers a baby sitters service. For the business traveler wishing to escape "
 "children this is of course very relevant too – perhaps a hotel that is not "
@@ -1301,6 +1433,11 @@ msgstr ""
 #: model:website.snippet.filter,name:website_blog.dynamic_filter_most_viewed_blog_posts
 msgid "Most Viewed Blog Posts"
 msgstr "פוסטים נצפים ביותר"
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.dynamic_filter_template_blog_post_single_badge
+msgid "NEW"
+msgstr "חדש"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag__name
@@ -1314,12 +1451,20 @@ msgid "New Blog Post"
 msgstr "פוסט חדש של בלוג"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
+msgid "New Tag"
+msgstr ""
+
+#. module: website_blog
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_page_option.xml:0
 msgid "Next Article"
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option.xml:0
 msgid "No Cover"
 msgstr ""
 
@@ -1349,7 +1494,8 @@ msgid "No tags defined yet."
 msgstr "עדיין לא הוגדרו תגיות."
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
 msgid "None"
 msgstr "אף אחד"
 
@@ -1364,12 +1510,14 @@ msgid ""
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
 msgid "Normal"
-msgstr "נורמלי "
+msgstr "נורמלי"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
 msgid "Normal picture"
 msgstr ""
 
@@ -1423,7 +1571,7 @@ msgstr ""
 
 #. module: website_blog
 #. odoo-javascript
-#: code:addons/website_blog/static/src/js/tours/website_blog.js:0
+#: code:addons/website_blog/static/src/tours/website_blog.js:0
 msgid ""
 "Once you have reviewed the content on mobile, you can switch back to the "
 "normal view by clicking here again"
@@ -1501,8 +1649,9 @@ msgid "Photo by Teddy Kelley, @teddykelley"
 msgstr "צילום: טדי קלי, @teddykelley"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
-msgid "Picture size"
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
+msgid "Picture Size"
 msgstr ""
 
 #. module: website_blog
@@ -1512,12 +1661,14 @@ msgid "Posts"
 msgstr "פוסטים"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option.xml:0
 msgid "Posts List"
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.blog_searchbar_input_snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_searchbar_option_plugin.js:0
 msgid "Publication Date"
 msgstr "תאריך פרסום"
 
@@ -1553,10 +1704,29 @@ msgid "Publishing date"
 msgstr "תאריך פרסום"
 
 #. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.sidebar_blog_index
+msgid "RSS"
+msgstr ""
+
+#. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__rating_ids
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__rating_ids
 msgid "Ratings"
 msgstr "דירוגים"
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_single_aside_preview_data
+msgid ""
+"Read Now <i class=\"fa fa-long-arrow-right ms-2\" role=\"presentation\"/>"
+msgstr ""
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.dynamic_filter_template_blog_post_single_aside
+#: model_terms:ir.ui.view,arch_db:website_blog.dynamic_filter_template_blog_post_single_circle
+#: model_terms:ir.ui.view,arch_db:website_blog.dynamic_filter_template_blog_post_single_full
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_single_circle_preview_data
+msgid "Read Now <i class=\"fa fa-long-arrow-right\" role=\"presentation\"/>"
+msgstr ""
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.posts_loop
@@ -1572,7 +1742,7 @@ msgstr "מסעדות, בתי קפה וברים"
 #: model:ir.model.fields,help:website_blog.field_blog_blog__website_id
 #: model:ir.model.fields,help:website_blog.field_blog_post__website_id
 msgid "Restrict to a specific website."
-msgstr ""
+msgstr "הגבל לאתר ספציפי."
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_form
@@ -1597,6 +1767,11 @@ msgstr "שגיאה בשליחת SMS"
 #: model_terms:ir.ui.view,arch_db:website_blog.dynamic_filter_template_blog_post_card
 #: model_terms:ir.ui.view,arch_db:website_blog.dynamic_filter_template_blog_post_horizontal
 #: model_terms:ir.ui.view,arch_db:website_blog.dynamic_filter_template_blog_post_list
+#: model_terms:ir.ui.view,arch_db:website_blog.dynamic_filter_template_blog_post_single_aside
+#: model_terms:ir.ui.view,arch_db:website_blog.dynamic_filter_template_blog_post_single_badge
+#: model_terms:ir.ui.view,arch_db:website_blog.dynamic_filter_template_blog_post_single_circle
+#: model_terms:ir.ui.view,arch_db:website_blog.dynamic_filter_template_blog_post_single_full
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_template_category
 msgid "Sample"
 msgstr "דגימה"
 
@@ -1608,7 +1783,7 @@ msgstr "לווינים"
 
 #. module: website_blog
 #. odoo-javascript
-#: code:addons/website_blog/static/src/js/tours/website_blog.js:0
+#: code:addons/website_blog/static/src/tours/website_blog.js:0
 msgid "Search for an image. (eg: type \"business\")"
 msgstr "חיפוש תמונה (לדוג' \"עסק\")"
 
@@ -1631,32 +1806,22 @@ msgstr "בחר בלוג"
 
 #. module: website_blog
 #. odoo-javascript
-#: code:addons/website_blog/static/src/js/tours/website_blog.js:0
+#: code:addons/website_blog/static/src/tours/website_blog.js:0
 msgid "Select the blog you want to add the post to."
 msgstr "בחר בבלוג שאליו תרצה להוסיף את הפוסט."
 
 #. module: website_blog
 #. odoo-javascript
-#: code:addons/website_blog/static/src/js/tours/website_blog.js:0
+#: code:addons/website_blog/static/src/tours/website_blog.js:0
 msgid "Select this menu item to create a new blog post."
 msgstr "בחר פריט בתפריט זה כדי ליצור פוסט חדש בבלוג."
-
-#. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
-msgid "Select to Comment"
-msgstr ""
-
-#. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
-msgid "Select to Tweet"
-msgstr ""
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__seo_name
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__seo_name
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag__seo_name
 msgid "Seo name"
-msgstr "שם Seo "
+msgstr "שם Seo"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_form
@@ -1664,8 +1829,13 @@ msgid "Separate every keyword with a comma"
 msgstr "הפרד כל מילת מפתח עם פסיק"
 
 #. module: website_blog
+#: model:ir.model.fields,field_description:website_blog.field_blog_blog__sequence
+msgid "Sequence"
+msgstr "רצף"
+
+#. module: website_blog
 #. odoo-javascript
-#: code:addons/website_blog/static/src/js/tours/website_blog.js:0
+#: code:addons/website_blog/static/src/tours/website_blog.js:0
 msgid "Set a blog post <b>cover</b>."
 msgstr "הגדרת <b>שער</b> לפוסט."
 
@@ -1678,7 +1848,8 @@ msgid ""
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_page_option.xml:0
 msgid "Share Links"
 msgstr "שתף קישורים"
 
@@ -1703,13 +1874,19 @@ msgid "Share this post"
 msgstr "שתף את הפוסט"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_page_option.xml:0
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option.xml:0
 msgid "Sidebar"
 msgstr "סרגל צד"
 
 #. module: website_blog
 #: model:blog.post,name:website_blog.blog_post_1
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_card_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_horizontal_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_list_preview_data
 #: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_single_aside_preview_data
 msgid "Sierra Tarahumara"
 msgstr "טאראהומרה סיירה"
 
@@ -1722,7 +1899,31 @@ msgid ""
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_single_aside_preview_data
+msgid ""
+"Sierra Tarahumara, popularly known as Copper Canyon is situated in Mexico. "
+"The area is a favorite destination among those seeking an adventurous "
+"vacation. Copper Canyon is one of the six gorges in the..."
+msgstr ""
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_list_preview_data
+msgid ""
+"Sierra Tarahumara, popularly known as Copper Canyon is situated in Mexico. "
+"The area is a favorite destination among those seeking an adventurous "
+"vacation. Copper Canyon is one of the six gorges..."
+msgstr ""
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_card_preview_data
+msgid ""
+"Sierra Tarahumara, popularly known as Copper Canyon is situated in Mexico. "
+"The area is a favorite destination among those..."
+msgstr ""
+
+#. module: website_blog
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
 msgid "Silly-Chico"
 msgstr ""
 
@@ -1733,12 +1934,14 @@ msgid "Skies"
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
 msgid "Smaller"
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
 msgid "Smaller picture"
 msgstr ""
 
@@ -1773,6 +1976,29 @@ msgid ""
 "performs in various star gazing situations, it is best to do some homework "
 "up front and get exposure to the different kinds. So before you make your "
 "first purchase…"
+msgstr ""
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_single_full_preview_data
+msgid ""
+"So you're going abroad, you've chosen your destination and now you have to "
+"choose a hotel. Ten years ago, you'd have probably visited your local travel "
+"agent and trusted the face-to-face advice you we..."
+msgstr ""
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_list_preview_data
+msgid ""
+"So you're going abroad, you've chosen your destination and now you have to "
+"choose a hotel. Ten years ago, you'd have probably visited your local travel "
+"agent and trusted the face-to-face advice..."
+msgstr ""
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_card_preview_data
+msgid ""
+"So you're going abroad, you've chosen your destination and now you have to "
+"choose a hotel. Ten years ago, you'd have..."
 msgstr ""
 
 #. module: website_blog
@@ -1859,17 +2085,20 @@ msgid "Tag name already exists!"
 msgstr "שם התגית כבר קיים!"
 
 #. module: website_blog
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_page_option.xml:0
+#: code:addons/website_blog/static/src/website_builder/blog_post_tags_option.xml:0
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__tag_ids
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag_category__tag_ids
 #: model:ir.ui.menu,name:website_blog.menu_blog_tag_global
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_tags_display
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_sidebar_blog_index_tags
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
 msgid "Tags"
 msgstr "תגיות"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option.xml:0
 msgid "Tags List"
 msgstr ""
 
@@ -1880,13 +2109,15 @@ msgid "Taking pictures in the dark"
 msgstr ""
 
 #. module: website_blog
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/dynamic_snippet_blog_posts_option.xml:0
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__teaser
-#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
 msgid "Teaser"
 msgstr "טיזר"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option.xml:0
 msgid "Teaser & Tags"
 msgstr ""
 
@@ -1951,14 +2182,19 @@ msgstr ""
 msgid ""
 "The cliffs in this region are among the highest in the world and to see "
 "water cascading from the high peaks is simply breathtaking. The short jaunt "
-"from Maui with Maui helicopter tours is well worth seeing the beauty of this"
-" natural environment."
+"from Maui with Maui helicopter tours is well worth seeing the beauty of this "
+"natural environment."
+msgstr ""
+
+#. module: website_blog
+#: model:ir.model.fields,help:website_blog.field_blog_post__website_absolute_url
+msgid "The full absolute URL to access the document through the website."
 msgstr ""
 
 #. module: website_blog
 #: model:ir.model.fields,help:website_blog.field_blog_post__website_url
-msgid "The full URL to access the document through the website."
-msgstr "כתובת האתר המלאה לגישה למסמך דרך אתר האינטרנט."
+msgid "The full relative URL to access the document through the website."
+msgstr ""
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_4
@@ -1995,8 +2231,8 @@ msgstr ""
 msgid ""
 "The view of this is truly breathtaking and is a sight not to be missed. It "
 "is also highly educational with a chance to see a dormant volcano up close, "
-"something that can not be seen every day. On the northern and southern sides"
-" of the volcano, you will see an incredible different view however. These "
+"something that can not be seen every day. On the northern and southern sides "
+"of the volcano, you will see an incredible different view however. These "
 "sides are lush and green and you will be able to see some beautiful "
 "waterfalls and gorgeous brush. Tropical rainforests abound on this side of "
 "the island and it is something that is not easily accessible by any other "
@@ -2009,13 +2245,12 @@ msgid ""
 "Then there’s the problem of the reviewer’s motivation. The more reviews you "
 "read, the more you notice how they tend to cluster at the extremes of "
 "opinion. On one end, you have angry reviewers with axes to grind; at the "
-"other, you have delighted guests who lavish praise beyond belief. You’ll not"
-" be surprised to learn that hotels sometimes post their own glowing reviews,"
-" or that competitor’s line up for the chance to lambaste the competition "
-"with bad reviews. It makes sense to consider what is really important to you"
-" when selecting a hotel. You should then choose an online hotel directory "
-"that gives up-to-date, independent, impartial information that really "
-"matters."
+"other, you have delighted guests who lavish praise beyond belief. You’ll not "
+"be surprised to learn that hotels sometimes post their own glowing reviews, "
+"or that competitor’s line up for the chance to lambaste the competition with "
+"bad reviews. It makes sense to consider what is really important to you when "
+"selecting a hotel. You should then choose an online hotel directory that "
+"gives up-to-date, independent, impartial information that really matters."
 msgstr ""
 
 #. module: website_blog
@@ -2038,9 +2273,9 @@ msgstr ""
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_3
 msgid ""
-"These things really do matter and any decent hotel directory should give you"
-" this sort of advice on bedrooms – not just the number of rooms which is the"
-" usual option!"
+"These things really do matter and any decent hotel directory should give you "
+"this sort of advice on bedrooms – not just the number of rooms which is the "
+"usual option!"
 msgstr ""
 
 #. module: website_blog
@@ -2050,13 +2285,7 @@ msgstr "תיבה זו לא תהיה גלויה למבקרים שלך"
 
 #. module: website_blog
 #. odoo-javascript
-#: code:addons/website_blog/static/src/js/options.js:0
-msgid "This tag already exists"
-msgstr "תווית זו כבר קיימת"
-
-#. module: website_blog
-#. odoo-javascript
-#: code:addons/website_blog/static/src/js/options.js:0
+#: code:addons/website_blog/static/src/website_builder/blog_cover_properties_option.js:0
 msgid "Tiny"
 msgstr "זעיר"
 
@@ -2067,12 +2296,14 @@ msgid "Title"
 msgstr "תואר"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_page_option.xml:0
 msgid "Title Above Cover"
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_page_option.xml:0
 msgid "Title Inside Cover"
 msgstr ""
 
@@ -2093,10 +2324,10 @@ msgid ""
 "some basic things we might need to look deeper, beyond just what we can see "
 "with the naked eye and begin to study the stars as well as enjoy them. The "
 "first thing you need isn’t equipment at all but literature. A good star map "
-"will show you the major constellations, the location of the key stars we use"
-" to navigate the sky and the planets that will appear larger than stars. And"
-" if you add to that map some well done introductory materials into the hobby"
-" of astronomy, you are well on your way."
+"will show you the major constellations, the location of the key stars we use "
+"to navigate the sky and the planets that will appear larger than stars. And "
+"if you add to that map some well done introductory materials into the hobby "
+"of astronomy, you are well on your way."
 msgstr ""
 
 #. module: website_blog
@@ -2127,12 +2358,18 @@ msgid ""
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
+#. odoo-javascript
+#: code:addons/website_blog/static/src/website_builder/blog_post_page_option.xml:0
 msgid "Top Banner"
 msgstr ""
 
 #. module: website_blog
 #: model:blog.blog,name:website_blog.blog_blog_1
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_card_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_horizontal_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_single_aside_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_single_circle_preview_data
+#: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_blog_posts_single_full_preview_data
 msgid "Travel"
 msgstr ""
 
@@ -2153,7 +2390,7 @@ msgstr "פוסט ללא שם"
 
 #. module: website_blog
 #. odoo-javascript
-#: code:addons/website_blog/static/src/js/tours/website_blog.js:0
+#: code:addons/website_blog/static/src/tours/website_blog.js:0
 msgid "Use this icon to preview your blog post on <b>mobile devices</b>."
 msgstr "שימוש בסמליל לתצוגה מקדימה ב<b>מכשירים חכמים</b>."
 
@@ -2171,7 +2408,7 @@ msgstr ""
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.post_info
 msgid "Views"
-msgstr "תצוגות"
+msgstr "צפיות"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.index
@@ -2194,6 +2431,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__website_id
 msgid "Website"
 msgstr "אתר אינטרנט"
+
+#. module: website_blog
+#: model:ir.model.fields,field_description:website_blog.field_blog_post__website_absolute_url
+msgid "Website Absolute URL"
+msgstr ""
 
 #. module: website_blog
 #: model:ir.actions.act_url,name:website_blog.action_open_website
@@ -2291,14 +2533,14 @@ msgstr ""
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_2
 msgid ""
-"You will see all the beauty that Maui has to offer and can have a great time"
-" for the entire family. Tours are not too expensive and last from forty five"
-" minutes to over an hour. You can see places that are typically inaccessible"
-" with Maui helicopter tours. Places that are not available by foot or "
-"vehicle can be seen by air. Breathtaking sights await those who are up for "
-"some fun Maui helicopter tours. If you will be staying on the island for a "
-"considerable amount of time, you may want to think about doing multiple Maui"
-" helicopter tours."
+"You will see all the beauty that Maui has to offer and can have a great time "
+"for the entire family. Tours are not too expensive and last from forty five "
+"minutes to over an hour. You can see places that are typically inaccessible "
+"with Maui helicopter tours. Places that are not available by foot or vehicle "
+"can be seen by air. Breathtaking sights await those who are up for some fun "
+"Maui helicopter tours. If you will be staying on the island for a "
+"considerable amount of time, you may want to think about doing multiple Maui "
+"helicopter tours."
 msgstr ""
 
 #. module: website_blog
@@ -2317,7 +2559,7 @@ msgid "breadcrumb"
 msgstr "סימני דרך"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_regular_cover
+#: model_terms:ir.ui.view,arch_db:website_blog.blog_post_info
 #: model_terms:ir.ui.view,arch_db:website_blog.post_heading
 msgid "by"
 msgstr "על ידי"
@@ -2335,7 +2577,7 @@ msgstr "מדריכים"
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_post_template_new_post
 msgid "has been published on the"
-msgstr "פורסם ב"
+msgstr "פורסם ה"
 
 #. module: website_blog
 #: model:blog.tag,name:website_blog.blog_tag_1
@@ -2344,6 +2586,7 @@ msgstr "בתי מלון"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_post_content
+#: model_terms:ir.ui.view,arch_db:website_blog.dynamic_filter_template_blog_post_single_badge
 msgid "in"
 msgstr "ב"
 
@@ -2363,13 +2606,86 @@ msgid "unpublished"
 msgstr "לא פורסם"
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_regular_cover
+#: model_terms:ir.ui.view,arch_db:website_blog.blog_post_info
 msgid ""
 "|\n"
-"                            <i class=\"fa fa-comment text-muted me-1\"/>"
+"            <i class=\"fa fa-comment ms-1 text-muted\"/>"
 msgstr ""
 
 #. module: website_blog
-#: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_regular_cover
+#: model_terms:ir.ui.view,arch_db:website_blog.blog_post_info
 msgid "| No comments yet"
 msgstr "עדיין אין תגובות!"
+
+#~ msgid "&amp;nbsp;"
+#~ msgstr "&amp;nbsp;"
+
+#~ msgid "' page header."
+#~ msgstr "' כותרת עליונה של דף."
+
+#~ msgid ""
+#~ "<i class=\"fa fa-github text-github\" aria-label=\"Github\" "
+#~ "title=\"Github\"/>"
+#~ msgstr ""
+#~ "<i class=\"fa fa-github text-github\" aria-label=\"Github\" "
+#~ "title=\"Github\"/>"
+
+#~ msgid ""
+#~ "<i class=\"fa fa-instagram text-instagram\" aria-label=\"Instagram\" "
+#~ "title=\"Instagram\"/>"
+#~ msgstr ""
+#~ "<i class=\"fa fa-instagram text-instagram\" aria-label=\"Instagram\" "
+#~ "title=\"Instagram\"/>"
+
+#~ msgid "<i class=\"fa fa-rss-square\" aria-label=\"RSS\" title=\"RSS\"/>"
+#~ msgstr "<i class=\"fa fa-rss-square\" aria-label=\"RSS\" title=\"RSS\"/>"
+
+#~ msgid ""
+#~ "<i class=\"fa fa-twitter text-twitter\" aria-label=\"Twitter\" "
+#~ "title=\"Twitter\"/>"
+#~ msgstr ""
+#~ "<i class=\"fa fa-twitter text-twitter\" aria-label=\"Twitter\" "
+#~ "title=\"Twitter\"/>"
+
+#~ msgid ""
+#~ "<i class=\"fa fa-youtube-play text-youtube\" aria-label=\"Youtube\" "
+#~ "title=\"Youtube\"/>"
+#~ msgstr ""
+#~ "<i class=\"fa fa-youtube-play text-youtube\" aria-label=\"Youtube\" "
+#~ "title=\"Youtube\"/>"
+
+#~ msgid "Edit the '"
+#~ msgstr "ערוך את '"
+
+#~ msgid "Follow us"
+#~ msgstr "עקוב אחרינו"
+
+#~ msgid "Group By"
+#~ msgstr "קבץ לפי"
+
+#~ msgid "Latest"
+#~ msgstr "אחרונים"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "מספר הודעות המחייבות פעולה"
+
+#~ msgid "Read more"
+#~ msgstr "קרא עוד"
+
+#~ msgid "Restrict publishing to this website."
+#~ msgstr "הגבל את הפרסום לאתר זה."
+
+#~ msgid "Share on Twitter"
+#~ msgstr "שתף בטוויטר"
+
+#~ msgid "The full URL to access the document through the website."
+#~ msgstr "כתובת האתר המלאה לגישה למסמך דרך אתר האינטרנט."
+
+#~ msgid "This tag already exists"
+#~ msgstr "תווית זו כבר קיימת"
+
+#~ msgid "in <i class=\"fa fa-folder-open text-muted\"/>"
+#~ msgstr "ב <i class=\"fa fa-folder-open text-muted\"/>"
+
+#~ msgid "in <i class=\"fa fa-folder-open text-white-75\"/>"
+#~ msgstr "ב <i class=\"fa fa-folder-open text-white-75\"/>"

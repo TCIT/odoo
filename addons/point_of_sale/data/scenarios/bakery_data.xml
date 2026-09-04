@@ -1,18 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
-		<!-- Bakery scenario config -->
-        <record id="pos_category_breads" model="pos.category">
-			<field name="name">Breads</field>
-			<field name="image_128" type="base64" file="point_of_sale/static/img/breads-icon.png" />
-			<field name="sequence">7</field>
-		</record>
-        <record id="pos_category_pastries" model="pos.category">
-			<field name="name">Pastries</field>
-			<field name="image_128" type="base64" file="point_of_sale/static/img/pastries-icon.png" />
-			<field name="sequence">8</field>
-		</record>
-
 		<!-- Bakery products -->
 		<record model="product.product" id="product_wholemeal_loaf">
 			<field name="name">Wholemeal loaf</field>
@@ -22,10 +10,23 @@
 			<field name="type">consu</field>
 			<field name="weight">0.01</field>
 			<field name="uom_id" ref="uom.product_uom_unit"/>
-			<field name="uom_po_id" ref="uom.product_uom_unit"/>
 			<field name="image_1920" type="base64" file="point_of_sale/static/img/product_wholemeal_loaf.png"/>
 			<field name="available_in_pos" eval="True"/>
-			<field name="categ_id" ref="product.product_category_1"/>
+			<field name="categ_id" eval="ref('point_of_sale.product_category_food', raise_if_not_found=False)"/>
+			<field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_breads')])]" />
+		</record>
+		<record model="product.product" id="product_flour">
+			<field name="name">Flour</field>
+			<field name="list_price">2.99</field>
+			<field name="standard_price">2.69</field>
+			<field name="description_sale">Flour sold by the kilogram.</field>
+			<field name="type">consu</field>
+			<field name="weight">1.00</field>
+			<field name="uom_id" ref="uom.product_uom_kgm"/>
+			<field name="image_1920" type="base64" file="point_of_sale/static/img/product_flour.png"/>
+			<field name="available_in_pos" eval="True"/>
+			<field name="to_weight" eval="True"/>
+			<field name="categ_id" eval="ref('point_of_sale.product_category_food', raise_if_not_found=False)"/>
 			<field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_breads')])]" />
 		</record>
 		<record model="product.product" id="product_tiger_white_loaf">
@@ -36,10 +37,9 @@
 			<field name="type">consu</field>
 			<field name="weight">0.01</field>
 			<field name="uom_id" ref="uom.product_uom_unit"/>
-			<field name="uom_po_id" ref="uom.product_uom_unit"/>
 			<field name="image_1920" type="base64" file="point_of_sale/static/img/product_tiger_white_loaf.png"/>
 			<field name="available_in_pos" eval="True"/>
-			<field name="categ_id" ref="product.product_category_1"/>
+			<field name="categ_id" eval="ref('point_of_sale.product_category_food', raise_if_not_found=False)"/>
 			<field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_breads')])]" />
 		</record>
 		<record model="product.product" id="product_butter_croissant">
@@ -50,10 +50,9 @@
 			<field name="type">consu</field>
 			<field name="weight">0.01</field>
 			<field name="uom_id" ref="uom.product_uom_unit"/>
-			<field name="uom_po_id" ref="uom.product_uom_unit"/>
 			<field name="image_1920" type="base64" file="point_of_sale/static/img/product_butter_croissant.png"/>
 			<field name="available_in_pos" eval="True"/>
-			<field name="categ_id" ref="product.product_category_1"/>
+			<field name="categ_id" eval="ref('point_of_sale.product_category_food', raise_if_not_found=False)"/>
 			<field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_pastries')])]" />
 		</record>
 		<record model="product.product" id="product_apple_pie">
@@ -64,10 +63,9 @@
 			<field name="type">consu</field>
 			<field name="weight">0.01</field>
 			<field name="uom_id" ref="uom.product_uom_unit"/>
-			<field name="uom_po_id" ref="uom.product_uom_unit"/>
 			<field name="image_1920" type="base64" file="point_of_sale/static/img/product_apple_pie.png"/>
 			<field name="available_in_pos" eval="True"/>
-			<field name="categ_id" ref="product.product_category_1"/>
+			<field name="categ_id" eval="ref('point_of_sale.product_category_food', raise_if_not_found=False)"/>
 			<field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_pastries')])]" />
 		</record>
 		<record model="product.product" id="product_cherry_pie">
@@ -78,10 +76,9 @@
 			<field name="type">consu</field>
 			<field name="weight">0.01</field>
 			<field name="uom_id" ref="uom.product_uom_unit"/>
-			<field name="uom_po_id" ref="uom.product_uom_unit"/>
 			<field name="image_1920" type="base64" file="point_of_sale/static/img/product_cherry_pie.png"/>
 			<field name="available_in_pos" eval="True"/>
-			<field name="categ_id" ref="product.product_category_1"/>
+			<field name="categ_id" eval="ref('point_of_sale.product_category_food', raise_if_not_found=False)"/>
 			<field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_pastries')])]" />
 		</record>
 		<record model="product.product" id="product_sourdough_loaf">
@@ -92,10 +89,9 @@
 			<field name="type">consu</field>
 			<field name="weight">0.01</field>
 			<field name="uom_id" ref="uom.product_uom_unit"/>
-			<field name="uom_po_id" ref="uom.product_uom_unit"/>
 			<field name="image_1920" type="base64" file="point_of_sale/static/img/product_sourdough_loaf.png"/>
 			<field name="available_in_pos" eval="True"/>
-			<field name="categ_id" ref="product.product_category_1"/>
+			<field name="categ_id" eval="ref('point_of_sale.product_category_food', raise_if_not_found=False)"/>
 			<field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_breads')])]" />
 		</record>
 		<record model="product.product" id="product_multigrain_bread">
@@ -106,9 +102,9 @@
 			<field name="type">consu</field>
 			<field name="weight">0.01</field>
 			<field name="uom_id" ref="uom.product_uom_unit"/>
-			<field name="uom_po_id" ref="uom.product_uom_unit"/>
 			<field name="image_1920" type="base64" file="point_of_sale/static/img/product_multigrain_bread.png"/>
 			<field name="available_in_pos" eval="True"/>
+			<field name="categ_id" eval="ref('point_of_sale.product_category_food', raise_if_not_found=False)"/>
 			<field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_breads')])]" />
 		</record>
 		<record model="product.product" id="product_rye_bread">
@@ -119,9 +115,9 @@
 			<field name="type">consu</field>
 			<field name="weight">0.01</field>
 			<field name="uom_id" ref="uom.product_uom_unit"/>
-			<field name="uom_po_id" ref="uom.product_uom_unit"/>
 			<field name="image_1920" type="base64" file="point_of_sale/static/img/product_rye_bread.png"/>
 			<field name="available_in_pos" eval="True"/>
+			<field name="categ_id" eval="ref('point_of_sale.product_category_food', raise_if_not_found=False)"/>
 			<field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_breads')])]" />
 		</record>
 		<record model="product.product" id="product_cinnamon_roll">
@@ -132,9 +128,9 @@
 			<field name="type">consu</field>
 			<field name="weight">0.01</field>
 			<field name="uom_id" ref="uom.product_uom_unit"/>
-			<field name="uom_po_id" ref="uom.product_uom_unit"/>
 			<field name="image_1920" type="base64" file="point_of_sale/static/img/product_cinnamon_roll.png"/>
 			<field name="available_in_pos" eval="True"/>
+			<field name="categ_id" eval="ref('point_of_sale.product_category_food', raise_if_not_found=False)"/>
 			<field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_pastries')])]" />
 		</record>
 		<record model="product.product" id="product_pain_au_chocolat">
@@ -145,9 +141,9 @@
 			<field name="type">consu</field>
 			<field name="weight">0.01</field>
 			<field name="uom_id" ref="uom.product_uom_unit"/>
-			<field name="uom_po_id" ref="uom.product_uom_unit"/>
 			<field name="image_1920" type="base64" file="point_of_sale/static/img/product_pain_au_chocolat.png"/>
 			<field name="available_in_pos" eval="True"/>
+			<field name="categ_id" eval="ref('point_of_sale.product_category_food', raise_if_not_found=False)"/>
 			<field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_pastries')])]" />
 		</record>
 		<record model="product.product" id="product_blueberry_muffin">
@@ -158,9 +154,9 @@
 			<field name="type">consu</field>
 			<field name="weight">0.01</field>
 			<field name="uom_id" ref="uom.product_uom_unit"/>
-			<field name="uom_po_id" ref="uom.product_uom_unit"/>
 			<field name="image_1920" type="base64" file="point_of_sale/static/img/product_blueberry_muffin.png"/>
 			<field name="available_in_pos" eval="True"/>
+			<field name="categ_id" eval="ref('point_of_sale.product_category_food', raise_if_not_found=False)"/>
 			<field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_pastries')])]" />
 		</record>
 		<record model="product.product" id="product_bagel">
@@ -171,9 +167,9 @@
 			<field name="type">consu</field>
 			<field name="weight">0.01</field>
 			<field name="uom_id" ref="uom.product_uom_unit"/>
-			<field name="uom_po_id" ref="uom.product_uom_unit"/>
 			<field name="image_1920" type="base64" file="point_of_sale/static/img/product_pain_au_chocolat.png"/>
 			<field name="available_in_pos" eval="True"/>
+			<field name="categ_id" eval="ref('point_of_sale.product_category_food', raise_if_not_found=False)"/>
 			<field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_breads')])]" />
 		</record>
 		<record model="product.product" id="product_cheese_croissant">
@@ -184,9 +180,9 @@
 			<field name="type">consu</field>
 			<field name="weight">0.01</field>
 			<field name="uom_id" ref="uom.product_uom_unit"/>
-			<field name="uom_po_id" ref="uom.product_uom_unit"/>
 			<field name="image_1920" type="base64" file="point_of_sale/static/img/product_cheese_croissant.png"/>
 			<field name="available_in_pos" eval="True"/>
+			<field name="categ_id" eval="ref('point_of_sale.product_category_food', raise_if_not_found=False)"/>
 			<field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_pastries')])]" />
 		</record>
 		<record model="product.product" id="product_pecan_pie">
@@ -197,9 +193,9 @@
 			<field name="type">consu</field>
 			<field name="weight">0.01</field>
 			<field name="uom_id" ref="uom.product_uom_unit"/>
-			<field name="uom_po_id" ref="uom.product_uom_unit"/>
 			<field name="image_1920" type="base64" file="point_of_sale/static/img/product_pecan_pie.png"/>
 			<field name="available_in_pos" eval="True"/>
+			<field name="categ_id" eval="ref('point_of_sale.product_category_food', raise_if_not_found=False)"/>
 			<field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_pastries')])]" />
 		</record>
 	</data>

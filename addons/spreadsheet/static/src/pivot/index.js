@@ -1,10 +1,10 @@
-/** @odoo-module */
 import { _t } from "@web/core/l10n/translation";
 
 import * as spreadsheet from "@odoo/o-spreadsheet";
 
 import { SEE_RECORDS_PIVOT, SEE_RECORDS_PIVOT_VISIBLE } from "./pivot_actions";
 import { PivotOdooCorePlugin } from "./plugins/pivot_odoo_core_plugin";
+import { PivotCoreViewGlobalFilterPlugin } from "./plugins/pivot_core_view_global_filter_plugin";
 import { PivotUIGlobalFilterPlugin } from "./plugins/pivot_ui_global_filter_plugin";
 
 const { coreTypes, invalidateEvaluationCommands } = spreadsheet;
@@ -24,9 +24,9 @@ invalidateEvaluationCommands.add("UPDATE_ODOO_PIVOT_DOMAIN");
 cellMenuRegistry.add("pivot_see_records", {
     name: _t("See records"),
     sequence: 175,
-    execute: async (env) => {
+    execute: async (env, isMiddleClick) => {
         const position = env.model.getters.getActivePosition();
-        await SEE_RECORDS_PIVOT(position, env);
+        await SEE_RECORDS_PIVOT(position, env, isMiddleClick);
     },
     isVisible: (env) => {
         const position = env.model.getters.getActivePosition();
@@ -37,4 +37,4 @@ cellMenuRegistry.add("pivot_see_records", {
 
 inverseCommandRegistry.add("UPDATE_ODOO_PIVOT_DOMAIN", identity);
 
-export { PivotOdooCorePlugin, PivotUIGlobalFilterPlugin };
+export { PivotOdooCorePlugin, PivotCoreViewGlobalFilterPlugin, PivotUIGlobalFilterPlugin };

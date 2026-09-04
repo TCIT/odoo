@@ -9,7 +9,7 @@ from unittest.mock import patch
 import psycopg2.errors
 
 from odoo import tools
-from odoo.addons.base.tests import test_mail_examples
+from odoo.addons.base.tests import mail_examples
 from odoo.addons.base.tests.common import MockSmtplibCase
 from odoo.tests import tagged, users
 from odoo.tests.common import TransactionCase
@@ -40,7 +40,7 @@ class EmailConfigCase(TransactionCase):
     @patch.dict(config.options, {"email_from": "settings@example.com"})
     def test_default_email_from(self):
         """ Email from setting is respected and comes from configuration. """
-        message = self.env["ir.mail_server"].build_email(
+        message = self.env["ir.mail_server"]._build_email__(
             False, "recipient@example.com", "Subject",
             "The body of an email",
         )
@@ -108,8 +108,8 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
             'content',
             '<p>content</p>',
             '<head><meta content="text/html; charset=utf-8" http-equiv="Content-Type"></head><body><p>content</p></body>',
-            test_mail_examples.MISC_HTML_SOURCE,
-            test_mail_examples.QUOTE_THUNDERBIRD_HTML,
+            mail_examples.MISC_HTML_SOURCE,
+            mail_examples.QUOTE_THUNDERBIRD_HTML,
         ]
         expected_list = [
             'content',
@@ -119,7 +119,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
             'On 01/05/2016 10:24 AM, Raoul\nPoilvache wrote:\n\n* Test reply. The suite. *\n\n--\nRaoul Poilvache\n\nTop cool !!!\n\n--\nRaoul Poilvache',
         ]
         for body, expected in zip(bodies, expected_list):
-            message = self.env['ir.mail_server'].build_email(
+            message = self.env['ir.mail_server']._build_email__(
                 'john.doe@from.example.com',
                 'destinataire@to.example.com',
                 body=body,
@@ -151,6 +151,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
     def test_mail_server_get_test_email_from(self):
         """ Test the email used to test the mail server connection. Check
         from_filter parsing / default fallback value. """
+        self.env.user.email = 'mitchell.admin@example.com'
         test_server = self.env['ir.mail_server'].create({
             'from_filter': 'example_2.com, example_3.com',
             'name': 'Test Server',
@@ -258,7 +259,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
                 with self.subTest(mail_from=mail_from, provide_smtp=provide_smtp):
                     with self.mock_smtplib_connection():
                         if provide_smtp:
-                            smtp_session = IrMailServer.connect(smtp_from=mail_from)
+                            smtp_session = IrMailServer._connect__(smtp_from=mail_from)
                             message = self._build_email(mail_from=mail_from)
                             IrMailServer.send_email(message, smtp_session=smtp_session)
                         else:
@@ -283,7 +284,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
         for provide_smtp in [False, True]:
             with self.mock_smtplib_connection():
                 if provide_smtp:
-                    smtp_session = IrMailServer.connect(smtp_from='"Name" <test@unknown_domain.com>')
+                    smtp_session = IrMailServer._connect__(smtp_from='"Name" <test@unknown_domain.com>')
                     message = self._build_email(mail_from='"Name" <test@unknown_domain.com>')
                     IrMailServer.send_email(message, smtp_session=smtp_session)
                 else:
@@ -317,7 +318,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
             mail_server, smtp_from = IrMailServer._find_mail_server(email_from='"Name" <test@unknown_domain.com>')
             self.assertEqual(mail_server, context_server)
             self.assertEqual(smtp_from, "notification@context.example.com")
-            smtp_session = IrMailServer.connect(smtp_from=smtp_from)
+            smtp_session = IrMailServer._connect__(smtp_from=smtp_from)
             message = self._build_email(mail_from='"Name" <test@unknown_domain.com>')
             IrMailServer.send_email(message, smtp_session=smtp_session)
 
@@ -401,7 +402,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
                 with self.subTest(mail_from=mail_from, provide_smtp=provide_smtp):
                     with self.mock_smtplib_connection():
                         if provide_smtp:
-                            smtp_session = IrMailServer.connect(smtp_from=mail_from)
+                            smtp_session = IrMailServer._connect__(smtp_from=mail_from)
                             message = self._build_email(mail_from=mail_from)
                             IrMailServer.send_email(message, smtp_session=smtp_session)
                         else:
@@ -472,3 +473,61 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
                     message_from=expected_msg_from,
                     mail_server=expected_mail_server,
                 )
+
+    def test_eml_attachment_encoding(self):
+        """Test that message/rfc822 attachments are encoded using 7bit, 8bit, or binary encoding per RFC."""
+        IrMailServer = self.env['ir.mail_server']
+
+        # Create a sample .eml file content
+        eml_content = b"From: user@example.com\nTo: user2@example.com\nSubject: Test Email\n\nThis is a test email."
+        attachments = [('test.eml', eml_content, 'message/rfc822')]
+
+        # Build the email with the .eml attachment
+        message = IrMailServer._build_email__(
+            email_from='john.doe@from.example.com',
+            email_to='destinataire@to.example.com',
+            subject='Subject with .eml attachment',
+            body='This email contains a .eml attachment.',
+            attachments=attachments,
+        )
+
+        acceptable_encodings = {'7bit', '8bit', 'binary'}
+        found_rfc822_part = False
+
+        for part in message.iter_attachments():
+            if part.get_content_type() == 'message/rfc822':
+                found_rfc822_part = True
+                # Get Content-Transfer-Encoding, defaulting to '7bit' if not present (per RFC)
+                encoding = part.get('Content-Transfer-Encoding', '7bit').lower()
+
+                self.assertIn(
+                    encoding,
+                    acceptable_encodings,
+                    f"RFC violation: message/rfc822 attachment has Content-Transfer-Encoding '{encoding}'. "
+                    f"Only 7bit, 8bit, or binary encoding is permitted per RFC 2046 Section 5.2.1."
+                )
+
+        self.assertTrue(found_rfc822_part, "No message/rfc822 attachment found in the built email")
+
+    def test_eml_message_serialization_with_non_ascii(self):
+        """Ensure an email with a message/rfc822 attachment containing non-ASCII chars can be serialized."""
+        IrMailServer = self.env['ir.mail_server']
+
+        # .eml content with non-ASCII character
+        eml_content = "From: user@example.com\nTo: user2@example.com\nSubject: Test\n\nBody with é"
+        attachments = [('test.eml', eml_content.encode(), 'message/rfc822')]
+
+        message = IrMailServer._build_email__(
+            email_from='john.doe@from.example.com',
+            email_to='destinataire@to.example.com',
+            subject='Serialization test',
+            body='This email contains a .eml attachment.',
+            attachments=attachments,
+        )
+
+        try:
+            serialized = message.as_string().encode('utf-8')
+        except UnicodeEncodeError as e:
+            raise AssertionError("Email with non-ASCII .eml attachment could not be serialized") from e
+
+        self.assertIsInstance(serialized, bytes)

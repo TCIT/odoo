@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
     import { registry } from "@web/core/registry";
 
     registry.category("web_tour.tours").add("shop_custom_attribute_value", {
@@ -8,6 +6,7 @@
         content: "click on Customizable Desk",
         trigger: '.oe_product_cart a:contains("Customizable Desk (TEST)")',
         run: "click",
+        expectUnloadPage: true,
     },
     {
         trigger: "li.js_attribute_value",
@@ -24,8 +23,9 @@
         run: 'click',
     },
     {
-        trigger: 'button:contains(Proceed to Checkout)',
+        trigger: 'button:contains(Go to Checkout)',
         run: 'click',
+        expectUnloadPage: true,
     },
     {
         trigger: "#cart_products",

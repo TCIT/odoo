@@ -1,20 +1,17 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-import base64
 
 from collections import defaultdict
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.osv import expression
+from odoo.fields import Domain
 
 
 class LunchProduct(models.Model):
     """ Products available to order. A product is linked to a specific vendor. """
     _name = 'lunch.product'
     _description = 'Lunch Product'
-    _inherit = 'image.mixin'
+    _inherit = ['image.mixin']
     _order = 'name'
     _check_company_auto = True
 
@@ -80,35 +77,29 @@ class LunchProduct(models.Model):
             Is available_at is always false when browsing it
             this field is there only to search (see _search_is_available_at)
         """
-        for product in self:
-            product.is_available_at = False
+        self.is_available_at = False
 
     def _search_is_available_at(self, operator, value):
-        supported_operators = ['in', 'not in', '=', '!=']
-
-        if not operator in supported_operators:
-            return expression.TRUE_DOMAIN
-
-        if isinstance(value, int):
-            value = [value]
-
-        if operator in expression.NEGATIVE_TERM_OPERATORS:
-            return expression.AND([[('supplier_id.available_location_ids', 'not in', value)], [('supplier_id.available_location_ids', '!=', False)]])
-
-        return expression.OR([[('supplier_id.available_location_ids', 'in', value)], [('supplier_id.available_location_ids', '=', False)]])
+        if operator != 'in':
+            return NotImplemented
+        return Domain('supplier_id.available_location_ids', 'in', value) | Domain('supplier_id.available_location_ids', '=', False)
 
     def _sync_active_from_related(self):
         """ Archive/unarchive product after related field is archived/unarchived """
-        return self.filtered(lambda p: (p.category_id.active and p.supplier_id.active) != p.active).toggle_active()
+        self.filtered(lambda p: p.active and not (p.category_id.active and p.supplier_id.active)).action_archive()
+        self.filtered(lambda p: not p.active and (p.category_id.active and p.supplier_id.active)).action_unarchive()
 
-    def toggle_active(self):
-        invalid_products = self.filtered(lambda product: not product.active and not product.category_id.active)
+    @api.constrains('active', 'category_id')
+    def _check_active_categories(self):
+        invalid_products = self.filtered(lambda product: product.active and not product.category_id.active)
         if invalid_products:
             raise UserError(_("The following product categories are archived. You should either unarchive the categories or change the category of the product.\n%s", '\n'.join(invalid_products.category_id.mapped('name'))))
-        invalid_products = self.filtered(lambda product: not product.active and not product.supplier_id.active)
+
+    @api.constrains('active', 'supplier_id')
+    def _check_active_suppliers(self):
+        invalid_products = self.filtered(lambda product: product.active and not product.supplier_id.active)
         if invalid_products:
             raise UserError(_("The following suppliers are archived. You should either unarchive the suppliers or change the supplier of the product.\n%s", '\n'.join(invalid_products.supplier_id.mapped('name'))))
-        return super().toggle_active()
 
     def _inverse_is_favorite(self):
         """ Handled in the write() """

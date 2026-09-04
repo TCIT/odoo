@@ -2,14 +2,19 @@
 
 from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError
-from odoo.osv import expression
+from odoo.fields import Domain
+from odoo.tools import babel_locale_parse
+from odoo.tools.date_utils import weeknumber
 import pytz
-from datetime import datetime
+from datetime import datetime, time
 
-class CalendarLeaves(models.Model):
+
+class ResourceCalendarLeaves(models.Model):
     _inherit = "resource.calendar.leaves"
 
     holiday_id = fields.Many2one("hr.leave", string='Time Off Request')
+    elligible_for_accrual_rate = fields.Boolean(string='Eligible for Accrual Rate', default=False,
+        help="If checked, this time off type will be taken into account for accruals computation.")
 
     @api.constrains('date_from', 'date_to', 'calendar_id')
     def _check_compare_dates(self):
@@ -32,15 +37,14 @@ class CalendarLeaves(models.Model):
                     raise ValidationError(_('Two public holidays cannot overlap each other for the same working hours.'))
 
     def _get_domain(self, time_domain_dict):
-        domain = expression.OR([
+        return Domain.OR(
             [
                 ('employee_company_id', '=', date['company_id']),
                 ('date_to', '>', date['date_from']),
                 ('date_from', '<', date['date_to']),
             ]
             for date in time_domain_dict
-        ])
-        return expression.AND([domain, [('state', 'not in', ['refuse', 'cancel'])]])
+        ) & Domain('state', 'not in', ['refuse', 'cancel'])
 
     def _get_time_domain_dict(self):
         return [{
@@ -60,31 +64,33 @@ class CalendarLeaves(models.Model):
 
         previous_durations = leaves.mapped('number_of_days')
         previous_states = leaves.mapped('state')
+        self.env.add_to_compute(self.env['hr.leave']._fields['number_of_days'], leaves)
+        self.env.add_to_compute(self.env['hr.leave']._fields['duration_display'], leaves)
         leaves.sudo().write({
             'state': 'confirm',
         })
-        self.env.add_to_compute(self.env['hr.leave']._fields['number_of_days'], leaves)
-        self.env.add_to_compute(self.env['hr.leave']._fields['duration_display'], leaves)
-        sick_time_status = self.env.ref('hr_holidays.holiday_status_sl')
+        sick_time_status = self.env.ref('hr_holidays.leave_type_sick_time_off', raise_if_not_found=False)
+        leaves_to_recreate = self.env['hr.leave']
         for previous_duration, leave, state in zip(previous_durations, leaves, previous_states):
             duration_difference = previous_duration - leave.number_of_days
             message = False
-            if duration_difference > 0 and leave.holiday_status_id.requires_allocation == 'yes':
+            if duration_difference > 0 and leave.holiday_status_id.requires_allocation:
                 message = _("Due to a change in global time offs, you have been granted %s day(s) back.", duration_difference)
             if leave.number_of_days > previous_duration\
-                    and leave.holiday_status_id not in sick_time_status:
+                    and (not sick_time_status or leave.holiday_status_id not in sick_time_status):
                 message = _("Due to a change in global time offs, %s extra day(s) have been taken from your allocation. Please review this leave if you need it to be changed.", -1 * duration_difference)
             try:
-                leave.write({'state': state})
+                leave.sudo().write({'state': state})  # sudo in order to skip _check_approval_update
                 leave._check_validity()
                 if leave.state == 'validate':
                     # recreate the resource leave that were removed by writing state to draft
-                    leave.sudo()._create_resource_leave()
+                    leaves_to_recreate |= leave
             except ValidationError:
                 leave.action_refuse()
                 message = _("Due to a change in global time offs, this leave no longer has the required amount of available allocation and has been set to refused. Please review this leave.")
             if message:
                 leave._notify_change(message)
+        leaves_to_recreate.sudo()._create_resource_leave()
 
     def _convert_timezone(self, utc_naive_datetime, tz_from, tz_to):
         """
@@ -156,6 +162,12 @@ class CalendarLeaves(models.Model):
 
         return res
 
+    @api.depends('calendar_id')
+    def _compute_company_id(self):
+        for leave in self:
+            leave.company_id = leave.holiday_id.employee_id.company_id or leave.calendar_id.company_id or self.env.company
+
+
 class ResourceCalendar(models.Model):
     _inherit = "resource.calendar"
 
@@ -163,7 +175,7 @@ class ResourceCalendar(models.Model):
 
     def _compute_associated_leaves_count(self):
         leaves_read_group = self.env['resource.calendar.leaves']._read_group(
-            [('resource_id', '=', False), ('calendar_id', 'in', [False, *self.ids])],
+            [('resource_id', '=', False), ('calendar_id', 'in', self.ids)],
             ['calendar_id'],
             ['__count'],
         )
@@ -171,3 +183,44 @@ class ResourceCalendar(models.Model):
         global_leave_count = result.get('global', 0)
         for calendar in self:
             calendar.associated_leaves_count = result.get(calendar.id, 0) + global_leave_count
+
+
+class ResourceResource(models.Model):
+    _inherit = "resource.resource"
+
+    leave_date_to = fields.Date(related="user_id.leave_date_to")
+
+    def _format_leave(self, leave, resource_hours_per_day, resource_hours_per_week, ranges_to_remove, start_day, end_day, locale):
+        leave_start = leave[0]
+        leave_record = leave[2]
+        holiday_id = leave_record.holiday_id
+        tz = pytz.timezone(self.tz or self.env.user.tz)
+
+        if holiday_id.request_unit_half:
+            # Half day leaves are limited to half a day within a single day
+            leave_day = leave_start.date()
+            half_start_datetime = tz.localize(datetime.combine(leave_day, datetime.min.time() if holiday_id.request_date_from_period == "am" else time(12)))
+            half_end_datetime = tz.localize(datetime.combine(leave_day, time(12) if holiday_id.request_date_from_period == "am" else datetime.max.time()))
+            ranges_to_remove.append((half_start_datetime, half_end_datetime, self.env['resource.calendar.attendance']))
+
+            if not self._is_fully_flexible():
+                # only days inside the original period
+                if leave_day >= start_day and leave_day <= end_day:
+                    resource_hours_per_day[self.id][leave_day] -= holiday_id.number_of_hours
+                week = weeknumber(babel_locale_parse(locale), leave_day)
+                resource_hours_per_week[self.id][week] -= holiday_id.number_of_hours
+        elif holiday_id.request_unit_hours:
+            # Custom leaves are limited to a specific number of hours within a single day
+            leave_day = leave_start.date()
+            range_start_datetime = pytz.utc.localize(leave_record.date_from).replace(tzinfo=None).astimezone(tz)
+            range_end_datetime = pytz.utc.localize(leave_record.date_to).replace(tzinfo=None).astimezone(tz)
+            ranges_to_remove.append((range_start_datetime, range_end_datetime, self.env['resource.calendar.attendance']))
+
+            if not self._is_fully_flexible():
+                # only days inside the original period
+                if leave_day >= start_day and leave_day <= end_day:
+                    resource_hours_per_day[self.id][leave_day] -= holiday_id.number_of_hours
+                week = weeknumber(babel_locale_parse(locale), leave_day)
+                resource_hours_per_week[self.id][week] -= holiday_id.number_of_hours
+        else:
+            super()._format_leave(leave, resource_hours_per_day, resource_hours_per_week, ranges_to_remove, start_day, end_day, locale)

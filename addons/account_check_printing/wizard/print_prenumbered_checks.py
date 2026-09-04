@@ -6,7 +6,7 @@ from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
 
-class PrintPreNumberedChecks(models.TransientModel):
+class PrintPrenumberedChecks(models.TransientModel):
     _name = 'print.prenumbered.checks'
     _description = 'Print Pre-numbered Checks'
 

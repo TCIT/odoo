@@ -1,27 +1,47 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* pos_sale
-# 
+# * pos_sale
+#
 # Translators:
-# Wil Odoo, 2024
-# 
+# Jaroslav Bosansky <jaro.bosansky@ekoenergo.sk>, 2022
+# SAKodoo <sak@odoo.com>, 2022
+# rastislav Brencic <rastislav.brencic99@gmail.com>, 2022
+# Rastislav Brencic <rastislav.brencic@azet.sk>, 2022
+# Jan Prokop, 2022
+# Martin Trigaux, 2022
+# Tomáš Píšek <Tomas.Pisek@seznam.cz>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Slovak (https://app.transifex.com/odoo/teams/41243/sk/)\n"
+"POT-Creation-Date: 2026-04-10 18:38+0000\n"
+"PO-Revision-Date: 2026-08-06 04:33+0000\n"
+"Last-Translator: Tomáš Píšek <Tomas.Pisek@seznam.cz>\n"
+"Language-Team: Slovak <https://translate.odoo.com/projects/odoo-19/pos_sale/"
+"sk/>\n"
+"Language: sk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: sk\n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && "
+"n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);\n"
+"X-Generator: Weblate 2026.6.1\n"
+
+#. module: pos_sale
+#. odoo-python
+#: code:addons/pos_sale/models/sale_order.py:0
+msgid "%(line_description)s (Cancelled)"
+msgstr ""
+
+#. module: pos_sale
+#. odoo-python
+#: code:addons/pos_sale/models/account_move.py:0
+msgid "%(old_name)s (Cancelled)"
+msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/components/orderline/orderline.xml:0
+#: code:addons/pos_sale/static/src/app/components/orderline/orderline.xml:0
 msgid "(tax incl.)"
 msgstr ""
 
@@ -32,7 +52,7 @@ msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "A new order has been created."
 msgstr ""
 
@@ -48,13 +68,13 @@ msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "Apply a down payment (fixed amount)"
 msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "Apply a down payment (percentage)"
 msgstr ""
 
@@ -62,6 +82,16 @@ msgstr ""
 #: model:ir.model,name:pos_sale.model_res_config_settings
 msgid "Config Settings"
 msgstr "Nastavenia konfigurácie"
+
+#. module: pos_sale
+#: model:ir.model,name:pos_sale.model_res_partner
+msgid "Contact"
+msgstr ""
+
+#. module: pos_sale
+#: model:ir.model,website_form_label:pos_sale.model_res_partner
+msgid "Create a Customer"
+msgstr ""
 
 #. module: pos_sale
 #: model:ir.model.fields,field_description:pos_sale.field_pos_order__currency_rate
@@ -79,16 +109,34 @@ msgid "Delivery Quantity"
 msgstr ""
 
 #. module: pos_sale
+#: model:ir.model.fields,field_description:pos_sale.field_account_move__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_account_move_line__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_crm_team__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_pos_config__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_pos_order__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_pos_order_line__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_pos_session__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_product_template__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_res_partner__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_sale_order__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_sale_order_line__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_sale_report__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_stock_picking__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "Do you want to load the SN/Lots linked to the Sales Order?"
 msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "Down Payment"
-msgstr "Zálohová platba"
+msgstr ""
 
 #. module: pos_sale
 #: model:product.template,name:pos_sale.default_downpayment_product_product_template
@@ -109,7 +157,7 @@ msgstr "Produkt pre zálohu"
 
 #. module: pos_sale
 #. odoo-python
-#: code:addons/pos_sale/models/pos_order.py:0
+#: code:addons/pos_sale/models/sale_order.py:0
 msgid ""
 "Down payment (ref: %(order_reference)s on \n"
 " %(date)s)"
@@ -117,14 +165,8 @@ msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "Due balance: %s"
-msgstr ""
-
-#. module: pos_sale
-#. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
-msgid "Error amount too high"
 msgstr ""
 
 #. module: pos_sale
@@ -133,16 +175,44 @@ msgid "From"
 msgstr "Od"
 
 #. module: pos_sale
+#: model:ir.model.fields,field_description:pos_sale.field_account_move__id
+#: model:ir.model.fields,field_description:pos_sale.field_account_move_line__id
+#: model:ir.model.fields,field_description:pos_sale.field_crm_team__id
+#: model:ir.model.fields,field_description:pos_sale.field_pos_config__id
+#: model:ir.model.fields,field_description:pos_sale.field_pos_order__id
+#: model:ir.model.fields,field_description:pos_sale.field_pos_order_line__id
+#: model:ir.model.fields,field_description:pos_sale.field_pos_session__id
+#: model:ir.model.fields,field_description:pos_sale.field_product_template__id
+#: model:ir.model.fields,field_description:pos_sale.field_res_config_settings__id
+#: model:ir.model.fields,field_description:pos_sale.field_res_partner__id
+#: model:ir.model.fields,field_description:pos_sale.field_sale_order__id
+#: model:ir.model.fields,field_description:pos_sale.field_sale_order_line__id
+#: model:ir.model.fields,field_description:pos_sale.field_sale_report__id
+#: model:ir.model.fields,field_description:pos_sale.field_stock_picking__id
+msgid "ID"
+msgstr ""
+
+#. module: pos_sale
 #: model:ir.model.fields.selection,name:pos_sale.selection__sale_report__state__invoiced
 msgid "Invoiced"
 msgstr "Fakturované"
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid ""
 "It seems that you didn't configure a down payment product in your point of "
 "sale. You can go to your point of sale configuration to choose one."
+msgstr ""
+
+#. module: pos_sale
+#: model:ir.model,name:pos_sale.model_account_move
+msgid "Journal Entry"
+msgstr ""
+
+#. module: pos_sale
+#: model:ir.model,name:pos_sale.model_account_move_line
+msgid "Journal Item"
 msgstr ""
 
 #. module: pos_sale
@@ -164,25 +234,14 @@ msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "No down payment product"
 msgstr ""
-
-#. module: pos_sale
-#: model:ir.model.fields,field_description:pos_sale.field_crm_team__pos_sessions_open_count
-msgid "Open POS Sessions"
-msgstr "Otvorte POS relácie"
 
 #. module: pos_sale
 #: model:ir.actions.act_window,name:pos_sale.pos_session_action_from_crm_team
 msgid "Open Sessions"
 msgstr "Otvorené relácie"
-
-#. module: pos_sale
-#. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/components/product_info_popup/product_info_popup.xml:0
-msgid "Optional Products:"
-msgstr ""
 
 #. module: pos_sale
 #: model:ir.model.fields,field_description:pos_sale.field_sale_report__order_reference
@@ -241,25 +300,25 @@ msgid "Posted"
 msgstr "Zaúčtované"
 
 #. module: pos_sale
-#: model:ir.model,name:pos_sale.model_product_product
-msgid "Product Variant"
-msgstr "Varianta produktu"
+#: model:ir.model,name:pos_sale.model_product_template
+msgid "Product"
+msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/components/control_buttons/control_buttons.xml:0
+#: code:addons/pos_sale/static/src/app/components/screens/product_screen/control_buttons/control_buttons.xml:0
 msgid "Quotation/Order"
 msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "SN/Lots Loading"
 msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/components/orderline/orderline.xml:0
+#: code:addons/pos_sale/static/src/app/components/orderline/orderline.xml:0
 msgid "SO"
 msgstr ""
 
@@ -281,7 +340,7 @@ msgstr "Report analýzy predaja"
 #. module: pos_sale
 #: model:ir.model,name:pos_sale.model_sale_order
 msgid "Sales Order"
-msgstr "Objednávka "
+msgstr "Predajná objednávka"
 
 #. module: pos_sale
 #: model:ir.model,name:pos_sale.model_sale_order_line
@@ -308,29 +367,14 @@ msgid "Sales are reported to the following sales team"
 msgstr "Predaje sú hlásené nasledujúcemu obchodnému tímu"
 
 #. module: pos_sale
-#: model_terms:ir.ui.view,arch_db:pos_sale.crm_team_view_kanban_dashboard
-msgid "Session Running"
-msgstr "Spustená relácia"
-
-#. module: pos_sale
-#: model:ir.model.fields,field_description:pos_sale.field_crm_team__pos_order_amount_total
-msgid "Session Sale Amount"
-msgstr "Suma predaja za reláciu"
-
-#. module: pos_sale
-#: model_terms:ir.ui.view,arch_db:pos_sale.crm_team_view_kanban_dashboard
-msgid "Sessions Running"
-msgstr "Spustené relácie"
-
-#. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/components/control_buttons/control_buttons.xml:0
+#: code:addons/pos_sale/static/src/app/components/screens/product_screen/control_buttons/control_buttons.xml:0
 msgid "Set Sale Order"
 msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "Settle the order"
 msgstr ""
 
@@ -372,7 +416,7 @@ msgstr ""
 #. module: pos_sale
 #: model:ir.model,name:pos_sale.model_stock_picking
 msgid "Transfer"
-msgstr "Prevod"
+msgstr ""
 
 #. module: pos_sale
 #: model_terms:ir.ui.view,arch_db:pos_sale.view_pos_order_form_inherit_pos_sale
@@ -385,25 +429,85 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:pos_sale.view_order_form_inherit_pos_sale
 msgid ""
 "Transferred<br/>\n"
-"                                to POS"
+"                            to POS"
 msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
+msgid "Warning for %s"
+msgstr ""
+
+#. module: pos_sale
+#. odoo-javascript
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "What do you want to do?"
 msgstr "Čo chcete spraviť?"
 
 #. module: pos_sale
-#. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
-msgid ""
-"You have tried to charge a down payment of %s but only %s remains to be "
-"paid, %s will be applied to the purchase order line."
+#. odoo-python
+#: code:addons/pos_sale/models/pos_order.py:0
+#: code:addons/pos_sale/models/sale_order.py:0
+msgid "id"
 msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/components/product_info_popup/product_info_popup.xml:0
-msgid "from"
-msgstr "od"
+#: code:addons/pos_sale/static/src/app/components/orderline/orderline.xml:0
+#: model_terms:ir.ui.view,arch_db:pos_sale.report_invoice_document
+msgid "x"
+msgstr ""
+
+#~ msgid "Back"
+#~ msgstr "Späť"
+
+#~ msgid "Cancelled"
+#~ msgstr "Zrušené"
+
+#~ msgid "Customer"
+#~ msgstr "Zákazník"
+
+#~ msgid "Date"
+#~ msgstr "Dátum"
+
+#~ msgid "Locked"
+#~ msgstr "Uzamknuté"
+
+#~ msgid "New"
+#~ msgstr "Nové"
+
+#~ msgid "No"
+#~ msgstr "Nie"
+
+#~ msgid "Open POS Sessions"
+#~ msgstr "Otvorte POS relácie"
+
+#~ msgid "Quotation"
+#~ msgstr "Cenová ponuka"
+
+#~ msgid "Quotation Sent"
+#~ msgstr "Cenová ponuka poslaná"
+
+#~ msgid "Salesman"
+#~ msgstr "Obchodník"
+
+#~ msgid "Salesperson"
+#~ msgstr "Obchodník"
+
+#~ msgid "Session Running"
+#~ msgstr "Spustená relácia"
+
+#~ msgid "Session Sale Amount"
+#~ msgstr "Suma predaja za reláciu"
+
+#~ msgid "Sessions Running"
+#~ msgstr "Spustené relácie"
+
+#~ msgid "State"
+#~ msgstr "Štát"
+
+#~ msgid "Total"
+#~ msgstr "Celkom"
+
+#~ msgid "Yes"
+#~ msgstr "Áno"

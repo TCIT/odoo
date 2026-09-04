@@ -28,10 +28,9 @@ export function usePositionHook(containerRef, document, callback) {
                 if (document.defaultView !== window) {
                     addDomListener(document.defaultView, "resize");
                 }
+                addDomListener(document, "scroll");
                 const scrollableElements = [containerRef.el, ...ancestors(containerRef.el)].filter(
-                    (node) => {
-                        return couldBeScrollableX(node) || couldBeScrollableY(node);
-                    }
+                    (node) => couldBeScrollableX(node) || couldBeScrollableY(node)
                 );
                 for (const scrollableElement of scrollableElements) {
                     addDomListener(scrollableElement, "scroll");

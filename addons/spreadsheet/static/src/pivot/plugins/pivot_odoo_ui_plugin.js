@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { OdooUIPlugin } from "@spreadsheet/plugins";
 import { helpers } from "@odoo/o-spreadsheet";
 
@@ -15,6 +13,7 @@ export class PivotOdooUIPlugin extends OdooUIPlugin {
      */
     handle(cmd) {
         switch (cmd.type) {
+            case "UPDATE_LOCALE":
             case "REFRESH_ALL_DATA_SOURCES":
                 this.refreshAllPivots();
                 break;

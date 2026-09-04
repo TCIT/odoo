@@ -44,13 +44,14 @@
                 ]"/>
                 <field string="Field" name="tracking_value_ids" filter_domain="[('tracking_value_ids.field_id', 'ilike', self)]"/>
                 <separator/>
-                <filter string="Update Only" name="update_only" domain="[('tracking_value_ids', '!=', False)]" groups="base.group_system"/>
-                <filter string="Create Only" name="create_only" domain="[('tracking_value_ids', '=', False)]" groups="base.group_system"/>
+                <filter string="Update" name="update_only" domain="[('tracking_value_ids', '!=', False)]" groups="base.group_system"/>
+                <filter string="Create" name="create_only" domain="[('tracking_value_ids', '=', False)]" groups="base.group_system"/>
+                <filter string="Restricted" name="restricted_by_audit_trail" domain="[('account_audit_log_restricted', '=', True)]"/>
                 <separator/>
                 <filter name="date" string="Date" date="date"/>
-                <group expand="0" string="Group By">
+                <group>
                     <filter string="Date" name="group_by_date" domain="[]" context="{'group_by': 'date'}"/>
-                    <filter string="Record" name="group_by_res_id" domain="[]" context="{'group_by': 'res_id'}"/>
+                    <filter string="Updated Data" name="group_by_res_id" domain="[]" context="{'group_by': 'res_id'}"/>
                 </group>
             </search>
         </field>
@@ -63,15 +64,13 @@
         <field name="view_mode">list</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">This is the Audit Trail Report</p>
-            <div>Make sure you first activate the audit trail in the accounting settings</div>
-            <a class="btn-link" type="action" name="%(action_account_config)d">Go to the accounting settings</a>
         </field>
         <field name="domain">[
             ('message_type', '=', 'notification'),
-            ('account_audit_log_activated', '=', True),
+            ('model', 'in', ('account.move', 'account.account', 'account.tax', 'res.partner', 'res.company')),
         ]</field>
         <field name="search_view_id" ref="view_message_tree_audit_log_search"/>
     </record>
 
-    <menuitem id="account_audit_trail_menu" name="Audit Trail" action="action_account_audit_trail_report" parent="account.account_reports_management_menu"/>
+    <menuitem id="account_audit_trail_menu" name="Audit Trail" action="action_account_audit_trail_report" parent="account.account_logs_menu"/>
 </odoo>

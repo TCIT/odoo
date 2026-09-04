@@ -9,7 +9,6 @@
     'data': [
         # Record data.
         'data/ir_actions_server_data.xml',
-        'data/onboarding_data.xml',
         'data/payment_method_data.xml',
         'data/payment_provider_data.xml',
         'data/payment_cron.xml',
@@ -33,11 +32,9 @@
         # Wizard views.
         'wizards/payment_capture_wizard_views.xml',
         'wizards/payment_link_wizard_views.xml',
-        'wizards/payment_onboarding_views.xml',
     ],
     'assets': {
         'web.assets_frontend': [
-            'payment/static/lib/jquery.payment/jquery.payment.js',
             'payment/static/src/**/*',
             ('remove', 'payment/static/src/js/payment_wizard_copy_clipboard_field.js'),
         ],
@@ -45,9 +42,14 @@
             'payment/static/src/scss/payment_provider.scss',
             'payment/static/src/js/payment_wizard_copy_clipboard_field.js',
         ],
-        'web.qunit_suite_tests': [
-            'payment/static/tests/payment_wizard_copy_clipboard_field_tests.js',
+        'web.assets_unit_tests_setup': [
+            'payment/static/src/interactions/payment_button.js',
+            'payment/static/src/interactions/payment_form.js',
+        ],
+        'web.assets_unit_tests': [
+            'payment/static/tests/**/*.test.js',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

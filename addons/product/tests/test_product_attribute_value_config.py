@@ -27,6 +27,8 @@ class TestProductAttributeValueCommon(BaseCommon):
             cls.ram_attribute,
             cls.hdd_attribute,
             cls.size_attribute,
+            cls.extras_attribute,
+            cls.operating_system_attribute,
         ) = cls.env['product.attribute'].create([{
             'name': 'Memory',
             'sequence': 1,
@@ -91,12 +93,44 @@ class TestProductAttributeValueCommon(BaseCommon):
                     'sequence': 3,
                 }),
             ],
+        }, {
+            'name': "Extras",
+            'sequence': 5,
+            'display_type': 'multi',
+            'create_variant': 'no_variant',
+            'value_ids': [
+                Command.create({
+                    'name': "CPU overclock",
+                    'sequence': 1,
+                }),
+                Command.create({
+                    'name': "RAM overclock",
+                    'sequence': 2,
+                }),
+            ],
+        }, {
+            'name': "Operating System",
+            'sequence': 6,
+            'display_type': 'multi',
+            'create_variant': 'no_variant',
+            'value_ids': [
+                Command.create({
+                    'name': "Linux",
+                    'sequence': 1,
+                }),
+                Command.create({
+                    'name': "Windows",
+                    'sequence': 2,
+                }),
+            ],
         }])
 
         cls.ssd_256, cls.ssd_512 = cls.ssd_attribute.value_ids
         cls.ram_8, cls.ram_16, cls.ram_32 = cls.ram_attribute.value_ids
         cls.hdd_1, cls.hdd_2, cls.hdd_4 = cls.hdd_attribute.value_ids
         cls.size_m, cls.size_l, cls.size_xl = cls.size_attribute.value_ids
+        cls.extra_cpu, cls.extra_ram = cls.extras_attribute.value_ids
+        cls.linux_operating_system, cls.windows_operating_system = cls.operating_system_attribute.value_ids
 
         cls.COMPUTER_SSD_PTAL_VALUES = {
             'product_tmpl_id': cls.computer.id,
@@ -112,6 +146,16 @@ class TestProductAttributeValueCommon(BaseCommon):
             'product_tmpl_id': cls.computer.id,
             'attribute_id': cls.hdd_attribute.id,
             'value_ids': [Command.set([cls.hdd_1.id, cls.hdd_2.id, cls.hdd_4.id])],
+        }
+        cls.COMPUTER_EXTRAS_PTAL_VALUES = {
+            'product_tmpl_id': cls.computer.id,
+            'attribute_id': cls.extras_attribute.id,
+            'value_ids': [Command.set([cls.extra_cpu.id, cls.extra_ram.id])],
+        }
+        cls.COMPUTER_OPERATING_SYSTEM_VALUES = {
+            'product_tmpl_id': cls.computer.id,
+            'attribute_id': cls.operating_system_attribute.id,
+            'value_ids': [Command.set([cls.windows_operating_system.id, cls.linux_operating_system.id])],
         }
 
         cls._add_computer_attribute_lines()
@@ -133,10 +177,14 @@ class TestProductAttributeValueCommon(BaseCommon):
             cls.computer_ssd_attribute_lines,
             cls.computer_ram_attribute_lines,
             cls.computer_hdd_attribute_lines,
+            cls.computer_extras_attribute_lines,
+            cls.computer_operating_system_lines,
         ) = cls.env['product.template.attribute.line'].create([
             cls.COMPUTER_SSD_PTAL_VALUES,
             cls.COMPUTER_RAM_PTAL_VALUES,
             cls.COMPUTER_HDD_PTAL_VALUES,
+            cls.COMPUTER_EXTRAS_PTAL_VALUES,
+            cls.COMPUTER_OPERATING_SYSTEM_VALUES,
         ])
 
         # Setup extra prices
@@ -442,7 +490,7 @@ class TestProductAttributeValueConfig(TestProductAttributeValueCommon):
         self.assertEqual(self.computer._get_first_possible_combination(), computer_ssd_512 + computer_ram_32 + computer_hdd_4)
 
         # Not possible to add an exclusion when only one variant is left -> it deletes the product template associated to it
-        with self.assertRaises(UserError), self.cr.savepoint():
+        with self.assertRaises(UserError):
             self._add_exclude(computer_ram_32, computer_hdd_4)
 
         # If an exclusion rule deletes all variants at once it does not delete the template.

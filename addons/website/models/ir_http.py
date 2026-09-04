@@ -3,23 +3,19 @@ import contextlib
 import functools
 import logging
 from lxml import etree
-import os
 import unittest
 
 import pytz
 import werkzeug
-import werkzeug.routing
-import werkzeug.utils
 
 import odoo
 from odoo import api, models, tools
 from odoo import SUPERUSER_ID
 from odoo.exceptions import AccessError
+from odoo.fields import Domain
 from odoo.http import request
 from odoo.tools.json import scriptsafe as json_scriptsafe
 from odoo.tools.safe_eval import safe_eval
-from odoo.osv.expression import FALSE_DOMAIN
-from odoo.addons.base.models.ir_http import EXTENSION_TO_WEB_MIMETYPES
 from odoo.addons.http_routing.models import ir_http
 from odoo.addons.portal.controllers.portal import _build_url_w_params
 
@@ -28,17 +24,16 @@ logger = logging.getLogger(__name__)
 
 def sitemap_qs2dom(qs, route, field='name'):
     """ Convert a query_string (can contains a path) to a domain"""
-    dom = []
     if qs and qs.lower() not in route:
         needles = qs.strip('/').split('/')
         # needles will be altered and keep only element which one is not in route
         # diff(from=['shop', 'product'], to=['shop', 'product', 'product']) => to=['product']
         unittest.util.unorderable_list_difference(route.strip('/').split('/'), needles)
         if len(needles) == 1:
-            dom = [(field, 'ilike', needles[0])]
+            return Domain(field, 'ilike', needles[0])
         else:
-            dom = list(FALSE_DOMAIN)
-    return dom
+            return Domain.FALSE
+    return Domain.TRUE
 
 
 def get_request_website():
@@ -58,7 +53,7 @@ def get_request_website():
     return request and getattr(request, 'website', False) or False
 
 
-class Http(models.AbstractModel):
+class IrHttp(models.AbstractModel):
     _inherit = 'ir.http'
 
     def routing_map(self, key=None):
@@ -92,7 +87,11 @@ class Http(models.AbstractModel):
             :param lang_code: Must be the lang `code`. It could also be something
                               else, such as `'[lang]'` (used for url_return).
         '''
-        path, _, qs = (url_from or '').partition('?')
+        path, sep, qs = (url_from or '').partition('?')
+
+        if not qs:
+            path, sep, qs = (url_from or '').partition('#')
+
         if (
             path
             # don't try to match route if we know that no rewrite has been loaded.
@@ -105,7 +104,7 @@ class Http(models.AbstractModel):
             )
         ):
             url_from, _ = request.env['ir.http'].url_rewrite(path)
-            url_from = url_from if not qs else url_from + '?%s' % qs
+            url_from = url_from if not qs else f"{url_from}{sep}{qs}"
 
         return super()._url_for(url_from, lang_code)
 
@@ -177,7 +176,7 @@ class Http(models.AbstractModel):
             if website:
                 request.update_env(user=website._get_cached('user_id'))
 
-        if not request.uid:
+        if not request.env.uid:
             super()._auth_method_public()
 
     @classmethod
@@ -188,14 +187,15 @@ class Http(models.AbstractModel):
             return False
         template = False
         if hasattr(response, '_cached_page'):
-            website_page, template = response._cached_page, response._cached_template
+            website_page, template = response._cached_page, response._cached_view_id
         elif hasattr(response, 'qcontext'):  # classic response
             main_object = response.qcontext.get('main_object')
             website_page = getattr(main_object, '_name', False) == 'website.page' and main_object
             template = response.qcontext.get('response_template')
+            if isinstance(template, str) and '.' not in template:
+                template = 'website.%s' % template
 
-        view = template and request.env['website'].get_template(template)
-        if not request.env.cr.readonly and view and view.track:
+        if template and not request.env.cr.readonly and request.env['ir.ui.view']._get_cached_template_info(template)['track']:
             request.env['website.visitor']._handle_webpage_dispatch(website_page)
 
         return False
@@ -225,8 +225,8 @@ class Http(models.AbstractModel):
                     raise werkzeug.exceptions.Forbidden()
 
     @classmethod
-    def _get_web_editor_context(cls):
-        ctx = super()._get_web_editor_context()
+    def _get_editor_context(cls):
+        ctx = super()._get_editor_context()
         if request.is_frontend_multilang and request.lang == cls._get_default_lang():
             ctx['edit_translations'] = False
         return ctx
@@ -235,7 +235,7 @@ class Http(models.AbstractModel):
     def _frontend_pre_dispatch(cls):
         super()._frontend_pre_dispatch()
 
-        if not request.context.get('tz'):
+        if not request.env.context.get('tz'):
             with contextlib.suppress(pytz.UnknownTimeZoneError):
                 request.update_context(tz=pytz.timezone(request.geoip.location.time_zone).zone)
 
@@ -259,10 +259,10 @@ class Http(models.AbstractModel):
         request.update_context(
             allowed_company_ids=allowed_company_ids,
             website_id=website.id,
-            **cls._get_web_editor_context(),
+            **cls._get_editor_context(),
         )
 
-        request.website = website.with_context(request.context)
+        request.website = website.with_context(request.env.context)
 
     @classmethod
     def _post_dispatch(cls, response):
@@ -279,7 +279,7 @@ class Http(models.AbstractModel):
         website_id = False
         if getattr(request, 'is_frontend', True):
             website_id = self.env.get('website_id', request.website_routing)
-        return super(Http, self.with_context(website_id=website_id)).get_nearest_lang(lang_code)
+        return super(IrHttp, self.with_context(website_id=website_id)).get_nearest_lang(lang_code)
 
     @classmethod
     def _get_default_lang(cls):
@@ -291,29 +291,22 @@ class Http(models.AbstractModel):
     @classmethod
     def _get_translation_frontend_modules_name(cls):
         mods = super()._get_translation_frontend_modules_name()
-        installed = request.registry._init_modules.union(odoo.conf.server_wide_modules)
-        return mods + [mod for mod in installed if mod.startswith('website')]
+        installed = request.registry._init_modules.union(odoo.tools.config['server_wide_modules'])
+        return mods + [mod for mod in installed if 'website' in mod]
 
     @classmethod
     def _serve_page(cls):
         req_page = request.httprequest.path
+        WebsitePage = request.env['website.page'].sudo()
+        page_info = WebsitePage._get_page_info(request)
 
-        def _search_page(comparator='='):
-            page_domain = [('url', comparator, req_page)] + request.website.website_domain()
-            return request.env['website.page'].sudo().search(page_domain, order='website_id asc', limit=1)
-
-        # specific page first
-        page = _search_page()
-
-        # case insensitive search
-        if not page:
-            page = _search_page('=ilike')
-            if page:
-                logger.info("Page %r not found, redirecting to existing page %r", req_page, page.url)
-                return request.redirect(page.url)
+        # redirect to the right url
+        if page_info and page_info['url'] != req_page:
+            logger.info("Page %r not found, redirecting to existing page %r", req_page, page_info['url'])
+            return request.redirect(page_info['url'])
 
         # redirect without trailing /
-        if not page and req_page != "/" and req_page.endswith("/"):
+        if not page_info and req_page != "/" and req_page.endswith("/"):
             # mimick `_postprocess_args()` redirect
             path = request.httprequest.path[:-1]
             if request.lang != cls._get_default_lang():
@@ -322,34 +315,22 @@ class Http(models.AbstractModel):
                 path += '?' + request.httprequest.query_string.decode('utf-8')
             return request.redirect(path, code=301)
 
-        if (
-            page
-            and (request.env.user.has_group('website.group_website_designer') or page.is_visible)
-            and (
-                # If a generic page (niche case) has been COWed and that COWed
-                # page received a URL change, it should not let you access the
-                # generic page anymore, despite having a different URL.
-                page.website_id
-                or not page.view_id._get_specific_views().filtered(lambda view: view.website_id == request.website)
-            )
-        ):
-            _, ext = os.path.splitext(req_page)
-            response = request.render(page.view_id.id, {
-                'main_object': page,
-            }, mimetype=EXTENSION_TO_WEB_MIMETYPES.get(ext, 'text/html'))
-            return response
+        if page_info:
+            return WebsitePage.browse(page_info['id'])._get_response(request)
+
         return False
 
     @classmethod
     def _serve_redirect(cls):
         req_page = request.httprequest.path
+        req_page_noslug = ir_http._UNSLUG_RE.sub(r'\2', req_page)
         req_page_with_qs = request.httprequest.environ['REQUEST_URI']
-        domain = [
-            ('redirect_type', 'in', ('301', '302')),
+        domain = (
+            Domain('redirect_type', 'in', ('301', '302'))
             # trailing / could have been removed by server_page
-            ('url_from', 'in', [req_page_with_qs, req_page.rstrip('/'), req_page + '/'])
-        ]
-        domain += request.website.website_domain()
+            & Domain('url_from', 'in', [req_page_with_qs, req_page.rstrip('/'), req_page + '/', req_page_noslug])
+            & request.website.website_domain()
+        )
         return request.env['website.rewrite'].sudo().search(domain, order='url_from DESC', limit=1)
 
     @classmethod
@@ -360,8 +341,6 @@ class Http(models.AbstractModel):
             return parent
 
         # minimal setup to serve frontend pages
-        if not request.uid:
-            cls._auth_method_public()
         cls._frontend_pre_dispatch()
         cls._handle_debug()
 
@@ -372,10 +351,15 @@ class Http(models.AbstractModel):
 
         redirect = cls._serve_redirect()
         if redirect:
+            redirect_to = redirect.url_to
+            if redirect_to.startswith('/') and ir_http._UNSLUG_RE.search(redirect_to):
+                # rewrite the url to add or fix the slug
+                redirect_to = request.env['ir.http']._url_localized(redirect_to, request.lang.code)
             return request.redirect(
-                _build_url_w_params(redirect.url_to, request.params),
+                _build_url_w_params(redirect_to, request.params),
                 code=redirect.redirect_type,
-                local=False)  # safe because only designers can specify redirects
+                local=False,  # safe because only designers can specify redirects
+            )
 
     @classmethod
     def _get_exception_code_values(cls, exception):
@@ -391,31 +375,28 @@ class Http(models.AbstractModel):
 
     @classmethod
     def _get_values_500_error(cls, env, values, exception):
-        View = env["ir.ui.view"]
         values = super()._get_values_500_error(env, values, exception)
-        if 'qweb_exception' in values:
-            try:
-                # exception.name might be int, string
-                exception_template = int(exception.name)
-            except ValueError:
-                exception_template = exception.name
-            view = View._view_obj(exception_template)
-            if exception.html and exception.html in view.arch:
+        if hasattr(exception, 'qweb'):
+            qweb_error = exception.qweb
+            exception_template = qweb_error.ref
+            View = env["ir.ui.view"].sudo()
+            view = exception_template and View._get_template_view(exception_template)
+            if not view or qweb_error.element and qweb_error.element in view.arch:
                 values['view'] = view
             else:
                 # There might be 2 cases where the exception code can't be found
                 # in the view, either the error is in a child view or the code
                 # contains branding (<div t-att-data="request.browse('ok')"/>).
                 et = view.with_context(inherit_branding=False)._get_combined_arch()
-                node = et.xpath(exception.path) if exception.path else et
+                node = et.xpath(qweb_error.path) if qweb_error.path else et
                 line = node is not None and len(node) > 0 and etree.tostring(node[0], encoding='unicode')
                 if line:
-                    values['view'] = View._views_get(exception_template).filtered(
+                    values['view'] = View._views_get(view.id).filtered(
                         lambda v: line in v.arch
                     )
                     values['view'] = values['view'] and values['view'][0]
         # Needed to show reset template on translated pages (`_prepare_environment` will set it for main lang)
-        values['editable'] = request.uid and request.env.user.has_group('website.group_website_designer')
+        values['editable'] = request.env.uid and request.env.user.has_group('website.group_website_designer')
         return values
 
     @classmethod
@@ -426,7 +407,7 @@ class Http(models.AbstractModel):
 
     @api.model
     def get_frontend_session_info(self):
-        session_info = super(Http, self).get_frontend_session_info()
+        session_info = super().get_frontend_session_info()
         geoip_country_code = request.geoip.country_code
         geoip_phone_code = request.env['res.country']._phone_code_for(geoip_country_code) if geoip_country_code else None
         session_info.update({

@@ -119,7 +119,6 @@ test(`save when page changed`, async () => {
                 </group>
             </form>
         `,
-        search: `<search/>`,
     };
 
     onRpc("web_save", ({ args }) => {
@@ -171,7 +170,6 @@ test(`save when breadcrumb clicked`, async () => {
                 </group>
             </form>
         `,
-        search: `<search/>`,
     };
 
     onRpc("web_save", ({ args }) => {
@@ -221,7 +219,6 @@ test(`error on save when breadcrumb clicked`, async () => {
                 </group>
             </form>
         `,
-        search: `<search/>`,
     };
 
     onRpc("web_save", () => {
@@ -236,7 +233,7 @@ test(`error on save when breadcrumb clicked`, async () => {
     await contains(`.breadcrumb-item.o_back_button`).click();
     expect.verifySteps(["web_save"]);
     await animationFrame();
-    expect(`.o_error_dialog`).toHaveCount(1);
+    expect(`.o_form_error_dialog`).toHaveCount(1);
 });
 
 test.tags("desktop");
@@ -268,7 +265,6 @@ test(`save when action changed`, async () => {
                 </group>
             </form>
         `,
-        search: `<search/>`,
         kanban: `
             <kanban>
                 <templates>
@@ -492,7 +488,6 @@ test(`save on closing tab/browser (detached form)`, async () => {
                 </group>
             </form>
         `,
-        search: `<search/>`,
     };
 
     mockSendBeacon(() => expect.step("sendBeacon"));
@@ -814,7 +809,7 @@ test("error on save when action button clicked", async () => {
     await contains(`.o-dropdown--menu .dropdown-item`).click();
     expect.verifySteps(["save"]);
     await animationFrame();
-    expect(`.o_error_dialog`).toHaveCount(1);
+    expect(`.o_form_error_dialog`).toHaveCount(1);
 });
 
 test.tags("desktop");
@@ -852,7 +847,7 @@ test("error on save when create button clicked", async () => {
     await contains(`.o_form_button_create`).click();
     expect.verifySteps(["save"]);
     await animationFrame();
-    expect(`.o_error_dialog`).toHaveCount(1);
+    expect(`.o_form_error_dialog`).toHaveCount(1);
 });
 
 test("doesn't autosave when in dialog (visibility change)", async () => {
@@ -911,7 +906,6 @@ test(`doesn't autosave when a many2one search more is open (visibility change)`,
                     <field name="name"/>
                 </list>
             `,
-        search: `<search/>`,
     };
 
     defineModels([Product]);
@@ -1029,4 +1023,46 @@ test(`doesn't autosave when a x2many is in openned (visibility change) 2`, async
     await animationFrame();
     expect(`.o_form_status_indicator_buttons:not(.invisible)`).toHaveCount(0);
     expect.verifySteps(["web_save"]);
+});
+
+test(`urgent save without changes preserves subsequent save commands`, async () => {
+    // Urgent save can be triggered by attachment downloads, not only when closing the browser tab.
+    // When triggered before any changes are done, it should not impact subsequent saves.
+    Partner._fields.child_ids = fields.One2many({
+        string: "one2many field",
+        relation: "partner",
+        default: [
+            [4, 1],
+            [4, 2],
+        ],
+    });
+    const commands = [
+        [
+            [4, 1],
+            [4, 2],
+        ],
+        [[3, 1]],
+    ];
+    onRpc("web_save", ({ args }) => {
+        expect(args[1].child_ids).toEqual(commands.shift());
+        expect.step("web_save");
+    });
+    await mountViewInDialog({
+        resModel: "partner",
+        type: "form",
+        arch: `
+            <form>
+                <field name="expertise"/>
+                <field name="child_ids" widget="many2many_tags"/>
+            </form>
+        `,
+    });
+    expect(`span.o_tag`).toHaveCount(2);
+    await unload();
+    await animationFrame();
+    await contains(`.oi-close`).click();
+    expect(`span.o_tag`).toHaveCount(1);
+    await contains(`.o_form_button_save`).click();
+    expect(`span.o_tag`).toHaveCount(1);
+    expect.verifySteps(["web_save", "web_save"]);
 });

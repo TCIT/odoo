@@ -17,23 +17,21 @@
                     <button class="btn-secondary" string="Approve Extra Hours" name="action_approve_overtime" type="object"/>
                     <button class="btn-secondary" string="Refuse Extra Hours" name="action_refuse_overtime" type="object"/>
                 </header>
-                <field name="employee_id" widget="many2one_avatar_user"/>
+                <field name="employee_id" widget="many2one_avatar_employee"/>
                 <field name="check_in"/>
                 <field name="check_out" options="{}"/>
                 <field name="worked_hours" string="Worked Hours" widget="float_time"/>
-                <field name="overtime_hours" string="Worked Extra Hours" optional="show" widget="float_time"/>
-                <field name="validated_overtime_hours" string="Extra Hours" optional="show" widget="float_time"/>
+                <field name="overtime_hours" optional="show" widget="float_time"/>
+                <field name="validated_overtime_hours" optional="show" widget="float_time"/>
                 <field name="overtime_status" optional="hidden" widget="badge" decoration-warning="overtime_status == 'to_approve'" decoration-success="overtime_status == 'approved'" decoration-danger="overtime_status == 'refused'"/>
                 <field name="in_mode" string="Input Mode (In)" optional="hidden"/>
                 <field name="out_mode" string="Input Mode (Out)" optional="hidden"/>
                 <field name="in_latitude" string="Latitude (In)" optional="hidden"/>
                 <field name="in_longitude" string="Longitude (In)" optional="hidden"/>
+                <field name="in_location" string="Location (In)" optional="hidden"/>
                 <field name="out_latitude" string="Latitude (Out)" optional="hidden"/>
                 <field name="out_longitude" string="Longitude (Out)" optional="hidden"/>
-                <field name="in_city" string="City (In)" optional="hidden"/>
-                <field name="out_city" string="City (Out)" optional="hidden"/>
-                <field name="in_country_name" string="Country (In)" optional="hidden"/>
-                <field name="out_country_name" string="Country (Out)" optional="hidden"/>
+                <field name="out_location" string="Location (Out)" optional="hidden"/>
                 <field name="create_uid" optional="hidden"/>
                 <field name="write_uid" optional="hidden"/>
                 <field name="write_date" optional="hidden"/>
@@ -51,7 +49,7 @@
                 <field name="check_out"/>
                 <templates>
                     <t t-name="card">
-                        <field name="employee_id" widget="many2one_avatar_user" options="{'display_avatar_name': True}" class="fs-5 fw-bold mb-2"/>
+                        <field name="employee_id" widget="many2one_avatar_employee" options="{'display_avatar_name': True}" class="fs-5 fw-bold mb-2"/>
                         <hr class="mt4 mb8"/>
                         <div>
                             <i class="fa fa-calendar me-1" aria-label="Period" role="img" title="Period"></i>
@@ -69,30 +67,72 @@
         <field name="arch" type="xml">
             <form string="Employee attendances" duplicate="false">
                 <header>
-                    <field name="overtime_status" widget="statusbar" readonly="0" options="{'clickable': '1'}"/>
+                    <field
+                        name="overtime_status"
+                        widget="statusbar"
+                        readonly="1"
+                        options="{'clickable': '1'}"
+                        invisible="not overtime_status"/>
                 </header>
                 <sheet>
                     <group>
                         <group colspan="2">
-                            <group col="1">
-                                <field name="employee_id" widget="many2one_avatar_user"/>
-                                <field name="check_in" options="{'rounding': 0}"/>
-                                <field name="check_out" options="{'rounding': 0}" placeholder="Currently Working"/>
+                            <group col="1" name="group_employee">
+                                <field
+                                    id="employee_no_officer"
+                                    name="employee_id"
+                                    widget="many2one_avatar_employee"
+                                    readonly="1"
+                                    groups="!hr_attendance.group_hr_attendance_officer"/>
+                                <field
+                                    id="employee_no_manager"
+                                    name="employee_id"
+                                    widget="many2one_avatar_employee"
+                                    domain="[
+                                        ('attendance_manager_id', '=', uid),
+                                        ('company_id', 'in', allowed_company_ids),
+                                    ]"
+                                    groups="hr_attendance.group_hr_attendance_officer,!hr_attendance.group_hr_attendance_user"/>
+                                <field
+                                    id="employee_manager"
+                                    name="employee_id"
+                                    widget="many2one_avatar_employee"
+                                    domain="[
+                                        ('company_id', 'in', allowed_company_ids),
+                                    ]"
+                                    groups="hr_attendance.group_hr_attendance_user"/>
+                                <field name="check_in" options="{'rounding': 0}" readonly="not is_manager"/>
+                                <field name="check_out" options="{'rounding': 0}" placeholder="Currently Working" readonly="not is_manager"/>
                             </group>
                             <group col="2">
                                 <field name="worked_hours" string="Worked Time" widget="float_time"/>
-                                <field name="overtime_hours" widget="float_time" string="Worked Extra Hours" invisible="overtime_hours == validated_overtime_hours"/>
+                                <field name="overtime_hours" widget="float_time" invisible="overtime_hours == validated_overtime_hours"/>
                                 <label for="validated_overtime_hours"/>
-                                <div class="o_row">
-                                <field
-                                    name="validated_overtime_hours"
-                                    class="o_hr_narrow_field-4"
-                                    widget="float_time"
-                                    string="Extra Hours"
-                                    readonly="overtime_status == 'refused'"
-                                    />
-                                    <button class="oe_stat_button" string="Approve" invisible="overtime_status not in ['to_approve', 'refused']" name="action_approve_overtime" icon="fa-check" type="object"/>
-                                    <button class="oe_stat_button" string="Refuse" invisible="overtime_status not in ['to_approve', 'approved']" name="action_refuse_overtime" icon="fa-times" type="object"/>
+                                <div>
+                                    <field
+                                        name="validated_overtime_hours"
+                                        style="width:5ch"
+                                        widget="float_time"
+                                        readonly="1"/>
+                                    <!-- TODO algin icons baseline with text -->
+                                    <button
+                                        class="oe_stat_button flex-shrink-0"
+                                        string=" "
+                                        help="Approve all overtimes for the same employee and date"
+                                        invisible="not is_manager or overtime_status not in ['to_approve', 'refused'] or not overtime_status"
+                                        name="action_approve_overtime"
+                                        icon="fa-check"
+                                        type="object"
+                                        groups="hr_attendance.group_hr_attendance_officer"/>
+                                    <button
+                                        class="oe_stat_button flex-shrink-0"
+                                        string=" "
+                                        help="Refuse all overtimes for the same employee and date"
+                                        invisible="not is_manager or overtime_status not in ['to_approve', 'approved'] or not overtime_status"
+                                        name="action_refuse_overtime"
+                                        icon="fa-times"
+                                        type="object"
+                                        groups="hr_attendance.group_hr_attendance_officer"/>
                                 </div>
                             </group>
                         </group>
@@ -101,21 +141,12 @@
                             <group>
                                 <group>
                                     <field name="in_mode"/>
-                                    <field name="in_ip_address" invisible="in_mode == 'manual'"/>
-                                    <field name="in_browser" invisible="in_mode == 'manual'"/>
+                                    <field name="in_ip_address" invisible="in_mode == 'manual' or not device_tracking_enabled"/>
+                                    <field name="in_browser" invisible="in_mode == 'manual' or not device_tracking_enabled"/>
                                 </group>
                             </group>
-                            <group invisible="in_mode == 'manual'">
-                                <label for="in_country_name" string="Localisation"/>
-                                <div class="o_row" name="in_location_info">
-                                    <span>
-                                        <field name="in_country_name"/>
-                                    </span>
-                                    <span>
-                                        <field name="in_city" invisible="in_city == 'Unknown'" nolabel="1"/>
-                                    </span>
-                                </div>
-
+                            <group invisible="in_mode == 'manual' or not device_tracking_enabled">
+                                <field name="in_location"/>
                                 <label for="in_latitude" string="GPS Coordinates"/>
                                 <div>
                                     <div class="o_row">
@@ -141,21 +172,12 @@
                             <group>
                                 <group>
                                     <field name="out_mode" string="Mode"/>
-                                    <field name="out_ip_address" string="IP Address" invisible="in_mode == 'manual'"/>
-                                    <field name="out_browser" string="Browser" invisible="in_mode == 'manual'"/>
+                                    <field name="out_ip_address" string="IP Address" invisible="in_mode == 'manual' or not device_tracking_enabled"/>
+                                    <field name="out_browser" string="Browser" invisible="in_mode == 'manual' or not device_tracking_enabled"/>
                                 </group>
                             </group>
-                            <group invisible="out_mode == 'manual'">
-                                <label for="out_country_name" string="Localisation"/>
-                                <div class="o_row" name="out_location_info" >
-                                    <span>
-                                        <field name="out_country_name"/>
-                                    </span>
-                                    <span>
-                                        <field name="out_city" invisible="out_city == 'Unknown'" nolabel="1"/>
-                                    </span>
-                                </div>
-
+                            <group invisible="out_mode == 'manual' or not device_tracking_enabled">
+                                <field name="out_location"/>
                                 <label for="out_latitude" string="GPS Coordinates"/>
                                 <div>
                                     <div class="o_row">
@@ -177,6 +199,35 @@
                             </group>
                         </group>
                     </group>
+                    <notebook invisible="not overtime_status">
+                        <page string="Overtime Details">
+                            <field name="linked_overtime_ids" readonly="1">
+                                <list editable="bottom">
+                                    <field name="rule_ids" widget="many2many_tags" readonly="1"/>
+                                    <field name="duration" widget="float_time" readonly="1"/>
+                                    <field name="manual_duration" widget="float_time" readonly="0" column_invisible="1"/>
+                                    <field name="amount_rate" widget="percentage"/>
+                                    <field name="status" widget="badge" readonly="1" decoration-warning="status == 'to_approve'" decoration-success="status == 'approved'" decoration-danger="status == 'refused'"/>
+                                    <button
+                                        class="oe_stat_button"
+                                        string="Approve"
+                                        invisible="not is_manager or status not in ['to_approve', 'refused']"
+                                        name="action_approve"
+                                        icon="fa-check"
+                                        type="object"
+                                        groups="hr_attendance.group_hr_attendance_officer"/>
+                                    <button
+                                        class="oe_stat_button"
+                                        string="Refuse"
+                                        invisible="not is_manager or status not in ['to_approve', 'approved']"
+                                        name="action_refuse"
+                                        icon="fa-times"
+                                        type="object"
+                                        groups="hr_attendance.group_hr_attendance_officer"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
                 <chatter/>
             </form>
@@ -205,8 +256,8 @@
                 <field name="check_in" type="col" interval="month"/>
                 <field name="worked_hours" type="measure" widget="float_time"/>
                 <field name="expected_hours" type="measure" widget="float_time"/>
-                <field name="overtime_hours" string="Difference" type="measure" widget="float_time"/>
-                <field name="validated_overtime_hours" string="Balance" type="measure" widget="float_time"/>
+                <field name="overtime_hours" type="measure" widget="float_time"/>
+                <field name="validated_overtime_hours" type="measure" widget="float_time"/>
             </pivot>
         </field>
     </record>
@@ -224,7 +275,7 @@
                 <separator/>
                 <filter string="At Work" name="nocheckout" domain="[('check_out', '=', False)]" />
                 <filter string="Errors" name="errors"
-                        domain="['|', ('worked_hours', '&gt;=', 16), '&amp;', ('check_out', '=', False), ('check_in', '&lt;=',  (context_today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]"/>
+                        domain="['|', ('worked_hours', '&gt;=', 16), '&amp;', ('check_out', '=', False), ('check_in', '&lt;=', '-1d')]"/>
                 <filter string="Automatically Checked-Out" name="auto_check"
                         domain="[('out_mode', '=', 'auto_check_out')]"/>
                 <separator/>
@@ -239,14 +290,10 @@
                     name="archivedemployees"
                     domain="[('employee_id.active', '=', False)]"/>
                 <separator invisible="1"/>
-                <filter string="Last 3 Months" invisible="1" name="last_three_months" domain="[(
-                    'check_in','&gt;=', (
-                        context_today() + datetime.timedelta(days=-90)
-                        )
-                    )]"/>
-                <group expand="0" string="Group By">
+                <filter string="Last 3 Months" invisible="1" name="last_three_months" domain="[('check_in','&gt;=', '-3m')]"/>
+                <group>
                     <filter string="Employee" name="employee" context="{'group_by': 'employee_id'}"/>
-                    <filter string="Departement" name="departement" context="{'group_by': 'department_id'}"/>
+                    <filter string="Department" name="departement" context="{'group_by': 'department_id'}"/>
                     <filter string="Manager" name="manager" context="{'group_by': 'manager_id'}"/>
                     <filter string="Method" name="groupby_mode_in" context="{'group_by': 'in_mode'}"/>
                     <filter string="Date" name="groupby_name" context="{'group_by': 'check_in:month'}"/>
@@ -275,6 +322,7 @@
         <field name="name">Attendances</field>
         <field name="path">attendances</field>
         <field name="res_model">hr.attendance</field>
+        <field name="group_ids" eval="[(4, ref('hr_attendance.group_hr_attendance_officer'))]"/>
         <field name="view_mode">list,form</field>
         <field name="context">
             {
@@ -290,11 +338,11 @@
     <record id="hr_attendance_reporting" model="ir.actions.act_window">
         <field name="name">Attendances</field>
         <field name="res_model">hr.attendance</field>
+        <field name="path">attendance-report</field>
         <field name="view_mode">pivot,graph</field>
         <field name="search_view_id" ref="hr_attendance_view_filter"/>
         <field name="context">
             {
-                "search_default_groupby_name" : 1,
                 "search_default_employee": 2,
                 "search_default_activeemployees": 1,
                 "search_default_last_three_months": 1
@@ -319,9 +367,11 @@
                 <filter string="My Attendances" name="myattendances" domain="[('employee_id.user_id', '=', uid)]" />
                 <filter string="My Team" name="myteam" domain="[('employee_id.parent_id.user_id', '=', uid)]"/>
                 <separator/>
-                <filter string="To Approve" name="to_approve" domain="[('overtime_status','=', 'to_approve'), ('overtime_hours', '!=', 0)]"/>
+                <filter string="To Approve" name="to_approve" domain="[('overtime_status','=', 'to_approve')]"/>
                 <filter string="Approved" name="approved" domain="[('overtime_status','=', 'approved')]"/>
                 <filter string="Refused" name="refused" domain="[('overtime_status','=', 'refused')]"/>
+                <separator/>
+                <filter string="Date" name="check_in_filter" date="check_in"/>
                 <separator/>
                 <filter
                     string="Active Employees"
@@ -331,8 +381,9 @@
                     string="Archived Employees"
                     name="archivedemployees"
                     domain="[('employee_id.active', '=', False)]"/>
-                <group string="Group By">
+                <group>
                     <filter string="Employee" name="employee" context="{'group_by': 'employee_id'}"/>
+                    <filter string="Date" name="groupby_date" context="{'group_by': 'check_in'}"/>
                 </group>
             </search>
         </field>
@@ -347,15 +398,28 @@
                     <button class="btn-secondary" string="Approve" name="action_approve_overtime" type="object"/>
                     <button class="btn-secondary" string="Refuse" name="action_refuse_overtime" type="object"/>
                 </header>
-                <field name="employee_id" widget="many2one_avatar_user" readonly="1"/>
+                <field name="employee_id" widget="many2one_avatar_employee" readonly="1"/>
                 <field name="check_in" readonly="1"/>
                 <field name="check_out" readonly="1"/>
                 <field name="worked_hours" readonly="1" string="Worked Time" widget="float_time"/>
-                <field name="overtime_hours" string="Worked Extra Hours" widget="float_time"/>
-                <field name="validated_overtime_hours" readonly="overtime_status == 'refused'" string="Extra Hours" widget="float_time"/>
-                <field name="overtime_status" widget="badge" decoration-warning="overtime_status == 'to_approve'" decoration-success="overtime_status == 'approved'" decoration-danger="overtime_status == 'refused'"/>
-                <button class="oe_stat_button" string="Approve" invisible="overtime_status not in ['to_approve', 'refused']" name="action_approve_overtime" icon="fa-check" type="object"/>
-                <button class="oe_stat_button" string="Refuse" invisible="overtime_status not in ['to_approve', 'approved']" name="action_refuse_overtime" icon="fa-times" type="object"/>
+                <field name="overtime_hours" widget="float_time"/>
+                <field name="validated_overtime_hours" readonly="overtime_status == 'refused'" widget="float_time"/>
+                <button
+                    class="oe_stat_button"
+                    string="Approve"
+                    invisible="not is_manager or overtime_status not in ['to_approve', 'refused']"
+                    groups="hr_attendance.group_hr_attendance_officer"
+                    name="action_approve_overtime"
+                    icon="fa-check"
+                    type="object"/>
+                <button
+                    class="oe_stat_button"
+                    string="Refuse"
+                    invisible="not is_manager or overtime_status not in ['to_approve', 'approved']"
+                    groups="hr_attendance.group_hr_attendance_officer"
+                    name="action_refuse_overtime"
+                    icon="fa-times"
+                    type="object"/>
             </list>
         </field>
     </record>
@@ -387,15 +451,6 @@
         <field name="tag">hr_attendance_greeting_message</field>
     </record>
 
-    <!-- not used anymore, will be removed in master -->
-    <record id="hr_attendance_action_install_kiosk_pwa" model="ir.actions.client">
-        <field name="name">Attendance Kiosk</field>
-        <field name="target">new</field>
-        <field name="res_model">hr.attendance</field>
-        <field name="tag">install_kiosk_pwa</field>
-        <field name="context">{'app_id': 'hr_attendance', 'footer': false}</field>
-    </record>
-
     <record model="ir.actions.server" id="open_kiosk_url">
         <field name="name">Open Kiosk Url</field>
         <field name="model_id" ref="hr_attendance.model_res_company"/>
@@ -405,18 +460,39 @@
         <field name="code">
             action = model._action_open_kiosk_mode()
         </field>
-        <field name="groups_id" eval="[(4, ref('hr_attendance.group_hr_attendance_manager'))]"/>
+        <field name="group_ids" eval="[(4, ref('hr_attendance.group_hr_attendance_user'))]"/>
     </record>
 
     <!-- Menus -->
 
     <menuitem id="menu_hr_attendance_root" name="Attendances" sequence="205" groups="hr_attendance.group_hr_attendance_officer" web_icon="hr_attendance,static/description/icon.png"/>
 
-    <menuitem id="menu_action_open_form" name="Kiosk Mode" action="open_kiosk_url" parent="menu_hr_attendance_root" sequence="10" groups="hr_attendance.group_hr_attendance_manager"/>
+    <menuitem id="menu_action_open_form" name="Kiosk Mode" action="open_kiosk_url" parent="menu_hr_attendance_root" sequence="10" groups="hr_attendance.group_hr_attendance_user"/>
 
-    <menuitem id="menu_hr_attendance_reporting" name="Reporting" action="hr_attendance_reporting" parent="menu_hr_attendance_root" sequence="15" groups="hr_attendance.group_hr_attendance_officer"/>
+    <menuitem
+        id="menu_hr_attendance_reporting"
+        name="Reporting"
+        parent="menu_hr_attendance_root"
+        sequence="15"
+        groups="hr_attendance.group_hr_attendance_officer"/>
 
-    <menuitem id="menu_hr_attendance_view_attendances" name="Overview" parent="menu_hr_attendance_root" sequence="5" groups="hr_attendance.group_hr_attendance_officer" action="hr_attendance_action"/>
+    <menuitem
+        id="menu_hr_attendance_attendance_reporting"
+        name="Attendances"
+        action="hr_attendance_reporting"
+        parent="menu_hr_attendance_reporting"
+        sequence="10"/>
+
+    <menuitem id="menu_hr_attendance_overview" name="Overview" parent="menu_hr_attendance_root" sequence="5" groups="hr_attendance.group_hr_attendance_officer"/>
+
+    <menuitem id="menu_hr_attendance_view_dashboard" name="Dashboard" action="hr_attendance_action" parent="menu_hr_attendance_overview" sequence="1"/>
+
+    <menuitem id="menu_hr_attendance_employee" name="Employees" parent="menu_hr_attendance_overview" action="hr.open_view_employee_list_my" groups="hr_attendance.group_hr_attendance_officer" sequence="2"/>
 
     <menuitem id="menu_hr_attendance_view_attendances_management" name="Management" parent="menu_hr_attendance_root" sequence="6" groups="hr_attendance.group_hr_attendance_officer" action="hr_attendance_management_action"/>
+
+    <menuitem id="menu_hr_attendance_configuration" name="Configuration" parent="menu_hr_attendance_root" sequence="99" groups="hr_attendance.group_hr_attendance_manager"/>
+
+    <menuitem id="menu_hr_attendance_onboarding" name="Onboarding" action="action_try_kiosk" parent="menu_hr_attendance_configuration" sequence="100" groups="hr.group_hr_user"/>
+
 </odoo>

@@ -1,10 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, api
-from odoo.osv.expression import OR
-
 import uuid
-from werkzeug.urls import url_join
+
+from odoo import fields, models, api
+from odoo.fields import Domain
+from odoo.tools.urls import urljoin as url_join
 
 
 class ResCompany(models.Model):
@@ -13,7 +13,9 @@ class ResCompany(models.Model):
     def _default_company_token(self):
         return str(uuid.uuid4())
 
+    # TODO: Remove in master
     overtime_company_threshold = fields.Integer(string="Tolerance Time In Favor Of Company", default=0)
+    # TODO: Remove in master
     overtime_employee_threshold = fields.Integer(string="Tolerance Time In Favor Of Employee", default=0)
     hr_attendance_display_overtime = fields.Boolean(string="Display Extra Hours")
     attendance_kiosk_mode = fields.Selection([
@@ -27,10 +29,10 @@ class ResCompany(models.Model):
         ('back', 'Back Camera'),
     ], string='Barcode Source', default='front')
     attendance_kiosk_delay = fields.Integer(default=10)
-    attendance_kiosk_key = fields.Char(default=lambda s: uuid.uuid4().hex, copy=False, groups='hr_attendance.group_hr_attendance_manager')
+    attendance_kiosk_key = fields.Char(default=lambda s: uuid.uuid4().hex, copy=False, groups='hr_attendance.group_hr_attendance_user')
     attendance_kiosk_url = fields.Char(compute="_compute_attendance_kiosk_url")
     attendance_kiosk_use_pin = fields.Boolean(string='Employee PIN Identification')
-    attendance_from_systray = fields.Boolean(string='Attendance From Systray', default=True)
+    attendance_from_systray = fields.Boolean(string='Attendance From Systray', default=False)
     attendance_overtime_validation = fields.Selection([
         ('no_validation', 'Automatically Approved'),
         ('by_manager', 'Approved by Manager'),
@@ -38,6 +40,7 @@ class ResCompany(models.Model):
     auto_check_out = fields.Boolean(string="Automatic Check Out", default=False)
     auto_check_out_tolerance = fields.Float(default=2, export_string_translation=False)
     absence_management = fields.Boolean(string="Absence Management", default=False)
+    attendance_device_tracking = fields.Boolean(string="Device & Location Tracking", default=False)
 
     @api.depends("attendance_kiosk_key")
     def _compute_attendance_kiosk_url(self):
@@ -68,18 +71,20 @@ class ResCompany(models.Model):
             self.env.cr.execute_values(query, values_args)
 
     def write(self, vals):
-        search_domains = []  # Overtime to generate
+        search_domain = Domain.FALSE  # Overtime to generate
         # Also recompute if the threshold have changed
         if 'overtime_company_threshold' in vals or 'overtime_employee_threshold' in vals:
-            for company in self:
-                # If we modify the thresholds only
-                if (vals.get('overtime_company_threshold') != company.overtime_company_threshold) or\
-                    (vals.get('overtime_employee_threshold') != company.overtime_employee_threshold):
-                    search_domains.append([('employee_id.company_id', '=', company.id)])
+            # If we modify the thresholds only
+            search_domain = Domain.OR(
+                Domain('employee_id.company_id', '=', company.id)
+                for company in self
+                if (vals.get('overtime_company_threshold') != company.overtime_company_threshold)
+                or (vals.get('overtime_employee_threshold') != company.overtime_employee_threshold)
+            )
 
         res = super().write(vals)
-        if search_domains:
-            self.env['hr.attendance'].search(OR(search_domains))._update_overtime()
+        if not search_domain.is_false():
+            self.env['hr.attendance'].search(search_domain)._update_overtime()
 
         return res
 

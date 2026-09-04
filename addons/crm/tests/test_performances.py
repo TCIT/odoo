@@ -21,6 +21,13 @@ class TestLeadAssignPerf(TestLeadAssignCommon):
     of random in tests.
     """
 
+    def setUp(self):
+        super().setUp()
+        # patch registry to simulate a ready environment
+        self.patch(self.env.registry, 'ready', True)
+        # we don't use mock_mail_gateway thus want to mock smtp to test the stack
+        self._mock_smtplib_connection()
+
     @mute_logger('odoo.models.unlink', 'odoo.addons.crm.models.crm_team', 'odoo.addons.crm.models.crm_team_member')
     def test_assign_perf_duplicates(self):
         """ Test assign process with duplicates on partner. Allow to ensure notably
@@ -47,10 +54,10 @@ class TestLeadAssignPerf(TestLeadAssignCommon):
         # commit probability and related fields
         leads.flush_recordset()
 
-        # randomness: at least 1 query
+        # randomness: at least 1 query, +3 for demo -> 957 + 5
         with self.with_user('user_sales_manager'):
             self.env.user._is_internal()  # warmup the cache to avoid inconsistency between community an enterprise
-            with self.assertQueryCount(user_sales_manager=1171):  # crm 1160 / com 1165
+            with self.assertQueryCount(user_sales_manager=962):
                 self.env['crm.team'].browse(self.sales_teams.ids)._action_assign_leads()
 
         # teams assign
@@ -93,9 +100,9 @@ class TestLeadAssignPerf(TestLeadAssignCommon):
         # commit probability and related fields
         leads.flush_recordset()
 
-        # randomness: at least 1 query
+        # randomness: at least 1 query, +1 for demo
         with self.with_user('user_sales_manager'):
-            with self.assertQueryCount(user_sales_manager=586):  # crm 582
+            with self.assertQueryCount(user_sales_manager=552):
                 self.env['crm.team'].browse(self.sales_teams.ids)._action_assign_leads()
 
         # teams assign
@@ -178,7 +185,7 @@ class TestLeadAssignPerf(TestLeadAssignCommon):
 
         # randomness: add 2 queries
         with self.with_user('user_sales_manager'):
-            with self.assertQueryCount(user_sales_manager=6066):  # crm 6048 / com 6052 / ent 6055
+            with self.assertQueryCount(user_sales_manager=5173):
                 self.env['crm.team'].browse(sales_teams.ids)._action_assign_leads()
 
         # teams assign

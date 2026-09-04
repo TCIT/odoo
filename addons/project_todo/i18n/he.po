@@ -1,34 +1,23 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* project_todo
-# 
-# Translators:
-# דודי מלכה <Dudimalka6@gmail.com>, 2024
-# MichaelHadar, 2024
-# שהאב חוסיין <shhab89@gmail.com>, 2024
-# NoaFarkash, 2024
-# ExcaliberX <excaliberx@gmail.com>, 2024
-# Hed Shefer <hed@laylinetech.com>, 2024
-# ZVI BLONDER <ZVIBLONDER@gmail.com>, 2024
-# Yihya Hugirat <hugirat@gmail.com>, 2024
-# david danilov, 2024
-# Martin Trigaux, 2024
-# Lilach Gilliam <lilach.gilliam@gmail.com>, 2024
-# yael terner, 2024
-# 
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~18.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: yael terner, 2024\n"
-"Language-Team: Hebrew (https://app.transifex.com/odoo/teams/41243/he/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 19:13+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Hebrew <https://translate.odoo.com/projects/odoo-19/"
+"project_todo/he/>\n"
+"Language: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: he\n"
-"Plural-Forms: nplurals=3; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: 2;\n"
+"Plural-Forms: nplurals=4; plural=(n == 1) ? 0 : ((n == 2) ? 1 : ((n > 10 && "
+"n % 10 == 0) ? 2 : 3));\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
@@ -40,15 +29,21 @@ msgstr ""
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
 msgid ""
+"<br/>\n"
+"    <span style=\"font-size: 14px;\">\n"
+"        Ensure you follow the correct format and order. For example: Send "
+"invitations #event @Mitchell !\n"
+"    </span>"
+msgstr ""
+
+#. module: project_todo
+#: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
+msgid ""
 "<span style=\"font-size: 14px;\">\n"
 "                    Add a checklist\n"
 "                    (/<span style=\"font-style: italic;\">checklist</span>)\n"
 "                </span>"
 msgstr ""
-"<span style=\"font-size: 14px;\">\n"
-"הוסף צ'ק ליסט\n"
-"(/<span style=\"font-style: italic;\">צ'ק ליסט</span>)\n"
-"</span>"
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
@@ -88,11 +83,14 @@ msgstr ""
 msgid ""
 "<span style=\"font-size: 14px;\">\n"
 "            Select text to\n"
-"            <font style=\"background-color: #017E84; color: white\">Highlight</font>,\n"
-"            <span style=\"text-decoration-line: line-through;\">strikethrough</span>\n"
+"            <font style=\"background-color: #017E84; color: "
+"white\">Highlight</font>,\n"
+"            <span style=\"text-decoration-line: line-through;"
+"\">strikethrough</span>\n"
 "            or\n"
 "            <span style=\"font-weight: bolder;\">style</span>\n"
-"            <span style=\"font-style: italic; text-decoration-line: underline;\">it</span>\n"
+"            <span style=\"font-style: italic; text-decoration-line: "
+"underline;\">it</span>\n"
 "        </span>"
 msgstr ""
 
@@ -100,9 +98,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
 msgid ""
 "<span style=\"font-size: 14px;\">\n"
-"        Access your personal pipeline with your to-dos and assigned tasks by going to the Project app and clicking\n"
+"        Access your personal pipeline with your to-dos and assigned tasks by "
+"going to the Project app and clicking\n"
 "        <span>\n"
-"            <font style=\"font-weight: bolder;\" class=\"text-o-color-2\">My Tasks</font>.\n"
+"            <font style=\"font-weight: bolder;\" class=\"text-o-color-2\">My "
+"Tasks</font>.\n"
 "        </span>\n"
 "    </span>\n"
 "    <br/>\n"
@@ -112,7 +112,8 @@ msgid ""
 "        <span style=\"font-weight: bolder;\">\n"
 "            <font class=\"text-o-color-2\">private tasks.</font>\n"
 "        </span>\n"
-"        Any task you create privately will also be included in your to-dos. Essentially, they are interchangeable.\n"
+"        Any task you create privately will also be included in your to-dos. "
+"Essentially, they are interchangeable.\n"
 "    </span>"
 msgstr ""
 
@@ -120,9 +121,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
 msgid ""
 "<span style=\"font-size: 14px;\">\n"
-"        By default, to-dos are only visible to you. You can share them with other users by adding them as\n"
+"        By default, to-dos are only visible to you. You can share them with "
+"other users by adding them as\n"
 "        <span>\n"
-"            <font style=\"font-weight: bolder;\" class=\"text-o-color-2\">assignees</font>.\n"
+"            <font style=\"font-weight: bolder;\" class=\"text-o-"
+"color-2\">assignees</font>.\n"
 "        </span>\n"
 "    </span>\n"
 "    <br/>"
@@ -144,9 +147,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
 msgid ""
 "<span style=\"font-size: 14px;\">\n"
-"        If you want to assign your to-do to a specific project, open the ⚙️ menu and click\n"
+"        If you want to assign your to-do to a specific project, open the ⚙️ "
+"menu and click\n"
 "        <span>\n"
-"            <font style=\"font-weight: bolder;\" class=\"text-o-color-2\">Convert to Task</font>.\n"
+"            <font style=\"font-weight: bolder;\" class=\"text-o-"
+"color-2\">Convert to Task</font>.\n"
 "        </span>\n"
 "        This action will make it visible to other users.\n"
 "    </span>\n"
@@ -157,7 +162,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
 msgid ""
 "<span style=\"font-size: 14px;\">\n"
-"        Use it to manage your work, take notes on the go, and create tasks based on them.\n"
+"        Use it to manage your work, take notes on the go, and create tasks "
+"based on them.\n"
 "    </span>"
 msgstr ""
 
@@ -165,7 +171,17 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
 msgid ""
 "<span style=\"font-size: 14px;\">\n"
-"        Wherever you are, use the magic keyboard shortcut to add yourself a reminder &amp;#128161;\n"
+"        Use these keywords in the title to streamline your to-dos:\n"
+"    </span>\n"
+"    <br/>"
+msgstr ""
+
+#. module: project_todo
+#: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
+msgid ""
+"<span style=\"font-size: 14px;\">\n"
+"        Wherever you are, use the magic keyboard shortcut to add yourself a "
+"reminder &amp;#128161;\n"
 "    </span>\n"
 "    <br/>"
 msgstr ""
@@ -179,9 +195,8 @@ msgstr ""
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
 msgid ""
-"<span style=\"font-size: 14px;\">Click anywhere, and just start "
-"typing</span>"
-msgstr "<span style=\"font-size: 14px;\">לחץ בכל מקום ופשוט התחל להקליד</span>"
+"<span style=\"font-size: 14px;\">Click anywhere, and just start typing</span>"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
@@ -192,7 +207,8 @@ msgstr ""
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
 msgid ""
-"<span style=\"font-size: 14px;\">This private to-do is for you to play around with.</span>\n"
+"<span style=\"font-size: 14px;\">This private to-do is for you to play "
+"around with.</span>\n"
 "    <br/>\n"
 "    <span style=\"font-size: 14px;\">Ready to give it a spin?</span>"
 msgstr ""
@@ -200,6 +216,51 @@ msgstr ""
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
 msgid "<span style=\"font-size: 14px;\">Try the following</span>"
+msgstr ""
+
+#. module: project_todo
+#: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
+msgid ""
+"<span style=\"font-weight: bolder;\">\n"
+"                <font class=\"text-o-color-2\">!!!:</font>\n"
+"            </span>\n"
+"            Mark the to-do as urgent"
+msgstr ""
+
+#. module: project_todo
+#: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
+msgid ""
+"<span style=\"font-weight: bolder;\">\n"
+"                <font class=\"text-o-color-2\">!!:</font>\n"
+"            </span>\n"
+"            Mark the to-do as high priority"
+msgstr ""
+
+#. module: project_todo
+#: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
+msgid ""
+"<span style=\"font-weight: bolder;\">\n"
+"                <font class=\"text-o-color-2\">!:</font>\n"
+"            </span>\n"
+"            Mark the to-do as medium priority"
+msgstr ""
+
+#. module: project_todo
+#: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
+msgid ""
+"<span style=\"font-weight: bolder;\">\n"
+"                <font class=\"text-o-color-2\">#tags:</font>\n"
+"            </span>\n"
+"            Add tags to categorize the to-do"
+msgstr ""
+
+#. module: project_todo
+#: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
+msgid ""
+"<span style=\"font-weight: bolder;\">\n"
+"                <font class=\"text-o-color-2\">@user:</font>\n"
+"            </span>\n"
+"            Assign the to-do to a specific user"
 msgstr ""
 
 #. module: project_todo
@@ -223,7 +284,7 @@ msgstr ""
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.mail_activity_todo_create_popup
 msgid "Add To-Do"
-msgstr "הוסף מטלה"
+msgstr ""
 
 #. module: project_todo
 #. odoo-javascript
@@ -240,18 +301,24 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_form
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
 msgid "Archived"
-msgstr "בארכיון"
+msgstr ""
+
+#. module: project_todo
+#. odoo-javascript
+#: code:addons/project_todo/static/src/views/todo_form/todo_form_controller.js:0
+msgid "Are you sure you want to restore this version?"
+msgstr ""
 
 #. module: project_todo
 #: model:ir.model.fields,field_description:project_todo.field_mail_activity_todo_create__user_id
 msgid "Assigned to"
-msgstr "משויכת ל"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_form
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
 msgid "Assignees"
-msgstr "מוקצה"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
@@ -266,17 +333,17 @@ msgstr ""
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_conversion_form
 msgid "Choose tags from the selected project"
-msgstr "בחר תגיות מהפרויקט שנבחר"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
 msgid "Closed"
-msgstr "סגור"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
 msgid "Closed On"
-msgstr "נסגר ב"
+msgstr ""
 
 #. module: project_todo
 #. odoo-javascript
@@ -284,11 +351,16 @@ msgstr "נסגר ב"
 #: model:ir.actions.act_window,name:project_todo.project_task_action_convert_todo_to_task
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_conversion_form
 msgid "Convert to Task"
-msgstr "הפוך למשימה"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
 msgid "Convert to-dos into tasks"
+msgstr ""
+
+#. module: project_todo
+#: model:ir.model,website_form_label:project_todo.model_project_task
+msgid "Create a Task"
 msgstr ""
 
 #. module: project_todo
@@ -304,43 +376,50 @@ msgstr ""
 #. module: project_todo
 #: model:ir.model.fields,field_description:project_todo.field_mail_activity_todo_create__create_uid
 msgid "Created by"
-msgstr "נוצר על-ידי"
+msgstr ""
 
 #. module: project_todo
 #: model:ir.model.fields,field_description:project_todo.field_mail_activity_todo_create__create_date
 msgid "Created on"
-msgstr "נוצר ב-"
+msgstr ""
+
+#. module: project_todo
+#: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
+msgid "Deadline"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_kanban
 msgid "Delete"
-msgstr "מחיקה"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.mail_activity_todo_create_popup
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_conversion_form
 msgid "Discard"
-msgstr "בטל"
+msgstr ""
 
 #. module: project_todo
 #: model:ir.model.fields,field_description:project_todo.field_mail_activity_todo_create__display_name
+#: model:ir.model.fields,field_description:project_todo.field_project_task__display_name
+#: model:ir.model.fields,field_description:project_todo.field_res_users__display_name
 msgid "Display Name"
-msgstr "שם לתצוגה"
+msgstr ""
 
 #. module: project_todo
 #: model:ir.model.fields,field_description:project_todo.field_mail_activity_todo_create__date_deadline
 msgid "Due Date"
-msgstr "תאריך פירעון"
+msgstr ""
+
+#. module: project_todo
+#: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
+msgid "Enhance Your To-Dos with Shortcuts &amp;#9889;"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
 msgid "Future Activities"
-msgstr "פעילויות עתידיות"
-
-#. module: project_todo
-#: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
-msgid "Group By"
-msgstr "קבץ לפי"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
@@ -349,30 +428,33 @@ msgstr ""
 
 #. module: project_todo
 #: model:ir.model.fields,field_description:project_todo.field_mail_activity_todo_create__id
+#: model:ir.model.fields,field_description:project_todo.field_project_task__id
+#: model:ir.model.fields,field_description:project_todo.field_res_users__id
 msgid "ID"
-msgstr "מזהה"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.actions.act_window,help:project_todo.project_task_action_todo
 msgid ""
 "Keep your work organized by using memos and to-do lists.\n"
-"                Your to-do items are private by default, but you can choose to share them with others by adding them as assignees."
+"                Your to-do items are private by default, but you can choose "
+"to share them with others by adding them as assignees."
 msgstr ""
 
 #. module: project_todo
 #: model:ir.model.fields,field_description:project_todo.field_mail_activity_todo_create__write_uid
 msgid "Last Updated by"
-msgstr "עודכן לאחרונה על-ידי"
+msgstr ""
 
 #. module: project_todo
 #: model:ir.model.fields,field_description:project_todo.field_mail_activity_todo_create__write_date
 msgid "Last Updated on"
-msgstr "עדכון אחרון ב"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
 msgid "Late Activities"
-msgstr "פעילויות באיחור"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
@@ -380,28 +462,38 @@ msgid "Manage your to-dos and assigned tasks from a single place"
 msgstr ""
 
 #. module: project_todo
+#: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
+msgid "My Activities"
+msgstr ""
+
+#. module: project_todo
 #: model_terms:ir.actions.act_window,help:project_todo.project_task_action_todo
 msgid "No to-do found. Let's create one!"
-msgstr "לא נמצאו מטלות. בואו ניצור!"
+msgstr ""
 
 #. module: project_todo
 #: model:ir.model.fields,field_description:project_todo.field_mail_activity_todo_create__note
 msgid "Note"
-msgstr "הערה"
-
-#. module: project_todo
-#: model:res.groups,name:project_todo.group_onboarding_todo
-msgid "Onboarding todo already generated for those users"
 msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
 msgid "Open"
-msgstr "פתח"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
 msgid "Organize your to-dos however you want"
+msgstr ""
+
+#. module: project_todo
+#: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_calendar
+msgid "Personal Stage"
+msgstr ""
+
+#. module: project_todo
+#: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
+msgid "Priority"
 msgstr ""
 
 #. module: project_todo
@@ -410,42 +502,64 @@ msgid "Reminder to..."
 msgstr ""
 
 #. module: project_todo
+#. odoo-javascript
+#: code:addons/project_todo/static/src/views/todo_form/todo_form_controller.js:0
+msgid "Restore"
+msgstr ""
+
+#. module: project_todo
+#. odoo-javascript
+#: code:addons/project_todo/static/src/views/todo_form/todo_form_controller.js:0
+msgid ""
+"Restoring will replace the current content with the selected version. Any "
+"unsaved changes will be lost."
+msgstr ""
+
+#. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_kanban
 msgid "Set Cover Image"
-msgstr "הגדר תמונת כריכה/כיסוי"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
-msgid "Show all records which has next action date is before today"
-msgstr "הצג את כל הרשומות שתאריך הפעולה הבא שלהן הוא עד היום"
+msgid "Show all records whose next activity date is past"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_tree
 msgid "Stage"
-msgstr "שלב"
-
-#. module: project_todo
-#: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
-msgid "Starred"
-msgstr "מסומן בכוכב"
+msgstr ""
 
 #. module: project_todo
 #: model:ir.model.fields,field_description:project_todo.field_mail_activity_todo_create__summary
 msgid "Summary"
-msgstr "תקציר"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
 msgid "Tags"
-msgstr "תגיות"
+msgstr ""
 
 #. module: project_todo
 #. odoo-python
 #: code:addons/project_todo/models/res_users.py:0
 #: model:ir.model,name:project_todo.model_project_task
 msgid "Task"
-msgstr "משימה"
+msgstr ""
+
+#. module: project_todo
+#: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_form
+msgid "Task Title..."
+msgstr ""
+
+#. module: project_todo
+#. odoo-javascript
+#: code:addons/project_todo/static/src/views/todo_form/todo_form_controller.js:0
+msgid ""
+"The To-do description lacks any past content that could be restored at the "
+"moment."
+msgstr ""
 
 #. module: project_todo
 #. odoo-python
@@ -457,34 +571,36 @@ msgstr ""
 #: model:ir.ui.menu,name:project_todo.menu_todo_todos
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_form
 msgid "To-do"
-msgstr "מטלה"
+msgstr ""
+
+#. module: project_todo
+#. odoo-javascript
+#: code:addons/project_todo/static/src/views/todo_form/todo_form_controller.js:0
+msgid "To-do History"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_quick_create_form
 msgid "To-do Title"
-msgstr "כותרת מטלה"
-
-#. module: project_todo
-#: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_form
-msgid "To-do..."
 msgstr ""
 
 #. module: project_todo
 #: model:ir.actions.act_window,name:project_todo.project_task_action_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_activity
+#: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_calendar
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_tree
 msgid "To-dos"
-msgstr "מטלות"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
 msgid "Today Activities"
-msgstr "פעילויות היום"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_search
 msgid "Todos"
-msgstr "מטלות"
+msgstr ""
 
 #. module: project_todo
 #. odoo-javascript
@@ -504,9 +620,40 @@ msgid "Untitled to-do"
 msgstr ""
 
 #. module: project_todo
+#: model:ir.model.fields,help:project_todo.field_project_task__display_name
+msgid ""
+"Use these keywords in the title to set new tasks:\n"
+"\n"
+"        30h Allocate 30 hours to the task\n"
+"        #tags Set tags on the task\n"
+"        @user Assign the task to a user\n"
+"        ! Set the task a medium priority\n"
+"        !! Set the task a high priority\n"
+"        !!! Set the task a urgent priority\n"
+"\n"
+"        Make sure to use the right format and order e.g. Improve the "
+"configuration screen 5h #feature #v16 @Mitchell !"
+msgstr ""
+
+#. module: project_todo
+#: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_quick_create_form
+msgid ""
+"Use these keywords in the title to streamline your to-dos:\n"
+"\n"
+"                             #tags: Add tags to categorize the to-do\n"
+"                             @user: Assign the to-do to a specific user\n"
+"                             !: Mark the to-do as medium priority\n"
+"                             !!: Mark the to-do as high priority\n"
+"                             !!!: Mark the to-do as urgent\n"
+"\n"
+"                             Ensure you follow the correct format and order. "
+"For example: \"Send invitations #event @Mitchell !\""
+msgstr ""
+
+#. module: project_todo
 #: model:ir.model,name:project_todo.model_res_users
 msgid "User"
-msgstr "משתמש"
+msgstr ""
 
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.todo_user_onboarding
@@ -514,8 +661,14 @@ msgid "Using the editor"
 msgstr ""
 
 #. module: project_todo
+#. odoo-javascript
+#: code:addons/project_todo/static/src/views/todo_form/todo_form_controller.js:0
+msgid "Version History"
+msgstr ""
+
+#. module: project_todo
 #. odoo-python
-#: code:addons/project_todo/models/project_task.py:0
+#: code:addons/project_todo/models/res_users.py:0
 msgid "Welcome %s!"
 msgstr ""
 
@@ -538,11 +691,6 @@ msgstr ""
 #. module: project_todo
 #: model_terms:ir.ui.view,arch_db:project_todo.project_task_view_todo_quick_create_form
 msgid "e.g. Send Invitations"
-msgstr ""
-
-#. module: project_todo
-#: model:ir.actions.server,name:project_todo.project_task_preload_action_todo
-msgid "menu load To-dos"
 msgstr ""
 
 #. module: project_todo

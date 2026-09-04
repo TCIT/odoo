@@ -61,6 +61,17 @@ class TestServerActionsEmail(MailCommon, TestServerActionsBase):
         self.action.with_context(self.context).run()
         self.assertEqual(self.test_partner.message_partner_ids, self.env.ref('base.partner_admin') | random_partner)
 
+    def test_action_followers_warning(self):
+        self.test_partner.message_unsubscribe(self.test_partner.message_partner_ids.ids)
+        self.action.write({
+            'state': 'followers',
+            "followers_type": "generic",
+            "followers_partner_field_name": "user_id.name"
+        })
+        self.assertEqual(self.action.warning, "The field 'Salesperson > Name' is not a partner field.")
+        self.action.write({"followers_partner_field_name": "parent_id.child_ids"})
+        self.assertEqual(self.action.warning, False)
+
     def test_action_message_post(self):
         # initial state
         self.assertEqual(len(self.test_partner.message_ids), 1,
@@ -81,7 +92,7 @@ class TestServerActionsEmail(MailCommon, TestServerActionsBase):
                               'mail_mail_values': {
                                 'author_id': self.env.user.partner_id,
                               },
-                              'message_type': 'notification',
+                              'message_type': 'auto_comment',
                               'subtype': 'mail.mt_comment',
                              }
             ):
@@ -98,7 +109,7 @@ class TestServerActionsEmail(MailCommon, TestServerActionsBase):
         with self.assertSinglePostNotifications(
                 [{'partner': self.test_partner, 'type': 'email', 'status': 'ready'}],
                 message_info={'content': 'Hello %s' % self.test_partner.name,
-                              'message_type': 'notification',
+                              'message_type': 'auto_comment',
                               'subtype': 'mail.mt_note',
                              }
             ):
@@ -120,6 +131,18 @@ class TestServerActionsEmail(MailCommon, TestServerActionsBase):
         self.assertEqual(self.env['mail.activity'].search_count([]), before_count + 1)
         self.assertEqual(self.env['mail.activity'].search_count([('summary', '=', 'TestNew')]), 1)
 
+    def test_action_next_activity_warning(self):
+        self.action.write({
+            'state': 'next_activity',
+            'activity_user_type': 'generic',
+            "activity_user_field_name": "user_id.name",
+            'activity_type_id': self.env.ref('mail.mail_activity_data_meeting').id,
+            'activity_summary': 'TestNew',
+        })
+        self.assertEqual(self.action.warning, "The field 'Salesperson > Name' is not a user field.")
+        self.action.write({"activity_user_field_name": "parent_id.user_id"})
+        self.assertEqual(self.action.warning, False)
+
     def test_action_next_activity_due_date(self):
         """ Make sure we don't crash if a due date is set without a type. """
         self.action.write({
@@ -135,6 +158,48 @@ class TestServerActionsEmail(MailCommon, TestServerActionsBase):
         self.assertFalse(run_res, 'ir_actions_server: create next activity action correctly finished should return False')
         self.assertEqual(self.env['mail.activity'].search_count([]), before_count + 1)
         self.assertEqual(self.env['mail.activity'].search_count([('summary', '=', 'TestNew')]), 1)
+
+    def test_action_next_activity_from_x2m_user(self):
+        self.test_partner.user_ids = self.user_demo | self.user_admin
+        self.action.write({
+            'state': 'next_activity',
+            'activity_user_type': 'generic',
+            'activity_user_field_name': 'user_ids',
+            'activity_type_id': self.env.ref('mail.mail_activity_data_meeting').id,
+            'activity_summary': 'TestNew',
+        })
+        before_count = self.env['mail.activity'].search_count([])
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: create next activity action correctly finished should return False')
+        self.assertEqual(self.env['mail.activity'].search_count([]), before_count + 1)
+        self.assertRecordValues(
+            self.env['mail.activity'].search([('res_model', '=', 'res.partner'), ('res_id', '=', self.test_partner.id)]),
+            [{
+                'summary': 'TestNew',
+                'user_id': self.user_demo.id,  # the first user found
+            }],
+        )
+
+        # Test dotted field path (e.g. 'parent_id.user_id') which traverses a relational chain.
+        parent_partner = self.env['res.partner'].create({
+            'name': 'ParentPartner',
+            'user_id': self.user_admin.id,
+        })
+        self.test_partner.write({'parent_id': parent_partner.id})
+        self.action.write({
+            'activity_user_field_name': 'parent_id.user_id',
+            'activity_summary': 'TestDottedField',
+        })
+        before_count = self.env['mail.activity'].search_count([])
+        run_res = self.action.with_context(self.context).run()
+        self.assertEqual(self.env['mail.activity'].search_count([]), before_count + 1)
+        self.assertRecordValues(
+            self.env['mail.activity'].search([('res_model', '=', 'res.partner'), ('res_id', '=', self.test_partner.id), ('user_id', '=', self.user_admin.id)]),
+            [{
+                'summary': 'TestDottedField',
+                'user_id': self.user_admin.id,
+            }],
+        )
 
     @mute_logger('odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
     def test_action_send_mail_without_mail_thread(self):

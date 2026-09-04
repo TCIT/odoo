@@ -1,37 +1,86 @@
-import { Record } from "@mail/core/common/record";
+import { fields, Record } from "@mail/core/common/record";
+import { Deferred } from "@web/core/utils/concurrency";
+
+/**
+ * @typedef {object} SessionInfo
+ * @property {boolean} [isSelfMuted]
+ * @property {boolean} [isDeaf]
+ * @property {boolean} [isTalking]
+ * @property {boolean} [isRaisingHand]
+ * @property {boolean} [isCameraOn]
+ * @property {boolean} [isScreenSharingOn]
+ */
 
 export class RtcSession extends Record {
+    static _name = "discuss.channel.rtc.session";
     static id = "id";
-    /** @type {Object.<number, import("models").RtcSession>} */
-    static records = {};
-    /** @returns {import("models").RtcSession} */
-    static get(data) {
-        return super.get(data);
-    }
-    /** @returns {import("models").RtcSession|import("models").RtcSession[]} */
-    static insert(data) {
-        return super.insert(...arguments);
-    }
+    static awaitedRecords = new Map();
     static _insert() {
         /** @type {import("models").RtcSession} */
         const session = super._insert(...arguments);
-        session.channel?.rtcSessions.add(session);
+        session.channel?.rtc_session_ids.add(session);
         return session;
+    }
+    /** @returns {Promise<import("models").RtcSession>} */
+    static async getWhenReady(id) {
+        const session = this.get(id);
+        if (!session) {
+            let deferred = this.awaitedRecords.get(id);
+            if (!deferred) {
+                deferred = new Deferred();
+                this.awaitedRecords.set(id, deferred);
+                setTimeout(() => {
+                    deferred.resolve();
+                    this.awaitedRecords.delete(id);
+                }, 120_000);
+            }
+            return deferred;
+        }
+        return session;
+    }
+    /** @returns {import("models").RtcSession} */
+    static new() {
+        const record = super.new(...arguments);
+        this.awaitedRecords.get(record.id)?.resolve(record);
+        this.awaitedRecords.delete(record.id);
+        return record;
     }
 
     // Server data
+    channel_member_id = fields.One("discuss.channel.member", { inverse: "rtcSession" });
+    partner_id = fields.One("res.partner", {
+        compute() {
+            return this.channel_member_id?.partner_id;
+        },
+    });
+    guest_id = fields.One("mail.guest", {
+        compute() {
+            return this.channel_member_id?.guest_id;
+        },
+    });
+    get persona() {
+        return this.partner_id || this.guest_id;
+    }
     /** @type {boolean} */
-    channelMember = Record.one("ChannelMember", { inverse: "rtcSession" });
+    is_camera_on;
     /** @type {boolean} */
-    isCameraOn;
-    /** @type {boolean} */
-    isScreenSharingOn;
+    is_screen_sharing_on = fields.Attr(undefined, {
+        onUpdate() {
+            if (
+                this.eq(this.channel?.activeRtcSession) &&
+                this.mainVideoStreamType === "screen" &&
+                !this.is_screen_sharing_on
+            ) {
+                this.channel.activeRtcSession = undefined;
+            }
+        },
+    });
     /** @type {number} */
     id;
     /** @type {boolean} */
-    isDeaf;
+    is_deaf;
     /** @type {boolean} */
-    isSelfMuted;
+    is_muted;
     // Client data
     /** @type {HTMLAudioElement} */
     audioElement;
@@ -41,32 +90,43 @@ export class RtcSession extends Record {
     dataChannel;
     audioError;
     videoError;
-    isTalking = Record.attr(false, {
+    isTalking = fields.Attr(false, {
         /** @this {import("models").RtcSession} */
         onUpdate() {
             if (this.isTalking && !this.isMute) {
                 this.talkingTime = this.store.nextTalkingTime++;
             }
+            this.channel?.updateCallFocusStack(this);
         },
     });
-    isActuallyTalking = Record.attr(false, {
+    isActuallyTalking = fields.Attr(false, {
         /** @this {import("models").RtcSession} */
         compute() {
             return this.isTalking && !this.isMute;
         },
     });
-    isVideoStreaming = Record.attr(false, {
+    isVideoStreaming = fields.Attr(false, {
         /** @this {import("models").RtcSession} */
         compute() {
-            return this.isScreenSharingOn || this.isCameraOn;
+            return this.is_screen_sharing_on || this.is_camera_on;
+        },
+        /** @this {import("models").RtcSession} */
+        onUpdate() {
+            if (
+                this.isVideoStreaming &&
+                this.channel?.channel_type === "chat" &&
+                this.store.rtc.selfSession?.in(this.channel.rtc_session_ids)
+            ) {
+                this.channel.focusAvailableVideo();
+            }
         },
     });
-    shortStatus = Record.attr(undefined, {
+    shortStatus = fields.Attr(undefined, {
         compute() {
-            if (this.isScreenSharingOn) {
+            if (this.is_screen_sharing_on) {
                 return "live";
             }
-            if (this.isDeaf) {
+            if (this.is_deaf) {
                 return "deafen";
             }
             if (this.isMute) {
@@ -85,24 +145,24 @@ export class RtcSession extends Record {
     videoStreams = new Map();
     /** @type {string} */
     mainVideoStreamType;
+    /**
+     * Represents the sequence of the last valid connection with that session. This can be used to
+     * compare connection attempts (if they follow the last valid connection) and to validate information
+     * (if they match the sequence).
+     *
+     *  @type {number}
+     */
+    sequence = 0;
     // RTC stats
     connectionState;
-    localCandidateType;
-    remoteCandidateType;
-    dataChannelState;
-    packetsReceived;
-    packetsSent;
-    dtlsState;
-    iceState;
-    iceGatheringState;
     logStep;
 
     get channel() {
-        return this.channelMember?.thread;
+        return this.channel_member_id?.channel_id;
     }
 
     get isMute() {
-        return this.isSelfMuted || this.isDeaf;
+        return this.is_muted || this.is_deaf;
     }
 
     get mainVideoStream() {
@@ -113,15 +173,17 @@ export class RtcSession extends Record {
         if (!this.mainVideoStreamType) {
             return false;
         }
-        return this.mainVideoStreamType === "camera" ? this.isCameraOn : this.isScreenSharingOn;
+        return this.mainVideoStreamType === "camera"
+            ? this.is_camera_on
+            : this.is_screen_sharing_on;
     }
 
     get hasVideo() {
-        return this.isScreenSharingOn || this.isCameraOn;
+        return this.is_screen_sharing_on || this.is_camera_on;
     }
 
     getStream(type) {
-        const isActive = type === "camera" ? this.isCameraOn : this.isScreenSharingOn;
+        const isActive = type === "camera" ? this.is_camera_on : this.is_screen_sharing_on;
         return isActive && this.videoStreams.get(type);
     }
 
@@ -130,30 +192,20 @@ export class RtcSession extends Record {
      */
     get info() {
         return {
-            isSelfMuted: this.isSelfMuted,
+            isSelfMuted: this.is_muted,
             isRaisingHand: Boolean(this.raisingHand),
-            isDeaf: this.isDeaf,
+            isDeaf: this.is_deaf,
             isTalking: this.isTalking,
-            isCameraOn: this.isCameraOn,
-            isScreenSharingOn: this.isScreenSharingOn,
+            isCameraOn: this.is_camera_on,
+            isScreenSharingOn: this.is_screen_sharing_on,
         };
-    }
-
-    get partnerId() {
-        const persona = this.channelMember?.persona;
-        return persona.type === "partner" ? persona.id : undefined;
-    }
-
-    get guestId() {
-        const persona = this.channelMember?.persona;
-        return persona.type === "guest" ? persona.id : undefined;
     }
 
     /**
      * @returns {string}
      */
     get name() {
-        return this.channelMember?.persona.name;
+        return this.channel_member_id?.name;
     }
 
     /**
@@ -174,6 +226,10 @@ export class RtcSession extends Record {
         if (!this.audioElement) {
             return;
         }
+        if (this.store.settings.audioOutputDeviceId) {
+            // skipping, it will use the default device.
+            await this.audioElement.setSinkId(this.store.settings.audioOutputDeviceId).catch();
+        }
         try {
             await this.audioElement.play();
             this.audioError = undefined;
@@ -188,9 +244,9 @@ export class RtcSession extends Record {
      */
     updateStreamState(type, state) {
         if (type === "camera") {
-            this.isCameraOn = state;
+            this.is_camera_on = state;
         } else if (type === "screen") {
-            this.isScreenSharingOn = state;
+            this.is_screen_sharing_on = state;
         }
     }
 }

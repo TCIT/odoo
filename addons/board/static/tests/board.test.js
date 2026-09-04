@@ -1,3 +1,4 @@
+import { BoardAction } from "@board/board_action";
 import { defineMailModels } from "@mail/../tests/mail_test_helpers";
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
 import { queryAllTexts, queryOne } from "@odoo/hoot-dom";
@@ -9,9 +10,10 @@ import {
     models,
     mountView,
     onRpc,
+    patchWithCleanup,
     serverState,
 } from "@web/../tests/web_test_helpers";
-import { BoardAction } from "@board/board_action";
+import { browser } from "@web/core/browser/browser";
 
 class Board extends models.Model {}
 
@@ -168,15 +170,13 @@ describe("board_desktop", () => {
     });
 
     test("views in the dashboard do not have a control panel", async () => {
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [
-                    [4, "list"],
-                    [5, "form"],
-                ],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [
+                [4, "list"],
+                [5, "form"],
+            ],
+        }));
         await mountView({
             type: "form",
             resModel: "board",
@@ -202,15 +202,13 @@ describe("board_desktop", () => {
         // action's params (like context or domain), as the dashboard can directly
         // retrieve them from the action. Same applies for the view_type, as the
         // first view of the action can be used, by default.
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [
-                    [4, "list"],
-                    [false, "form"],
-                ],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [
+                [4, "list"],
+                [false, "form"],
+            ],
+        }));
 
         await mountView({
             type: "form",
@@ -229,12 +227,10 @@ describe("board_desktop", () => {
     });
 
     test("can sort a sub list", async () => {
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "list"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "list"]],
+        }));
         await mountView({
             type: "form",
             resModel: "board",
@@ -271,12 +267,10 @@ describe("board_desktop", () => {
                 return true;
             },
         });
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "list"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "list"]],
+        }));
         await mountView({
             type: "form",
             resModel: "board",
@@ -291,6 +285,44 @@ describe("board_desktop", () => {
         });
 
         await contains("tr.o_data_row td:contains(yop)").click();
+    });
+
+    test("can open a record in a new tab", async () => {
+        Partner._views.kanban = `
+            <kanban>
+                <templates>
+                    <t t-name="card">
+                        <field name="foo"/>
+                    </t>
+                </templates>
+            </kanban>`;
+
+        patchWithCleanup(browser, {
+            open: (url) => {
+                expect.step(`opened in new window: ${url}`);
+            },
+        });
+
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            view_mode: "kanban",
+            views: [[false, "kanban"]],
+        }));
+        await mountView({
+            type: "form",
+            resModel: "board",
+            arch: `
+                <form string="My Dashboard" js_class="board">
+                    <board style="2-1">
+                        <column>
+                            <action name="149" string="Partner" view_mode="kanban" id="action_0_1"></action>
+                        </column>
+                    </board>
+                </form>`,
+        });
+
+        await contains(".o_kanban_record").click({ ctrlKey: true });
+        expect.verifySteps(["opened in new window: /odoo/m-partner/1"]);
     });
 
     test("can open record using action form view", async () => {
@@ -308,15 +340,13 @@ describe("board_desktop", () => {
             },
         });
 
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [
-                    [4, "list"],
-                    [5, "form"],
-                ],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [
+                [4, "list"],
+                [5, "form"],
+            ],
+        }));
 
         await mountView({
             type: "form",
@@ -335,12 +365,10 @@ describe("board_desktop", () => {
     });
 
     test("can drag and drop a view", async () => {
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "list"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "list"]],
+        }));
         onRpc("/web/view/edit_custom", () => {
             expect.step("edit custom");
             return true;
@@ -379,15 +407,13 @@ describe("board_desktop", () => {
                     </t>
                 </templates>
             </kanban>`;
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [
-                    [4, "list"],
-                    [5, "kanban"],
-                ],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [
+                [4, "list"],
+                [5, "kanban"],
+            ],
+        }));
         onRpc("/web/view/edit_custom", () => {
             expect.step("edit custom");
             return true;
@@ -411,10 +437,12 @@ describe("board_desktop", () => {
     });
 
     test("non-existing action in a dashboard", async () => {
-        onRpc("/web/action/load", () => {
-            // server answer if the action doesn't exist anymore
-            return false;
-        });
+        onRpc(
+            "/web/action/load",
+            () =>
+                // server answer if the action doesn't exist anymore
+                false
+        );
         await mountView({
             type: "form",
             resModel: "board",
@@ -451,13 +479,11 @@ describe("board_desktop", () => {
                 expect(params.type).toBe("object");
             },
         });
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                view_mode: "kanban",
-                views: [[false, "kanban"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            view_mode: "kanban",
+            views: [[false, "kanban"]],
+        }));
         await mountView({
             type: "form",
             resModel: "board",
@@ -477,12 +503,10 @@ describe("board_desktop", () => {
     test("Views should be loaded in the user's language", async () => {
         expect.assertions(2);
         serverState.lang = "fr_FR";
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "list"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "list"]],
+        }));
         onRpc("get_views", (args) => {
             expect(args.kwargs.context.lang).toBe("fr_FR");
         });
@@ -502,12 +526,10 @@ describe("board_desktop", () => {
 
     test("Dashboard should use correct groupby", async () => {
         expect.assertions(1);
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "list"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "list"]],
+        }));
         onRpc("web_read_group", (args) => {
             expect(args.kwargs.groupby).toEqual(["bar"]);
         });
@@ -525,58 +547,12 @@ describe("board_desktop", () => {
         });
     });
 
-    test("Dashboard should read comparison from context", async () => {
-        expect.assertions(2);
-        Partner._views["pivot,4"] = '<pivot><field name="int_field" type="measure"/></pivot>';
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "pivot"]],
-            };
-        });
-        await mountView({
-            type: "form",
-            resModel: "board",
-            arch: `
-                <form string="My Dashboard" js_class="board">
-                    <board style="2-1">
-                        <column>
-                            <action
-                                name="356"
-                                string="Sales Analysis pivot"
-                                view_mode="pivot"
-                                context="{
-                                    'comparison': {
-                                        'fieldName': 'date',
-                                        'domains': [
-                                            {
-                                                'arrayRepr': [],
-                                                'description': 'February 2023',
-                                            },
-                                            {
-                                                'arrayRepr': [],
-                                                'description': 'January 2023',
-                                            },
-                                        ]
-                                    },
-                                }"
-                            />
-                        </column>
-                    </board>
-                </form>`,
-        });
-        expect(".o_pivot_origin_row:eq(0)").toHaveText("January 2023");
-        expect(".o_pivot_origin_row:eq(1)").toHaveText("February 2023");
-    });
-
     test("Dashboard should use correct groupby when defined as a string of one field", async () => {
         expect.assertions(1);
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "list"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "list"]],
+        }));
         onRpc("web_read_group", ({ kwargs }) => {
             expect(kwargs.groupby).toEqual(["bar"]);
         });
@@ -606,14 +582,12 @@ describe("board_desktop", () => {
             },
         });
 
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "pivot"]],
-            };
-        });
-        onRpc("web_read_group", (args) => {
-            expect(args.kwargs.groupby).toEqual(["bar"]);
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "pivot"]],
+        }));
+        onRpc("formatted_read_group", (args) => {
+            expect(args.kwargs.groupby).toEqual([]);
         });
 
         await mountView({
@@ -638,12 +612,10 @@ describe("board_desktop", () => {
 
     test("graphs in dashboard aren't squashed", async () => {
         Partner._views["graph,4"] = '<graph><field name="int_field" type="measure"/></graph>';
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "graph"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "graph"]],
+        }));
         await mountView({
             type: "form",
             resModel: "board",
@@ -662,7 +634,6 @@ describe("board_desktop", () => {
     });
 
     test("pivot view with property in pivot_column_groupby", async function () {
-        Partner._views["pivot,false"] = `<pivot/>`;
         Partner._fields.properties_definition = fields.PropertiesDefinition();
         Partner._fields.properties_definition = fields.PropertiesDefinition();
         Partner._fields.parent_id = fields.Many2one({ relation: "partner" });
@@ -677,18 +648,21 @@ describe("board_desktop", () => {
         onRpc(({ method, kwargs }) => {
             if (method === "get_property_definition") {
                 return {};
-            } else if (method === "read_group" && kwargs.groupby?.includes("properties.my_char")) {
+            } else if (method === "formatted_read_grouping_sets") {
                 return [
-                    {
-                        "properties.my_char": false,
-                        __domain: [["properties.my_char", "=", false]],
-                        __count: 2,
-                    },
-                    {
-                        "properties.my_char": "aaa",
-                        __domain: [["properties.my_char", "=", "aaa"]],
-                        __count: 1,
-                    },
+                    [{ __count: 3, __extra_domain: [] }],
+                    [
+                        {
+                            "properties.my_char": false,
+                            __extra_domain: [["properties.my_char", "=", false]],
+                            __count: 2,
+                        },
+                        {
+                            "properties.my_char": "aaa",
+                            __extra_domain: [["properties.my_char", "=", "aaa"]],
+                            __count: 1,
+                        },
+                    ],
                 ];
             }
         });
@@ -713,12 +687,10 @@ describe("board_mobile", () => {
     test("can't switch views in the dashboard", async () => {
         Partner._views["list,4"] = '<list string="Partner"><field name="foo"/></list>';
 
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "list"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "list"]],
+        }));
         await mountView({
             type: "form",
             resModel: "board",
@@ -738,7 +710,7 @@ describe("board_mobile", () => {
         expect(".o-dashboard-layout-1").toHaveCount(1, {
             message: "The display layout is force to 1",
         });
-        expect(".o-dashboard-action .o_control_panel").not.toBeVisible();
+        expect(".o-dashboard-action .o_control_panel").not.toHaveCount();
         expect(".o-dashboard-action-header .fa-close").toHaveCount(0, {
             message: "Should not have a close action button",
         });
@@ -747,12 +719,10 @@ describe("board_mobile", () => {
     test("Correctly soft switch to '1' layout on small screen", async () => {
         Partner._views["list,4"] = '<list string="Partner"><field name="foo"/></list>';
 
-        onRpc("/web/action/load", () => {
-            return {
-                res_model: "partner",
-                views: [[4, "list"]],
-            };
-        });
+        onRpc("/web/action/load", () => ({
+            res_model: "partner",
+            views: [[4, "list"]],
+        }));
         await mountView({
             type: "form",
             resModel: "board",

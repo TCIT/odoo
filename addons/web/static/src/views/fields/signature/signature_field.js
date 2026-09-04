@@ -28,7 +28,7 @@ export class SignatureField extends Component {
 
     setup() {
         this.displaySignatureRatio = 3;
-
+        this.notification = useService("notification");
         this.dialogService = useService("dialog");
         this.state = useState({
             isValid: true,
@@ -97,7 +97,7 @@ export class SignatureField extends Component {
                 const fullNameData = record.data[fullName];
                 if (record.fields[fullName].type === "many2one") {
                     // If m2o is empty, it will have falsy value in recordData
-                    signName = fullNameData && fullNameData[1];
+                    signName = fullNameData && fullNameData.display_name;
                 } else {
                     signName = fullNameData;
                 }
@@ -137,6 +137,7 @@ export class SignatureField extends Component {
 export const signatureField = {
     component: SignatureField,
     fieldDependencies: [{ name: "write_date", type: "datetime" }],
+    supportedTypes: ["binary"],
     supportedOptions: [
         {
             label: _t("Prefill with"),

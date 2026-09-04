@@ -1,24 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
-
-        <!-- Resource: pos.category -->
-        <record id="pos_category_miscellaneous" model="pos.category">
-          <field name="name">Misc</field>
-          <field name="image_128" type="base64" file="point_of_sale/static/img/misc_category.png" />
-          <field name="sequence">1</field>
-        </record>
-        <record id="pos_category_desks" model="pos.category">
-          <field name="name">Desks</field>
-          <field name="image_128" type="base64" file="point_of_sale/static/img/desk_category.png" />
-          <field name="sequence">2</field>
-        </record>
-        <record id="pos_category_chairs" model="pos.category">
-          <field name="name">Chairs</field>
-          <field name="image_128" type="base64" file="point_of_sale/static/img/chair_category.png" />
-          <field name="sequence">3</field>
-        </record>
-
         <!-- Products -->
 
         <!-- Old -->
@@ -32,10 +14,9 @@
             <field name="weight">0.01</field>
             <field name="barcode">2100002000003</field>
             <field name="taxes_id" eval="[(5,)]" />
-            <field name="categ_id" ref="product.product_category_5" />
+            <field name="categ_id" eval="ref('product.product_category_goods', raise_if_not_found=False)"/>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]" />
             <field name="uom_id" ref="uom.product_uom_unit" />
-            <field name="uom_po_id" ref="uom.product_uom_unit" />
             <field name="image_1920" type="base64" file="point_of_sale/static/img/wall_shelf_unit.png" />
         </record>
         <record id="small_shelf" model="product.product">
@@ -46,10 +27,9 @@
             <field name="is_storable" eval="True"/>
             <field name="weight">0.01</field>
             <field name="taxes_id" eval="[(5,)]" />
-            <field name="categ_id" ref="product.product_category_5" />
+            <field name="categ_id" eval="ref('product.product_category_goods', raise_if_not_found=False)"/>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]" />
             <field name="uom_id" ref="uom.product_uom_unit" />
-            <field name="uom_po_id" ref="uom.product_uom_unit" />
             <field name="image_1920" type="base64" file="point_of_sale/static/img/small_shelf.png" />
         </record>
 
@@ -60,10 +40,9 @@
             <field name="default_code">FURN_0004</field>
             <field name="is_storable" eval="True"/>
             <field name="weight">0.01</field>
-            <field name="categ_id" ref="product.product_category_5" />
+            <field name="categ_id" eval="ref('product.product_category_goods', raise_if_not_found=False)"/>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]" />
             <field name="uom_id" ref="uom.product_uom_unit" />
-            <field name="uom_po_id" ref="uom.product_uom_unit" />
             <field name="image_1920" type="base64" file="point_of_sale/static/img/letter_tray.png" />
         </record>
 
@@ -75,10 +54,9 @@
             <field name="is_storable" eval="True"/>
             <field name="weight">0.01</field>
             <field name="barcode">2301000000006</field>
-            <field name="categ_id" ref="product.product_category_5" />
+            <field name="categ_id" eval="ref('product.product_category_goods', raise_if_not_found=False)"/>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]" />
             <field name="uom_id" ref="uom.product_uom_unit" />
-            <field name="uom_po_id" ref="uom.product_uom_unit" />
             <field name="image_1920" type="base64" file="point_of_sale/static/img/magnetic_board.png" />
         </record>
 
@@ -88,9 +66,8 @@
             <field name="name">Whiteboard</field>
             <field name="is_storable" eval="True"/>
             <field name="weight">0.01</field>
-            <field name="categ_id" ref="product.product_category_5" />
+            <field name="categ_id" eval="ref('product.product_category_goods', raise_if_not_found=False)"/>
             <field name="uom_id" ref="uom.product_uom_unit" />
-            <field name="uom_po_id" ref="uom.product_uom_unit" />
             <field name="image_1920" type="base64" file="point_of_sale/static/img/whiteboard.png" />
         </record>
 
@@ -101,10 +78,9 @@
             <field name="default_code">FURN_0003</field>
             <field name="is_storable" eval="True"/>
             <field name="weight">0.01</field>
-            <field name="categ_id" ref="product.product_category_5" />
+            <field name="categ_id" eval="ref('product.product_category_goods', raise_if_not_found=False)"/>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]" />
             <field name="uom_id" ref="uom.product_uom_unit" />
-            <field name="uom_po_id" ref="uom.product_uom_unit" />
             <field name="image_1920" type="base64" file="point_of_sale/static/img/led_lamp.png" />
         </record>
 
@@ -116,10 +92,9 @@
             <field name="is_storable" eval="True"/>
             <field name="weight">0.01</field>
             <field name="barcode">2100001000004</field>
-            <field name="categ_id" ref="product.product_category_5" />
+            <field name="categ_id" eval="ref('product.product_category_goods', raise_if_not_found=False)"/>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]" />
             <field name="uom_id" ref="uom.product_uom_unit" />
-            <field name="uom_po_id" ref="uom.product_uom_unit" />
             <field name="image_1920" type="base64" file="point_of_sale/static/img/newspaper_stand.png" />
         </record>
 
@@ -129,10 +104,9 @@
             <field name="name">Whiteboard Pen</field>
             <field name="weight">0.01</field>
             <field name="default_code">CONS_0001</field>
-            <field name="categ_id" ref="product.product_category_consumable" />
+            <field name="categ_id" eval="ref('product.product_category_goods', raise_if_not_found=False)"/>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]" />
             <field name="uom_id" ref="uom.product_uom_unit" />
-            <field name="uom_po_id" ref="uom.product_uom_unit" />
             <field name="image_1920" type="base64" file="point_of_sale/static/img/whiteboard_pen.png" />
         </record>
 

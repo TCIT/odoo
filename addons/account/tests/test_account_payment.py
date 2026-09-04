@@ -1,14 +1,15 @@
-# -*- coding: utf-8 -*-
 from contextlib import contextmanager
 
-from odoo import Command
+from odoo import Command, fields
+from odoo.exceptions import UserError
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.addons.mail.tests.common import MailCommon
 from odoo.tests import Form, tagged
 from unittest.mock import patch
 
 
 @tagged('post_install', '-at_install')
-class TestAccountPayment(AccountTestInvoicingCommon):
+class TestAccountPayment(AccountTestInvoicingCommon, MailCommon):
 
     @classmethod
     def setUpClass(cls):
@@ -36,11 +37,13 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             'acc_number': "985632147",
             'partner_id': cls.env.company.partner_id.id,
             'acc_type': 'bank',
+            'allow_out_payment': True,
         })
         cls.comp_bank_account2 = cls.env['res.partner.bank'].create({
             'acc_number': "741258963",
             'partner_id': cls.env.company.partner_id.id,
             'acc_type': 'bank',
+            'allow_out_payment': True,
         })
 
         cls.pay_term_epd = cls.env['account.payment.term'].create([{
@@ -104,6 +107,10 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             expected_counterpart_line,
             expected_liquidity_line,
         ])
+
+        # Cancel the move.
+        payment.move_id.button_cancel()
+        self.assertRecordValues(payment, [{'state': 'canceled'}])
 
     def test_payment_move_sync_update_journal_custom_accounts(self):
         """The objective is to edit the journal of a payment in order to check if the accounts are updated."""
@@ -218,12 +225,14 @@ class TestAccountPayment(AccountTestInvoicingCommon):
         # So, change the payment partner_type beforehand rather than in the form view.
         payment.action_draft()
         payment.partner_type = 'supplier'
+        payment.date = '2024-01-01'
         pay_form = Form(payment)
         pay_form.currency_id = self.other_currency
         payment = pay_form.save()
         self.assertRecordValues(payment, [{
             **expected_payment_values,
             'partner_type': 'supplier',
+            'date': fields.Date.from_string('2024-01-01'),
             'destination_account_id': self.partner_a.property_account_payable_id.id,
             'currency_id': self.other_currency.id,
             'partner_id': self.partner_a.id,
@@ -232,6 +241,7 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             **expected_move_values,
             'currency_id': self.other_currency.id,
             'partner_id': self.partner_a.id,
+            'date': fields.Date.from_string('2024-01-01'),
         }])
         self.assertRecordValues(payment.move_id.line_ids.sorted('balance'), [
             {
@@ -279,6 +289,30 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             'payment_method_line_id': self.inbound_payment_method_line.id,
             'journal_id': self.company_data['default_journal_bank'].id,
         }])
+
+    def test_attachments_send_multiple(self):
+        payments = self.env['account.payment'].create([{
+            'amount': 100.0,
+            'payment_type': 'inbound',
+            'partner_type': 'customer',
+            'partner_id': p.id,
+        } for p in (self.partner_a, self.partner_b)])
+
+        form = Form(self.env['mail.compose.message'].with_context({
+            'mailing_document_based': True,
+            'mail_post_autofollow': True,
+            'default_composition_mode': 'mass_mail',
+            'default_template_id': self.env.ref('account.mail_template_data_payment_receipt'),
+            'default_email_layout_xmlid': 'mail.mail_notification_light',
+            'default_model': 'account.payment',
+            'default_res_ids': payments.ids,
+        }))
+        saved_form = form.save()
+        with self.mock_mail_gateway():
+            saved_form._action_send_mail()
+
+        for p in payments:
+            self.assertTrue(p._get_mail_thread_data_attachments())
 
     def test_compute_currency_id(self):
         ''' When creating a new account.payment without specifying a currency, the default currency should be the one
@@ -489,6 +523,7 @@ class TestAccountPayment(AccountTestInvoicingCommon):
         invoice.js_assign_outstanding_line(credit_line.id)
         self.assertTrue(invoice.payment_state in ('in_payment', 'paid'), "Invoice should be paid")
         invoice.button_draft()
+        invoice.line_ids.remove_move_reconcile()
         self.assertTrue(invoice.payment_state == 'not_paid', "Invoice should'nt be paid anymore")
         self.assertTrue(invoice.state == 'draft', "Invoice should be draft")
 
@@ -510,6 +545,38 @@ class TestAccountPayment(AccountTestInvoicingCommon):
 
             payment.journal_id = default_journal
             self.assertEqual(payment.payment_method_line_id.journal_id.id, default_journal.id)
+
+    def test_journal_change_and_change_names(self):
+        """Test that changing the journal on a payment updates the journal entry name correctly."""
+
+        initial_journal = self.company_data['default_journal_bank']
+        new_journal = self.company_data['default_journal_cash']
+
+        # Use the existing payment method line from the initial journal
+        payment_method_line = initial_journal.inbound_payment_method_line_ids[0]
+
+        # Ensure the new journal has the correct payment method line
+        new_journal.inbound_payment_method_line_ids[0].payment_account_id = self.payment_debit_account_id
+
+        # Create the payment with the initial journal and post it
+        payment = self.env['account.payment'].create({
+            'amount': 50.0,
+            'payment_type': 'inbound',
+            'partner_type': 'customer',
+            'partner_id': self.partner_a.id,
+            'journal_id': initial_journal.id,
+            'payment_method_line_id': payment_method_line.id,
+        })
+        payment.action_post()
+
+        # Change the journal, reset the payment to draft, and post again
+        payment.action_draft()
+        payment.journal_id = new_journal
+        payment.payment_method_line_id = new_journal.inbound_payment_method_line_ids[0]
+        payment.action_post()
+
+        # Verify the journal entry's name were updated correctly
+        self.assertRegex(payment.move_id.name, rf"^P{new_journal.code}/")
 
     def test_payments_copy_data(self):
         payment_1, payment_2 = self.env['account.payment'].create([
@@ -589,12 +656,12 @@ class TestAccountPayment(AccountTestInvoicingCommon):
         }])
         invoice_1.action_post()
         register_payment_and_assert_state(invoice_1, 100.0, is_community=True)
-        self.assertTrue(invoice_1.matched_payment_ids.move_id)
+        self.assertTrue(invoice_1.reconciled_payment_ids.move_id)
 
         invoice_2 = invoice_1.copy()
         invoice_2.action_post()
         register_payment_and_assert_state(invoice_2, 100.0, is_community=False)
-        self.assertFalse(invoice_2.matched_payment_ids.move_id)
+        self.assertFalse(invoice_2.reconciled_payment_ids.move_id)
 
     def test_payment_confirmation_with_bank_outstanding_account(self):
         """ Ensures that when the outstanding account of the payment method is set to a bank,
@@ -611,6 +678,44 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             'amount': 2629,
         })
         payment.action_post()
+        self.assertEqual(payment.state, 'paid')
+
+    def test_payment_memo_account_move_ref_inverse(self):
+        ''' Ensure that when the account payment's memo is updated,
+            the related account move's ref is also updated.
+        '''
+        bank_journal = self.company_data['default_journal_bank']
+        bank_journal.inbound_payment_method_line_ids.payment_account_id = self.inbound_payment_method_line.payment_account_id
+        payment = self.env['account.payment'].create({
+            'payment_type': 'inbound',
+            'partner_type': 'customer',
+            'partner_id': self.partner_a.id,
+            'journal_id': bank_journal.id,
+            'amount': 2629,
+            'memo': 'Test Memo'
+        })
+        payment.action_post()
+        payment.write({'memo': 'Updated Memo'})
+
+        self.assertEqual(payment.move_id.ref, payment.memo)
+
+    def test_payment_state_with_unreconciliable_outstanding_account(self):
+        unreconciliable_account = self.env['account.account'].create({
+            'code': '209.01.01',
+            'name': 'Bank Account',
+            'account_type': 'asset_cash',
+            'reconcile': False,
+        })
+        self.company_data['default_journal_bank'].outbound_payment_method_line_ids.payment_account_id = unreconciliable_account
+        invoice = self.init_invoice(move_type='out_invoice', amounts=[10], post=True)
+
+        payment = self.env['account.payment.register'].with_context(
+            active_model='account.move',
+            active_ids=invoice.ids,
+        ).create({
+            'payment_method_line_id': self.company_data['default_journal_bank'].outbound_payment_method_line_ids[0].id,
+        })._create_payments()
+
         self.assertEqual(payment.state, 'paid')
 
     def test_invoice_paid_hook_called_in_various_scenarios(self):
@@ -708,16 +813,17 @@ class TestAccountPayment(AccountTestInvoicingCommon):
 
         payment.action_post()
 
+        year = fields.Date.today().year
         wizard = self.env['account.resequence.wizard'].with_context({
             'active_ids': payment.move_id.ids,
             'active_model': 'account.move',
         }).create({
-            'first_name': 'PBNK1/2025/00002',
+            'first_name': f'PBNK1/{year}/00002',
         })
         wizard.resequence()
 
-        self.assertEqual(payment.move_id.name, 'PBNK1/2025/00002')
-        self.assertEqual(payment.name, 'PBNK1/2025/00002')
+        self.assertEqual(payment.move_id.name, f'PBNK1/{year}/00002')
+        self.assertEqual(payment.name, f'PBNK1/{year}/00002')
 
     def test_vendor_payment_save_user_selected_journal_id(self):
         journal_bank = self.env['account.journal'].search([('name', '=', 'Bank')])
@@ -734,3 +840,107 @@ class TestAccountPayment(AccountTestInvoicingCommon):
 
         self.assertEqual(payment.payment_method_line_id.journal_id, payment.journal_id)
         self.assertEqual(payment.journal_id, journal_bank)
+
+    def test_empty_string_payment_method(self):
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'invoice_line_ids': [Command.create({'product_id': self.product_a.id})],
+        })
+        invoice.action_post()
+
+        journal = self.company_data['default_journal_bank']
+        payment_method_line = journal.inbound_payment_method_line_ids.filtered(lambda pm: pm.code == "manual")
+        payment_method_line.write({
+            'name': False,
+            'payment_account_id': self.payment_debit_account_id.id,
+        })
+
+        self.env['account.payment.register']\
+            .with_context(active_model='account.move', active_ids=invoice.ids)\
+            .create({'payment_method_line_id': payment_method_line.id})\
+            ._create_payments()
+        self.assertEqual(invoice.state, "posted")
+
+    def test_payment_amount_without_move(self):
+        bank_journal_2 = self.company_data['default_journal_bank'].copy()
+
+        payment = self.env['account.payment'].create({
+            'amount': 100,
+            'payment_type': 'outbound',
+            'partner_type': 'supplier',
+            'partner_id': self.partner_a.id,
+            'currency_id': self.other_currency.id,
+            'journal_id': bank_journal_2.id,
+        })
+
+        payment.action_post()
+
+        self.assertRecordValues(payment, [{
+            'amount': 100,
+            'amount_signed': -100,
+            'amount_company_currency_signed': -50,
+        }])
+
+    def test_payment_state_computation(self):
+        def create_invoice(post=False, kwargs=None):
+            move = self.env['account.move'].create({
+                'move_type': 'out_invoice',
+                'partner_id': self.partner_a.id,
+                'invoice_line_ids': [Command.create({'product_id': self.product_a.id})],
+            })
+            if post:
+                move.action_post()
+            if kwargs is not None:
+                move.update({**kwargs})
+            return move
+
+        for post, payment_state, expected in [
+            (False, 'not_paid', 'draft'),
+            (False, 'partial', 'partial'),
+            (False, 'in_payment', 'in_payment'),
+            (False, 'paid', 'paid'),
+            (False, 'blocked', 'blocked'),
+            (True, 'partial', 'partial'),
+            (True, 'in_payment', 'in_payment'),
+            (True, 'paid', 'paid'),
+            (True, 'reversed', 'reversed'),
+            (True, 'blocked', 'blocked'),
+        ]:
+            invoice = create_invoice(post=post, kwargs={'payment_state': payment_state})
+            self.assertEqual(invoice.status_in_payment, expected)
+
+        for is_move_sent, expected in [
+            (True, 'sent'),
+            (False, 'posted'),
+        ]:
+            invoice = create_invoice(post=True, kwargs={'is_move_sent': is_move_sent})
+            self.assertEqual(invoice.status_in_payment, expected)
+
+    def test_payment_move_with_multiple_liquidity_lines(self):
+        payment = self.env['account.payment'].create({
+            'amount': 150.0,
+            'payment_type': 'inbound',
+            'partner_type': 'customer',
+            'partner_id': self.partner_a.id,
+            'journal_id': self.company_data['default_journal_bank'].id,
+        })
+        payment.action_post()
+        move = payment.move_id
+        move.button_draft()
+        liquidity_lines = payment._seek_for_lines()[0]
+        move.write({
+            'line_ids': [
+                Command.update(liquidity_lines.id, {'amount_currency': 100}),
+                Command.create({
+                    'account_id': liquidity_lines.account_id.id,
+                    'balance': 50.0,
+                    'amount_currency': 50.0,
+                    'currency_id': payment.currency_id.id,
+                }),
+            ],
+        })
+        move.action_post()
+        payment.action_draft()
+        with self.assertRaises(UserError):
+            payment.amount = 300.0

@@ -2,7 +2,7 @@
 from odoo import fields, models
 
 
-class L10nPeResCityDistrict(models.Model):
+class L10n_PeResCityDistrict(models.Model):
     _name = 'l10n_pe.res.city.district'
     _description = 'District'
     _order = 'name'

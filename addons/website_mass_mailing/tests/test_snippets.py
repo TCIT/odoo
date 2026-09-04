@@ -15,7 +15,7 @@ class TestSnippets(HttpCase):
         emails = mailing_list.contact_ids.mapped('email')
         self.assertIn("hello@world.com", emails)
 
-    def test_snippet_newsletter_block_witih_edit(self):
+    def test_snippet_newsletter_block_with_edit(self):
         self.env.ref('base.user_admin').email = 'admin@yourcompany.example.com'
         admin_email = self.env.ref('base.user_admin').email
         # Get contacts with this email

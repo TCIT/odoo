@@ -1,29 +1,39 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_debit_note
-# 
-# Translators:
-# Wil Odoo, 2024
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2024
-# 
+# * account_debit_note
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# Bren Driesen <brdri@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Erwin van der Ploeg <erwin@odooexperts.nl>, 2024\n"
-"Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
+"POT-Creation-Date: 2026-06-19 17:35+0000\n"
+"PO-Revision-Date: 2026-08-13 08:12+0000\n"
+"Last-Translator: Bren Driesen <brdri@odoo.com>\n"
+"Language-Team: Dutch <https://translate.odoo.com/projects/odoo-19/"
+"account_debit_note/nl/>\n"
+"Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: nl\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: account_debit_note
 #: model_terms:ir.ui.view,arch_db:account_debit_note.view_move_form_debit
 msgid "<span class=\"o_stat_text\">Debit Notes</span>"
 msgstr "<span class=\"o_stat_text\">Debetfacturen</span>"
+
+#. module: account_debit_note
+#: model_terms:ir.ui.view,arch_db:account_debit_note.report_invoice_document_inherit_debit_note
+msgid "<strong>Debit Note Date</strong>"
+msgstr "<strong>Datum debetnota</strong>"
+
+#. module: account_debit_note
+#: model_terms:ir.ui.view,arch_db:account_debit_note.report_invoice_document_inherit_debit_note
+msgid "<strong>Invoice Date</strong>"
+msgstr "<strong>Factuurdatum</strong>"
 
 #. module: account_debit_note
 #: model:ir.model,name:account_debit_note.model_account_debit_note
@@ -36,13 +46,33 @@ msgid "Cancel"
 msgstr "Annuleren"
 
 #. module: account_debit_note
+#: model_terms:ir.ui.view,arch_db:account_debit_note.report_invoice_document_inherit_debit_note
+msgid "Cancelled Debit Note"
+msgstr "Geannuleerde debetnota"
+
+#. module: account_debit_note
+#: model_terms:ir.ui.view,arch_db:account_debit_note.report_invoice_document_inherit_debit_note
+msgid "Cancelled Invoice"
+msgstr "Geannuleerde factuur"
+
+#. module: account_debit_note
+#: model_terms:ir.ui.view,arch_db:account_debit_note.report_invoice_document_inherit_debit_note
+msgid "Cancelled Proforma Debit Note"
+msgstr "Geannuleerde pro-forma-debetnota"
+
+#. module: account_debit_note
+#: model_terms:ir.ui.view,arch_db:account_debit_note.report_invoice_document_inherit_debit_note
+msgid "Cancelled Proforma Invoice"
+msgstr "Geannuleerde pro-formafactuur"
+
+#. module: account_debit_note
 #: model:ir.model.fields,help:account_debit_note.field_account_journal__debit_sequence
 msgid ""
-"Check this box if you don't want to share the same sequence for invoices and"
-" debit notes made from this journal"
+"Check this box if you don't want to share the same sequence for invoices and "
+"debit notes made from this journal"
 msgstr ""
-"Vink dit vakje aan als je niet dezelfde volgorde wilt voor facturen en "
-"debetnota's die vanuit dit dagboek worden gemaakt"
+"Vink dit vakje aan als je niet dezelfde reeksnummering wilt delen voor "
+"facturen en debetfacturen vanuit dit dagboek"
 
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__copy_lines
@@ -71,9 +101,10 @@ msgid "Created on"
 msgstr "Aangemaakt op"
 
 #. module: account_debit_note
-#: model:ir.actions.server,name:account_debit_note.action_move_debit_note
+#: model_terms:ir.ui.view,arch_db:account_debit_note.report_invoice_document_inherit_debit_note
 #: model_terms:ir.ui.view,arch_db:account_debit_note.view_account_move_filter_debit
 #: model_terms:ir.ui.view,arch_db:account_debit_note.view_account_move_line_filter_debit
+#: model_terms:ir.ui.view,arch_db:account_debit_note.view_move_form_debit
 msgid "Debit Note"
 msgstr "Debetfactuur"
 
@@ -96,15 +127,39 @@ msgstr "Debetfacturen"
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_journal__debit_sequence
 msgid "Dedicated Debit Note Sequence"
-msgstr "Speciale reeks debetnota's"
+msgstr "Aparte reeksnummering voor debetfacturen"
 
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__display_name
+#: model:ir.model.fields,field_description:account_debit_note.field_account_journal__display_name
+#: model:ir.model.fields,field_description:account_debit_note.field_account_move__display_name
 msgid "Display Name"
 msgstr "Schermnaam"
 
 #. module: account_debit_note
+#: model_terms:ir.ui.view,arch_db:account_debit_note.report_invoice_document_inherit_debit_note
+msgid "Draft Debit Note"
+msgstr "Concept-debetnota"
+
+#. module: account_debit_note
+#: model_terms:ir.ui.view,arch_db:account_debit_note.report_invoice_document_inherit_debit_note
+msgid "Draft Invoice"
+msgstr "Conceptfactuur"
+
+#. module: account_debit_note
+#: model_terms:ir.ui.view,arch_db:account_debit_note.report_invoice_document_inherit_debit_note
+msgid "Draft Proforma Debit Note"
+msgstr "Concept pro-forma-debetnota"
+
+#. module: account_debit_note
+#: model_terms:ir.ui.view,arch_db:account_debit_note.report_invoice_document_inherit_debit_note
+msgid "Draft Proforma Invoice"
+msgstr "Concept pro-formafactuur"
+
+#. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__id
+#: model:ir.model.fields,field_description:account_debit_note.field_account_journal__id
+#: model:ir.model.fields,field_description:account_debit_note.field_account_move__id
 msgid "ID"
 msgstr "ID"
 
@@ -120,8 +175,12 @@ msgid ""
 "copy them.  We won't copy them for debit notes from credit notes. "
 msgstr ""
 "Als je voor elke regel correcties moet aanbrengen, kan het handig zijn om "
-"deze te kopiëren. We kopiëren ze niet voor debetfacturen van creditfacturen."
-" "
+"deze te kopiëren. We kopiëren ze niet voor debetfacturen van creditfacturen. "
+
+#. module: account_debit_note
+#: model_terms:ir.ui.view,arch_db:account_debit_note.report_invoice_document_inherit_debit_note
+msgid "Invoice"
+msgstr "Factuur"
 
 #. module: account_debit_note
 #: model:ir.model,name:account_debit_note.model_account_journal
@@ -156,7 +215,7 @@ msgstr "Boekingen"
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__move_type
 msgid "Move Type"
-msgstr "Soort boeking"
+msgstr "Boekingstype"
 
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_bank_statement_line__debit_note_count
@@ -169,6 +228,16 @@ msgstr "Aantal debetfacturen"
 #: model:ir.model.fields,field_description:account_debit_note.field_account_move__debit_origin_id
 msgid "Original Invoice Debited"
 msgstr "Originele factuur gedebiteerd"
+
+#. module: account_debit_note
+#: model_terms:ir.ui.view,arch_db:account_debit_note.report_invoice_document_inherit_debit_note
+msgid "Proforma Debit Note"
+msgstr "Pro-forma-debetnota"
+
+#. module: account_debit_note
+#: model_terms:ir.ui.view,arch_db:account_debit_note.report_invoice_document_inherit_debit_note
+msgid "Proforma Invoice"
+msgstr "Pro-formafactuur"
 
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__reason
@@ -192,7 +261,7 @@ msgstr "De debetfacturengemaakt voor deze factuur"
 
 #. module: account_debit_note
 #. odoo-python
-#: code:addons/account_debit_note/wizard/account_debit_note.py:0
+#: code:addons/account_debit_note/models/account_move.py:0
 msgid "This debit note was created from: %s"
 msgstr "Deze debetfactuur is gemaakt op basis van: %s"
 
@@ -209,8 +278,7 @@ msgid ""
 "Note, a Vendor Bill or a Vendor Credit Note."
 msgstr ""
 "Je kunt enkel een debetfactuur aanmaken voor een klantfactuur, een "
-"klantcreditfactuur, een leveranciersfactuur of een "
-"leverancierscreditfactuur."
+"klantcreditfactuur, een leveranciersfactuur of een leverancierscreditfactuur."
 
 #. module: account_debit_note
 #. odoo-python
@@ -222,8 +290,14 @@ msgstr "Je kunt alleen geboekte boekingen debiteren."
 #. odoo-python
 #: code:addons/account_debit_note/wizard/account_debit_note.py:0
 msgid ""
-"You can't make a debit note for an invoice that is already linked to a debit"
-" note."
+"You can't make a debit note for an invoice that is already linked to a debit "
+"note."
 msgstr ""
 "Je kunt geen debetfactuur aanmaken voor een factuur die al gekoppeld is aan "
 "een debetfactuur."
+
+#. module: account_debit_note
+#. odoo-python
+#: code:addons/account_debit_note/models/account_move.py:0
+msgid "debit_origin_id"
+msgstr "debit_origin_id"

@@ -4,7 +4,7 @@
 {
     'name': 'POS QR Tests',
     'version': '1.0',
-    'category': 'Hidden',
+    'category': 'Sales/Point of Sale',
     'sequence': 9876,
     'description': """
         This module contains tests related to point of sale QR code payment.
@@ -24,5 +24,6 @@
             'l10n_test_pos_qr_payment/static/tests/**/*',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

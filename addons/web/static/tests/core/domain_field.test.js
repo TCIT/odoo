@@ -17,6 +17,7 @@ import {
     getConditionText,
     getCurrentPath,
     getCurrentValue,
+    label,
 } from "@web/../tests/core/tree_editor/condition_tree_editor_test_helpers";
 import {
     contains,
@@ -30,6 +31,7 @@ import {
     serverState,
 } from "@web/../tests/web_test_helpers";
 
+import { registry } from "@web/core/registry";
 import { WebClient } from "@web/webclient/webclient";
 
 class PartnerType extends models.Model {
@@ -44,10 +46,28 @@ class PartnerType extends models.Model {
 
 defineModels([Partner, Product, Team, Player, Country, Stage, PartnerType]);
 
-test("The domain editor should not crash the view when given a dynamic filter", async function () {
+function replaceNotificationService() {
+    registry.category("services").add(
+        "notification",
+        {
+            start() {
+                return {
+                    add(message) {
+                        expect.step(message);
+                    },
+                };
+            },
+        },
+        { force: true }
+    );
+}
+
+test("The domain editor should not crash the view when given a dynamic filter (allow_expressions=False)", async function () {
     // dynamic filters (containing variables, such as uid, parent or today)
     // are handled by the domain editor
     Partner._records[0].foo = `[("int", "=", uid)]`;
+
+    replaceNotificationService();
 
     await mountView({
         type: "form",
@@ -63,6 +83,49 @@ test("The domain editor should not crash the view when given a dynamic filter", 
     expect(getCurrentValue()).toBe("uid", {
         message: "The widget should show the dynamic filter.",
     });
+    expect(".o_field_domain").not.toHaveClass("o_field_invalid");
+    expect.verifySteps(["The domain should not involve non-literals"]);
+});
+
+test("The domain editor should not crash the view when given a dynamic filter (allow_expressions=False) in a sub domain", async function () {
+    Partner._fields.company_id = fields.Many2one({ relation: "partner" });
+    Partner._records[0].foo = "[('company_id', 'any', [('id', '=', uid)])]";
+
+    replaceNotificationService();
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: `
+                <form>
+                    <field name="foo" widget="domain" options="{'model': 'partner'}" />
+                    <field name="int" invisible="1" />
+                </form>`,
+    });
+    expect.verifySteps(["The domain should not involve non-literals"]);
+});
+
+test("The domain editor should not crash the view when given a dynamic filter (allow_expressions=True)", async function () {
+    Partner._records[0].foo = `[("int", "=", uid)]`;
+
+    replaceNotificationService();
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: `
+                    <form>
+                        <field name="foo" widget="domain" options="{'model': 'partner', 'allow_expressions':True}" />
+                        <field name="int" invisible="1" />
+                    </form>`,
+    });
+    expect(getCurrentValue()).toBe("uid", {
+        message: "The widget should show the dynamic filter.",
+    });
+    expect(".o_field_domain").not.toHaveClass("o_field_invalid");
+    expect.verifySteps(["The domain involves non-literals. Their evaluation might fail."]);
 });
 
 test("The domain editor should not crash the view when given a dynamic filter ( datetime )", async function () {
@@ -196,7 +259,7 @@ test("domain field is correctly reset on every view change", async function () {
             </form>`,
     });
 
-    // As the domain is equal to [["id", "=", 1]] there should be a field
+    // As the domain = to [["id", "=", 1]] there should be a field
     // selector to change this
     expect(".o_field_domain .o_model_field_selector").toHaveCount(1, {
         message: "there should be a field selector",
@@ -364,7 +427,7 @@ test("field context is propagated when opening selection", async function () {
 });
 
 test("domain field: manually edit domain with textarea", async function () {
-    serverState.debug = true;
+    serverState.debug = "1";
 
     Partner._fields.bar = fields.Char();
     Partner._records = [
@@ -380,7 +443,6 @@ test("domain field: manually edit domain with textarea", async function () {
                 <field name="bar"/>
                 <field name="foo" widget="domain" options="{'model': 'bar'}"/>
             </form>`,
-        search: `<search />`,
     };
 
     onRpc("search_count", ({ args }) => expect.step(args[0]));
@@ -409,7 +471,7 @@ test("domain field: manually edit domain with textarea", async function () {
 });
 
 test("domain field: manually set an invalid domain with textarea", async function () {
-    serverState.debug = true;
+    serverState.debug = "1";
 
     Partner._fields.bar = fields.Char();
     Partner._records = [
@@ -421,11 +483,10 @@ test("domain field: manually set an invalid domain with textarea", async functio
 
     Partner._views = {
         form: `
-                <form>
-                    <field name="bar"/>
-                    <field name="foo" widget="domain" options="{'model': 'bar'}"/>
-                </form>`,
-        search: `<search />`,
+            <form>
+                <field name="bar"/>
+                <field name="foo" widget="domain" options="{'model': 'bar'}"/>
+            </form>`,
     };
 
     onRpc("/web/domain/validate", async (request) => {
@@ -476,7 +537,7 @@ test("domain field: manually set an invalid domain with textarea", async functio
 });
 
 test("domain field: reload count by clicking on the refresh button", async function () {
-    serverState.debug = true;
+    serverState.debug = "1";
 
     Partner._fields.bar = fields.Char();
     Partner._records = [
@@ -488,11 +549,10 @@ test("domain field: reload count by clicking on the refresh button", async funct
 
     Partner._views = {
         form: `
-                <form>
-                    <field name="bar"/>
-                    <field name="foo" widget="domain" options="{'model': 'bar'}"/>
-                </form>`,
-        search: `<search />`,
+            <form>
+                <field name="bar"/>
+                <field name="foo" widget="domain" options="{'model': 'bar'}"/>
+            </form>`,
     };
 
     onRpc("/web/domain/validate", () => true);
@@ -554,10 +614,115 @@ test("domain field: does not wait for the count to render", async function () {
     expect(".o_domain_show_selection_button").toHaveText("2 record(s)");
 });
 
+test("domain field: have a default count limit of 10000", async function () {
+    serverState.debug = "1";
+
+    Partner._fields.bar = fields.Char();
+    Partner._records = [
+        {
+            foo: "[]",
+            bar: "product",
+        },
+    ];
+    Partner._views = {
+        form: `
+                <form>
+                    <field name="bar"/>
+                    <field name="foo" widget="domain" options="{'model': 'bar'}"/>
+                </form>`,
+    };
+
+    onRpc("search_count", ({ kwargs }) => {
+        expect.step(kwargs.limit);
+        return 99999;
+    });
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction({
+        name: "test",
+        res_id: 1,
+        res_model: "partner",
+        type: "ir.actions.act_window",
+        views: [[false, "form"]],
+    });
+    expect.verifySteps([10001]);
+    expect(".o_domain_show_selection_button").toHaveText("10000+ record(s)");
+});
+
+test("domain field: foldable and count limit reached", async function () {
+    serverState.debug = "1";
+
+    Partner._fields.bar = fields.Char();
+    Partner._records = [
+        {
+            foo: "[]",
+            bar: "product",
+        },
+    ];
+    Partner._views = {
+        form: `
+                <form>
+                    <field name="bar"/>
+                    <field name="foo" widget="domain" options="{'foldable': true, 'model': 'bar'}"/>
+                </form>`,
+    };
+
+    onRpc("search_count", ({ kwargs }) => {
+        expect.step(kwargs.limit);
+        return 99999;
+    });
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction({
+        name: "test",
+        res_id: 1,
+        res_model: "partner",
+        type: "ir.actions.act_window",
+        views: [[false, "form"]],
+    });
+    expect.verifySteps([10001]);
+    expect(".o_domain_show_selection_button").toHaveText("10000+ record(s)");
+});
+
+test("domain field: configurable count limit", async function () {
+    serverState.debug = "1";
+
+    Partner._fields.bar = fields.Char();
+    Partner._records = [
+        {
+            foo: "[]",
+            bar: "product",
+        },
+    ];
+    Partner._views = {
+        form: `
+                <form>
+                    <field name="bar"/>
+                    <field name="foo" widget="domain" options="{'model': 'bar', 'count_limit': 10}"/>
+                </form>`,
+    };
+
+    onRpc("search_count", ({ kwargs }) => {
+        expect.step(kwargs.limit);
+        return 99999;
+    });
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction({
+        name: "test",
+        res_id: 1,
+        res_model: "partner",
+        type: "ir.actions.act_window",
+        views: [[false, "form"]],
+    });
+    expect.verifySteps([11]);
+    expect(".o_domain_show_selection_button").toHaveText("10+ record(s)");
+});
+
 test("domain field: edit domain with dynamic content", async function () {
     expect.assertions(3);
 
-    serverState.debug = true;
+    serverState.debug = "1";
 
     Partner._fields.bar = fields.Char();
     let rawDomain = `[("date", ">=", datetime.datetime.combine(context_today() + relativedelta(days = -365), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S"))]`;
@@ -572,9 +737,8 @@ test("domain field: edit domain with dynamic content", async function () {
         form: `
             <form>
                 <field name="bar"/>
-                <field name="foo" widget="domain" options="{'model': 'bar'}"/>
+                <field name="foo" widget="domain" options="{'model': 'bar', 'allow_expressions':True}"/>
             </form>`,
-        search: `<search />`,
     };
 
     onRpc("web_save", ({ args }) => {
@@ -600,7 +764,7 @@ test("domain field: edit domain with dynamic content", async function () {
 });
 
 test("domain field: edit through selector (dynamic content)", async function () {
-    serverState.debug = true;
+    serverState.debug = "1";
     mockDate("2020-09-05 00:00:00");
 
     Partner._fields.bar = fields.Char();
@@ -616,9 +780,8 @@ test("domain field: edit through selector (dynamic content)", async function () 
         form: `
             <form>
                 <field name="bar"/>
-                <field name="foo" widget="domain" options="{'model': 'bar'}"/>
+                <field name="foo" widget="domain" options="{'model': 'bar', 'allow_expressions':True}"/>
             </form>`,
-        search: `<search />`,
     };
 
     onRpc(({ method }) => expect.step(method));
@@ -644,7 +807,7 @@ test("domain field: edit through selector (dynamic content)", async function () 
     // Open and close the datepicker
     await contains(".o_datetime_input").click();
     expect(".o_datetime_picker").toHaveCount(1);
-    await scroll(getFixture(), { top: 10 });
+    await scroll(getFixture(), { top: 10 }, { scrollable: false });
     expect(".o_datetime_picker").toHaveCount(1);
     expect(SELECTORS.debugArea).toHaveValue(rawDomain);
     expect.verifySteps([]);
@@ -746,7 +909,7 @@ test("domain field with 'inDialog' options", async function () {
 
 test("invalid value in domain field with 'inDialog' options", async function () {
     Partner._fields.name.default = "[]";
-    serverState.debug = true;
+    serverState.debug = "1";
     await mountView({
         type: "form",
         resModel: "partner",
@@ -770,7 +933,7 @@ test("invalid value in domain field with 'inDialog' options", async function () 
 
 test("edit domain button is available even while loading records count", async function () {
     Partner._fields.name.default = "[]";
-    serverState.debug = true;
+    serverState.debug = "1";
     const searchCountDeffered = new Deferred();
     onRpc("/web/domain/validate", () => true);
     onRpc("search_count", () => searchCountDeffered);
@@ -794,7 +957,7 @@ test("edit domain button is available even while loading records count", async f
 
 test("debug input editing sets the field as dirty even without a focus out", async function () {
     Partner._fields.name.default = "[]";
-    serverState.debug = true;
+    serverState.debug = "1";
     onRpc("/web/domain/validate", () => {
         expect.step("validate domain");
         return true;
@@ -816,7 +979,7 @@ test("debug input editing sets the field as dirty even without a focus out", asy
 
 test("debug input corrections don't need a focus out to be saved", async function () {
     Partner._fields.name.default = "[]";
-    serverState.debug = true;
+    serverState.debug = "1";
     await mountView({
         type: "form",
         resModel: "partner",
@@ -836,7 +999,7 @@ test("debug input corrections don't need a focus out to be saved", async functio
 });
 
 test("quick check on save if domain has been edited via the debug input", async function () {
-    serverState.debug = true;
+    serverState.debug = "1";
     Partner._fields.name = fields.Char({ default: "[['id', '=', False]]" });
     onRpc("/web/domain/validate", async (request) => {
         const { params } = await request.json();
@@ -925,7 +1088,7 @@ test("domain field can be foldable", async function () {
 });
 
 test("add condition in empty foldable domain", async function () {
-    serverState.debug = true;
+    serverState.debug = "1";
     Partner._records[0].foo = '[("id", "=", 1)]';
 
     await mountView({
@@ -1000,16 +1163,16 @@ test("folded domain field with any operator", async function () {
                 </sheet>
             </form>`,
     });
-    expect(`.o_field_domain .o_facet_values`).toHaveText("Company matches ( Id = 1 )");
+    expect(`.o_field_domain .o_facet_values`).toHaveText("Company : ( Id = 1 )");
 });
 
-test("folded domain field with withinh operator", async function () {
-    Partner._fields.company_id = fields.Many2one({ relation: "partner" });
-    Partner._records[0].foo = `[
-        "&",
-        ("datetime", ">=", datetime.datetime.combine(context_today(), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")),
-        ("datetime", "<=", datetime.datetime.combine(context_today() + relativedelta(months = 2), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S"))
-    ]`;
+test("foldable domain, search_count delayed", async function () {
+    Partner._records[0].foo = '[("id", "=", 1)]';
+    const def = new Deferred();
+    onRpc("search_count", async () => {
+        await def;
+    });
+
     await mountView({
         type: "form",
         resModel: "partner",
@@ -1018,10 +1181,104 @@ test("folded domain field with withinh operator", async function () {
             <form>
                 <sheet>
                     <group>
-                        <field name="foo" widget="domain" options="{'model': 'partner', 'foldable': true}" />
+                        <field name="foo" widget="domain" options="{'model': 'partner.type', 'foldable': true}" />
                     </group>
                 </sheet>
             </form>`,
     });
-    expect(`.o_field_domain .o_facet_values`).toHaveText("Datetime is within 2 months");
+    expect(".o_domain_show_selection_button").toHaveCount(0);
+    expect(".o_tree_editor").toHaveCount(0);
+    expect(`.o_field_domain .o_facet_values`).toHaveText("Id = 1");
+    def.resolve();
+    await animationFrame();
+    expect(".o_domain_show_selection_button").toHaveCount(1);
+});
+
+test(`folded domain field with "in range" operator`, async function () {
+    Partner._fields.company_id = fields.Many2one({ relation: "partner" });
+    Partner._records[0].foo = `["&", ("datetime", ">=", "today"), ("datetime", "<", "today +1d")]`;
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: `
+            <form>
+                <sheet>
+                    <group>
+                        <field name="foo" widget="domain" options="{'model': 'partner', 'foldable': true, 'allow_expressions':True}" />
+                    </group>
+                </sheet>
+            </form>`,
+    });
+    expect(`.o_field_domain .o_facet_values`).toHaveText(`Datetime ${label("in range")} Today`);
+});
+
+test("allow_expressions = true", async function () {
+    Partner._records[0].foo = "[]";
+
+    serverState.debug = "1";
+    replaceNotificationService();
+
+    onRpc("/web/domain/validate", () => true);
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: `
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="foo" widget="domain" options="{'model': 'partner.type', 'allow_expressions':True}" />
+                        </group>
+                    </sheet>
+                </form>`,
+        context: { path: "name", name: "name" },
+    });
+
+    await contains(SELECTORS.debugArea).edit(`[("name", "=", [name])]`);
+    await animationFrame();
+    expect(".o_field_domain").not.toHaveClass("o_field_invalid");
+    expect.verifySteps(["The domain involves non-literals. Their evaluation might fail."]);
+
+    await contains(SELECTORS.debugArea).edit(
+        `["&", ("name", "=", "name"), (path, "=", "other name")]`
+    );
+    await animationFrame();
+    expect(".o_field_domain").not.toHaveClass("o_field_invalid");
+    expect.verifySteps(["The domain involves non-literals. Their evaluation might fail."]);
+});
+
+test("allow_expressions = false (default)", async function () {
+    Partner._records[0].foo = "[]";
+
+    serverState.debug = "1";
+    replaceNotificationService();
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: `
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="foo" widget="domain" options="{'model': 'partner.type' }" />
+                        </group>
+                    </sheet>
+                </form>`,
+        context: { path: "name", name: "name" },
+    });
+
+    await contains(SELECTORS.debugArea).edit(`[("name", "=", [name])]`);
+    await animationFrame();
+    expect(".o_field_domain").toHaveClass("o_field_invalid");
+    expect.verifySteps(["The domain should not involve non-literals"]);
+
+    await contains(SELECTORS.debugArea).edit(
+        `["&", ("name", "=", "name"), (path, "=", "other name")]`
+    );
+    await animationFrame();
+    expect(".o_field_domain").toHaveClass("o_field_invalid");
+    expect.verifySteps(["The domain should not involve non-literals"]);
 });

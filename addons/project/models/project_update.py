@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import timedelta
 from dateutil.relativedelta import relativedelta
-from werkzeug.urls import url_encode
 
 from odoo import api, fields, models
-from odoo.osv import expression
+from odoo.fields import Domain
 from odoo.tools import format_amount, formatLang
 
 STATUS_COLOR = {
@@ -20,12 +17,14 @@ STATUS_COLOR = {
     'to_define': 0,
 }
 
+
 class ProjectUpdate(models.Model):
     _name = 'project.update'
     _description = 'Project Update'
     _order = 'id desc'
     _inherit = ['mail.thread.cc', 'mail.activity.mixin']
 
+    @api.model
     def default_get(self, fields):
         result = super().default_get(fields)
         if 'project_id' in fields and not result.get('project_id'):
@@ -48,7 +47,7 @@ class ProjectUpdate(models.Model):
         ('at_risk', 'At Risk'),
         ('off_track', 'Off Track'),
         ('on_hold', 'On Hold'),
-        ('done', 'Done'),
+        ('done', 'Complete'),
     ], required=True, tracking=True, export_string_translation=False)
     color = fields.Integer(compute='_compute_color', export_string_translation=False)
     progress = fields.Integer(tracking=True)
@@ -56,11 +55,12 @@ class ProjectUpdate(models.Model):
     user_id = fields.Many2one('res.users', string='Author', required=True, default=lambda self: self.env.user)
     description = fields.Html()
     date = fields.Date(default=fields.Date.context_today, tracking=True)
-    project_id = fields.Many2one('project.project', required=True, export_string_translation=False)
+    project_id = fields.Many2one('project.project', required=True, domain=[('is_template', '=', False)], index=True, export_string_translation=False)
     name_cropped = fields.Char(compute="_compute_name_cropped", export_string_translation=False)
     task_count = fields.Integer("Task Count", readonly=True, export_string_translation=False)
     closed_task_count = fields.Integer("Closed Task Count", readonly=True, export_string_translation=False)
     closed_task_percentage = fields.Integer("Closed Task Percentage", compute="_compute_closed_task_percentage", export_string_translation=False)
+    label_tasks = fields.Char(related="project_id.label_tasks")
 
     @api.depends('status')
     def _compute_color(self):
@@ -75,7 +75,7 @@ class ProjectUpdate(models.Model):
     @api.depends('name')
     def _compute_name_cropped(self):
         for update in self:
-            update.name_cropped = (update.name[:57] + '...') if len(update.name) > 60 else update.name
+            update.name_cropped = (update.name[:57] + '...') if update.name and len(update.name) > 60 else update.name
 
     def _compute_closed_task_percentage(self):
         for update in self:
@@ -113,13 +113,16 @@ class ProjectUpdate(models.Model):
     @api.model
     def _get_template_values(self, project):
         milestones = self._get_milestone_values(project)
+        profitability_values, show_profitability = project._get_profitability_values()
         return {
             'user': self.env.user,
             'project': project,
+            'profitability': profitability_values,
+            'show_profitability': show_profitability,
             'show_activities': milestones['show_section'],
             'milestones': milestones,
             'format_lang': lambda value, digits: formatLang(self.env, value, digits=digits),
-            'format_monetary': lambda value: format_amount(self.env, value, project.currency_id),
+            'format_monetary': lambda value: format_amount(self.env, value, project.currency_id, trailing_zeroes=False),
         }
 
     @api.model
@@ -137,9 +140,9 @@ class ProjectUpdate(models.Model):
             [('project_id', '=', project.id),
              '|', ('deadline', '<', fields.Date.context_today(self) + relativedelta(years=1)), ('deadline', '=', False)])._get_data_list()
         updated_milestones = self._get_last_updated_milestone(project)
-        domain = [('project_id', '=', project.id)]
+        domain = Domain('project_id', '=', project.id)
         if project.last_update_id.create_date:
-            domain = expression.AND([domain, [('create_date', '>', project.last_update_id.create_date)]])
+            domain &= Domain('create_date', '>', project.last_update_id.create_date)
         created_milestones = Milestone.search(domain)._get_data_list()
         return {
             'show_section': (list_milestones or updated_milestones or created_milestones) and True or False,

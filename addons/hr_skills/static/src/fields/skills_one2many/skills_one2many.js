@@ -1,10 +1,5 @@
-/** @odoo-module */
-
 import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
-import {
-    useX2ManyCrud,
-    useOpenX2ManyRecord,
-} from "@web/views/fields/relational_utils";
+import { useX2ManyCrud, useOpenX2ManyRecord } from "@web/views/fields/relational_utils";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
@@ -43,15 +38,15 @@ export class SkillsListRenderer extends CommonSkillsListRenderer {
 
     async openSkillsReport() {
         // fetch id through employee or public.employee
-        const id = this.env.model.root.data.id || this.env.model.root.data.employee_id[0];
--        this.actionService.doAction({
+        const id = this.env.model.root.data.id || this.env.model.root.data.employee_id.id;
+        this.actionService.doAction({
             type: "ir.actions.act_window",
             name: _t("Skills Report"),
-            res_model: "hr.employee.skill.log",
+            res_model: "hr.employee.skill.history.report",
             view_mode: "graph,list",
-            views: [[false, "graph"], [false, "list"]],
+            views: [[false, "graph"]],
             context: {
-                'fill_temporal': 0,
+                'fill_temporal': false,
             },
             target: "current",
             domain: [['employee_id', '=', id]],
@@ -65,7 +60,7 @@ export class SkillsListRenderer extends CommonSkillsListRenderer {
     get SkillsRight() {
         let isSubordinate = false;
         if (this.env.model.root.data.employee_id) {
-            isSubordinate = this.userSubordinates.includes(this.env.model.root.data.employee_id[0]);
+            isSubordinate = this.userSubordinates.includes(this.env.model.root.data.employee_id.id);
         }
         return this.IsHrUser || isSubordinate;
     }
@@ -77,7 +72,10 @@ export class SkillsX2ManyField extends X2ManyField {
         ListRenderer: SkillsListRenderer,
     };
     setup() {
-        super.setup()
+        super.setup();
+        this.orm = useService('orm');
+        this.actionService = useService('action');
+
         const { saveRecord, updateRecord } = useX2ManyCrud(
             () => this.list,
             this.isMany2Many
@@ -88,10 +86,7 @@ export class SkillsX2ManyField extends X2ManyField {
             activeField: this.activeField,
             activeActions: this.activeActions,
             getList: () => this.list,
-            saveRecord: async (record) => {
-                await saveRecord(record);
-                await this.props.record.save();
-            },
+            saveRecord: saveRecord,
             updateRecord: updateRecord,
             withParentId: this.props.widget !== "many2many",
         });
@@ -103,11 +98,11 @@ export class SkillsX2ManyField extends X2ManyField {
     }
 
     getWizardTitleName() {
-        return _t("Select Skills")
+        return _t("Update Skills")
     }
 
     async onAdd({ context, editable } = {}) {
-        const employeeId = this.props.record.resModel === "res.users" ? this.props.record.data.employee_id[0] : this.props.record.resId;
+        const employeeId = this.props.record.resModel === "res.users" ? this.props.record.data.employee_id.id : this.props.record.resId;
         return super.onAdd({
             editable,
             context: {

@@ -1,13 +1,29 @@
 /** @odoo-module alias=@web/../tests/utils default=false */
 
-import { __debug__, after, afterEach, expect, getFixture } from "@odoo/hoot";
+import { __debug__, after, afterEach, expect, getFixture, globals } from "@odoo/hoot";
 import { queryAll, queryFirst } from "@odoo/hoot-dom";
-import { Deferred, tick } from "@odoo/hoot-mock";
-import { asyncStep, waitForSteps } from "@web/../tests/web_test_helpers";
+import { Deferred, animationFrame, tick } from "@odoo/hoot-mock";
 import { isMacOS } from "@web/core/browser/feature_detection";
 import { isVisible } from "@web/core/utils/ui";
-export const step = asyncStep;
-export const assertSteps = waitForSteps;
+
+/**
+ * Time the wait helpers give the client before failing. The wait that follows
+ * openDiscuss pays for the whole mount and the first fetches.
+ */
+export const TIMEOUT = 10000;
+const TICK_TIMEOUT = 500;
+const { clearTimeout: unmockedClearTimeout, setTimeout: unmockedSetTimeout } = globals;
+
+/**
+ * Use `expect.step` instead
+ * @deprecated
+ */
+export const step = expect.step;
+/**
+ * Use `expect.waitForSteps` instead
+ * @deprecated
+ */
+export const assertSteps = expect.waitForSteps;
 
 /** @param {EventInit} [args] */
 const mapBubblingEvent = (args) => ({ ...args, bubbles: true });
@@ -263,9 +279,17 @@ export async function editInput(el, selector, value) {
         throw new Error("Only 'input' and 'textarea' elements can be edited with 'editInput'.");
     }
     if (
-        !["text", "textarea", "email", "search", "color", "number", "file", "tel"].includes(
-            input.type
-        )
+        ![
+            "text",
+            "textarea",
+            "email",
+            "search",
+            "color",
+            "number",
+            "file",
+            "tel",
+            "range",
+        ].includes(input.type)
     ) {
         throw new Error(`Type "${input.type}" not supported by 'editInput'.`);
     }
@@ -308,6 +332,7 @@ function createFakeDataTransfer(files) {
         effectAllowed: "all",
         files,
         items: [],
+        getData: () => "",
         types: ["Files"],
     };
 }
@@ -316,7 +341,7 @@ function createFakeDataTransfer(files) {
  * Waits until exactly one element matching the given `selector` is present in
  * `options.target` and then clicks on it.
  *
- * @param {string} selector
+ * @param {import("@odoo/hoot-dom").Target} selector
  * @param {ContainsOptions} [options] forwarded to `contains`
  * @param {boolean} [options.shiftKey]
  */
@@ -330,7 +355,7 @@ export async function click(selector, options = {}) {
  * Waits until exactly one element matching the given `selector` is present in
  * `options.target` and then dragenters `files` on it.
  *
- * @param {string} selector
+ * @param {import("@odoo/hoot-dom").Target} selector
  * @param {Object[]} files
  * @param {ContainsOptions} [options] forwarded to `contains`
  */
@@ -342,7 +367,7 @@ export async function dragenterFiles(selector, files, options) {
  * Waits until exactly one element matching the given `selector` is present in
  * `options.target` and then dragovers `files` on it.
  *
- * @param {string} selector
+ * @param {import("@odoo/hoot-dom").Target} selector
  * @param {Object[]} files
  * @param {ContainsOptions} [options] forwarded to `contains`
  */
@@ -354,7 +379,7 @@ export async function dragoverFiles(selector, files, options) {
  * Waits until exactly one element matching the given `selector` is present in
  * `options.target` and then drops `files` on it.
  *
- * @param {string} selector
+ * @param {import("@odoo/hoot-dom").Target} selector
  * @param {Object[]} files
  * @param {ContainsOptions} [options] forwarded to `contains`
  */
@@ -366,7 +391,7 @@ export async function dropFiles(selector, files, options) {
  * Waits until exactly one element matching the given `selector` is present in
  * `options.target` and then inputs `files` on it.
  *
- * @param {string} selector
+ * @param {import("@odoo/hoot-dom").Target} selector
  * @param {Object[]} files
  * @param {ContainsOptions} [options] forwarded to `contains`
  */
@@ -378,7 +403,7 @@ export async function inputFiles(selector, files, options) {
  * Waits until exactly one element matching the given `selector` is present in
  * `options.target` and then pastes `files` on it.
  *
- * @param {string} selector
+ * @param {import("@odoo/hoot-dom").Target} selector
  * @param {Object[]} files
  * @param {ContainsOptions} [options] forwarded to `contains`
  */
@@ -390,7 +415,7 @@ export async function pasteFiles(selector, files, options) {
  * Waits until exactly one element matching the given `selector` is present in
  * `options.target` and then focuses on it.
  *
- * @param {string} selector
+ * @param {import("@odoo/hoot-dom").Target} selector
  * @param {ContainsOptions} [options] forwarded to `contains`
  */
 export async function focus(selector, options) {
@@ -401,7 +426,7 @@ export async function focus(selector, options) {
  * Waits until exactly one element matching the given `selector` is present in
  * `options.target` and then inserts the given `content`.
  *
- * @param {string} selector
+ * @param {import("@odoo/hoot-dom").Target} selector
  * @param {string} content
  * @param {ContainsOptions} [options] forwarded to `contains`
  * @param {boolean} [options.replace=false]
@@ -410,13 +435,14 @@ export async function insertText(selector, content, options = {}) {
     const { replace = false } = options;
     delete options.replace;
     await contains(selector, { ...options, insertText: { content, replace } });
+    await animationFrame(); // wait for t-model synced with new value
 }
 
 /**
  * Waits until exactly one element matching the given `selector` is present in
  * `options.target` and then sets its `scrollTop` to the given value.
  *
- * @param {string} selector
+ * @param {import("@odoo/hoot-dom").Target} selector
  * @param {number|"bottom"} scrollTop
  * @param {ContainsOptions} [options] forwarded to `contains`
  */
@@ -428,7 +454,7 @@ export async function scroll(selector, scrollTop, options) {
  * Waits until exactly one element matching the given `selector` is present in
  * `options.target` and then triggers `event` on it.
  *
- * @param {string} selector
+ * @param {import("@odoo/hoot-dom").Target} selector
  * @param {(import("@web/../tests/helpers/utils").EventType|[import("@web/../tests/helpers/utils").EventType, EventInit])[]} events
  * @param {ContainsOptions} [options] forwarded to `contains`
  */
@@ -525,8 +551,9 @@ afterEach(() => (hasUsedContainsPositively = false));
  * @property {boolean} [visible] if provided, the found element(s) must be (in)visible
  */
 class Contains {
+    timeoutCount = 0;
     /**
-     * @param {string} selector
+     * @param {import("@odoo/hoot-dom").Target} selector
      * @param {ContainsOptions} [options={}]
      */
     constructor(selector, options = {}) {
@@ -592,6 +619,19 @@ class Contains {
         this.executeError = undefined;
     }
 
+    setTickTimeout() {
+        this.timer = unmockedSetTimeout(() => {
+            this.timeoutCount++;
+            const res = this.runOnce(
+                `Timeout of ${(this.timeoutCount * TICK_TIMEOUT) / 1000} seconds`,
+                { crashOnFail: this.timeoutCount >= TIMEOUT / TICK_TIMEOUT }
+            );
+            if (!res && !this.done) {
+                this.setTickTimeout();
+            }
+        }, TICK_TIMEOUT);
+    }
+
     /**
      * Starts this contains check, either immediately resolving if there is a
      * match, or registering appropriate listeners and waiting until there is a
@@ -605,12 +645,12 @@ class Contains {
         this.done = false;
         this.def = new Deferred();
         this.scrollListeners = new Set();
+        this.onBlur = () => this.runOnce("after blur");
+        this.onChange = () => this.runOnce("after change");
+        this.onFocus = () => this.runOnce("after focus");
         this.onScroll = () => this.runOnce("after scroll");
         if (!this.runOnce("immediately")) {
-            this.timer = setTimeout(
-                () => this.runOnce("Timeout of 3 seconds", { crashOnFail: true }),
-                3000
-            );
+            this.setTickTimeout();
             this.observer = new MutationObserver((mutations) => {
                 try {
                     this.runOnce("after mutations");
@@ -623,6 +663,9 @@ class Contains {
                 childList: true,
                 subtree: true,
             });
+            document.body.addEventListener("blur", this.onBlur, { capture: true });
+            document.body.addEventListener("change", this.onChange, { capture: true });
+            document.body.addEventListener("focus", this.onFocus, { capture: true });
             after(() => {
                 if (!this.done) {
                     this.runOnce("Test ended", { crashOnFail: true });
@@ -649,10 +692,13 @@ class Contains {
         if ((res?.length ?? 0) === this.options.count || crashOnFail) {
             // clean before doing anything else to avoid infinite loop due to side effects
             this.observer?.disconnect();
-            clearTimeout(this.timer);
+            unmockedClearTimeout(this.timer);
             for (const el of this.scrollListeners ?? []) {
                 el.removeEventListener("scroll", this.onScroll);
             }
+            document.body.removeEventListener("blur", this.onBlur, { capture: true });
+            document.body.removeEventListener("change", this.onChange, { capture: true });
+            document.body.removeEventListener("focus", this.onFocus, { capture: true });
             this.done = true;
         }
         if ((res?.length ?? 0) === this.options.count) {
@@ -933,7 +979,7 @@ class Contains {
  * Waits until `count` elements matching the given `selector` are present in
  * `options.target`.
  *
- * @param {string} selector
+ * @param {import("@odoo/hoot-dom").Target} selector
  * @param {ContainsOptions} [options]
  * @returns {Promise}
  */

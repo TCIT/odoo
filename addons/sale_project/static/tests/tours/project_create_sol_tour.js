@@ -1,5 +1,5 @@
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 
 registry.category("web_tour.tours").add('project_create_sol_tour', {
     url: "/odoo",
@@ -56,3 +56,4 @@ registry.category("web_tour.tours").add('project_create_sol_tour', {
     ...stepUtils.toggleHomeMenu(),
     ...stepUtils.goToAppSteps("project.menu_main_pm", 'Go to the Project app.'),
 ]});
+

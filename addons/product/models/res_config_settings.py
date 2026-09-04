@@ -6,20 +6,18 @@ from odoo import _, api, fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
-    group_uom = fields.Boolean("Units of Measure", implied_group='uom.group_uom')
+    group_uom = fields.Boolean("Units of Measure & Packagings", implied_group='uom.group_uom')
     group_product_variant = fields.Boolean("Variants", implied_group='product.group_product_variant')
     module_loyalty = fields.Boolean("Promotions, Coupons, Gift Card & Loyalty Program")
-    group_stock_packaging = fields.Boolean('Product Packagings',
-        implied_group='product.group_stock_packaging')
     group_product_pricelist = fields.Boolean("Pricelists",
         implied_group='product.group_product_pricelist')
     product_weight_in_lbs = fields.Selection([
-        ('0', 'Kilograms'),
-        ('1', 'Pounds'),
+        ('0', 'Kilograms (kg)'),
+        ('1', 'Pounds (lb)'),
     ], 'Weight unit of measure', config_parameter='product.weight_in_lbs', default='0')
     product_volume_volume_in_cubic_feet = fields.Selection([
-        ('0', 'Cubic Meters'),
-        ('1', 'Cubic Feet'),
+        ('0', 'Cubic Meters (m³)'),
+        ('1', 'Cubic Feet (ft³)'),
     ], 'Volume unit of measure', config_parameter='product.volume_in_cubic_feet', default='0')
 
     @api.onchange('group_product_pricelist')

@@ -6,7 +6,9 @@ import psycopg2
 
 from odoo import http
 from odoo.http import request
+from odoo.tools.translate import LazyTranslate
 
+_lt = LazyTranslate(__name__)
 _logger = logging.getLogger(__name__)
 
 
@@ -23,7 +25,7 @@ class PaymentPostProcessing(http.Controller):
 
     MONITORED_TX_ID_KEY = '__payment_monitored_tx_id__'
 
-    @http.route('/payment/status', type='http', auth='public', website=True, sitemap=False)
+    @http.route('/payment/status', type='http', auth='public', website=True, sitemap=False, list_as_website_content=_lt("Payment Status"))
     def display_status(self, **kwargs):
         """ Fetch the transaction and display it on the payment status page.
 
@@ -36,7 +38,7 @@ class PaymentPostProcessing(http.Controller):
         values = {'tx': monitored_tx} if monitored_tx else {'payment_not_found': True}
         return request.render('payment.payment_status', values)
 
-    @http.route('/payment/status/poll', type='json', auth='public')
+    @http.route('/payment/status/poll', type='jsonrpc', auth='public')
     def poll_status(self, **_kwargs):
         """ Fetch the transaction and trigger its post-processing.
 

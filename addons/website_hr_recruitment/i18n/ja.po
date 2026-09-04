@@ -1,24 +1,29 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_hr_recruitment
-# 
+# * website_hr_recruitment
+#
 # Translators:
-# Wil Odoo, 2024
-# Junko Augias, 2025
-# 
+# Martin Trigaux, 2022
+# Andy Yiu, 2023
+# Ryoko Tsuda <ryoko@quartile.co>, 2023, 2025, 2026.
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Junko Augias (juau)" <juau@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Junko Augias, 2025\n"
-"Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
+"POT-Creation-Date: 2026-04-10 18:38+0000\n"
+"PO-Revision-Date: 2026-08-13 03:55+0000\n"
+"Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-19/"
+"website_hr_recruitment/ja/>\n"
+"Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ja\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_hr_recruitment
 #. odoo-python
@@ -48,13 +53,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/website_hr_recruitment/controllers/main.py:0
 msgid " In case of issue, contact %(contact_infos)s"
-msgstr "問題がある場合は、%(contact_infos)sにご連絡下さい。"
-
-#. module: website_hr_recruitment
-#. odoo-python
-#: code:addons/website_hr_recruitment/models/hr_applicant.py:0
-msgid "%s's Application"
-msgstr "%sの応募者"
+msgstr " 問題がある場合は、%(contact_infos)sにご連絡下さい"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
@@ -62,28 +61,18 @@ msgid "'. Showing results for '"
 msgstr "」。 次の結果を表示しています「"
 
 #. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
-msgid "+1 (650) 555-0187"
-msgstr "+1 (650) 555-0187"
-
-#. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid "12 days / year, including <br/>6 of your choice."
 msgstr "自ら選択した<br/>6日間を含む12日間/年"
 
 #. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.view_hr_job_kanban_referal_extends
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid ""
-"<i class=\"fa fa-fw fa-external-link\" role=\"img\"/>\n"
-"                        Job Page"
+"<a href=\"/\" class=\"btn btn-primary o_translate_inline\" "
+"target=\"_blank\"><small><b>READ</b></small></a>"
 msgstr ""
-"<i class=\"fa fa-fw fa-external-link\" role=\"img\"/>\n"
-"                       採用ページ"
-
-#. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_pages_kanban_view
-msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
-msgstr "<i class=\"fa fa-globe me-1\" title=\"ウェブサイト\"/>"
+"<a href=\"/\" class=\"btn btn-primary o_translate_inline\" target=\"_blank\">"
+"<small><b>詳しく見る</b></small></a>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.detail
@@ -105,28 +94,15 @@ msgid "<i class=\"oi oi-arrow-left\"/> Job Description"
 msgstr "<i class=\"oi oi-arrow-left\"/> 職務内容"
 
 #. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
-msgid "<small><b>READ</b></small>"
-msgstr "<small><b>既読</b></small>"
-
-#. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_offices
-msgid "<span class=\"fst-italic\">No address specified</span>"
-msgstr "<span class=\"fst-italic\">住所が特定されていません</span>"
-
-#. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.thankyou_ir_ui_view
 msgid ""
 "<span class=\"h5 fw-light\">In the meantime,</span><br/>\n"
-"                                            <span class=\"h3 mt8 mb32 fw-bold\">Take a look around our website:</span>"
+"                                            <span class=\"h3 mt8 mb32 fw-"
+"bold\">Take a look around our website:</span>"
 msgstr ""
 "<span class=\"h5 fw-light\">それまで</span><br/>\n"
-"                                            <span class=\"h3 mt8 mb32 fw-bold\">当社のウェブサイトをご覧下さい:</span>"
-
-#. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
-msgid "<span class=\"navbar-brand h5 my-0 me-sm-auto\">Our Job Offers</span>"
-msgstr "<span class=\"navbar-brand h5 my-0 me-sm-auto\">採用情報</span>"
+"                                            <span class=\"h3 mt8 mb32 fw-"
+"bold\">当社のウェブサイトをご覧下さい:</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -157,28 +133,34 @@ msgstr "<span class=\"s_website_form_label_content\">自己紹介（簡易）</s
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Email</span>\n"
-"                                                <span class=\"s_website_form_mark\"> *</span>"
+"                                                <span "
+"class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">メールアドレス</span>\n"
-"                                                <span class=\"s_website_form_mark\"> *</span>"
+"                                                <span "
+"class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Name</span>\n"
-"                                                <span class=\"s_website_form_mark\"> *</span>"
+"                                                <span "
+"class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">氏名</span>\n"
-"                                                <span class=\"s_website_form_mark\"> *</span>"
+"                                                <span "
+"class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Phone Number</span>\n"
-"                                                <span class=\"s_website_form_mark\"> *</span>"
+"                                                <span "
+"class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">電話番号</span>\n"
-"                                                <span class=\"s_website_form_mark\"> *</span>"
+"                                                <span "
+"class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -205,19 +187,34 @@ msgstr "<span class=\"text-muted small\">勤務地</span>"
 msgid ""
 "<span class=\"text-muted small\">Provide either a resume file or a linkedin "
 "profile</span>"
-msgstr "<span class=\"text-muted small\">履歴書ファイルまたLinkedinプロフィールを提出</span>"
+msgstr ""
+"<span class=\"text-muted small\">履歴書ファイルまたLinkedinプロフィールを提"
+"出</span>"
 
 #. module: website_hr_recruitment
-#. odoo-javascript
-#: code:addons/website_hr_recruitment/static/src/fields/boolean_toggle_labeled_field.js:0
-msgid "A clickable label for the toggle. Contains text for the false state."
-msgstr "トグル用のクリック可能なラベル。偽の状態のテキストを含みます。"
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
+msgid "<strong class=\"s_rating_title\">Administrative Work</strong>"
+msgstr "<strong class=\"s_rating_title\">事務作業</strong>"
 
 #. module: website_hr_recruitment
-#. odoo-javascript
-#: code:addons/website_hr_recruitment/static/src/fields/boolean_toggle_labeled_field.js:0
-msgid "A clickable label for the toggle. Contains text for the true state."
-msgstr "トグル用のクリック可能なラベル。真の状態のテキストを含みます。"
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
+msgid "<strong class=\"s_rating_title\">Autonomy</strong>"
+msgstr "<strong class=\"s_rating_title\">自律性</strong>"
+
+#. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
+msgid "<strong class=\"s_rating_title\">Customer Relationship</strong>"
+msgstr "<strong class=\"s_rating_title\">顧客関係</strong>"
+
+#. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
+msgid "<strong class=\"s_rating_title\">Personal Evolution</strong>"
+msgstr "<strong class=\"s_rating_title\">個人の成長</strong>"
+
+#. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
+msgid "<strong class=\"s_rating_title\">Technical Expertise</strong>"
+msgstr "<strong class=\"s_rating_title\">技術的な専門性</strong>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -245,37 +242,25 @@ msgid "Additional languages"
 msgstr "他に話せる言語"
 
 #. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
-msgid "Administrative Work"
-msgstr "管理的業務"
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_base
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_base_mobile
+msgid "All"
+msgstr "全て"
 
 #. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_countries
-msgid "All Countries"
-msgstr "すべての国"
-
-#. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_departments
-msgid "All Departments"
-msgstr "全部門"
-
-#. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_offices
-msgid "All Offices"
-msgstr "全オフィス"
-
-#. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_employment_type
-msgid "All Types"
-msgstr "全てのタイプ"
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.view_hr_job_form_website_published_button
+msgid "All websites"
+msgstr "全てのウェブサイト"
 
 #. module: website_hr_recruitment
 #. odoo-python
 #: code:addons/website_hr_recruitment/controllers/main.py:0
 msgid ""
-"An application already exists for %(value)s. Duplicates might be rejected. "
-"%(recruiter_contact)s"
-msgstr " %(value)s用の応募が既に存在します。重複は不採用となる可能性があります。%(recruiter_contact)s"
+"An application already exists for %(value)s. Duplicates might be rejected. %"
+"(recruiter_contact)s"
+msgstr ""
+"%(value)s用の応募が既に存在します。重複は不採用となる可能性があります。%"
+"(recruiter_contact)s"
 
 #. module: website_hr_recruitment
 #: model:ir.model,name:website_hr_recruitment.model_hr_applicant
@@ -304,30 +289,40 @@ msgid "Apply Now!"
 msgstr "応募する"
 
 #. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
-msgid ""
-"As an employee of our company, you will <b>collaborate with each department\n"
-"                        to create and deploy disruptive products.</b> Come work at a growing company\n"
-"                        that offers great benefits with opportunities to moving forward and learn\n"
-"                        alongside accomplished leaders. We're seeking an experienced and outstanding\n"
-"                        member of staff.\n"
-"                        <br/><br/>\n"
-"                        This position is both <b>creative and rigorous</b> by nature you need to think\n"
-"                        outside the box. We expect the candidate to be proactive and have a \"get it done\"\n"
-"                        spirit. To be successful, you will have solid solving problem skills."
-msgstr ""
-"当社の社員として、<b>各部門と協力して革新的な製品を生み出し展開して\n"
-"　　　　　　　いただきます。</b> 成長中の企業で働きませんか？実績のあるリーダー達の側で学びながら前進するチャンスと、素晴らしい待遇を提供します。経験のある優秀な\n"
-"　　　　　　スタッフを募集しています。\n"
-"                            <br/><br/>\n"
-"                         この職位では<b>創造性と厳密さ</b>の両方が必要で、枠にとらわれない発想が求められます。積極的に行動し、「やり遂げる」精神を持った応募者の方を\n"
-"　　　　　　お待ちしています。\n"
-"                        また、優れた問題解決能力をお持ちの方を採用致します。"
+#: model:ir.model,website_form_label:website_hr_recruitment.model_hr_applicant
+msgid "Apply for a Job"
+msgstr "求人に応募する"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
-msgid "Autonomy"
-msgstr "自主性"
+msgid ""
+"As an employee of our company, you will <b>collaborate with each department\n"
+"                        to create and deploy disruptive products.</b> Come "
+"work at a growing company\n"
+"                        that offers great benefits with opportunities to "
+"moving forward and learn\n"
+"                        alongside accomplished leaders. We're seeking an "
+"experienced and outstanding\n"
+"                        member of staff.\n"
+"                        <br/><br/>\n"
+"                        This position is both <b>creative and rigorous</b> "
+"by nature you need to think\n"
+"                        outside the box. We expect the candidate to be "
+"proactive and have a \"get it done\"\n"
+"                        spirit. To be successful, you will have solid "
+"solving problem skills."
+msgstr ""
+"当社の社員として、<b>各部門と協力して革新的な製品を生み出し展開して\n"
+"                         いただきます。</b> 成長中の企業で働きませんか？実績"
+"のあるリーダー達の側で学びながら前進するチャンスと、素晴らしい待遇を提供しま"
+"す。経験のある優秀な\n"
+"                         スタッフを募集しています。\n"
+"                            <br/><br/>\n"
+"                         この職位では<b>創造性と厳密さ</b>の両方が必要で、枠"
+"にとらわれない発想が求められます。積極的に行動し、「やり遂げる」精神を持った"
+"応募者の方を\n"
+"                         お待ちしています。\n"
+"                        また、優れた問題解決能力をお持ちの方を採用致します。"
 
 #. module: website_hr_recruitment
 #. odoo-javascript
@@ -344,6 +339,11 @@ msgstr "学士またはそれ以上（修士、博士）"
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_job__can_publish
 msgid "Can Publish"
 msgstr "公開可"
+
+#. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.topbar_customizations
+msgid "Close"
+msgstr "クローズ"
 
 #. module: website_hr_recruitment
 #: model:ir.model.fields,help:website_hr_recruitment.field_hr_job__job_details
@@ -367,7 +367,13 @@ msgid "Copied"
 msgstr "複製対象"
 
 #. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.snippet_options
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_countries
+msgid "Countries"
+msgstr "国"
+
+#. module: website_hr_recruitment
+#. odoo-javascript
+#: code:addons/website_hr_recruitment/static/src/website_builder/website_hr_recruitment_option.xml:0
 msgid "Countries Filter"
 msgstr "国フィルタ"
 
@@ -379,14 +385,8 @@ msgstr "日常的にユーザーに役立つ項目を新規に作成する"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid ""
-"Create new job pages from the <strong>+ <i>New</i></strong> top-right "
-"button."
+"Create new job pages from the <strong>+ <i>New</i></strong> top-right button."
 msgstr "新しい採用ページを 右上ボタン<strong>+ <i>新規</i></strong>から作成します。"
-
-#. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
-msgid "Customer Relationship"
-msgstr "担当顧客"
 
 #. module: website_hr_recruitment
 #. odoo-javascript
@@ -396,12 +396,19 @@ msgid "Department"
 msgstr "部門"
 
 #. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.snippet_options
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_departments
+msgid "Departments"
+msgstr "部門"
+
+#. module: website_hr_recruitment
+#. odoo-javascript
+#: code:addons/website_hr_recruitment/static/src/website_builder/website_hr_recruitment_option.xml:0
 msgid "Departments Filter"
 msgstr "部門フィルタ"
 
 #. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.jobs_searchbar_input_snippet_options
+#. odoo-javascript
+#: code:addons/website_hr_recruitment/static/src/website_builder/website_hr_recruitment_searchbar_option_plugin.js:0
 msgid "Description"
 msgstr "説明"
 
@@ -411,7 +418,12 @@ msgid "Discover our products."
 msgstr "当社製品について"
 
 #. module: website_hr_recruitment
+#: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_applicant__display_name
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_department__display_name
+#: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_job__display_name
+#: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_recruitment_source__display_name
+#: model:ir.model.fields,field_description:website_hr_recruitment.field_website__display_name
+#: model:ir.model.fields,field_description:website_hr_recruitment.field_website_page__display_name
 msgid "Display Name"
 msgstr "表示名"
 
@@ -419,12 +431,16 @@ msgstr "表示名"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid ""
 "Each employee has a chance to see the impact of his work.\n"
-"                    You can make a real contribution to the success of the company.\n"
+"                    You can make a real contribution to the success of the "
+"company.\n"
 "                    <br/>\n"
-"                    Several activities are often organized all over the year, such as weekly\n"
-"                    sports sessions, team building events, monthly drink, and much more"
+"                    Several activities are often organized all over the "
+"year, such as weekly\n"
+"                    sports sessions, team building events, monthly drink, "
+"and much more"
 msgstr ""
-"全ての従業員に自分の仕事が与えるインパクトを目の当たりにするチャンスがあります。\n"
+"全ての従業員に自分の仕事が与えるインパクトを目の当たりにするチャンスがありま"
+"す。\n"
 "                    会社の成功に本当の意味で貢献できるのです。\n"
 "                    <br/>\n"
 "                    年間を通じて様々な行事があり、週1のスポーツセッション、\n"
@@ -436,7 +452,8 @@ msgid "Eat &amp; Drink"
 msgstr "飲食"
 
 #. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.snippet_options
+#. odoo-javascript
+#: code:addons/website_hr_recruitment/static/src/website_builder/website_hr_recruitment_option.xml:0
 msgid "Employment Types Filter"
 msgstr "雇用タイプフィルタ"
 
@@ -456,14 +473,24 @@ msgid "Facebook"
 msgstr "Facebook"
 
 #. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_base
+msgid "Filter by country"
+msgstr "国で絞り込む"
+
+#. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.topbar_customizations
+msgid "Filters"
+msgstr "フィルタ"
+
+#. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
 msgid "Follow us"
-msgstr "よかったらフォローお願いします"
+msgstr "フォローする"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid "Fruit, coffee and <br/>snacks provided."
-msgstr "フルーツ、コーヒー、<br>スナックが提供されます。"
+msgstr "フルーツ、コーヒー、<br>軽食が提供されます。"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -490,25 +517,40 @@ msgstr "ホーム"
 msgid ""
 "I usually <strong>answer applications within 3 days</strong>.\n"
 "                                                <br/><br/>\n"
-"                                                The next step is either a call or a meeting in our offices.\n"
+"                                                The next step is either a "
+"call or a meeting in our offices.\n"
 "                                                <br/><br/>\n"
-"                                                Feel free to <strong>contact me if you want a faster\n"
-"                                                feedback</strong> or if you don't get news from me\n"
+"                                                Feel free to <strong>contact "
+"me if you want a faster\n"
+"                                                feedback</strong> or if you "
+"don't get news from me\n"
 "                                                quickly enough."
 msgstr ""
 "通常、<strong>ご応募に対して、3日以内に返信します</strong>。\n"
 "                                                <br/><br/>\n"
-"                                                次の段階は、電話またはオフィスでの面接です。\n"
+"                                                次の段階は、電話または"
+"オフィスでの面接です。\n"
 "                                                <br/><br/>\n"
-"                                                <strong>もしお急ぎで回答が\n"
-"必要な\n"
-"　　　　　　　　　　　　 場合</strong>または返信が遅い場合　　　　　　　には\n"
+"                                                <strong>もしお急ぎで回答が必"
+"要な\n"
+"                                               場合</strong>または返信が遅い"
+"場合には\n"
 "                                                ご連絡下さい。"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid "I'm feeling lucky"
-msgstr "私はラッキーです"
+msgstr "応募"
+
+#. module: website_hr_recruitment
+#: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_applicant__id
+#: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_department__id
+#: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_job__id
+#: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_recruitment_source__id
+#: model:ir.model.fields,field_description:website_hr_recruitment.field_website__id
+#: model:ir.model.fields,field_description:website_hr_recruitment.field_website_page__id
+msgid "ID"
+msgstr "ID"
 
 #. module: website_hr_recruitment
 #. odoo-javascript
@@ -516,6 +558,17 @@ msgstr "私はラッキーです"
 msgid ""
 "If checked, the record will be saved immediately when the field is modified."
 msgstr "チェックした場合、フィールドが変更されるとレコードは直ちに保存されます。"
+
+#. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_industries
+msgid "Industries"
+msgstr "インダストリー(業種別ソリューション)"
+
+#. module: website_hr_recruitment
+#. odoo-javascript
+#: code:addons/website_hr_recruitment/static/src/website_builder/website_hr_recruitment_option.xml:0
+msgid "Industries Filter"
+msgstr "インダストリーフィルタ"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
@@ -536,6 +589,11 @@ msgstr "応募フォーム"
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_job__description
 msgid "Job Description"
 msgstr "職務内容"
+
+#. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.hr_job_website_inherit
+msgid "Job Page"
+msgstr "求人ページ"
 
 #. module: website_hr_recruitment
 #: model:ir.actions.act_window,name:website_hr_recruitment.action_job_pages_list
@@ -559,25 +617,22 @@ msgid "Job not found"
 msgstr "職位がみつかりません"
 
 #. module: website_hr_recruitment
+#. odoo-javascript
 #. odoo-python
+#: code:addons/website_hr_recruitment/controllers/main.py:0
 #: code:addons/website_hr_recruitment/models/website.py:0
+#: code:addons/website_hr_recruitment/static/src/website_builder/website_hr_recruitment_searchbar_option.xml:0
 #: model:ir.ui.menu,name:website_hr_recruitment.menu_job_pages
 #: model:website.menu,name:website_hr_recruitment.website_menu_jobs
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.jobs_searchbar_input_snippet_options
 msgid "Jobs"
 msgstr "採用情報"
 
 #. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.snippet_options
+#. odoo-javascript
+#: code:addons/website_hr_recruitment/static/src/website_builder/website_hr_recruitment_option_plugin.js:0
 msgid "Jobs Page"
 msgstr "採用ページ"
-
-#. module: website_hr_recruitment
-#. odoo-javascript
-#: code:addons/website_hr_recruitment/static/src/fields/boolean_toggle_labeled_field.js:0
-msgid "Label"
-msgstr "ラベル"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -603,7 +658,7 @@ msgstr "当社ソフトウェアのマスターデモ"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid "Must Have"
-msgstr "必須"
+msgstr "必須要件"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -613,17 +668,12 @@ msgstr "交渉と契約"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid "Nice to have"
-msgstr "歓迎"
-
-#. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_offices
-msgid "No address specified"
-msgstr "特定された住所がありません"
+msgstr "あると望ましい要件"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid "No dumb managers, no stupid tools to use, no rigid working hours"
-msgstr "愚かなマネージャーはいませんし、お馬鹿なツールは使いませんし、労働時間の強制拘束もありません"
+msgstr "自由でフラットな職場環境、使いやすいツール、柔軟な勤務時間"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
@@ -637,7 +687,19 @@ msgid ""
 msgstr "企業プロセス、真の責任、自律性に無駄はありません"
 
 #. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.snippet_options
+#. odoo-javascript
+#: code:addons/website_hr_recruitment/static/src/fields/boolean_toggle_labeled_field.xml:0
+msgid "Not Published"
+msgstr "未公開"
+
+#. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_offices
+msgid "Offices"
+msgstr "オフィス"
+
+#. module: website_hr_recruitment
+#. odoo-javascript
+#: code:addons/website_hr_recruitment/static/src/website_builder/website_hr_recruitment_option.xml:0
 msgid "Offices Filter"
 msgstr "オフィスフィルタ"
 
@@ -652,9 +714,19 @@ msgid "Others"
 msgstr "その他"
 
 #. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
+msgid "Our Job Offers"
+msgstr "採用情報"
+
+#. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid "Our Product"
 msgstr "当社製品"
+
+#. module: website_hr_recruitment
+#: model:ir.model,name:website_hr_recruitment.model_website_page
+msgid "Page"
+msgstr "ページ"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -670,11 +742,6 @@ msgstr "完璧な英語の文章"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid "Perks"
 msgstr "パークス"
-
-#. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
-msgid "Personal Evolution"
-msgstr "個人の進化"
 
 #. module: website_hr_recruitment
 #. odoo-javascript
@@ -699,8 +766,11 @@ msgid "Products"
 msgstr "プロダクト"
 
 #. module: website_hr_recruitment
+#. odoo-javascript
+#: code:addons/website_hr_recruitment/static/src/fields/boolean_toggle_labeled_field.xml:0
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.hr_job_search_view_inherit
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.hr_job_website_inherit
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.view_hr_job_form_website_published_button
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.view_hr_job_tree_inherit_website
 msgid "Published"
 msgstr "公開済"
@@ -722,10 +792,20 @@ msgstr "急成長企業での真の責任と挑戦"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_countries
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_offices
 msgid "Remote"
 msgstr "リモート"
+
+#. module: website_hr_recruitment
+#. odoo-javascript
+#: code:addons/website_hr_recruitment/static/src/website_builder/website_hr_recruitment_option.xml:0
+msgid "Reset Filter"
+msgstr "フィルタをリセット"
+
+#. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_reset_filters
+msgid "Reset Filters"
+msgstr "フィルタをリセット"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -735,12 +815,7 @@ msgstr "責任"
 #. module: website_hr_recruitment
 #: model:ir.model.fields,help:website_hr_recruitment.field_hr_job__website_id
 msgid "Restrict to a specific website."
-msgstr "特定のウェブサイトに制限"
-
-#. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_pages_kanban_view
-msgid "SEO Optimized"
-msgstr "SEO最適化済"
+msgstr "特定のウェブサイトに制限する。"
 
 #. module: website_hr_recruitment
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_job__is_seo_optimized
@@ -748,7 +823,8 @@ msgid "SEO optimized"
 msgstr "SEO最適化済"
 
 #. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.snippet_options
+#. odoo-javascript
+#: code:addons/website_hr_recruitment/static/src/website_builder/website_hr_recruitment_option.xml:0
 msgid "Search Bar"
 msgstr "検索バー"
 
@@ -775,14 +851,21 @@ msgid "Short Introduction"
 msgstr "短い紹介"
 
 #. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.snippet_options
+#. odoo-python
+#: code:addons/website_hr_recruitment/controllers/main.py:0
+msgid "Short introduction from applicant"
+msgstr "応募者からの簡単な自己紹介"
+
+#. module: website_hr_recruitment
+#. odoo-javascript
+#: code:addons/website_hr_recruitment/static/src/website_builder/website_hr_recruitment_option.xml:0
 msgid "Sidebar"
 msgstr "サイドバー"
 
 #. module: website_hr_recruitment
 #: model:ir.model,name:website_hr_recruitment.model_hr_recruitment_source
 msgid "Source of Applicants"
-msgstr "応募者の情報源"
+msgstr "応募者の応募元"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -795,14 +878,14 @@ msgid "Strong analytical skills"
 msgstr "強い分析スキル"
 
 #. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
-msgid "Technical Expertise"
-msgstr "技術職経験"
+#: model:ir.model.fields,help:website_hr_recruitment.field_hr_job__website_absolute_url
+msgid "The full absolute URL to access the document through the website."
+msgstr "ウェブサイト経由でこのドキュメントにアクセスするための完全な絶対URLです。"
 
 #. module: website_hr_recruitment
 #: model:ir.model.fields,help:website_hr_recruitment.field_hr_job__website_url
-msgid "The full URL to access the document through the website."
-msgstr "サイト経由して、文書にアクセスする完全なURL。"
+msgid "The full relative URL to access the document through the website."
+msgstr "ウェブサイト経由でこのドキュメントにアクセスするための完全な相対URLです。"
 
 #. module: website_hr_recruitment
 #. odoo-javascript
@@ -818,7 +901,7 @@ msgstr "求人募集は終了しました。"
 
 #. module: website_hr_recruitment
 #. odoo-javascript
-#: code:addons/website_hr_recruitment/static/src/js/website_hr_applicant_form.js:0
+#: code:addons/website_hr_recruitment/static/src/interactions/hr_recruitment_form.js:0
 msgid "The profile that you gave us doesn't seems like a linkedin profile"
 msgstr "入力されたプロフィールはLinkedinプロフィールではないようです。"
 
@@ -826,10 +909,12 @@ msgstr "入力されたプロフィールはLinkedinプロフィールではな�
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid ""
 "There are currently no open job opportunities,<br class=\"mb-2\"/>\n"
-"                                            but feel free to <span class=\"fw-bold\">contact us</span> for a spontaneous application."
+"                                            but feel free to <span "
+"class=\"fw-bold\">contact us</span> for a spontaneous application."
 msgstr ""
 "現在募集中の職位はありませんが<br class=\"mb-2\"/>\n"
-"　　　　　　　　　　ご自分で応募されたい場合は<span class=\"fw-bold\">ご連絡</span>下さい。"
+"　　　　　　　　　　ご自分で応募されたい場合は<span class=\"fw-bold\">ご連"
+"絡</span>下さい。"
 
 #. module: website_hr_recruitment
 #. odoo-javascript
@@ -849,8 +934,14 @@ msgstr "トレーニング"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_employment_type
-msgid "Unspecified type"
-msgstr "特定されていないタイプ"
+msgid "Types"
+msgstr "タイプ"
+
+#. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_base
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_base_mobile
+msgid "Unspecified"
+msgstr "特定されていない"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -865,11 +956,15 @@ msgstr "現在のサイトに表示"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
 msgid ""
-"We are a team of passionate people whose goal is to improve everyone's life through disruptive products.\n"
-"                                We build great products to solve your business problems."
+"We are a team of passionate people whose goal is to improve everyone's life "
+"through disruptive products.\n"
+"                                We build great products to solve your "
+"business problems."
 msgstr ""
-"当社は、革新的な製品を通じて皆様の生活を向上させることを目標に情熱を燃やす社員からなるチームです。\n"
-"　　　　　　　私たちは、お客様のビジネス上の問題を解決するために、優れた製品を開発しています。"
+"当社は、革新的な製品を通じて皆様の生活を向上させることを目標に情熱を燃やす社"
+"員からなるチームです。\n"
+"　　　　　　　私たちは、お客様のビジネス上の問題を解決するために、優れた製品"
+"を開発しています。"
 
 #. module: website_hr_recruitment
 #. odoo-python
@@ -877,7 +972,9 @@ msgstr ""
 msgid ""
 "We found a recent application with a similar name, email, phone number. You "
 "can continue if it's not a mistake."
-msgstr "最近、類似した名前、Eメール、電話番号で登録された応募が見つかりました。間違いでなければ、続行できます。"
+msgstr ""
+"最近、類似した名前、Eメール、電話番号で登録された応募が見つかりました。間違い"
+"でなければ、続行できます。"
 
 #. module: website_hr_recruitment
 #. odoo-python
@@ -885,13 +982,20 @@ msgstr "最近、類似した名前、Eメール、電話番号で登録され�
 msgid ""
 "We've found a previous closed application in our system within the last 6 "
 "months. Please consider before applying in order not to duplicate efforts."
-msgstr "過去6か月以内に、当社システム内で以前に締め切られた応募を見つけました。重複しないよう、応募前にご確認下さい。"
+msgstr ""
+"過去6か月以内に、当社システム内で以前に締め切られた応募を見つけました。重複し"
+"ないよう、応募前にご確認下さい。"
 
 #. module: website_hr_recruitment
 #: model:ir.model,name:website_hr_recruitment.model_website
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_job__website_id
 msgid "Website"
 msgstr "ウェブサイト"
+
+#. module: website_hr_recruitment
+#: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_job__website_absolute_url
+msgid "Website Absolute URL"
+msgstr "ウェブサイト絶対URL"
 
 #. module: website_hr_recruitment
 #: model:ir.actions.act_url,name:website_hr_recruitment.action_open_website
@@ -936,7 +1040,12 @@ msgstr "当社からオファーするもの"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid "What's great in the job?"
-msgstr "この職の素晴らしい点"
+msgstr "この仕事の素晴らしい点"
+
+#. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
+msgid "X"
+msgstr ""
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.thankyou_ir_ui_view
@@ -962,7 +1071,7 @@ msgid ""
 "                                    We usually respond within 3 days..."
 msgstr ""
 "応募を正常に受け付けました。<br class=\"mb-2\"/>\n"
-"　　　　　　　　 通常3日以内にお返事いたします。"
+"通常3日以内にお返事いたします。"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -1005,3 +1114,42 @@ msgstr "募集職種"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid "unpublished"
 msgstr "未公開"
+
+#~ msgid "+1 (650) 555-0187"
+#~ msgstr "+1 (650) 555-0187"
+
+#~ msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
+#~ msgstr "<i class=\"fa fa-globe me-1\" title=\"Webサイト\"/>"
+
+#~ msgid "<small><b>READ</b></small>"
+#~ msgstr "<small><b>既読</b></small>"
+
+#~ msgid "Administrative Work"
+#~ msgstr "管理的業務"
+
+#~ msgid "All Countries"
+#~ msgstr "すべての国"
+
+#~ msgid "Autonomy"
+#~ msgstr "自主性"
+
+#~ msgid "Customer Relationship"
+#~ msgstr "担当顧客"
+
+#~ msgid "Not published"
+#~ msgstr "非公開"
+
+#~ msgid "Personal Evolution"
+#~ msgstr "個人の進化"
+
+#~ msgid "Restrict publishing to this website."
+#~ msgstr "このWebサイトへの公開を制限します。"
+
+#~ msgid "SEO Optimized"
+#~ msgstr "SEO最適化済"
+
+#~ msgid "Technical Expertise"
+#~ msgstr "技術職経験"
+
+#~ msgid "The full URL to access the document through the website."
+#~ msgstr "ウェブサイトを介してドキュメントにアクセスするために完全なURLです。"

@@ -1,8 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, api
+from odoo import api, fields, models, tools
 
 from odoo.addons.hr_homeworking.models.hr_homeworking import DAYS
+
 
 class HomeworkLocationWizard(models.TransientModel):
     _name = 'homework.location.wizard'
@@ -13,7 +14,6 @@ class HomeworkLocationWizard(models.TransientModel):
     work_location_type = fields.Selection(related="work_location_id.location_type")
     employee_id = fields.Many2one('hr.employee', default=lambda self: self.env.user.employee_id, required=True, ondelete="cascade")
     employee_name = fields.Char(related="employee_id.name")
-    user_can_edit = fields.Boolean(compute='_compute_user_can_edit')
     weekly = fields.Boolean(default=False)
     date = fields.Date(string="Date")
     day_week_string = fields.Char(compute="_compute_day_week_string")
@@ -21,14 +21,12 @@ class HomeworkLocationWizard(models.TransientModel):
     @api.depends('date')
     def _compute_day_week_string(self):
         for record in self:
-            record.day_week_string = record.date.strftime("%A")
-
-    @api.depends('date')
-    def _compute_user_can_edit(self):
-        self.user_can_edit = self.env.user.can_edit
+            record.day_week_string = tools.format_date(record.env, record.date, date_format='EEEE') if record.date else ''
 
     def set_employee_location(self):
         self.ensure_one()
+        if not self.date:
+            return
         default_employee_id = self.env.context.get('default_employee_id') or self.env.user.employee_id.id
         employee_id = self.env['hr.employee'].browse(self.employee_id.id or default_employee_id)
         employee_location = self.env['hr.employee.location'].search([

@@ -4,9 +4,10 @@
 from markupsafe import Markup
 from unittest.mock import patch
 
+from odoo import Command
 from odoo.addons.mail.tests import common
 from odoo.exceptions import AccessError
-from odoo.tests import tagged, users
+from odoo.tests import Form, tagged, users
 
 
 class TestMailRenderCommon(common.MailCommon):
@@ -123,7 +124,8 @@ class TestMailRenderCommon(common.MailCommon):
             'subject': cls.base_inline_template_bits[0],
             'body_html': cls.base_qweb_bits[1],
             'model_id': cls.env['ir.model']._get('res.partner').id,
-            'lang': '{{ object.lang }}'
+            'lang': '{{ object.lang }}',
+            'use_default_to': True,
         })
 
         # some translations
@@ -149,8 +151,8 @@ class TestMailRenderCommon(common.MailCommon):
             notification_type='inbox',
             signature='--\nErnest'
         )
-        cls.user_rendering_restricted.groups_id -= cls.env.ref('mail.group_mail_template_editor')
-        cls.user_employee.groups_id += cls.env.ref('mail.group_mail_template_editor')
+        cls.env.ref('mail.group_mail_template_editor').write({'implied_by_ids': [Command.clear()]})
+        cls.user_employee.group_ids += cls.env.ref('mail.group_mail_template_editor')
 
 
 @tagged('mail_render')
@@ -274,7 +276,7 @@ class TestMailRender(TestMailRenderCommon):
         partner_ids = self.env['res.partner'].sudo().create([{
             'name': f'test partner {n}'
         } for n in range(20)]).ids
-        with patch('odoo.models.Model.get_base_url', new=_mock_get_base_url), self.assertQueryCount(12):
+        with patch('odoo.models.Model.get_base_url', new=_mock_get_base_url), self.assertQueryCount(13):
             # make sure name isn't already in cache
             self.env['res.partner'].browse(partner_ids).invalidate_recordset(['name', 'display_name'])
             render_results = self.env['mail.render.mixin']._render_template(
@@ -393,6 +395,7 @@ class TestMailRender(TestMailRenderCommon):
             '<div style="background-image:url(\'/web/path?a=a&b=b\');"/>',
             '<div style="background-image:url(&#34;/web/path?a=a&b=b&#34;);"/>',
             '<div background="/web/path?a=a&b=b"/>',
+            '<div style=\'background-image:url("/web/path?a=a&b=b");\'/>',
         ]
         base_url = self.env['mail.render.mixin'].get_base_url()
         rendered_local_links = [
@@ -404,6 +407,7 @@ class TestMailRender(TestMailRenderCommon):
             '<div style="background-image:url(\'%s/web/path?a=a&b=b\');"/>' % base_url,
             '<div style="background-image:url(&#34;%s/web/path?a=a&b=b&#34;);"/>' % base_url,
             '<div background="%s/web/path?a=a&b=b"/>' % base_url,
+            '<div style=\'background-image:url("%s/web/path?a=a&b=b");\'/>' % base_url,
         ]
         for source, expected in zip(local_links_template_bits, rendered_local_links):
             rendered = self.env['mail.render.mixin']._replace_local_links(source)
@@ -444,17 +448,20 @@ class TestRegexRendering(common.MailCommon):
                     Default
                     </p>''', '<p>Default</p>'),
             ('''<div><p t-out="object.name"/></div>''', '<div><p>Alice</p></div>'),
-            ('''<div/aa t-out="object.name"></div/aa>''', '<div>Alice</div>'),
-            ('''<div/aa='x' t-out="object.name"></div/aa='x'>''', '<div>Alice</div>'),
-            ('''<55 t-out="object.name"></55>''', '&lt;55 t-out="object.name"&gt;55&gt;'),
         )
         o_qweb_render = self.env['ir.qweb']._render
         for template, expected in static_templates:
-            with (patch('odoo.addons.base.models.ir_qweb.IrQWeb._render', side_effect=o_qweb_render) as qweb_render,
+            with (patch('odoo.addons.base.models.ir_qweb.IrQweb._render', side_effect=o_qweb_render) as qweb_render,
                 patch('odoo.addons.base.models.ir_qweb.unsafe_eval', side_effect=eval) as unsafe_eval):
                 self.assertEqual(render(template), expected)
                 self.assertFalse(qweb_render.called)
                 self.assertFalse(unsafe_eval.called)
+
+        with (patch('odoo.addons.base.models.ir_qweb.IrQweb._render', side_effect=o_qweb_render) as qweb_render,
+                patch('odoo.addons.base.models.ir_qweb.unsafe_eval', side_effect=eval) as unsafe_eval):
+            self.assertNotIn("<55", render('''<55 t-out="object.name"></55>'''))
+            self.assertFalse(qweb_render.called)
+            self.assertFalse(unsafe_eval.called)
 
         # double check that we are able to catch the eval
         non_static_templates = (
@@ -468,7 +475,7 @@ class TestRegexRendering(common.MailCommon):
             ('''<p t-out="'<h1>test</h1>'"/>''', '<p>&lt;h1&gt;test&lt;/h1&gt;</p>'),
         )
         for template, expected in non_static_templates:
-            with (patch('odoo.addons.base.models.ir_qweb.IrQWeb._render', side_effect=o_qweb_render) as qweb_render,
+            with (patch('odoo.addons.base.models.ir_qweb.IrQweb._render', side_effect=o_qweb_render) as qweb_render,
                 patch('odoo.addons.base.models.ir_qweb.unsafe_eval', side_effect=eval) as unsafe_eval):
                 rendered = render(template)
                 self.assertTrue(isinstance(rendered, Markup))
@@ -565,6 +572,50 @@ class TestMailRenderSecurity(TestMailRenderCommon):
             res_ids
         )[res_ids[0]]
         self.assertIn('26', result, 'Template Editor should be able to render inline_template code')
+
+    @users('user_rendering_restricted')
+    def test_render_restricted_allow_template_defaults(self):
+        """Check that default template values are implicitly allowed for the specific field they define."""
+        def patched_mail_template_default_values(model):
+            return {
+                'email_cc': '{{ object.user_ids and object.user_ids[0].email }}',  # inline
+                'lang': '{{ object.user_ids and object.user_ids[0].lang }}',  # inline
+                'body_html': '<p>Hi <t t-out="object.user_ids and object.user_ids[0].name"/></p>',  # qweb
+            }
+        template_defaults = patched_mail_template_default_values(self.env['mail.template'])
+        partner_model_id = self.env['ir.model']._get_id('res.partner')
+
+        # check no default
+        template = Form(self.env['mail.template'].with_context({
+            'default_name': 'test_allow_template_defaults_nodefault_valid',
+            'default_model_id': partner_model_id,
+        }))
+        template = template.save()
+        self.assertFalse(template.lang)
+        self.assertFalse(template.email_cc)
+        self.assertFalse(template.body_html)
+
+        # sanity check, make sure the expressions are not allowed before the test (not in default allow list, etc...)
+        with self.assertRaises(AccessError, msg="Complex inline expression should fail if it is not the default."):
+            template.lang = template_defaults['lang']
+        with self.assertRaises(AccessError, msg="Complex qweb expression should fail if it is not the default."):
+            template.body_html = template_defaults['body_html']
+
+        with patch(
+            'odoo.addons.base.models.res_partner.ResPartner._mail_template_default_values',
+            new=patched_mail_template_default_values, create=True,
+        ):
+            template = Form(self.env['mail.template'].with_context({
+                'default_name': 'test_allow_template_with_default',
+                'default_model_id': partner_model_id,
+            }))
+            template = template.save()
+            self.assertEqual(template.lang, template_defaults['lang'])
+            self.assertEqual(template.email_cc, template_defaults['email_cc'])
+            self.assertEqual(template.body_html, template_defaults['body_html'])
+
+            with self.assertRaises(AccessError, msg="Complex expressions should only be allowed if they are the default for that field."):
+                template.email_cc = template_defaults['lang']
 
     @users('user_rendering_restricted')
     def test_render_template_qweb_restricted(self):

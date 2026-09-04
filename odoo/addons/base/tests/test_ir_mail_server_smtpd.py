@@ -7,14 +7,16 @@ import ssl
 import unittest
 import warnings
 from base64 import b64encode
+from os import getenv
 from pathlib import Path
-from unittest.mock import patch
 from socket import getaddrinfo  # keep a reference on the non-patched function
+from unittest.mock import patch
 
-from odoo import modules
 from odoo.exceptions import UserError
 from odoo.tools import config, file_path, mute_logger
+
 from .common import TransactionCaseWithUserDemo
+from odoo.addons.base.models.ir_mail_server import IrMail_Server
 
 try:
     import aiosmtpd
@@ -25,9 +27,15 @@ except ImportError:
     aiosmtpd = None
 
 
+SMTP_TIMEOUT = 5
 PASSWORD = 'secretpassword'
 _openssl = shutil.which('openssl')
 _logger = logging.getLogger(__name__)
+
+if getenv('ODOO_RUNBOT') and not _openssl:
+    _logger.warning("detected runbot environment but openssl not found in PATH, TestIrMailServerSMTPD will be skipped")
+if getenv('ODOO_RUNBOT') and not aiosmtpd:
+    _logger.warning("detected runbot environment but aiosmtpd not installed, TestIrMailServerSMTPD will be skipped")
 
 
 def _find_free_local_address():
@@ -61,7 +69,7 @@ class Certificate:
 @unittest.skipUnless(aiosmtpd, "aiosmtpd couldn't be imported")
 @unittest.skipUnless(_openssl, "openssl not found in path")
 # fail fast for timeout errors
-@patch('odoo.addons.base.models.ir_mail_server.SMTP_TIMEOUT', .1)
+@patch('odoo.addons.base.models.ir_mail_server.SMTP_TIMEOUT', SMTP_TIMEOUT)
 # prevent the CLI from interfering with the tests
 @patch.dict(config.options, {'smtp_server': ''})
 class TestIrMailServerSMTPD(TransactionCaseWithUserDemo):
@@ -135,20 +143,22 @@ class TestIrMailServerSMTPD(TransactionCaseWithUserDemo):
         patcher.start()
         cls.addClassCleanup(patcher.stop)
 
-        # reactivate sending emails during this test suite, make sure
-        # NOT TO send emails using another ir.mail_server than the one
-        # created in setUp!
-        patcher = patch.object(modules.module, 'current_test', False)
-        patcher.start()
-        cls.addClassCleanup(patcher.stop)
-
         # fix runbot, docker uses a single ipv4 stack but it gives ::1
         # when resolving "localhost" (so stupid), use the following to
         # force aiosmtpd/odoo to bind/connect to a fixed ipv4 OR ipv6
         # address.
-        family, _, cls.port = _find_free_local_address()
-        cls.localhost = getaddrinfo('localhost', cls.port, family)
+        family, addr, cls.port = _find_free_local_address()
+        cls.localhost = getaddrinfo(addr, cls.port, family)
         cls.startClassPatcher(patch('socket.getaddrinfo', cls.getaddrinfo))
+
+    def setUp(self):
+        super().setUp()
+        # reactivate sending emails during this test suite, make sure
+        # NOT TO send emails using another ir.mail_server than the one
+        # created in setUp!
+        patcher = patch.object(IrMail_Server, '_disable_send', return_value=False)
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     @classmethod
     def getaddrinfo(cls, host, port, *args, **kwargs):
@@ -175,6 +185,7 @@ class TestIrMailServerSMTPD(TransactionCaseWithUserDemo):
         :param auth_required: whether the server enforces password
             authentication or not.
         """
+        encryption = encryption.removesuffix('_strict')
         assert encryption in ('none', 'ssl', 'starttls')
         assert encryption == 'none' or ssl_context
 
@@ -247,7 +258,7 @@ class TestIrMailServerSMTPD(TransactionCaseWithUserDemo):
             ('certificate', "valid client", client_cert, client_key, None),
         ]
 
-        for encryption in ('starttls', 'ssl'):
+        for encryption in ('starttls', 'starttls_strict', 'ssl', 'ssl_strict'):
             mail_server.smtp_encryption = encryption
             with self.start_smtpd(encryption, ssl_context, auth_required=False):
                 for authentication, name, certificate, private_key, error_pattern in matrix:
@@ -258,12 +269,13 @@ class TestIrMailServerSMTPD(TransactionCaseWithUserDemo):
                             'smtp_ssl_private_key': private_key,
                         })
                         if error_pattern:
-                            with self.assertRaises(UserError) as error_capture:
+                            timeout = .1 if 'timed out' in error_pattern else SMTP_TIMEOUT
+                            with self.assertRaises(UserError) as error_capture, \
+                                 patch('odoo.addons.base.models.ir_mail_server.SMTP_TIMEOUT', timeout):
                                 mail_server.test_smtp_connection()
                             self.assertRegex(error_capture.exception.args[0], error_pattern)
                         else:
                             mail_server.test_smtp_connection()
-
 
     def test_authentication_login_matrix(self):
         """
@@ -290,9 +302,7 @@ class TestIrMailServerSMTPD(TransactionCaseWithUserDemo):
         matrix = [
             # auth_required, password, error_pattern
             (False, MISSING, None),
-            (True, MISSING,
-                r"The server refused the sender address \(noreply@localhost\) "
-                r"with error b'5\.7\.0 Authentication required'"),
+            (True, MISSING, r"The server refused the sender address \(noreply@localhost\) with error .*"),
             (True, INVALID,
                 r"The server has closed the connection unexpectedly\. "
                 r"Check configuration served on this port number\.\n "
@@ -300,7 +310,7 @@ class TestIrMailServerSMTPD(TransactionCaseWithUserDemo):
             (True, PASSWORD, None),
         ]
 
-        for encryption in ('none', 'starttls', 'ssl'):
+        for encryption in ('none', 'starttls', 'starttls_strict', 'ssl', 'ssl_strict'):
             mail_server.smtp_encryption = encryption
             for auth_required, password, error_pattern in matrix:
                 mail_server.smtp_user = password and self.user_demo.email
@@ -310,7 +320,9 @@ class TestIrMailServerSMTPD(TransactionCaseWithUserDemo):
                                   password=password):
                     with self.start_smtpd(encryption, ssl_context, auth_required):
                         if error_pattern:
-                            with self.assertRaises(UserError) as capture:
+                            timeout = .1 if 'timed out' in error_pattern else SMTP_TIMEOUT
+                            with self.assertRaises(UserError) as capture, \
+                                 patch('odoo.addons.base.models.ir_mail_server.SMTP_TIMEOUT', timeout):
                                 mail_server.test_smtp_connection()
                             self.assertRegex(capture.exception.args[0], error_pattern)
                         else:
@@ -343,8 +355,7 @@ class TestIrMailServerSMTPD(TransactionCaseWithUserDemo):
                 r"Check configuration served on this port number\.\n "
                 r"Connection unexpectedly closed: timed out"),
             ('none', 'starttls',
-                r"The server refused the sender address \(noreply@localhost\) with error "
-                r"b'Must issue a STARTTLS command first'"),
+                r"The server refused the sender address \(noreply@localhost\) with error .*"),
             ('starttls', 'none',
                 r"An option is not supported by the server:\n "
                 r"STARTTLS extension not supported by server\."),
@@ -367,10 +378,13 @@ class TestIrMailServerSMTPD(TransactionCaseWithUserDemo):
                               client_encryption=client_encryption):
                 mail_server.smtp_encryption = client_encryption
                 with self.start_smtpd(server_encryption, ssl_context, auth_required=False):
-                    with self.assertRaises(UserError) as capture:
+                    timeout = .1 if 'timed out' in error_pattern else SMTP_TIMEOUT
+                    with self.assertRaises(UserError) as capture, \
+                         patch('odoo.addons.base.models.ir_mail_server.SMTP_TIMEOUT', timeout):
                         mail_server.test_smtp_connection()
                     self.assertRegex(capture.exception.args[0], error_pattern)
 
+    @mute_logger('mail.log')
     def test_man_in_the_middle_matrix(self):
         """
         Simulate that a pirate was successful at intercepting the live
@@ -394,22 +408,33 @@ class TestIrMailServerSMTPD(TransactionCaseWithUserDemo):
         host_good = 'localhost'
         host_bad = 'notlocalhost'
 
-        # for now it doesn't raise any error for bad cert/host
         matrix = [
-            # authentication, certificate, hostname, error_pattern
-            ('login', cert_bad, host_good, None),
-            ('login', cert_good, host_bad, None),
-            ('certificate', cert_bad, host_good, None),
-            ('certificate', cert_good, host_bad, None),
+            # strict?, authentication, certificate, hostname, error_pattern
+            (False, 'login', cert_bad, host_good, None),
+            (False, 'login', cert_good, host_bad, None),
+            (False, 'certificate', cert_bad, host_good, None),
+            (False, 'certificate', cert_good, host_bad, None),
+            (True, 'login', cert_bad, host_good,
+                r"^An SSL exception occurred\. Check connection security type\.\n "
+                r".*certificate verify failed"),
+            (True, 'login', cert_good, host_bad,
+                r"^An SSL exception occurred\. Check connection security type\.\n "
+                r".*Hostname mismatch, certificate is not valid for 'notlocalhost'"),
+            (True, 'certificate', cert_bad, host_good,
+                r"^An SSL exception occurred\. Check connection security type\.\n "
+                r".*certificate verify failed"),
+            (True, 'certificate', cert_good, host_bad,
+                r"^An SSL exception occurred\. Check connection security type\.\n "
+                r".*CertificateError: hostname 'notlocalhost' doesn't match 'localhost'"),
         ]
 
         for encryption in ('starttls', 'ssl'):
-            for authentication, certificate, hostname, error_pattern in matrix:
+            for strict, authentication, certificate, hostname, error_pattern in matrix:
                 mail_server.smtp_host = hostname
                 mail_server.smtp_authentication = authentication
-                mail_server.smtp_encryption = encryption
+                mail_server.smtp_encryption = encryption + ('_strict' if strict else '')
                 with self.subTest(
-                    encryption=encryption,
+                    encryption=encryption + ('_strict' if strict else ''),
                     authentication=authentication,
                     cert_good=certificate == cert_good,
                     host_good=hostname == host_good,

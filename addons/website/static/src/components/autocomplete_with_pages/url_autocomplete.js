@@ -1,9 +1,10 @@
-/** @odoo-module **/
-
 import { Component } from "@odoo/owl";
 import { rpc } from "@web/core/network/rpc";
+import { useChildRef } from "@web/core/utils/hooks";
 import { AutoCompleteWithPages } from "@website/components/autocomplete_with_pages/autocomplete_with_pages";
 
+// TODO: we probably don't need it anymore after merging html_builder
+// see: https://github.com/odoo/odoo/pull/187091
 export class UrlAutoComplete extends Component {
     static props = {
         options: { type: Object },
@@ -13,11 +14,8 @@ export class UrlAutoComplete extends Component {
     static template = "website.UrlAutoComplete";
     static components = { AutoCompleteWithPages };
 
-    _mapItemToSuggestion(item) {
-        return {
-            ...item,
-            classList: item.separator ? "ui-autocomplete-category" : "ui-autocomplete-item",
-        };
+    setup() {
+        this.inputRef = useChildRef();
     }
 
     get dropdownClass() {
@@ -25,7 +23,7 @@ export class UrlAutoComplete extends Component {
         for (const key in this.props.options?.classes) {
             classList.push(key, this.props.options.classes[key]);
         }
-        return classList.join(" ")
+        return classList.join(" ");
     }
 
     get dropdownOptions() {
@@ -39,16 +37,20 @@ export class UrlAutoComplete extends Component {
     get sources() {
         return [
             {
-                optionTemplate: "website.AutoCompleteWithPagesItem",
+                optionSlot: "option",
                 options: async (term) => {
+                    const makeItem = (item) => ({
+                        cssClass: "ui-autocomplete-item",
+                        label: item.label,
+                        onSelect: this.onSelect.bind(this, item.value),
+                    });
+
                     if (term[0] === "#") {
                         const anchors = await this.props.loadAnchors(
                             term,
                             this.props.options && this.props.options.body
                         );
-                        return anchors.map((anchor) =>
-                            this._mapItemToSuggestion({ label: anchor, value: anchor })
-                        );
+                        return anchors.map((anchor) => makeItem({ label: anchor, value: anchor }));
                     } else if (term.startsWith("http") || term.length === 0) {
                         // avoid useless call to /website/get_suggested_links
                         return [];
@@ -60,24 +62,30 @@ export class UrlAutoComplete extends Component {
                         needle: term,
                         limit: 15,
                     });
-                    let choices = res.matching_pages;
-                    res.others.forEach((other) => {
+                    const choices = [];
+                    for (const page of res.matching_pages) {
+                        choices.push(makeItem(page));
+                    }
+                    for (const other of res.others) {
                         if (other.values.length) {
-                            choices = choices.concat(
-                                [{ separator: other.title, label: other.title }],
-                                other.values
-                            );
+                            choices.push({
+                                cssClass: "ui-autocomplete-category",
+                                data: { separator: true },
+                                label: other.title,
+                            });
+                            for (const page of other.values) {
+                                choices.push(makeItem(page));
+                            }
                         }
-                    });
-                    return choices.map(this._mapItemToSuggestion);
+                    }
+                    return choices;
                 },
             },
         ];
     }
 
-    onSelect(selectedSubjection, { input }) {
-        const { value } = Object.getPrototypeOf(selectedSubjection);
-        input.value = value;
+    onSelect(value) {
+        this.inputRef.value = value;
         this.props.targetDropdown.value = value;
         this.props.options.urlChosen?.();
     }

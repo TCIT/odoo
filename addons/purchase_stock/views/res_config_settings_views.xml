@@ -14,6 +14,12 @@
 							 documentation="/applications/inventory_and_mrp/inventory/shipping/operation/dropshipping.html">
 						<field name="module_stock_dropshipping"/>
 					</setting>
+					<setting title="This adds a Replenish On Order (MTO) route to apply on products in order to generate on-demand replenishment linked to your sales orders (for example) as soon as they are confirmed, with a direct link. Purchase orders, manufacturing orders, etc. are triggered based on what way to replenish is set on the product (Buy or Manufacture route)."
+							 help="Allow Make to Order, or automate PO, when a product is sold and get direct links between documents."
+                             				 documentation="/applications/inventory_and_mrp/inventory/warehouses_storage/replenishment/mto.html"
+											 groups="stock.group_stock_manager">
+                        			<field name="replenish_on_order"/>
+                    			</setting>
 				</block>
 			</xpath>
 		</field>
@@ -24,18 +30,7 @@
 		<field name="model">res.config.settings</field>
 		<field name="inherit_id" ref="stock.res_config_settings_view_form"/>
 		<field name="arch" type="xml">
-			<xpath expr="//block[@id='schedule_info']" position="attributes">
-				<attribute name="invisible">0</attribute>
-			</xpath>
 			<div id="purchase_po_lead" position="replace">
-				<setting company_dependent="1" help="Schedule request for quotations earlier to avoid delays" documentation="/applications/inventory_and_mrp/inventory/management/planning/scheduled_dates.html" title="Margin of error for vendor lead times. When the system generates Purchase Orders for reordering products,they will be scheduled that many days earlier to cope with unexpected vendor delays." name="schedule_receivings_setting_container">
-					<field name="use_po_lead"/>
-					<div class="content-group">
-						<div class="mt16" invisible="not use_po_lead">
-							<span>Move forward expected request creation date by <field name="po_lead" class="oe_inline"/> days</span>
-						</div>
-					</div>
-				</setting>
 				<setting company_dependent="1" help="Days needed to confirm a PO">
 					<field name="days_to_purchase" class="oe_inline"/><span> days</span>
 				</setting>

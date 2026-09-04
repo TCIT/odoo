@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
@@ -17,79 +16,12 @@ from odoo.exceptions import RedirectWarning, UserError, AccessError
 from odoo.http import request
 from odoo.tools import html2plaintext, sql
 from odoo.tools.pdf import PdfFileReader
+from odoo.addons.portal.controllers.portal_thread import PortalChatter
 
 _logger = logging.getLogger(__name__)
 
 
-class SlidePartnerRelation(models.Model):
-    _name = 'slide.slide.partner'
-    _description = 'Slide / Partner decorated m2m'
-    _table = 'slide_slide_partner'
-    _rec_name = 'partner_id'
-
-    slide_id = fields.Many2one('slide.slide', string="Content", ondelete="cascade", index=True, required=True)
-    slide_category = fields.Selection(related='slide_id.slide_category')
-    channel_id = fields.Many2one(
-        'slide.channel', string="Channel",
-        related="slide_id.channel_id", store=True, index=True, ondelete='cascade')
-    partner_id = fields.Many2one('res.partner', index=True, required=True, ondelete='cascade')
-    vote = fields.Integer('Vote', default=0)
-    completed = fields.Boolean('Completed')
-    quiz_attempts_count = fields.Integer('Quiz attempts count', default=0)
-
-    _sql_constraints = [
-        ('slide_partner_uniq',
-         'unique(slide_id, partner_id)',
-         'A partner membership to a slide must be unique!'
-        ),
-        ('check_vote',
-         'CHECK(vote IN (-1, 0, 1))',
-         'The vote must be 1, 0 or -1.'
-        ),
-    ]
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        res = super().create(vals_list)
-        completed = res.filtered('completed')
-        if completed:
-            completed._recompute_completion()
-        return res
-
-    def write(self, values):
-        slides_completion_to_recompute = self.env['slide.slide.partner']
-        if 'completed' in values:
-            slides_completion_to_recompute = self.filtered(
-                lambda slide_partner: slide_partner.completed != values['completed'])
-
-        res = super(SlidePartnerRelation, self).write(values)
-
-        if slides_completion_to_recompute:
-            slides_completion_to_recompute._recompute_completion()
-
-        return res
-
-    def _recompute_completion(self):
-        self.env['slide.channel.partner'].search([
-            ('channel_id', 'in', self.channel_id.ids),
-            ('partner_id', 'in', self.partner_id.ids),
-            ('member_status', 'not in', ('completed', 'invited'))
-        ])._recompute_completion()
-
-
-class SlideTag(models.Model):
-    """ Tag to search slides across channels. """
-    _name = 'slide.tag'
-    _description = 'Slide Tag'
-
-    name = fields.Char('Name', required=True, translate=True)
-
-    _sql_constraints = [
-        ('slide_tag_unique', 'UNIQUE(name)', 'A tag must be unique!'),
-    ]
-
-
-class Slide(models.Model):
+class SlideSlide(models.Model):
     _name = 'slide.slide'
     _inherit = [
         'mail.thread',
@@ -120,14 +52,14 @@ class Slide(models.Model):
     sequence = fields.Integer('Sequence', default=0)
     user_id = fields.Many2one('res.users', string='Uploaded by', default=lambda self: self.env.uid)
     description = fields.Html('Description', translate=True, sanitize_attributes=False, sanitize_overridable=True)
-    channel_id = fields.Many2one('slide.channel', string="Course", required=True, ondelete='cascade')
+    channel_id = fields.Many2one('slide.channel', string="Course", required=True, index=True, ondelete='cascade')
     tag_ids = fields.Many2many('slide.tag', 'rel_slide_tag', 'slide_id', 'tag_id', string='Tags')
     is_preview = fields.Boolean('Allow Preview', default=False, help="The course is accessible by anyone : the users don't need to join the channel to access the content of the course.")
     is_new_slide = fields.Boolean('Is New Slide', compute='_compute_is_new_slide')
     completion_time = fields.Float('Duration', digits=(10, 4), compute='_compute_category_completion_time', recursive=True, readonly=False, store=True)
     # Categories
     is_category = fields.Boolean('Is a category', default=False)
-    category_id = fields.Many2one('slide.slide', string="Section", compute="_compute_category_id", store=True)
+    category_id = fields.Many2one('slide.slide', string="Section", compute="_compute_category_id", store=True, index='btree_not_null')
     slide_ids = fields.One2many('slide.slide', "category_id", string="Content")
     # subscribers
     partner_ids = fields.Many2many('res.partner', 'slide_slide_partner', 'slide_id', 'partner_id',
@@ -239,9 +171,10 @@ class Slide(models.Model):
     is_published = fields.Boolean(tracking=1)
     website_published = fields.Boolean(tracking=False)
 
-    _sql_constraints = [
-        ('exclusion_html_content_and_url', "CHECK(html_content IS NULL OR url IS NULL)", "A slide is either filled with a url or HTML content. Not both.")
-    ]
+    _exclusion_html_content_and_url = models.Constraint(
+        'CHECK(html_content IS NULL OR url IS NULL)',
+        'A slide is either filled with a url or HTML content. Not both.',
+    )
 
     @api.depends('slide_category', 'source_type', 'image_binary_content')
     def _compute_image_1920(self):
@@ -274,7 +207,7 @@ class Slide(models.Model):
             if slide.channel_id.id not in channel_slides:
                 channel_slides[slide.channel_id.id] = slide.channel_id.slide_ids
 
-        for cid, slides in channel_slides.items():
+        for slides in channel_slides.values():
             current_category = self.env['slide.slide']
             slide_list = list(slides)
             slide_list.sort(key=lambda s: (s.sequence, not s.is_category))
@@ -307,10 +240,17 @@ class Slide(models.Model):
         for slide in self:
             slide.questions_count = len(slide.question_ids)
 
-    @api.depends('website_message_ids.res_id', 'website_message_ids.model', 'website_message_ids.message_type')
+    @api.depends("website_message_ids")
     def _compute_comments_count(self):
+        count_by_slide = dict(
+            self.env["mail.message"]._read_group(
+                PortalChatter._get_portal_message_fetch_domain(self),
+                groupby=["res_id"],
+                aggregates=["__count"],
+            )
+        )
         for slide in self:
-            slide.comments_count = len(slide.website_message_ids)
+            slide.comments_count = count_by_slide.get(slide.id, 0)
 
     @api.depends('slide_views', 'public_views')
     def _compute_total(self):
@@ -591,11 +531,14 @@ class Slide(models.Model):
 
     @api.depends('name', 'channel_id.website_id.domain')
     def _compute_website_url(self):
-        super(Slide, self)._compute_website_url()
+        super()._compute_website_url()
         for slide in self:
             if slide.id:  # avoid to perform a slug on a not yet saved record in case of an onchange.
-                base_url = slide.channel_id.get_base_url()
-                slide.website_url = '%s/slides/slide/%s' % (base_url, self.env['ir.http']._slug(slide))
+                slide.website_url = f"/slides/slide/{self.env['ir.http']._slug(slide)}"
+
+    @api.depends('channel_id.website_id.domain')
+    def _compute_website_absolute_url(self):
+        super()._compute_website_absolute_url()
 
     @api.depends('is_published')
     def _compute_website_share_url(self):
@@ -655,7 +598,8 @@ class Slide(models.Model):
                 slide.channel_id.channel_partner_ids._recompute_completion()
         return slides
 
-    def write(self, values):
+    def write(self, vals):
+        values = vals
         if values.get('is_category'):
             values['is_preview'] = True
             values['is_published'] = True
@@ -669,7 +613,8 @@ class Slide(models.Model):
             elif values['slide_category'] != 'article':
                 values = {'html_content': False, **values}
 
-        res = super(Slide, self).write(values)
+        res = super().write(values)
+
         if values.get('is_published'):
             self.date_published = datetime.datetime.now()
             self._post_publication()
@@ -689,6 +634,8 @@ class Slide(models.Model):
                 })
 
         if 'is_published' in values or 'active' in values:
+            # archiving a channel unpublishes its slides
+            self.filtered(lambda slide: not slide.active and not slide.is_category and slide.is_published).is_published = False
             # recompute the completion for all partners of the channel
             self.channel_id.channel_partner_ids._recompute_completion()
 
@@ -698,7 +645,7 @@ class Slide(models.Model):
         """Sets the sequence to zero so that it always lands at the beginning
         of the newly selected course as an uncategorized slide"""
         default = dict(default or {})
-        if 'slide.channel' not in self._context.get('__copy_data_seen', {}) and 'sequence' not in default:
+        if 'slide.channel' not in self.env.context.get('__copy_data_seen', {}) and 'sequence' not in default:
             default['sequence'] = 0
         return super().copy_data(default=default)
 
@@ -706,28 +653,28 @@ class Slide(models.Model):
         for category in self.filtered(lambda slide: slide.is_category):
             category.channel_id._move_category_slides(category, False)
         channel_partner_ids = self.channel_id.channel_partner_ids
-        res = super(Slide, self).unlink()
+        res = super().unlink()
         channel_partner_ids._recompute_completion()
         return res
 
-    def toggle_active(self):
-        # archiving/unarchiving a channel does it on its slides, too
-        to_archive = self.filtered(lambda slide: slide.active)
-        res = super(Slide, self).toggle_active()
-        if to_archive:
-            to_archive.filtered(lambda slide: not slide.is_category).is_published = False
-        return res
+    def _can_return_content(self, field_name=None, access_token=None):
+        # Override because the module `website` overrides `_can_return_content` to allow returning the content of any
+        # `website_published=True` record while the content of a course (`slide.slide`) can still be restricted
+        # despite it's website published, according if the course is on invitation and so on.
+        if self.website_published:
+            return self.has_access("read")
+        # if not `website_published`, the base `_can_return_content` returns `False``
+        return super()._can_return_content(field_name, access_token)
 
     # ---------------------------------------------------------
     # Mail/Rating
     # ---------------------------------------------------------
 
-    @api.returns('mail.message', lambda value: value.id)
     def message_post(self, *, message_type='notification', **kwargs):
         self.ensure_one()
         if message_type == 'comment' and not self.channel_id.can_comment:  # user comments have a restriction on karma
             raise AccessError(_('Not enough karma to comment'))
-        return super(Slide, self).message_post(message_type=message_type, **kwargs)
+        return super().message_post(message_type=message_type, **kwargs)
 
     def _get_access_action(self, access_uid=None, force_website=False):
         """ Instead of the classic form view, redirect to website if it is published. """
@@ -735,15 +682,14 @@ class Slide(models.Model):
         if force_website or self.website_published:
             return {
                 'type': 'ir.actions.act_url',
-                'url': '%s' % self.website_url,
+                'url': self.website_absolute_url,
                 'target': 'self',
                 'target_type': 'public',
                 'res_id': self.id,
             }
-        return super(Slide, self)._get_access_action(access_uid=access_uid, force_website=force_website)
+        return super()._get_access_action(access_uid=access_uid, force_website=force_website)
 
-    def _notify_get_recipients_groups(self, message, model_description, msg_vals=None):
-        """ Add access button to everyone if the document is active. """
+    def _notify_get_recipients_groups(self, message, model_description, msg_vals=False):
         groups = super()._notify_get_recipients_groups(
             message, model_description, msg_vals=msg_vals
         )
@@ -799,7 +745,7 @@ class Slide(models.Model):
             reply_to = publish_template._render_field('reply_to', slide.ids)[slide.id]
             if reply_to:
                 kwargs['reply_to'] = reply_to
-            slide.channel_id.with_context(mail_create_nosubscribe=True).message_post(
+            slide.channel_id.with_context(mail_post_autofollow_author_skip=True).message_post(
                 subject=subject,
                 body=html_body,
                 subtype_xmlid='website_slides.mt_channel_slide_published',
@@ -807,15 +753,6 @@ class Slide(models.Model):
                 **kwargs,
             )
         return True
-
-    def _generate_signed_token(self, partner_id):
-        """ Lazy generate the acces_token and return it signed by the given partner_id
-            :rtype tuple (string, int)
-            :return (signed_token, partner_id)
-        """
-        if not self.access_token:
-            self.write({'access_token': self._default_access_token()})
-        return self._sign_token(partner_id)
 
     def _send_share_email(self, email, fullscreen):
         courses_without_templates = self.channel_id.filtered(lambda channel: not channel.share_slide_template_id)
@@ -1130,6 +1067,7 @@ class Slide(models.Model):
 
         params = {}
         params['projection'] = 'BASIC'
+        params['supportsAllDrives'] = 'true'  # Allow Shared Drive links
         if 'google.drive.config' in self.env:
             access_token = False
             try:
@@ -1309,7 +1247,7 @@ class Slide(models.Model):
         return slide_metadata, None
 
     def _default_website_meta(self):
-        res = super(Slide, self)._default_website_meta()
+        res = super()._default_website_meta()
         res['default_opengraph']['og:title'] = res['default_twitter']['twitter:title'] = self.name
         res['default_opengraph']['og:description'] = res['default_twitter']['twitter:description'] = html2plaintext(self.description)
         res['default_opengraph']['og:image'] = res['default_twitter']['twitter:image'] = self.env['website'].image_url(self, 'image_1024')
@@ -1388,13 +1326,14 @@ class Slide(models.Model):
         results_data = super()._search_render_results(fetch_fields, mapping, icon, limit)
         for slide, data in zip(self, results_data):
             data['_fa'] = icon_per_category.get(slide.slide_category, 'fa-file-pdf-o')
-            data['url'] = slide.website_url
+            data['url'] = slide.website_absolute_url
             data['course'] = _('Course: %s', slide.channel_id.name)
-            data['course_url'] = slide.channel_id.website_url
+            data['course_url'] = slide.channel_id.website_absolute_url
         return results_data
 
-    def open_website_url(self):
-        """ Overridden to use a relative URL instead of an absolute when website_id is False. """
-        if self.website_id:
-            return super().open_website_url()
-        return self.env['website'].get_client_action(f'/slides/slide/{self.env["ir.http"]._slug(self)}')
+    def get_base_url(self):
+        """As website_id is not defined on this record, we rely on channel website_id for base URL."""
+        return self.channel_id.get_base_url()
+
+    def _mail_get_partner_fields(self, introspect_fields=False):
+        return []

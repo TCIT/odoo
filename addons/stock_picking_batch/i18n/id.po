@@ -1,29 +1,35 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* stock_picking_batch
-# 
+# * stock_picking_batch
+#
 # Translators:
-# Wil Odoo, 2024
-# Abe Manyo, 2025
-# 
+# Martin Trigaux, 2022
+# Abe Manyo, 2022
+# Muftiara Syuhada <muftiara.syuhada@gmail.com>, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Abe Manyo (abem)" <abem@odoo.com>, 2025, 2026.
+# "Nurul Aini Akrima Sabila (nuaas)" <nuaas@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:24+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Abe Manyo, 2025\n"
-"Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
+"POT-Creation-Date: 2026-07-17 17:39+0000\n"
+"PO-Revision-Date: 2026-08-02 11:32+0000\n"
+"Last-Translator: \"Abe Manyo (abem)\" <abem@odoo.com>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-19/"
+"stock_picking_batch/id/>\n"
+"Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: id\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "2023-08-20"
-msgstr "2023-08-20"
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "%s was removed from the batch, no quantity processed"
+msgstr "%s dihapus dari batch, tidak ada kuantitas yang diproses"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_type_kanban_batch
@@ -45,8 +51,18 @@ msgid ""
 "<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">Batch "
 "Grouping</span>"
 msgstr ""
-"<span class=\"o_form_label fw-bold\" invisible=\"not "
-"auto_batch\">Pengelompokkan Batch</span>"
+"<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">"
+"Pengelompokkan Batch</span>"
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+msgid "<span class=\"o_stat_text\">Moves</span>"
+msgstr "<span class=\"o_stat_text\">Pergerakan</span>"
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+msgid "<span class=\"o_stat_text\">Packages</span>"
+msgstr "<span class=\"o_stat_text\">Paket</span>"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
@@ -86,25 +102,29 @@ msgstr "<strong>→</strong>"
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_lines
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this number of lines if the transfer is added to it.\n"
+"A transfer will not be automatically added to batches that will exceed this "
+"number of lines if the transfer is added to it.\n"
 "Leave this value as '0' if no line limit."
 msgstr ""
-"Transfer akan secara otomatis ditambahkan ke batch yang memenuhi jumlah baris ini bila transfer ditambahkan ke batch tersebut.\n"
+"Transfer akan secara otomatis ditambahkan ke batch yang memenuhi jumlah "
+"baris ini bila transfer ditambahkan ke batch tersebut.\n"
 "Berikan nilai '0' ke value ini bila tidak ada batasan baris."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_pickings
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this number of transfers.\n"
+"A transfer will not be automatically added to batches that will exceed this "
+"number of transfers.\n"
 "Leave this value as '0' if no transfer limit."
 msgstr ""
-"Transfer akan secara otomatis ditambahkan ke batch yang akan memenuhi jumlah transfer ini.\n"
+"Transfer akan secara otomatis ditambahkan ke batch yang akan memenuhi jumlah "
+"transfer ini.\n"
 "Berikan nilai ini '0' bila tidak ada batasan transfer."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_needaction
 msgid "Action Needed"
-msgstr "Tindakan Diperluka"
+msgstr "Tindakan Diperlukan"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__activity_ids
@@ -124,7 +144,7 @@ msgstr "Status Aktivitas"
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__activity_type_icon
 msgid "Activity Type Icon"
-msgstr "Ikon Jenis Aktifitas"
+msgstr "Ikon Jenis Aktivitas"
 
 #. module: stock_picking_batch
 #. odoo-python
@@ -250,7 +270,6 @@ msgstr "Properti-Properti Batch"
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
-#: code:addons/stock_picking_batch/wizard/stock_picking_to_batch.py:0
 #: model:ir.actions.report,name:stock_picking_batch.action_report_picking_batch
 #: model:ir.model,name:stock_picking_batch.model_stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move_line__batch_id
@@ -290,6 +309,34 @@ msgstr "Batch terkait transfer ini"
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
 msgid "Batch transfers"
 msgstr "Transfer-transfer batch"
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "Batch transfers cannot be merged with wave transfers and vice versa."
+msgstr ""
+"Batch transfer tidak dapat digabung dengan wave transfer dan sebaliknya."
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "Batch/Wave transfers have been merged into the following transfer"
+msgstr "Batch/Wave transfer telah digabung ke transfer berikut"
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "Batch/Wave transfers with different operation types cannot be merged."
+msgstr ""
+"Batch/Wave transfer dengan tipe-tipe operasi yang berbeda tidak dapat "
+"digabung."
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "Batch/Wave transfers with different states cannot be merged."
+msgstr ""
+"Batch/Wavae transfer dengan status-status yang berbeda tidak dapat digabung."
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_type_kanban_batch
@@ -406,14 +453,25 @@ msgid "Destination Location"
 msgstr "Lokasi Tujuan"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 msgid "Detailed Operations"
 msgstr "Operasi Detail"
 
 #. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_picking_move_tree_inherited
+msgid "Details"
+msgstr "Perincian"
+
+#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__display_name
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move__display_name
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move_line__display_name
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking__display_name
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__display_name
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_to_batch__display_name
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__display_name
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_warehouse__display_name
 msgid "Display Name"
 msgstr "Nama Tampilan"
 
@@ -451,11 +509,6 @@ msgid "Future Activities"
 msgstr "Kegiatan - Kegiatan Mendatang"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
-msgid "Group By"
-msgstr "Dikelompokkan berdasarkan"
-
-#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_group_by_dest_loc
 msgid "Group by Destination Location"
 msgstr "Kelompokkan berdasarkan Lokasi Tujuan"
@@ -477,8 +530,13 @@ msgstr "Memiliki Pesan"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__id
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move__id
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move_line__id
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking__id
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__id
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_to_batch__id
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__id
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_warehouse__id
 msgid "ID"
 msgstr "ID"
 
@@ -555,7 +613,7 @@ msgstr "Terakhir Diperbarui pada"
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
 msgid "Late Activities"
-msgstr "Aktifitas terakhir"
+msgstr "Aktivitas terakhir"
 
 #. module: stock_picking_batch
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
@@ -578,9 +636,14 @@ msgid "List of transfers associated to this batch"
 msgstr "Daftar transfer yang terkait batch ini"
 
 #. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+msgid "List view of detailed operations"
+msgstr "Tampilan daftar dari operasi rinci"
+
+#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__wave_group_by_location
 msgid "Location"
-msgstr "Lokasi "
+msgstr "Lokasi"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
@@ -603,6 +666,11 @@ msgid "Lot Number"
 msgstr "Nomor Lot"
 
 #. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_move_line_tree
+msgid "Lot/Serial Number"
+msgstr "Nomor Lot/Seri"
+
+#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_max_lines
 msgid "Maximum lines"
 msgstr "Baris maksimum"
@@ -611,6 +679,11 @@ msgstr "Baris maksimum"
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_max_pickings
 msgid "Maximum transfers"
 msgstr "Transfer maksimum"
+
+#. module: stock_picking_batch
+#: model:ir.actions.server,name:stock_picking_batch.action_merge_batch_picking
+msgid "Merge"
+msgstr "Gabung"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_has_error
@@ -634,14 +707,25 @@ msgid "Move Lines"
 msgstr "Baris Pergerakan"
 
 #. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
+msgid "My Activities"
+msgstr "Aktivitas Saya"
+
+#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__my_activity_date_deadline
 msgid "My Activity Deadline"
-msgstr "Deadline Kegiatan Saya"
+msgstr "Tenggat Aktivitas Saya"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
 msgid "My Transfers"
 msgstr "Transfer Saya"
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "New"
+msgstr ""
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__activity_calendar_event_id
@@ -651,7 +735,7 @@ msgstr "Kalender Acara Aktivitas Berikutnya"
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Batas Waktu Aktivitas Berikutnya"
+msgstr "Tenggat Aktivitas Berikutnya"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__activity_summary
@@ -699,6 +783,13 @@ msgid "Package ID"
 msgstr "ID Paket"
 
 #. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+msgid "Packages"
+msgstr "Paket-Paket"
+
+#. module: stock_picking_batch
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
 msgid ""
@@ -722,11 +813,8 @@ msgstr "Tipe Picking"
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
-msgid ""
-"Please add 'Done' quantities to the batch picking to create a new pack."
-msgstr ""
-"Mohon tambahkan kuantitas 'Selesai' ke batch picking untuk membuat pack "
-"baru."
+msgid "Please select at least two batch/wave transfers to merge."
+msgstr "Silakan pilih setidaknya dua transfer batch/wave untuk digabung."
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_type_kanban_batch
@@ -785,6 +873,7 @@ msgstr "Properti"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_move_line_tree
 msgid "Put in Pack"
 msgstr "Masukkan ke Paket"
 
@@ -807,8 +896,7 @@ msgstr "Rating"
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
 msgid ""
-"Regroup multiple orders into one picking and consolidate at the packing "
-"zone."
+"Regroup multiple orders into one picking and consolidate at the packing zone."
 msgstr ""
 "Kelompokkan ulang lebih dari satu pesanan menjadi satu picking dan "
 "konsolidasikan pada zona packing."
@@ -846,14 +934,20 @@ msgstr "Tanggal Terjadwal"
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__scheduled_date
 msgid ""
 "Scheduled date for the transfers to be processed.\n"
-"              - If manually set then scheduled date for all transfers in batch will automatically update to this date.\n"
-"              - If not manually changed and transfers are added/removed/updated then this will be their earliest scheduled date\n"
-"                but this scheduled date will not be set for all transfers in batch."
+"              - If manually set then scheduled date for all transfers in "
+"batch will automatically update to this date.\n"
+"              - If not manually changed and transfers are added/removed/"
+"updated then this will be their earliest scheduled date\n"
+"                but this scheduled date will not be set for all transfers in "
+"batch."
 msgstr ""
 "Jadwalkan tanggal untuk transfer untuk diproses\n"
-"              - Bila secara manual ditetapkan maka tanggal yang dijadwalkan untuk semua transfer di batch akan secara otomatis diupdate ke tanggal ini.\n"
-"              - Bila tidak dirubah secara manual dan transfer ditambahkan/dihapus/diupdate maka ini akan menjadi tanggal terjadwal yang paling awal\n"
-"                namun tanggal terjadwal ini tidak akan ditetapkan untuk semua transfer di batch."
+"              - Bila secara manual ditetapkan maka tanggal yang dijadwalkan "
+"untuk semua transfer di batch akan secara otomatis diupdate ke tanggal ini.\n"
+"              - Bila tidak dirubah secara manual dan transfer ditambahkan/"
+"dihapus/diupdate maka ini akan menjadi tanggal terjadwal yang paling awal\n"
+"                namun tanggal terjadwal ini tidak akan ditetapkan untuk "
+"semua transfer di batch."
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
@@ -892,8 +986,9 @@ msgstr "Tunjukkan Teks Lo"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
-msgid "Show all records which has next action date is before today"
-msgstr "Tampilkan semua dokumen dengan aksi berikut sebelum hari ini"
+msgid "Show all records whose next activity date is past"
+msgstr ""
+"Tunjukkan semua rekaman yang tanggal kegiatan berikutnya berada di masa lalu"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_picking_type_form_inherit
@@ -906,14 +1001,14 @@ msgid ""
 "Split transfers by defined locations, then group transfers with the same "
 "location."
 msgstr ""
-"Pisah transfer berdasarkan lokasi yang didefinisikan, lalu transfer kelompok"
-" dengan lokasi yang sama."
+"Pisah transfer berdasarkan lokasi yang didefinisikan, lalu transfer kelompok "
+"dengan lokasi yang sama."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__wave_group_by_category
 msgid ""
-"Split transfers by product category, then group transfers that have the same"
-" product category."
+"Split transfers by product category, then group transfers that have the same "
+"product category."
 msgstr ""
 "Pisah transfer berdasarkan kategori produk, lalu kelompokkan transfer yang "
 "memiliki kategori produk yang sama."
@@ -923,8 +1018,8 @@ msgstr ""
 msgid ""
 "Split transfers by product then group transfers that have the same product."
 msgstr ""
-"Pisah transfer berdasarkan produk lalu transfer kelompok yang masih memiliki"
-" produk yang sama."
+"Pisah transfer berdasarkan produk lalu transfer kelompok yang masih memiliki "
+"produk yang sama."
 
 #. module: stock_picking_batch
 #: model:mail.message.subtype,description:stock_picking_batch.mt_batch_state
@@ -968,19 +1063,14 @@ msgid "Stock Move"
 msgstr "Pergerakan Stok"
 
 #. module: stock_picking_batch
-#: model:ir.model,name:stock_picking_batch.model_stock_package_destination
-msgid "Stock Package Destination"
-msgstr "Tujuan Paket Stok"
-
-#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__move_line_ids
 msgid "Stock move lines"
-msgstr "Baris pergerakkan stok"
+msgstr "Baris pergerakan stok"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__move_ids
 msgid "Stock moves"
-msgstr "Pergerakkan stok"
+msgstr "Pergerakan stok"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
@@ -989,15 +1079,41 @@ msgstr "Ringkasan:"
 
 #. module: stock_picking_batch
 #. odoo-python
+#: code:addons/stock_picking_batch/wizard/stock_picking_to_batch.py:0
+msgid "The following batch transfer has been created"
+msgstr "Batch transfer berikut telah dibuat"
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/wizard/stock_picking_to_batch.py:0
+msgid "The following batch transfer has been updated"
+msgstr "Batch transfer berikut telah diupdate"
+
+#. module: stock_picking_batch
+#. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 msgid ""
-"The following transfers cannot be added to batch transfer %(batch)s. Please check their states and operation types.\n"
+"The following transfers cannot be added to batch transfer %(batch)s. Please "
+"check their states and operation types.\n"
 "\n"
 "Incompatibilities: %(incompatible_transfers)s"
 msgstr ""
-"Transfer berikut tidak dapat ditambahkan ke batch transfer %(batch)s. Silakan periksa tipe status dan operasi mereka.\n"
+"Transfer berikut tidak dapat ditambahkan ke batch transfer %(batch)s. "
+"Silakan periksa tipe status dan operasi mereka.\n"
 "\n"
 "Tidak kompatibel: %(incompatible_transfers)s"
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_move_line.py:0
+msgid "The following wave transfer has been created"
+msgstr "Wave transfer berikut telah dibuat"
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_move_line.py:0
+msgid "The following wave transfer has been updated"
+msgstr "Wave transfer berikut telah diupdate"
 
 #. module: stock_picking_batch
 #. odoo-python
@@ -1022,6 +1138,14 @@ msgstr "Transfer yang dipilih harus berasal dari perusahaan yang unik."
 #: code:addons/stock_picking_batch/wizard/stock_add_to_wave.py:0
 msgid "The selected transfers should belong to the same operation type"
 msgstr "Transfer yang dipilih harus berasal dari tipe operasi yang sama"
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid ""
+"The sequence '%(sequence)s' is misconfigured. Its prefix should end with a "
+"'/' separator."
+msgstr ""
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__is_wave
@@ -1083,11 +1207,6 @@ msgid "Unassigned responsible from %s"
 msgstr "Batalkan penanggungjawab dari %s"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "Unit of Measure"
-msgstr "Satuan Ukuran"
-
-#. module: stock_picking_batch
 #: model:ir.actions.server,name:stock_picking_batch.action_unreserve_batch_picking
 msgid "Unreserve"
 msgstr "Batalkan Reservasi"
@@ -1106,7 +1225,7 @@ msgstr "Gudang"
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__wave_location_ids
 msgid "Wave Locations"
-msgstr "Lokasi-Lokasi Wave"
+msgstr "Lokasi Wave"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__wave_category_ids
@@ -1143,7 +1262,7 @@ msgstr "Pesan situs"
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__website_message_ids
 msgid "Website communication history"
-msgstr "Sejarah komunikasi situs"
+msgstr "Riwayat komunikasi situs"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_to_batch__is_create_draft
@@ -1155,6 +1274,14 @@ msgstr "Saat dicentang, buat batch dalam status draft"
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 msgid "You cannot delete Done batch transfers."
 msgstr "Anda tidak dapat menghapus transfer batch yang Selesai."
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+msgid "You cannot merge done or cancelled batch/wave transfers."
+msgstr ""
+"Anda tidak dapat menggabungkan batch/wave transfer yang selesai atau "
+"dibatalkan."
 
 #. module: stock_picking_batch
 #. odoo-python
@@ -1191,3 +1318,15 @@ msgstr "shipping_volume"
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__estimated_shipping_weight
 msgid "shipping_weight"
 msgstr "shipping_weight"
+
+#~ msgid "2023-08-20"
+#~ msgstr "2023-08-20"
+
+#~ msgid "Group By"
+#~ msgstr "Dikelompokkan berdasarkan"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Jumlah pesan yang butuh tindakan"
+
+#~ msgid "Show all records which has next action date is before today"
+#~ msgstr "Tampilkan semua dokumen dengan aksi berikut sebelum hari ini"

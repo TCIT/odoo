@@ -1,38 +1,39 @@
 import { Thread } from "@mail/core/common/thread_model";
 
 import { patch } from "@web/core/utils/patch";
-import { Record } from "../common/record";
+import { fields } from "../common/record";
 import { compareDatetime } from "@mail/utils/common/misc";
+import { rpc } from "@web/core/network/rpc";
 
-patch(Thread.prototype, {
-    /** @type {integer|undefined} */
-    recipientsCount: undefined,
+/** @type {import("models").Thread} */
+const threadPatch = {
     setup() {
         super.setup();
-        this.recipients = Record.many("Follower");
-        this.activities = Record.many("Activity", {
+        /** @type {number|undefined} */
+        this.recipientsCount = undefined;
+        this.recipients = fields.Many("mail.followers");
+        this.activities = fields.Many("mail.activity", {
             sort: (a, b) => compareDatetime(a.date_deadline, b.date_deadline) || a.id - b.id,
             onDelete(r) {
                 r.remove();
+            },
+        });
+        /** @type {boolean} */
+        this.isDisplayedInDiscussAppDesktop = fields.Attr(undefined, {
+            /** @this {import("models").Thread} */
+            compute() {
+                if (this.store.discuss.isActive && !this.store.env.services.ui.isSmall) {
+                    return this.eq(this.store.discuss.thread);
+                }
+                return false;
             },
         });
     },
     get recipientsFullyLoaded() {
         return this.recipientsCount === this.recipients.length;
     },
-    closeChatWindow() {
-        const chatWindow = this.store.ChatWindow.get({ thread: this });
-        chatWindow?.close({ notifyState: false });
-    },
     computeIsDisplayed() {
-        if (this.store.discuss.isActive && !this.store.env.services.ui.isSmall) {
-            return this.eq(this.store.discuss.thread);
-        }
-        return super.computeIsDisplayed();
-    },
-    async leave() {
-        this.closeChatWindow();
-        super.leave(...arguments);
+        return this.isDisplayedInDiscussAppDesktop || super.computeIsDisplayed();
     },
     async loadMoreFollowers() {
         const data = await this.store.env.services.orm.call(this.model, "message_get_followers", [
@@ -50,32 +51,60 @@ patch(Thread.prototype, {
         );
         this.store.insert(data);
     },
+    /** @override */
     open(options) {
-        if (this.model === "discuss.channel") {
-            this.store.env.services["bus_service"].addChannel(this.busChannel);
+        const res = super.open(...arguments);
+        if (res) {
+            return res;
         }
-        if (!this.store.discuss.isActive && !this.store.env.services.ui.isSmall) {
-            this.openChatWindow(options);
-            return;
-        }
-        if (this.store.env.services.ui.isSmall && this.model === "discuss.channel") {
-            this.openChatWindow(options);
-            return;
-        }
-        if (this.model !== "discuss.channel") {
-            this.store.env.services.action.doAction({
-                type: "ir.actions.act_window",
-                res_id: this.id,
-                res_model: this.model,
-                views: [[false, "form"]],
+        const actionService = this.store.env.services.action;
+        if (this.model === "mail.box") {
+            if (this.store.discuss.isActive) {
+                this.setAsDiscussThread();
+            } else {
+                actionService.doAction({
+                    context: { active_id: `mail.box_${this.id}` },
+                    tag: "mail.action_discuss",
+                    type: "ir.actions.client",
+                });
+            }
+        } else {
+            actionService.doAction(this.openRecordActionRequest).catch((error) => {
+                if (options?.fromMessagingMenu) {
+                    this.store.inbox.highlightMessage = this.needactionMessages.at(-1);
+                    actionService.doAction({
+                        context: { active_id: "mail.box_inbox" },
+                        tag: "mail.action_discuss",
+                        type: "ir.actions.client",
+                    });
+                } else {
+                    throw error;
+                }
             });
-            return;
         }
-        super.open();
+        return true;
+    },
+    get openRecordActionRequest() {
+        return {
+            type: "ir.actions.act_window",
+            res_id: this.id,
+            res_model: this.model,
+            views: [[false, "form"]],
+        };
     },
     async unpin() {
+        await this.store.chatHub.initPromise;
         const chatWindow = this.store.ChatWindow.get({ thread: this });
         await chatWindow?.close();
-        super.unpin(...arguments);
+        await super.unpin(...arguments);
     },
-});
+    async follow() {
+        const data = await rpc("/mail/thread/subscribe", {
+            res_model: this.model,
+            res_id: this.id,
+            partner_ids: [this.store.self.id],
+        });
+        this.store.insert(data);
+    },
+};
+patch(Thread.prototype, threadPatch);

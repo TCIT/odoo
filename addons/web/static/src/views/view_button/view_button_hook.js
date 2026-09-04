@@ -54,7 +54,7 @@ export function useViewButtons(ref, options = {}) {
     const comp = useComponent();
     const env = useEnv();
     useSubEnv({
-        async onClickViewButton({ clickParams, getResParams, beforeExecute }) {
+        async onClickViewButton({ clickParams, getResParams, beforeExecute, newWindow }) {
             async function execute() {
                 let _continue = true;
                 if (beforeExecute) {
@@ -86,15 +86,19 @@ export function useViewButtons(ref, options = {}) {
                     resIds: params.resIds,
                     context: params.context || {},
                     buttonContext,
-                    onClose: async () => {
-                        if (!closeDialog && status(comp) !== "destroyed") {
+                    onClose: async (onCloseInfo) => {
+                        if (
+                            !closeDialog &&
+                            status(comp) !== "destroyed" &&
+                            !onCloseInfo?.noReload
+                        ) {
                             await options.reload?.();
                         }
                     },
                 });
                 let error;
                 try {
-                    await action.doActionButton(doActionParams);
+                    await action.doActionButton(doActionParams, { newWindow });
                 } catch (_e) {
                     error = _e;
                 }

@@ -31,80 +31,78 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
             'partner_id': cls.partner_a.id,
             'partner_invoice_id': cls.partner_a.id,
             'partner_shipping_id': cls.partner_a.id,
-            'pricelist_id': cls.company_data['default_pricelist'].id,
         })
         cls.sol1_service_deliver = cls.env['sale.order.line'].create({
             'product_id': cls.company_data['product_service_delivery'].id,
             'product_uom_qty': 1,
             'order_id': cls.sale_order_1.id,
-            'tax_id': False,
+            'tax_ids': False,
         })
         cls.sol1_product_order = cls.env['sale.order.line'].create({
             'product_id': cls.company_data['product_order_no'].id,
             'product_uom_qty': 2,
             'order_id': cls.sale_order_1.id,
-            'tax_id': False,
+            'tax_ids': False,
         })
         cls.sol1_service_purchase_1 = cls.env['sale.order.line'].create({
             'product_id': cls.service_purchase_1.id,
             'product_uom_qty': 4,
             'order_id': cls.sale_order_1.id,
-            'tax_id': False,
+            'tax_ids': False,
         })
 
         cls.sale_order_2 = SaleOrder.create({
             'partner_id': cls.partner_a.id,
             'partner_invoice_id': cls.partner_a.id,
             'partner_shipping_id': cls.partner_a.id,
-            'pricelist_id': cls.company_data['default_pricelist'].id,
         })
         cls.sol2_product_deliver = cls.env['sale.order.line'].create({
             'product_id': cls.company_data['product_delivery_no'].id,
             'product_uom_qty': 5,
             'order_id': cls.sale_order_2.id,
-            'tax_id': False,
+            'tax_ids': False,
         })
         cls.sol2_service_order = cls.env['sale.order.line'].create({
             'product_id': cls.company_data['product_service_order'].id,
             'product_uom_qty': 6,
             'order_id': cls.sale_order_2.id,
-            'tax_id': False,
+            'tax_ids': False,
         })
         cls.sol2_service_purchase_2 = cls.env['sale.order.line'].create({
             'product_id': cls.service_purchase_2.id,
             'product_uom_qty': 7,
             'order_id': cls.sale_order_2.id,
-            'tax_id': False,
+            'tax_ids': False,
         })
 
     def test_sale_create_purchase(self):
-        """ Confirming 2 sales orders with a service that should create a PO, then cancelling the PO should shedule 1 next activity per SO """
+        """ Confirming 2 sales orders with a service that should create two PO, then cancelling the PO should shedule 1 next activity per SO """
         self.sale_order_1.action_confirm()
         self.sale_order_2.action_confirm()
 
-        purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.supplierinfo1.partner_id.id), ('state', '=', 'draft')])
+        purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.service_purchase_1.seller_ids.partner_id.id), ('state', '=', 'draft')])
         purchase_lines_so1 = self.env['purchase.order.line'].search([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
         purchase_line1 = purchase_lines_so1[0]
 
         purchase_lines_so2 = self.env['purchase.order.line'].search([('sale_line_id', 'in', self.sale_order_2.order_line.ids)])
         purchase_line2 = purchase_lines_so2[0]
 
-        self.assertEqual(len(purchase_order), 1, "Only one PO should have been created, from the 2 Sales orders")
+        self.assertEqual(len(purchase_order), 2, "Two PO should have been created, from the 2 Sales orders")
         self.assertEqual(len(purchase_order.order_line), 2, "The purchase order should have 2 lines")
-        self.assertIn(self.sale_order_1.name, purchase_order.origin, "The PO should have SO 1 in its source documents")
-        self.assertIn(self.sale_order_2.name, purchase_order.origin, "The PO should have SO 2 in its source documents")
+        self.assertIn(self.sale_order_1.name, purchase_order[1].origin, "The PO should have SO 1 in its source documents")
+        self.assertIn(self.sale_order_2.name, purchase_order[0].origin, "The PO should have SO 2 in its source documents")
         self.assertEqual(len(purchase_lines_so1), 1, "Only one SO line from SO 1 should have create a PO line")
         self.assertEqual(len(purchase_lines_so2), 1, "Only one SO line from SO 2 should have create a PO line")
         self.assertEqual(len(purchase_order.activity_ids), 0, "No activity should be scheduled on the PO")
-        self.assertEqual(purchase_order.state, 'draft', "The created PO should be in draft state")
+        self.assertEqual(set(purchase_order.mapped('state')), {'draft'}, "The created PO should be in draft state.")
 
         self.assertNotEqual(purchase_line1.product_id, purchase_line2.product_id, "The 2 PO line should have different products")
         self.assertEqual(purchase_line1.product_id, self.sol1_service_purchase_1.product_id, "The create PO line must have the same product as its mother SO line")
         self.assertEqual(purchase_line2.product_id, self.sol2_service_purchase_2.product_id, "The create PO line must have the same product as its mother SO line")
 
-        self.assertEqual(purchase_line1.price_unit, self.supplierinfo1.price, "Unit price should be taken from the vendor line")
-        self.assertEqual(purchase_line2.price_unit, self.supplierinfo2.price, "Unit price should be taken from the vendor line")
-        self.assertEqual(purchase_line1.discount, self.supplierinfo1.discount, "Discount should be taken from the vendor line")
+        self.assertEqual(purchase_line1.price_unit, self.service_purchase_1.seller_ids.price, "Unit price should be taken from the vendor line")
+        self.assertEqual(purchase_line2.price_unit, self.service_purchase_2.seller_ids.price, "Unit price should be taken from the vendor line")
+        self.assertEqual(purchase_line1.discount, self.service_purchase_1.seller_ids.discount, "Discount should be taken from the vendor line")
 
         purchase_order.button_cancel()
 
@@ -116,18 +114,19 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
 
     def test_uom_conversion(self):
         """ Test generated PO use the right UoM according to product configuration """
+        self.service_purchase_2.seller_ids.product_uom_id = self.env.ref('uom.product_uom_unit')
         self.sale_order_2.action_confirm()
         purchase_line = self.env['purchase.order.line'].search([('sale_line_id', '=', self.sol2_service_purchase_2.id)])  # only one line
 
         self.assertTrue(purchase_line, "The SO line should generate a PO line")
-        self.assertEqual(purchase_line.product_uom, self.service_purchase_2.uom_po_id, "The UoM on the purchase line should be the one from the product configuration")
-        self.assertNotEqual(purchase_line.product_uom, self.sol2_service_purchase_2.product_uom, "As the product configuration, the UoM on the SO line should still be different from the one on the PO line")
+        self.assertEqual(purchase_line.product_uom_id, self.service_purchase_2.seller_ids.product_uom_id, "The UoM on the purchase line should be the one from the product configuration")
+        self.assertNotEqual(purchase_line.product_uom_id, self.sol2_service_purchase_2.product_uom_id, "As the product configuration, the UoM on the SO line should still be different from the one on the PO line")
         self.assertEqual(purchase_line.product_qty, self.sol2_service_purchase_2.product_uom_qty * 12, "The quantity from the SO should be converted with th UoM factor on the PO line")
 
     def test_no_supplier(self):
         """ Test confirming SO with product with no supplier raise Error """
         # delete the suppliers
-        self.supplierinfo1.unlink()
+        self.service_purchase_1.seller_ids.unlink()
         # confirm the SO should raise UserError
         with self.assertRaises(UserError):
             self.sale_order_1.action_confirm()
@@ -136,7 +135,7 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         """ Confirm SO, cancel it, then re-confirm it should not regenerate a purchase line """
         self.sale_order_1.action_confirm()
 
-        purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.supplierinfo1.partner_id.id), ('state', '=', 'draft')])
+        purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.service_purchase_1.seller_ids.partner_id.id), ('state', '=', 'draft')])
         purchase_lines = self.env['purchase.order.line'].search([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
         purchase_line = purchase_lines[0]
 
@@ -145,14 +144,14 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         self.assertEqual(len(purchase_order.order_line), 1, "Only one line on PO, after SO confirmation")
         self.assertEqual(purchase_order, purchase_lines.order_id, "The generated purchase line should be in the generated purchase order")
         self.assertEqual(purchase_order.state, 'draft', "Generated purchase should be in draft state")
-        self.assertEqual(purchase_line.price_unit, self.supplierinfo1.price, "Purchase line price is the one from the supplier")
+        self.assertEqual(purchase_line.price_unit, self.service_purchase_1.seller_ids.price, "Purchase line price is the one from the supplier")
         self.assertEqual(purchase_line.product_qty, self.sol1_service_purchase_1.product_uom_qty, "Quantity on SO line is not the same on the purchase line (same UoM)")
 
         self.sale_order_1._action_cancel()
 
         self.assertEqual(len(purchase_order.activity_ids), 1, "One activity should be scheduled on the PO since a SO has been cancelled")
 
-        purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.supplierinfo1.partner_id.id), ('state', '=', 'draft')])
+        purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.service_purchase_1.seller_ids.partner_id.id), ('state', '=', 'draft')])
         purchase_lines = self.env['purchase.order.line'].search([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
         purchase_line = purchase_lines[0]
 
@@ -161,13 +160,13 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         self.assertEqual(len(purchase_order.order_line), 1, "Still one line on PO, even after SO cancellation")
         self.assertEqual(purchase_order, purchase_lines.order_id, "The generated purchase line should still be in the generated purchase order")
         self.assertEqual(purchase_order.state, 'draft', "Generated purchase should still be in draft state")
-        self.assertEqual(purchase_line.price_unit, self.supplierinfo1.price, "Purchase line price is still the one from the supplier")
+        self.assertEqual(purchase_line.price_unit, self.service_purchase_1.seller_ids.price, "Purchase line price is still the one from the supplier")
         self.assertEqual(purchase_line.product_qty, self.sol1_service_purchase_1.product_uom_qty, "Quantity on SO line should still be the same on the purchase line (same UoM)")
 
         self.sale_order_1.action_draft()
         self.sale_order_1.action_confirm()
 
-        purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.supplierinfo1.partner_id.id), ('state', '=', 'draft')])
+        purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.service_purchase_1.seller_ids.partner_id.id), ('state', '=', 'draft')])
         purchase_lines = self.env['purchase.order.line'].search([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
         purchase_line = purchase_lines[0]
 
@@ -176,22 +175,22 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         self.assertEqual(len(purchase_order.order_line), 1, "Only one line on PO, even after SO reconfirmation")
         self.assertEqual(purchase_order, purchase_lines.order_id, "The generated purchase line should be in the generated purchase order")
         self.assertEqual(purchase_order.state, 'draft', "Generated purchase should be in draft state")
-        self.assertEqual(purchase_line.price_unit, self.supplierinfo1.price, "Purchase line price is the one from the supplier")
+        self.assertEqual(purchase_line.price_unit, self.service_purchase_1.seller_ids.price, "Purchase line price is the one from the supplier")
         self.assertEqual(purchase_line.product_qty, self.sol1_service_purchase_1.product_uom_qty, "Quantity on SO line is not the same on the purchase line (same UoM)")
 
     def test_update_ordered_sale_quantity(self):
         """ Test the purchase order behovior when changing the ordered quantity on the sale order line.
             Increase of qty on the SO
             - If PO is draft ['draft', 'sent', 'to approve'] : increase the quantity on the PO
-            - If PO is confirmed ['purchase', 'done', 'cancel'] : create a new PO
+            - If PO is confirmed ['purchase', 'cancel'] : create a new PO
 
             Decrease of qty on the SO
             - If PO is draft  ['draft', 'sent', 'to approve'] : next activity on the PO
-            - If PO is confirmed ['purchase', 'done', 'cancel'] : next activity on the PO
+            - If PO is confirmed ['purchase', 'cancel'] : next activity on the PO
         """
         self.sale_order_1.action_confirm()
 
-        purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.supplierinfo1.partner_id.id), ('state', '=', 'draft')])
+        purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.service_purchase_1.seller_ids.partner_id.id), ('state', '=', 'draft')])
         purchase_lines = self.env['purchase.order.line'].search([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
         purchase_line = purchase_lines[0]
 
@@ -231,7 +230,7 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         self.assertEqual(purchase_line.product_qty, sale_line_old_quantity, "The quantity on the PO line should not have changed.")
         self.assertEqual(len(purchase_order.activity_ids), 2, "Always 2 activity on confirmed the PO")
 
-        purchase_order2 = self.env['purchase.order'].search([('partner_id', '=', self.supplierinfo1.partner_id.id), ('state', '=', 'draft')])
+        purchase_order2 = self.env['purchase.order'].search([('partner_id', '=', self.service_purchase_1.seller_ids.partner_id.id), ('state', '=', 'draft')])
         purchase_lines = self.env['purchase.order.line'].search([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
         purchase_lines2 = purchase_lines.filtered(lambda pol: pol.order_id == purchase_order2)
         purchase_line2 = purchase_lines2[0]
@@ -321,7 +320,7 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         })
         sale_order.action_confirm()
         pol = sale_order._get_purchase_orders().order_line
-        self.assertEqual(pol.name, f"{self.service_purchase_1.display_name}\n\n{product_attribute.name}: {product_attribute_value.name}: {custom_value}")
+        self.assertEqual(pol.name, f"{self.service_purchase_1.display_name}\n{product_attribute.name}: {product_attribute_value.name}: {custom_value}")
 
     def test_service_to_purchase_multi_company(self):
         """Test the service to purchase in a multi-company environment
@@ -375,3 +374,67 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         # FIXME: same sudo issue as above
         order2.sudo().with_company(company_2).action_confirm()
         self.assertTrue(order2.purchase_order_count)
+
+    def test_service_to_purchase_branch_tax_propagation(self):
+        """
+        Ensure that SO/PO of a branch can use root company's taxes
+        """
+        branch = self.env['res.company'].create({
+            'name': "Branch Company",
+            'parent_id': self.env.company.id,
+        })
+        self.env.user.company_id = branch
+        service_product = self.env['product.product'].create({
+            'name': "Branch Out-sourced Service",
+            'standard_price': 200.0,
+            'type': 'service',
+            'invoice_policy': 'delivery',
+            'taxes_id': self.company_data['default_tax_sale'],
+            'supplier_taxes_id': self.company_data['default_tax_purchase'],
+            'service_to_purchase': True,
+            'seller_ids': [Command.create({
+                'partner_id': self.partner_b.id,
+                'min_qty': 1,
+                'price': 100,
+            })],
+        })
+        so = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({
+                'product_id': service_product.id,
+            })],
+        })
+        self.assertEqual(so.order_line.tax_ids, self.company_data['default_tax_sale'])
+        so.action_confirm()
+        self.assertEqual(so.order_line.purchase_line_ids.tax_ids, self.company_data['default_tax_purchase'])
+
+    def test_purchase_service_qty_increase_with_uom_conversion(self):
+        """Ensure that increasing the quantity of a service-to-purchase product
+        with different Sales UoM and Purchase UoM correctly computes the qty
+        in the Purchase Order.
+
+        Case:
+        - SO created with 1 dozen → PO = 12 units
+        - SO increased to 2 dozen → new PO should be 12 units
+        """
+        self.service_purchase_2.seller_ids.product_uom_id = self.env.ref('uom.product_uom_unit')
+        so = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [
+                Command.create({
+                    'name': self.service_purchase_2.name,
+                    'product_id': self.service_purchase_2.id,
+                    'product_uom_qty': 1,
+                    'product_uom_id': self.env.ref('uom.product_uom_dozen').id,
+                })
+            ],
+        })
+        so.action_confirm()
+        # Case 1: initial confirmation with 1 dozen
+        po_1 = so._get_purchase_orders()
+        self.assertEqual(po_1.order_line.product_qty, 12, "Initial PO should have 12 units (1 dozen  from SOL converted to PO uom)")
+        po_1.button_confirm()
+        # Case 2: increase SO quantity to 2 dozen
+        so.order_line.product_uom_qty = 2
+        po_2 = so._get_purchase_orders() - po_1
+        self.assertEqual(po_2.order_line.product_qty, 12, "The quantity on the SO line should be converted to the purchase UoM.")

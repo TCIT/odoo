@@ -33,6 +33,7 @@ export const odooExceptionTitleMap = new Map(
         "odoo.exceptions.AccessDenied": _t("Access Denied"),
         "odoo.exceptions.MissingError": _t("Missing Record"),
         "odoo.addons.web.controllers.action.MissingActionError": _t("Missing Action"),
+        "odoo.addons.base.models.ir_actions.ServerActionWithWarningsError": _t("Invalid Operation"),
         "odoo.exceptions.UserError": _t("Invalid Operation"),
         "odoo.exceptions.ValidationError": _t("Validation Error"),
         "odoo.exceptions.AccessError": _t("Access Error"),
@@ -61,8 +62,8 @@ export class ErrorDialog extends Component {
         if (this.props.serverHost) {
             this.contextDetails += `on ${this.props.serverHost} `;
         }
-        if (this.props.model && this.props.id) {
-            this.contextDetails += `on model ${this.props.model} and id ${this.props.id} `;
+        if (this.props.model) {
+            this.contextDetails += `on model ${this.props.model} `;
         }
         this.contextDetails += `on ${DateTime.now()
             .setZone("UTC")
@@ -93,6 +94,12 @@ ClientErrorDialog.title = _t("Odoo Client Error");
 // -----------------------------------------------------------------------------
 export class NetworkErrorDialog extends ErrorDialog {}
 NetworkErrorDialog.title = _t("Odoo Network Error");
+
+// -----------------------------------------------------------------------------
+// Request Entity Too Large Dialog
+// -----------------------------------------------------------------------------
+export class RequestEntityTooLargeErrorDialog extends ErrorDialog {}
+RequestEntityTooLargeErrorDialog.title = _t("The request sent to the server was too large");
 
 // -----------------------------------------------------------------------------
 // RPC Error Dialog
@@ -184,7 +191,7 @@ export class RedirectWarningDialog extends Component {
         this.additionalContext = additionalContext;
     }
     async onClick() {
-        const options = {};
+        const options = { forceLeave: true };
         if (this.additionalContext) {
             options.additionalContext = this.additionalContext;
         }
@@ -224,6 +231,7 @@ registry
     .add("odoo.exceptions.AccessError", WarningDialog)
     .add("odoo.exceptions.MissingError", WarningDialog)
     .add("odoo.addons.web.controllers.action.MissingActionError", WarningDialog)
+    .add("odoo.addons.base.models.ir_actions.ServerActionWithWarningsError", WarningDialog)
     .add("odoo.exceptions.UserError", WarningDialog)
     .add("odoo.exceptions.ValidationError", WarningDialog)
     .add("odoo.exceptions.RedirectWarning", RedirectWarningDialog)

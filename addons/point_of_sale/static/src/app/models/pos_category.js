@@ -3,6 +3,7 @@ import { Base } from "./related_models";
 
 export class PosCategory extends Base {
     static pythonModel = "pos.category";
+    static excludedLazyGetters = ["hasProductsToShow"];
 
     getAllChildren() {
         const children = [this];
@@ -29,6 +30,31 @@ export class PosCategory extends Base {
         }
 
         return parents.reverse();
+    }
+    get associatedProducts() {
+        const allCategoryIds = this.getAllChildren().map((cat) => cat.id);
+        const seen = new Set();
+        const products = [];
+
+        const productTemplateModel = this.models["product.template"].toRaw();
+        for (const catId of allCategoryIds) {
+            const catProducts = productTemplateModel.getBy("pos_categ_ids", catId);
+            if (!catProducts) {
+                continue;
+            }
+            for (const product of catProducts) {
+                if (!seen.has(product.id)) {
+                    seen.add(product.id);
+                    products.push(product);
+                }
+            }
+        }
+
+        return products;
+    }
+
+    get hasProductsToShow() {
+        return this.associatedProducts.length > 0;
     }
 }
 

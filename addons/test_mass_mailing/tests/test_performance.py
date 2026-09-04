@@ -47,7 +47,11 @@ class TestMassMailPerformance(TestMassMailPerformanceBase):
         })
 
         # runbot needs +101 compared to local
-        with self.assertQueryCount(__system__=1578, marketing=1579):  # 1424, 1425
+        with (
+            self.mock_mail_gateway(mail_unlink_sent=True),
+            # contains notably 1 query / record for unlink in mail
+            self.assertQueryCount(__system__=1380, marketing=1384),  # 1231, 1235
+        ):
             mailing.action_send_mail()
 
         self.assertEqual(mailing.sent, 50)
@@ -89,12 +93,15 @@ class TestMassMailBlPerformance(TestMassMailPerformanceBase):
             'mailing_domain': [('id', 'in', self.mm_recs.ids)],
         })
 
-        # runbot needs +101 compared to local
-        with self.assertQueryCount(__system__=1637, marketing=1638):  # 1484, 1485
+        # runbot needs +153 compared to local
+        # contains notably 1 query / record for unlink in mail
+        with self.assertQueryCount(__system__=1412, marketing=1419):  # 1259, 1266
             mailing.action_send_mail()
 
         self.assertEqual(mailing.sent, 50)
         self.assertEqual(mailing.delivered, 50)
+        self.assertEqual(mailing.canceled, 12)
 
-        cancelled_mail_count = self.env['mail.mail'].sudo().search([('mailing_id', '=', mailing.id)])
-        self.assertEqual(len(cancelled_mail_count), 12, 'Should not have auto deleted the blacklisted emails')
+        mail_mail_count = len(self.env['mail.mail'].sudo().search([('mailing_id', '=', mailing.id)]))
+        self.assertEqual(mail_mail_count, 0,
+                         "Mail_mail for blacklisted emails mustn't have been created and others must have been deleted")

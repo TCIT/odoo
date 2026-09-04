@@ -6,7 +6,7 @@
     'summary': 'Find free high-resolution images from Unsplash',
     'version': '1.1',
     'description': """Explore the free high-resolution image library of Unsplash.com and find images to use in Odoo. An Unsplash search bar is added to the image library modal.""",
-    'depends': ['base_setup', 'web_editor', 'html_editor'],
+    'depends': ['base_setup', 'html_editor'],
     'data': [
         'views/res_config_settings_view.xml',
         ],
@@ -21,20 +21,10 @@
             'web_unsplash/static/src/unsplash_error/**/*',
             'web_unsplash/static/src/unsplash_service.js',
         ],
-        'web_editor.assets_media_dialog': [
-            # Bundle to remove when removing web_editor
-            'web_unsplash/static/src/media_dialog_legacy/**/*',
-            'web_unsplash/static/src/unsplash_credentials/**/*',
-            'web_unsplash/static/src/unsplash_error/**/*',
-            'web_unsplash/static/src/unsplash_service.js',
-        ],
-        'web.qunit_suite_tests': [
-            'web_unsplash/static/tests/legacy/**/*',
-        ],
         'web.assets_unit_tests': [
             'web_unsplash/static/tests/**/*',
-            ('remove', 'web_unsplash/static/tests/legacy/**/*'),
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

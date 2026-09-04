@@ -6,12 +6,14 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import fields, http
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo, HttpCaseWithUserPortal
+from odoo.addons.http_routing.tests.common import MockRequest
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.website_event.tests.common import TestEventOnlineCommon, OnlineEventCase
 from odoo.exceptions import AccessError
 from odoo.tests import HttpCase, tagged
 from odoo.tools import mute_logger
 from odoo.tests.common import users
+
 
 class TestEventRegisterUTM(HttpCase, TestEventOnlineCommon):
     def test_event_registration_utm_values(self):
@@ -88,11 +90,14 @@ class TestUi(HttpCaseWithUserDemo, HttpCaseWithUserPortal):
             'date_end': fields.Datetime.now() + relativedelta(days=15),
             'event_ticket_ids': [(0, 0, {
                 'name': 'Free',
-                'start_sale_datetime': fields.Datetime.now() - relativedelta(days=15)
+                'start_sale_datetime': fields.Datetime.now() - relativedelta(days=15),
+                'limit_max_per_order': 22,
             }), (0, 0, {
                 'name': 'Other',
                 'start_sale_datetime': fields.Datetime.now() - relativedelta(days=15)
             })],
+            'seats_limited': True,
+            'seats_max': 28,
             'website_published': True,
             'question_ids': [(0, 0, {
                 'title': 'Name',
@@ -170,6 +175,51 @@ class TestUi(HttpCaseWithUserDemo, HttpCaseWithUserPortal):
         self.assertEqual(first_registration_answers.filtered(
             lambda answer: answer.question_id.title == 'How did you learn about this event?'
         ).value_answer_id.name, 'A friend')
+
+    def test_website_event_search(self):
+        """ Ensure filters are not reset when changing pages or performing a search. """
+        tag_category = self.env['event.tag.category'].create({'name': 'Test Category'})
+
+        tags = self.env['event.tag'].create([
+            {'name': 'tag 1', 'category_id': tag_category.id},
+            {'name': 'tag 2', 'category_id': tag_category.id},
+        ])
+
+        # Need to create a bunch of events to have severals pages
+        self.env['event.event'].create([
+            {
+                'name': f'Filter Test Event - {tag.name}',
+                'website_published': True,
+                'date_begin': datetime.today() - timedelta(days=1),
+                'date_end': datetime.today() + timedelta(days=1),
+                'tag_ids': tag,
+            }
+            for tag in tags
+            for _ in range(20)
+        ])
+
+        self.start_tour('/event', 'test_website_event_search', login='admin')
+
+    def test_website_event_social_image(self):
+        website = self.env['website'].get_current_website()
+        event = self.env['event.event'].create({
+            'name': 'Event With Menu',
+            'website_menu': True,
+            'website_id': website.id,
+        })
+        with MockRequest(self.env, website=website, url_root='http://example.com'):
+            event.cover_properties = """{"background-image": "url('/1.jpg')"}"""
+            meta = event.get_website_meta()
+            self.assertEqual(meta['opengraph_meta']['og:image'], 'http://example.com/1.jpg')
+            self.assertEqual(meta['twitter_meta']['twitter:image'], 'http://example.com/1.jpg')
+            event.cover_properties = """{"background-image": "url(\\"/2.jpg\\")"}"""
+            meta = event.get_website_meta()
+            self.assertEqual(meta['opengraph_meta']['og:image'], 'http://example.com/2.jpg')
+            self.assertEqual(meta['twitter_meta']['twitter:image'], 'http://example.com/2.jpg')
+            event.cover_properties = """{"background-image": "url(/3.jpg)"}"""
+            meta = event.get_website_meta()
+            self.assertEqual(meta['opengraph_meta']['og:image'], 'http://example.com/3.jpg')
+            self.assertEqual(meta['twitter_meta']['twitter:image'], 'http://example.com/3.jpg')
 
 
 @tagged('post_install', '-at_install')
@@ -263,7 +313,7 @@ class TestWebsiteAccess(HttpCaseWithUserDemo, OnlineEventCase):
 
         unpublished_events = self.events.filtered(lambda event: not event.website_published)
         resp = self.url_open('/event/%i' % unpublished_events[0].id)
-        self.assertEqual(resp.status_code, 403, 'Public must not have access to unpublished event')
+        self.assertEqual(resp.status_code, 404, 'Public must not have access to unpublished event')
 
         resp = self.url_open('/event')
         self.assertTrue(published_events[0].name in resp.text, 'Public must see the published events.')

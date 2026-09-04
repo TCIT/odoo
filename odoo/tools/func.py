@@ -1,9 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from __future__ import annotations
-import typing
-from inspect import Parameter, getsourcefile, signature
 
-from decorator import decorator
+import functools
+import typing
+import warnings
+from collections.abc import Callable  # noqa: TC003
+from inspect import Parameter, getsourcefile, signature
 
 __all__ = [
     'classproperty',
@@ -11,53 +13,41 @@ __all__ = [
     'lazy',
     'lazy_classproperty',
     'lazy_property',
-    'synchronized',
+    'reset_cached_properties',
 ]
 
 T = typing.TypeVar("T")
-
-if typing.TYPE_CHECKING:
-    from collections.abc import Callable
+P = typing.ParamSpec("P")
 
 
-class lazy_property(typing.Generic[T]):
-    """ Decorator for a lazy property of an object, i.e., an object attribute
-        that is determined by the result of a method call evaluated once. To
-        reevaluate the property, simply delete the attribute on the object, and
-        get it again.
-    """
-    def __init__(self, fget: Callable[[typing.Any], T]):
-        assert not fget.__name__.startswith('__'),\
-            "lazy_property does not support mangled names"
-        self.fget = fget
+def reset_cached_properties(obj) -> None:
+    """ Reset all cached properties on the instance `obj`. """
+    cls = type(obj)
+    obj_dict = vars(obj)
+    for name in list(obj_dict):
+        if isinstance(getattr(cls, name, None), functools.cached_property):
+            del obj_dict[name]
 
-    @typing.overload
-    def __get__(self, obj: None, cls: typing.Any, /) -> typing.Any: ...
-    @typing.overload
-    def __get__(self, obj: object, cls: typing.Any, /) -> T: ...
 
-    def __get__(self, obj, cls, /):
-        if obj is None:
-            return self
-        value = self.fget(obj)
-        setattr(obj, self.fget.__name__, value)
-        return value
-
-    @property
-    def __doc__(self):
-        return self.fget.__doc__
+class lazy_property(functools.cached_property):
+    def __init__(self, func):
+        super().__init__(func)
+        warnings.warn(
+            "lazy_property is deprecated since Odoo 19, use `functools.cached_property`",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
 
     @staticmethod
-    def reset_all(obj) -> None:
-        """ Reset all lazy properties on the instance `obj`. """
-        cls = type(obj)
-        obj_dict = vars(obj)
-        for name in list(obj_dict):
-            if isinstance(getattr(cls, name, None), lazy_property):
-                obj_dict.pop(name)
+    def reset_all(instance):
+        warnings.warn(
+            "lazy_property is deprecated since Odoo 19, use `reset_cache_properties` directly",
+            category=DeprecationWarning,
+        )
+        reset_cached_properties(instance)
 
 
-def conditional(condition, decorator):
+def conditional(condition: typing.Any, decorator: Callable[[T], T]) -> Callable[[T], T]:
     """ Decorator for a conditionally applied decorator.
 
         Example::
@@ -90,12 +80,14 @@ def filter_kwargs(func: Callable, kwargs: dict[str, typing.Any]) -> dict[str, ty
     return {key: kwargs[key] for key in kwargs if key not in leftovers}
 
 
-def synchronized(lock_attr: str = '_lock'):
-    @decorator
-    def locked(func, inst, *args, **kwargs):
-        with getattr(inst, lock_attr):
-            return func(inst, *args, **kwargs)
-    return locked
+def synchronized(lock_attr: str = '_lock') -> Callable[[Callable[P, T]], Callable[P, T]]:
+    def synchronized_lock(func, /):
+        @functools.wraps(func)
+        def locked(inst, *args, **kwargs):
+            with getattr(inst, lock_attr):
+                return func(inst, *args, **kwargs)
+        return locked
+    return synchronized_lock
 
 
 locked = synchronized()
@@ -108,7 +100,7 @@ def frame_codeinfo(fframe, back=0):
     try:
         if not fframe:
             return "<unknown>", ''
-        for i in range(back):
+        for _i in range(back):
             fframe = fframe.f_back
         try:
             fname = getsourcefile(fframe)

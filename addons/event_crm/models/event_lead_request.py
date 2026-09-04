@@ -1,8 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import threading
-
-from odoo import api, fields, models
+from odoo import api, fields, models, modules
 
 
 class EventLeadRequest(models.Model):
@@ -15,7 +13,7 @@ class EventLeadRequest(models.Model):
     To benefit from a background processing, we use a CRON that calls itself with a CRON trigger
     until the batch is completed, which unlinks this technical generation record. """
 
-    _name = "event.lead.request"
+    _name = 'event.lead.request'
     _description = "Event Lead Request"
     _log_access = False
     _rec_name = "event_id"
@@ -24,12 +22,14 @@ class EventLeadRequest(models.Model):
     _REGISTRATIONS_BATCH_SIZE = 200
 
     event_id = fields.Many2one('event.event', required=True, string="Event", ondelete="cascade")
+    event_lead_rule_ids = fields.Many2many('event.lead.rule', string="Lead Rules")
     processed_registration_id = fields.Integer("Processed Registration",
         help="The ID of the last processed event.registration, used to know where to resume.")
 
-    _sql_constraints = [
-        ('uniq_event', 'unique(event_id)', 'You can only have one generation request per event at a time.'),
-    ]
+    _uniq_event = models.Constraint(
+        'unique(event_id)',
+        'You can only have one generation request per event at a time.',
+    )
 
     @api.model
     def _cron_generate_leads(self, job_limit=100, registrations_batch_size=None):
@@ -41,7 +41,7 @@ class EventLeadRequest(models.Model):
           Defaults to event.lead.request._REGISTRATIONS_BATCH_SIZE """
 
         # auto-commit except in testing mode
-        auto_commit = not getattr(threading.current_thread(), 'testing', False)
+        auto_commit = not modules.module.current_test
 
         registrations_batch_size = registrations_batch_size or self._REGISTRATIONS_BATCH_SIZE
         generate_requests = self.env['event.lead.request'].search([], limit=job_limit)
@@ -55,7 +55,7 @@ class EventLeadRequest(models.Model):
                 order='id asc'
             )
 
-            registrations_to_process._apply_lead_generation_rules()
+            registrations_to_process._apply_lead_generation_rules(event_lead_rules=generate_request.event_lead_rule_ids)
 
             if len(registrations_to_process) < registrations_batch_size:
                 # done processing

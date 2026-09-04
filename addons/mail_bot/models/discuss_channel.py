@@ -3,7 +3,7 @@
 from odoo import api, models, _
 
 
-class Channel(models.Model):
+class DiscussChannel(models.Model):
     _inherit = 'discuss.channel'
 
     def execute_command_help(self, **kwargs):

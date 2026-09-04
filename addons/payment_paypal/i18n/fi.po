@@ -1,41 +1,38 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* payment_paypal
-# 
+# * payment_paypal
+#
 # Translators:
-# Tuomas Lyyra <tuomas.lyyra@legenda.fi>, 2024
-# Eino Mäkitalo <eino.makitalo@netitbe.fi>, 2024
-# Kari Lindgren <kari.lindgren@emsystems.fi>, 2024
-# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2024
-# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2024
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2024
-# Jiri Grönroos <jiri.gronroos@iki.fi>, 2024
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025
-# Jessica Jakara, 2025
-# 
+# Martin Trigaux, 2018
+# Mikko Salmela <salmemik@gmail.com>, 2018
+# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2018
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Saara Hakanen <sahak@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Jessica Jakara, 2025\n"
-"Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-02 16:33+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-19/"
+"payment_paypal/fi/>\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fi\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: payment_paypal
 #: model_terms:ir.ui.view,arch_db:payment_paypal.payment_provider_form
 msgid "Client ID"
-msgstr "Asiakkaan tunniste/ID"
+msgstr "Asiakastunnus"
 
 #. module: payment_paypal
 #: model_terms:ir.ui.view,arch_db:payment_paypal.payment_provider_form
 msgid "Client Secret"
-msgstr "Client Secret"
+msgstr "Asiakassalaisuus"
 
 #. module: payment_paypal
 #: model:ir.model.fields,field_description:payment_paypal.field_payment_provider__code
@@ -45,14 +42,14 @@ msgstr "Koodi"
 #. module: payment_paypal
 #. odoo-python
 #: code:addons/payment_paypal/models/payment_provider.py:0
-msgid "Could not establish the connection to the API."
-msgstr "Yhteyttä API:han ei saatu muodostettua."
-
-#. module: payment_paypal
-#. odoo-python
-#: code:addons/payment_paypal/models/payment_provider.py:0
 msgid "Could not generate a new access token."
 msgstr "Uutta käyttöoikeustunnistetta ei voitu luoda."
+
+#. module: payment_paypal
+#: model:ir.model.fields,field_description:payment_paypal.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:payment_paypal.field_payment_transaction__display_name
+msgid "Display Name"
+msgstr "Näyttönimi"
 
 #. module: payment_paypal
 #: model:ir.model.fields,field_description:payment_paypal.field_payment_provider__paypal_email_account
@@ -70,6 +67,12 @@ msgid "How to configure your paypal account?"
 msgstr "Kuinka määrittää Paypal-tilisi?"
 
 #. module: payment_paypal
+#: model:ir.model.fields,field_description:payment_paypal.field_payment_provider__id
+#: model:ir.model.fields,field_description:payment_paypal.field_payment_transaction__id
+msgid "ID"
+msgstr "Tunnus"
+
+#. module: payment_paypal
 #. odoo-python
 #: code:addons/payment_paypal/controllers/main.py:0
 msgid "Invalid response format, can't normalize."
@@ -80,12 +83,6 @@ msgstr "Virheellinen vastausmuoto, ei voi normalisoida."
 #: code:addons/payment_paypal/models/payment_transaction.py:0
 msgid "Missing value for txn_id (%(txn_id)s) or txn_type (%(txn_type)s)."
 msgstr "Puuttuva arvo txn_id (%(txn_id)s) tai txn_type (%(txn_type)s)."
-
-#. module: payment_paypal
-#. odoo-python
-#: code:addons/payment_paypal/models/payment_transaction.py:0
-msgid "No transaction found matching reference %s."
-msgstr "Viitettä %s vastaavaa tapahtumaa ei löytynyt."
 
 #. module: payment_paypal
 #: model:ir.model.fields.selection,name:payment_paypal.selection__payment_provider__code__paypal
@@ -134,7 +131,7 @@ msgstr "Maksutapahtuma"
 
 #. module: payment_paypal
 #. odoo-javascript
-#: code:addons/payment_paypal/static/src/js/payment_form.js:0
+#: code:addons/payment_paypal/static/src/interactions/payment_form.js:0
 msgid "Payment processing failed"
 msgstr "Maksun käsittely epäonnistui"
 
@@ -142,13 +139,7 @@ msgstr "Maksun käsittely epäonnistui"
 #. odoo-python
 #: code:addons/payment_paypal/models/payment_transaction.py:0
 msgid "Received data with invalid payment status: %s"
-msgstr "Vastaanotetut tiedot, joiden maksutila on virheellinen: %s"
-
-#. module: payment_paypal
-#. odoo-python
-#: code:addons/payment_paypal/models/payment_provider.py:0
-msgid "The communication with the API failed. Details: %s"
-msgstr "Yhteys API:n kanssa epäonnistui. Yksityiskohdat: %s"
+msgstr "Vastaanotetut tiedot, joiden maksun tila on virheellinen: %s"
 
 #. module: payment_paypal
 #. odoo-python
@@ -172,14 +163,18 @@ msgstr ""
 #. module: payment_paypal
 #: model:ir.model.fields,help:payment_paypal.field_payment_provider__paypal_access_token
 msgid "The short-lived token used to access Paypal APIs"
-msgstr ""
-"Lyhytikäinen tunniste, jota käytetään Paypalin sovellusliittymien "
-"käyttämiseen"
+msgstr "Nopeasti vanheneva tunniste, jota käytetään Paypalin API:n käyttämiseen"
 
 #. module: payment_paypal
 #: model:ir.model.fields,help:payment_paypal.field_payment_provider__code
 msgid "The technical code of this payment provider."
 msgstr "Tämän maksupalveluntarjoajan tekninen koodi."
+
+#. module: payment_paypal
+#. odoo-python
+#: code:addons/payment_paypal/controllers/main.py:0
+msgid "Unable to verify the payment data"
+msgstr "Maksutietoja ei voida vahvistaa"
 
 #. module: payment_paypal
 #: model_terms:ir.ui.view,arch_db:payment_paypal.payment_provider_form
@@ -191,3 +186,9 @@ msgstr "Webhook-tunnus"
 #: code:addons/payment_paypal/models/payment_provider.py:0
 msgid "You must have an HTTPS connection to generate a webhook."
 msgstr "Webhookin luominen edellyttää HTTPS-yhteyttä."
+
+#~ msgid "Paypal Instant Payment Notification"
+#~ msgstr "Paypal välitön maksuilmoitus"
+
+#~ msgid "Use IPN"
+#~ msgstr "Käytä välitöntä maksuilmoitusta"

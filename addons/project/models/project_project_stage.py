@@ -4,6 +4,7 @@
 from odoo import fields, models, _
 from odoo.exceptions import UserError
 
+
 class ProjectProjectStage(models.Model):
     _name = 'project.project.stage'
     _description = 'Project Stage'
@@ -14,9 +15,10 @@ class ProjectProjectStage(models.Model):
     name = fields.Char(required=True, translate=True)
     mail_template_id = fields.Many2one('mail.template', string='Email Template', domain=[('model', '=', 'project.project')],
         help="If set, an email will be automatically sent to the customer when the project reaches this stage.")
-    fold = fields.Boolean('Folded in Kanban',
-        help="If enabled, this stage will be displayed as folded in the Kanban view of your projects. Projects in a folded stage are considered as closed.")
+    fold = fields.Boolean('Folded',
+        help="If enabled, this stage will be displayed as folded in the Kanban and List views of your projects. Projects in a folded stage are considered as closed.")
     company_id = fields.Many2one('res.company', string="Company")
+    color = fields.Integer(string='Color', export_string_translation=False)
 
     def copy_data(self, default=None):
         vals_list = super().copy_data(default=default)
@@ -59,12 +61,12 @@ class ProjectProjectStage(models.Model):
             self.env['project.project'].search([('stage_id', 'in', self.ids)]).write({'active': False})
         return super().write(vals)
 
-    def toggle_active(self):
-        res = super().toggle_active()
-        stage_active = self.filtered('active')
-        inactive_projects = self.env['project.project'].with_context(active_test=False).search(
-            [('active', '=', False), ('stage_id', 'in', stage_active.ids)], limit=1)
-        if stage_active and inactive_projects:
+    def action_unarchive(self):
+        res = super().action_unarchive()
+        stage_active = self.filtered(self._active_name)
+        if stage_active and self.env['project.project'].with_context(active_test=False).search_count(
+            [('active', '=', False), ('stage_id', 'in', stage_active.ids)], limit=1
+        ):
             wizard = self.env['project.project.stage.delete.wizard'].create({
                 'stage_ids': stage_active.ids,
             })

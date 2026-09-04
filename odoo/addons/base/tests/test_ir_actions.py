@@ -3,15 +3,17 @@
 
 from datetime import date
 import json
+from markupsafe import Markup
 from psycopg2 import IntegrityError, ProgrammingError
 import requests
 from unittest.mock import patch
 
 import odoo
 from odoo.exceptions import UserError, ValidationError, AccessError
-from odoo.tools import mute_logger
+from odoo.tools import mute_logger, frozendict
 from odoo.tests import common, tagged
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
+from odoo.addons.base.models.res_partner import ResPartner
 from odoo import Command
 
 
@@ -189,6 +191,59 @@ ZeroDivisionError: division by zero""" % self.test_server_action.id
         self.assertEqual(len(category), 1, 'ir_actions_server: TODO')
         self.assertIn(category, self.test_partner.category_id)
 
+    def test_25_crud_copy(self):
+        self.action.write({
+            'state': 'object_copy',
+            'crud_model_id': self.res_partner_model.id,
+            'resource_ref': self.test_partner,
+        })
+        partner = self.env['res.partner'].search([('name', 'ilike', self.test_partner.name)])
+        self.assertEqual(len(partner), 1)
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: duplicate record action correctly finished should return False')
+        partner = self.env['res.partner'].search([('name', 'ilike', self.test_partner.name)])
+        self.assertEqual(len(partner), 2)
+
+    def test_25_crud_copy_link_many2one(self):
+        self.action.write({
+            'state': 'object_copy',
+            'crud_model_id': self.res_partner_model.id,
+            'resource_ref': self.test_partner,
+            'link_field_id': self.res_partner_parent_field.id,
+        })
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: duplicate record action correctly finished should return False')
+        dupe = self.test_partner.search([('name', 'ilike', self.test_partner.name), ('id', '!=', self.test_partner.id)])
+        self.assertEqual(len(dupe), 1)
+        self.assertEqual(self.test_partner.parent_id, dupe)
+
+    def test_25_crud_copy_link_one2many(self):
+        self.action.write({
+            'state': 'object_copy',
+            'crud_model_id': self.res_partner_model.id,
+            'resource_ref': self.test_partner,
+            'link_field_id': self.res_partner_children_field.id,
+        })
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: duplicate record action correctly finished should return False')
+        dupe = self.test_partner.search([('name', 'ilike', self.test_partner.name), ('id', '!=', self.test_partner.id)])
+        self.assertEqual(len(dupe), 1)
+        self.assertIn(dupe, self.test_partner.child_ids)
+
+    def test_25_crud_copy_link_many2many(self):
+        category_id = self.env['res.partner.category'].name_create("CategoryToDuplicate")[0]
+        self.action.write({
+            'state': 'object_copy',
+            'crud_model_id': self.res_partner_category_model.id,
+            'link_field_id': self.res_partner_category_field.id,
+            'resource_ref': f'res.partner.category,{category_id}',
+        })
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: duplicate record action correctly finished should return False')
+        dupe = self.env['res.partner.category'].search([('name', 'ilike', 'CategoryToDuplicate'), ('id', '!=', category_id)])
+        self.assertEqual(len(dupe), 1)
+        self.assertIn(dupe, self.test_partner.category_id)
+
     def test_30_crud_write(self):
         # Do: update partner name
         self.action.write({
@@ -202,6 +257,34 @@ ZeroDivisionError: division by zero""" % self.test_server_action.id
         partner = self.test_partner.search([('name', 'ilike', 'TestNew')])
         self.assertEqual(len(partner), 1, 'ir_actions_server: TODO')
         self.assertEqual(partner.city, 'OrigCity', 'ir_actions_server: TODO')
+
+    def test_31_crud_write_html(self):
+        self.assertEqual(self.action.value, False)
+        self.action.write({
+            'state': 'object_write',
+            'update_path': 'comment',
+            'html_value': '<p>MyComment</p>',
+        })
+        self.assertEqual(self.action.html_value, Markup('<p>MyComment</p>'))
+        # Test run
+        self.assertEqual(self.test_partner.comment, False)
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: create record action correctly finished should return False')
+        self.assertEqual(self.test_partner.comment, Markup('<p>MyComment</p>'))
+
+    def test_object_write_equation(self):
+        # Do: update partners city
+        self.action.write({
+            'state': 'object_write',
+            'update_path': 'city',
+            'evaluation_type': 'equation',
+            'value': 'record.id',
+        })
+        partners = self.test_partner + self.test_partner.copy()
+        self.action.with_context(self.context, active_ids=partners.ids).run()
+        # Test: partners updated
+        self.assertEqual(partners[0].city, str(partners[0].id))
+        self.assertEqual(partners[1].city, str(partners[1].id))
 
     def test_35_crud_write_selection(self):
         # Don't want to use res.partner because no 'normal selection field' exists there
@@ -406,7 +489,7 @@ ZeroDivisionError: division by zero""" % self.test_server_action.id
         self.action.write({
             'model_id': self.res_country_model.id,
             'binding_model_id': self.res_country_model.id,
-            'groups_id': [Command.link(group0.id)],
+            'group_ids': [Command.link(group0.id)],
             'code': 'record.write({"vat_label": "VatFromTest"})',
         })
 
@@ -419,13 +502,24 @@ ZeroDivisionError: division by zero""" % self.test_server_action.id
         self.assertFalse(self.test_country.vat_label)
 
         # add group to the user, and test again
-        self.env.user.write({'groups_id': [Command.link(group0.id)]})
+        self.env.user.write({'group_ids': [Command.link(group0.id)]})
 
         bindings = Actions.get_bindings('res.country')
         self.assertItemsEqual(bindings.get('action'), self.action.read(['name', 'sequence', 'binding_view_types']))
 
         self.action.with_context(self.context).run()
         self.assertEqual(self.test_country.vat_label, 'VatFromTest', 'vat label should be changed to VatFromTest')
+
+    @mute_logger('odoo.addons.base.models.ir_actions')
+    def test_55_access_error_message(self):
+        self.action.write({
+            'model_id': self.res_country_model.id,
+            'binding_model_id': self.res_country_model.id,
+            'code': '1+2',
+        })
+
+        with self.assertRaisesRegex(AccessError, "You don't have enough access rights to run this action."):
+            self.action.with_user(self.user_demo).with_context(active_model="res.country").run()
 
     def test_60_sort(self):
         """ check the actions sorted by sequence """
@@ -510,10 +604,51 @@ ZeroDivisionError: division by zero""" % self.test_server_action.id
         with patch.object(requests, 'post', _patched_post), mute_logger('odoo.addons.base.models.ir_actions'):
             # first run: 200
             self.action.with_context(self.context).run()
+            self.env.cr.postcommit.run()  # webhooks run in postcommit
             # second run: 400, should *not* raise but
             # should warn in logs (hence mute_logger)
             self.action.with_context(self.context).run()
+            self.env.cr.postcommit.run()  # webhooks run in postcommit
         self.assertEqual(num_requests, 2)
+
+    def test_webhook_sample_payload_with_frozendict_key(self):
+        """Test webhook sample payload generation with a frozendict used as a dict key.
+        Ensure serialization does not crash and key content is preserved in the output."""
+
+        model = self.env['ir.model']._get('res.partner')
+
+        field = self.env['ir.model.fields'].create({
+            'name': 'x_payload',
+            'field_description': 'Payload',
+            'model_id': model.id,
+            'store': False,
+            'ttype': 'binary',
+        })
+
+        action = self.env['ir.actions.server'].create({
+            'name': 'Webhook Test',
+            'state': 'webhook',
+            'model_id': model.id,
+            'webhook_field_ids': [Command.link(field.id)],
+        })
+
+        fake_payload = {
+            frozendict({
+                'move_id': 1,
+                'date_maturity': date(2026, 6, 24),
+            }): {
+                'amount_currency': 1.15,
+                'balance': 1.15,
+            },
+        }
+
+        # Bypass the JSON field's own json.dumps validation by mocking read(),
+        # Such values cannot be stored through normal ORM field types, but can
+        with patch.object(ResPartner, 'read', return_value=[{'x_payload': fake_payload}]):
+            action._compute_webhook_sample_payload()
+
+        self.assertTrue(action.webhook_sample_payload)
+        self.assertIn('move_id', action.webhook_sample_payload)
 
     def test_90_convert_to_float(self):
         # make sure eval_value convert the value into float for float-type fields
@@ -734,7 +869,7 @@ class TestCustomFields(TestCommonCustomFields):
         #
         # Add a custom field equivalent to the following definition:
         #
-        # class Partner(models.Model)
+        # class ResPartner(models.Model)
         #     _inherit = 'res.partner'
         #     x_oh_boy = fields.Char(related="country_id.code", store=True)
         #
@@ -751,7 +886,7 @@ class TestCustomFields(TestCommonCustomFields):
 
         # create a non-computed field, and assert how many queries it takes
         model_id = self.env['ir.model']._get_id('res.partner')
-        query_count = 49
+        query_count = 50
         with self.assertQueryCount(query_count):
             self.env.registry.clear_cache()
             self.env['ir.model.fields'].create({
@@ -851,6 +986,103 @@ class TestCustomFields(TestCommonCustomFields):
 
 @tagged('post_install', '-at_install')
 class TestCustomFieldsPostInstall(TestCommonCustomFields):
+
+    def test_related_field_non_stored_not_allowed(self):
+        """ Test related field behavior with stored/non-stored combinations """
+
+        model_id = self.env['ir.model']._get_id('res.partner')
+        dummy_model = self.env['ir.model'].create({
+            'name': 'Dummy Model Test',
+            'model': 'x_dummy_model_test',
+        })
+
+        # NON-STORED M2O
+        self.env['ir.model.fields'].create({
+            'model_id': model_id,
+            'name': 'x_non_stored_m2o_test',
+            'field_description': 'x_non_stored_m2o_test',
+            'ttype': 'many2one',
+            'relation': 'x_dummy_model_test',
+            'store': False,
+        })
+
+        # Stored M2O
+        self.env['ir.model.fields'].create({
+            'model_id': model_id,
+            'name': 'x_stored_m2o_test',
+            'field_description': 'x_stored_m2o_test',
+            'ttype': 'many2one',
+            'relation': 'x_dummy_model_test',
+            'store': True,
+        })
+
+        # Stored boolean
+        self.env['ir.model.fields'].create({
+            'model_id': dummy_model.id,
+            'name': 'x_bool_stored_test',
+            'field_description': 'x_bool_stored_test',
+            'ttype': 'boolean',
+            'store': True,
+        })
+
+        # Non-stored boolean
+        self.env['ir.model.fields'].create({
+            'model_id': dummy_model.id,
+            'name': 'x_bool_non_stored_test',
+            'field_description': 'x_bool_non_stored_test',
+            'ttype': 'boolean',
+            'store': False,
+        })
+
+        # 1. Intermediate non-stored → should FAIL
+        self.env.registry.clear_cache()
+        with self.assertRaises(UserError):
+            self.env['ir.model.fields'].create({
+                'model_id': model_id,
+                'name': 'x_fail_intermediate_non_stored',
+                'field_description': 'x_fail_intermediate_non_stored',
+                'ttype': 'boolean',
+                'related': 'x_non_stored_m2o_test.x_bool_stored_test',
+                'store': True,
+            })
+
+        # 2. Last non-stored → should PASS
+        self.env.registry.clear_cache()
+        field = self.env['ir.model.fields'].create({
+            'model_id': model_id,
+            'name': 'x_pass_last_non_stored',
+            'field_description': 'x_pass_last_non_stored',
+            'ttype': 'boolean',
+            'related': 'x_stored_m2o_test.x_bool_non_stored_test',
+            'store': True,
+        })
+        self.assertTrue(field)
+
+        # 3. All stored → should PASS
+        self.env.registry.clear_cache()
+        field = self.env['ir.model.fields'].create({
+            'model_id': model_id,
+            'name': 'x_pass_all_stored',
+            'field_description': 'x_pass_all_stored',
+            'ttype': 'boolean',
+            'related': 'x_stored_m2o_test.x_bool_stored_test',
+            'store': True,
+        })
+        self.assertTrue(field)
+
+        # 4. One non-stored → should PASS
+        self.env.registry.clear_cache()
+        field = self.env['ir.model.fields'].create({
+            'model_id': model_id,
+            'name': 'x_pass_single_non_stored',
+            'field_description': 'x_pass_single_non_stored',
+            'ttype': 'many2one',
+            'relation': 'x_dummy_model_test',
+            'related': 'x_non_stored_m2o_test',
+            'store': True,
+        })
+        self.assertTrue(field)
+
     def test_add_field_valid(self):
         """ custom field names must start with 'x_', even when bypassing the constraints
 
@@ -864,9 +1096,9 @@ class TestCustomFieldsPostInstall(TestCommonCustomFields):
         # as a user could do through a SQL shell or a `cr.execute` in a server action
         self.env.cr.execute("ALTER TABLE ir_model_fields DROP CONSTRAINT ir_model_fields_name_manual_field")
         self.env.cr.execute("UPDATE ir_model_fields SET name = 'foo' WHERE id = %s", [field.id])
-        with self.assertLogs('odoo.addons.base.models.ir_model') as log_catcher:
+        with self.assertLogs('odoo.registry') as log_catcher:
             # Trick to reload the registry. The above rename done through SQL didn't reload the registry. This will.
-            self.env.registry.setup_models(self.cr)
+            self.env.registry._setup_models__(self.cr, [self.MODEL])
             self.assertIn(
                 f'The field `{field.name}` is not defined in the `{field.model}` Python class', log_catcher.output[0]
             )

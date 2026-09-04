@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
+import { queryAllAttributes, queryAllTexts, queryFirst, runAllTimers } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { Component, onMounted, xml } from "@odoo/owl";
 import {
@@ -17,17 +18,24 @@ import {
     stepAllNetworkCalls,
     toggleMenuItem,
     toggleSearchBarMenu,
+    serverState,
 } from "@web/../tests/web_test_helpers";
 
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { WebClient } from "@web/webclient/webclient";
-import { router, routerBus } from "@web/core/browser/router";
+import { router, routerBus, startRouter } from "@web/core/browser/router";
 import { redirect } from "@web/core/utils/urls";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
-import { _t } from "@web/core/l10n/translation";
+import { _t as basic_t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
-import { queryAllAttributes, queryAllTexts, queryFirst } from "@odoo/hoot-dom";
+
+function _t() {
+    odoo.translationContext = "web";
+    const translatedTerm = basic_t(...arguments);
+    odoo.translationContext = null;
+    return translatedTerm;
+}
 
 describe.current.tags("desktop");
 
@@ -122,17 +130,9 @@ defineActions([
 ]);
 
 defineMenus([
-    {
-        id: "root",
-        name: "root",
-        appID: "root",
-        children: [
-            // id:0 is a hack to not load anything at webClient mount
-            { id: 0, children: [], name: "UglyHack", appID: 0, xmlid: "menu_0" },
-            { id: 1, children: [], name: "App1", appID: 1, actionID: 1001, xmlid: "menu_1" },
-            { id: 2, children: [], name: "App2", appID: 2, actionID: 1002, xmlid: "menu_2" },
-        ],
-    },
+    { id: 0 }, // prevents auto-loading the first action
+    { id: 1, actionID: 1001 },
+    { id: 2, actionID: 1002 },
 ]);
 
 class Partner extends models.Model {
@@ -149,7 +149,7 @@ class Partner extends models.Model {
         { id: 5, name: "Fifth record", foo: "zoup" },
     ];
     _views = {
-        kanban: `
+        "kanban,1": /* xml */ `
             <kanban>
                 <templates>
                     <t t-name="card">
@@ -158,8 +158,12 @@ class Partner extends models.Model {
                 </templates>
             </kanban>
         `,
-        list: `<list><field name="foo"/></list>`,
-        form: `
+        "list,2": /* xml */ `
+            <list>
+                <field name="foo" />
+            </list>
+        `,
+        "form,666": /* xml */ `
             <form>
                 <header>
                     <button name="object" string="Call method" type="object"/>
@@ -171,7 +175,11 @@ class Partner extends models.Model {
                 </group>
             </form>
         `,
-        search: `<search><field name="foo" string="Foo"/></search>`,
+        search: /* xml */ `
+            <search>
+                <field name="foo" string="Foo" />
+            </search>
+        `,
     };
 }
 defineModels([Partner]);
@@ -216,6 +224,20 @@ describe(`new urls`, () => {
         expect.verifySteps([
             "Update the state without updating URL, nextState: actionStack,action",
         ]);
+    });
+
+    test(`action loading, when action not found, load previous`, async () => {
+        redirect("/odoo/action-1001/action-666");
+        logHistoryInteractions();
+
+        await mountWebClient();
+        expect(`.test_client_action`).toHaveCount(1);
+        expect(`.o_menu_brand`).toHaveText("App1");
+        expect(browser.sessionStorage.getItem("menu_id")).toBe("1");
+        expect(browser.location.href).toBe("http://example.com/odoo/action-1001", {
+            message: "url changed",
+        });
+        expect.verifySteps(["pushState http://example.com/odoo/action-1001"]);
     });
 
     test(`menu loading`, async () => {
@@ -679,6 +701,7 @@ describe(`new urls`, () => {
             "/web/action/load",
             "get_views",
             "web_search_read",
+            "has_group",
             "Update the state without updating URL, nextState: actionStack,action",
         ]);
     });
@@ -706,32 +729,6 @@ describe(`new urls`, () => {
     test(`properly load records with existing first APP`, async () => {
         // simulate a real scenario with a first app (e.g. Discuss), to ensure that we don't
         // fallback on that first app when only a model and res_id are given in the url
-        defineActions([
-            {
-                id: "root",
-                name: "root",
-                appID: "root",
-                children: [
-                    {
-                        id: 1,
-                        children: [],
-                        name: "App1",
-                        appID: 1,
-                        actionID: 1001,
-                        xmlid: "menu_1",
-                    },
-                    {
-                        id: 2,
-                        children: [],
-                        name: "App2",
-                        appID: 2,
-                        actionID: 1002,
-                        xmlid: "menu_2",
-                    },
-                ],
-            },
-        ]);
-
         redirect("/odoo/m-partner/2");
         logHistoryInteractions();
         stepAllNetworkCalls();
@@ -789,6 +786,7 @@ describe(`new urls`, () => {
             "/web/action/load",
             "get_views",
             "web_search_read",
+            "has_group",
             "Update the state without updating URL, nextState: actionStack,action,view_type",
         ]);
     });
@@ -949,15 +947,7 @@ describe(`new urls`, () => {
     });
 
     test(`load state supports being given menu_id alone`, async () => {
-        defineMenus([
-            {
-                id: 666,
-                children: [],
-                name: "App1",
-                appID: 1,
-                actionID: 1,
-            },
-        ]);
+        defineMenus([{ id: 666, actionID: 1 }]);
 
         redirect("/odoo?menu_id=666");
         logHistoryInteractions();
@@ -975,6 +965,7 @@ describe(`new urls`, () => {
             "/web/action/load",
             "get_views",
             "web_search_read",
+            "has_group",
             "pushState http://example.com/odoo/action-1",
         ]);
     });
@@ -1133,14 +1124,11 @@ describe(`new urls`, () => {
     });
 
     test(`load a form view via url, then switch to view list, the search view is correctly initialized`, async () => {
-        Partner._views = {
-            ...Partner._views,
-            "search,false": `
+        Partner._views.search = `
                 <search>
                     <filter name="filter" string="Filter" domain="[('foo', '=', 'yop')]"/>
                 </search>
-            `,
-        };
+            `;
 
         redirect("/odoo/action-3/new");
         logHistoryInteractions();
@@ -1315,7 +1303,7 @@ describe(`new urls`, () => {
         stepAllNetworkCalls();
         redirect("/odoo/action-3/2");
         logHistoryInteractions();
-        Partner._views["form,false"] = /* xml */ `
+        Partner._views["form"] = /* xml */ `
             <form string="Partner">
                 <sheet>
                     <a href="http://example.com/odoo/action-5" class="clickMe">clickMe</a>
@@ -1394,7 +1382,7 @@ describe(`new urls`, () => {
         ]);
     });
 
-    test("properly reload dynamic actions from sessionStorage", async () => {
+    test("properly reload dynamic actions from sessionStorage (action without id)", async () => {
         patchWithCleanup(browser.sessionStorage, {
             setItem(key, value) {
                 expect.step(`set ${key}-${value}`);
@@ -1428,8 +1416,16 @@ describe(`new urls`, () => {
 
         expect(`.o_kanban_view`).toHaveCount(1);
         expect.verifySteps([
+            "get menu_id-null",
+            "get current_lang-null",
+            "get current_state-null",
+            "get current_action-null",
+            'set current_state-{"actionStack":[{"displayName":"First record","model":"partner","view_type":"form","resId":1}],"resId":1,"model":"partner"}',
             'set current_action-{"type":"ir.actions.act_window","res_model":"partner","res_id":1,"views":[[false,"form"]]}',
+            "set current_lang-en",
+            'set current_state-{"actionStack":[{"displayName":"First record","model":"partner","view_type":"form","resId":1},{"displayName":"","model":"partner","view_type":"kanban","active_id":1}],"active_id":1,"model":"partner"}',
             'set current_action-{"type":"ir.actions.act_window","res_model":"partner","views":[[1,"kanban"]],"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"active_model":"partner","active_id":1,"active_ids":[1]}}',
+            "set current_lang-en",
         ]);
 
         expect(browser.location.href).toBe("http://example.com/odoo/m-partner/1/m-partner");
@@ -1440,9 +1436,587 @@ describe(`new urls`, () => {
         await animationFrame();
         expect(`.o_kanban_view`).toHaveCount(1);
         expect.verifySteps([
-            'get current_action-{"type":"ir.actions.act_window","res_model":"partner","views":[[1,"kanban"]],"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"active_model":"partner","active_id":1,"active_ids":[1]}}',
-            'set current_action-{"type":"ir.actions.act_window","res_model":"partner","views":[[1,"kanban"]],"context":{"lang":"en","tz":"taht","uid":7,"active_model":"partner","active_id":1,"active_ids":[1]}}',
             "get menu_id-null",
+            "get current_lang-en",
+            'get current_state-{"actionStack":[{"displayName":"First record","model":"partner","view_type":"form","resId":1},{"displayName":"","model":"partner","view_type":"kanban","active_id":1}],"active_id":1,"model":"partner"}',
+            'get current_action-{"type":"ir.actions.act_window","res_model":"partner","views":[[1,"kanban"]],"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"active_model":"partner","active_id":1,"active_ids":[1]}}',
+            'set current_state-{"actionStack":[{"displayName":"First record","model":"partner","view_type":"form","resId":1},{"displayName":"","model":"partner","view_type":"kanban","active_id":1}],"active_id":1,"model":"partner"}',
+            'set current_action-{"type":"ir.actions.act_window","res_model":"partner","views":[[1,"kanban"]],"context":{"lang":"en","tz":"taht","uid":7,"active_model":"partner","active_id":1,"active_ids":[1]}}',
+            "set current_lang-en",
+        ]);
+    });
+
+    test("properly reload dynamic actions from sessionStorage (action with id)", async () => {
+        patchWithCleanup(browser.sessionStorage, {
+            setItem(key, value) {
+                expect.step(`set ${key}-${value}`);
+                super.setItem(key, value);
+            },
+            getItem(key) {
+                const res = super.getItem(key);
+                expect.step(`get ${key}-${res}`);
+                return res;
+            },
+        });
+
+        defineActions([
+            {
+                id: 100,
+                type: "ir.actions.act_window",
+                res_model: "partner",
+                res_id: 1,
+                views: [[false, "form"]],
+            },
+            {
+                id: 200,
+                type: "ir.actions.act_window",
+                res_model: "partner",
+                views: [[1, "kanban"]],
+            },
+        ]);
+
+        await mountWebClient();
+        await getService("action").doAction(100);
+
+        expect(`.o_form_view`).toHaveCount(1);
+
+        //add a domain to an existing action.
+        await getService("action").doAction({
+            id: 200,
+            type: "ir.actions.act_window",
+            res_model: "partner",
+            views: [[1, "kanban"]],
+            domain: [["id", "=", 1]],
+        });
+        await animationFrame();
+
+        expect(`.o_kanban_view`).toHaveCount(1);
+        expect(`.o_kanban_record:not(.o_kanban_ghost)`).toHaveCount(1);
+        expect.verifySteps([
+            "get menu_id-null",
+            "get current_lang-null",
+            "get current_state-null",
+            "get current_action-null",
+            'set current_state-{"actionStack":[{"displayName":"First record","action":100,"view_type":"form","resId":1}],"resId":1,"action":100}',
+            'set current_action-{"binding_type":"action","binding_view_types":"list,form","id":100,"type":"ir.actions.act_window","xml_id":100,"res_model":"partner","res_id":1,"views":[[false,"form"]],"context":{},"embedded_action_ids":[],"group_ids":[],"limit":80,"mobile_view_mode":"kanban","target":"current","view_ids":[],"view_mode":"list,form","cache":true}',
+            "set current_lang-en",
+            'set current_state-{"actionStack":[{"displayName":"First record","action":100,"view_type":"form","resId":1},{"displayName":"","action":200,"view_type":"kanban"}],"action":200}',
+            'set current_action-{"id":200,"type":"ir.actions.act_window","res_model":"partner","views":[[1,"kanban"]],"domain":[["id","=",1]]}',
+            "set current_lang-en",
+        ]);
+
+        expect(browser.location.href).toBe("http://example.com/odoo/action-100/1/action-200");
+
+        // Emulate a Reload
+        startRouter(); // Emulate a full reload. Update the current state of the router with the URL (as is done on reload)
+        expect(router.current.action).toBe(200);
+        expect(router.current.active_id).toBe(1);
+        routerBus.trigger("ROUTE_CHANGE");
+
+        await animationFrame();
+        await animationFrame();
+        expect(`.o_kanban_view`).toHaveCount(1);
+        expect(`.o_kanban_record:not(.o_kanban_ghost)`).toHaveCount(1);
+        expect.verifySteps([
+            "get menu_id-null",
+            "get current_lang-en",
+            'get current_state-{"actionStack":[{"displayName":"First record","action":100,"view_type":"form","resId":1},{"displayName":"","action":200,"view_type":"kanban"}],"action":200}',
+            'get current_action-{"id":200,"type":"ir.actions.act_window","res_model":"partner","views":[[1,"kanban"]],"domain":[["id","=",1]]}',
+            'set current_state-{"actionStack":[{"displayName":"First record","action":100,"view_type":"form","resId":1},{"displayName":"","action":200,"view_type":"kanban","active_id":1}],"action":200,"active_id":1}',
+            'set current_action-{"id":200,"type":"ir.actions.act_window","res_model":"partner","views":[[1,"kanban"]],"domain":[["id","=",1]]}',
+            "set current_lang-en",
+        ]);
+    });
+
+    test("properly reload dynamic actions from sessionStorage (form view)", async () => {
+        patchWithCleanup(browser.sessionStorage, {
+            setItem(key, value) {
+                expect.step(`set ${key}-${value}`);
+                super.setItem(key, value);
+            },
+            getItem(key) {
+                const res = super.getItem(key);
+                expect.step(`get ${key}-${res}`);
+                return res;
+            },
+        });
+
+        await mountWebClient();
+
+        await getService("action").doAction(
+            {
+                type: "ir.actions.act_window",
+                res_model: "partner",
+                views: [
+                    [false, "list"],
+                    [666, "form"],
+                ],
+            },
+            { props: { resId: 1 }, viewType: "form" }
+        );
+        await animationFrame();
+
+        expect(`.o_form_view`).toHaveCount(1);
+
+        expect.verifySteps([
+            "get menu_id-null",
+            "get current_lang-null",
+            "get current_state-null",
+            "get current_action-null",
+            'set current_state-{"actionStack":[{"displayName":"First record","model":"partner","view_type":"form","resId":1}],"resId":1,"model":"partner"}',
+            'set current_action-{"type":"ir.actions.act_window","res_model":"partner","views":[[false,"list"],[666,"form"]]}',
+            "set current_lang-en",
+        ]);
+
+        expect(browser.location.href).toBe("http://example.com/odoo/m-partner/1");
+
+        // Emulate a Reload
+        routerBus.trigger("ROUTE_CHANGE");
+        await animationFrame();
+        await animationFrame();
+        expect(`.o_form_view`).toHaveCount(1);
+        expect.verifySteps([
+            "get menu_id-null",
+            "get current_lang-en",
+            'get current_state-{"actionStack":[{"displayName":"First record","model":"partner","view_type":"form","resId":1}],"resId":1,"model":"partner"}',
+            'get current_action-{"type":"ir.actions.act_window","res_model":"partner","views":[[false,"list"],[666,"form"]]}',
+            'set current_state-{"actionStack":[{"displayName":"First record","model":"partner","view_type":"form","resId":1}],"resId":1,"model":"partner"}',
+            'set current_action-{"type":"ir.actions.act_window","res_model":"partner","views":[[false,"list"],[666,"form"]]}',
+            "set current_lang-en",
+        ]);
+    });
+
+    test("don't reload actions from sessionStorage (form view)", async () => {
+        patchWithCleanup(browser.sessionStorage, {
+            setItem(key, value) {
+                expect.step(`set ${key}-${value}`);
+                super.setItem(key, value);
+            },
+            getItem(key) {
+                const res = super.getItem(key);
+                expect.step(`get ${key}-${res}`);
+                return res;
+            },
+        });
+
+        // Prepare a stored action
+        browser.sessionStorage.setItem(
+            "current_action",
+            JSON.stringify({
+                id: 9001,
+                name: "Partners",
+                type: "ir.actions.act_window",
+                res_model: "partner",
+                views: [
+                    [false, "list"],
+                    [666, "form"],
+                ],
+                context: {},
+            })
+        );
+
+        defineActions([
+            {
+                id: 9001,
+                name: "Partners",
+                type: "ir.actions.act_window",
+                res_model: "partner",
+                views: [
+                    [false, "list"],
+                    [666, "form"],
+                ],
+            },
+        ]);
+
+        redirect("/odoo/m-partner/1");
+        await mountWebClient();
+        expect(`.o_form_view`).toHaveCount(1);
+        expect.verifySteps([
+            'set current_action-{"id":9001,"name":"Partners","type":"ir.actions.act_window","res_model":"partner","views":[[false,"list"],[666,"form"]],"context":{}}',
+            "get menu_id-null",
+            "get current_lang-null",
+            "get current_state-null",
+            'get current_action-{"id":9001,"name":"Partners","type":"ir.actions.act_window","res_model":"partner","views":[[false,"list"],[666,"form"]],"context":{}}',
+            'set current_state-{"actionStack":[{"displayName":"First record","model":"partner","view_type":"form","resId":1}],"resId":1,"model":"partner"}',
+            'set current_action-{"res_model":"partner","res_id":1,"type":"ir.actions.act_window","views":[[false,"form"]]}',
+            "set current_lang-en",
+        ]);
+    });
+
+    test("menu jumping fix: multiple menus sharing same action", async () => {
+        // Test case for menu jumping issue when multiple menus share the same action
+        // Scenario: User navigates to Sale->Customers, then F5 reload should stay in Sale, not jump to Account
+        defineActions([
+            {
+                id: 9001,
+                name: "Partners",
+                res_model: "partner",
+                type: "ir.actions.act_window",
+                views: [
+                    [false, "list"],
+                    [false, "form"],
+                ],
+            },
+        ]);
+
+        defineMenus([
+            { id: 0 }, // prevents auto-loading
+            // Sale App
+            { id: 100, name: "Sale", appID: 100, children: [101] },
+            { id: 101, name: "Customers", appID: 100, actionID: 9001, parent_id: 100 },
+            // Account App
+            { id: 200, name: "Accounting", appID: 200, children: [201] },
+            { id: 201, name: "Customers", appID: 200, actionID: 9001, parent_id: 200 }, // Same action!
+        ]);
+
+        patchWithCleanup(browser.sessionStorage, {
+            setItem(key, value) {
+                expect.step(`set ${key}-${value}`);
+                super.setItem(key, value);
+            },
+            getItem(key) {
+                const res = super.getItem(key);
+                expect.step(`get ${key}-${res}`);
+                return res;
+            },
+        });
+
+        // Step 1: Navigate to Sale->Customers with explicit menu_id
+        redirect("/odoo/action-9001?menu_id=100");
+        logHistoryInteractions();
+
+        await mountWebClient();
+        expect(`.o_list_view`).toHaveCount(1);
+
+        // Step 2: Emulate F5 reload
+        routerBus.trigger("ROUTE_CHANGE");
+        await animationFrame();
+        await animationFrame();
+
+        expect(`.o_list_view`).toHaveCount(1);
+
+        expect.verifySteps([
+            "get menu_id-null",
+            "set menu_id-100",
+            "get current_lang-null",
+            "get current_state-null",
+            "get current_action-null",
+            'set current_state-{"actionStack":[{"displayName":"Partners","action":9001,"view_type":"list"}],"action":9001}',
+            'set current_action-{"binding_type":"action","binding_view_types":"list,form","id":9001,"type":"ir.actions.act_window","xml_id":9001,"name":"Partners","res_model":"partner","views":[[false,"list"],[false,"form"]],"context":{},"embedded_action_ids":[],"group_ids":[],"limit":80,"mobile_view_mode":"kanban","target":"current","view_ids":[],"view_mode":"list,form","cache":true}',
+            "set current_lang-en",
+            "pushState http://example.com/odoo/action-9001",
+            "get menu_id-100", // F5 reload checks stored menu
+            "get current_lang-en",
+            'get current_state-{"actionStack":[{"displayName":"Partners","action":9001,"view_type":"list"}],"action":9001}',
+            'get current_action-{"binding_type":"action","binding_view_types":"list,form","id":9001,"type":"ir.actions.act_window","xml_id":9001,"name":"Partners","res_model":"partner","views":[[false,"list"],[false,"form"]],"context":{},"embedded_action_ids":[],"group_ids":[],"limit":80,"mobile_view_mode":"kanban","target":"current","view_ids":[],"view_mode":"list,form","cache":true}',
+            'set current_state-{"actionStack":[{"displayName":"Partners","action":9001,"view_type":"list"}],"action":9001}',
+            'set current_action-{"binding_type":"action","binding_view_types":"list,form","id":9001,"type":"ir.actions.act_window","xml_id":9001,"name":"Partners","res_model":"partner","views":[[false,"list"],[false,"form"]],"context":{},"embedded_action_ids":[],"group_ids":[],"limit":80,"mobile_view_mode":"kanban","target":"current","view_ids":[],"view_mode":"list,form","cache":true}',
+            "set current_lang-en",
+            "Update the state without updating URL, nextState: actionStack,action",
+        ]);
+    });
+
+    test(`properly reload breadcrumb (state)`, async () => {
+        onRpc("/web/action/load_breadcrumbs", () => {
+            expect.step(`load_breadcrumbs shouldn't be called`);
+        });
+        patchWithCleanup(browser.sessionStorage, {
+            setItem(key, value) {
+                expect.step(`set ${key}-${value}`);
+                super.setItem(key, value);
+            },
+            getItem(key) {
+                const res = super.getItem(key);
+                expect.step(`get ${key}-${res}`);
+                return res;
+            },
+        });
+
+        defineActions([
+            {
+                id: 100,
+                type: "ir.actions.act_window",
+                res_model: "partner",
+                res_id: 1,
+                name: "Partners",
+                views: [
+                    [false, "form"],
+                    [false, "list"],
+                ],
+            },
+            {
+                id: 200,
+                type: "ir.actions.act_window",
+                res_model: "partner",
+                name: "Kanban Partners",
+                views: [
+                    [1, "kanban"],
+                    [false, "form"],
+                ],
+            },
+            {
+                id: 300,
+                type: "ir.actions.act_window",
+                res_model: "partner",
+                context: { active_id: 5 },
+                name: "List Partners with active id",
+                views: [[false, "list"]],
+            },
+        ]);
+
+        await mountWebClient();
+        await getService("action").doAction(200);
+        await getService("action").doAction(300);
+        await getService("action").doAction(100);
+
+        await animationFrame();
+        expect(`.o_form_view`).toHaveCount(1);
+        expect(browser.location.href).toBe(
+            "http://example.com/odoo/action-200/5/action-300/action-100/1"
+        );
+        expect(queryAllTexts`.breadcrumb-item, .o_breadcrumb .active`).toEqual([
+            "Kanban Partners",
+            "List Partners with active id",
+            "First record",
+        ]);
+        expect(router.current.actionStack).toEqual([
+            {
+                action: 200,
+                displayName: "Kanban Partners",
+                view_type: "kanban",
+            },
+            {
+                action: 300,
+                active_id: 5,
+                displayName: "List Partners with active id",
+                view_type: "list",
+            },
+            {
+                action: 100,
+                displayName: "First record",
+                resId: 1,
+                view_type: "form",
+            },
+        ]);
+        expect.verifySteps([
+            "get menu_id-null",
+            "get current_lang-null",
+            "get current_state-null",
+            "get current_action-null",
+            'set current_state-{"actionStack":[{"displayName":"Kanban Partners","action":200,"view_type":"kanban"}],"action":200}',
+            'set current_action-{"binding_type":"action","binding_view_types":"list,form","id":200,"type":"ir.actions.act_window","xml_id":200,"res_model":"partner","name":"Kanban Partners","views":[[1,"kanban"],[false,"form"]],"context":{},"embedded_action_ids":[],"group_ids":[],"limit":80,"mobile_view_mode":"kanban","target":"current","view_ids":[],"view_mode":"list,form","cache":true}',
+            "set current_lang-en",
+            'set current_state-{"actionStack":[{"displayName":"Kanban Partners","action":200,"view_type":"kanban"},{"displayName":"List Partners with active id","action":300,"view_type":"list","active_id":5}],"action":300,"active_id":5}',
+            'set current_action-{"binding_type":"action","binding_view_types":"list,form","id":300,"type":"ir.actions.act_window","xml_id":300,"res_model":"partner","context":{"active_id":5},"name":"List Partners with active id","views":[[false,"list"]],"embedded_action_ids":[],"group_ids":[],"limit":80,"mobile_view_mode":"kanban","target":"current","view_ids":[],"view_mode":"list,form","cache":true}',
+            "set current_lang-en",
+            'set current_state-{"actionStack":[{"displayName":"Kanban Partners","action":200,"view_type":"kanban"},{"displayName":"List Partners with active id","action":300,"view_type":"list","active_id":5},{"displayName":"First record","action":100,"view_type":"form","resId":1}],"resId":1,"action":100}',
+            'set current_action-{"binding_type":"action","binding_view_types":"list,form","id":100,"type":"ir.actions.act_window","xml_id":100,"res_model":"partner","res_id":1,"name":"Partners","views":[[false,"form"],[false,"list"]],"context":{},"embedded_action_ids":[],"group_ids":[],"limit":80,"mobile_view_mode":"kanban","target":"current","view_ids":[],"view_mode":"list,form","cache":true}',
+            "set current_lang-en",
+        ]);
+
+        // Emulate a Reload
+        startRouter(); // Emulate a full reload. Update the current state of the router with the URL (as is done on reload)
+        // State created from URL with 5 actions and without displayNames
+        expect(router.current.actionStack).toEqual([
+            {
+                action: 200,
+            },
+            {
+                action: 200,
+                resId: 5,
+            },
+            {
+                action: 300,
+                active_id: 5,
+            },
+            {
+                action: 100,
+            },
+            {
+                action: 100,
+                resId: 1,
+            },
+        ]);
+        routerBus.trigger("ROUTE_CHANGE");
+
+        await animationFrame();
+        await animationFrame();
+        // State from the sessionStoreage with 3 actions and with displayNames
+        expect(router.current.actionStack).toEqual([
+            {
+                action: 200,
+                displayName: "Kanban Partners",
+            },
+            {
+                action: 300,
+                active_id: 5,
+                displayName: "List Partners with active id",
+            },
+            {
+                action: 100,
+                displayName: "First record",
+                resId: 1,
+                view_type: "form",
+            },
+        ]);
+        expect(browser.location.href).toBe(
+            "http://example.com/odoo/action-200/5/action-300/action-100/1"
+        );
+        expect(queryAllTexts`.breadcrumb-item, .o_breadcrumb .active`).toEqual([
+            "Kanban Partners",
+            "List Partners with active id",
+            "First record",
+        ]);
+        expect.verifySteps([
+            "get menu_id-null",
+            "get current_lang-en",
+            'get current_state-{"actionStack":[{"displayName":"Kanban Partners","action":200,"view_type":"kanban"},{"displayName":"List Partners with active id","action":300,"view_type":"list","active_id":5},{"displayName":"First record","action":100,"view_type":"form","resId":1}],"resId":1,"action":100}',
+            'get current_action-{"binding_type":"action","binding_view_types":"list,form","id":100,"type":"ir.actions.act_window","xml_id":100,"res_model":"partner","res_id":1,"name":"Partners","views":[[false,"form"],[false,"list"]],"context":{},"embedded_action_ids":[],"group_ids":[],"limit":80,"mobile_view_mode":"kanban","target":"current","view_ids":[],"view_mode":"list,form","cache":true}',
+            'set current_state-{"actionStack":[{"displayName":"Kanban Partners","action":200},{"displayName":"List Partners with active id","action":300,"active_id":5},{"displayName":"First record","action":100,"view_type":"form","resId":1}],"resId":1,"action":100}',
+            'set current_action-{"binding_type":"action","binding_view_types":"list,form","id":100,"type":"ir.actions.act_window","xml_id":100,"res_model":"partner","res_id":1,"name":"Partners","views":[[false,"form"],[false,"list"]],"context":{},"embedded_action_ids":[],"group_ids":[],"limit":80,"mobile_view_mode":"kanban","target":"current","view_ids":[],"view_mode":"list,form","cache":true}',
+            "set current_lang-en",
+        ]);
+    });
+
+    test(`browser back on invalid form view`, async () => {
+        Partner._fields.foo.required = true;
+        await mountWebClient();
+        await getService("action").doAction({
+            type: "ir.actions.act_window",
+            res_model: "partner",
+            name: "Partners",
+            views: [
+                [false, "list"],
+                [false, "form"],
+            ],
+        });
+
+        await runAllTimers(); // wait for router pushState
+        expect(`.o_list_view`).toHaveCount(1);
+
+        await contains(".o_data_cell").click();
+        await runAllTimers(); // wait for router pushState
+        expect(`.o_form_view`).toHaveCount(1);
+
+        await contains(".o_field_widget[name=foo] input").edit("");
+        browser.history.back(); // Click on back button
+        await animationFrame();
+        expect(`.o_form_view`).toHaveCount(1);
+        expect(`.o_field_widget[name=foo]`).toHaveClass("o_field_invalid");
+        // In webclient, we listen to the "ROUTE_CHANGE" event to load the new state,
+        // and we set `pointer-events: none` during the loadState. In this case,
+        // we assert that the rule has been correctly removed.
+        expect(document.body.style.pointerEvents).not.toBe("none");
+    });
+
+    test(`reload without lang change`, async () => {
+        onRpc("/web/action/load_breadcrumbs", () => {
+            expect.step(`/web/action/load_breadcrumbs`);
+        });
+        onRpc("/web/action/load", () => {
+            expect.step(`/web/action/load`);
+        });
+
+        defineActions([
+            {
+                id: 100,
+                type: "ir.actions.act_window",
+                res_model: "partner",
+                name: "Partners",
+                views: [
+                    [false, "list"],
+                    [false, "form"],
+                ],
+            },
+            {
+                id: 200,
+                type: "ir.actions.act_window",
+                res_model: "partner",
+                name: "Kanban Partners",
+                views: [[1, "kanban"]],
+            },
+        ]);
+
+        await mountWebClient();
+        await getService("action").doAction(100);
+        await contains(".o_data_cell").click();
+        await getService("action").doAction(200);
+        expect.verifySteps(["/web/action/load", "/web/action/load"]);
+
+        await runAllTimers(); // wait for the router to be updated
+        expect(router.stateToUrl(router.current)).toBe("/odoo/action-100/1/action-200");
+
+        // simulate a reload
+        await startRouter();
+        routerBus.trigger("ROUTE_CHANGE");
+        await runAllTimers();
+        // assert that we didn't reload the action or breadcrumbs as they are stored in session storage
+        expect.verifySteps([]);
+    });
+
+    test(`reload with lang change`, async () => {
+        onRpc("/web/action/load_breadcrumbs", () => {
+            expect.step(`/web/action/load_breadcrumbs`);
+        });
+        onRpc("/web/action/load", () => {
+            expect.step(`/web/action/load`);
+        });
+
+        defineActions([
+            {
+                id: 100,
+                type: "ir.actions.act_window",
+                res_model: "partner",
+                name: "Partners",
+                views: [
+                    [false, "list"],
+                    [false, "form"],
+                ],
+            },
+            {
+                id: 200,
+                type: "ir.actions.act_window",
+                res_model: "partner",
+                name: "Kanban Partners",
+                views: [[1, "kanban"]],
+            },
+        ]);
+
+        await mountWebClient();
+        await getService("action").doAction(100);
+        await runAllTimers(); // wait for the router to be updated
+        await contains(".o_data_cell").click();
+        await runAllTimers(); // wait for the router to be updated
+        await getService("action").doAction(200);
+        expect.verifySteps(["/web/action/load", "/web/action/load"]);
+
+        await runAllTimers(); // wait for the router to be updated
+        expect(router.stateToUrl(router.current)).toBe("/odoo/action-100/1/action-200");
+
+        // simulate a reload with a new lang
+        serverState.lang = "fr_FR";
+        await startRouter();
+        routerBus.trigger("ROUTE_CHANGE");
+        await runAllTimers();
+        // assert that we properly reload action and breacrumbs as lang changed
+        expect.verifySteps(["/web/action/load_breadcrumbs", "/web/action/load"]);
+    });
+
+    test(`switch to form view after reload`, async () => {
+        redirect("/odoo/action-3/2");
+
+        await mountWebClient();
+        expect(`.o_form_view`).toHaveCount(1);
+        expect(queryAllTexts(".breadcrumb-item, .o_breadcrumb .active")).toEqual([
+            "Partners",
+            "Second record",
+        ]);
+
+        await getService("action").switchView("form", { resId: 5 });
+        expect(`.o_form_view`).toHaveCount(1);
+        expect(queryAllTexts(".breadcrumb-item, .o_breadcrumb .active")).toEqual([
+            "Partners",
+            "Fifth record",
         ]);
     });
 });
@@ -1594,6 +2168,7 @@ describe(`legacy urls`, () => {
             "/web/action/load",
             "get_views",
             "web_search_read",
+            "has_group",
         ]);
     });
 
@@ -1615,35 +2190,6 @@ describe(`legacy urls`, () => {
     test(`properly load records with existing first APP`, async () => {
         // simulate a real scenario with a first app (e.g. Discuss), to ensure that we don't
         // fallback on that first app when only a model and res_id are given in the url
-        defineActions(
-            [
-                {
-                    id: "root",
-                    name: "root",
-                    appID: "root",
-                    children: [
-                        {
-                            id: 1,
-                            children: [],
-                            name: "App1",
-                            appID: 1,
-                            actionID: 1001,
-                            xmlid: "menu_1",
-                        },
-                        {
-                            id: 2,
-                            children: [],
-                            name: "App2",
-                            appID: 2,
-                            actionID: 1002,
-                            xmlid: "menu_2",
-                        },
-                    ],
-                },
-            ],
-            { mode: "replace" }
-        );
-
         redirect("/web#id=2&model=partner");
         stepAllNetworkCalls();
 
@@ -1687,6 +2233,7 @@ describe(`legacy urls`, () => {
             "/web/action/load",
             "get_views",
             "web_search_read",
+            "has_group",
         ]);
     });
 
@@ -1786,9 +2333,7 @@ describe(`legacy urls`, () => {
         defineMenus([
             {
                 id: 666,
-                children: [],
                 name: "App1",
-                appID: 1,
                 actionID: 1,
             },
         ]);
@@ -1807,6 +2352,7 @@ describe(`legacy urls`, () => {
             "/web/action/load",
             "get_views",
             "web_search_read",
+            "has_group",
         ]);
     });
 
@@ -1885,14 +2431,11 @@ describe(`legacy urls`, () => {
     });
 
     test(`charge a form view via url, then switch to view list, the search view is correctly initialized`, async () => {
-        Partner._views = {
-            ...Partner._views,
-            "search,false": `
+        Partner._views.search = `
                 <search>
                     <filter name="filter" string="Filter" domain="[('foo', '=', 'yop')]"/>
                 </search>
-            `,
-        };
+            `;
 
         redirect("/web#action=3&model=partner&view_type=form");
 

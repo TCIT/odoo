@@ -2,9 +2,9 @@
 from odoo import models
 
 
-class AccountEdiXmlUBLDE(models.AbstractModel):
-    _inherit = "account.edi.xml.ubl_bis3"
+class AccountEdiXmlUbl_De(models.AbstractModel):
     _name = 'account.edi.xml.ubl_de'
+    _inherit = ["account.edi.xml.ubl_bis3"]
     _description = "BIS3 DE (XRechnung)"
 
     # -------------------------------------------------------------------------
@@ -12,39 +12,114 @@ class AccountEdiXmlUBLDE(models.AbstractModel):
     # -------------------------------------------------------------------------
 
     def _export_invoice_filename(self, invoice):
-        return f"{invoice.name.replace('/', '_')}_ubl_de.xml"
-
-    def _export_invoice_ecosio_schematrons(self):
-        return {
-            'invoice': 'de.xrechnung:ubl-invoice:2.2.0',
-            'credit_note': 'de.xrechnung:ubl-creditnote:2.2.0',
-        }
-
-    def _export_invoice_vals(self, invoice):
-        # EXTENDS account.edi.xml.ubl_bis3
-        vals = super()._export_invoice_vals(invoice)
-        vals['vals']['customization_id'] = self._get_customization_ids()['xrechnung']
-        return vals
+        return f"{invoice.name.replace('/', '_')}_xrechnung.xml"
 
     def _export_invoice_constraints(self, invoice, vals):
         # EXTENDS account.edi.xml.ubl_bis3
         constraints = super()._export_invoice_constraints(invoice, vals)
 
         constraints.update({
-            'bis3_de_supplier_telephone_required': self._check_required_fields(vals['supplier'], ['phone', 'mobile']),
+            'bis3_de_supplier_telephone_required': self._check_required_fields(vals['supplier'], ['phone']),
             'bis3_de_supplier_electronic_mail_required': self._check_required_fields(vals['supplier'], 'email'),
         })
 
         return constraints
 
-    def _get_partner_party_vals(self, partner, role):
-        # EXTENDS account.edi.xml.ubl_bis3
-        vals = super()._get_partner_party_vals(partner, role)
+    # -------------------------------------------------------------------------
+    # EXPORT: Templates
+    # -------------------------------------------------------------------------
 
-        if not vals.get('endpoint_id') and partner.email:
-            vals.update({
-                'endpoint_id': partner.email,
-                'endpoint_id_attrs': {'schemeID': 'EM'},
+    def _get_customization_id(self, process_type='billing'):
+        if process_type == 'billing':
+            return 'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0'
+
+    def _ubl_add_tax_currency_code_node(self, vals):
+        # OVERRIDE account.edi.xml.ubl_bis3
+        self._ubl_add_tax_currency_code_node_empty(vals)
+
+    def _ubl_tax_totals_node_grouping_key(self, base_line, tax_data, vals, currency):
+        # EXTENDS account.edi.xml.ubl_bis3
+        tax_total_keys = super()._ubl_tax_totals_node_grouping_key(base_line, tax_data, vals, currency)
+
+        company_currency = vals['company'].currency_id
+        if (
+            tax_total_keys['tax_total_key']
+            and company_currency != vals['currency']
+            and tax_total_keys['tax_total_key']['currency'] == company_currency
+        ):
+            tax_total_keys['tax_total_key'] = None
+
+        return tax_total_keys
+
+    def _ubl_add_customization_id_node(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_customization_id_node(vals)
+        vals['document_node']['cbc:CustomizationID']['_text'] = 'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0'
+
+    def _ubl_add_buyer_reference_node(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_buyer_reference_node(vals)
+        node = vals['document_node']['cbc:BuyerReference']
+
+        customer = vals['customer'].commercial_partner_id
+        if customer.peppol_eas == "0204":
+            node['_text'] = customer.peppol_endpoint
+
+        if not node['_text']:
+            node['_text'] = 'N/A'
+
+    def _ubl_add_party_endpoint_id_node(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_party_endpoint_id_node(vals)
+        partner = vals['party_vals']['partner']
+
+        if not vals['party_node']['cbc:EndpointID']['_text'] and partner.email:
+            vals['party_node']['cbc:EndpointID'] = {
+                '_text': partner.email,
+                'schemeID': 'EM'
+            }
+
+    def _ubl_add_party_tax_scheme_nodes(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_party_tax_scheme_nodes(vals)
+        nodes = vals['party_node']['cac:PartyTaxScheme']
+        partner = vals['party_vals']['partner']
+        commercial_partner = partner.commercial_partner_id
+
+        if (
+            not nodes
+            and commercial_partner.peppol_eas
+        ):
+            nodes.append({
+                'cbc:CompanyID': {'_text': None},
+                'cac:TaxScheme': {
+                    'cbc:ID': {'_text': commercial_partner.peppol_eas},
+                },
             })
 
-        return vals
+    def _ubl_add_party_legal_entity_nodes(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_party_legal_entity_nodes(vals)
+        nodes = vals['party_node']['cac:PartyLegalEntity']
+        partner = vals['party_vals']['partner']
+        commercial_partner = partner.commercial_partner_id
+
+        if (
+            not nodes
+            and commercial_partner.name
+        ):
+            nodes.append({
+                'cbc:RegistrationName': {'_text': commercial_partner.name},
+                'cbc:CompanyID': {
+                    '_text': None,
+                    'schemeID': None,
+                },
+            })
+
+    def _ubl_get_line_allowance_charge_discount_node(self, vals, discount_values):
+        # EXTENDS account.edi.xml.ubl_bis3
+        discount_node = super()._ubl_get_line_allowance_charge_discount_node(vals, discount_values)
+        discount_node['cbc:AllowanceChargeReason'] = None
+        discount_node['cbc:MultiplierFactorNumeric'] = None
+        discount_node['cbc:BaseAmount'] = None
+        return discount_node

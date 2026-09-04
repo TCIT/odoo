@@ -8,11 +8,11 @@ from odoo import fields, models
 _logger = logging.getLogger(__name__)
 
 
-class AliasMixin(models.AbstractModel):
+class MailAliasMixin(models.AbstractModel):
     """ A mixin for models that inherits mail.alias to have a one-to-one relation
     between the model and its alias. """
     _name = 'mail.alias.mixin'
-    _inherit = 'mail.alias.mixin.optional'
+    _inherit = ['mail.alias.mixin.optional']
     _inherits = {'mail.alias': 'alias_id'}
     _description = 'Email Aliases Mixin'
 
@@ -45,8 +45,10 @@ class AliasMixin(models.AbstractModel):
         child_model = self.sudo().with_context(child_ctx)
 
         for record in child_model.search([('alias_id', '=', False)]):
-            # create the alias, and link it to the current record
-            alias = self.env['mail.alias'].sudo().create(record._alias_get_creation_values())
+            # create the alias associated with its company if one exists,
+            # and link it to the current record
+            record_company = record._mail_get_companies()[record.id]
+            alias = self.env['mail.alias'].sudo().with_company(record_company).create(record._alias_get_creation_values())
             record.with_context(mail_notrack=True).alias_id = alias
             _logger.info('Mail alias created for %s %s (id %s)',
                          record._name, record.display_name, record.id)

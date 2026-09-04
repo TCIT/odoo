@@ -8,18 +8,19 @@
         <field name="arch" type="xml">
             <!-- Needed by customContentKanbanLikeWidget to save selected documents on the product. -->
             <!-- Desktop view -->
-            <xpath expr="//field[@name='order_line']//list" position="inside">
+            <xpath expr="//field[@name='order_line']/list" position="inside">
                 <field name="product_document_ids" column_invisible="1"/>
             </xpath>
             <!-- Mobile view -->
-            <xpath expr="//field[@name='order_line']//kanban" position="inside">
+            <xpath expr="//field[@name='order_line']/kanban" position="inside">
                 <field name="product_document_ids" column_invisible="1"/>
             </xpath>
-            <page name="optional_products" position="after">
+            <page name="order_lines" position="after">
                 <page
                     name="pdf_quote_builder"
                     string="Quote Builder"
-                    invisible="not (partner_id and is_pdf_quote_builder_available)"
+                    groups="sales_team.group_sale_salesman"
+                    invisible="not (partner_id and is_pdf_quote_builder_available) or context.get('hide_pdf_quote_builder')"
                 >
                     <!-- Needed by customContentKanbanLikeWidget to save selected documents. -->
                     <field name="quotation_document_ids" invisible="1"/>

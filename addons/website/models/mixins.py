@@ -2,32 +2,33 @@
 
 import logging
 import re
-
-from werkzeug.urls import url_join
+import urllib.parse
 
 from odoo import api, fields, models, _
+from odoo.fields import Domain
 from odoo.addons.website.tools import text_from_html
 from odoo.http import request
-from odoo.osv import expression
 from odoo.exceptions import AccessError
 from odoo.tools import escape_psql
+from odoo.tools.urls import urljoin as url_join
 from odoo.tools.json import scriptsafe as json_safe
 
 logger = logging.getLogger(__name__)
 
 
-class SeoMetadata(models.AbstractModel):
-
+class WebsiteSeoMetadata(models.AbstractModel):
     _name = 'website.seo.metadata'
+
     _description = 'SEO metadata'
 
-    is_seo_optimized = fields.Boolean("SEO optimized", compute='_compute_is_seo_optimized')
+    is_seo_optimized = fields.Boolean("SEO optimized", compute='_compute_is_seo_optimized', store=True)
     website_meta_title = fields.Char("Website meta title", translate=True, prefetch="website_meta")
     website_meta_description = fields.Text("Website meta description", translate=True, prefetch="website_meta")
     website_meta_keywords = fields.Char("Website meta keywords", translate=True, prefetch="website_meta")
     website_meta_og_img = fields.Char("Website opengraph image")
     seo_name = fields.Char("Seo name", translate=True, prefetch=True)
 
+    @api.depends("website_meta_title", "website_meta_description", "website_meta_keywords")
     def _compute_is_seo_optimized(self):
         for record in self:
             record.is_seo_optimized = record.website_meta_title and record.website_meta_description and record.website_meta_keywords
@@ -89,8 +90,12 @@ class SeoMetadata(models.AbstractModel):
         if self.website_meta_description:
             opengraph_meta['og:description'] = self.website_meta_description
             twitter_meta['twitter:description'] = self.website_meta_description
-        opengraph_meta['og:image'] = url_join(root_url, self.env['ir.http']._url_for(self.website_meta_og_img or opengraph_meta['og:image']))
-        twitter_meta['twitter:image'] = url_join(root_url, self.env['ir.http']._url_for(self.website_meta_og_img or twitter_meta['twitter:image']))
+        # 19.0: remove domain of absolute URL before odoo/odoo#228253
+        og_image = self.website_meta_og_img and urllib.parse.urlunsplit(
+            ["", "", *urllib.parse.urlsplit(self.website_meta_og_img)[2:]]
+        )
+        opengraph_meta['og:image'] = url_join(root_url, self.env['ir.http']._url_for(og_image or opengraph_meta['og:image']))
+        twitter_meta['twitter:image'] = url_join(root_url, self.env['ir.http']._url_for(og_image or twitter_meta['twitter:image']))
         return {
             'opengraph_meta': opengraph_meta,
             'twitter_meta': twitter_meta,
@@ -98,9 +103,9 @@ class SeoMetadata(models.AbstractModel):
         }
 
 
-class WebsiteCoverPropertiesMixin(models.AbstractModel):
-
+class WebsiteCover_PropertiesMixin(models.AbstractModel):
     _name = 'website.cover_properties.mixin'
+
     _description = 'Cover Properties Website Mixin'
 
     cover_properties = fields.Text('Cover Properties', default=lambda s: json_safe.dumps(s._default_cover_properties()))
@@ -149,13 +154,31 @@ class WebsiteCoverPropertiesMixin(models.AbstractModel):
             old_cover_properties = json_safe.loads(item.cover_properties)
             cover_properties['resize_class'] = old_cover_properties.get('resize_class', classes[0])
             copy_vals['cover_properties'] = json_safe.dumps(cover_properties)
-            super(WebsiteCoverPropertiesMixin, item).write(copy_vals)
+            super(WebsiteCover_PropertiesMixin, item).write(copy_vals)
         return True
 
 
-class WebsiteMultiMixin(models.AbstractModel):
+class WebsitePageVisibilityOptionsMixin(models.AbstractModel):
+    _name = 'website.page_visibility_options.mixin'
+    _description = "Website page/record specific visibility options"
 
+    header_visible = fields.Boolean(default=True)
+    footer_visible = fields.Boolean(default=True)
+
+
+class WebsitePageOptionsMixin(models.AbstractModel):
+    _name = 'website.page_options.mixin'
+    _inherit = ['website.page_visibility_options.mixin']
+    _description = "Website page/record specific options"
+
+    header_overlay = fields.Boolean()
+    header_color = fields.Char()
+    header_text_color = fields.Char()
+
+
+class WebsiteMultiMixin(models.AbstractModel):
     _name = 'website.multi.mixin'
+
     _description = 'Multi Website Mixin'
 
     website_id = fields.Many2one(
@@ -176,19 +199,29 @@ class WebsiteMultiMixin(models.AbstractModel):
 
 
 class WebsitePublishedMixin(models.AbstractModel):
+    _name = 'website.published.mixin'
 
-    _name = "website.published.mixin"
     _description = 'Website Published Mixin'
 
     website_published = fields.Boolean('Visible on current website', related='is_published', readonly=False)
     is_published = fields.Boolean('Is Published', copy=False, default=lambda self: self._default_is_published(), index=True)
     can_publish = fields.Boolean('Can Publish', compute='_compute_can_publish')
-    website_url = fields.Char('Website URL', compute='_compute_website_url', help='The full URL to access the document through the website.')
+    website_url = fields.Char('Website URL', compute='_compute_website_url', help='The full relative URL to access the document through the website.')
+    # The compute dependency (for get_base_url) must be added and get_base_url must be overridden if needed
+    website_absolute_url = fields.Char('Website Absolute URL', compute='_compute_website_absolute_url',
+                                       help='The full absolute URL to access the document through the website.')
 
     @api.depends_context('lang')
     def _compute_website_url(self):
         for record in self:
             record.website_url = '#'
+
+    @api.depends('website_url')
+    def _compute_website_absolute_url(self):
+        self.website_absolute_url = '#'
+        for record in self:
+            if record.website_url != '#':
+                record.website_absolute_url = url_join(record.get_base_url(), record.website_url)
 
     def _default_is_published(self):
         return False
@@ -204,27 +237,33 @@ class WebsitePublishedMixin(models.AbstractModel):
 
     @api.model_create_multi
     def create(self, vals_list):
-        records = super(WebsitePublishedMixin, self).create(vals_list)
+        records = super().create(vals_list)
         if any(record.is_published and not record.can_publish for record in records):
             raise AccessError(self._get_can_publish_error_message())
 
         return records
 
-    def write(self, values):
-        if 'is_published' in values and any(not record.can_publish for record in self):
+    def write(self, vals):
+        if 'is_published' in vals and any(not record.can_publish for record in self):
             raise AccessError(self._get_can_publish_error_message())
 
-        return super(WebsitePublishedMixin, self).write(values)
+        return super().write(vals)
 
     def create_and_get_website_url(self, **kwargs):
         return self.create(kwargs).website_url
 
+    @api.depends_context('uid')
     def _compute_can_publish(self):
-        """ This method can be overridden if you need more complex rights management than just 'website_restricted_editor'
-        The publish widget will be hidden and the user won't be able to change the 'website_published' value
-        if this method sets can_publish False """
+        """ This method can be overridden if you need more complex rights
+        management than just write access to the model.
+        The publish widget will be hidden and the user won't be able to change
+        the 'website_published' value if this method sets can_publish False """
         for record in self:
-            record.can_publish = True
+            try:
+                self.env['website'].get_current_website()._check_user_can_modify(record)
+                record.can_publish = True
+            except AccessError:
+                record.can_publish = False
 
     @api.model
     def _get_can_publish_error_message(self):
@@ -234,7 +273,6 @@ class WebsitePublishedMixin(models.AbstractModel):
 
 
 class WebsitePublishedMultiMixin(WebsitePublishedMixin):
-
     _name = 'website.published.multi.mixin'
     _inherit = ['website.published.mixin', 'website.multi.mixin']
     _description = 'Multi Website Published Mixin'
@@ -247,7 +285,7 @@ class WebsitePublishedMultiMixin(WebsitePublishedMixin):
     @api.depends('is_published', 'website_id')
     @api.depends_context('website_id')
     def _compute_website_published(self):
-        current_website_id = self._context.get('website_id')
+        current_website_id = self.env.context.get('website_id')
         for record in self:
             if current_website_id:
                 record.website_published = record.is_published and (not record.website_id or record.website_id.id == current_website_id)
@@ -259,18 +297,15 @@ class WebsitePublishedMultiMixin(WebsitePublishedMixin):
             record.is_published = record.website_published
 
     def _search_website_published(self, operator, value):
-        if not isinstance(value, bool) or operator not in ('=', '!='):
-            logger.warning('unsupported search on website_published: %s, %s', operator, value)
-            return [()]
+        if operator != 'in':
+            return NotImplemented
+        assert list(value) == [True]
 
-        if operator in expression.NEGATIVE_TERM_OPERATORS:
-            value = not value
-
-        current_website_id = self._context.get('website_id')
-        is_published = [('is_published', '=', value)]
+        current_website_id = self.env.context.get('website_id')
+        is_published = Domain('is_published', '=', True)
         if current_website_id:
-            on_current_website = self.env['website'].website_domain(current_website_id)
-            return (['!'] if value is False else []) + expression.AND([is_published, on_current_website])
+            on_current_website = self.env['website'].browse(current_website_id).website_domain()
+            return is_published & on_current_website
         else:  # should be in the backend, return things that are published anywhere
             return is_published
 
@@ -307,14 +342,14 @@ class WebsiteSearchableMixin(models.AbstractModel):
 
         :return: domain limited to the matches of the search expression
         """
-        domains = domain_list.copy()
+        domain = Domain.AND(domain_list)
         if search:
-            for search_term in search.split(' '):
-                subdomains = [[(field, 'ilike', escape_psql(search_term))] for field in fields]
+            for search_term in search.split():
+                subdomains = [Domain(field, 'ilike', escape_psql(search_term)) for field in fields]
                 if extra:
                     subdomains.append(extra(self.env, search_term))
-                domains.append(expression.OR(subdomains))
-        return expression.AND(domains)
+                domain &= Domain.OR(subdomains)
+        return domain
 
     @api.model
     def _search_get_detail(self, website, order, options):
@@ -352,7 +387,7 @@ class WebsiteSearchableMixin(models.AbstractModel):
             limit=limit,
             order=search_detail.get('order', order)
         )
-        count = model.search_count(domain)
+        count = model.search_count(domain) if limit and limit == len(results) else len(results)
         return results, count
 
     def _search_render_results(self, fetch_fields, mapping, icon, limit):
@@ -362,7 +397,7 @@ class WebsiteSearchableMixin(models.AbstractModel):
             result['_mapping'] = mapping
         html_fields = [config['name'] for config in mapping.values() if config.get('html')]
         if html_fields:
-            for result, data in zip(self, results_data):
+            for data in results_data:
                 for html_field in html_fields:
                     if data[html_field]:
                         if html_field == 'arch':

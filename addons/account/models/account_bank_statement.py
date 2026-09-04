@@ -3,11 +3,12 @@ from contextlib import contextmanager
 
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import UserError
-from odoo.tools import create_index
+from odoo.fields import Domain
 from odoo.tools.misc import formatLang
 
+
 class AccountBankStatement(models.Model):
-    _name = "account.bank.statement"
+    _name = 'account.bank.statement'
     _description = "Bank Statement"
     _order = "first_line_index desc"
     _check_company_auto = True
@@ -26,8 +27,8 @@ class AccountBankStatement(models.Model):
     )
 
     date = fields.Date(
-        compute='_compute_date_index', store=True,
-        index=True,
+        compute='_compute_date', store=True,
+        index=True, readonly=False,
     )
 
     # The internal index of the first line of a statement, it is used for sorting the statements
@@ -35,7 +36,7 @@ class AccountBankStatement(models.Model):
     # keeping this order is important because the validity of the statements are based on their order
     first_line_index = fields.Char(
         comodel_name='account.bank.statement.line',
-        compute='_compute_date_index', store=True,
+        compute='_compute_first_line_index', store=True,
     )
 
     balance_start = fields.Monetary(
@@ -61,7 +62,7 @@ class AccountBankStatement(models.Model):
 
     currency_id = fields.Many2one(
         comodel_name='res.currency',
-        compute='_compute_currency_id',
+        compute='_compute_currency_id', store=True,
     )
 
     journal_id = fields.Many2one(
@@ -93,6 +94,10 @@ class AccountBankStatement(models.Model):
         search='_search_is_valid',
     )
 
+    journal_has_invalid_statements = fields.Boolean(
+        related='journal_id.has_invalid_statements',
+    )
+
     problem_description = fields.Text(
         compute='_compute_problem_description',
     )
@@ -100,20 +105,11 @@ class AccountBankStatement(models.Model):
     attachment_ids = fields.Many2many(
         comodel_name='ir.attachment',
         string="Attachments",
+        bypass_search_access=True,
     )
 
-    def init(self):
-        super().init()
-        create_index(self.env.cr,
-                     indexname='account_bank_statement_journal_id_date_desc_id_desc_idx',
-                     tablename='account_bank_statement',
-                     expressions=['journal_id', 'date DESC', 'id DESC'])
-        create_index(
-            self.env.cr,
-            indexname='account_bank_statement_first_line_index_idx',
-            tablename='account_bank_statement',
-            expressions=['journal_id', 'first_line_index'],
-        )
+    _journal_id_date_desc_id_desc_idx = models.Index("(journal_id, date DESC, id DESC)")
+    _first_line_index_idx = models.Index("(journal_id, first_line_index)")
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -128,12 +124,18 @@ class AccountBankStatement(models.Model):
             stmt.name = name +_("Statement %(date)s", date=stmt.date or fields.Date.to_date(stmt.create_date))
 
     @api.depends('line_ids.internal_index', 'line_ids.state')
-    def _compute_date_index(self):
+    def _compute_first_line_index(self):
         for stmt in self:
             # When we create lines manually from the form view, they don't have any `internal_index` set yet.
             sorted_lines = stmt.line_ids.filtered("internal_index").sorted('internal_index')
             stmt.first_line_index = sorted_lines[:1].internal_index
-            stmt.date = sorted_lines.filtered(lambda l: l.state == 'posted')[-1:].date
+
+    @api.depends('line_ids.internal_index', 'line_ids.state')
+    def _compute_date(self):
+        for statement in self:
+            # When we create lines manually from the form view, they don't have any `internal_index` set yet.
+            sorted_lines = statement.line_ids.filtered('internal_index').sorted('internal_index')
+            statement.date = sorted_lines.filtered(lambda l: l.state == 'posted')[-1:].date
 
     @api.depends('create_date')
     def _compute_balance_start(self):
@@ -175,7 +177,7 @@ class AccountBankStatement(models.Model):
         for stmt in self:
             stmt.balance_end_real = stmt.balance_end
 
-    @api.depends('journal_id')
+    @api.depends('journal_id.currency_id', 'company_id.currency_id')
     def _compute_currency_id(self):
         for statement in self:
             statement.currency_id = statement.journal_id.currency_id or statement.company_id.currency_id
@@ -215,11 +217,9 @@ class AccountBankStatement(models.Model):
             stmt.problem_description = description
 
     def _search_is_valid(self, operator, value):
-        if operator not in ('=', '!=', '<>'):
-            raise UserError(_('Operation not supported'))
+        if operator != 'in':
+            return NotImplemented
         invalid_ids = self._get_invalid_statement_ids(all_statements=True)
-        if operator in ('!=', '<>') and value or operator == '=' and not value:
-            return [('id', 'in', invalid_ids)]
         return [('id', 'not in', invalid_ids)]
 
     # -------------------------------------------------------------------------
@@ -231,6 +231,7 @@ class AccountBankStatement(models.Model):
         previous = self.env['account.bank.statement'].search(
             [
                 ('first_line_index', '<', self.first_line_index),
+                ('first_line_index', '!=', False),
                 ('journal_id', '=', self.journal_id.id),
             ],
             limit=1,
@@ -245,22 +246,29 @@ class AccountBankStatement(models.Model):
         self.env['account.bank.statement'].flush_model(['balance_start', 'balance_end_real', 'first_line_index'])
 
         self.env.cr.execute(f"""
-            SELECT st.id
-              FROM account_bank_statement st
-         LEFT JOIN res_company co ON st.company_id = co.id
-         LEFT JOIN account_journal j ON st.journal_id = j.id
-         LEFT JOIN res_currency currency ON COALESCE(j.currency_id, co.currency_id) = currency.id,
-                   LATERAL (
-                       SELECT balance_end_real
-                         FROM account_bank_statement st_lookup
-                        WHERE st_lookup.first_line_index < st.first_line_index
-                          AND st_lookup.journal_id = st.journal_id
-                     ORDER BY st_lookup.first_line_index desc
-                        LIMIT 1
-                   ) prev
-             WHERE ROUND(prev.balance_end_real, currency.decimal_places) != ROUND(st.balance_start, currency.decimal_places)
-               {"" if all_statements else "AND st.id IN %(ids)s"}
+             WITH statements AS (
+                     SELECT st.id,
+                            st.balance_start,
+                            st.journal_id,
+                            LAG(st.balance_end_real) OVER (
+                                PARTITION BY st.journal_id
+                                    ORDER BY st.first_line_index
+                            ) AS prev_balance_end_real,
+                            currency.decimal_places
+                       FROM account_bank_statement st
+                  LEFT JOIN res_company co ON st.company_id = co.id
+                  LEFT JOIN account_journal j ON st.journal_id = j.id
+                  LEFT JOIN res_currency currency ON COALESCE(j.currency_id, co.currency_id) = currency.id
+                      WHERE st.first_line_index IS NOT NULL
+                      {"" if all_statements else "AND st.journal_id IN %(journal_ids)s"}
+                  )
+           SELECT id
+             FROM statements
+            WHERE prev_balance_end_real IS NOT NULL
+              AND ROUND(prev_balance_end_real, decimal_places) != ROUND(balance_start, decimal_places)
+              {"" if all_statements else "AND id IN %(ids)s"};
         """, {
+            'journal_ids': tuple(set(self.journal_id.ids)),
             'ids': tuple(self.ids)
         })
         res = self.env.cr.fetchall()
@@ -271,16 +279,16 @@ class AccountBankStatement(models.Model):
     # -------------------------------------------------------------------------
 
     @api.model
-    def default_get(self, fields_list):
+    def default_get(self, fields):
         # EXTENDS base
-        defaults = super().default_get(fields_list)
+        defaults = super().default_get(fields)
 
-        if 'line_ids' not in fields_list:
+        if 'line_ids' not in fields:
             return defaults
 
-        active_ids = self._context.get('active_ids', [])
-        context_split_line_id = self._context.get('split_line_id')
-        context_st_line_id = self._context.get('st_line_id')
+        active_ids = self.env.context.get('active_ids', [])
+        context_split_line_id = self.env.context.get('split_line_id')
+        context_st_line_id = self.env.context.get('st_line_id')
         lines = None
         # creating statements with split button
         if context_split_line_id:
@@ -355,11 +363,11 @@ class AccountBankStatement(models.Model):
             container['records'] = stmts = super().create(vals_list)
         return stmts
 
-    def write(self, values):
-        if len(self) != 1 and 'attachment_ids' in values:
-            values.pop('attachment_ids')
+    def write(self, vals):
+        if len(self) != 1 and 'attachment_ids' in vals:
+            vals.pop('attachment_ids')
 
         container = {'records': self}
-        with self._check_attachments(container, [values]):
-            result = super().write(values)
+        with self._check_attachments(container, [vals]):
+            result = super().write(vals)
         return result

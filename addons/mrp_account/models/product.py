@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import fields, models
@@ -6,14 +5,24 @@ from odoo.tools import float_round, groupby
 
 
 class ProductTemplate(models.Model):
-    _name = 'product.template'
     _inherit = 'product.template'
 
     def _get_product_accounts(self):
         accounts = super()._get_product_accounts()
-        accounts.update({
-            'production': self.categ_id.property_stock_account_production_cost_id,
-        })
+        if self.categ_id:
+            # If category set on the product take production account from category even if
+            # production account on category is False
+            production_account = self.categ_id.property_stock_account_production_cost_id
+        else:
+            ProductCategory = self.env['product.category']
+            production_account = (
+                self.valuation == 'real_time'
+                and ProductCategory._fields['property_stock_account_production_cost_id'].get_company_dependent_fallback(
+                    ProductCategory
+                )
+                or self.env['account.account']
+            )
+        accounts['production'] = production_account
         return accounts
 
     def action_bom_cost(self):
@@ -28,17 +37,16 @@ class ProductTemplate(models.Model):
 
 
 class ProductProduct(models.Model):
-    _name = 'product.product'
     _inherit = 'product.product'
 
     def button_bom_cost(self):
         self.ensure_one()
-        self._set_price_from_bom()
+        self.with_context(action_button_product=self)._set_price_from_bom()
 
     def action_bom_cost(self):
         boms_to_recompute = self.env['mrp.bom'].search(['|', ('product_id', 'in', self.ids), '&', ('product_id', '=', False), ('product_tmpl_id', 'in', self.mapped('product_tmpl_id').ids)])
         for product in self:
-            product._set_price_from_bom(boms_to_recompute)
+            product.with_context(action_button_product=product)._set_price_from_bom(boms_to_recompute)
 
     def _set_price_from_bom(self, boms_to_recompute=False):
         self.ensure_one()
@@ -52,30 +60,6 @@ class ProductProduct(models.Model):
                 if price:
                     self.standard_price = price
 
-    def _compute_average_price(self, qty_invoiced, qty_to_invoice, stock_moves, is_returned=False):
-        self.ensure_one()
-        if stock_moves.product_id == self:
-            return super()._compute_average_price(qty_invoiced, qty_to_invoice, stock_moves, is_returned=is_returned)
-        bom = self.env['mrp.bom']._bom_find(self, company_id=stock_moves.company_id.id, bom_type='phantom')[self]
-        if not bom:
-            return super()._compute_average_price(qty_invoiced, qty_to_invoice, stock_moves, is_returned=is_returned)
-        value = 0
-        dummy, bom_lines = bom.explode(self, 1)
-        bom_lines = {line: data for line, data in bom_lines}
-        for bom_line, moves_list in groupby(stock_moves.filtered(lambda sm: sm.state != 'cancel'), lambda sm: sm.bom_line_id):
-            if bom_line not in bom_lines:
-                for move in moves_list:
-                    component_quantity = next(
-                        (bml.product_qty for bml in move.product_id.bom_line_ids if bml in bom_lines),
-                        1
-                    )
-                    value += component_quantity * move.product_id._compute_average_price(qty_invoiced * move.product_qty, qty_to_invoice * move.product_qty, move, is_returned=is_returned)
-                continue
-            line_qty = bom_line.product_uom_id._compute_quantity(bom_lines[bom_line]['qty'], bom_line.product_id.uom_id)
-            moves = self.env['stock.move'].concat(*moves_list)
-            value += line_qty * bom_line.product_id._compute_average_price(qty_invoiced * line_qty, qty_to_invoice * line_qty, moves, is_returned=is_returned)
-        return value
-
     def _compute_bom_price(self, bom, boms_to_recompute=False, byproduct_bom=False):
         self.ensure_one()
         if not bom:
@@ -87,10 +71,7 @@ class ProductProduct(models.Model):
             if opt._skip_operation_line(self):
                 continue
 
-            duration_expected = (
-                opt.workcenter_id._get_expected_duration(self) +
-                opt.time_cycle * 100 / opt.workcenter_id.time_efficiency)
-            total += (duration_expected / 60) * opt._total_cost_per_hour()
+            total += opt.cost
 
         for line in bom.bom_line_ids:
             if line._skip_bom_line(self):
@@ -115,6 +96,20 @@ class ProductProduct(models.Model):
             if byproduct_cost_share:
                 total *= float_round(1 - byproduct_cost_share / 100, precision_rounding=0.0001)
             return bom.product_uom_id._compute_price(total / bom.product_qty, self.uom_id)
+        return 0.0
+
+    def _compute_value(self):
+        """
+        Exclude kit products from inventory valuation to avoid double counting.
+        Only non-kit products are valuated; kits are set to zero value.
+        """
+        non_kit_products = self.filtered(lambda product: not product.is_kits)
+        super(ProductProduct, non_kit_products)._compute_value()
+        kit_products = self - non_kit_products
+        for kit_product in kit_products:
+            kit_product.company_currency_id = kit_product.company_id.currency_id or self.env.company.currency_id
+            kit_product.total_value = 0.0
+            kit_product.avg_cost = 0.0
 
 
 class ProductCategory(models.Model):
@@ -122,9 +117,6 @@ class ProductCategory(models.Model):
 
     property_stock_account_production_cost_id = fields.Many2one(
         'account.account', 'Production Account', company_dependent=True, ondelete='restrict',
-        domain="[('deprecated', '=', False)]", check_company=True,
+        check_company=True,
         help="""This account will be used as a valuation counterpart for both components and final products for manufacturing orders.
                 If there are any workcenter/employee costs, this value will remain on the account once the production is completed.""")
-
-    def _get_stock_account_property_field_names(self):
-        return super()._get_stock_account_property_field_names() + ['property_stock_account_production_cost_id']

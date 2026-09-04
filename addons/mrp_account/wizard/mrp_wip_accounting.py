@@ -4,10 +4,9 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import fields, models, _, api, Command
 from odoo.exceptions import UserError
-from odoo.tools import format_list
 
 
-class MrpWipAccountingLine(models.TransientModel):
+class MrpAccountWipAccountingLine(models.TransientModel):
     _name = 'mrp.account.wip.accounting.line'
     _description = 'Account move line to be created when posting WIP account move'
 
@@ -18,10 +17,10 @@ class MrpWipAccountingLine(models.TransientModel):
     currency_id = fields.Many2one('res.currency', "Currency", default=lambda self: self.env.company.currency_id)
     wip_accounting_id = fields.Many2one('mrp.account.wip.accounting', "WIP accounting wizard")
 
-    _sql_constraints = [
-        ('check_debit_credit', 'CHECK ( debit = 0 OR credit = 0 )',
-         'A single line cannot be both credit and debit.')
-    ]
+    _check_debit_credit = models.Constraint(
+        'CHECK ( debit = 0 OR credit = 0 )',
+        'A single line cannot be both credit and debit.',
+    )
 
     @api.depends('credit')
     def _compute_debit(self):
@@ -36,23 +35,23 @@ class MrpWipAccountingLine(models.TransientModel):
                 record.credit = 0
 
 
-class MrpWipAccounting(models.TransientModel):
+class MrpAccountWipAccounting(models.TransientModel):
     _name = 'mrp.account.wip.accounting'
     _description = 'Wizard to post Manufacturing WIP account move'
 
     @api.model
-    def default_get(self, fields_list):
-        res = super().default_get(fields_list)
+    def default_get(self, fields):
+        res = super().default_get(fields)
         productions = self.env['mrp.production'].browse(self.env.context.get('active_ids'))
         # ignore selected MOs that aren't a WIP
         productions = productions.filtered(lambda mo: mo.state in ['progress', 'to_close', 'confirmed'])
-        if 'journal_id' in fields_list:
+        if 'journal_id' in fields:
             default = self.env['product.category']._fields['property_stock_journal'].get_company_dependent_fallback(self.env['product.category'])
             if default:
                 res['journal_id'] = default.id
-        if 'reference' in fields_list:
-            res['reference'] = _("Manufacturing WIP - %(orders_list)s", orders_list=productions and format_list(self.env, productions.mapped('name')) or _("Manual Entry"))
-        if 'mo_ids' in fields_list:
+        if 'reference' in fields:
+            res['reference'] = _("Manufacturing WIP - %(orders_list)s", orders_list=productions.mapped('name') or _("Manual Entry"))
+        if 'mo_ids' in fields:
             res['mo_ids'] = [Command.set(productions.ids)]
         return res
 
@@ -72,10 +71,7 @@ class MrpWipAccounting(models.TransientModel):
         if overhead_account:
             return overhead_account.id
         ProductCategory = self.env['product.category']
-        cop_acc = ProductCategory._fields['property_stock_account_production_cost_id'].get_company_dependent_fallback(ProductCategory)
-        if cop_acc:
-            return cop_acc.id
-        return ProductCategory._fields['property_stock_account_input_categ_id'].get_company_dependent_fallback(ProductCategory).id
+        return ProductCategory._fields['property_stock_account_production_cost_id'].get_company_dependent_fallback(ProductCategory).id
 
     def _get_line_vals(self, productions=False, date=False):
         if not productions:
@@ -100,7 +96,7 @@ class MrpWipAccounting(models.TransientModel):
                 'account_id': self._get_overhead_account(),
             }),
             Command.create({
-                'label': _("Manufacturing WIP - %(orders_list)s", orders_list=productions and format_list(self.env, productions.mapped('name')) or _("Manual Entry")),
+                'label': _("Manufacturing WIP - %(orders_list)s", orders_list=productions.mapped('name') or _("Manual Entry")),
                 'debit': compo_value + overhead_value,
                 'account_id': self.env.company.account_production_wip_account_id.id,
             })
@@ -109,7 +105,7 @@ class MrpWipAccounting(models.TransientModel):
     @api.depends('date')
     def _compute_reversal_date(self):
         for wizard in self:
-            if not wizard.reversal_date or wizard.reversal_date <= wizard.date:
+            if wizard.date and (not wizard.reversal_date or wizard.reversal_date <= wizard.date):
                 wizard.reversal_date = wizard.date + relativedelta(days=1)
             else:
                 wizard.reversal_date = wizard.reversal_date
@@ -119,13 +115,13 @@ class MrpWipAccounting(models.TransientModel):
         for wizard in self:
             # don't update lines when manual (i.e. no applicable MOs) entry
             if not wizard.line_ids or wizard.mo_ids:
-                wizard.line_ids = [Command.clear()] + wizard._get_line_vals(wizard.mo_ids, datetime.combine(wizard.date, time.max))
+                wizard.line_ids = [Command.clear()] + wizard._get_line_vals(wizard.mo_ids, wizard.date and datetime.combine(wizard.date, time.max))
 
     def confirm(self):
         self.ensure_one()
         if self.env.company.currency_id.compare_amounts(sum(self.line_ids.mapped('credit')), sum(self.line_ids.mapped('debit'))) != 0:
             raise UserError(_("Please make sure the total credit amount equals the total debit amount."))
-        if self.reversal_date <= self.date:
+        if self.date and self.reversal_date <= self.date:
             raise UserError(_("Reversal date must be after the posting date."))
         move = self.env['account.move'].sudo().create({
             'journal_id': self.journal_id.id,

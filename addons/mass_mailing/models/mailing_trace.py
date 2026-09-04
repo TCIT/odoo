@@ -57,6 +57,7 @@ class MailingTrace(models.Model):
     _order = 'create_date DESC'
 
     trace_type = fields.Selection([('mail', 'Email')], string='Type', default='mail', required=True)
+    is_test_trace = fields.Boolean('Generated for testing')
     # mail data
     mail_mail_id = fields.Many2one('mail.mail', string='Mail', index='btree_not_null')
     mail_mail_id_int = fields.Integer(
@@ -98,6 +99,7 @@ class MailingTrace(models.Model):
         ("unknown", "Unknown error"),
         # mail
         ("mail_bounce", "Bounce"),
+        ("mail_spam", "Detected As Spam"),
         ("mail_email_invalid", "Invalid email address"),
         ("mail_email_missing", "Missing email address"),
         ("mail_from_invalid", "Invalid from address"),
@@ -113,14 +115,10 @@ class MailingTrace(models.Model):
     links_click_ids = fields.One2many('link.tracker.click', 'mailing_trace_id', string='Links click')
     links_click_datetime = fields.Datetime('Clicked On', help='Stores last click datetime in case of multi clicks.')
 
-    _sql_constraints = [
-        # Required on a Many2one reference field is not sufficient as actually
-        # writing 0 is considered as a valid value, because this is an integer field.
-        # We therefore need a specific constraint check.
-        ('check_res_id_is_set',
-         'CHECK(res_id IS NOT NULL AND res_id !=0 )',
-         'Traces have to be linked to records with a not null res_id.')
-    ]
+    _check_res_id_is_set = models.Constraint(
+        'CHECK(res_id IS NOT NULL AND res_id !=0 )',
+        'Traces have to be linked to records with a not null res_id.',
+    )
 
     @api.depends('trace_type', 'mass_mailing_id')
     def _compute_display_name(self):
@@ -128,11 +126,11 @@ class MailingTrace(models.Model):
             trace.display_name = f'{trace.trace_type}: {trace.mass_mailing_id.name} ({trace.id})'
 
     @api.model_create_multi
-    def create(self, values_list):
-        for values in values_list:
+    def create(self, vals_list):
+        for values in vals_list:
             if 'mail_mail_id' in values:
                 values['mail_mail_id_int'] = values['mail_mail_id']
-        return super(MailingTrace, self).create(values_list)
+        return super().create(vals_list)
 
     def action_view_contact(self):
         self.ensure_one()

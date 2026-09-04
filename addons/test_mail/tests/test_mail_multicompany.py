@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
@@ -9,8 +8,8 @@ from freezegun import freeze_time
 from unittest.mock import patch
 from werkzeug.urls import url_parse
 
-from odoo.addons.mail.models.mail_message import Message
-from odoo.addons.mail.tests.common import MailCommon
+from odoo.addons.mail.models.mail_message import MailMessage
+from odoo.addons.mail.tests.common import MailCommon, mail_new_test_user
 from odoo.addons.test_mail.models.test_mail_corner_case_models import MailTestMultiCompanyWithActivity
 from odoo.addons.test_mail.tests.common import TestRecipients
 from odoo.exceptions import AccessError
@@ -59,6 +58,15 @@ class TestMailMCCommon(MailCommon, TestRecipients):
             'author_id': cls.partner_1.id,
             'message_id': '<123456-openerp-%s-mail.test.gateway@%s>' % (cls.test_record.id, socket.gethostname()),
         })
+
+        cls._create_portal_user()
+        cls.user_portal_c2 = mail_new_test_user(
+            cls.env,
+            groups='base.group_portal',
+            login='portal_user_c2',
+            company_id=cls.company_2.id,
+            name="Portal User C2",
+        )
 
     def setUp(self):
         super().setUp()
@@ -140,14 +148,14 @@ class TestMultiCompanySetup(TestMailMCCommon, HttpCase):
         # Other company (no access)
         # ------------------------------------------------------------
 
-        _original_car = Message._check_access
-        with patch.object(Message, '_check_access',
+        _original_car = MailMessage._check_access
+        with patch.object(MailMessage, '_check_access',
                           autospec=True, side_effect=_original_car) as mock_msg_car:
             with self.assertRaises(AccessError):
                 test_records_mc_c1.message_post(
                     body='<p>Hello</p>',
+                    force_record_name='CustomName',  # avoid ACL on display_name
                     message_type='comment',
-                    record_name='CustomName',  # avoid ACL on display_name
                     reply_to='custom.reply.to@test.example.com',  # avoid ACL in notify_get_reply_to
                     subtype_xmlid='mail.mt_comment',
                 )
@@ -174,26 +182,17 @@ class TestMultiCompanySetup(TestMailMCCommon, HttpCase):
         # now able to post as was notified of parent message
         test_records_mc_c1.message_post(
             body='<p>Hello</p>',
+            force_record_name='CustomName',  # avoid ACL on display_name
             message_type='comment',
             parent_id=initial_message.id,
-            record_name='CustomName',  # avoid ACL on display_name
             reply_to='custom.reply.to@test.example.com',  # avoid ACL in notify_get_reply_to
             subtype_xmlid='mail.mt_comment',
         )
 
-        # now able to post as was notified of parent message
-        attachments = self.env['ir.attachment'].create(
-            self._generate_attachments_data(
-                2, 'mail.compose.message', 0,
-                prefix='Other'
-            )
-        )
         # record_name and reply_to may generate ACLs issues when computed by
         # 'message_post' but should not, hence not specifying them to be sure
         # testing the complete flow
         test_records_mc_c1.message_post(
-            attachments=attachments_data,
-            attachment_ids=attachments.ids,
             body='<p>Hello</p>',
             message_type='comment',
             parent_id=initial_message.id,
@@ -215,8 +214,8 @@ class TestMultiCompanySetup(TestMailMCCommon, HttpCase):
             attachments=attachments_data,
             attachment_ids=attachments.ids,
             body='<p>Hello</p>',
+            force_record_name='CustomName',  # avoid ACL on display_name
             message_type='comment',
-            record_name='CustomName',  # avoid ACL on display_name
             reply_to='custom.reply.to@test.example.com',  # avoid ACL in notify_get_reply_to
             subtype_xmlid='mail.mt_comment',
         )
@@ -249,8 +248,8 @@ class TestMultiCompanySetup(TestMailMCCommon, HttpCase):
                 attachments=attachments_data,
                 attachment_ids=attachments.ids,
                 body='<p>Hello</p>',
+                force_record_name='CustomName',  # avoid ACL on display_name
                 message_type='comment',
-                record_name='CustomName',  # avoid ACL on display_name
                 reply_to='custom.reply.to@test.example.com',  # avoid ACL in notify_get_reply_to
                 subtype_xmlid='mail.mt_comment',
             )
@@ -258,7 +257,6 @@ class TestMultiCompanySetup(TestMailMCCommon, HttpCase):
     def test_recipients_multi_company(self):
         """Test mentioning a partner with no common company."""
         test_records_mc_c2 = self.test_records_mc[1]
-        self._reset_bus()
         with self.assertBus([(self.cr.dbname, "res.partner", self.user_employee_c3.partner_id.id)]):
             test_records_mc_c2.with_user(self.user_employee_c2).with_context(
                 allowed_company_ids=self.company_2.ids
@@ -269,146 +267,96 @@ class TestMultiCompanySetup(TestMailMCCommon, HttpCase):
                 subtype_xmlid="mail.mt_comment",
             )
 
-    @freeze_time('2023-11-22 08:00:00')
-    @users("admin")
-    def test_systray_get_activities(self):
-        original_check_access = MailTestMultiCompanyWithActivity._check_access
-        user_admin = self.user_admin.with_user(self.user_admin)
-        user_employee = self.user_employee.with_user(self.user_employee)
-        company_1_all = user_admin.company_id
-        company_2_admin_only = self.company_2
-        test_model_name = 'mail.test.multi.company.with.activity'
-        activity_type_todo = 'test_mail.mail_act_test_todo'
 
-        def _mock_check_access(records, operation):
-            """ To avoid creating a new test model not accessible by employee user, we modify the access rules. """
-            result = original_check_access(records, operation)
-            if records.env.uid == self.user_admin.id:
-                return result
-            forbidden = result[0] if result else records.browse()
-            forbidden += (records - forbidden).filtered(lambda record: record.create_uid != user_employee)
-            if forbidden:
-                return (forbidden, lambda: AccessError("Nope"))
-            return None
+@tagged('-at_install', 'post_install', 'multi_company', 'mail_controller')
+class TestMultiCompanyControllers(TestMailMCCommon, HttpCase):
 
-        user_records = self.env[test_model_name].with_user(user_employee).sudo().create([
-            {"name": "Test1", "company_id": company_1_all.id},
-            {"name": "Test2", "company_id": company_2_admin_only.id},
-        ])
-        admin_records = self.env[test_model_name].create([
-            {"name": "TestAdmin1", "company_id": company_1_all.id},
-            {"name": "TestAdmin2", "company_id": company_2_admin_only.id},
-            {"name": "TestAdmin3", "company_id": False},
-        ])
-        # Schedule an employee and admin todo activity for each records
-        admin_activities_on_user_records = self.env['mail.activity'].concat(
-            *(record.activity_schedule(activity_type_todo, user_id=user_admin.id) for record in user_records))
-        admin_activities_on_admin_records = self.env['mail.activity'].concat(
-            *(record.activity_schedule(activity_type_todo, user_id=user_admin.id) for record in admin_records))
-        admin_activities_all = admin_activities_on_user_records | admin_activities_on_admin_records
-        user_activities_on_user_records = self.env['mail.activity'].concat(
-            *(record.activity_schedule(activity_type_todo, user_id=user_employee.id) for record in user_records))
-        user_activities_on_admin_records = self.env['mail.activity'].concat(
-            *(record.activity_schedule(activity_type_todo, user_id=user_employee.id) for record in admin_records))
+    def test_mail_thread_data(self):
+        """ Test returned thread data, in MC environment, to test notably MC
+        access issues on partner, ACL support, ... """
+        customer_c3 = self.env["res.partner"].create({
+            "company_id": self.company_3.id,
+            "name": "C3 Customer",
+        })
+        record = self.env["mail.test.multi.company.read"].with_user(self.user_employee_c2).create({
+            "company_id": self.user_employee_c2.company_id.id,
+            "name": "Multi Company Record",
+        })
+        self.assertEqual(record.company_id, self.company_2)
 
-        self.assertTrue((company_1_all | company_2_admin_only) <= user_admin.company_ids)
-        self.assertEqual(company_1_all, user_employee.company_ids)
+        record.message_subscribe(partner_ids=customer_c3.ids)
+        with self.assertRaises(AccessError):
+            customer_c3.with_user(self.user_employee_c2).check_access("read")
 
-        # We test the outcome of systray_get_activities for different couple of user and allowed companies
-        for (user, allowed_company_ids), (expected_other_activities, expected_test_model_activities) in (
-                (
-                        # Admin see only activities of records of allowed companies (company_1).
-                        (user_admin, company_1_all.ids),
-                        (False, admin_activities_on_user_records[0] +
-                                admin_activities_on_admin_records[0] + admin_activities_on_admin_records[2]),
-                ),
-                (
-                        # Admin see only activities of records of allowed companies (company_2).
-                        (user_admin, company_2_admin_only.ids),
-                        (False, admin_activities_on_user_records[1] +
-                                admin_activities_on_admin_records[1] + admin_activities_on_admin_records[2]),
-                ),
-                (
-                        # Admin see only activities of records of allowed companies (company_1 and company_2).
-                        (user_admin, (company_1_all | company_2_admin_only).ids),
-                        (False, admin_activities_all),
-                ),
-                (
-                        # Employee see all activities of records of allowed companies (company_1) he has access to,
-                        # and under "Other activities", see all activities of allowed companies he has not access to
-                        # + activities related to record with company False or he has not access to.
-                        (user_employee, company_1_all.ids),
-                        # No access to admin_records nor the user_records[1] (bound to company_2 he has no access)
-                        (user_activities_on_admin_records + user_activities_on_user_records[1],
-                         user_activities_on_user_records[0]),
-                ),
+        self.authenticate(self.user_employee_c2.login, self.user_employee_c2.login)
+        result = self.make_jsonrpc_request(
+            "/mail/data", {"fetch_params": [["mail.thread", {
+                "thread_id": record.id,
+                "thread_model": record._name,
+                "request_list": ["followers"],
+            }]]},
+        )
+        self.assertEqual(len(result["mail.followers"]), 2)
+        self.assertEqual(result["mail.followers"][0]["partner_id"], customer_c3.id)
+        self.assertEqual(result["mail.thread"][0]["followersCount"], 2)
+        self.assertTrue(result["mail.thread"][0]["hasWriteAccess"])
+        self.assertTrue(result["mail.thread"][0]["hasReadAccess"])
+        self.assertTrue(result["mail.thread"][0]["canPostOnReadonly"])
+
+        # check read / write / post access info
+        for test_user, (has_w, has_r, can_post) in zip(
+            (self.user_portal, self.user_portal_c2, self.user_employee, self.user_admin),
+            (
+                (False, True, True),  # currently not really supported actually, should go through portal controllers
+                (False, True, True),  # currently not really supported actually, should go through portal controllers
+                (False, True, True),
+                (True, True, True),
+            ),
         ):
-            with self.subTest(user=user, allowed_company_ids=allowed_company_ids):
-                self.authenticate(user.login, user.login)
-                with patch.object(MailTestMultiCompanyWithActivity, '_check_access', autospec=True,
-                                  side_effect=_mock_check_access):
-                    activity_groups = self.make_jsonrpc_request("/mail/data", {
-                        "systray_get_activities": True,
-                        "context": {"allowed_company_ids": allowed_company_ids}
-                    })["Store"]["activityGroups"]
-                activity_groups_by_model = {ag["model"]: ag for ag in activity_groups}
-                other_activities_model_name = 'mail.activity'
-                if expected_other_activities:
-                    self.assertIn(other_activities_model_name, activity_groups_by_model)
-                    activity_group = activity_groups_by_model[other_activities_model_name]
-                    self.assertDictEqual(
+            with self.subTest(user_name=test_user.name):
+                self.authenticate(test_user.login, test_user.login)
+                result = self.make_jsonrpc_request(
+                    "/mail/data",
+                    {
+                        "fetch_params": [
+                            [
+                                "mail.thread",
+                                {
+                                    "thread_id": record.id,
+                                    "thread_model": record._name,
+                                    "request_list": ["followers"],
+                                },
+                            ]
+                        ]
+                    },
+                )
+                if test_user in self.user_portal + self.user_portal_c2:
+                    self.assertEqual(list(result), ["mail.thread"])
+                    self.assertEqual(
+                        result["mail.thread"][0],
                         {
-                            "type": "activity",
-                            "view_type": "list",
-                            "overdue_count": 0,
-                            "planned_count": 0,
-                            "today_count": len(expected_other_activities),
-                            "total_count": len(expected_other_activities),
-                            "id": self.env["ir.model"]._get_id(other_activities_model_name),
-                            "model": other_activities_model_name,
-                            "name": "Other activities",
-                            "icon": "/mail/static/description/icon.png",
-                            "activity_ids": set(expected_other_activities.ids),
+                            "id": record.id,
+                            "model": record._name,
+                            "canPostOnReadonly": can_post,
+                            "hasReadAccess": has_r,
+                            "hasWriteAccess": has_w,
                         },
-                        {
-                            **activity_group,
-                            # To compare regardless the order
-                            "activity_ids": set(activity_group['activity_ids']),
-                        }
                     )
                 else:
-                    self.assertNotIn(other_activities_model_name, activity_groups_by_model)
-                self.assertIn(test_model_name, activity_groups_by_model)
-                self.assertDictEqual(
-                    {
-                        "type": "activity",
-                        "view_type": "list",
-                        "overdue_count": 0,
-                        "planned_count": 0,
-                        "today_count": len(expected_test_model_activities),
-                        "total_count": len(expected_test_model_activities),
-                        "id": self.env["ir.model"]._get_id(test_model_name),
-                        "model": test_model_name,
-                        "name": "Test Multi Company Mail With Activity",
-                        "icon": "/base/static/description/icon.png",
-                    },
-                    activity_groups_by_model[test_model_name])
-        # Activities related to not accessible records are in other activities regardless of the allowed companies
-        self.authenticate(user_admin.login, user_admin.login)
-        with patch.object(MailTestMultiCompanyWithActivity, '_check_access', autospec=True,
-                          side_effect=lambda self, operation: (self, lambda: AccessError("Nope"))):
-            for companies in (company_1_all, company_2_admin_only, company_1_all | company_2_admin_only):
-                with self.subTest(companies=companies):
-                    activity_groups = self.make_jsonrpc_request("/mail/data", {
-                        "systray_get_activities": True,
-                        "context": {"allowed_company_ids": companies.ids}
-                    })["Store"]["activityGroups"]
-                    other_activity_group = next(ag for ag in activity_groups if ag['model'] == 'mail.activity')
-                    self.assertEqual(other_activity_group["total_count"], 5)
+                    self.assertEqual(result["mail.thread"][0]["followersCount"], 2)
+                    self.assertEqual(result["mail.thread"][0]["hasWriteAccess"], has_w)
+                    self.assertEqual(result["mail.thread"][0]["hasReadAccess"], has_r)
+                    self.assertEqual(result["mail.thread"][0]["canPostOnReadonly"], can_post)
 
-
-@tagged('-at_install', 'post_install', 'multi_company')
-class TestMultiCompanyRedirect(MailCommon, HttpCase):
+        record.with_user(self.user_admin).message_post(
+            body='Hello!',
+            message_type='comment',
+            subtype_xmlid='mail.mt_comment',
+            partner_ids=[self.partner_employee_c2.id, customer_c3.id],
+        )
+        self.authenticate(self.user_employee_c2.login, self.user_employee_c2.login)
+        messages = self.make_jsonrpc_request("/mail/inbox/messages")
+        self.assertEqual(len(messages['data']['mail.message']), 1)
 
     def test_redirect_to_records(self):
         """ Test mail/view redirection in MC environment, notably cids being
@@ -442,8 +390,7 @@ class TestMultiCompanyRedirect(MailCommon, HttpCase):
                 if not login:
                     path = url_parse(response.url).path
                     self.assertEqual(path, '/web/login')
-                    self.assertTrue('cids' in response.request._cookies)
-                    self.assertEqual(response.request._cookies.get('cids'), str(mc_record.company_id.id))
+                    self.assertNotIn('cids', response.request._cookies)
                 else:
                     user = self.env['res.users'].browse(self.session.uid)
                     self.assertEqual(user.login, login)
@@ -479,7 +426,7 @@ class TestMultiCompanyRedirect(MailCommon, HttpCase):
             }
         ])
 
-        self.authenticate('admin', 'admin')
+        self.authenticate(self.user_admin.login, self.user_admin.login)
         companies = []
         for mc_record in mc_records:
             with self.subTest(mc_record=mc_record):
@@ -519,20 +466,51 @@ class TestMultiCompanyRedirect(MailCommon, HttpCase):
                     self.assertTrue('cids' in response.request._cookies)
                     self.assertEqual(response.request._cookies.get('cids'), str(user_company.id))
 
-        # when being not logged, cids should be added based on
-        # '_get_redirect_suggested_company'
+        # when being not logged, cids should not be added as redirection after
+        # logging will be 'mail/view' again
         for test_record in nothreads:
-            with self.subTest(record_name=test_record.name, user_company=user_company):
+            with self.subTest(record_name=test_record.name):
                 self.authenticate(None, None)
-                self.user_admin.write({'company_id': user_company.id})
                 response = self.url_open(
                     f'/mail/view?model={test_record._name}&res_id={test_record.id}',
                     timeout=15
                 )
                 self.assertEqual(response.status_code, 200)
+                self.assertNotIn('cids', response.request._cookies)
 
-                if test_record.company_id:
-                    self.assertIn('cids', response.request._cookies)
-                    self.assertEqual(response.request._cookies.get('cids'), str(test_record.company_id.id))
-                else:
-                    self.assertNotIn('cids', response.request._cookies)
+    def test_mail_message_post_other_company_with_cids(self):
+        """
+        Ensure that a user can post a message on a thread belonging to another
+        company when:
+
+        - The user has access to both companies via `company_ids`.
+        - The active company context only includes the other company.
+        - The target record belongs to a different company than the active one.
+
+        This reproduces the scenario where a user receives a notification from a
+        record in Company A while being active in Company B, and attempts to reply
+        from the inbox.
+        """
+        self.user_employee_c2.write({'company_ids': [(6, 0, [self.user_employee.company_id.id, self.company_2.id])]})
+        record_c1 = self.env["mail.test.multi.company"].sudo().create({
+            "name": "Thread in C1",
+            "company_id": self.user_employee.company_id.id,  # company 1
+        })
+        self.authenticate('employee_c2', 'employee_c2')
+        self.opener.cookies.set('cids', str(self.company_2.id))
+        payload = {
+            "thread_model": record_c1._name,
+            "thread_id": record_c1.id,
+            "post_data": {
+                "body": "<p>Reply from inbox</p>",
+                "message_type": "comment",
+                "subtype_xmlid": "mail.mt_comment",
+            },
+            "context": {
+                "allowed_company_ids": self.company_2.ids,
+            }
+        }
+        result = self.make_jsonrpc_request("/mail/message/post", payload)
+        message_data = result["store_data"]["mail.message"][0]
+        self.assertEqual(message_data["body"], ["markup", "<p>Reply from inbox</p>"])
+        self.assertTrue(record_c1.message_ids.filtered(lambda m: m.id == message_data["id"]))

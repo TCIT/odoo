@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from ast import literal_eval
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class WebsiteControllerPage(models.Model):
@@ -12,11 +13,12 @@ class WebsiteControllerPage(models.Model):
     ]
     _description = 'Model Page'
     _order = 'website_id, id DESC'
-    _sql_constraints = [
-        ('unique_name_slugified', 'UNIQUE(name_slugified)', 'url should be unique')
-    ]
+    _unique_name_slugified = models.Constraint(
+        'UNIQUE(name_slugified)',
+        'url should be unique',
+    )
 
-    view_id = fields.Many2one('ir.ui.view', string='Listing view', required=True, ondelete="cascade")
+    view_id = fields.Many2one('ir.ui.view', string='Listing view', required=True, index=True, ondelete="cascade")
     record_view_id = fields.Many2one('ir.ui.view', string='Record view', ondelete="cascade")
     menu_ids = fields.One2many('website.menu', 'controller_page_id', 'Related Menus')
 
@@ -25,12 +27,19 @@ class WebsiteControllerPage(models.Model):
     name = fields.Char(string="The name is used to generate the URL and is shown in the browser title bar",
         compute="_compute_name",
         inverse="_inverse_name",
+        precompute=True,
         required=True,
         store=True)
     # Bindings to model/records, to expose the page on the website.
     # Route: /model/<string:page_name_slugified>
-    name_slugified = fields.Char(compute="_compute_name_slugified", store=True,
-        string="URL", help="The name of the page usable in a URL", inverse="_inverse_name_slugified")
+    name_slugified = fields.Char(
+        compute="_compute_name_slugified",
+        inverse="_inverse_name_slugified",
+        precompute=True,
+        store=True,
+        string="URL",
+        help="The name of the page usable in a URL",
+    )
     url_demo = fields.Char(string="Demo URL", compute="_compute_url_demo")
 
     record_domain = fields.Char(string="Domain", help="Domain to restrict records that can be viewed publicly")
@@ -42,10 +51,12 @@ class WebsiteControllerPage(models.Model):
         default="grid",
     )
 
-    @api.constrains('view_id', 'model_id', "model")
     def _check_user_has_model_access(self):
-        for record in self:
-            self.env[record.model_id.model].check_access('read')
+        for model_id in self.mapped("model_id"):
+            Model = self.env[model_id.model]
+            if Model._transient or Model._abstract or not Model._auto:
+                raise ValidationError(self.env._("A page must be set to display a concrete model."))
+            Model.check_access('read')
 
     @api.depends("view_id")
     def _compute_name(self):
@@ -81,6 +92,12 @@ class WebsiteControllerPage(models.Model):
     def _default_is_published(self):
         return False
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super().create(vals_list)
+        res._check_user_has_model_access()
+        return res
+
     def write(self, vals):
         res = super().write(vals)
         for rec in self:
@@ -88,6 +105,8 @@ class WebsiteControllerPage(models.Model):
                 "url": f"/model/{rec.name_slugified}",
                 "name": rec.name,
             })
+        if "model_id" in vals:
+            self._check_user_has_model_access()
         return res
 
     def unlink(self):
@@ -101,8 +120,9 @@ class WebsiteControllerPage(models.Model):
         self = self - views_to_delete.controller_page_ids
         views_to_delete.unlink()
 
-        # Make sure website._get_menu_ids() will be recomputed
-        self.env.registry.clear_cache()
+        # Make sure website.is_menu_cache_disabled() will be recomputed
+        if self:
+            self.env.registry.clear_cache('templates')
         return super().unlink()
 
     def open_website_url(self):

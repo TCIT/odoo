@@ -21,21 +21,30 @@
                     context="props.context"
                     getDomain.bind="getDomain"
                     isToMany="true"
-                    getOptionClassnames.bind="getOptionClassnames"
-                />
+                    specification="specification"
+                >
+                    <t t-set-slot="autoCompleteItem" t-slot-scope="autoCompleteItemScope">
+                        <t t-call="{{ constructor.optionTemplate }}"/>
+                    </t>
+                </Many2XAutocomplete>
             </div>
         </div>
+    </t>
+
+    <t t-name="web.Many2ManyTagsAvatarField.option">
+        <span class="o_avatar_many2x_autocomplete o_avatar d-flex align-items-center">
+            <img t-if="autoCompleteItemScope.record.id" class="rounded me-1"
+                t-attf-src="/web/image/{{relation}}/{{autoCompleteItemScope.record.id}}/avatar_128"/>
+            <span t-att-class="{ 'fw-bold': isSelected(autoCompleteItemScope.record) }" class="text-truncate" t-out="autoCompleteItemScope.label"/>
+        </span>
     </t>
 
     <t t-name="web.KanbanMany2ManyTagsAvatarFieldTagsList" t-inherit="web.TagsList" t-inherit-mode="primary">
         <xpath expr="//t[@t-foreach='visibleTags']" position="before">
             <t t-if="canDisplayQuickAssignAvatar">
-                <a t-on-click.stop.prevent="openPopover" tabIndex="-1" href="#" title="Assign"
-                   aria-label="Assign" class="o_quick_assign fa fa-user-plus o_m2m_avatar btn-link d-flex align-items-center text-dark" role="button"/>
+                <a t-on-click.stop.prevent="openPopover" tabIndex="-1" href="#" data-tooltip="Assign"
+                   aria-label="Assign" class="o_quick_assign fa o_m2m_avatar btn-link d-flex align-items-center text-dark" t-attf-class="{{ props.tags.length ? 'fa-pencil' : 'fa-user-plus' }}" role="button"/>
             </t>
-        </xpath>
-        <xpath expr="//span[hasclass('o_m2m_avatar_empty')]" position="attributes">
-            <attribute name="t-on-click.stop.prevent">openPopover</attribute>
         </xpath>
     </t>
 

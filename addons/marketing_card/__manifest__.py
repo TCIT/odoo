@@ -1,7 +1,7 @@
 {
     'name': 'Marketing Card',
     'version': '1.1',
-    'category': 'Marketing/Social Marketing',
+    'category': 'Marketing/Marketing Card',
     'summary': 'Generate dynamic shareable cards',
     'depends': ['link_tracker', 'mass_mailing', 'website'],
     'data': [
@@ -27,5 +27,6 @@
     },
     'application': True,
     'installable': True,
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

@@ -13,6 +13,7 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'co_puc_220500',
             'property_account_expense_categ_id': 'co_puc_610000',
             'property_account_income_categ_id': 'co_puc_417500',
+            'property_stock_valuation_account_id': 'co_puc_140500',
         }
 
     @template('co', 'res.company')
@@ -33,5 +34,18 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_purchase_tax_id': 'l10n_co_tax_1',
                 'default_cash_difference_income_account_id': 'co_puc_428000',
                 'default_cash_difference_expense_account_id': 'co_puc_532000',
+                'expense_account_id': 'co_puc_610000',
+                'income_account_id': 'co_puc_417500',
+                'account_stock_journal_id': 'inventory_valuation',
+                'account_stock_valuation_id': 'co_puc_140500',
+            },
+        }
+
+    @template('co', 'account.account')
+    def _get_co_account_account(self):
+        return {
+            'co_puc_140500': {
+                'account_stock_expense_id': 'co_puc_621000',
+                'account_stock_variation_id': 'co_puc_146501',
             },
         }

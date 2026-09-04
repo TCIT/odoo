@@ -2,6 +2,7 @@
 
 from odoo.tests import Form, tagged
 from odoo import Command
+from odoo.exceptions import RedirectWarning
 
 from odoo.addons.analytic.tests.common import AnalyticCommon
 
@@ -19,11 +20,11 @@ class TestAnalyticAccount(AnalyticCommon):
         cls.distribution_1, cls.distribution_2 = cls.env['account.analytic.distribution.model'].create([
             {
                 'partner_id': cls.partner_a.id,
-                'analytic_distribution': {cls.analytic_account_3.id: 100}
+                'analytic_distribution': {cls.analytic_account_3.id: 100},  # analytic_plan_2
             },
             {
                 'partner_id': cls.partner_b.id,
-                'analytic_distribution': {cls.analytic_account_2.id: 100}
+                'analytic_distribution': {cls.analytic_account_2.id: 100},  # analytic_plan_1
             },
         ])
         cls.company_b_branch = cls.env['res.company'].create({'name': "B Branch", 'parent_id': cls.company.id})
@@ -92,9 +93,9 @@ class TestAnalyticAccount(AnalyticCommon):
 
     def test_order_analytic_distribution_model(self):
         """ Test the distribution returned with company field"""
-        distribution_3 = self.env['account.analytic.distribution.model'].create({
+        self.env['account.analytic.distribution.model'].create({  # distribution_3
             'partner_id': self.partner_a.id,
-            'analytic_distribution': {self.analytic_account_1.id: 100},
+            'analytic_distribution': {self.analytic_account_1.id: 100},  # analytic_plan_1
             'company_id': self.company.id,
         })
         distribution_json = self.env['account.analytic.distribution.model']._get_distribution({})
@@ -104,7 +105,8 @@ class TestAnalyticAccount(AnalyticCommon):
             "partner_id": self.partner_a.id,
             "company_id": self.company.id,
         })
-        self.assertEqual(distribution_json, distribution_3.analytic_distribution | self.distribution_1.analytic_distribution,
+
+        self.assertEqual(distribution_json, {f"{self.analytic_account_1.id},{self.analytic_account_3.id}": 100},
                          "Distribution 3 & 1 should be given, as the company and partner are specified in the models")
 
         distribution_json = self.env['account.analytic.distribution.model']._get_distribution({
@@ -119,9 +121,9 @@ class TestAnalyticAccount(AnalyticCommon):
             'category_id': [Command.set([partner_category.id])]
         })
 
-        distribution_4 = self.env['account.analytic.distribution.model'].create({
+        self.env['account.analytic.distribution.model'].create({  # distribution_4
             'partner_id': self.partner_a.id,
-            'analytic_distribution': {self.analytic_account_1.id: 100, self.analytic_account_2.id: 100},
+            'analytic_distribution': {self.analytic_account_1.id: 100, self.analytic_account_2.id: 100},  # analytic_plan_1, analytic_plan_1
             'partner_category_id': partner_category.id,
             'sequence': 1,
         })
@@ -132,8 +134,12 @@ class TestAnalyticAccount(AnalyticCommon):
             "partner_category_id": partner_category.ids,
         })
 
-        self.assertEqual(distribution_json, distribution_4.analytic_distribution | self.distribution_1.analytic_distribution,
-                         "Distribution 4 & 1 should be given based on sequence")
+        self.assertEqual(distribution_json, {
+            f"{self.analytic_account_1.id},{self.analytic_account_3.id}": 50,
+            f"{self.analytic_account_2.id},{self.analytic_account_3.id}": 50,
+            f"{self.analytic_account_1.id}": 50,
+            f"{self.analytic_account_2.id}": 50,
+        }, "Distribution 4 & 1 should be given based on sequence")
 
     def test_analytic_plan_account_child(self):
         """
@@ -187,7 +193,7 @@ class TestAnalyticAccount(AnalyticCommon):
         analyst_partner = self.env['res.partner'].create({'name': 'analyst'})
         analyst = self.env['res.users'].create({
             'login': 'analyst',
-            'groups_id': [Command.set(self.env.ref('analytic.group_analytic_accounting').ids)],
+            'group_ids': [Command.set(self.env.ref('analytic.group_analytic_accounting').ids)],
             'partner_id': analyst_partner.id
         })
         plan = self.env['account.analytic.plan'].with_user(analyst).create({'name': 'test plan'})
@@ -210,3 +216,151 @@ class TestAnalyticAccount(AnalyticCommon):
             'amount': 100,
             'company_id': self.company_b_branch.id,
         })
+
+    def test_change_plan(self):
+        """Changing the plan of an account updates columns of the analytic lines."""
+        plan_1_col = self.analytic_plan_1._column_name()
+        plan_2_col = self.analytic_plan_2._column_name()
+        self.assertNotEqual(plan_1_col, plan_2_col)
+        line = self.env['account.analytic.line'].create({
+            'name': 'test',
+            plan_1_col: self.analytic_account_1.id,
+        })
+        self.analytic_account_1.plan_id = self.analytic_plan_2
+        self.assertRecordValues(line, [{
+            plan_1_col: False,
+            plan_2_col: self.analytic_account_1.id,
+        }])
+
+    def test_change_plan_conflict(self):
+        """Don't allow changing the plan if some lines already have values set for that plan."""
+        plan_1_col = self.analytic_plan_1._column_name()
+        plan_2_col = self.analytic_plan_2._column_name()
+        self.assertNotEqual(plan_1_col, plan_2_col)
+        self.env['account.analytic.line'].create({
+            'name': 'test',
+            plan_1_col: self.analytic_account_1.id,
+            plan_2_col: self.analytic_account_2.id,
+        })
+        with self.assertRaisesRegex(RedirectWarning, "wipe out your current data"):
+            self.analytic_account_1.plan_id = self.analytic_plan_2
+
+    def test_change_plan_no_conflict(self):
+        """Exception for the previous test if it was already the correct value that is set."""
+        plan_1_col = self.analytic_plan_1._column_name()
+        plan_2_col = self.analytic_plan_2._column_name()
+        self.assertNotEqual(plan_1_col, plan_2_col)
+        line = self.env['account.analytic.line'].create({
+            'name': 'test',
+            plan_1_col: self.analytic_account_1.id,
+            plan_2_col: self.analytic_account_1.id,
+        })
+        self.analytic_account_1.plan_id = self.analytic_plan_2
+        self.assertRecordValues(line, [{
+            plan_1_col: False,
+            plan_2_col: self.analytic_account_1.id,
+        }])
+
+    def test_change_parent_plan(self):
+        """Changing the parent of a plan updates account columns of the analytic lines."""
+        plan_1_col = self.analytic_plan_1._column_name()
+        plan_2_col = self.analytic_plan_2._column_name()
+        line = self.env['account.analytic.line'].create({
+            'name': 'test',
+            plan_1_col: self.analytic_account_1.id,
+        })
+
+        # Setting a parent plan should lead to the line having analytic_account_1 under Plan 2
+        self.analytic_plan_1.parent_id = self.analytic_plan_2
+        self.assertRecordValues(line, [{
+            plan_2_col: self.analytic_account_1.id,
+        }])
+        # plan_1_col should no longer be a field of the analytic line
+        self.assertNotIn(plan_1_col, line)
+
+        # Removing the parent plan should fully reverse the analytic line
+        self.analytic_plan_1.parent_id = False
+        self.assertRecordValues(line, [{
+            plan_1_col: self.analytic_account_1.id,
+            plan_2_col: False,
+        }])
+
+    def test_change_parent_plan_conflict(self):
+        """
+        Test case where changing the parent plan leads to more than one account under the same
+        plan in an analytic line.
+        """
+        plan_1_col = self.analytic_plan_1._column_name()
+        plan_2_col = self.analytic_plan_2._column_name()
+        self.env['account.analytic.line'].create({
+            'name': 'test',
+            plan_1_col: self.analytic_account_1.id,
+            plan_2_col: self.analytic_account_3.id,
+        })
+        with self.assertRaisesRegex(RedirectWarning, "Making this change would wipe out"):
+            self.analytic_plan_1.parent_id = self.analytic_plan_2
+
+    def test_change_parent_plan_with_intermediate(self):
+        """All the accounts are updated even if not direct members of the plan changed."""
+        plan_1_col = self.analytic_plan_1._column_name()
+        plan_2_col = self.analytic_plan_2._column_name()
+        intermediate_plan = self.env['account.analytic.plan'].create({
+            'name': 'Mid level',
+            'parent_id': self.analytic_plan_1.id,
+        })
+        self.analytic_account_1.plan_id = intermediate_plan
+        line = self.env['account.analytic.line'].create({
+            'name': 'test',
+            plan_1_col: self.analytic_account_1.id,
+        })
+
+        # Setting a parent plan should lead to the line having analytic_account_1 under Plan 2
+        self.analytic_plan_1.parent_id = self.analytic_plan_2
+        self.assertRecordValues(line, [{
+            plan_2_col: self.analytic_account_1.id,
+        }])
+
+        # Removing the parent plan should fully reverse the analytic line
+        self.analytic_plan_1.parent_id = False
+        self.assertRecordValues(line, [{
+            plan_1_col: self.analytic_account_1.id,
+            plan_2_col: False,
+        }])
+
+    def test_update_analytic_distribution_clean_all_plans(self):
+        """
+        This test ensures no IndexError occurs and no changes are made when clearing all percentages
+        in the analytic distribution wizard.
+        """
+        plan_1_col = self.analytic_plan_1._column_name()
+        plan_2_col = self.analytic_plan_2._column_name()
+
+        line = self.env['account.analytic.line'].create({
+            'name': 'Test line',
+            plan_1_col: self.analytic_account_1.id,
+            plan_2_col: self.analytic_account_3.id,
+        })
+
+        # Simulate the wizard cleaning all percentages: update all plans but provide no values
+        # This results in an empty final distribution in the inverse method.
+        line.write({
+            'analytic_distribution': {
+                '__update__': [plan_1_col, plan_2_col],
+                # No other entries -> cleaned percentages
+            }
+        })
+
+        # No crash and the line remains unchanged (no lines created/deleted, same accounts)
+        self.assertTrue(line.exists(), "The analytic line should still exist after update")
+        self.assertRecordValues(line, [{
+            plan_1_col: self.analytic_account_1.id,
+            plan_2_col: self.analytic_account_3.id,
+        }])
+
+    def test_change_sys_param(self):
+        ''' Test if changing project_plan param updates dynamic fields on account.analytic.line '''
+        current_project_plan, _other_plans = self.env['account.analytic.plan']._get_all_plans()
+        current_project_plan.write({'name': 'Old Project Plan'})
+        self.analytic_account_1.write({'company_id': self.company.id})
+        self.env['ir.config_parameter'].set_param('analytic.project_plan', self.analytic_plan_2.id)
+        self.analytic_account_1._check_company_consistency()

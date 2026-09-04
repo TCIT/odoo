@@ -142,8 +142,8 @@ class GetMetadataDialog extends Component {
         this.state.xmlid = metadata.xmlid;
         this.state.xmlids = metadata.xmlids;
         this.state.noupdate = metadata.noupdate;
-        this.state.creator = formatMany2one(metadata.create_uid);
-        this.state.lastModifiedBy = formatMany2one(metadata.write_uid);
+        this.state.creator = formatMany2one(metadata.create_uid && { display_name: metadata.create_uid[1] });
+        this.state.lastModifiedBy = formatMany2one(metadata.write_uid && { display_name: metadata.write_uid[1] });
         this.state.createDate = formatDateTime(deserializeDateTime(metadata.create_date));
         this.state.writeDate = formatDateTime(deserializeDateTime(metadata.write_date));
     }
@@ -170,6 +170,20 @@ export function viewMetadata({ component, env }) {
 
 debugRegistry.category("form").add("viewMetadata", viewMetadata);
 
+function sortKeysDeep(obj) {
+    if (Array.isArray(obj)) {
+        return obj.map(sortKeysDeep);
+    } else if (obj && typeof obj === "object") {
+        return Object.keys(obj)
+            .sort()
+            .reduce((result, key) => {
+                result[key] = sortKeysDeep(obj[key]);
+                return result;
+            }, {});
+    }
+    return obj;
+}
+
 // -----------------------------------------------------------------------------
 // View Raw Record Data
 // -----------------------------------------------------------------------------
@@ -188,12 +202,12 @@ class RawRecordDialog extends Component {
     };
     get content() {
         const record = this.props.record;
-        return JSON.stringify(record, Object.keys(record).sort(), 2);
+        return JSON.stringify(sortKeysDeep(record), null, 2);
     }
 }
 
 export function viewRawRecord({ component, env }) {
-    const { resId, resModel } = component.model.config;
+    const { resId, resModel, fields } = component.model.config;
     if (!resId) {
         return null;
     }
@@ -202,7 +216,11 @@ export function viewRawRecord({ component, env }) {
         type: "item",
         description,
         callback: async () => {
-            const records = await component.model.orm.read(resModel, [resId]);
+            const serializableFields = Object.entries(fields).reduce(
+                (acc, [k, v]) => (v.type !== "binary" && !v.propertyName ? acc.concat(k) : acc),
+                []
+            );
+            const records = await component.model.orm.read(resModel, [resId], serializableFields);
             env.services.dialog.add(RawRecordDialog, {
                 title: _t("Data: %(model)s(%(id)s)", { model: resModel, id: resId }),
                 record: records[0],
@@ -302,12 +320,18 @@ class SetDefaultDialog extends Component {
     display(fieldInfo, value) {
         let displayed = value;
         if (value && fieldInfo.type === "many2one") {
-            displayed = value[1];
-            value = value[0];
+            displayed = value.display_name;
+            value = value.id;
         } else if (value && fieldInfo.type === "selection") {
             displayed = fieldInfo.selection.find((option) => {
                 return option[0] === value;
             })[1];
+        }
+        if (
+            (typeof displayed === "string" || displayed instanceof String) &&
+            displayed.length > 60
+        ) {
+            displayed = displayed.slice(0, 57) + "...";
         }
         return [value, displayed];
     }

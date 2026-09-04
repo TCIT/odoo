@@ -1,9 +1,11 @@
-from datetime import date
+from datetime import date, timedelta
 
 from freezegun import freeze_time
 
 from odoo.exceptions import ValidationError
+from odoo.fields import Date, Datetime
 from odoo.tests import Form, tagged, users
+from odoo.tools import format_date
 
 from odoo.addons.hr_holidays.tests.common import TestHrHolidaysCommon
 
@@ -16,7 +18,7 @@ class TestAllocations(TestHrHolidaysCommon):
         cls.leave_type = cls.env['hr.leave.type'].create({
             'name': 'Time Off with no validation for approval',
             'time_type': 'leave',
-            'requires_allocation': 'yes',
+            'requires_allocation': True,
             'allocation_validation_type': 'no_validation',
         })
         cls.department = cls.env['hr.department'].create({
@@ -34,7 +36,7 @@ class TestAllocations(TestHrHolidaysCommon):
 
         cls.leave_type_paid = cls.env['hr.leave.type'].create({
             'name': 'Paid Time Off',
-            'requires_allocation': 'yes',
+            'requires_allocation': True,
             'allocation_validation_type': 'no_validation',
         })
 
@@ -104,6 +106,27 @@ class TestAllocations(TestHrHolidaysCommon):
 
         num_of_allocations = self.env['hr.leave.allocation'].search_count([('employee_id', '=', self.employee.id)])
         self.assertEqual(num_of_allocations, 1)
+
+    @users('Titus')
+    def test_create_group_allocation_without_hr_right(self):
+        employee_1, employee_2 = self.env['hr.employee'].sudo().create([
+            {
+                'name': 'Emp1',
+                'leave_manager_id': self.user_responsible_id,
+            }, {
+                'name': 'Emp2',
+                'leave_manager_id': self.user_responsible_id,
+            },
+        ])
+        allocation_wizard = self.env['hr.leave.allocation.generate.multi.wizard'].create({
+            'holiday_status_id': self.leave_type.id,
+            'date_from': date(2019, 5, 6),
+            'date_to': date(2019, 5, 6),
+            'employee_ids': (employee_1 + employee_2).ids,
+            'duration': 2,
+            'allocation_type': 'regular',
+        })
+        allocation_wizard.action_generate_allocations()
 
     def test_allocation_category(self):
         category_allocation = self.env['hr.leave.allocation.generate.multi.wizard'].create({
@@ -206,6 +229,30 @@ class TestAllocations(TestHrHolidaysCommon):
         self.assertEqual(employee_allocation.number_of_hours_display, 10)
         self.assertEqual(employee_emp_allocation.number_of_hours_display, 10)
 
+    def test_allocation_hours_recompute_on_schedule_change(self):
+        self.leave_type.request_unit = 'hour'
+        self.employee.resource_calendar_id = self.employee_emp.resource_calendar_id  # 8 hours/day
+
+        allocation = self.env['hr.leave.allocation'].create({
+            'name': 'Hours Allocation',
+            'holiday_status_id': self.leave_type.id,
+            'employee_id': self.employee.id,
+            'allocation_type': 'regular',
+            'number_of_days': 7,  # 7 days * 8 hours/day = 56 hours
+        })
+        self.assertEqual(allocation.number_of_hours_display, 56)
+
+        # Moving the employee to a 7 hours/day schedule must recompute the
+        # allocation duration so the accrued hours stay unchanged.
+        self.employee.resource_calendar_id = self.calendar_35h
+        self.assertEqual(allocation.number_of_days, 8)  # 56 hours / 7 hours/day
+        self.assertEqual(allocation.number_of_hours_display, 56)
+
+        # A later accrual adds time at the new schedule (number_of_days += days).
+        # The hours accrued under the old schedule must not be revalued.
+        allocation.number_of_days += 8  # +8 days * 7 hours/day = +56 hours
+        self.assertEqual(allocation.number_of_hours_display, 112)  # 56 + 56
+
     def change_allocation_type_hours(self):
         self.leave_type.write({
             'name': 'Custom Time Off Test',
@@ -235,7 +282,7 @@ class TestAllocations(TestHrHolidaysCommon):
             'employee_id': self.employee.id,
             'date_from': date(2024, 1, 1),
         })
-        allocation.action_validate()
+        allocation.action_approve()
 
         leave_request = self.env['hr.leave'].create({
             'name': 'Leave Request',
@@ -261,7 +308,7 @@ class TestAllocations(TestHrHolidaysCommon):
             'date_from': date(2024, 1, 1),
             'date_to': date(2024, 1, 30),
         })
-        allocation_one.action_validate()
+        allocation_one.action_approve()
 
         # Creating the second overlapping allocation
         allocation_two = self.env['hr.leave.allocation'].create({
@@ -272,7 +319,7 @@ class TestAllocations(TestHrHolidaysCommon):
             'date_from': date(2024, 1, 20),
             'date_to': date(2024, 2, 20),
         })
-        allocation_two.action_validate()
+        allocation_two.action_approve()
 
         # Creating a leave request consuming days from both allocations
         leave_request = self.env['hr.leave'].create({
@@ -298,7 +345,7 @@ class TestAllocations(TestHrHolidaysCommon):
         shown correctly in the dropdown menu or not
         :return:
         """
-        leave_type = self.env.ref('hr_holidays.holiday_status_comp')
+        leave_type = self.env.ref('hr_holidays.leave_type_compensatory_days')
         allocation = self.env['hr.leave.allocation'].sudo().create({
             'name': 'Alloc',
             'employee_id': self.employee.id,
@@ -308,7 +355,7 @@ class TestAllocations(TestHrHolidaysCommon):
             'date_from': date(2024, 1, 1),
             'date_to': date(2024, 4, 30)
         })
-        allocation.action_validate()
+        allocation.action_approve()
 
         second_allocation = self.env['hr.leave.allocation'].sudo().create({
             'name': 'Alloc2',
@@ -319,12 +366,16 @@ class TestAllocations(TestHrHolidaysCommon):
             'date_from': date(2024, 5, 1),
             'date_to': date(2024, 12, 31)
         })
-        second_allocation.action_validate()
+        second_allocation.action_approve()
+
+        # _compute_leaves depends on the context that is getting cleared
+        self.env['hr.leave.type'].invalidate_model(['max_leaves', 'leaves_taken', 'virtual_remaining_leaves'])
         result = self.env['hr.leave.type'].with_context(
             employee_id=self.employee.id,
+            leave_date_from='2024-08-18 06:00:00',  # for _compute_leaves
             default_date_from='2024-08-18 06:00:00',
             default_date_to='2024-08-18 15:00:00'
-        ).name_search(args=[['id', '=', leave_type.id]])
+        ).name_search(domain=[['id', '=', leave_type.id]])
         self.assertEqual(result[0][1], 'Compensatory Days (9 remaining out of 9 days)')
 
     def test_allocation_hourly_leave_type(self):
@@ -341,12 +392,12 @@ class TestAllocations(TestHrHolidaysCommon):
         leave_type = self.env['hr.leave.type'].create({
             'name': 'Hourly Leave Type',
             'time_type': 'leave',
-            'requires_allocation': 'yes',
+            'requires_allocation': True,
             'allocation_validation_type': 'no_validation',
             'request_unit': 'hour',
         })
 
-        with Form(self.env['hr.leave.allocation']) as allocation_form:
+        with Form(self.env['hr.leave.allocation'].with_user(self.user_hrmanager)) as allocation_form:
             allocation_form.allocation_type = 'regular'
             allocation_form.employee_id = employee
             allocation_form.holiday_status_id = leave_type
@@ -354,3 +405,303 @@ class TestAllocations(TestHrHolidaysCommon):
             allocation = allocation_form.save()
 
         self.assertEqual(allocation.number_of_hours_display, 10.0)
+
+    def test_automatic_allocation_type(self):
+        """
+        Make sure that an allocation with an accrual plan imported will automatically set the allocation_type to 'accrual'
+        """
+        leave_type = self.env['hr.leave.type'].create({
+            'name': 'Hourly Leave Type',
+            'time_type': 'leave',
+            'requires_allocation': 'yes',
+            'allocation_validation_type': 'no_validation',
+            'request_unit': 'hour',
+        })
+
+        accrual_plan = self.env['hr.leave.accrual.plan'].with_context(tracking_disable=True).create({
+            'name': 'Accrual Plan For Test',
+        })
+
+        allocation = self.env['hr.leave.allocation'].create({
+            'name': 'Alloc with accrual plan',
+            'employee_id': self.employee.id,
+            'holiday_status_id': leave_type.id,
+            'accrual_plan_id': accrual_plan.id,
+        })
+
+        self.assertEqual(allocation.allocation_type, 'accrual')
+
+        allocation.update({
+            'accrual_plan_id': False,
+        })
+
+        self.assertEqual(allocation.allocation_type, 'regular')
+
+    def test_create_allocation_from_company_with_no_employee_for_current_user(self):
+        """
+            This test makes sure that the allocation can be created if the current company doesn't have an employee
+            linked to the loggedIn user.
+        """
+        self.user_hrmanager.employee_id = False
+        allocation_form = Form(self.env['hr.leave.allocation'].with_user(self.user_hrmanager))
+        self.assertFalse(allocation_form.employee_id)
+        allocation_form.employee_id = self.employee
+        allocation_form.holiday_status_id = self.leave_type
+        allocation = allocation_form.save()
+        self.assertTrue(allocation)
+
+    def test_hr_leave_allocation_balance(self):
+        """
+            This test makes sure that the time off balance showed on the time off management kanban card is correct
+        """
+        leave_type = self.env.ref('hr_holidays.leave_type_compensatory_days')
+
+        invalid_allocation = self.env['hr.leave.allocation'].sudo().create({
+            'name': 'Alloc',
+            'employee_id': self.employee.id,
+            'holiday_status_id': leave_type.id,
+            'number_of_days': 5,
+            'allocation_type': 'regular',
+            'date_from': date(2024, 1, 1),
+            'date_to': date(2024, 4, 30)
+        })
+        invalid_allocation.action_approve()
+
+        first_valid_allocation = self.env['hr.leave.allocation'].sudo().create({
+            'name': 'Alloc',
+            'employee_id': self.employee.id,
+            'holiday_status_id': leave_type.id,
+            'number_of_days': 10,
+            'allocation_type': 'regular',
+            'date_from': date(2024, 1, 1),
+            'date_to': False
+        })
+        first_valid_allocation.action_approve()
+
+        second_valid_allocation = self.env['hr.leave.allocation'].sudo().create({
+            'name': 'Alloc',
+            'employee_id': self.employee.id,
+            'holiday_status_id': leave_type.id,
+            'number_of_days': 12,
+            'allocation_type': 'regular',
+            'date_from': date(2025, 1, 1),
+            'date_to': date.today()
+        })
+        second_valid_allocation.action_approve()
+
+        leave = self.env['hr.leave'].create({
+            'employee_id': self.employee.id,
+            'holiday_status_id': leave_type.id,
+            'request_date_from': date(2025, 1, 1),
+            'request_date_to': date(2025, 1, 10)
+        })
+        leave._action_validate()
+
+        self.assertEqual(leave.max_leaves, 22)
+        self.assertEqual(leave.virtual_remaining_leaves, 14)
+
+    def test_allocation_request_with_date_from(self):
+        allocation = self.env['hr.leave.allocation'].with_user(self.user_hrmanager)
+        allocation_view = 'hr_holidays.hr_leave_allocation_view_form'
+        with self.assertRaises(AssertionError):
+            with Form(allocation, allocation_view) as allocation_form:
+                allocation_form.holiday_status_id = self.leave_type
+                allocation_form.date_from = False
+
+        with Form(allocation, allocation_view) as allocation_form:
+            date_from = Date.today()
+            allocation_form.holiday_status_id = self.leave_type
+            allocation_form.date_from = date_from
+
+            self.assertEqual(allocation_form.date_from, date_from)
+            self.assertEqual(
+                allocation_form.name_validity,
+                "%(allocation_name)s (from %(date_from)s to No Limit)" % {
+                    'allocation_name': allocation_form.name,
+                    'date_from': format_date(allocation.env, Date.context_today(allocation, Datetime.to_datetime(allocation_form.date_from))),
+                },
+                "The name_validity field was not set correctly."
+            )
+
+    def test_leave_allocation_by_removing_employee(self):
+        """
+        Test that creating a leave allocation and then removing the employee will
+        not raise an error
+        """
+        self.leave_type.request_unit = "hour"
+        with self.assertRaises(AssertionError):  # AssertionError raised by Form as employee is required
+            with Form(self.env['hr.leave.allocation']) as allocation_form:
+                allocation_form.allocation_type = "regular"
+                allocation_form.holiday_status_id = self.leave_type
+                allocation_form.number_of_hours_display = 10
+                allocation_form.employee_id = self.env["hr.employee"]
+            allocation_form.save()
+
+    def test_employee_holidays_archived_display(self):
+        admin_user = self.env.ref('base.user_admin')
+
+        employee = self.env['hr.employee'].create({
+            'name': 'test_employee',
+        })
+
+        leave_type = self.env['hr.leave.type'].with_user(admin_user)
+
+        holidays_type_1 = leave_type.create({
+            'name': 'archived_holidays',
+            'allocation_validation_type': 'no_validation',
+        })
+
+        self.env['hr.leave.allocation'].create({
+            'name': 'archived_holidays_allocation',
+            'employee_id': employee.id,
+            'holiday_status_id': holidays_type_1.id,
+            'number_of_days': 10,
+            'state': 'confirm',
+            'date_from': '2022-01-01',
+        })
+
+        self.assertEqual(employee.allocation_display, '10')
+
+        holidays_type_1.active = False
+        employee._compute_allocation_remaining_display()
+
+        self.assertEqual(employee.allocation_display, '0')
+
+    def test_refuse_validated_allocation_with_leaves(self):
+        """
+        Test that an allocation can be refused after being validated only if the existing leave's taken days can be
+        handled by the other allocations
+        """
+
+        today = date.today()
+        start_of_week = today - timedelta(days=today.weekday())
+
+        leave_employee = self.env['hr.employee'].create({
+            'name': 'Test Employee',
+            'user_id': self.env.uid,
+        })
+
+        def _create_allocation(days):
+            return self.env['hr.leave.allocation'].create({
+                'name': f'{days} days Allocation',
+                'holiday_status_id': self.leave_type_paid.id,
+                'number_of_days': days,
+                'employee_id': leave_employee.id,
+                'date_from': start_of_week,
+            })
+
+        allocation_5_days = _create_allocation(days=5)
+        allocation_5_days.action_approve()
+        self.assertEqual(allocation_5_days.state, 'validate')
+
+        # 4 Days leave - Can be only on the 5 days allocation
+        leave_request = self.env['hr.leave'].create({
+            'name': 'Leave Request',
+            'holiday_status_id': self.leave_type_paid.id,
+            'request_date_from': start_of_week,
+            'request_date_to': start_of_week + timedelta(days=3),
+            'employee_id': leave_employee.id,
+        })
+        leave_request.action_approve()
+
+        allocation_3_days = _create_allocation(days=3)
+        allocation_3_days.date_to = start_of_week + timedelta(days=5)
+        allocation_3_days.action_approve()
+        self.assertEqual(allocation_3_days.state, 'validate')
+
+        # Can't Refuse 5 days allocation
+        with self.assertRaises(ValidationError):
+            allocation_5_days.action_refuse()
+        self.assertEqual(allocation_5_days.state, 'validate')
+
+        # But can Refuse 3 days one
+        allocation_3_days.action_refuse()
+        self.assertEqual(allocation_3_days.state, 'refuse')
+        allocation_3_days.state = 'confirm'
+        allocation_3_days.action_approve()
+        self.assertEqual(allocation_3_days.state, 'validate')
+
+        # 2 Days leave - Both allocations can be refused / but not at the same time
+        leave_request.state = 'confirm'
+        leave_request.request_date_to = start_of_week + timedelta(days=1)
+        leave_request.action_approve()
+
+        allocation_5_days.action_refuse()
+        self.assertEqual(allocation_5_days.state, 'refuse')
+
+        with self.assertRaises(ValidationError):
+            allocation_3_days.action_refuse()
+        self.assertEqual(allocation_3_days.state, 'validate')
+
+        allocation_5_days.state = 'confirm'
+        allocation_5_days.action_approve()
+        self.assertEqual(allocation_5_days.state, 'validate')
+        allocation_3_days.action_refuse()
+        self.assertEqual(allocation_3_days.state, 'refuse')
+
+    def test_time_off_hours_start_date_attendance(self):
+        """
+        When we set a date_from and/or a date_to on an attendance, it doesn't appear in global attendances anymore,
+        causing the hours of this attendance to not be taken into account. If all attendances have a date_from and/or
+        a date_to, the total hours_per_day will reach zero, which causes a division per zero when setting a time
+        off based on hours. This test makes sure that we don't divide ever by zero, even in that case.
+        """
+        calendar = self.env['resource.calendar'].create({
+            'name': 'Standard Calendar',
+            'two_weeks_calendar': False,
+        })
+        self.env['resource.calendar.attendance'].create({
+            'name': 'Monday',
+            'calendar_id': calendar.id,
+            'dayofweek': '0',  # Monday
+            'hour_from': 8,
+            'hour_to': 16,
+        })
+        self.leave_type.write({'request_unit': 'hour'})
+        with Form(self.env['hr.leave.allocation'].with_user(self.user_hrmanager)) as allocation_form:
+            allocation_form.allocation_type = 'regular'
+            allocation_form.employee_id = self.employee
+            allocation_form.holiday_status_id = self.leave_type
+            allocation_form.number_of_hours_display = 7.2
+            allocation = allocation_form.save()
+            self.assertEqual(allocation.duration_display, '7.2 hours')
+
+    @freeze_time('2024-03-25')
+    def test_allocation_count_date_previous_year(self):
+        """Checks that the allocation count is calculated correctly when an employee has an allocation starting during
+        the prevous year, but which hasn't expired yet."""
+
+        self.env['hr.leave.allocation'].create({
+            'employee_id': self.employee.id,
+            'holiday_status_id': self.leave_type.id,
+            'allocation_type': 'regular',
+            'date_from': '2023-12-25'
+        })
+        self.assertEqual(1, self.leave_type.allocation_count)
+
+    def test_allocation_title_displays_rounded_hours(self):
+        """
+        Ensure that the allocation title displays a rounded duration when
+        the request unit is set to hours.
+        """
+        leave_type = self.env['hr.leave.type'].create({
+            'name': 'Test Time Off',
+            'time_type': 'leave',
+            'requires_allocation': 'yes',
+            'allocation_validation_type': 'no_validation',
+            'request_unit': 'hour',
+        })
+        flex_38h_calendar = self.env['resource.calendar'].create({
+            'name': 'Flexible 38/week',
+            'hours_per_day': 7.6,
+            'full_time_required_hours': 38.0,
+            'flexible_hours': True,
+        })
+        self.employee.resource_calendar_id = flex_38h_calendar
+
+        with Form(self.env['hr.leave.allocation'].with_user(self.user_hrmanager)) as allocation_form:
+            allocation_form.allocation_type = 'regular'
+            allocation_form.employee_id = self.employee
+            allocation_form.holiday_status_id = leave_type
+            allocation_form.number_of_hours_display = 8
+            self.assertEqual(allocation_form.name, "Test Time Off (8.0 hour(s))")

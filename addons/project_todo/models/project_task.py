@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models, Command
+from odoo import api, models
 from odoo.tools import html2plaintext
 
 
-class Task(models.Model):
+class ProjectTask(models.Model):
     _inherit = 'project.task'
 
     @api.model_create_multi
@@ -20,30 +20,6 @@ class Task(models.Model):
                 else:
                     vals['name'] = self.env._('Untitled to-do')
         return super().create(vals_list)
-
-    def _ensure_onboarding_todo(self):
-        if not self.env.user.has_group('project_todo.group_onboarding_todo'):
-            self._generate_onboarding_todo(self.env.user)
-            onboarding_group = self.env.ref('project_todo.group_onboarding_todo').sudo()
-            onboarding_group.write({'users': [Command.link(self.env.user.id)]})
-
-    def _generate_onboarding_todo(self, user):
-        user.ensure_one()
-        self_lang = self.with_context(lang=user.lang or self.env.user.lang)
-        body = self_lang.env['ir.qweb']._render(
-            'project_todo.todo_user_onboarding',
-            {'object': user},
-            minimal_qcontext=True,
-            raise_if_not_found=False
-        )
-        if not body:
-            return
-        title = self_lang.env._('Welcome %s!', user.name)
-        self.env['project.task'].create([{
-            'user_ids': user.ids,
-            'description': body,
-            'name': title,
-        }])
 
     def action_convert_to_task(self):
         self.ensure_one()
@@ -67,5 +43,6 @@ class Task(models.Model):
             (self.env['ir.model.data']._xmlid_to_res_id("project_todo.project_task_view_todo_kanban"), "kanban"),
             (self.env['ir.model.data']._xmlid_to_res_id("project_todo.project_task_view_todo_tree"), "list"),
             (self.env['ir.model.data']._xmlid_to_res_id("project_todo.project_task_view_todo_form"), "form"),
+            (self.env['ir.model.data']._xmlid_to_res_id("project_todo.project_task_view_todo_calendar"), "calendar"),
             (self.env['ir.model.data']._xmlid_to_res_id("project_todo.project_task_view_todo_activity"), "activity"),
         ]

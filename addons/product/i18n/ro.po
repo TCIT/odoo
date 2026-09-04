@@ -1,27 +1,33 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* product
-# 
+# * product
+#
 # Translators:
-# Lyall Kindmurr, 2024
-# Wil Odoo, 2025
-# Foldi Robert <foldirobert@nexterp.ro>, 2025
-# Dorin Hongu <dhongu@gmail.com>, 2025
-# Hongu Cosmin <cosmin513@gmail.com>, 2025
-# 
+# Hongu Cosmin <cosmin513@gmail.com>, 2022
+# Foldi Robert <foldirobert@nexterp.ro>, 2022
+# Martin Trigaux, 2022
+# Cozmin Candea <office@terrabit.ro>, 2023
+# Dorin Hongu <dhongu@gmail.com>, 2023, 2025, 2026.
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Adrian Cocos <adrian.cocos@capps.ai>, 2025, 2026.
+# Odoo Translation Bot <c3p@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 13:04+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Hongu Cosmin <cosmin513@gmail.com>, 2025\n"
-"Language-Team: Romanian (https://app.transifex.com/odoo/teams/41243/ro/)\n"
+"POT-Creation-Date: 2026-04-10 18:39+0000\n"
+"PO-Revision-Date: 2026-08-02 16:30+0000\n"
+"Last-Translator: Adrian Cocos <adrian.cocos@capps.ai>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-19/product/"
+"ro/>\n"
+"Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ro\n"
-"Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
+"20)) ? 1 : 2;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: product
 #. odoo-python
@@ -31,6 +37,9 @@ msgid ""
 "\n"
 "Note: products that you don't have access to will not be shown above."
 msgstr ""
+"\n"
+"\n"
+"Notă: produsele la care nu aveți acces nu vor fi afișate mai sus."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_variant_count
@@ -45,51 +54,50 @@ msgid "# Products"
 msgstr "# Produse"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
-msgid "$14.00"
+#. odoo-python
+#: code:addons/product/models/product_pricelist_item.py:0
+msgid ""
+"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra "
+"fee\n"
+"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
+"(total_amount)s"
 msgstr ""
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
-msgid "$15.00"
-msgstr ""
+"%(base)s cu un %(discount)s %% %(discount_type)s și o taxă suplimentară de %"
+"(surcharge)s\n"
+"Exemplu: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
+"(total_amount)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid ""
-"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra fee\n"
-"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %(total_amount)s"
+"%(item_name)s: end date (%(end_date)s) should be after start date (%"
+"(start_date)s)"
 msgstr ""
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/product_pricelist_item.py:0
-msgid ""
-"%(item_name)s: end date (%(end_date)s) should be after start date "
-"(%(start_date)s)"
-msgstr ""
+"%(item_name)s: data de sfârșit (%(end_date)s) trebuie să fie după data de "
+"început (%(start_date)s)"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid "%(percentage)s %% %(discount_type)s on %(base)s %(extra)s"
-msgstr ""
+msgstr "%(percentage)s %% %(discount_type)s pe %(base)s %(extra)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid "%(percentage)s %% discount on %(pricelist)s"
-msgstr ""
+msgstr "%(percentage)s %% reducere pe %(pricelist)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid "%(percentage)s %% discount on sales price"
-msgstr ""
+msgstr "%(percentage)s %% reducere la prețul de vânzare"
 
 #. module: product
 #. odoo-python
+#: code:addons/product/models/product_category.py:0
 #: code:addons/product/models/product_pricelist.py:0
 #: code:addons/product/models/product_tag.py:0
 #: code:addons/product/models/product_template.py:0
@@ -107,71 +115,74 @@ msgstr "'Etichete produse - %s' % (object.name)"
 
 #. module: product
 #: model:ir.actions.report,print_report_name:product.report_product_packaging
-msgid "'Products packaging - %s' % (object.name)"
-msgstr "'Produse ambalate - %s' % (object.name)"
+msgid "'Products packaging - %s' % (object.uom_id.name)"
+msgstr "'Ambalaje produse - %s' % (object.uom_id.name)"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "(e.g: product description, ebook, legal notice, ...)."
 msgstr ""
+"(de ex: descrierea produsului, carte electronică, notificare legală, ...)."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid "+ %(amount)s extra fee"
-msgstr ""
+msgstr "+ %(amount)s taxă suplimentară"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid "- %(amount)s rebate"
-msgstr ""
+msgstr "- %(amount)s rabat"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_product.py:0
-msgid "- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
+msgid ""
+"- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
 msgstr ""
+"- Codul de bare \"%(barcode)s\" este deja atribuit produselor: %"
+"(product_list)s"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__create_variant
 msgid ""
-"- Instantly: All possible variants are created as soon as the attribute and its values are added to a product.\n"
-"        - Dynamically: Each variant is created only when its corresponding attributes and values are added to a sales order.\n"
+"- Instantly: All possible variants are created as soon as the attribute and "
+"its values are added to a product.\n"
+"        - Dynamically: Each variant is created only when its corresponding "
+"attributes and values are added to a sales order.\n"
 "        - Never: Variants are never created for the attribute.\n"
 "        Note: this cannot be changed once the attribute is used on a product."
 msgstr ""
+"- Instantaneu: Toate variantele posibile sunt create imediat ce atributul și "
+"valorile sale sunt adăugate unui produs.\n"
+"        - Dinamic: Fiecare variantă este creată numai atunci când atributele "
+"și valorile corespunzătoare sunt adăugate unei comenzi de vânzare.\n"
+"        - Niciodată: Variantele nu sunt niciodată create pentru atribut.\n"
+"        Notă: acest lucru nu poate fi schimbat odată ce atributul este "
+"folosit pe un produs."
 
 #. module: product
-#: model:product.attribute.value,name:product.product_attribute_value_5
+#: model:product.attribute.value,name:product.pav_duration_month_1
+msgid "1 month"
+msgstr "1 lună"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_duration_year_1
 msgid "1 year"
 msgstr "1 an"
 
 #. module: product
-#: model:product.attribute.value,name:product.pav_warranty
-msgid "1 year warranty extension"
-msgstr ""
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
-msgid "10"
-msgstr "10"
-
-#. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
 msgid "10 Units"
-msgstr ""
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
-msgid "123456789012"
-msgstr ""
+msgstr "10 Unități"
 
 #. module: product
 #: model:product.template,description_sale:product.product_product_4_product_template
-msgid "160x80cm, with large legs."
-msgstr "160x80cm, cu picioare mari."
+msgid "160x80cm, with large legs"
+msgstr "160x80cm, cu picioare mari"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_label_layout__print_format__2x7xprice
@@ -179,9 +190,24 @@ msgid "2 x 7 with price"
 msgstr "2 x 7 cu preț"
 
 #. module: product
-#: model:product.attribute.value,name:product.product_attribute_value_6
-msgid "2 year"
+#: model:product.attribute.value,name:product.pav_duration_year_2
+msgid "2 years"
 msgstr "2 ani"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_size_2xl
+msgid "2XL"
+msgstr "2XL"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_duration_year_3
+msgid "3 years"
+msgstr "3 ani"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_size_3xl
+msgid "3XL"
+msgstr "3XL"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_label_layout__print_format__4x12
@@ -199,9 +225,33 @@ msgid "4 x 7 with price"
 msgstr "4 x 7 cu preț"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_size_4xl
+msgid "4XL"
+msgstr ""
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_size_5xl
+msgid "5XL"
+msgstr ""
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_duration_month_6
+msgid "6 months"
+msgstr "6 luni"
+
+#. module: product
+#: model_terms:product.template,website_description:product.product_product_4_product_template
+msgid ""
+"<a href=\"/contactus\" class=\"mb-2 btn btn-primary "
+"o_translate_inline\">Contact Us</a>"
+msgstr ""
+"<a href=\"/contactus\" class=\"mb-2 btn btn-primary o_translate_inline\">"
+"Contactați-ne</a>"
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid "<b>Tip: want to round at 9.99?</b>"
-msgstr ""
+msgstr "<b>Sfat: doriți să rotunjiți la 9,99?</b>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
@@ -214,30 +264,12 @@ msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view_kanban
-msgid "<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" title=\"Currency\"/>"
-msgstr "<i class=\"fa fa-money\" role=\"img\" aria-label=\"Moneda\" title=\"Moneda\"/>"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid ""
-"<span class=\"o_stat_text\" invisible=\"pricelist_item_count == 1\">\n"
-"                                            Rules\n"
-"                                        </span>\n"
-"                                        <span class=\"o_stat_text\" invisible=\"pricelist_item_count != 1\">\n"
-"                                            Rule\n"
-"                                        </span>"
+"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" "
+"title=\"Currency\"/>"
 msgstr ""
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_template_form_view
-msgid ""
-"<span class=\"o_stat_text\" invisible=\"pricelist_item_count == 1\">\n"
-"                                        Pricelists\n"
-"                                    </span>\n"
-"                                    <span class=\"o_stat_text\" invisible=\"pricelist_item_count != 1\">\n"
-"                                        Pricelist\n"
-"                                    </span>"
-msgstr ""
+"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Moneda\" "
+"title=\"Moneda\"/>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_category_form_view
@@ -245,21 +277,19 @@ msgid "<span class=\"o_stat_text\"> Products</span>"
 msgstr "<span class=\"o_stat_text\"> Produse</span>"
 
 #. module: product
+#: model_terms:ir.ui.view,arch_db:product.uom_uom_form_view_inherit
+msgid "<span class=\"o_stat_text\">Packaging Barcodes</span>"
+msgstr "<span class=\"o_stat_text\">Coduri de bare ambalaje</span>"
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_attribute_view_form
 msgid "<span class=\"o_stat_text\">Products</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">Produse</span>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid "<span>%</span>"
 msgstr "<span>%</span>"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
-msgid ""
-"<span>%</span>\n"
-"                                <span>on</span>"
-msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
@@ -268,16 +298,14 @@ msgstr ""
 "<span>Toate setările generale despre acest produs sunt gestionate în</span>"
 
 #. module: product
+#: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
+msgid "<span>on</span>"
+msgstr "<span>pe</span>"
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
 msgid "<strong>Qty: </strong>"
 msgstr "<strong>Cant: </strong>"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
-msgid ""
-"<strong>Save</strong> this page and come back\n"
-"                                here to set up the feature."
-msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_only_form_view
@@ -291,84 +319,101 @@ msgstr ""
 "variante."
 
 #. module: product
-#: model:ir.model.constraint,message:product.constraint_product_packaging_barcode_uniq
+#: model:ir.model.constraint,message:product.constraint_product_uom_barcode_uniq
 msgid "A barcode can only be assigned to one packaging."
-msgstr ""
+msgstr "Un cod de bare poate fi atribuit unui singur ambalaj."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_combo.py:0
 msgid "A combo choice can't contain duplicate products."
-msgstr ""
+msgstr "O opțiune combo nu poate conține produse duplicate."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_combo_item.py:0
 msgid "A combo choice can't contain products of type \"combo\"."
-msgstr ""
+msgstr "O opțiune combo nu poate conține produse de tip „combo”."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_combo.py:0
 msgid "A combo choice must contain at least 1 product."
-msgstr ""
+msgstr "O opțiune combo trebuie să conțină cel puțin 1 produs."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "A combo product must contain at least 1 combo choice."
-msgstr ""
+msgstr "Un produs combo trebuie să conțină cel puțin o opțiune combo."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__description_sale
 #: model:ir.model.fields,help:product.field_product_template__description_sale
 msgid ""
-"A description of the Product that you want to communicate to your customers."
-" This description will be copied to every Sales Order, Delivery Order and "
+"A description of the Product that you want to communicate to your customers. "
+"This description will be copied to every Sales Order, Delivery Order and "
 "Customer Invoice/Credit Note"
 msgstr ""
-"O descriere a produsului, accesibilă clienților. Această descriere va fi "
-"copiată în fiecare comandă de vânzare sau factură emisă"
+"O descriere a produsului pe care doriți să o comunicați clienților dvs. "
+"Această descriere va fi copiată în fiecare comandă de vânzare, comandă de "
+"livrare și factură/notă de credit client"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_product.py:0
 msgid "A packaging already uses the barcode"
-msgstr ""
+msgstr "Un ambalaj folosește deja codul de bare"
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
 msgid ""
-"A price is a set of sales prices or rules to compute the price of sales order lines based on products, product categories, dates and ordered quantities.\n"
-"            This is the perfect tool to handle several pricings, seasonal discounts, etc."
+"A price is a set of sales prices or rules to compute the price of sales "
+"order lines based on products, product categories, dates and ordered "
+"quantities.\n"
+"            This is the perfect tool to handle several pricings, seasonal "
+"discounts, etc."
 msgstr ""
+"Un preț este un set de prețuri de vânzare sau reguli pentru a calcula prețul "
+"linie de comandă de vânzare pe baza produselor, categoriilor de produse, "
+"datelor și cantităților comandate."
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_packaging.py:0
-msgid "A product already uses the barcode"
+#: code:addons/product/models/product_pricelist_item.py:0
+msgid ""
+"A pricelist item with \"Other Pricelist\" as base must have a "
+"base_pricelist_id."
 msgstr ""
+"Un element de listă de prețuri cu „Altă listă de prețuri” ca bază trebuie să "
+"aibă un base_pricelist_id."
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_uom.py:0
+msgid "A product already uses the barcode"
+msgstr "Un produs folosește deja codul de bare"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "A sellable combo product can only contain sellable products."
-msgstr ""
+msgstr "Un produs combo vândabil poate conține doar produse vândabile."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__access_token
 msgid "Access Token"
-msgstr "Access Token"
+msgstr "Token de acces"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
 msgid "Acme Widget"
-msgstr ""
+msgstr "Acme Widget"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
 msgid "Acme Widget - Blue"
-msgstr ""
+msgstr "Acme Widget - Albastru"
 
 #. module: product
 #: model:product.template,name:product.product_template_acoustic_bloc_screens
@@ -381,7 +426,7 @@ msgstr "Panouri acustice"
 #: model:ir.model.fields,field_description:product.field_product_product__message_needaction
 #: model:ir.model.fields,field_description:product.field_product_template__message_needaction
 msgid "Action Needed"
-msgstr "Acțiune necesară"
+msgstr "Intervenție necesară"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__active
@@ -401,7 +446,7 @@ msgstr "Activ"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_search_view
 msgid "Active Products"
-msgstr ""
+msgstr "Produse active"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__activity_ids
@@ -415,7 +460,7 @@ msgstr "Activități"
 #: model:ir.model.fields,field_description:product.field_product_product__activity_exception_decoration
 #: model:ir.model.fields,field_description:product.field_product_template__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "Decorator Excepție Activitate"
+msgstr "Activitate Excepție Decorare"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__activity_state
@@ -435,19 +480,24 @@ msgstr "Pictograma tipului de activitate"
 #. odoo-javascript
 #: code:addons/product/static/src/product_catalog/order_line/order_line.xml:0
 msgid "Add"
-msgstr "Adaugă"
+msgstr "Adăugare"
 
 #. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "Add Products"
-msgstr "Adăugați produse"
+msgstr "Adăugare produse"
 
 #. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.js:0
 msgid "Add Products to pricelist report"
-msgstr ""
+msgstr "Adăugare produse la raportul de listă de prețuri"
+
+#. module: product
+#: model_terms:ir.ui.view,arch_db:product.product_template_form_view
+msgid "Add a price"
+msgstr "Adăugare preț"
 
 #. module: product
 #. odoo-javascript
@@ -462,27 +512,43 @@ msgid ""
 "Add products using the \"Add Products\" button at the top right to\n"
 "                                include them in the report."
 msgstr ""
+"Adăugați produse folosind butonul „Adăugați produse” din dreapta sus pentru "
+"a\n"
+"                                le include în raport."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_attribute_value.py:0
 msgid "Add to all products"
-msgstr ""
+msgstr "Adaugă la toate produsele"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__update_product_attribute_value__mode__add
 msgid "Add to existing products"
-msgstr ""
+msgstr "Adaugă la produsele existente"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_attribute_view_form
 msgid "Add to products"
+msgstr "Adaugă la produse"
+
+#. module: product
+#: model:ir.model.fields,help:product.field_product_product__uom_ids
+#: model:ir.model.fields,help:product.field_product_template__uom_ids
+msgid "Additional packagings for this product which can be used for sales"
 msgstr ""
+"Ambalaje suplimentare pentru acest produs care pot fi utilizate pentru "
+"vânzări"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_adidas
+msgid "Adidas"
+msgstr "Adidas"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_search
 msgid "All"
-msgstr "Tot"
+msgstr "Toate"
 
 #. module: product
 #. odoo-python
@@ -493,20 +559,17 @@ msgstr "Toate categoriile"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__all_product_tag_ids
 msgid "All Product Tag"
-msgstr ""
+msgstr "Toate etichetele de produs"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_tag__product_ids
 msgid "All Product Variants using this Tag"
-msgstr ""
+msgstr "Toate variantele de produs care utilizează această etichetă"
 
 #. module: product
-#. odoo-javascript
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__applied_on__3_global
-#: model_terms:ir.ui.view,arch_db:product.product_tag_form_view
 msgid "All Products"
 msgstr "Toate produsele"
 
@@ -529,27 +592,33 @@ msgstr "Toate fișierele încărcate"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid "All products"
-msgstr ""
+msgstr "Toate produsele"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_tree_view_from_product
 msgid "All variants"
-msgstr ""
+msgstr "Toate variantele"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute_value__is_custom
 #: model:ir.model.fields,help:product.field_product_template_attribute_value__is_custom
 msgid "Allow customers to set their own value"
-msgstr ""
+msgstr "Permite clienților să-și stabilească propria valoare"
 
 #. module: product
-#: model:product.attribute.value,name:product.product_attribute_value_2
+#: model:product.attribute.value,name:product.pav_legs_aluminium
 msgid "Aluminium"
 msgstr "Aluminiu"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_brand_apple
+msgid "Apple"
+msgstr "Apple"
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_tree_view
+#: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Applied On"
 msgstr "Aplicat în"
 
@@ -561,7 +630,7 @@ msgstr "Aplică pe"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid "Apply To"
-msgstr ""
+msgstr "Aplică la"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
@@ -582,6 +651,11 @@ msgid "Archived"
 msgstr "Arhivat"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_brand_ariel
+msgid "Ariel"
+msgstr "Ariel"
+
+#. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__sequence
 msgid "Assigns the priority to the list of product vendor."
 msgstr "Alocă prioritatea listei de furnizori de produse."
@@ -593,13 +667,13 @@ msgid ""
 "At most %s quantities can be displayed simultaneously. Remove a selected "
 "quantity to add others."
 msgstr ""
-"Cel mult %s cantități pot fi afișate simultan. Eliminați o cantitate "
+"La maximum %s cantități pot fi afișate simultan. Eliminați o cantitate "
 "selectată pentru a adăuga altele."
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_form
 msgid "Attached To"
-msgstr "Anexat la"
+msgstr "Atașat la"
 
 #. module: product
 #: model:ir.model,name:product.model_ir_attachment
@@ -617,7 +691,7 @@ msgstr "Număr atașamente"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__local_url
 msgid "Attachment URL"
-msgstr "Atașament URL"
+msgstr "URL atașament"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__name
@@ -659,7 +733,6 @@ msgstr "Valori atribute"
 #: model:ir.actions.act_window,name:product.attribute_action
 #: model_terms:ir.ui.view,arch_db:product.product_template_attribute_value_view_tree
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
-#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Attributes"
 msgstr "Atribute"
 
@@ -672,30 +745,20 @@ msgstr "Atribute & variante"
 #. odoo-javascript
 #: code:addons/product/static/src/product_catalog/kanban_controller.js:0
 msgid "Back to Order"
-msgstr ""
+msgstr "Înapoi la comandă"
 
 #. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/product_catalog/kanban_controller.js:0
 msgid "Back to Quotation"
-msgstr ""
+msgstr "Înapoi la ofertă"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_packaging__barcode
 #: model:ir.model.fields,field_description:product.field_product_product__barcode
 #: model:ir.model.fields,field_description:product.field_product_template__barcode
+#: model:ir.model.fields,field_description:product.field_product_uom__barcode
 msgid "Barcode"
 msgstr "Cod de bare"
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_packaging__barcode
-msgid ""
-"Barcode used for packaging identification. Scan this packaging barcode from "
-"a transfer in the Barcode app to move all the contained units"
-msgstr ""
-"Cod de bare utilizat pentru identificarea ambalajului. Scanează acest cod de"
-" bare de ambalare dintr-un transfer în aplicația Coduri de bare pentru a "
-"muta toate unitățile conținute"
 
 #. module: product
 #. odoo-python
@@ -705,6 +768,14 @@ msgid ""
 "\n"
 "%s"
 msgstr ""
+"Coduri de bare deja atribuite:\n"
+"\n"
+"%s"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_uom_uom__product_uom_ids
+msgid "Barcodes"
+msgstr "Coduri de bare"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__base
@@ -714,6 +785,11 @@ msgid ""
 "Cost Price: The base price will be the cost price.\n"
 "Other Pricelist: Computation of the base price based on another Pricelist."
 msgstr ""
+"Preț de bază pentru calcul.\n"
+"Preț de vânzare: Prețul de bază va fi prețul de vânzare.\n"
+"Preț de cost: Prețul de bază va fi prețul de cost.\n"
+"Altă listă de prețuri: Calculul prețului de bază se bazează pe o altă listă "
+"de prețuri."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__base
@@ -723,7 +799,7 @@ msgstr "Bazat pe"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid "Based price"
-msgstr ""
+msgstr "Preț de bază"
 
 #. module: product
 #: model:res.groups,name:product.group_product_pricelist
@@ -731,9 +807,39 @@ msgid "Basic Pricelists"
 msgstr "Liste Prețuri de bază"
 
 #. module: product
-#: model:product.attribute.value,name:product.product_attribute_value_4
+#: model:product.attribute.value,name:product.pav_color_beige
+msgid "Beige"
+msgstr "Bej"
+
+#. module: product
+#: model:product.template,description_sale:product.consu_delivery_02_product_template
+msgid "Big table seats 10–12 for team discussions"
+msgstr "Masa mare are 10-12 locuri pentru discuții de echipă"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_black
 msgid "Black"
 msgstr "Negru"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_blue
+msgid "Blue"
+msgstr "Albastru"
+
+#. module: product
+#: model:product.template,description_sale:product.product_product_7_product_template
+msgid "Blue plastic bin for flexible office storage"
+msgstr "Coș de plastic albastru pentru depozitare flexibilă în birou"
+
+#. module: product
+#: model:product.attribute,name:product.pa_brand
+msgid "Brand"
+msgstr "Brand"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_brown
+msgid "Brown"
+msgstr "Maro"
 
 #. module: product
 #. odoo-javascript
@@ -750,7 +856,7 @@ msgstr "Dulap cu Uși"
 #: model:ir.model.fields,field_description:product.field_product_product__can_image_1024_be_zoomed
 #: model:ir.model.fields,field_description:product.field_product_template__can_image_1024_be_zoomed
 msgid "Can Image 1024 be zoomed"
-msgstr "Poate Imaginea 1024 să fie mărită "
+msgstr "Poate Imaginea 1024 să fie mărită"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__can_image_variant_1024_be_zoomed
@@ -761,6 +867,17 @@ msgstr "Imaginea variantă 1024 poate fi mărită"
 #: model_terms:ir.ui.view,arch_db:product.update_product_attribute_value_form
 msgid "Cancel"
 msgstr "Anulează"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_canon
+msgid "Canon"
+msgstr "Canon"
+
+#. module: product
+#: model:ir.actions.act_window,name:product.product_category_action_form
+#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
+msgid "Categories"
+msgstr "Categorii"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__categ_id
@@ -777,6 +894,22 @@ msgid "Category: %s"
 msgstr "Categorie: %s"
 
 #. module: product
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+#: code:addons/product/models/product_template.py:0
+msgid ""
+"Changing the unit of measure for your product will apply a conversion 1 %"
+"(old_uom_name)s = 1 %(new_uom_name)s.\n"
+"All existing records (Sales orders, Purchase orders, etc.) using this "
+"product will be updated by replacing the unit name."
+msgstr ""
+"Schimbarea unității de măsură pentru produsul dvs. va aplica o conversie 1 %"
+"(old_uom_name)s = 1 %(new_uom_name)s.\n"
+"Toate înregistrările existente (comenzi de vânzare, comenzi de cumpărare, "
+"etc.) care utilizează acest produs vor fi actualizate prin înlocuirea "
+"numelui unității."
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__checksum
 msgid "Checksum/SHA1"
 msgstr "Sumă de control/SHA1"
@@ -787,19 +920,14 @@ msgid "Child Categories"
 msgstr "Categorii secundare"
 
 #. module: product
-#: model:ir.actions.act_window,name:product.action_open_label_layout
-msgid "Choose Labels Layout"
-msgstr "Alegeți aspectul etichetelor"
-
-#. module: product
 #: model:ir.model,name:product.model_product_label_layout
 msgid "Choose the sheet layout to print the labels"
 msgstr "Alegeti aspectul foii pentru a imprima etichetele"
 
 #. module: product
-#: model:product.attribute.value,name:product.pav_cleaning_kit
-msgid "Cleaning kit"
-msgstr ""
+#: model:product.attribute.value,name:product.pav_brand_cocacola
+msgid "Coca-Cola"
+msgstr "Coca-Cola"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
@@ -807,13 +935,18 @@ msgid "Codes"
 msgstr "Coduri"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_brand_colgate
+msgid "Colgate"
+msgstr "Colgate"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__html_color
 #: model:ir.model.fields,field_description:product.field_product_tag__color
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__color
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__display_type__color
-#: model:product.attribute,name:product.product_attribute_2
+#: model:product.attribute,name:product.pa_color
 msgid "Color"
-msgstr "Culoare"
+msgstr "Color"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__color
@@ -842,7 +975,7 @@ msgstr "Combo"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_combo_view_form
 msgid "Combo Choice"
-msgstr ""
+msgstr "Opțiune combo"
 
 #. module: product
 #: model:ir.actions.act_window,name:product.product_combo_action
@@ -850,23 +983,23 @@ msgstr ""
 #: model:ir.model.fields,field_description:product.field_product_template__combo_ids
 #: model_terms:ir.ui.view,arch_db:product.product_combo_view_tree
 msgid "Combo Choices"
-msgstr ""
+msgstr "Opțiuni combo"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_combo__combo_item_ids
 msgid "Combo Item"
-msgstr ""
+msgstr "Element combo"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_combo__base_price
 msgid "Combo Price"
-msgstr ""
+msgstr "Preț combo"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "Combo products can't have attributes."
-msgstr ""
+msgstr "Produsele combo nu pot avea atribute."
 
 #. module: product
 #. odoo-python
@@ -875,6 +1008,13 @@ msgid ""
 "Combos allow to choose one product amongst a selection of choices per "
 "category."
 msgstr ""
+"Combo-urile permit alegerea unui produs dintr-o selecție de opțiuni pe "
+"categorie."
+
+#. module: product
+#: model:product.template,description_sale:product.product_delivery_01_product_template
+msgid "Comfortable yellow chair for daily work"
+msgstr "Scaun galben confortabil pentru munca zilnică"
 
 #. module: product
 #: model:ir.model,name:product.model_res_company
@@ -885,12 +1025,12 @@ msgstr "Companii"
 #: model:ir.model.fields,field_description:product.field_product_combo__company_id
 #: model:ir.model.fields,field_description:product.field_product_combo_item__company_id
 #: model:ir.model.fields,field_description:product.field_product_document__company_id
-#: model:ir.model.fields,field_description:product.field_product_packaging__company_id
 #: model:ir.model.fields,field_description:product.field_product_pricelist__company_id
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__company_id
 #: model:ir.model.fields,field_description:product.field_product_product__company_id
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__company_id
 #: model:ir.model.fields,field_description:product.field_product_template__company_id
+#: model:ir.model.fields,field_description:product.field_product_uom__company_id
 msgid "Company"
 msgstr "Companie"
 
@@ -915,11 +1055,6 @@ msgid "Conference Chair"
 msgstr "Scaun conferință"
 
 #. module: product
-#: model:product.template,description_sale:product.consu_delivery_02_product_template
-msgid "Conference room table"
-msgstr "Masă pentru sală de conferințe"
-
-#. module: product
 #: model:ir.model,name:product.model_res_config_settings
 msgid "Config Settings"
 msgstr "Setări de configurare"
@@ -930,7 +1065,6 @@ msgid "Configure"
 msgstr "Configurare"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_label_layout_form
 #: model_terms:ir.ui.view,arch_db:product.update_product_attribute_value_form
 msgid "Confirm"
 msgstr "Confirmă"
@@ -938,37 +1072,12 @@ msgstr "Confirmă"
 #. module: product
 #: model:ir.model,name:product.model_res_partner
 msgid "Contact"
-msgstr "Contactați"
+msgstr "Contact"
 
 #. module: product
-#: model_terms:product.template,website_description:product.product_product_4_product_template
-msgid "Contact Us"
-msgstr "Contactați-ne"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_packaging__qty
-msgid "Contained Quantity"
-msgstr "Cantitate cuprinsă"
-
-#. module: product
-#: model:ir.model.constraint,message:product.constraint_product_packaging_positive_qty
-msgid "Contained Quantity should be positive."
-msgstr "Cantitatea cuprinsă ar trebui să fie pozitivă."
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_packaging_form_view
-msgid "Contained quantity"
-msgstr "Cantitate cuprinsă"
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_product__uom_category_id
-#: model:ir.model.fields,help:product.field_product_template__uom_category_id
-msgid ""
-"Conversion between Units of Measure can only occur if they belong to the "
-"same category. The conversion will be made based on the ratios."
-msgstr ""
-"Conversia între Unitățile de Măsură poate fi efectuată numai dacă acestea "
-"aparțin aceleiași categorii. Conversia va fi făcută pe baza indicilor."
+#: model:ir.model.fields,field_description:product.field_product_label_layout__custom_quantity
+msgid "Copies"
+msgstr "Copii"
 
 #. module: product
 #: model:product.template,name:product.product_product_13_product_template
@@ -991,7 +1100,7 @@ msgstr "Cost"
 #: model:ir.model.fields,field_description:product.field_product_product__cost_currency_id
 #: model:ir.model.fields,field_description:product.field_product_template__cost_currency_id
 msgid "Cost Currency"
-msgstr "Cost Monedă "
+msgstr "Cost Monedă"
 
 #. module: product
 #: model:ir.model,name:product.model_res_country_group
@@ -1002,6 +1111,16 @@ msgstr "Group Țară"
 #: model:ir.model.fields,field_description:product.field_product_pricelist__country_group_ids
 msgid "Country Groups"
 msgstr "Groupuri țări"
+
+#. module: product
+#: model:res.groups,name:product.group_product_manager
+msgid "Create"
+msgstr "Creează"
+
+#. module: product
+#: model:ir.model,website_form_label:product.model_res_partner
+msgid "Create a Customer"
+msgstr "Creează un client"
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
@@ -1025,13 +1144,13 @@ msgstr "Creați o nouă variantă de produs"
 #. odoo-javascript
 #: code:addons/product/static/src/product_catalog/kanban_renderer.xml:0
 msgid "Create a product"
-msgstr ""
+msgstr "Creează un produs"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__service_tracking
 #: model:ir.model.fields,field_description:product.field_product_template__service_tracking
 msgid "Create on Order"
-msgstr "Creare la comandă"
+msgstr "Creează la comandă"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__create_uid
@@ -1042,7 +1161,6 @@ msgstr "Creare la comandă"
 #: model:ir.model.fields,field_description:product.field_product_combo_item__create_uid
 #: model:ir.model.fields,field_description:product.field_product_document__create_uid
 #: model:ir.model.fields,field_description:product.field_product_label_layout__create_uid
-#: model:ir.model.fields,field_description:product.field_product_packaging__create_uid
 #: model:ir.model.fields,field_description:product.field_product_pricelist__create_uid
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__create_uid
 #: model:ir.model.fields,field_description:product.field_product_product__create_uid
@@ -1052,6 +1170,7 @@ msgstr "Creare la comandă"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_exclusion__create_uid
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__create_uid
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__create_uid
+#: model:ir.model.fields,field_description:product.field_product_uom__create_uid
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__create_uid
 msgid "Created by"
 msgstr "Creat de"
@@ -1065,7 +1184,6 @@ msgstr "Creat de"
 #: model:ir.model.fields,field_description:product.field_product_combo_item__create_date
 #: model:ir.model.fields,field_description:product.field_product_document__create_date
 #: model:ir.model.fields,field_description:product.field_product_label_layout__create_date
-#: model:ir.model.fields,field_description:product.field_product_packaging__create_date
 #: model:ir.model.fields,field_description:product.field_product_pricelist__create_date
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__create_date
 #: model:ir.model.fields,field_description:product.field_product_product__create_date
@@ -1075,9 +1193,10 @@ msgstr "Creat de"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_exclusion__create_date
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__create_date
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__create_date
+#: model:ir.model.fields,field_description:product.field_product_uom__create_date
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__create_date
 msgid "Created on"
-msgstr "Creat pe"
+msgstr "Creat în"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_form
@@ -1086,13 +1205,13 @@ msgstr "Creare"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_volume_volume_in_cubic_feet__1
-msgid "Cubic Feet"
-msgstr "Cubic Feet"
+msgid "Cubic Feet (ft³)"
+msgstr "Picioare Cubice (ft³)"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_volume_volume_in_cubic_feet__0
-msgid "Cubic Meters"
-msgstr "Metri cubi"
+msgid "Cubic Meters (m³)"
+msgstr "Metri Cubi (m³)"
 
 #. module: product
 #: model:ir.model,name:product.model_res_currency
@@ -1105,10 +1224,12 @@ msgstr "Metri cubi"
 #: model:ir.model.fields,field_description:product.field_product_template__currency_id
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__currency_id
 msgid "Currency"
-msgstr "Monedă"
+msgstr "Moneda"
 
 #. module: product
-#: model:product.attribute.value,name:product.fabric_attribute_custom
+#: model:product.attribute.value,name:product.pav_custom
+#: model:product.attribute.value,name:product.pav_legs_custom
+#: model:product.attribute.value,name:product.pav_length_custom
 msgid "Custom"
 msgstr "Personalizat"
 
@@ -1128,14 +1249,19 @@ msgid "Customizable Desk"
 msgstr "Birou personalizabil"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__db_datas
-msgid "Database Data"
-msgstr "Datele din baza de date"
+#: model:product.attribute,name:product.pa_customization
+msgid "Customization"
+msgstr "Personalizare"
 
 #. module: product
-#: model:ir.model,name:product.model_decimal_precision
-msgid "Decimal Precision"
-msgstr "Precizie zecimală"
+#: model:product.attribute.value,name:product.pav_color_cyan
+msgid "Cyan"
+msgstr "Cyan"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_document__db_datas
+msgid "Database Data"
+msgstr "Date din baza de date"
 
 #. module: product
 #. odoo-python
@@ -1146,30 +1272,18 @@ msgstr "Implicit"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__default_extra_price
 msgid "Default Extra Price"
-msgstr ""
+msgstr "Preț suplimentar implicit"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__default_extra_price_changed
 msgid "Default Extra Price Changed"
-msgstr ""
+msgstr "Preț suplimentar implicit modificat"
 
 #. module: product
-#: model:ir.model.fields,help:product.field_product_packaging__product_uom_id
 #: model:ir.model.fields,help:product.field_product_product__uom_id
 #: model:ir.model.fields,help:product.field_product_template__uom_id
 msgid "Default unit of measure used for all stock operations."
-msgstr "Unitatea de măsură folosită implicit în toate operațiunile de stoc."
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_product__uom_po_id
-#: model:ir.model.fields,help:product.field_product_supplierinfo__product_uom
-#: model:ir.model.fields,help:product.field_product_template__uom_po_id
-msgid ""
-"Default unit of measure used for purchase orders. It must be in the same "
-"category as the default unit of measure."
-msgstr ""
-"Unitatea de măsură implicită folosită pentru comenzile de achiziție. Acesta "
-"trebuie să fie în aceeași categorie cu unitatea de măsură implicită."
+msgstr "Unitatea de măsură implicită folosită în toate operațiunile stocului."
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_tag_action
@@ -1184,7 +1298,7 @@ msgstr "Definiți unitatea de măsură a volumului dvs."
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
 msgid "Define your weight unit of measure"
-msgstr "Definiți Unitatea de Măsură a Greutății "
+msgstr "Definiți Unitatea de Măsură a Greutății"
 
 #. module: product
 #. odoo-javascript
@@ -1194,9 +1308,9 @@ msgid "Delete"
 msgstr "Șterge"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_supplierinfo__delay
-msgid "Delivery Lead Time"
-msgstr "Timpul total de livrare"
+#: model:product.attribute.value,name:product.pav_brand_dell
+msgid "Dell"
+msgstr "Dell"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__description
@@ -1204,6 +1318,11 @@ msgstr "Timpul total de livrare"
 #: model:ir.model.fields,field_description:product.field_product_template__description
 msgid "Description"
 msgstr "Descriere"
+
+#. module: product
+#: model:product.template,description_sale:product.product_order_01_product_template
+msgid "Design and plan smart offices with ease"
+msgstr "Proiectați și planificați birouri inteligente cu ușurință"
 
 #. module: product
 #: model:product.template,name:product.product_product_3_product_template
@@ -1218,7 +1337,7 @@ msgstr "Organizator birou"
 #. module: product
 #: model:product.template,name:product.desk_pad_product_template
 msgid "Desk Pad"
-msgstr "Tăbliță de birou"
+msgstr "Pad birou"
 
 #. module: product
 #: model:product.template,name:product.product_product_22_product_template
@@ -1227,8 +1346,8 @@ msgstr "Stand de birou cu ecran"
 
 #. module: product
 #: model:product.template,description_sale:product.product_product_3_product_template
-msgid "Desk combination, black-brown: chair + desk + drawer."
-msgstr "Combinație de birou, negru-maro: scaun + birou + sertar."
+msgid "Desk combination, black-brown: chair + desk + drawer"
+msgstr "Combinație de birou, negru-maro: scaun + birou + sertar"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__sequence
@@ -1255,23 +1374,24 @@ msgstr "Reducere (%)"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__price_discounted
 msgid "Discounted Price"
-msgstr ""
+msgstr "Preț redus"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__display_applied_on
 msgid "Display Applied On"
-msgstr ""
+msgstr "Afișează aplicat pe"
 
 #. module: product
+#: model:ir.model.fields,field_description:product.field_ir_attachment__display_name
 #: model:ir.model.fields,field_description:product.field_product_attribute__display_name
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__display_name
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__display_name
+#: model:ir.model.fields,field_description:product.field_product_catalog_mixin__display_name
 #: model:ir.model.fields,field_description:product.field_product_category__display_name
 #: model:ir.model.fields,field_description:product.field_product_combo__display_name
 #: model:ir.model.fields,field_description:product.field_product_combo_item__display_name
 #: model:ir.model.fields,field_description:product.field_product_document__display_name
 #: model:ir.model.fields,field_description:product.field_product_label_layout__display_name
-#: model:ir.model.fields,field_description:product.field_product_packaging__display_name
 #: model:ir.model.fields,field_description:product.field_product_pricelist__display_name
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__display_name
 #: model:ir.model.fields,field_description:product.field_product_product__display_name
@@ -1281,6 +1401,19 @@ msgstr ""
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_exclusion__display_name
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__display_name
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__display_name
+#: model:ir.model.fields,field_description:product.field_product_uom__display_name
+#: model:ir.model.fields,field_description:product.field_report_product_report_pricelist__display_name
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel2x7__display_name
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel4x12__display_name
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel4x12noprice__display_name
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel4x7__display_name
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel_dymo__display_name
+#: model:ir.model.fields,field_description:product.field_res_company__display_name
+#: model:ir.model.fields,field_description:product.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:product.field_res_country_group__display_name
+#: model:ir.model.fields,field_description:product.field_res_currency__display_name
+#: model:ir.model.fields,field_description:product.field_res_partner__display_name
+#: model:ir.model.fields,field_description:product.field_uom_uom__display_name
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__display_name
 msgid "Display Name"
 msgstr "Nume afișat"
@@ -1310,12 +1443,17 @@ msgstr "Documente"
 #: model:ir.model.fields,field_description:product.field_product_product__product_document_count
 #: model:ir.model.fields,field_description:product.field_product_template__product_document_count
 msgid "Documents Count"
-msgstr "Numărul de documente"
+msgstr "Număr documente"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_search
 msgid "Documents of this variant"
-msgstr ""
+msgstr "Documente ale acestei variante"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_dove
+msgid "Dove"
+msgstr "Dove"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_kanban
@@ -1326,7 +1464,7 @@ msgstr "Descarcă"
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "Download examples"
-msgstr ""
+msgstr "Descarcă exemple"
 
 #. module: product
 #: model:product.template,name:product.product_product_27_product_template
@@ -1340,11 +1478,22 @@ msgstr "Sertar negru"
 
 #. module: product
 #: model_terms:product.template,description:product.product_product_27_product_template
-msgid "Drawer with two routing possiblities."
-msgstr "Sertar cu două posibilități de rutare."
+msgid "Drawer with two routing possiblities"
+msgstr "Sertar cu două posibilități de rutare"
 
 #. module: product
-#: model:product.attribute,name:product.product_attribute_3
+#: model:product.attribute.value,name:product.pav_options_drawers
+msgid "Drawers"
+msgstr "Sertare"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+msgid "Duplicate values in attribute values are not allowed: %s"
+msgstr ""
+
+#. module: product
+#: model:product.attribute,name:product.pa_duration
 msgid "Duration"
 msgstr "Durată"
 
@@ -1359,15 +1508,19 @@ msgid "Dynamically"
 msgstr "Dinamic"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_brand_dyson
+msgid "Dyson"
+msgstr "Dyson"
+
+#. module: product
 #: model:ir.model.constraint,message:product.constraint_product_template_attribute_value_attribute_value_unique
 msgid "Each value should be defined only once per attribute per product."
-msgstr ""
-"Fiecare valoare trebuie definită o singură dată pe atribut per produs."
+msgstr "Fiecare valoare trebuie definită o singură dată pe atribut per produs."
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
 msgid "Eco-friendly Wooden Chair"
-msgstr ""
+msgstr "Scaun din lemn ecologic"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_kanban
@@ -1404,7 +1557,7 @@ msgstr "Ergonomic"
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.js:0
 msgid "Error exporting file. Please try again."
-msgstr ""
+msgstr "Eroare la exportul fișierului. Vă rugăm să încercați din nou."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__exclude_for
@@ -1433,27 +1586,22 @@ msgid "Extra Info"
 msgstr "Informații suplimentare"
 
 #. module: product
-#: model:product.attribute,name:product.pa_extra_options
-msgid "Extra Options"
-msgstr ""
-
-#. module: product
 #: model:ir.model.fields,field_description:product.field_product_combo_item__extra_price
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__price_extra
 msgid "Extra Price"
-msgstr ""
+msgstr "Preț suplimentar"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_template_attribute_value__price_extra
 msgid ""
-"Extra price for the variant with this attribute value on sale price. eg. 200"
-" price extra, 1000 + 200 = 1200."
+"Extra price for the variant with this attribute value on sale price. eg. 200 "
+"price extra, 1000 + 200 = 1200."
 msgstr ""
 "Preț suplimentar pentru varianta cu această valoare a atributului la prețul "
 "de vânzare. de exemplu. 200 preț suplimentar, 1000 + 200 = 1200."
 
 #. module: product
-#: model:product.attribute,name:product.fabric_attribute
+#: model:product.attribute,name:product.pa_fabric
 msgid "Fabric"
 msgstr "Țesătură"
 
@@ -1485,6 +1633,11 @@ msgid "File Size"
 msgstr "Dimensiune fișier"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_options_file_cabinets
+msgid "File cabinets"
+msgstr "Fișete"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__fixed_price
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__compute_price__fixed
 msgid "Fixed Price"
@@ -1501,7 +1654,7 @@ msgstr "Răsturnare"
 #: model:ir.model.fields,field_description:product.field_product_product__message_follower_ids
 #: model:ir.model.fields,field_description:product.field_product_template__message_follower_ids
 msgid "Followers"
-msgstr "Urmăritori"
+msgstr "Persoane interesate"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_category__message_partner_ids
@@ -1516,15 +1669,17 @@ msgstr "Urmăritori (Parteneri)"
 #: model:ir.model.fields,help:product.field_product_product__activity_type_icon
 #: model:ir.model.fields,help:product.field_product_template__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr "Pictogramă Font awesome, de ex. fa-sarcini"
+msgstr "Pictogramă minunată pentru font, de ex. fa-sarcini"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__min_quantity
 msgid ""
-"For the rule to apply, bought/sold quantity must be greater than or equal to the minimum quantity specified in this field.\n"
+"For the rule to apply, bought/sold quantity must be greater than or equal to "
+"the minimum quantity specified in this field.\n"
 "Expressed in the default unit of measure of the product."
 msgstr ""
-"Pentru ca regula să se aplice, cantitatea cumpărată / vândută trebuie să fie mai mare sau egală cu cantitatea minimă specificată în acest câmp.\n"
+"Pentru ca regula să se aplice, cantitatea cumpărată / vândută trebuie să fie "
+"mai mare sau egală cu cantitatea minimă specificată în acest câmp.\n"
 " Exprimat în unitatea de măsură implicită a produsului."
 
 #. module: product
@@ -1543,20 +1698,15 @@ msgid "Four Person Desk"
 msgstr "Birou pentru 4 persoane"
 
 #. module: product
-#: model:product.template,description_sale:product.consu_delivery_03_product_template
-msgid "Four person modern office workstation"
-msgstr "Stație de lucru modernă pentru patru persoane"
-
-#. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__is_custom
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__is_custom
 msgid "Free text"
-msgstr ""
+msgstr "Text liber"
 
 #. module: product
 #: model:product.template,name:product.product_product_furniture_product_template
 msgid "Furniture Assembly"
-msgstr ""
+msgstr "Asamblare mobilier"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
@@ -1569,15 +1719,9 @@ msgid "General Information"
 msgstr "Informații generale"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
-msgid "Get product pictures using Barcode"
-msgstr "Obțineți imagini de produs folosind codul de bare"
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_product__packaging_ids
-#: model:ir.model.fields,help:product.field_product_template__packaging_ids
-msgid "Gives the different ways to package the same product."
-msgstr "Oferă diferite modalități de a ambala același produs."
+#: model:product.attribute.value,name:product.pav_brand_gillette
+msgid "Gillette"
+msgstr "Gillette"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__sequence
@@ -1586,9 +1730,19 @@ msgid "Gives the sequence order when displaying a product list"
 msgstr "Oferă ordinea secvenței atunci când se afișează o listă de produse"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_fabric_glass
+msgid "Glass"
+msgstr "Pahar"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_gold
+msgid "Gold"
+msgstr "Gold"
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
 msgid "Gold Member Pricelist"
-msgstr ""
+msgstr "Listă de prețuri Gold Member"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_template__type__consu
@@ -1604,19 +1758,23 @@ msgid ""
 "Goods are tangible materials and merchandise you provide.\n"
 "A service is a non-material product you provide."
 msgstr ""
+"Bunurile sunt materiale tangibile și mărfuri pe care le furnizați.\n"
+"Un serviciu este un produs nematerial pe care îl furnizați."
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
-msgid "Google Images"
-msgstr "Imagini Google"
+#: model:product.attribute.value,name:product.pav_color_gray
+msgid "Gray"
+msgstr "Gri"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_view_search
-#: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_search_view
-#: model_terms:ir.ui.view,arch_db:product.product_template_search_view
-#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
-msgid "Group By"
-msgstr "Grupează după"
+#: model:product.attribute.value,name:product.pav_color_green
+msgid "Green"
+msgstr "Verde"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_h_m
+msgid "H&M"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__html_color
@@ -1632,6 +1790,21 @@ msgid "Has Message"
 msgstr "Are mesaj"
 
 #. module: product
+#: model:ir.model.fields,field_description:product.field_product_document__has_thumbnail
+msgid "Has Thumbnail"
+msgstr "Are miniatură"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_head_shoulders
+msgid "Head & Shoulders"
+msgstr "Head & Shoulders"
+
+#. module: product
+#: model:product.attribute,name:product.pa_height
+msgid "Height"
+msgstr "Înălțime"
+
+#. module: product
 #: model:ir.model.fields,help:product.field_product_attribute_value__html_color
 #: model:ir.model.fields,help:product.field_product_template_attribute_value__html_color
 msgid ""
@@ -1640,6 +1813,11 @@ msgid ""
 msgstr ""
 "Aici puteți seta un anumit index HTML de culoare (de exemplu, # ff0000) "
 "pentru a afișa culoarea dacă tipul atributului este „Culoare”."
+
+#. module: product
+#: model:product.template,description_sale:product.product_product_12_product_template
+msgid "High-back office chair with great support"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_form
@@ -1652,15 +1830,16 @@ msgid "Hotel Accommodation"
 msgstr "Cazare la hotel"
 
 #. module: product
+#: model:ir.model.fields,field_description:product.field_ir_attachment__id
 #: model:ir.model.fields,field_description:product.field_product_attribute__id
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__id
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__id
+#: model:ir.model.fields,field_description:product.field_product_catalog_mixin__id
 #: model:ir.model.fields,field_description:product.field_product_category__id
 #: model:ir.model.fields,field_description:product.field_product_combo__id
 #: model:ir.model.fields,field_description:product.field_product_combo_item__id
 #: model:ir.model.fields,field_description:product.field_product_document__id
 #: model:ir.model.fields,field_description:product.field_product_label_layout__id
-#: model:ir.model.fields,field_description:product.field_product_packaging__id
 #: model:ir.model.fields,field_description:product.field_product_pricelist__id
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__id
 #: model:ir.model.fields,field_description:product.field_product_product__id
@@ -1670,6 +1849,19 @@ msgstr "Cazare la hotel"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_exclusion__id
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__id
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__id
+#: model:ir.model.fields,field_description:product.field_product_uom__id
+#: model:ir.model.fields,field_description:product.field_report_product_report_pricelist__id
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel2x7__id
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel4x12__id
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel4x12noprice__id
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel4x7__id
+#: model:ir.model.fields,field_description:product.field_report_product_report_producttemplatelabel_dymo__id
+#: model:ir.model.fields,field_description:product.field_res_company__id
+#: model:ir.model.fields,field_description:product.field_res_config_settings__id
+#: model:ir.model.fields,field_description:product.field_res_country_group__id
+#: model:ir.model.fields,field_description:product.field_res_currency__id
+#: model:ir.model.fields,field_description:product.field_res_partner__id
+#: model:ir.model.fields,field_description:product.field_uom_uom__id
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__id
 msgid "ID"
 msgstr "ID"
@@ -1686,7 +1878,7 @@ msgstr "Pictogramă"
 #: model:ir.model.fields,help:product.field_product_product__activity_exception_icon
 #: model:ir.model.fields,help:product.field_product_template__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr "Pictograma care indică o activitate de excepție."
+msgstr "Pictograma pentru a indica o activitate de excepție."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_category__message_needaction
@@ -1694,7 +1886,7 @@ msgstr "Pictograma care indică o activitate de excepție."
 #: model:ir.model.fields,help:product.field_product_product__message_needaction
 #: model:ir.model.fields,help:product.field_product_template__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "Dacă este bifat, mesaje noi necesită atenția dumneavoastră."
+msgstr "Dacă este selectat, mesajele noi necesită atenția dumneavoastră."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_category__message_has_error
@@ -1702,7 +1894,7 @@ msgstr "Dacă este bifat, mesaje noi necesită atenția dumneavoastră."
 #: model:ir.model.fields,help:product.field_product_product__message_has_error
 #: model:ir.model.fields,help:product.field_product_template__message_has_error
 msgid "If checked, some messages have a delivery error."
-msgstr "Dacă este bifată, există mesaje cu eroare de livrare."
+msgstr "Dacă este bifată, unele mesaje au o eroare de livrare."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__product_id
@@ -1716,7 +1908,7 @@ msgstr ""
 #: model:ir.model.fields,help:product.field_product_attribute__active
 msgid ""
 "If unchecked, it will allow you to hide the attribute without removing it."
-msgstr ""
+msgstr "Dacă nu este bifat, vă permite să ascundeți atributul fără a-l elimina."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist__active
@@ -1731,14 +1923,15 @@ msgstr ""
 #: model:ir.model.fields,help:product.field_product_template__active
 msgid ""
 "If unchecked, it will allow you to hide the product without removing it."
-msgstr ""
-"Dacă ramâne nebifat, vă permite să ascundeți produsul fără a-l șterge."
+msgstr "Dacă ramâne nebifat, vă permite să ascundeți produsul fără a-l șterge."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__image
 #: model:ir.model.fields,field_description:product.field_product_product__image_1920
+#: model:ir.model.fields,field_description:product.field_product_tag__image
 #: model:ir.model.fields,field_description:product.field_product_template__image_1920
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__image
+#: model:ir.model.fields.selection,name:product.selection__product_attribute__display_type__image
 msgid "Image"
 msgstr "Imagine"
 
@@ -1774,12 +1967,12 @@ msgstr "Înălțime imagine"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__image_src
 msgid "Image Src"
-msgstr "Sursa Imagine"
+msgstr "Sursă imagine"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__image_width
 msgid "Image Width"
-msgstr "Lățimee imagine"
+msgstr "Lățime imagine"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_kanban
@@ -1796,7 +1989,7 @@ msgstr "Șablon de import pentru lista de prețuri"
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "Import Template for Products"
-msgstr "Importa Template pentru Produse"
+msgstr "Importare Modele pentru Produse"
 
 #. module: product
 #. odoo-python
@@ -1808,7 +2001,7 @@ msgstr "Șablon de import pentru liste de prețuri ale furnizorului"
 #: model_terms:ir.ui.view,arch_db:product.product_attribute_search
 #: model_terms:ir.ui.view,arch_db:product.product_template_attribute_value_view_search
 msgid "Inactive"
-msgstr "Inactiv"
+msgstr "Inactiv(ă)"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__index_content
@@ -1839,8 +2032,7 @@ msgstr "Referință internă"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__barcode
 msgid "International Article Number used for product identification."
-msgstr ""
-"Număr de articol internațional folosit pentru identificarea produselor."
+msgstr "Număr de articol internațional folosit pentru identificarea produselor."
 
 #. module: product
 #. odoo-javascript
@@ -1851,7 +2043,13 @@ msgstr "Operație invalidă"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Inventory"
-msgstr "Stoc"
+msgstr "Inventar"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__is_dynamically_created
+#: model:ir.model.fields,field_description:product.field_product_template__is_dynamically_created
+msgid "Is Dynamically Created"
+msgstr "Este creat dinamic"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_category__message_is_follower
@@ -1860,6 +2058,16 @@ msgstr "Stoc"
 #: model:ir.model.fields,field_description:product.field_product_template__message_is_follower
 msgid "Is Follower"
 msgstr "Este urmăritor"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__is_in_selected_section_of_order
+msgid "Is In Selected Section Of Order"
+msgstr "Este în secțiunea selectată a comenzii"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_pricelist_item__is_pricelist_required
+msgid "Is Pricelist Required"
+msgstr "Este necesară lista de prețuri"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__is_product_variant
@@ -1880,12 +2088,41 @@ msgstr "Este o variantă de produs"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__public
 msgid "Is public document"
-msgstr "Este un document public"
+msgstr "Este document public"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+msgid ""
+"It is not possible to import different values for the same attribute: %s"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_weight_in_lbs__0
-msgid "Kilograms"
-msgstr "Kilograme"
+msgid "Kilograms (kg)"
+msgstr "Kilograme (kg)"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_size_l
+msgid "L"
+msgstr ""
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_loreal
+msgid "L'Oréal"
+msgstr "L'Oréal"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_LG
+msgid "LG"
+msgstr "LG"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+#: code:addons/product/models/product_template.py:0
+msgid "Labels cannot be printed for products of service type"
+msgstr "Etichetele nu pot fi tipărite pentru produsele de tip serviciu"
 
 #. module: product
 #: model:product.template,name:product.product_product_6_product_template
@@ -1900,7 +2137,7 @@ msgstr "Birou mare"
 #. module: product
 #: model:product.template,name:product.consu_delivery_02_product_template
 msgid "Large Meeting Table"
-msgstr "Masă mare de ședințe"
+msgstr "Masă mare de întâlnire"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__write_uid
@@ -1911,7 +2148,6 @@ msgstr "Masă mare de ședințe"
 #: model:ir.model.fields,field_description:product.field_product_combo_item__write_uid
 #: model:ir.model.fields,field_description:product.field_product_document__write_uid
 #: model:ir.model.fields,field_description:product.field_product_label_layout__write_uid
-#: model:ir.model.fields,field_description:product.field_product_packaging__write_uid
 #: model:ir.model.fields,field_description:product.field_product_pricelist__write_uid
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__write_uid
 #: model:ir.model.fields,field_description:product.field_product_product__write_uid
@@ -1921,6 +2157,7 @@ msgstr "Masă mare de ședințe"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_exclusion__write_uid
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__write_uid
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__write_uid
+#: model:ir.model.fields,field_description:product.field_product_uom__write_uid
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__write_uid
 msgid "Last Updated by"
 msgstr "Ultima actualizare făcută de"
@@ -1934,7 +2171,6 @@ msgstr "Ultima actualizare făcută de"
 #: model:ir.model.fields,field_description:product.field_product_combo_item__write_date
 #: model:ir.model.fields,field_description:product.field_product_document__write_date
 #: model:ir.model.fields,field_description:product.field_product_label_layout__write_date
-#: model:ir.model.fields,field_description:product.field_product_packaging__write_date
 #: model:ir.model.fields,field_description:product.field_product_pricelist__write_date
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__write_date
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__write_date
@@ -1943,6 +2179,7 @@ msgstr "Ultima actualizare făcută de"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_exclusion__write_date
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__write_date
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__write_date
+#: model:ir.model.fields,field_description:product.field_product_uom__write_date
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__write_date
 msgid "Last Updated on"
 msgstr "Ultima actualizare pe"
@@ -1951,6 +2188,11 @@ msgstr "Ultima actualizare pe"
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 msgid "Late Activities"
 msgstr "Activități întârziate"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_supplierinfo__delay
+msgid "Lead Time"
+msgstr "Termen livrare"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__delay
@@ -1964,20 +2206,50 @@ msgstr ""
 "comenzii de achiziție"
 
 #. module: product
-#: model:product.attribute.value,name:product.fabric_attribute_leather
+#: model:product.attribute.value,name:product.pav_fabric_leather
 msgid "Leather"
 msgstr "Piele"
 
 #. module: product
-#: model:product.attribute,name:product.product_attribute_1
+#: model:product.template,description_sale:product.product_product_13_product_template
+msgid "Left-sided workspace with storage"
+msgstr "Spațiu de lucru pe partea stângă cu depozitare"
+
+#. module: product
+#: model:product.attribute,name:product.pa_legs
 msgid "Legs"
 msgstr "Picioare"
+
+#. module: product
+#: model:product.attribute,name:product.pa_length
+msgid "Length"
+msgstr "Lungime"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_lenovo
+msgid "Lenovo"
+msgstr "Lenovo"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_levis
+msgid "Levi's"
+msgstr "Levi's"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_fabric_linen
+msgid "Linen"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__attribute_line_ids
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__pav_attribute_line_ids
 msgid "Lines"
 msgstr "Linii"
+
+#. module: product
+#: model:ir.model,name:product.model_product_uom
+msgid "Link between products and their UoMs"
+msgstr "Legătură între produse și UoM-urile lor"
 
 #. module: product
 #: model:product.template,name:product.product_product_local_delivery_product_template
@@ -2005,19 +2277,19 @@ msgstr ""
 "ofertă."
 
 #. module: product
-#: model:ir.model.fields,help:product.field_product_template_attribute_value__exclude_for
-msgid ""
-"Make this attribute value not compatible with other values of the product or"
-" some attribute values of optional and accessory products."
+#: model:product.attribute.value,name:product.pav_size_m
+msgid "M"
 msgstr ""
-"Faceți ca această valoare a atributului să nu fie compatibilă cu alte valori"
-" ale produsului sau cu unele valori ale atributelor produselor opționale și "
-"accesorii."
 
 #. module: product
-#: model:res.groups,name:product.group_stock_packaging
-msgid "Manage Product Packaging"
-msgstr "Gestionați Ambalarea Produsului"
+#: model:ir.model.fields,help:product.field_product_template_attribute_value__exclude_for
+msgid ""
+"Make this attribute value not compatible with other values of the product or "
+"some attribute values of optional and accessory products."
+msgstr ""
+"Faceți ca această valoare a atributului să nu fie compatibilă cu alte valori "
+"ale produsului sau cu unele valori ale atributelor produselor opționale și "
+"accesorii."
 
 #. module: product
 #: model:res.groups,name:product.group_product_variant
@@ -2033,6 +2305,11 @@ msgstr "Marje"
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__price_markup
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid "Markup"
+msgstr "Adaos"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_maroon
+msgid "Maroon"
 msgstr ""
 
 #. module: product
@@ -2046,6 +2323,11 @@ msgid "Max. Price Margin"
 msgstr "Marjă Preț Maxim"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_brand_maybelline
+msgid "Maybelline"
+msgstr ""
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__message
 msgid "Message"
 msgstr "Mesaj"
@@ -2056,7 +2338,7 @@ msgstr "Mesaj"
 #: model:ir.model.fields,field_description:product.field_product_product__message_has_error
 #: model:ir.model.fields,field_description:product.field_product_template__message_has_error
 msgid "Message Delivery error"
-msgstr "Eroare de livrare a mesajului"
+msgstr "Eroare livrare mesaj"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_category__message_ids
@@ -2067,6 +2349,11 @@ msgid "Messages"
 msgstr "Mesaje"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_fabric_metal
+msgid "Metal"
+msgstr "Metal"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__mimetype
 msgid "Mime Type"
 msgstr "Tip MIME"
@@ -2074,7 +2361,7 @@ msgstr "Tip MIME"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid "Min Qty"
-msgstr ""
+msgstr "Cant. min."
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
@@ -2092,6 +2379,11 @@ msgid "Min. Quantity"
 msgstr "Cantitate min."
 
 #. module: product
+#: model:product.template,description_sale:product.product_product_8_product_template
+msgid "Minimalist wooden desk for executive use"
+msgstr "Birou din lemn, minimalist, pentru uz executiv"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__mode
 msgid "Mode"
 msgstr "Mod"
@@ -2099,18 +2391,28 @@ msgstr "Mod"
 #. module: product
 #: model:product.template,name:product.monitor_stand_product_template
 msgid "Monitor Stand"
-msgstr "Stand Monitorizare"
+msgstr "Suport monitor"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_montblanc
+msgid "Montblanc"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__display_type__multi
 msgid "Multi-checkbox"
-msgstr ""
+msgstr "Multi-bifă"
 
 #. module: product
 #: model:ir.model.constraint,message:product.constraint_product_attribute_check_multi_checkbox_no_variant
 msgid ""
 "Multi-checkbox display type is not compatible with the creation of variants"
-msgstr ""
+msgstr "Tipul de afișare multi-bifă nu este compatibil cu crearea de variante"
+
+#. module: product
+#: model_terms:ir.ui.view,arch_db:product.product_template_search_view
+msgid "My Activities"
+msgstr "Activitățile mele"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__my_activity_date_deadline
@@ -2132,6 +2434,16 @@ msgid "Name"
 msgstr "Nume"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_color_navy
+msgid "Navy"
+msgstr ""
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_nestle
+msgid "Nestlé"
+msgstr ""
+
+#. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__create_variant__no_variant
 msgid "Never"
 msgstr "Niciodată"
@@ -2140,7 +2452,12 @@ msgstr "Niciodată"
 #. odoo-python
 #: code:addons/product/models/product_pricelist.py:0
 msgid "New"
-msgstr "Nou"
+msgstr "Nou(ă)"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_new_balance
+msgid "New Balance"
+msgstr "Sold nou"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__activity_calendar_event_id
@@ -2168,7 +2485,22 @@ msgstr "Sumarul următoarei activități"
 #: model:ir.model.fields,field_description:product.field_product_product__activity_type_id
 #: model:ir.model.fields,field_description:product.field_product_template__activity_type_id
 msgid "Next Activity Type"
-msgstr "Următorul tip de activitate"
+msgstr "Tip de activitate urmatoare"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_nike
+msgid "Nike"
+msgstr "Nike"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_nikon
+msgid "Nikon"
+msgstr ""
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_nivea
+msgid "Nivea"
+msgstr ""
 
 #. module: product
 #. odoo-python
@@ -2184,13 +2516,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/product/static/src/product_catalog/kanban_renderer.xml:0
 msgid "No products could be found."
-msgstr ""
+msgstr "Nu s-au găsit produse."
 
 #. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "No products found in the report"
-msgstr ""
+msgstr "Nu s-au găsit produse în raport"
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_supplierinfo_type_action
@@ -2202,6 +2534,11 @@ msgstr "Nu a fost găsită nicio listă de prețuri pentru furnizori"
 #: code:addons/product/static/src/js/product_attribute_value_list.js:0
 msgid "No, keep it"
 msgstr "Nu, o păstrez."
+
+#. module: product
+#: model:product.template,description_sale:product.product_template_acoustic_bloc_screens
+msgid "Noise-reducing panels for open spaces"
+msgstr ""
 
 #. module: product
 #. odoo-python
@@ -2234,7 +2571,7 @@ msgstr "Număr de acțiuni"
 #: model:ir.model.fields,field_description:product.field_product_product__message_has_error_counter
 #: model:ir.model.fields,field_description:product.field_product_template__message_has_error_counter
 msgid "Number of errors"
-msgstr "Număr de erori"
+msgstr "Numărul de erori"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_category__message_needaction_counter
@@ -2242,7 +2579,7 @@ msgstr "Număr de erori"
 #: model:ir.model.fields,help:product.field_product_product__message_needaction_counter
 #: model:ir.model.fields,help:product.field_product_template__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr "Numărul de mesaje care necesită acțiune"
+msgstr "Număr de mesaje care necesită acțiune"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_category__message_has_error_counter
@@ -2251,12 +2588,6 @@ msgstr "Numărul de mesaje care necesită acțiune"
 #: model:ir.model.fields,help:product.field_product_template__message_has_error_counter
 msgid "Number of messages with delivery error"
 msgstr "Numărul de mesaje cu eroare de livrare"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_product__pricelist_item_count
-#: model:ir.model.fields,field_description:product.field_product_template__pricelist_item_count
-msgid "Number of price rules"
-msgstr "Numărul de reguli de preț"
 
 #. module: product
 #: model:product.template,name:product.product_delivery_01_product_template
@@ -2271,7 +2602,7 @@ msgstr "Scaun de birou negru"
 #. module: product
 #: model:product.template,name:product.office_combo_product_template
 msgid "Office Combo"
-msgstr ""
+msgstr "Combo Office"
 
 #. module: product
 #: model:product.template,name:product.product_order_01_product_template
@@ -2284,30 +2615,57 @@ msgid "Office Lamp"
 msgstr "Lampă de Birou"
 
 #. module: product
-#. odoo-python
-#: code:addons/product/models/product_template_attribute_line.py:0
-msgid ""
-"On the product %(product)s you cannot associate the value %(value)s with the"
-" attribute %(attribute)s because they do not match."
+#: model:product.attribute.value,name:product.pav_brand_olay
+msgid "Olay"
 msgstr ""
-"Pe produs %(product)s nu puteți asocia valoarea %(value)s cu atributul "
-"%(attribute)s, deoarece acestea nu se potrivesc."
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_olive
+msgid "Olive"
+msgstr ""
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"On the product %(product)s you cannot transform the attribute "
-"%(attribute_src)s into the attribute %(attribute_dest)s."
+"On the product %(product)s you cannot associate the value %(value)s with the "
+"attribute %(attribute)s because they do not match."
 msgstr ""
-"Pe produs %(product)s nu puteți transforma atributul %(attribute_src)s în "
-"atribut %(attribute_dest)s."
+"Pe produsul %(product)s nu puteți asocia valoarea %(value)s cu atributul %"
+"(attribute)s deoarece acestea nu se potrivesc."
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_template_attribute_line.py:0
+msgid ""
+"On the product %(product)s you cannot transform the attribute %"
+"(attribute_src)s into the attribute %(attribute_dest)s."
+msgstr ""
+"Pe produsul %(product)s nu puteți transforma atributul %(attribute_src)s în "
+"atributul %(attribute_dest)s."
 
 #. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/product_document_kanban/upload_button/upload_button.js:0
 msgid "Oops! '%(fileName)s' didn’t upload since its format isn’t allowed."
 msgstr ""
+"Ups! '%(fileName)s' nu a fost încărcat deoarece formatul nu este permis."
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_combo_item__product_id
+#: model:product.attribute,name:product.pa_options
+msgid "Options"
+msgstr "Opțiuni"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_oral_b
+msgid "Oral-B"
+msgstr ""
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_orange
+msgid "Orange"
+msgstr "Portocaliu"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__original_id
@@ -2317,7 +2675,7 @@ msgstr "Atașament original (neoptimizat, nemodificat)"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_combo_item__lst_price
 msgid "Original Price"
-msgstr ""
+msgstr "Preț original"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__base_pricelist_id
@@ -2329,20 +2687,45 @@ msgstr "Altă listă de preț"
 #. module: product
 #: model:product.template,name:product.product_template_dining_table
 msgid "Outdoor dining table"
-msgstr ""
+msgstr "Masă de exterior pentru servit masa"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_options_overhead_shelves
+msgid "Overhead shelves"
+msgstr "Etajere suspendate"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
 msgid "Package Type A"
+msgstr "Tip ambalaj A"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/uom_uom.py:0
+#: model_terms:ir.ui.view,arch_db:product.product_uom_list_view
+msgid "Packaging Barcodes"
+msgstr "Coduri de bare pentru ambalaje"
+
+#. module: product
+#: model:ir.actions.report,name:product.report_product_packaging
+msgid "Packaging Barcodes (PDF)"
+msgstr "Coduri de bare pentru ambalaje (PDF)"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__uom_ids
+#: model:ir.model.fields,field_description:product.field_product_template__uom_ids
+msgid "Packagings"
+msgstr "Impachetare"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_panasonic
+msgid "Panasonic"
 msgstr ""
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_packaging_form_view
-#: model_terms:ir.ui.view,arch_db:product.product_packaging_tree_view
-#: model_terms:ir.ui.view,arch_db:product.product_template_form_view
-#: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
-msgid "Packaging"
-msgstr "Ambalare"
+#: model:product.attribute.value,name:product.pav_brand_pantene
+msgid "Pantene"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_category__parent_id
@@ -2360,9 +2743,19 @@ msgid "Pedal Bin"
 msgstr "Pedală de coș de gunoi"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_brand_pepsi
+msgid "Pepsi"
+msgstr "Pepsi"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__percent_price
 msgid "Percentage Price"
 msgstr "Preț procentual"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_philips
+msgid "Philips"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__display_type__pills
@@ -2370,15 +2763,15 @@ msgid "Pills"
 msgstr "Pastile"
 
 #. module: product
-#: model:product.attribute.value,name:product.fabric_attribute_plastic
-msgid "Plastic"
-msgstr "Plastic"
+#: model:product.attribute.value,name:product.pav_color_pink
+msgid "Pink"
+msgstr "Roz"
 
 #. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.js:0
 msgid "Please enter a positive whole number."
-msgstr ""
+msgstr "Vă rugăm să introduceți un număr întreg pozitiv."
 
 #. module: product
 #. odoo-python
@@ -2389,12 +2782,16 @@ msgid ""
 "\n"
 "Invalid URL: %s"
 msgstr ""
+"Vă rugăm să introduceți un URL valid.\n"
+"Exemplu: https://www.odoo.com\n"
+"\n"
+"URL invalid: %s"
 
 #. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.js:0
 msgid "Please select some products first."
-msgstr ""
+msgstr "Vă rugăm să selectați mai întâi câteva produse."
 
 #. module: product
 #. odoo-python
@@ -2423,8 +2820,8 @@ msgstr ""
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_weight_in_lbs__1
-msgid "Pounds"
-msgstr "Lire"
+msgid "Pounds (lb)"
+msgstr ""
 
 #. module: product
 #: model_terms:product.template,website_description:product.product_product_4_product_template
@@ -2437,10 +2834,8 @@ msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__price
-#: model:ir.model.fields,field_description:product.field_product_supplierinfo__price
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_tree_view_from_product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
-#: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_tree_view
 msgid "Price"
 msgstr "Preț"
 
@@ -2455,19 +2850,15 @@ msgid "Price Rounding"
 msgstr "Rotunjure preț"
 
 #. module: product
-#. odoo-python
-#: code:addons/product/models/product_product.py:0
-#: code:addons/product/models/product_template.py:0
 #: model:ir.actions.act_window,name:product.product_pricelist_item_action
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_tree_view
-#: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
 msgid "Price Rules"
 msgstr "Reguli de preț"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid "Price Type"
-msgstr ""
+msgstr "Tip preț"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__list_price
@@ -2490,7 +2881,6 @@ msgstr "Preț:"
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__pricelist_id
 #: model:ir.model.fields,field_description:product.field_res_partner__property_product_pricelist
 #: model:ir.model.fields,field_description:product.field_res_users__property_product_pricelist
-#: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_tree_view_from_product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_view_search
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
@@ -2521,7 +2911,7 @@ msgstr "Raport lista de prețuri"
 #. odoo-python
 #: code:addons/product/models/product_pricelist.py:0
 msgid "Pricelist Report Preview"
-msgstr ""
+msgstr "Previzualizare raport listă de prețuri"
 
 #. module: product
 #: model:ir.model,name:product.model_product_pricelist_item
@@ -2531,6 +2921,8 @@ msgstr "Regula listei de prețuri"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__item_ids
+#: model:ir.model.fields,field_description:product.field_product_product__pricelist_rule_ids
+#: model:ir.model.fields,field_description:product.field_product_template__pricelist_rule_ids
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_tree_view_from_product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
 msgid "Pricelist Rules"
@@ -2544,44 +2936,47 @@ msgid "Pricelists"
 msgstr "Liste de prețuri"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.view_partner_property_form
-msgid "Pricelists are managed on"
-msgstr "Listele de prețuri sunt gestionate în"
+#: model_terms:ir.ui.view,arch_db:product.product_template_form_view
+msgid "Prices"
+msgstr "Prețuri"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
 msgid "Pricing"
-msgstr "Costuri"
+msgstr "Prețuri"
 
 #. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
+#: model_terms:ir.ui.view,arch_db:product.product_label_layout_form
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
 msgid "Print"
 msgstr "Tipăriți"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_product_tree_view
-#: model_terms:ir.ui.view,arch_db:product.product_template_form_view
-#: model_terms:ir.ui.view,arch_db:product.product_template_tree_view
-#: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
+#: model:ir.actions.act_window,name:product.action_open_label_layout
+#: model:ir.actions.server,name:product.action_product_print_labels
+#: model:ir.actions.server,name:product.action_product_template_print_labels
 msgid "Print Labels"
 msgstr "Tipărire Etichete"
+
+#. module: product
+#: model:product.template,description_sale:product.product_product_24_product_template
+msgid "Private pod with desk and chair"
+msgstr ""
 
 #. module: product
 #. odoo-python
 #: code:addons/product/controllers/pricelist_report.py:0
 #: model:ir.model,name:product.model_product_template
-#: model:ir.model.fields,field_description:product.field_product_combo_item__product_id
 #: model:ir.model.fields,field_description:product.field_product_label_layout__product_ids
-#: model:ir.model.fields,field_description:product.field_product_packaging__product_id
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_tmpl_id
 #: model:ir.model.fields,field_description:product.field_product_product__product_variant_id
 #: model:ir.model.fields,field_description:product.field_product_template__product_variant_id
+#: model:ir.model.fields,field_description:product.field_product_uom__product_id
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__applied_on__1_product
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__display_applied_on__1_product
 #: model_terms:ir.ui.view,arch_db:product.product_kanban_view
-#: model_terms:ir.ui.view,arch_db:product.product_packaging_search_view
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_view_search
 #: model_terms:ir.ui.view,arch_db:product.product_search_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
@@ -2607,7 +3002,7 @@ msgstr "Atribut produs"
 #. module: product
 #: model:ir.model,name:product.model_product_attribute_custom_value
 msgid "Product Attribute Custom Value"
-msgstr "Valoarea personalizată a atributului produsului"
+msgstr "Valoare Personalizată Atributul Produs"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__product_template_value_ids
@@ -2628,10 +3023,9 @@ msgstr "Atribute produs"
 #. module: product
 #: model:ir.model,name:product.model_product_catalog_mixin
 msgid "Product Catalog Mixin"
-msgstr ""
+msgstr "Mixin catalog produs"
 
 #. module: product
-#: model:ir.actions.act_window,name:product.product_category_action_form
 #: model_terms:ir.ui.view,arch_db:product.product_category_list_view
 #: model_terms:ir.ui.view,arch_db:product.product_category_search_view
 msgid "Product Categories"
@@ -2651,23 +3045,18 @@ msgstr "Categorie produs"
 #. module: product
 #: model:ir.model,name:product.model_product_combo
 msgid "Product Combo"
-msgstr ""
+msgstr "Combo produs"
 
 #. module: product
 #: model:ir.model,name:product.model_product_combo_item
 msgid "Product Combo Item"
-msgstr ""
+msgstr "Element combo produs"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_combo__combo_item_count
 #: model:ir.model.fields,field_description:product.field_update_product_attribute_value__product_count
 msgid "Product Count"
-msgstr "Numărul de produse"
-
-#. module: product
-#: model:res.groups,name:product.group_product_manager
-msgid "Product Creation"
-msgstr ""
+msgstr "Număr produse"
 
 #. module: product
 #: model:ir.model,name:product.model_product_document
@@ -2682,22 +3071,22 @@ msgstr "Eticheta produsului (PDF)"
 #. module: product
 #: model:ir.actions.report,name:product.report_product_template_label_2x7
 msgid "Product Label 2x7 (PDF)"
-msgstr ""
+msgstr "Etichetă produs 2x7 (PDF)"
 
 #. module: product
 #: model:ir.actions.report,name:product.report_product_template_label_4x12
 msgid "Product Label 4x12 (PDF)"
-msgstr ""
+msgstr "Etichetă produs 4x12 (PDF)"
 
 #. module: product
 #: model:ir.actions.report,name:product.report_product_template_label_4x12_noprice
 msgid "Product Label 4x12 No Price (PDF)"
-msgstr ""
+msgstr "Etichetă produs 4x12 fără preț (PDF)"
 
 #. module: product
 #: model:ir.actions.report,name:product.report_product_template_label_4x7
 msgid "Product Label 4x7 (PDF)"
-msgstr ""
+msgstr "Etichetă produs 4x7 (PDF)"
 
 #. module: product
 #: model:ir.model,name:product.model_report_product_report_producttemplatelabel_dymo
@@ -2707,22 +3096,22 @@ msgstr "Raport etichete produs"
 #. module: product
 #: model:ir.model,name:product.model_report_product_report_producttemplatelabel2x7
 msgid "Product Label Report 2x7"
-msgstr ""
+msgstr "Raport etichetă produs 2x7"
 
 #. module: product
 #: model:ir.model,name:product.model_report_product_report_producttemplatelabel4x12
 msgid "Product Label Report 4x12"
-msgstr ""
+msgstr "Raport etichetă produs 4x12"
 
 #. module: product
 #: model:ir.model,name:product.model_report_product_report_producttemplatelabel4x12noprice
 msgid "Product Label Report 4x12 No Price"
-msgstr ""
+msgstr "Raport etichetă produs 4x12 fără preț"
 
 #. module: product
 #: model:ir.model,name:product.model_report_product_report_producttemplatelabel4x7
 msgid "Product Label Report 4x7"
-msgstr ""
+msgstr "Raport etichetă produs 4x7"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_product_view_form_normalized
@@ -2732,35 +3121,10 @@ msgid "Product Name"
 msgstr "Nume produs"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_product__packaging_ids
-#: model:ir.model.fields,field_description:product.field_product_template__packaging_ids
-msgid "Product Packages"
-msgstr "Pachete de produse"
-
-#. module: product
-#: model:ir.model,name:product.model_product_packaging
-#: model:ir.model.fields,field_description:product.field_product_packaging__name
-#: model_terms:ir.ui.view,arch_db:product.product_packaging_form_view
-msgid "Product Packaging"
-msgstr "Ambalare Produs"
-
-#. module: product
-#: model:ir.actions.report,name:product.report_product_packaging
-msgid "Product Packaging (PDF)"
-msgstr "Ambalare produs (PDF)"
-
-#. module: product
-#: model:ir.actions.act_window,name:product.action_packaging_view
-#: model:ir.model.fields,field_description:product.field_res_config_settings__group_stock_packaging
-#: model_terms:ir.ui.view,arch_db:product.product_packaging_search_view
-#: model_terms:ir.ui.view,arch_db:product.product_packaging_tree_view
-msgid "Product Packagings"
-msgstr "Împachetare produse"
-
-#. module: product
 #: model:ir.model.fields,field_description:product.field_product_category__product_properties_definition
+#: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 msgid "Product Properties"
-msgstr ""
+msgstr "Proprietăți produs"
 
 #. module: product
 #: model:ir.model,name:product.model_product_tag
@@ -2802,10 +3166,9 @@ msgstr "Valoare Atribut Model Produs"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_tag__product_template_ids
-#: model_terms:ir.ui.view,arch_db:product.product_tag_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_view_tree_tag
 msgid "Product Templates"
-msgstr "Modele Produs"
+msgstr "Șabloane produs"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_label_layout__product_tmpl_ids
@@ -2832,6 +3195,12 @@ msgid "Product Unit of Measure"
 msgstr "Unitate de măsură produs"
 
 #. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__import_attribute_values
+#: model:ir.model.fields,field_description:product.field_product_template__import_attribute_values
+msgid "Product Values"
+msgstr ""
+
+#. module: product
 #: model:ir.model,name:product.model_product_product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__product_id
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__applied_on__0_product_variant
@@ -2839,7 +3208,7 @@ msgstr "Unitate de măsură produs"
 #: model_terms:ir.ui.view,arch_db:product.product_normal_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_tag_tree_view
 msgid "Product Variant"
-msgstr "Variantă de produs"
+msgstr "Variantă produs"
 
 #. module: product
 #. odoo-python
@@ -2855,7 +3224,6 @@ msgstr "Valorile variantei produsului"
 #: model_terms:ir.ui.view,arch_db:product.product_product_tree_view
 #: model_terms:ir.ui.view,arch_db:product.product_product_view_activity
 #: model_terms:ir.ui.view,arch_db:product.product_product_view_tree_tag
-#: model_terms:ir.ui.view,arch_db:product.product_tag_form_view
 msgid "Product Variants"
 msgstr "Variante produs"
 
@@ -2874,6 +3242,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:product.product_template_action_all
 #: model:ir.model.fields,field_description:product.field_product_product__product_variant_ids
 #: model:ir.model.fields,field_description:product.field_product_template__product_variant_ids
+#: model:res.groups.privilege,name:product.res_groups_privilege_product
 #: model_terms:ir.ui.view,arch_db:product.product_template_view_activity
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
 msgid "Products"
@@ -2918,17 +3287,16 @@ msgid "Properties"
 msgstr "Proprietăți"
 
 #. module: product
-#: model:product.attribute.value,name:product.pav_protection_kit
-msgid "Protection kit"
+#: model:product.attribute.value,name:product.pav_brand_puma
+msgid "Puma"
 msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__purchase_ok
 #: model:ir.model.fields,field_description:product.field_product_template__purchase_ok
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
-#: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 msgid "Purchase"
-msgstr "Achiziție"
+msgstr "Achiziții"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__description_purchase
@@ -2937,10 +3305,9 @@ msgid "Purchase Description"
 msgstr "Descriere achiziție"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_product__uom_po_id
-#: model:ir.model.fields,field_description:product.field_product_template__uom_po_id
-msgid "Purchase Unit"
-msgstr ""
+#: model:product.attribute.value,name:product.pav_color_purple
+msgid "Purple"
+msgstr "Mov"
 
 #. module: product
 #. odoo-javascript
@@ -2951,10 +3318,9 @@ msgstr "Cantitati"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
 msgid "Quantities (Price)"
-msgstr ""
+msgstr "Cantități (Preț)"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_label_layout__custom_quantity
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__min_qty
 msgid "Quantity"
 msgstr "Cantitate"
@@ -2963,18 +3329,13 @@ msgstr "Cantitate"
 #. odoo-python
 #: code:addons/product/controllers/pricelist_report.py:0
 msgid "Quantity (%s UoM)"
-msgstr ""
+msgstr "Cantitate (%s UDM)"
 
 #. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.js:0
 msgid "Quantity already present (%s)."
 msgstr "Cantitatea deja prezentă (%s)."
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_packaging__qty
-msgid "Quantity of products contained in the packaging."
-msgstr "Cantitatea de produse conținută în ambalaj."
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
@@ -2987,6 +3348,27 @@ msgid "Radio"
 msgstr "Radio"
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_brand_rayban
+msgid "Ray-Ban"
+msgstr ""
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_pricelist_item.py:0
+msgid "Recursive pricelist rules detected: %s"
+msgstr "Au fost detectate reguli recursive în lista de prețuri: %s"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_red
+msgid "Red"
+msgstr "Roșu(ie)"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_reebok
+msgid "Reebok"
+msgstr ""
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__code
 #: model_terms:ir.ui.view,arch_db:product.product_template_only_form_view
 msgid "Reference"
@@ -2995,8 +3377,8 @@ msgstr "Referință"
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_supplierinfo_type_action
 msgid ""
-"Register the prices requested by your vendors for each product, based on the"
-" quantity and the period."
+"Register the prices requested by your vendors for each product, based on the "
+"quantity and the period."
 msgstr ""
 "Înregistrați prețurile solicitate de furnizorii dvs. pentru fiecare produs, "
 "în funcție de cantitate și perioadă."
@@ -3031,7 +3413,7 @@ msgstr "Eliminați cantitatea"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__res_field
 msgid "Resource Field"
-msgstr "Câmp de resurse"
+msgstr "Câmp resursă"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__res_id
@@ -3041,7 +3423,7 @@ msgstr "ID Resursa"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__res_model
 msgid "Resource Model"
-msgstr "Model de resursa"
+msgstr "Model resursă"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__res_name
@@ -3061,9 +3443,19 @@ msgid "Restaurant Expenses"
 msgstr "Cheltuieli Restaurant"
 
 #. module: product
+#: model:product.template,description_sale:product.product_product_5_product_template
+msgid "Right-aligned desk with storage"
+msgstr "Birou cu aliniere dreapta și spațiu de depozitare"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_rolex
+msgid "Rolex"
+msgstr ""
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid "Round off to"
-msgstr ""
+msgstr "Rotunjește la"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_label_layout__rows
@@ -3074,6 +3466,11 @@ msgstr "Rânduri"
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__rule_tip
 msgid "Rule Tip"
 msgstr "Sfat regulă"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_size_s
+msgid "S"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__sale_ok
@@ -3101,9 +3498,25 @@ msgid "Sales Price"
 msgstr "Preț vânzare"
 
 #. module: product
+#: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
+msgid "Sales Prices"
+msgstr "Prețuri de vânzare"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__lst_price
 msgid "Sales Price"
 msgstr "Preț vânzare"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_samsung
+msgid "Samsung"
+msgstr ""
+
+#. module: product
+#. odoo-javascript
+#: code:addons/product/static/src/product_name_and_description/product_name_and_description.js:0
+msgid "Search a product"
+msgstr "Caută un produs"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__display_type__select
@@ -3115,7 +3528,6 @@ msgstr "Selectează"
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__sequence
 #: model:ir.model.fields,field_description:product.field_product_combo__sequence
 #: model:ir.model.fields,field_description:product.field_product_document__sequence
-#: model:ir.model.fields,field_description:product.field_product_packaging__sequence
 #: model:ir.model.fields,field_description:product.field_product_pricelist__sequence
 #: model:ir.model.fields,field_description:product.field_product_product__sequence
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__sequence
@@ -3143,6 +3555,15 @@ msgid ""
 "Rounding is applied after the discount and before the surcharge.\n"
 "To have prices that end in 9.99, round off to 10.00 and set an extra at -0.01"
 msgstr ""
+"Setează prețul astfel încât să fie un multiplu al acestei valori.\n"
+"Rotunjirea se aplică după discount și înainte de adaos.\n"
+"Pentru a avea prețuri care se termină în 9.99, rotunjiți la 10.00 și setați "
+"un supliment de -0.01"
+
+#. module: product
+#: model:product.attribute,name:product.pa_shoe_size
+msgid "Shoes size"
+msgstr "Mărime pantofi"
 
 #. module: product
 #. odoo-javascript
@@ -3152,21 +3573,35 @@ msgstr "Nume afișare"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
-msgid "Show all records which has next action date is before today"
+msgid "Show all records whose next activity date is past"
 msgstr ""
-"Afișați toate înregistrările care au data următoarei acțiuni înainte de data"
-" de astăzi"
+"Afișează toate înregistrările a căror dată a următoarei activități a trecut"
 
 #. module: product
-#: model:product.attribute,name:product.size_attribute
+#: model:product.attribute.value,name:product.pav_color_silver
+msgid "Silver"
+msgstr "Argint"
+
+#. module: product
+#: model:product.attribute,name:product.pa_size
 msgid "Size"
 msgstr "Dimensiune"
+
+#. module: product
+#: model:product.template,description_sale:product.product_product_9_product_template
+msgid "Soft-close pedal bin for office use"
+msgstr "Coș de gunoi cu pedală și închidere silențioasă pentru birou"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_sony
+msgid "Sony"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_res_partner__specific_property_product_pricelist
 #: model:ir.model.fields,field_description:product.field_res_users__specific_property_product_pricelist
 msgid "Specific Property Product Pricelist"
-msgstr ""
+msgstr "Listă de prețuri produs proprietate specifică"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__categ_id
@@ -3174,9 +3609,9 @@ msgid ""
 "Specify a product category if this rule only applies to products belonging "
 "to this category or its children categories. Keep empty otherwise."
 msgstr ""
-"Specificați o categorie de produse dacă această regulă se aplică numai "
-"produselor care aparțin acestei categorii sau categoriilor copil. Păstrați "
-"necompletat în caz contrar."
+"Specificati o categorie a produsului daca aceasta regula se aplica doar "
+"produselor care apartin acestei categorii sau categoriilor subordonate ei. "
+"In caz contrar lasati necompletat."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__product_id
@@ -3184,8 +3619,8 @@ msgid ""
 "Specify a product if this rule only applies to one product. Keep empty "
 "otherwise."
 msgstr ""
-"Specificați un produs daca aceasta regula se aplica doar unui produs. In caz"
-" contrar, lasati necompletat."
+"Specificati un produs daca aceasta regula se aplica doar unui produs. In caz "
+"contrar, lasati necompletat."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__product_tmpl_id
@@ -3202,6 +3637,8 @@ msgid ""
 "Specify the fixed amount to add or subtract (if negative) to the amount "
 "calculated with the discount."
 msgstr ""
+"Specificați suma fixă de adăugat sau scăzut (dacă este negativă) la suma "
+"calculată cu discountul."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_max_margin
@@ -3244,12 +3681,12 @@ msgid ""
 "Planned: Future activities."
 msgstr ""
 "Stare bazată pe activități\n"
-"Întârziată: data activitații este deja trecută\n"
-"Astăzi: data activității este astăzi\n"
+"Întârziată: data scadentă este deja trecută\n"
+"Astăzi: activității pentru astăzi\n"
 "Planificate: activități viitoare."
 
 #. module: product
-#: model:product.attribute.value,name:product.product_attribute_value_1
+#: model:product.attribute.value,name:product.pav_legs_steel
 msgid "Steel"
 msgstr "Oțel"
 
@@ -3269,6 +3706,11 @@ msgid "Supplier Pricelist"
 msgstr "Lista de preturi Furnizor"
 
 #. module: product
+#: model_terms:ir.ui.view,arch_db:product.product_tag_form_view
+msgid "Tag"
+msgstr "Etichetă"
+
+#. module: product
 #: model:ir.model.constraint,message:product.constraint_product_tag_name_uniq
 msgid "Tag name already exists!"
 msgstr "Nume etichetă existent deja!"
@@ -3278,18 +3720,29 @@ msgstr "Nume etichetă existent deja!"
 #: model:ir.model.fields,field_description:product.field_product_template__product_tag_ids
 #: model_terms:ir.ui.view,arch_db:product.product_search_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
+#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Tags"
 msgstr "Etichete"
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_tag_action
 msgid "Tags are used to search product for a given theme."
+msgstr "Etichetele sunt folosite pentru a căuta produse după o anumită temă."
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_tan
+msgid "Tan"
 msgstr ""
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_teal
+msgid "Teal"
+msgstr "Verde albastru"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__template_value_ids
 msgid "Template Values"
-msgstr ""
+msgstr "Valori șablon"
 
 #. module: product
 #. odoo-python
@@ -3301,17 +3754,17 @@ msgstr "Referința internă '%s' există deja."
 #. odoo-python
 #: code:addons/product/models/product_product.py:0
 msgid "The Reference '%s' already exists."
-msgstr ""
+msgstr "Referința '%s' există deja."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"The attribute %(attribute)s must have at least one value for the product "
-"%(product)s."
+"The attribute %(attribute)s must have at least one value for the product %"
+"(product)s."
 msgstr ""
-"Atributul %(attribute)s trebuie să aibă cel puțin o valoare pentru produsul "
-"%(product)s."
+"Atributul %(attribute)s trebuie să aibă cel puțin o valoare pentru produsul %"
+"(product)s."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute_value__attribute_id
@@ -3324,13 +3777,10 @@ msgstr ""
 
 #. module: product
 #. odoo-python
+#: code:addons/product/models/product_product.py:0
 #: code:addons/product/models/product_template.py:0
-msgid ""
-"The default Unit of Measure and the purchase Unit of Measure must be in the "
-"same category."
-msgstr ""
-"Unitatea de măsură implicită și Unitatea de măsură de achiziție trebuie să "
-"fie din aceeași categorie."
+msgid "The cost of a product can't be negative."
+msgstr "Costul unui produs nu poate fi negativ."
 
 #. module: product
 #: model:product.template,description_sale:product.desk_organizer_product_template
@@ -3339,6 +3789,9 @@ msgid ""
 "since the 5 boxes are loose, you can move and place them in the way that "
 "suits you and your things best."
 msgstr ""
+"Organizatorul de birou este perfect pentru depozitarea tuturor lucrurilor "
+"mici, iar cele 5 cutii fiind separate, le poți muta și aranja cum dorești, "
+"în funcție de nevoile tale."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__display_type
@@ -3348,9 +3801,13 @@ msgid "The display type used in the Product Configurator."
 msgstr "Tipul de afișare utilizat în Configuratorul de produs."
 
 #. module: product
-#: model:ir.model.fields,help:product.field_product_packaging__sequence
-msgid "The first in the sequence is the default one."
-msgstr "Primul din secvență este cel implicit."
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+msgid ""
+"The exitings product has different attribute value. \"%(imported_values)s\" "
+"is not equivalent to \"%(existing_values)s\" for \"%(external_id)s\", \"%"
+"(id)s\""
+msgstr ""
 
 #. module: product
 #: model_terms:product.template,website_description:product.product_product_4_product_template
@@ -3372,9 +3829,13 @@ msgstr "Limita minimă ar trebui sa fie mai mica decât limita maximă."
 msgid ""
 "The minimum price among the products in this combo. This value will be used "
 "to prorate the price of this combo with respect to the other combos in a "
-"combo product. This heuristic ensures that whatever product the user chooses"
-" in a combo, it will always be the same price."
+"combo product. This heuristic ensures that whatever product the user chooses "
+"in a combo, it will always be the same price."
 msgstr ""
+"Prețul minim dintre produsele din acest combo. Această valoare va fi "
+"folosită pentru a repartiza prețul acestui combo în raport cu celelalte "
+"combo-uri dintr-un produs combo. Această regulă asigură că indiferent ce "
+"produs alege utilizatorul într-un combo, prețul va fi mereu același."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_category__product_count
@@ -3389,11 +3850,15 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid ""
-"The number of variants to generate is above allowed limit. You should either"
-" not generate variants for each combination or generate them on demand from "
+"The number of variants to generate is above allowed limit. You should either "
+"not generate variants for each combination or generate them on demand from "
 "the sales order. To do so, open the form view of attributes and change the "
 "mode of *Create Variants*."
 msgstr ""
+"Numărul de variante de generat depășește limita permisă. Ar trebui fie să nu "
+"generați variante pentru fiecare combinație, fie să le generați la cerere "
+"din comanda de vânzare. Pentru aceasta, deschideți formularul atributelor și "
+"schimbați modul *Creare variante*."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__price
@@ -3411,29 +3876,30 @@ msgstr ""
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__min_qty
 msgid ""
-"The quantity to purchase from this vendor to benefit from the price, "
-"expressed in the vendor Product Unit of Measure if not any, in the default "
-"unit of measure of the product otherwise."
+"The quantity to purchase from this vendor to benefit from the unit price. If "
+"a vendor unit is set, quantity should be specified in this unit, otherwise "
+"it should be specified in the default unit of the product."
 msgstr ""
-"Cantitatea de cumpărat de la acest furnizor pentru a beneficia de preț, "
-"exprimată în unitatea de măsură a produsului furnizorului dacă nu există, în"
-" unitatea de măsură implicită a produsului în caz contrar."
+"Cantitatea de achiziționat de la acest furnizor pentru a beneficia de prețul "
+"pe unitate. Dacă este setată o unitate de furnizor, cantitatea trebuie "
+"specificată în această unitate, altfel trebuie specificată în unitatea "
+"implicită a produsului."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid "The rounding method must be strictly positive."
-msgstr ""
+msgstr "Metoda de rotunjire trebuie să fie strict pozitivă."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_combo_item__lst_price
 #: model:ir.model.fields,help:product.field_product_product__lst_price
 msgid ""
-"The sale price is managed from the product template. Click on the 'Configure"
-" Variants' button to set the extra attribute prices."
+"The sale price is managed from the product template. Click on the 'Configure "
+"Variants' button to set the extra attribute prices."
 msgstr ""
-"Prețul de vânzare este gestionat din produsul șablon. Clic pe butonul "
-"„Prețuri Variante” pentru a seta prețuri suplimentare pe atribute."
+"Prețul de vânzare este gestionat din produsul șablon. Clic pe butonul „"
+"Prețuri Variante” pentru a seta prețuri suplimentare pe atribute."
 
 #. module: product
 #. odoo-python
@@ -3442,8 +3908,8 @@ msgid ""
 "The value %(value)s is not defined for the attribute %(attribute)s on the "
 "product %(product)s."
 msgstr ""
-"Valoarea %(value)snu este definită pentru atributul %(attribute)s produsului"
-" %(product)s"
+"Valoarea %(value)s nu este definită pentru atributul %(attribute)s la "
+"produsul %(product)s."
 
 #. module: product
 #. odoo-python
@@ -3491,33 +3957,13 @@ msgid "This note is only for internal purposes."
 msgstr "Această notă este numai pentru scopuri interne."
 
 #. module: product
-#: model:ir.model.fields,help:product.field_res_partner__property_product_pricelist
-#: model:ir.model.fields,help:product.field_res_users__property_product_pricelist
-msgid ""
-"This pricelist will be used, instead of the default one, for sales to the "
-"current partner"
-msgstr ""
-"Aceasta lista de prețuri va fi folosită în locul celei implicite pentru "
-"vânzările către partenerul curent"
-
-#. module: product
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid ""
 "This product is part of a combo, so its type can't be changed to \"combo\"."
 msgstr ""
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/uom_uom.py:0
-msgid ""
-"This rounding precision is higher than the Decimal Accuracy (%(digits)s digits).\n"
-"This may cause inconsistencies in computations.\n"
-"Please set a precision between %(min_precision)s and 1."
-msgstr ""
-"Această precizie de rotunjire este mai mare decât Precizia zecimală (%(digits)s cifre).\n"
-"Acest lucru poate cauza neconcordanțe în calcule.\n"
-"Vă rugăm să setați o precizie între %(min_precision)s și 1"
+"Acest produs face parte dintr-un combo, deci tipul său nu poate fi schimbat "
+"în „combo”."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__product_code
@@ -3525,7 +3971,7 @@ msgid ""
 "This vendor's product code will be used when printing a request for "
 "quotation. Keep empty to use the internal one."
 msgstr ""
-"Colul  produsului utilizat de furnizor va fi folosit la imprimarea unei "
+"Colul produsului utilizat de furnizor va fi folosit la imprimarea unei "
 "cereri de ofertă. Mențineți-l gol pentru a-l utiliza pe cel intern."
 
 #. module: product
@@ -3538,19 +3984,29 @@ msgstr ""
 "cereri de ofertă. Mențineți-l gol pentru a-l utiliza pe cel intern."
 
 #. module: product
-#: model:product.template,description_sale:product.consu_delivery_01_product_template
-msgid "Three Seater Sofa with Lounger in Steel Grey Colour"
-msgstr "Sofă cu 3 locuri și un loc de relaxare în gri metalic"
+#: model:ir.model.fields,field_description:product.field_product_document__thumbnail
+msgid "Thumbnail"
+msgstr "Miniatură"
 
 #. module: product
-#: model:product.template,name:product.consu_delivery_01_product_template
-msgid "Three-Seat Sofa"
-msgstr "Canapea cu trei locuri"
+#: model:product.attribute.value,name:product.pav_brand_tide
+msgid "Tide"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 msgid "Today Activities"
 msgstr "Activitățile de astăzi"
+
+#. module: product
+#: model:product.template,name:product.consu_delivery_01_product_template
+msgid "Two-Seat Sofa"
+msgstr ""
+
+#. module: product
+#: model:product.template,description_sale:product.consu_delivery_01_product_template
+msgid "Two-Seater Sofa with Oak Wood Frame"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__type
@@ -3562,14 +4018,14 @@ msgstr "Tip"
 #: model:ir.model.fields,help:product.field_product_product__activity_exception_decoration
 #: model:ir.model.fields,help:product.field_product_template__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr "Tipul de activitate de excepție înregistrată."
+msgstr "Tipul activității de excepție din înregistrare."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/controllers/pricelist_report.py:0
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
 msgid "UOM"
-msgstr ""
+msgstr "UM"
 
 #. module: product
 #. odoo-python
@@ -3578,86 +4034,111 @@ msgid "Unable to find report template for %s format"
 msgstr "Nu se poate găsi șablonul de raport pentru formatul %s"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_product_tree_view
-#: model_terms:ir.ui.view,arch_db:product.product_template_tree_view
-msgid "Unit"
-msgstr "buc"
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+msgid ""
+"Unable to import products with attribute value without attribute name "
+"(defined as: attribute:value): %s"
+msgstr ""
 
 #. module: product
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+msgid ""
+"Unable to import products with attribute values but without name of product "
+"set"
+msgstr ""
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_underarmour
+msgid "Under Armour"
+msgstr "Sub Armură"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_options_under_desk_pedestals
+msgid "Under-desk pedestals"
+msgstr "Piedestaluri sub birou"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_uniqlo
+msgid "Uniqlo"
+msgstr ""
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__uom_id
+#: model:ir.model.fields,field_description:product.field_product_supplierinfo__product_uom_id
+#: model:ir.model.fields,field_description:product.field_product_template__uom_id
+#: model:ir.model.fields,field_description:product.field_product_uom__uom_id
+msgid "Unit"
+msgstr "Unitate"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__product_uom_ids
+msgid "Unit Barcode"
+msgstr "Cod de bare unitate"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_uom_name
+#: model:ir.model.fields,field_description:product.field_product_product__uom_name
+#: model:ir.model.fields,field_description:product.field_product_template__uom_name
+msgid "Unit Name"
+msgstr "Numele unității"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_supplierinfo__price
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
 msgid "Unit Price"
 msgstr "Preț unitar"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_packaging__product_uom_id
-#: model:ir.model.fields,field_description:product.field_product_product__uom_id
-#: model:ir.model.fields,field_description:product.field_product_supplierinfo__product_uom
-#: model:ir.model.fields,field_description:product.field_product_template__uom_id
-msgid "Unit of Measure"
-msgstr "Unitatea de măsură"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_uom
-#: model:ir.model.fields,field_description:product.field_product_product__uom_name
-#: model:ir.model.fields,field_description:product.field_product_template__uom_name
-msgid "Unit of Measure Name"
-msgstr "Nume unitate de măsură"
-
-#. module: product
 #. odoo-javascript
-#: code:addons/product/static/src/product_catalog/order_line/order_line.xml:0
-msgid "Unit price:"
-msgstr ""
-
-#. module: product
+#: code:addons/product/static/src/product_catalog/kanban_model.js:0
 #: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
 msgid "Units"
-msgstr "Buc"
+msgstr "Unități"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_res_config_settings__group_uom
 #: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
 msgid "Units of Measure"
 msgstr "Unități de măsură"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_product__uom_category_id
-#: model:ir.model.fields,field_description:product.field_product_template__uom_category_id
-msgid "UoM Category"
-msgstr "Categorie UoM"
+#: model:ir.model.fields,field_description:product.field_res_config_settings__group_uom
+msgid "Units of Measure & Packagings"
+msgstr "Unități de măsură și ambalaje"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_attribute_view_form
 msgid "Update extra prices"
-msgstr ""
+msgstr "Actualizează prețurile suplimentare"
 
 #. module: product
 #: model:ir.model,name:product.model_update_product_attribute_value
 msgid "Update product attribute value"
-msgstr ""
+msgstr "Actualizează valoarea atributului produsului"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_attribute_value.py:0
 msgid "Update product extra prices"
-msgstr ""
+msgstr "Actualizează prețurile suplimentare ale produsului"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__update_product_attribute_value__mode__update_extra_price
 msgid "Update the extra price on existing products"
-msgstr ""
+msgstr "Actualizează prețul suplimentar la produsele existente"
 
 #. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/product_document_kanban/upload_button/upload_button.xml:0
 msgid "Upload"
-msgstr "Încărcare"
+msgstr "Încarcă"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "Upload files to your product"
-msgstr ""
+msgstr "Încarcă fișiere la produsul tău"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
@@ -3675,6 +4156,8 @@ msgid ""
 "Use the discount rules and activate the discount settings in order to show "
 "discount to customer."
 msgstr ""
+"Folosiți regulile de discount și activați setările de discount pentru a "
+"afișa reducerea clientului."
 
 #. module: product
 #. odoo-python
@@ -3683,6 +4166,14 @@ msgid ""
 "Use this feature to store any files you would like to share with your "
 "customers"
 msgstr ""
+"Folosiți această funcționalitate pentru a stoca orice fișiere doriți să "
+"partajați cu clienții dumneavoastră"
+
+#. module: product
+#: model:ir.model.fields,help:product.field_res_partner__property_product_pricelist
+#: model:ir.model.fields,help:product.field_res_users__property_product_pricelist
+msgid "Used for sales to the current partner"
+msgstr "Folosit pentru vânzările către partenerul curent"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__is_used_on_products
@@ -3727,9 +4218,14 @@ msgstr "Număr valori"
 #: model:ir.model.fields,help:product.field_product_template__standard_price
 msgid ""
 "Value of the product (automatically computed in AVCO).\n"
-"        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).\n"
+"        Used to value the product when the purchase cost is not known (e.g. "
+"inventory adjustment).\n"
 "        Used to compute margins on sale orders."
 msgstr ""
+"Valoarea produsului (calculată automat în AVCO).\n"
+"        Folosită pentru evaluarea produsului atunci când costul de achiziție "
+"nu este cunoscut (ex: ajustare de stoc).\n"
+"        Folosită pentru calculul marjelor în comenzile de vânzare."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__value_ids
@@ -3754,7 +4250,7 @@ msgstr "Număr variante"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__create_variant
 msgid "Variant Creation"
-msgstr ""
+msgstr "Creare variantă"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__image_variant_1920
@@ -3800,7 +4296,7 @@ msgstr "Vânzător de variante"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__additional_product_tag_ids
 msgid "Variant Tags"
-msgstr ""
+msgstr "Etichete variantă"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__product_template_variant_value_ids
@@ -3820,6 +4316,11 @@ msgstr "Variantă: %s"
 #: model_terms:ir.ui.view,arch_db:product.product_template_only_form_view
 msgid "Variants"
 msgstr "Variante"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_fabric_velvet
+msgid "Velvet"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__partner_id
@@ -3873,9 +4374,16 @@ msgstr "Design interior virtual"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_combo_view_form
+#: model_terms:ir.ui.view,arch_db:product.product_document_form
+#: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Visible to all"
-msgstr ""
+msgstr "Vizibil pentru toți"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_tag__visible_to_customers
+msgid "Visible to customers"
+msgstr "Vizibil pentru clienți"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__voice_ids
@@ -3902,13 +4410,6 @@ msgid "Volume unit of measure label"
 msgstr "Etichetă unitatea de măsură a volumului"
 
 #. module: product
-#. odoo-python
-#: code:addons/product/models/decimal_precision.py:0
-#: code:addons/product/models/uom_uom.py:0
-msgid "Warning!"
-msgstr "Atenție!"
-
-#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 msgid "Warnings"
 msgstr "Atenționări"
@@ -3916,18 +4417,18 @@ msgstr "Atenționări"
 #. module: product
 #: model_terms:product.template,website_description:product.product_product_4_product_template
 msgid ""
-"We pay special attention to detail, which is why our desks are of a superior"
-" quality."
+"We pay special attention to detail, which is why our desks are of a superior "
+"quality."
 msgstr ""
-"Acordăm o atenție deosebită detaliilor, de aceea birourile noastre sunt de o"
-" calitate superioară."
+"Acordăm o atenție deosebită detaliilor, de aceea birourile noastre sunt de o "
+"calitate superioară."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__weight
 #: model:ir.model.fields,field_description:product.field_product_template__weight
 #: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
 msgid "Weight"
-msgstr "Greutate"
+msgstr "Masă"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_res_config_settings__product_weight_in_lbs
@@ -3941,19 +4442,52 @@ msgid "Weight unit of measure label"
 msgstr "Eticheta unității de măsură a greutății"
 
 #. module: product
-#: model:product.attribute.value,name:product.product_attribute_value_3
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+#: code:addons/product/models/product_template.py:0
+msgid "What to expect ?"
+msgstr "La ce să te aștepți?"
+
+#. module: product
+#: model:ir.model.fields,help:product.field_product_tag__visible_to_customers
+msgid "Whether the tag is displayed to customers."
+msgstr "Dacă eticheta este afișată clienților."
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_brand_whirlpool
+msgid "Whirlpool"
+msgstr ""
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_white
 msgid "White"
 msgstr "Alb"
 
 #. module: product
-#: model:product.attribute.value,name:product.product_attribute_value_color_wood
+#: model:product.attribute.value,name:product.pav_fabric_wood
+#: model:product.attribute.value,name:product.pav_legs_wood
 msgid "Wood"
 msgstr "Lemn"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__write_date
 msgid "Write Date"
-msgstr "Data Scriere"
+msgstr "Data scrierii"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_size_xl
+msgid "XL"
+msgstr "XL"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_size_xs
+msgid "XS"
+msgstr "XS"
+
+#. module: product
+#: model:product.attribute.value,name:product.pav_color_yellow
+msgid "Yellow"
+msgstr "Galben"
 
 #. module: product
 #. odoo-python
@@ -3962,12 +4496,14 @@ msgid ""
 "You are about to add the value \"%(attribute_value)s\" to %(product_count)s "
 "products."
 msgstr ""
+"Urmează să adăugați valoarea \"%(attribute_value)s\" la %(product_count)s "
+"produse."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/wizard/update_product_attribute_value.py:0
 msgid "You are about to update the extra price of %s products."
-msgstr ""
+msgstr "Urmează să actualizați prețul suplimentar pentru %s produse."
 
 #. module: product
 #. odoo-python
@@ -3976,20 +4512,8 @@ msgid ""
 "You are deactivating the pricelist feature. Every active pricelist will be "
 "archived."
 msgstr ""
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/decimal_precision.py:0
-msgid ""
-"You are setting a Decimal Accuracy less precise than the UOMs:\n"
-"%s\n"
-"This may cause inconsistencies in computations.\n"
-"Please increase the rounding of those units of measure, or the digits of this Decimal Accuracy."
-msgstr ""
-"Setați o precizie zecimală mai puțin precisă decât UOMs:\n"
-"%s\n"
-"Aceasta poate cauza inconsistențe în calcule.\n"
-"Vă rugăm să creșteți rotunjirea acestor unități de măsură, sau cifrele acestei precizii zecimale."
+"Dezactivați funcționalitatea listelor de prețuri. Toate listele de prețuri "
+"active vor fi arhivate."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__percent_price
@@ -4000,7 +4524,7 @@ msgstr "Puteți aplica o majorare prin setarea unui discount negativ."
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_markup
 msgid "You can apply a mark-up on the cost"
-msgstr ""
+msgstr "Puteți aplica un adaos la cost"
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
@@ -4017,8 +4541,8 @@ msgid ""
 "You can either upload a file from your computer or copy/paste an internet "
 "link to your file."
 msgstr ""
-"Poți încărca un fișier din calculator sau introduce un link catre fișierul "
-"de pe internet."
+"Puteți încărca un fișier din calculator sau puteți copia/lipi un link de pe "
+"internet către fișierul dvs."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute_value__image
@@ -4027,12 +4551,14 @@ msgid ""
 "You can upload an image that will be used as the color of the attribute "
 "value."
 msgstr ""
+"Puteți încărca o imagine care va fi folosită ca și culoare pentru valoarea "
+"atributului."
 
 #. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/product_catalog/order_line/order_line.xml:0
 msgid "You can't edit this product in the catalog."
-msgstr ""
+msgstr "Nu puteți edita acest produs în catalog."
 
 #. module: product
 #. odoo-python
@@ -4040,66 +4566,53 @@ msgstr ""
 msgid ""
 "You cannot archive this attribute as there are still products linked to it"
 msgstr ""
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/product_pricelist_item.py:0
-msgid ""
-"You cannot assign the Main Pricelist as Other Pricelist in PriceList Item"
-msgstr ""
-"Nu puteți atribui Lista de preț principală ca altă Lista de preț în "
-"elementele listei de prețuri"
+"Nu puteți arhiva acest atribut deoarece există încă produse asociate cu el"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_attribute.py:0
 msgid ""
-"You cannot change the Variants Creation Mode of the attribute %(attribute)s because it is used on the following products:\n"
+"You cannot change the Variants Creation Mode of the attribute %(attribute)s "
+"because it is used on the following products:\n"
 "%(products)s"
 msgstr ""
-"Nu puteți modifica modul de creare a variantelor atributului %(attribute)s, deoarece este utilizat pe următoarele produse:\n"
+"Nu puteți schimba modul de creare a variantelor pentru atributul %(attribute)"
+"s deoarece este folosit pe următoarele produse:\n"
 "%(products)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_attribute_value.py:0
 msgid ""
-"You cannot change the attribute of the value %(value)s because it is used on"
-" the following products: %(products)s"
+"You cannot change the attribute of the value %(value)s because it is used on "
+"the following products: %(products)s"
 msgstr ""
+"Nu puteți schimba atributul valorii %(value)s deoarece este folosit pe "
+"următoarele produse: %(products)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_value.py:0
 msgid ""
-"You cannot change the product of the value %(value)s set on product "
-"%(product)s."
+"You cannot change the product of the value %(value)s set on product %"
+"(product)s."
 msgstr ""
-"Nu puteți schimba produsul cu valoarea%(value)s setată pe produs%(product)s"
+"Nu puteți schimba produsul pentru valoarea %(value)s setată pe produsul %"
+"(product)s."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_value.py:0
 msgid ""
-"You cannot change the value of the value %(value)s set on product "
-"%(product)s."
-msgstr "Nu puteți modifica valoarea %(value)s setată pe produs %(product)s."
+"You cannot change the value of the value %(value)s set on product %"
+"(product)s."
+msgstr "Nu puteți schimba valoarea %(value)s setată pe produsul %(product)s."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_category.py:0
 msgid "You cannot create recursive categories."
 msgstr "Nu puteți crea categorii recursive."
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/decimal_precision.py:0
-msgid ""
-"You cannot define the decimal precision of 'Account' as greater than the "
-"rounding factor of the company's main currency"
-msgstr ""
-"Nu puteți defini precizia zecimală a \"contului\" ca fiind mai mare decât "
-"factorul de rotunjire a monedei principale a companiei"
 
 #. module: product
 #. odoo-python
@@ -4110,48 +4623,43 @@ msgid ""
 "They are used within pricelist(s):\n"
 "%(other_pricelists)s"
 msgstr ""
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/product_category.py:0
-msgid "You cannot delete the %s product category."
-msgstr "Nu puteți șterge categoria de produse %s."
+"Nu puteți șterge lista(ele) de prețuri:\n"
+"(%(pricelists)s)\n"
+"Acestea sunt folosite în următoarele liste de prețuri:\n"
+"%(other_pricelists)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_attribute.py:0
 msgid ""
-"You cannot delete the attribute %(attribute)s because it is used on the following products:\n"
+"You cannot delete the attribute %(attribute)s because it is used on the "
+"following products:\n"
 "%(products)s"
 msgstr ""
-"Nu puteți șterge atributul%(attribute)s deoarece este utilizat pe următoarele produse:\n"
+"Nu puteți șterge atributul %(attribute)s deoarece este folosit pe "
+"următoarele produse:\n"
 "%(products)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_attribute_value.py:0
 msgid ""
-"You cannot delete the value %(value)s because it is used on the following products:\n"
+"You cannot delete the value %(value)s because it is used on the following "
+"products:\n"
 "%(products)s\n"
 msgstr ""
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/product_category.py:0
-msgid ""
-"You cannot delete this product category, it is the default generic category."
-msgstr ""
-"Nu puteți șterge această categorie de produse, este categoria generică "
-"implicită."
+"Nu puteți șterge valoarea %(value)s deoarece este folosită pe următoarele "
+"produse:\n"
+"%(products)s\n"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"You cannot move the attribute %(attribute)s from the product %(product_src)s"
-" to the product %(product_dest)s."
+"You cannot move the attribute %(attribute)s from the product %(product_src)s "
+"to the product %(product_dest)s."
 msgstr ""
-"Nu puteți muta atributul%(attribute)s de la produsul%(product_src)s la "
+"Nu puteți muta atributul %(attribute)s de la produsul %(product_src)s la "
 "produsul %(product_dest)s."
 
 #. module: product
@@ -4169,8 +4677,11 @@ msgstr ""
 #: code:addons/product/static/src/product_catalog/kanban_renderer.xml:0
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
-"                            whether it's a storable product, a consumable or a service."
+"                            whether it's a storable product, a consumable or "
+"a service."
 msgstr ""
+"Trebuie să definiți un produs pentru tot ceea ce vindeți sau cumpărați, fie "
+"că este un produs stocabil, un consumabil sau un serviciu."
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_normal_action
@@ -4187,28 +4698,39 @@ msgstr ""
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
 "                whether it's a storable product, a consumable or a service.\n"
-"                The product form contains information to simplify the sale process:\n"
-"                price, notes in the quotation, accounting data, procurement methods, etc."
+"                The product form contains information to simplify the sale "
+"process:\n"
+"                price, notes in the quotation, accounting data, procurement "
+"methods, etc."
 msgstr ""
-"Trebuie să definiți un produs pentru tot ceea ce vindeți sau cumpărați, indiferent dacă este un produs stocabil, un consumabil sau un serviciu.\n"
-"Formularul de produs conține informații pentru simplificarea procesului de vânzare: preț, note pentru ofertă, date contabile, metode de achiziție etc."
+"Trebuie să definiți un produs pentru tot ceea ce vindeți sau cumpărați, "
+"indiferent dacă este un produs stocabil, un consumabil sau un serviciu.\n"
+"Formularul de produs conține informații pentru simplificarea procesului de "
+"vânzare: preț, note pentru ofertă, date contabile, metode de achiziție etc."
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_normal_action_sell
 msgid ""
-"You must define a product for everything you sell, whether it's a physical product,\n"
+"You must define a product for everything you sell, whether it's a physical "
+"product,\n"
 "                a consumable or a service you offer to customers.\n"
-"                The product form contains information to simplify the sale process:\n"
-"                price, notes in the quotation, accounting data, procurement methods, etc."
+"                The product form contains information to simplify the sale "
+"process:\n"
+"                price, notes in the quotation, accounting data, procurement "
+"methods, etc."
 msgstr ""
-"Trebuie să definiți un produs pentru tot ceea ce vindeți, indiferent dacă este vorba despre un produs fizic, un consumabil sau un serviciu pe care îl oferiți clienților.\n"
-"Formularul de produs conține informații pentru a simplifica procesul de vânzare: prețul, notele în cotație, datele contabile, metodele de achiziție etc."
+"Trebuie să definiți un produs pentru tot ceea ce vindeți, indiferent dacă "
+"este vorba despre un produs fizic, un consumabil sau un serviciu pe care îl "
+"oferiți clienților.\n"
+"Formularul de produs conține informații pentru a simplifica procesul de "
+"vânzare: prețul, notele în cotație, datele contabile, metodele de achiziție "
+"etc."
 
 #. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.js:0
 msgid "You must leave at least one quantity."
-msgstr ""
+msgstr "Trebuie să lăsați cel puțin o cantitate."
 
 #. module: product
 #. odoo-python
@@ -4217,10 +4739,21 @@ msgid "You need to set a positive quantity."
 msgstr "Trebuie să setați o cantitate pozitivă."
 
 #. module: product
+#: model:product.attribute.value,name:product.pav_brand_zara
+msgid "Zara"
+msgstr "Zara"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_attribute.py:0
+msgid "attribute_id"
+msgstr ""
+
+#. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "csv"
-msgstr ""
+msgstr "csv"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
@@ -4237,12 +4770,12 @@ msgstr "reducere"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_product_view_form_normalized
 msgid "e.g. 1234567890"
-msgstr ""
+msgstr "ex. 1234567890"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_combo_view_form
 msgid "e.g. Burger Choice"
-msgstr ""
+msgstr "ex. Opțiune Burger"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_product_view_form_normalized
@@ -4258,12 +4791,12 @@ msgstr "e.g. Lămpi"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
 msgid "e.g. Odoo Enterprise Subscription"
-msgstr "e.g. Abonament Odoo Enterprise "
+msgstr "e.g. Abonament Odoo Enterprise"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "e.g. Starter - Meal - Desert"
-msgstr ""
+msgstr "ex. Gustare - Fel principal - Desert"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
@@ -4272,9 +4805,15 @@ msgstr "e.g. Retaileri USD"
 
 #. module: product
 #. odoo-python
+#: code:addons/product/models/product_template_attribute_line.py:0
+msgid "id"
+msgstr "id"
+
+#. module: product
+#. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid "markup"
-msgstr ""
+msgstr "adaos"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_form
@@ -4304,24 +4843,19 @@ msgstr "produs"
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid "product cost"
-msgstr ""
+msgstr "cost produs"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid "round off to 10.00 and set an extra at -0.01"
-msgstr ""
+msgstr "rotunjiți la 10.00 și setați un supliment de -0.01"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid "sales price"
-msgstr ""
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.view_partner_property_form
-msgid "the parent company"
-msgstr "compania părinte"
+msgstr "preț vânzare"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
@@ -4337,4 +4871,478 @@ msgstr "la"
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "xlsx"
-msgstr ""
+msgstr "xlsx"
+
+#~ msgid "$14.00"
+#~ msgstr "$14.00"
+
+#~ msgid "$15.00"
+#~ msgstr "$15.00"
+
+#~ msgid "10"
+#~ msgstr "10"
+
+#~ msgid "100"
+#~ msgstr "100"
+
+#~ msgid "120"
+#~ msgstr "120"
+
+#~ msgid "123456789012"
+#~ msgstr "123456789012"
+
+#~ msgid "140"
+#~ msgstr "140"
+
+#~ msgid "160"
+#~ msgstr "160"
+
+#~ msgid "39"
+#~ msgstr "39"
+
+#~ msgid "40"
+#~ msgstr "40"
+
+#~ msgid "41"
+#~ msgstr "41"
+
+#~ msgid "42"
+#~ msgstr "42"
+
+#~ msgid "43"
+#~ msgstr "43"
+
+#~ msgid "45"
+#~ msgstr "45"
+
+#~ msgid "85"
+#~ msgstr "85"
+
+#~ msgid ""
+#~ "You cannot assign the Main Pricelist as Other Pricelist in PriceList Item"
+#~ msgstr ""
+#~ "Nu puteți atribui Lista de preț principală ca altă Lista de preț în "
+#~ "elementele listei de prețuri"
+
+#~ msgid ""
+#~ "%(base)s with a %(discount)s %% discount and %(surcharge)s extra fee\n"
+#~ "Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
+#~ "(total_amount)s"
+#~ msgstr ""
+#~ "%(base)s cu %(discount)s %% reducere și %(surcharge)s extra \n"
+#~ "Exemplu: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
+#~ "(total_amount)s"
+
+#~ msgid "%(percentage)s %% discount and %(price)s surcharge"
+#~ msgstr "%(percentage)s%%reducere și  %(price)s suprataxă"
+
+#~ msgid "%s %% discount"
+#~ msgstr "%s %% discount"
+
+#~ msgid "'Products packaging - %s' % (object.name)"
+#~ msgstr "'Produse ambalate - %s' % (object.name)"
+
+#~ msgid ""
+#~ "- Instantly: All possible variants are created as soon as the attribute "
+#~ "and its values are added to a product.\n"
+#~ "        - Dynamically: Each variant is created only when its "
+#~ "corresponding attributes and values are added to a sales order.\n"
+#~ "        - Never: Variants are never created for the attribute.\n"
+#~ "        Note: the variants creation mode cannot be changed once the "
+#~ "attribute is used on at least one product."
+#~ msgstr ""
+#~ "- Instant: Toate variantele posibile sunt create imediat ce atributul și "
+#~ "valorile acestuia sunt adăugate la un produs.\n"
+#~ "- Dinamic: fiecare variantă este creată numai atunci când atributele și "
+#~ "valorile corespunzătoare sunt adăugate la o comandă de vânzare.\n"
+#~ "- Niciodată: Variantele nu sunt create niciodată pentru atribut.\n"
+#~ "         Notă: modul de creare a variantelor nu poate fi schimbat odată "
+#~ "ce atributul este utilizat pe cel puțin un produs."
+
+#~ msgid "160x80cm, with large legs."
+#~ msgstr "160x80cm, cu picioare mari."
+
+#~ msgid "2 year"
+#~ msgstr "2 ani"
+
+#~ msgid "<span class=\"o_stat_text\">Related Products</span>"
+#~ msgstr "<span class=\"o_stat_text\">Produse asociate</span>"
+
+#~ msgid ""
+#~ "A storable product is a product for which you manage stock. The Inventory "
+#~ "app has to be installed.\n"
+#~ "A consumable product is a product for which stock is not managed.\n"
+#~ "A service is a non-material product you provide."
+#~ msgstr ""
+#~ "Un produs stocabil este un produs pentru care gestionați stocul. "
+#~ "Aplicația \"Inventar\" trebuie instalată.\n"
+#~ "Un produs consumabil, pe de altă parte, este un produs pentru care nu "
+#~ "este gestionat stocul.\n"
+#~ "Un serviciu este un produs nematerial pe care îl oferiți."
+
+#~ msgid "Advanced Pricelists"
+#~ msgstr "Listă prețuri avansată "
+
+#~ msgid "Advanced price rules (discounts, formulas)"
+#~ msgstr "Reguli avansate de preț (reduceri, formule)"
+
+#~ msgid "Allow users to input custom values for this attribute value"
+#~ msgstr ""
+#~ "Permiteți utilizatorilor să introducă valori personalizate pentru această "
+#~ "valoare de atribut"
+
+#~ msgid ""
+#~ "Allows to manage different prices based on rules per category of "
+#~ "customers.\n"
+#~ "                Example: 10% for retailers, promotion of 5 EUR on this "
+#~ "product, etc."
+#~ msgstr ""
+#~ "Permite gestionarea prețurilor diferite pe baza regulilor pe categorii de "
+#~ "clienți.\n"
+#~ "Exemplu: 10% pentru comercianți cu amănuntul, promoție de 5 EUR la acest "
+#~ "produs etc."
+
+#~ msgid "Applicable On"
+#~ msgstr "Aplicabil la"
+
+#~ msgid "Availability"
+#~ msgstr "Disponibilitate"
+
+#~ msgid ""
+#~ "Barcode used for packaging identification. Scan this packaging barcode "
+#~ "from a transfer in the Barcode app to move all the contained units"
+#~ msgstr ""
+#~ "Cod de bare utilizat pentru identificarea ambalajului. Scanează acest cod "
+#~ "de bare de ambalare dintr-un transfer în aplicația Coduri de bare pentru "
+#~ "a muta toate unitățile conținute"
+
+#~ msgid "Can be Purchased"
+#~ msgstr "Poate fi achiziționat"
+
+#~ msgid "Can be Sold"
+#~ msgstr "Poate fi vândut"
+
+#~ msgid "Choose Labels Layout"
+#~ msgstr "Alegeți aspectul etichetelor"
+
+#~ msgid "Computation"
+#~ msgstr "Calcul"
+
+#~ msgid "Conditions"
+#~ msgstr "Condiții"
+
+#~ msgid "Conference room table"
+#~ msgstr "Masă pentru sală de conferințe"
+
+#~ msgid "Configuration"
+#~ msgstr "Configurare"
+
+#~ msgid "Consumable"
+#~ msgstr "Consumabil"
+
+#~ msgid ""
+#~ "Consumables are physical products for which you don't manage the "
+#~ "inventory level: they are always available."
+#~ msgstr ""
+#~ "Consumabilele sunt produse fizice pentru care nu gestionați stocul sunt "
+#~ "întotdeauna disponibile."
+
+#~ msgid "Contact Us"
+#~ msgstr "Contactați-ne"
+
+#~ msgid "Contained Quantity"
+#~ msgstr "Cantitate cuprinsă"
+
+#~ msgid "Contained Quantity should be positive."
+#~ msgstr "Cantitatea cuprinsă ar trebui să fie pozitivă."
+
+#~ msgid "Contained quantity"
+#~ msgstr "Cantitate cuprinsă"
+
+#~ msgid "Cubic Feet"
+#~ msgstr "Cubic Feet"
+
+#~ msgid "Cubic Meters"
+#~ msgstr "Metri cubi"
+
+#~ msgid "Decimal Precision"
+#~ msgstr "Precizie zecimală"
+
+#~ msgid ""
+#~ "Default unit of measure used for purchase orders. It must be in the same "
+#~ "category as the default unit of measure."
+#~ msgstr ""
+#~ "Unitatea de măsură implicită folosită pentru comenzile de achiziție. "
+#~ "Acesta trebuie să fie în aceeași categorie cu unitatea de măsură "
+#~ "implicită."
+
+#~ msgid "Delivery Lead Time"
+#~ msgstr "Timpul total de livrare"
+
+#~ msgid "Desk combination, black-brown: chair + desk + drawer."
+#~ msgstr "Combinație de birou, negru-maro: scaun + birou + sertar."
+
+#~ msgid "Discount Policy"
+#~ msgstr "Politică Reducere"
+
+#~ msgid "Discount included in the price"
+#~ msgstr "Reducere inclusă în preț"
+
+#~ msgid "Discount on lines"
+#~ msgstr "Reduceri pe linii"
+
+#~ msgid "Discounts"
+#~ msgstr "Reduceri"
+
+#~ msgid "Display Pricelist"
+#~ msgstr "Afișare Listă Prețuri"
+
+#~ msgid "Drawer with two routing possiblities."
+#~ msgstr "Sertar cu două posibilități de rutare."
+
+#~ msgid "Four person modern office workstation"
+#~ msgstr "Stație de lucru modernă pentru patru persoane"
+
+#~ msgid "Generate Pricelist Report"
+#~ msgstr "Generați raportul listei de prețuri"
+
+#~ msgid "Get product pictures using Barcode"
+#~ msgstr "Obțineți imagini de produs folosind codul de bare"
+
+#~ msgid "Gives the different ways to package the same product."
+#~ msgstr "Oferă diferite modalități de a ambala același produs."
+
+#~ msgid "Google Images"
+#~ msgstr "Imagini Google"
+
+#~ msgid "Group By"
+#~ msgstr "Grupează după"
+
+#~ msgid "Is custom value"
+#~ msgstr "Valoare personalizată"
+
+#~ msgid "Kilograms"
+#~ msgstr "Kilograme"
+
+#~ msgid "Manage Product Packaging"
+#~ msgstr "Gestionați Ambalarea Produsului"
+
+#~ msgid "Multiple prices per product"
+#~ msgstr "Prețuri multiple pe produs"
+
+#~ msgid ""
+#~ "Multiple prices: Pricelists with fixed price rules by product,\n"
+#~ "Advanced rules: enables advanced price rules for pricelists."
+#~ msgstr ""
+#~ "Prețuri multiple: Liste de prețuri cu reguli de preț fixe în funcție de "
+#~ "produs,\n"
+#~ "Reguli avansate: permite reguli avansate de preț pentru listele de "
+#~ "prețuri."
+
+#~ msgid "Never (option)"
+#~ msgstr "Niciodată (opțiune)"
+
+#~ msgid "Normal"
+#~ msgstr "Normal"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Număr de mesaje ce necesită intervenție"
+
+#~ msgid "Number of price rules"
+#~ msgstr "Numărul de reguli de preț"
+
+#~ msgid "Packaging"
+#~ msgstr "Ambalare"
+
+#~ msgid "Pounds"
+#~ msgstr "Lire"
+
+#~ msgid "Price Computation"
+#~ msgstr "Calcul preț"
+
+#~ msgid "Price Surcharge"
+#~ msgstr "Suprataxare preț"
+
+#~ msgid "Pricelist:"
+#~ msgstr "Listă de prețuri:"
+
+#~ msgid "Pricelists Method"
+#~ msgstr "Metoda listelor de prețuri"
+
+#~ msgid "Pricelists are managed on"
+#~ msgstr "Listele de prețuri sunt gestionate în"
+
+#~ msgid "Product Packages"
+#~ msgstr "Pachete de produse"
+
+#~ msgid "Product Packaging"
+#~ msgstr "Ambalare Produs"
+
+#~ msgid "Product Packaging (PDF)"
+#~ msgstr "Ambalare produs (PDF)"
+
+#~ msgid "Product Packagings"
+#~ msgstr "Împachetare produse"
+
+#~ msgid "Product: %s"
+#~ msgstr "Produs: %s"
+
+#~ msgid "Purchase UoM"
+#~ msgstr "UM achiziție"
+
+#~ msgid "Quantity of products contained in the packaging."
+#~ msgstr "Cantitatea de produse conținută în ambalaj."
+
+#~ msgid "Rounding Method"
+#~ msgstr "Metodă de rotunjire"
+
+#~ msgid "Sales Grid Entry"
+#~ msgstr "Intrare Grilă Vânzări"
+
+#~ msgid ""
+#~ "Sets the price so that it is a multiple of this value.\n"
+#~ "Rounding is applied after the discount and before the surcharge.\n"
+#~ "To have prices that end in 9.99, set rounding 10, surcharge -0.01"
+#~ msgstr ""
+#~ "Seteaza pretul astfel incat sa fie un multiplu al acestei valori.\n"
+#~ "Rotunjirea se aplica dupa reducere si inainte de majorare.\n"
+#~ "Pentru a avea preturi care se termină in 9.99, setati rotunjirea la 10, "
+#~ "iar majorarea la -0.01"
+
+#~ msgid "Show all records which has next action date is before today"
+#~ msgstr ""
+#~ "Afișați toate înregistrările care au data următoarei acțiuni în trecut"
+
+#~ msgid "Show public price & discount to the customer"
+#~ msgstr "Afișează clientului prețul public și discountul"
+
+#~ msgid "Tag Name"
+#~ msgstr "Nume eticheta"
+
+#~ msgid "The Type of this product doesn't match the Detailed Type"
+#~ msgstr "Tipul acestui produs nu se potrivește cu Tipul detaliat"
+
+#~ msgid ""
+#~ "The computed price is expressed in the default Unit of Measure of the "
+#~ "product."
+#~ msgstr ""
+#~ "Prețul calculat exprimat pe unitatea de măsură implicită a produsului"
+
+#~ msgid ""
+#~ "The default Unit of Measure and the purchase Unit of Measure must be in "
+#~ "the same category."
+#~ msgstr ""
+#~ "Unitatea de măsură implicită și Unitatea de măsură de cumpărare trebuie "
+#~ "să fie din aceeași categorie."
+
+#~ msgid "The first in the sequence is the default one."
+#~ msgstr "Primul din secvență este cel implicit."
+
+#~ msgid ""
+#~ "The number of variants to generate is too high. You should either not "
+#~ "generate variants for each combination or generate them on demand from "
+#~ "the sales order. To do so, open the form view of attributes and change "
+#~ "the mode of *Create Variants*."
+#~ msgstr ""
+#~ "Numărul de variante de generat este prea mare. Nu trebuie să generați "
+#~ "variante pentru fiecare combinație sau să generați variante opțional din "
+#~ "comanda de vânzări. Pentru a face acest lucru, deschideți ecranul de "
+#~ "atribute și schimbați modul de generare a variantelor."
+
+#~ msgid ""
+#~ "The quantity to purchase from this vendor to benefit from the price, "
+#~ "expressed in the vendor Product Unit of Measure if not any, in the "
+#~ "default unit of measure of the product otherwise."
+#~ msgstr ""
+#~ "Cantitatea de cumpărat de la acest furnizor pentru a beneficia de preț, "
+#~ "exprimată în unitatea de măsură a produsului furnizorului dacă nu există, "
+#~ "în unitatea de măsură implicită a produsului în caz contrar."
+
+#~ msgid ""
+#~ "This pricelist will be used, instead of the default one, for sales to the "
+#~ "current partner"
+#~ msgstr ""
+#~ "Aceasta lista de prețuri va fi folosită în locul celei implicite pentru "
+#~ "vânzările către partenerul curent"
+
+#~ msgid ""
+#~ "This rounding precision is higher than the Decimal Accuracy (%s digits).\n"
+#~ "This may cause inconsistencies in computations.\n"
+#~ "Please set a precision between %s and 1."
+#~ msgstr ""
+#~ "Această precizie de rotunjire este mai mare decât Precizia zecimală (%s "
+#~ "cifre).\n"
+#~ "Acest lucru poate cauza neconcordanțe în calcule.\n"
+#~ "Vă rugăm să setați o precizie între %s și 1"
+
+#~ msgid "Three Seater Sofa with Lounger in Steel Grey Colour"
+#~ msgstr "Sofă cu 3 locuri și un loc de relaxare în gri metalic"
+
+#~ msgid "Three-Seat Sofa"
+#~ msgstr "Canapea cu trei locuri"
+
+#~ msgid "Unit of Measure"
+#~ msgstr "Unitatea de măsură"
+
+#~ msgid "Unit of Measure Name"
+#~ msgstr "Nume unitate de măsură"
+
+#~ msgid "UoM"
+#~ msgstr "UM"
+
+#~ msgid "Value Price Extra"
+#~ msgstr "Valoare Preț Extra"
+
+#~ msgid "Variants Creation Mode"
+#~ msgstr "Mod generare variante"
+
+#~ msgid "Warning!"
+#~ msgstr "Atenție!"
+
+#~ msgid ""
+#~ "You are setting a Decimal Accuracy less precise than the UOMs:\n"
+#~ "%s\n"
+#~ "This may cause inconsistencies in computations.\n"
+#~ "Please increase the rounding of those units of measure, or the digits of "
+#~ "this Decimal Accuracy."
+#~ msgstr ""
+#~ "Setați o precizie zecimală mai puțin precisă decât UOMs:\n"
+#~ "%s\n"
+#~ "Aceasta poate cauza inconsistențe în calcule.\n"
+#~ "Vă rugăm să creșteți rotunjirea acestor unități de măsură, sau cifrele "
+#~ "acestei precizii zecimale."
+
+#~ msgid ""
+#~ "You cannot create two values with the same name for the same attribute."
+#~ msgstr "Nu puteți crea două valori cu același nume pentru același atribut."
+
+#~ msgid ""
+#~ "You cannot define the decimal precision of 'Account' as greater than the "
+#~ "rounding factor of the company's main currency"
+#~ msgstr ""
+#~ "Nu puteți defini precizia zecimală a \"contului\" ca fiind mai mare decât "
+#~ "factorul de rotunjire a monedei principale a companiei"
+
+#~ msgid "You cannot delete the %s product category."
+#~ msgstr "Nu puteți șterge categoria de produse %s."
+
+#~ msgid ""
+#~ "You cannot delete this product category, it is the default generic "
+#~ "category."
+#~ msgstr ""
+#~ "Nu puteți șterge această categorie de produse, este categoria generică "
+#~ "implicită."
+
+#~ msgid ""
+#~ "You cannot delete those pricelist(s):\n"
+#~ "(%s)\n"
+#~ ", they are used in other pricelist(s):\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Nu puteți șterge aceste liste de prețuri:\n"
+#~ "(%s)\n"
+#~ ", sunt utilizate în alte liste de prețuri:\n"
+#~ "%s"
+
+#~ msgid "the parent company"
+#~ msgstr "compania părinte"

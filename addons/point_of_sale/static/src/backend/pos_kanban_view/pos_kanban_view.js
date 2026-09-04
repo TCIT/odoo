@@ -1,13 +1,12 @@
-/** @odoo-module **/
-
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { registry } from "@web/core/registry";
+import { cookie } from "@web/core/browser/cookie";
 import { kanbanView } from "@web/views/kanban/kanban_view";
 import { onWillStart, useState, onWillRender } from "@odoo/owl";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
-import { useTrackedAsync } from "@point_of_sale/app/utils/hooks";
+import { useTrackedAsync } from "@point_of_sale/app/hooks/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { KanbanController } from "@web/views/kanban/kanban_controller";
 
@@ -21,6 +20,7 @@ export class PosKanbanController extends KanbanController {
     setup() {
         super.setup();
         this.orm = useService("orm");
+        this.action = useService("action");
         this.initialPosState = {
             has_pos_config: true,
             has_chart_template: true,
@@ -41,21 +41,24 @@ export class PosKanbanRenderer extends KanbanRenderer {
         this.orm = useService("orm");
         this.action = useService("action");
         this.posState = useState(this.props.initialPosState);
-        this.loadScenario = useTrackedAsync(async ({ functionName, isRestaurant }) => {
-            return await this.callWithViewUpdate(async () => {
-                let isInstalledWithDemo = false;
-                if (isRestaurant && !this.posState.is_restaurant_installed) {
-                    const result = await this.orm.call("pos.config", "install_pos_restaurant");
-                    isInstalledWithDemo = result.installed_with_demo;
-                }
-                if (
-                    !isInstalledWithDemo ||
-                    (isInstalledWithDemo && !this.posState.is_main_company)
-                ) {
-                    await this.orm.call("pos.config", functionName);
-                }
-            });
-        });
+        this.loadScenario = useTrackedAsync(
+            async ({ functionName, isRestaurant }) =>
+                await this.callWithViewUpdate(async () => {
+                    let isInstalledWithDemo = false;
+                    if (isRestaurant && !this.posState.is_restaurant_installed) {
+                        const result = await this.orm.call("pos.config", "install_pos_restaurant");
+                        isInstalledWithDemo = result.installed_with_demo;
+                    }
+                    if (
+                        !isInstalledWithDemo ||
+                        (isInstalledWithDemo && !this.posState.is_main_company)
+                    ) {
+                        // load onboarding scenario without demo data
+                        const result = await this.orm.call("pos.config", functionName, [false]);
+                        return result;
+                    }
+                })
+        );
 
         onWillRender(() => this.checkDisplayedResult());
     }
@@ -71,10 +74,18 @@ export class PosKanbanRenderer extends KanbanRenderer {
         this.posState.show_predefined_scenarios = this.props.list.count === 0;
     }
 
+    get isDarkTheme() {
+        return cookie.get("color_scheme") === "dark";
+    }
+
     async callWithViewUpdate(func) {
         try {
-            const isPosManager = await user.hasGroup("point_of_sale.group_pos_manager");
-            if (!isPosManager) {
+            const [isPosManager, isAdmin] = await Promise.all([
+                user.hasGroup("point_of_sale.group_pos_manager"),
+                user.hasGroup("base.group_system"),
+            ]);
+
+            if (!(isPosManager && isAdmin)) {
                 this.dialog.add(AlertDialog, {
                     title: _t("Access Denied"),
                     body: _t(
@@ -83,8 +94,9 @@ export class PosKanbanRenderer extends KanbanRenderer {
                 });
                 return;
             }
-            await func();
+            const result = await func();
             await updatePosKanbanViewState(this.orm, this.posState);
+            return result;
         } finally {
             this.env.searchModel.clearQuery();
         }
@@ -96,19 +108,19 @@ export class PosKanbanRenderer extends KanbanRenderer {
                 name: _t("Clothes"),
                 description: _t("Multi colors and sizes"),
                 functionName: "load_onboarding_clothes_scenario",
-                iconFile: "clothes-icon.png",
+                iconFile: this.isDarkTheme ? "clothes-icon-dark.png" : "clothes-icon.png",
             },
             {
                 name: _t("Furniture"),
                 description: _t("Stock, product configurator, replenishment, discounts"),
                 functionName: "load_onboarding_furniture_scenario",
-                iconFile: "furniture-icon.png",
+                iconFile: this.isDarkTheme ? "furniture-icon-dark.png" : "furniture-icon.png",
             },
             {
                 name: _t("Bakery"),
                 description: _t("Food, but over the counter"),
                 functionName: "load_onboarding_bakery_scenario",
-                iconFile: "bakery-icon.png",
+                iconFile: this.isDarkTheme ? "bakery-icon-dark.png" : "bakery-icon.png",
             },
         ];
     }
@@ -120,20 +132,26 @@ export class PosKanbanRenderer extends KanbanRenderer {
                 isRestaurant: true,
                 description: _t("Tables, menus, kitchen display, etc."),
                 functionName: "load_onboarding_restaurant_scenario",
-                iconFile: "restaurant-icon.png",
+                iconFile: this.isDarkTheme ? "restaurant-icon-dark.png" : "restaurant-icon.png",
             },
             {
                 name: _t("Bar"),
                 isRestaurant: true,
                 description: _t("Floor plan, tips, self order, etc."),
                 functionName: "load_onboarding_bar_scenario",
-                iconFile: "cocktail-icon.png",
+                iconFile: this.isDarkTheme ? "cocktail-icon-dark.png" : "cocktail-icon.png",
             },
         ];
     }
 
-    createNewProducts() {
-        window.open("/odoo/action-point_of_sale.action_client_product_menu", "_self");
+    get retailScenario() {
+        return {
+            name: _t("Retail"),
+            isRestaurant: false,
+            description: _t("Any shop"),
+            functionName: "load_onboarding_retail_scenario",
+            iconFile: this.isDarkTheme ? "retail-icon-dark.png" : "retail-icon.png",
+        };
     }
 
     showTopBorder() {

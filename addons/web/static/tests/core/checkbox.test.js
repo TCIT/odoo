@@ -18,7 +18,7 @@ test("has a slot for translatable text", async () => {
     class Parent extends Component {
         static components = { CheckBox };
         static props = {};
-        static template = xml`<CheckBox>ragabadabadaba</CheckBox>`;
+        static template = xml`<div t-translation-context="web"><CheckBox>ragabadabadaba</CheckBox></div>`;
     }
 
     await mountWithCleanup(Parent);
@@ -132,4 +132,17 @@ test("toggling through multiple ways", async () => {
 
     expect(`.o-checkbox input`).not.toBeChecked();
     expect.verifySteps(["true", "false", "true", "false"]);
+});
+
+test("checkbox with props indeterminate", async () => {
+    class Parent extends Component {
+        static components = { CheckBox };
+        static props = {};
+        static template = xml`<CheckBox indeterminate="true" />`;
+    }
+
+    await mountWithCleanup(Parent);
+
+    expect(`.o-checkbox input`).toHaveCount(1);
+    expect(`.o-checkbox input`).toBeChecked({ indeterminate: true });
 });

@@ -1,25 +1,25 @@
 declare module "models" {
     import { DiscussApp as DiscussAppClass } from "@mail/core/public_web/discuss_app_model";
-    import { DiscussAppCategory as DiscussAppCategoryClass } from "@mail/core/public_web/discuss_app_category_model";
 
-    export interface DiscussApp extends DiscussAppClass { }
-    export interface DiscussAppCategory extends DiscussAppCategoryClass { }
+    export interface DiscussApp extends DiscussAppClass {}
+
     export interface Store {
-        DiscussApp: DiscussApp,
-        DiscussAppCategory : DiscussAppCategory,
-        discuss: DiscussApp,
-        action_discuss_id: number,
-        getDiscussSidebarCategoryCounter: (categoryId: number) => number,
+        action_discuss_id: number|undefined;
+        discuss: DiscussApp;
+        DiscussApp: StaticMailRecord<DiscussApp, typeof DiscussAppClass>;
     }
-
     export interface Thread {
-        discussAppCategory: DiscussAppCategory,
-        setAsDiscussThread: (pushState: boolean) => void,
-        unpin: () => Promise<void>,
+        askLeaveConfirmation: (body: string) => Promise<void>;
+        autoOpenChatWindowOnNewMessage: Readonly<boolean>;
+        inChathubOnNewMessage: Readonly<boolean>;
+        notifyMessageToUser: (message: Message) => Promise<void>;
+        notifyWhenOutOfFocus: Readonly<boolean>;
+        setActiveURL: () => void;
+        setAsDiscussThread: (pushState: boolean) => void;
+        unpin: () => Promise<void>;
     }
 
     export interface Models {
-        "DiscussApp": DiscussApp,
-        "DiscussAppCategory": DiscussAppCategory,
+        DiscussApp: DiscussApp;
     }
 }

@@ -5,8 +5,14 @@ import io
 import json
 
 from odoo import _, api, models
-from odoo.tools import format_amount, format_date, format_datetime, pdf
-from odoo.tools.pdf import PdfFileWriter, PdfFileReader, NameObject, NumberObject, createStringObject
+from odoo.tools import format_amount, format_date, format_datetime, pdf, str2bool
+from odoo.tools.pdf import (
+    NameObject,
+    NumberObject,
+    PdfFileReader,
+    PdfFileWriter,
+    createStringObject,
+)
 
 
 class IrActionsReport(models.Model):
@@ -18,11 +24,15 @@ class IrActionsReport(models.Model):
         if self._get_report(report_ref).report_name != 'sale.report_saleorder':
             return result
 
+        ICP = self.env['ir.config_parameter'].sudo()
+        always_include = str2bool(ICP.get_param('sale.always_include_selected_documents'))
         orders = self.env['sale.order'].browse(res_ids)
 
         for order in orders:
-            initial_stream = result[order.id]['stream']
-            if initial_stream:
+            if (
+                (order.state != 'sale' or always_include)
+                and (initial_stream := result.get(order.id, {}).get('stream'))
+            ):
                 quotation_documents = order.quotation_document_ids
                 headers = quotation_documents.filtered(lambda doc: doc.document_type == 'header')
                 footers = quotation_documents - headers
@@ -88,7 +98,7 @@ class IrActionsReport(models.Model):
                            order lines.
         :param recordset order: the sale order from where to take the values
         :param recordset order_line: the sale order line from where to take the values (optional)
-        return: None
+        :return: None
         """
         document.ensure_one()
         order.ensure_one()
@@ -142,7 +152,7 @@ class IrActionsReport(models.Model):
                     formatted_value_ = format_amount(
                         self.env, value_, currency_id_ or order.currency_id
                     )
-                elif not value_:
+                elif not value_ and field_type_ not in {'integer', 'float'}:
                     formatted_value_ = ''
                 elif field_type_ == 'date':
                     formatted_value_ = format_date(self.env, value_)
@@ -172,14 +182,14 @@ class IrActionsReport(models.Model):
         :return: value that need to be shown in the final pdf.
         :rtype: str
         """
-        existing_mapping = json.loads(order.customizable_pdf_form_fields)
+        existing_mapping = json.loads(order.customizable_pdf_form_fields or '{}')
         if order_line:
             base_values = existing_mapping.get('line', {}).get(str(order_line.id), {})
         elif document.document_type == 'header':
             base_values = existing_mapping.get('header', {})
         else:
             base_values = existing_mapping.get('footer', {})
-        custom_form_fields = base_values.get(str(document.id), {}).get('custom_form_fields')
+        custom_form_fields = base_values.get(str(document.id), {}).get('custom_form_fields', {})
         return custom_form_fields.get(form_field_name, "")
 
     @api.model
@@ -206,6 +216,9 @@ class IrActionsReport(models.Model):
                 # Modifying the annots that hold every information about the form fields
                 for j in range(len(page['/Annots'])):
                     reader_annot = page['/Annots'][j].getObject()
+                    # Check parent object for '/T' if missing.
+                    if '/T' not in reader_annot and '/Parent' in reader_annot:
+                        reader_annot = reader_annot['/Parent'].getObject()
                     if reader_annot.get('/T') in field_names:
                         # Prefix all form fields in the document with the document identifier.
                         # This is necessary to know which value needs to be taken when filling the forms.

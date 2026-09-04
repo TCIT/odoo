@@ -1,13 +1,18 @@
 import * as PosLoyalty from "@pos_loyalty/../tests/tours/utils/pos_loyalty_util";
-import * as ProductScreen from "@point_of_sale/../tests/tours/utils/product_screen_util";
-import * as TicketScreen from "@point_of_sale/../tests/tours/utils/ticket_screen_util";
-import * as Dialog from "@point_of_sale/../tests/tours/utils/dialog_util";
-import * as Chrome from "@point_of_sale/../tests/tours/utils/chrome_util";
-import * as PartnerList from "@point_of_sale/../tests/tours/utils/partner_list_util";
+import * as ProductScreen from "@point_of_sale/../tests/pos/tours/utils/product_screen_util";
+import * as TicketScreen from "@point_of_sale/../tests/pos/tours/utils/ticket_screen_util";
+import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
+import * as Chrome from "@point_of_sale/../tests/pos/tours/utils/chrome_util";
+import * as PartnerList from "@point_of_sale/../tests/pos/tours/utils/partner_list_util";
+import * as PaymentScreen from "@point_of_sale/../tests/pos/tours/utils/payment_screen_util";
+import * as Numpad from "@point_of_sale/../tests/generic_helpers/numpad_util";
+import * as Order from "@point_of_sale/../tests/generic_helpers/order_widget_util";
+import * as ReceiptScreen from "@point_of_sale/../tests/pos/tours/utils/receipt_screen_util";
+import { negateStep } from "@point_of_sale/../tests/generic_helpers/utils";
+import { delay } from "@web/core/utils/concurrency";
 import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("EWalletProgramTour1", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -28,12 +33,52 @@ registry.category("web_tour.tours").add("EWalletProgramTour1", {
             ProductScreen.addOrderline("Top-up eWallet", "1", "10"),
             PosLoyalty.orderTotalIs("10.00"),
             PosLoyalty.finalizeOrder("Cash", "10"),
+
+            // Check numpad visibility when clicking on eWallet orderline
+            ProductScreen.addOrderline("Whiteboard Pen"),
+            ProductScreen.clickPartnerButton(),
+            ProductScreen.clickCustomer("AAAAAAA"),
+            PosLoyalty.eWalletButtonState({
+                highlighted: true,
+                text: getEWalletText("Pay"),
+                click: true,
+            }),
+            PosLoyalty.orderTotalIs("0.00"),
+            ...ProductScreen.clickLine("eWallet"),
+            // Added a small wait because the clickLine function uses a 300ms timeout
+            {
+                content: "Wait 300ms after clicking orderline",
+                trigger: "body",
+                async run() {
+                    await delay(300);
+                },
+            },
+            Numpad.isVisible(),
+            ...Order.hasLine({
+                withClass: ".selected",
+                run: "click",
+                productName: "eWallet",
+                quantity: "1.0",
+            }),
+            {
+                content: "Wait 300ms after clicking orderline",
+                trigger: "body",
+                async run() {
+                    await delay(300);
+                },
+            },
+            negateStep(Numpad.isVisible()),
+            {
+                content: "Click Current Balance line in orderline",
+                trigger: ".orderline li:contains(Current Balance:)",
+                run: "click",
+            },
+            Numpad.isVisible(),
         ].flat(),
 });
 
 const getEWalletText = (suffix) => "eWallet" + (suffix !== "" ? ` ${suffix}` : "");
 registry.category("web_tour.tours").add("EWalletProgramTour2", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -100,8 +145,10 @@ registry.category("web_tour.tours").add("EWalletProgramTour2", {
             // - Refund order.
             ...ProductScreen.clickRefund(),
             TicketScreen.filterIs("Paid"),
-            TicketScreen.selectOrder("-0004"),
+            TicketScreen.selectOrder("2004"),
             TicketScreen.confirmRefund(),
+            PaymentScreen.isShown(),
+            PaymentScreen.clickBack(),
             ProductScreen.isShown(),
             PosLoyalty.eWalletButtonState({
                 highlighted: true,
@@ -114,7 +161,6 @@ registry.category("web_tour.tours").add("EWalletProgramTour2", {
 });
 
 registry.category("web_tour.tours").add("ExpiredEWalletProgramTour", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -129,7 +175,6 @@ registry.category("web_tour.tours").add("ExpiredEWalletProgramTour", {
 });
 
 registry.category("web_tour.tours").add("PosLoyaltyPointsEwallet", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -149,7 +194,6 @@ registry.category("web_tour.tours").add("PosLoyaltyPointsEwallet", {
 });
 
 registry.category("web_tour.tours").add("EWalletLoyaltyHistory", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -172,5 +216,37 @@ registry.category("web_tour.tours").add("EWalletLoyaltyHistory", {
             }),
             PosLoyalty.orderTotalIs("0.00"),
             PosLoyalty.finalizeOrder("Cash", "0"),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("EWalletRefundCreditNoteQtyTour", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickPartnerButton(),
+            ProductScreen.clickCustomer("Ewal"),
+            ProductScreen.addOrderline("Whiteboard Pen", "1", "20", "20.00"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickInvoiceButton(),
+            PaymentScreen.isInvoiceOptionSelected(),
+            PaymentScreen.clickPaymentMethod("Cash"),
+            PaymentScreen.clickValidate(),
+            ReceiptScreen.clickNextOrder(),
+            ProductScreen.clickRefund(),
+            TicketScreen.filterIs("Paid"),
+            TicketScreen.selectOrder("Ewal"),
+            TicketScreen.confirmRefund(),
+            PaymentScreen.isShown(),
+            PaymentScreen.clickBack(),
+            PosLoyalty.eWalletButtonState({
+                highlighted: true,
+                text: getEWalletText("Refund"),
+                click: true,
+            }),
+            PosLoyalty.orderTotalIs("0.00"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.isInvoiceOptionSelected(),
+            PaymentScreen.clickValidate(),
         ].flat(),
 });

@@ -9,27 +9,27 @@
                 <div class="col-lg-6">
                     <div class="row">
                         <div class="col-12 pb32">
-                            <h3>Features showcase</h3>
+                            <h2 class="h3-fs">Features showcase</h2>
                             <p class="lead">A features section highlights your product’s key attributes, engaging visitors and boosting conversions.</p>
                         </div>
                         <div class="col-12 pt8 pb8" data-name="Feature">
                             <i class="s_showcase_icon fa fa-star-o me-auto rounded float-start bg-o-color-3" role="img"/>
                             <div class="d-flex flex-column">
-                                <h5 class="s_showcase_title">Highlights Key Attributes</h5>
+                                <h3 class="s_showcase_title h5-fs">Highlights Key Attributes</h3>
                                 <p>A feature section allows you to clearly showcase the main benefits and unique aspects of your product.</p>
                             </div>
                         </div>
                         <div class="col-12 pt8 pb8" data-name="Feature">
                             <i class="s_showcase_icon fa fa-user-o me-auto rounded float-start bg-o-color-3" role="img"/>
                             <div class="d-flex flex-column">
-                                <h5 class="s_showcase_title">Engages Visitors</h5>
+                                <h3 class="s_showcase_title h5-fs">Engages Visitors</h3>
                                 <p>It captures your visitors' attention and helps them quickly understand the value of your product.</p>
                             </div>
                         </div>
                         <div class="col-12 pt8 pb8" data-name="Feature">
                             <i class="s_showcase_icon fa fa-heart-o me-auto rounded float-start bg-o-color-3" role="img"/>
                             <div class="d-flex flex-column">
-                                <h5 class="s_showcase_title">Boosts Conversions</h5>
+                                <h3 class="s_showcase_title h5-fs">Boosts Conversions</h3>
                                 <p>Organizing and presenting key information effectively increases the likelihood of turning your visitors into customers.</p>
                             </div>
                         </div>
@@ -49,39 +49,25 @@
     </section>
 </template>
 
-<!-- Options -->
-<template id="s_showcase_options" inherit_id="website.snippet_options">
-    <xpath expr="//div[@data-js='Box']" position="before">
-        <div data-js="Showcase" data-selector=".s_showcase .row &gt; div:has(&gt; .s_showcase_title)"/>
-    </xpath>
-</template>
-
 <!-- Assets -->
-<record id="website.s_showcase_000_scss" model="ir.asset">
-    <field name="name">Showcase 000 SCSS</field>
-    <field name="bundle">web.assets_frontend</field>
-    <field name="path">website/static/src/snippets/s_showcase/000.scss</field>
-    <field name="active" eval="False"/>
-</record>
+<asset id="website.s_showcase_000_scss" name="Showcase 000 SCSS" active="False">
+    <bundle>web.assets_frontend</bundle>
+    <path>website/static/src/snippets/s_showcase/000.scss</path>
+</asset>
 
-<record id="website.s_showcase_001_scss" model="ir.asset">
-    <field name="name">Showcase 001 SCSS</field>
-    <field name="bundle">web.assets_frontend</field>
-    <field name="path">website/static/src/snippets/s_showcase/001.scss</field>
-    <field name="active" eval="False"/>
-</record>
+<asset id="website.s_showcase_001_scss" name="Showcase 001 SCSS" active="False">
+    <bundle>web.assets_frontend</bundle>
+    <path>website/static/src/snippets/s_showcase/001.scss</path>
+</asset>
 
-<record id="website.s_showcase_002_scss" model="ir.asset">
-    <field name="name">Showcase 002 SCSS</field>
-    <field name="bundle">web.assets_frontend</field>
-    <field name="path">website/static/src/snippets/s_showcase/002.scss</field>
-    <field name="active" eval="False"/>
-</record>
+<asset id="website.s_showcase_002_scss" name="Showcase 002 SCSS" active="False">
+    <bundle>web.assets_frontend</bundle>
+    <path>website/static/src/snippets/s_showcase/002.scss</path>
+</asset>
 
-<record id="website.s_showcase_003_scss" model="ir.asset">
-    <field name="name">Showcase 003 SCSS</field>
-    <field name="bundle">web.assets_frontend</field>
-    <field name="path">website/static/src/snippets/s_showcase/003.scss</field>
-</record>
+<asset id="website.s_showcase_003_scss" name="Showcase 003 SCSS">
+    <bundle>web.assets_frontend</bundle>
+    <path>website/static/src/snippets/s_showcase/003.scss</path>
+</asset>
 
 </odoo>

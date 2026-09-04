@@ -3,7 +3,7 @@
 from collections import defaultdict
 
 from odoo import api, fields, models, _
-from odoo.osv import expression
+from odoo.fields import Domain
 
 
 class AccountMove(models.Model):
@@ -77,11 +77,29 @@ class AccountMove(models.Model):
         """
         for line in self.filtered(lambda i: i.move_type == 'out_invoice' and i.state == 'draft').invoice_line_ids:
             sale_line_delivery = line.sale_line_ids.filtered(lambda sol: sol.product_id.invoice_policy == 'delivery' and sol.product_id.service_type == 'timesheet')
+            if not start_date and not end_date:
+                start_date, end_date = self._get_range_dates(sale_line_delivery.order_id)
             if sale_line_delivery:
-                domain = line._timesheet_domain_get_invoiced_lines(sale_line_delivery)
+                domain = Domain(line._timesheet_domain_get_invoiced_lines(sale_line_delivery))
                 if start_date:
-                    domain = expression.AND([domain, [('date', '>=', start_date)]])
+                    domain &= Domain('date', '>=', start_date)
                 if end_date:
-                    domain = expression.AND([domain, [('date', '<=', end_date)]])
+                    domain &= Domain('date', '<=', end_date)
                 timesheets = self.env['account.analytic.line'].sudo().search(domain)
                 timesheets.write({'timesheet_invoice_id': line.move_id.id})
+
+    def _get_range_dates(self, order):
+        # A method that can be overridden
+        # to set the start and end dates according to order values
+        return None, None
+
+    def action_post(self):
+        result = super().action_post()
+        credit_notes = self.filtered(lambda move: move.move_type == 'out_refund' and move.reversed_entry_id)
+        timesheets_sudo = self.env['account.analytic.line'].sudo().search([
+            ('timesheet_invoice_id', 'in', credit_notes.reversed_entry_id.ids),
+            ('so_line', 'in', credit_notes.invoice_line_ids.sale_line_ids.ids),
+            ('project_id', '!=', False),
+        ])
+        timesheets_sudo.write({'timesheet_invoice_id': False})
+        return result

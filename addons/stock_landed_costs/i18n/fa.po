@@ -1,40 +1,52 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* stock_landed_costs
-# 
+# * stock_landed_costs
+#
 # Translators:
-# zakariya moradi, 2025
-# Tiffany Chang, 2025
-# 
+# Mohammad Tahmasebi <hit.tah75@gmail.com>, 2023
+# Hamid Darabi, 2023
+# Zahed Alfak <tamass4116@gmail.com>, 2023
+# Mohsen Mohammadi <iammohsen.123@gmail.com>, 2023
+# Farid Hariri <fhari1234@gmail.com>, 2023
+# Hamed Mohammadi <hamed@dehongi.com>, 2023
+# Martin Trigaux, 2023
+# Hanna Kheradroosta, 2023
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# سید سعید محمودزاده حسینی <ssmhos@gmail.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Tiffany Chang, 2025\n"
-"Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 13:37+0000\n"
+"Last-Translator: سید سعید محمودزاده حسینی <ssmhos@gmail.com>\n"
+"Language-Team: Persian <https://translate.odoo.com/projects/odoo-19/"
+"stock_landed_costs/fa/>\n"
+"Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fa\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: stock_landed_costs
 #. odoo-python
-#: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
-msgid "%(product)s: %(quantity)s already out"
+#: code:addons/stock_landed_costs/models/stock_move.py:0
+msgid "+ %(value)s (Landed Cost: %(landed_cost)s)"
+msgstr ""
+
+#. module: stock_landed_costs
+#. odoo-python
+#: code:addons/stock_landed_costs/models/stock_move.py:0
+msgid "+ %(value)s from %(vendor_bill)s (Landed Cost: %(landed_cost)s)"
 msgstr ""
 
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.stock_landed_cost_view_kanban
-msgid "<i class=\"fa fa-clock-o\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
-msgstr "<i class=\"fa fa-clock-o\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
-
-#. module: stock_landed_costs
-#: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_form
-msgid "<span class=\"o_stat_text\">Valuation</span>"
-msgstr "<span class=\"o_stat_text\">ارزش‌گذاری</span>"
+msgid ""
+"<i class=\"fa fa-clock-o\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
+msgstr ""
+"<i class=\"fa fa-clock-o\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__account_id
@@ -80,6 +92,14 @@ msgstr "هزینه های اضافی"
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__additional_landed_cost
 msgid "Additional Landed Cost"
 msgstr "هزینه سربار اضافی"
+
+#. module: stock_landed_costs
+#. odoo-python
+#: code:addons/stock_landed_costs/models/stock_move.py:0
+msgid ""
+"Additional landed costs:\n"
+"%(landed_cost)s"
+msgstr ""
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__target_model
@@ -128,7 +148,7 @@ msgstr "لغو شد"
 #. module: stock_landed_costs
 #: model:ir.model,name:stock_landed_costs.model_res_company
 msgid "Companies"
-msgstr "شرکت‌ها"
+msgstr "شرکت"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__company_id
@@ -233,11 +253,18 @@ msgid "Description"
 msgstr "توصیف"
 
 #. module: stock_landed_costs
+#: model:ir.model.fields,field_description:stock_landed_costs.field_account_move__display_name
+#: model:ir.model.fields,field_description:stock_landed_costs.field_account_move_line__display_name
+#: model:ir.model.fields,field_description:stock_landed_costs.field_product_template__display_name
+#: model:ir.model.fields,field_description:stock_landed_costs.field_purchase_order_line__display_name
+#: model:ir.model.fields,field_description:stock_landed_costs.field_res_company__display_name
+#: model:ir.model.fields,field_description:stock_landed_costs.field_res_config_settings__display_name
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__display_name
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__display_name
+#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_move__display_name
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__display_name
 msgid "Display Name"
-msgstr "نام نمایش داده شده"
+msgstr "نام نمایشی"
 
 #. module: stock_landed_costs
 #: model:mail.message.subtype,name:stock_landed_costs.mt_stock_landed_cost_open
@@ -295,18 +322,20 @@ msgid ""
 msgstr ""
 
 #. module: stock_landed_costs
-#: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
-msgid "Group By"
-msgstr "گروه‌بندی برمبنای"
-
-#. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__has_message
 msgid "Has Message"
 msgstr "آیا دارای پیام است"
 
 #. module: stock_landed_costs
+#: model:ir.model.fields,field_description:stock_landed_costs.field_account_move__id
+#: model:ir.model.fields,field_description:stock_landed_costs.field_account_move_line__id
+#: model:ir.model.fields,field_description:stock_landed_costs.field_product_template__id
+#: model:ir.model.fields,field_description:stock_landed_costs.field_purchase_order_line__id
+#: model:ir.model.fields,field_description:stock_landed_costs.field_res_company__id
+#: model:ir.model.fields,field_description:stock_landed_costs.field_res_config_settings__id
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__id
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__id
+#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_move__id
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__id
 msgid "ID"
 msgstr "شناسه"
@@ -371,22 +400,23 @@ msgstr "روزنامه"
 #: model:ir.model,name:stock_landed_costs.model_account_move
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__account_move_id
 msgid "Journal Entry"
-msgstr "سند دفترروزنامه‌"
+msgstr "داده روزنامه"
 
 #. module: stock_landed_costs
 #: model:ir.model,name:stock_landed_costs.model_account_move_line
 msgid "Journal Item"
-msgstr "آیتم دفترروزنامه"
+msgstr "آیتم روزنامه"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__cost_id
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__cost_id
-#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_layer__stock_landed_cost_id
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_form
 msgid "Landed Cost"
 msgstr "هزینه سربار"
 
 #. module: stock_landed_costs
+#. odoo-python
+#: code:addons/stock_landed_costs/models/account_move.py:0
 #: model:ir.actions.act_window,name:stock_landed_costs.action_stock_landed_cost
 #: model:ir.model.fields,field_description:stock_landed_costs.field_account_bank_statement_line__landed_costs_ids
 #: model:ir.model.fields,field_description:stock_landed_costs.field_account_move__landed_costs_ids
@@ -422,7 +452,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__write_uid
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__write_uid
 msgid "Last Updated by"
-msgstr "آخرین بروز رسانی توسط"
+msgstr "آخرین تغییر توسط"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__write_date
@@ -450,6 +480,11 @@ msgstr "خطای تحویل پیام"
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_ids
 msgid "Messages"
 msgstr "پیام ها"
+
+#. module: stock_landed_costs
+#: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
+msgid "My Activities"
+msgstr "فعالیت‌های من"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__my_activity_date_deadline
@@ -585,8 +620,8 @@ msgstr "خطای تحویل پیامک"
 
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
-msgid "Show all records which has next action date is before today"
-msgstr "تمام رکوردهایی که تاریخ اقدام بعدی آن قبل از امروز است را نشان بده"
+msgid "Show all records whose next activity date is past"
+msgstr ""
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__split_method
@@ -596,7 +631,7 @@ msgstr "روش تقسیم"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__state
 msgid "State"
-msgstr "استان"
+msgstr "وضعیت"
 
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
@@ -633,12 +668,6 @@ msgid "Stock Move"
 msgstr "انتقال موجودی"
 
 #. module: stock_landed_costs
-#: model:ir.model,name:stock_landed_costs.model_stock_valuation_layer
-#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__stock_valuation_layer_ids
-msgid "Stock Valuation Layer"
-msgstr "لایه ارزش گذاری موجودی"
-
-#. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
 msgid "Today Activities"
 msgstr "فعالیت های امروز"
@@ -646,7 +675,7 @@ msgstr "فعالیت های امروز"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__amount_total
 msgid "Total"
-msgstr "مجموع"
+msgstr "جمع کل:"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__picking_ids
@@ -671,8 +700,8 @@ msgid ""
 "Validated landed costs cannot be cancelled, but you could create negative "
 "landed costs to reverse them"
 msgstr ""
-"هزینه های سربار تایید شده را نمی توان لغو کرد، اما می توانید برای معکوس کردن"
-" آنها هزینه های سربار منفی ایجاد کنید"
+"هزینه های سربار تایید شده را نمی توان لغو کرد، اما می توانید برای معکوس کردن "
+"آنها هزینه های سربار منفی ایجاد کنید"
 
 #. module: stock_landed_costs
 #: model:ir.model,name:stock_landed_costs.model_stock_valuation_adjustment_lines
@@ -724,8 +753,34 @@ msgstr ""
 #. odoo-python
 #: code:addons/stock_landed_costs/models/product.py:0
 msgid ""
-"You cannot change the product type or disable landed cost option because the"
-" product is used in an account move line."
+"You cannot change the product type or disable landed cost option because the "
+"product is used in an account move line."
 msgstr ""
 "شما نمی توانید نوع محصول را تغییر دهید یا گزینه هزینه سربار را غیرفعال کنید "
 "زیرا محصول در خط انتقال حساب استفاده می شود."
+
+#~ msgid ""
+#~ "A storable product is a product for which you manage stock. The Inventory "
+#~ "app has to be installed.\n"
+#~ "A consumable product is a product for which stock is not managed.\n"
+#~ "A service is a non-material product you provide."
+#~ msgstr ""
+#~ "محصول قابل ذخیره سازی محصولی است که شما موجودی آن را مدیریت می کنید. "
+#~ "برنامه انبار باید نصب شود.\n"
+#~ "کالای مصرفی محصولی است که انبار آن مدیریت نمی شود.\n"
+#~ "خدمات یک محصول غیر مادی است که شما ارائه می کنید."
+
+#~ msgid "Company related to this journal"
+#~ msgstr "شرکت مربوط به این روزنامه"
+
+#~ msgid "Group By"
+#~ msgstr "گروه‌بندی برمبنای"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "تعداد پیام ها که نیاز به عمل"
+
+#~ msgid "Show all records which has next action date is before today"
+#~ msgstr "تمام رکوردهایی که تاریخ اقدام بعدی آن قبل از امروز است را نشان بده"
+
+#~ msgid "Stock Valuation Layer"
+#~ msgstr "لایه ارزش گذاری موجودی"

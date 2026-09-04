@@ -8,14 +8,16 @@ class Website(models.Model):
 
     warehouse_id = fields.Many2one('stock.warehouse', string='Warehouse')
 
-    # NB: unused and dropped in 18.1
-    def _get_warehouse_available(self):
-        return (
-            self.warehouse_id.id or
-            self.env['ir.default'].sudo()._get('sale.order', 'warehouse_id', company_id=self.company_id.id) or
-            self.env['ir.default'].sudo()._get('sale.order', 'warehouse_id') or
-            self.env['stock.warehouse'].sudo().search([('company_id', '=', self.company_id.id)], limit=1).id
-        )
-
     def _get_product_available_qty(self, product, **kwargs):
+        """Give the available quantity of a given product.
+
+        NB: this method is only meant to be used on the shop before the checkout.
+        For checkout steps, please use `cart._get_free_qty` instead to consider
+        the chosen warehouse for delivery (website_sale_collect).
+
+        :param product: product.product record
+        :param dict kwargs: unused parameters, available for overrides
+        :return: available quantity
+        :rtype: float
+        """
         return product.with_context(warehouse_id=self.warehouse_id.id).free_qty

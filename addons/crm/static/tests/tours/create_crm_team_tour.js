@@ -1,7 +1,5 @@
-/** @odoo-module */
-
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 
 registry.category("web_tour.tours").add('create_crm_team_tour', {
     url: "/odoo",
@@ -20,7 +18,7 @@ registry.category("web_tour.tours").add('create_crm_team_tour', {
     trigger: 'input[id="name_0"]',
     run: "edit My CRM Team",
 }, {
-    trigger: 'button.o-kanban-button-new',
+    trigger: '.btn.o-kanban-button-new',
     run: "click",
 }, {
     trigger: 'div.modal-dialog tr:contains("Test Salesman") input.form-check-input',
@@ -31,7 +29,7 @@ registry.category("web_tour.tours").add('create_crm_team_tour', {
 }, {
     trigger: 'div.modal-dialog tr:contains("Test Sales Manager") input.form-check-input:checked',
 }, {
-    trigger: '.o_list_selection_box:contains(2)',
+    trigger: '.o_selection_box:contains(2)',
 }, {
     trigger: 'button.o_select_button',
     run: "click",

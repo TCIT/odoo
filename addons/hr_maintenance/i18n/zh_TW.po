@@ -1,24 +1,26 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* hr_maintenance
-# 
+# * hr_maintenance
+#
 # Translators:
-# Wil Odoo, 2024
-# Tony Ng, 2024
-# 
+# Wil Odoo, 2025
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~18.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Tony Ng, 2024\n"
-"Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-05 04:20+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
+"projects/odoo-19/hr_maintenance/zh_Hant/>\n"
+"Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: hr_maintenance
 #: model:ir.model.fields,field_description:hr_maintenance.field_maintenance_equipment__assign_date
@@ -34,11 +36,6 @@ msgstr "分派的部門"
 #: model:ir.model.fields,field_description:hr_maintenance.field_maintenance_equipment__employee_id
 msgid "Assigned Employee"
 msgstr "分派的員工"
-
-#. module: hr_maintenance
-#: model:ir.model.fields,field_description:hr_maintenance.field_res_users__equipment_count
-msgid "Assigned Equipment"
-msgstr "已分配設備"
 
 #. module: hr_maintenance
 #: model_terms:ir.ui.view,arch_db:hr_maintenance.maintenance_request_view_form_inherit_hr
@@ -65,6 +62,15 @@ msgid "Departure Wizard"
 msgstr "離職作業"
 
 #. module: hr_maintenance
+#: model:ir.model.fields,field_description:hr_maintenance.field_hr_departure_wizard__display_name
+#: model:ir.model.fields,field_description:hr_maintenance.field_hr_employee__display_name
+#: model:ir.model.fields,field_description:hr_maintenance.field_hr_employee_public__display_name
+#: model:ir.model.fields,field_description:hr_maintenance.field_maintenance_equipment__display_name
+#: model:ir.model.fields,field_description:hr_maintenance.field_maintenance_request__display_name
+msgid "Display Name"
+msgstr "顯示名稱"
+
+#. module: hr_maintenance
 #: model:ir.model,name:hr_maintenance.model_hr_employee
 #: model:ir.model.fields,field_description:hr_maintenance.field_maintenance_request__employee_id
 #: model:ir.model.fields.selection,name:hr_maintenance.selection__maintenance_equipment__equipment_assign_to__employee
@@ -78,11 +84,14 @@ msgstr "員工"
 #: model:ir.model.fields,field_description:hr_maintenance.field_hr_employee__equipment_ids
 #: model:ir.model.fields,field_description:hr_maintenance.field_maintenance_request__equipment_id
 #: model_terms:ir.ui.view,arch_db:hr_maintenance.hr_departure_wizard_view_form
+#: model_terms:ir.ui.view,arch_db:hr_maintenance.hr_employee_public_view_form
+#: model_terms:ir.ui.view,arch_db:hr_maintenance.hr_employee_view_form
 msgid "Equipment"
 msgstr "設備"
 
 #. module: hr_maintenance
 #: model:ir.model.fields,field_description:hr_maintenance.field_hr_employee__equipment_count
+#: model:ir.model.fields,field_description:hr_maintenance.field_hr_employee_public__equipment_count
 msgid "Equipment Count"
 msgstr "設備數目"
 
@@ -90,6 +99,15 @@ msgstr "設備數目"
 #: model:ir.model.fields,field_description:hr_maintenance.field_hr_departure_wizard__unassign_equipment
 msgid "Free Equiments"
 msgstr "免費裝備"
+
+#. module: hr_maintenance
+#: model:ir.model.fields,field_description:hr_maintenance.field_hr_departure_wizard__id
+#: model:ir.model.fields,field_description:hr_maintenance.field_hr_employee__id
+#: model:ir.model.fields,field_description:hr_maintenance.field_hr_employee_public__id
+#: model:ir.model.fields,field_description:hr_maintenance.field_maintenance_equipment__id
+#: model:ir.model.fields,field_description:hr_maintenance.field_maintenance_request__id
+msgid "ID"
+msgstr "識別號"
 
 #. module: hr_maintenance
 #: model:ir.model,name:hr_maintenance.model_maintenance_equipment
@@ -100,11 +118,6 @@ msgstr "設備維護保養"
 #: model:ir.model,name:hr_maintenance.model_maintenance_request
 msgid "Maintenance Request"
 msgstr "保養請求"
-
-#. module: hr_maintenance
-#: model:ir.model.fields,field_description:hr_maintenance.field_res_users__equipment_ids
-msgid "Managed Equipment"
-msgstr "管理的設備"
 
 #. module: hr_maintenance
 #: model_terms:ir.ui.view,arch_db:hr_maintenance.maintenance_request_view_search_inherit_hr
@@ -122,6 +135,11 @@ msgid "Owner"
 msgstr "所有者"
 
 #. module: hr_maintenance
+#: model:ir.model,name:hr_maintenance.model_hr_employee_public
+msgid "Public Employee"
+msgstr ""
+
+#. module: hr_maintenance
 #: model:ir.model.fields,help:hr_maintenance.field_hr_departure_wizard__unassign_equipment
 msgid "Unassign Employee from Equipments"
 msgstr "取消指派設備予員工"
@@ -136,7 +154,11 @@ msgstr "未分派"
 msgid "Used By"
 msgstr "用於"
 
-#. module: hr_maintenance
-#: model:ir.model,name:hr_maintenance.model_res_users
-msgid "User"
-msgstr "使用者"
+#~ msgid "Assigned Equipment"
+#~ msgstr "已分配設備"
+
+#~ msgid "Managed Equipment"
+#~ msgstr "管理的設備"
+
+#~ msgid "User"
+#~ msgstr "使用者"

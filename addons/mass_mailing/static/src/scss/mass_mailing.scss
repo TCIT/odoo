@@ -13,7 +13,7 @@
     }
 }
 
-@include media-breakpoint-up(lg, $o-extra-grid-breakpoints) {
+@include media-breakpoint-up(lg) {
     .o_form_view .o_form_sheet .o_notebook .tab-content .tab-pane .o_mail_body {
         // cancel the padding of the form_sheet when breakpoints are reached
         margin-left: calc(var(--formView-sheet-padding-x) * -1);
@@ -80,18 +80,36 @@ body.editor_has_snippets .o_field_mass_mailing_html div.d-flex:has(iframe) {
         }
         &.o_kanban_ungrouped {
             padding: 0;
-            .o_mailing_list_kanban_grouped {
-                display: none !important;
-            }
             .o_kanban_record {
                 width: 100%;
                 margin: 0;
             }
         }
-        &.o_kanban_grouped .o_mailing_list_kanban_ungrouped {
-            display: none !important;
+        @mixin kanban-stats-button-style {
+            font-size: 150% !important;
+            margin-bottom: 30px;
+            min-width: 90px;
+            width: 40%;
+            margin-right: 1rem !important;
         }
-        .o_mailing_list_kanban_ungrouped {
+        &.o_kanban_grouped {
+            .flex-row > div {
+                flex: 1 1 100% !important;
+                max-width: 100% !important;
+
+                &.col-6 {
+                    flex: 1 1 50% !important;
+                    max-width: 50% !important;
+                }
+                &.d-none {
+                    display: none !important; //forcing the d-none to override the d-lg or d-sm classes for grouped view
+                }
+                &.o_mailing_list_kanban_stats > a {
+                    @include kanban-stats-button-style;
+                }
+            }
+        }
+        article > div {
             --KanbanRecord-padding-h: #{$o-horizontal-padding};
 
             .o_mailing_list_kanban_stats > div {
@@ -100,14 +118,10 @@ body.editor_has_snippets .o_field_mass_mailing_html div.d-flex:has(iframe) {
             .o_mailing_list_kanban_stats > a {
                 flex-wrap: wrap;
                 &:hover {
-                    font-weight: normal !important;
+                    color: rgb(1, 126, 132) !important;
                 }
                 @include media-breakpoint-down(sm) {
-                    font-size: 1.4rem !important;
-                    height: 40px;
-                    margin-bottom: 30px;
-                    min-width: 90px;
-                    width: 30%;
+                    @include kanban-stats-button-style;
                 }
             }
             .o_mailing_list_kanban_button {
@@ -116,14 +130,14 @@ body.editor_has_snippets .o_field_mass_mailing_html div.d-flex:has(iframe) {
                 outline: 0;
                 padding: 0;
                 font-weight: 300;
-                &:hover {
-                    font-weight: normal;
-                }
                 &.o_mailing_list_kanban_big_nb {
                     text-align: left;
                     font-size: 300%;
                     @include media-breakpoint-up(sm) {
                         text-align: right;
+                    }
+                    &:hover {
+                        color: rgb(113, 75, 103) !important;
                     }
                 }
             }
@@ -166,4 +180,12 @@ body.editor_has_snippets .o_field_mass_mailing_html div.d-flex:has(iframe) {
 
 .o_dialog .o_content:has(.o_field_mass_mailing_html) {
     overflow: unset;
+    .o_form_statusbar {
+        position: static !important;
+    }
+}
+
+.o-overlay-container:has(~ .o-mail-ChatHub > .o-mail-ChatWindow.o-isAiComposer)
+    > .o-overlay-item:has(.o_dialog .o_add_snippet_dialog):not(:has(.o_error_dialog)) {
+    z-index: $zindex-modal;
 }

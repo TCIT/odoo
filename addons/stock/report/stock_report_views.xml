@@ -30,7 +30,7 @@
             <field name="print_report_name">'Packages - %s' % (object.name)</field>
             <field name="binding_model_id" ref="model_stock_picking"/>
             <field name="binding_type">report</field>
-            <field name="groups_id" eval="[Command.link(ref('stock.group_tracking_lot'))]"/>
+            <field name="group_ids" eval="[Command.link(ref('stock.group_tracking_lot'))]"/>
         </record>
         <record id="action_report_inventory" model="ir.actions.report">
             <field name="name">Count Sheet</field>
@@ -42,22 +42,40 @@
             <field name="binding_model_id" ref="model_stock_quant"/>
             <field name="binding_type">report</field>
         </record>
-        <record id="action_report_quant_package_barcode" model="ir.actions.report">
+        <record id="action_report_package_barcode" model="ir.actions.report">
             <field name="name">Package Barcode with Contents</field>
-            <field name="model">stock.quant.package</field>
+            <field name="model">stock.package</field>
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">stock.report_package_barcode</field>
             <field name="report_file">stock.report_package_barcode</field>
-            <field name="binding_model_id" ref="model_stock_quant_package"/>
+            <field name="binding_model_id" ref="model_stock_package"/>
             <field name="binding_type">report</field>
         </record>
-        <record id="action_report_quant_package_barcode_small" model="ir.actions.report">
+        <record id="action_report_package_history_barcode" model="ir.actions.report">
+            <field name="name">Package Barcode with Contents</field>
+            <field name="model">stock.package.history</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">stock.report_package_history_barcode</field>
+            <field name="report_file">stock.report_package_barcode</field>
+            <field name="binding_model_id" ref="model_stock_package_history"/>
+            <field name="binding_type">report</field>
+        </record>
+        <record id="action_report_package_barcode_small" model="ir.actions.report">
             <field name="name">Package Barcode (PDF)</field>
-            <field name="model">stock.quant.package</field>
+            <field name="model">stock.package</field>
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">stock.report_package_barcode_small</field>
             <field name="report_file">stock.report_package_barcode</field>
-            <field name="binding_model_id" ref="model_stock_quant_package"/>
+            <field name="binding_model_id" ref="model_stock_package"/>
+            <field name="binding_type">report</field>
+        </record>
+        <record id="action_report_package_history_barcode_small" model="ir.actions.report">
+            <field name="name">Package Barcode (PDF)</field>
+            <field name="model">stock.package.history</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">stock.report_package_history_barcode_small</field>
+            <field name="report_file">stock.report_package_barcode</field>
+            <field name="binding_model_id" ref="model_stock_package_history"/>
             <field name="binding_type">report</field>
         </record>
         <record id="action_report_location_barcode" model="ir.actions.report">
@@ -120,20 +138,29 @@
         </record>
         <record id="label_package_template" model="ir.actions.report">
             <field name="name">Package Barcode (ZPL)</field>
-            <field name="model">stock.quant.package</field>
+            <field name="model">stock.package</field>
             <field name="report_type">qweb-text</field>
             <field name="report_name">stock.label_package_template_view</field>
             <field name="report_file">stock.label_package_template_view</field>
-            <field name="binding_model_id" ref="model_stock_quant_package"/>
+            <field name="binding_model_id" ref="model_stock_package"/>
             <field name="binding_type">report</field>
         </record>
-        <record id="label_product_packaging" model="ir.actions.report">
-            <field name="name">Product Packaging (ZPL)</field>
-            <field name="model">product.packaging</field>
+        <record id="label_package_history_template" model="ir.actions.report">
+            <field name="name">Package Barcode (ZPL)</field>
+            <field name="model">stock.package.history</field>
             <field name="report_type">qweb-text</field>
-            <field name="report_name">stock.label_product_packaging_view</field>
-            <field name="report_file">stock.label_product_packaging_view</field>
-            <field name="binding_model_id" ref="product.model_product_packaging"/>
+            <field name="report_name">stock.label_package_history_template_view</field>
+            <field name="report_file">stock.label_package_template_view</field>
+            <field name="binding_model_id" ref="model_stock_package_history"/>
+            <field name="binding_type">report</field>
+        </record>
+        <record id="label_packaging_barcode" model="ir.actions.report">
+            <field name="name">Packaging Barcodes (ZPL)</field>
+            <field name="model">product.uom</field>
+            <field name="report_type">qweb-text</field>
+            <field name="report_name">stock.label_packaging_barcode_view</field>
+            <field name="report_file">stock.label_packaging_barcode_view</field>
+            <field name="binding_model_id" ref="product.model_product_uom"/>
             <field name="binding_type">report</field>
         </record>
         <record id="label_picking_type" model="ir.actions.report">

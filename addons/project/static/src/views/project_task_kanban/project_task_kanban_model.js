@@ -1,12 +1,28 @@
-/** @odoo-module */
-
 import { RelationalModel } from "@web/model/relational_model/relational_model";
 import { Record } from "@web/model/relational_model/record";
 import { makeActiveField } from "@web/model/relational_model/utils";
+import { ProjectTaskRelationalModel } from "../project_task_relational_model";
 
 export class ProjectTaskKanbanDynamicGroupList extends RelationalModel.DynamicGroupList {
     get isGroupedByStage() {
         return !!this.groupByField && this.groupByField.name === "stage_id";
+    }
+
+    async _unlinkGroups(groups) {
+        if (this.isGroupedByStage) {
+            const action = await this.model.orm.call(
+                this.groupByField.relation,
+                'unlink_wizard',
+                groups.map((g) => g.value),
+                { context: this.context },
+            );
+            return new Promise((resolve) => {
+                this.model.action.doAction(action, {
+                    onClose: ({ success }) => resolve(!!success),
+                });
+            });
+        }
+        return super._unlinkGroups(groups);
     }
 }
 
@@ -18,7 +34,7 @@ export class ProjectTaskRecord extends Record {
     }
 
     async toggleSubtasksList() {
-        const { display_name, project_id, state, user_ids } = this.config.fields;
+        const { display_name, project_id, state, user_ids, sequence } = this.config.fields;
         const activeField = makeActiveField({ onChange: true });
         activeField.related = {
             activeFields: {
@@ -26,12 +42,14 @@ export class ProjectTaskRecord extends Record {
                 state: makeActiveField(),
                 user_ids: makeActiveField(),
                 project_id: makeActiveField(),
+                sequence: makeActiveField(),
             },
             fields: {
                 display_name,
                 project_id,
                 state,
                 user_ids,
+                sequence,
             },
         };
         await this._load({
@@ -41,8 +59,8 @@ export class ProjectTaskRecord extends Record {
     }
 }
 
-export class ProjectTaskKanbanModel extends RelationalModel {
-    async _webReadGroup(config, firstGroupByName, orderBy) {
+export class ProjectTaskKanbanModel extends ProjectTaskRelationalModel {
+    async _webReadGroup(config) {
         config.context = {
             ...config.context,
             project_kanban: true,

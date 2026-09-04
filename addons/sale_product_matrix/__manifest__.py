@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 {
     'name': "Sale Matrix",
     'summary': "Add variants to Sales Order through a grid entry.",
@@ -23,5 +23,6 @@ by choosing product variants quantity through a Grid Entry.
             'sale_product_matrix/static/src/**/*',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

@@ -1,5 +1,3 @@
-/* @odoo-module */
-
 import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("website_livechat.chatbot_redirect", {
@@ -15,7 +13,7 @@ registry.category("web_tour.tours").add("website_livechat.chatbot_redirect", {
             run: "click",
         },
         {
-            trigger: ".o-livechat-root:shadow li:contains(Go to the #chatbot-redirect anchor)",
+            trigger: ".o-livechat-root:shadow button:contains(Go to the #chatbot-redirect anchor)",
             run: "click",
         },
         {
@@ -35,7 +33,13 @@ registry.category("web_tour.tours").add("website_livechat.chatbot_redirect", {
             run: "click",
         },
         {
-            trigger: ".o-livechat-root:shadow li:contains(Go to the /chatbot-redirect page)",
+            trigger: ".o-livechat-root:shadow button:contains(Go to the /chatbot-redirect page)",
+            run: "click",
+            expectUnloadPage: true,
+        },
+        {
+            isActive: ["mobile"], //chatwindow is folded on mobile
+            trigger: ".o-livechat-root:shadow .o-mail-ChatBubble[name='Redirection Bot']",
             run: "click",
         },
         {

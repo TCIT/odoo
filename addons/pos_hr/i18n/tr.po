@@ -1,66 +1,63 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* pos_hr
-# 
+# * pos_hr
+#
 # Translators:
-# Tugay Hatıl <tugayh@projetgrup.com>, 2024
-# Umur Akın <umura@projetgrup.com>, 2024
-# emre oktem, 2024
-# Murat Kaplan <muratk@projetgrup.com>, 2024
-# Ediz Duman <neps1192@gmail.com>, 2024
-# Ramiz Deniz Öner <deniz@denizoner.com>, 2024
-# Martin Trigaux, 2024
-# Levent Karakaş <levent@mektup.at>, 2024
-# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2024
-# Buket Şeker <buket_skr@hotmail.com>, 2024
-# Halil, 2025
-# 
+# abc Def <hdogan1974@gmail.com>, 2022
+# Ramiz Deniz Öner <deniz@denizoner.com>, 2022
+# Martin Trigaux, 2022
+# Levent Karakaş <levent@mektup.at>, 2022
+# Umur Akın <umura@projetgrup.com>, 2022
+# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2022
+# Murat Kaplan <muratk@projetgrup.com>, 2022
+# Halil, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# DeepL <noreply-mt-deepl@weblate.org>, 2025.
+# Odoo Turkish Import <dyki+tr@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:40+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Halil, 2025\n"
-"Language-Team: Turkish (https://app.transifex.com/odoo/teams/41243/tr/)\n"
+"POT-Creation-Date: 2026-07-31 17:37+0000\n"
+"PO-Revision-Date: 2026-08-06 21:50+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-19/pos_hr/"
+"tr/>\n"
+"Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: tr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-
-#. module: pos_hr
-#: model:ir.model,name:pos_hr.model_report_pos_hr_multi_employee_sales_report
-msgid "A collection of single session reports. One for each employee"
-msgstr ""
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: pos_hr
 #: model_terms:ir.ui.view,arch_db:pos_hr.single_employee_sales_report
 msgid "Abigal Peterson"
-msgstr ""
+msgstr "Abigal Peterson"
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/overrides/screens/product_screen/order_summary/order_summary.js:0
+#: code:addons/pos_hr/static/src/app/screens/product_screen/order_summary/order_summary.js:0
 msgid "Access Denied"
 msgstr "Erişim Engellendi"
 
 #. module: pos_hr
 #: model:ir.model.fields,field_description:pos_hr.field_pos_daily_sales_reports_wizard__add_report_per_employee
 msgid "Add a report per each employee"
-msgstr ""
+msgstr "Her çalışan için bir rapor ekleyin"
 
 #. module: pos_hr
 #: model_terms:ir.ui.view,arch_db:pos_hr.pos_config_form_view_inherit
 #: model_terms:ir.ui.view,arch_db:pos_hr.res_config_settings_view_form
 msgid "Advanced rights"
-msgstr ""
+msgstr "Gelişmiş yetkiler"
 
 #. module: pos_hr
 #: model_terms:ir.ui.view,arch_db:pos_hr.pos_config_form_view_inherit
 #: model_terms:ir.ui.view,arch_db:pos_hr.res_config_settings_view_form
 msgid "All Employees"
-msgstr ""
+msgstr "Tüm Çalışanlar"
 
 #. module: pos_hr
 #: model:ir.model,name:pos_hr.model_account_bank_statement_line
@@ -71,20 +68,22 @@ msgstr "Banka Hesap Ekstresi Kalemi"
 #: model_terms:ir.ui.view,arch_db:pos_hr.pos_config_form_view_inherit
 #: model_terms:ir.ui.view,arch_db:pos_hr.res_config_settings_view_form
 msgid "Basic rights"
-msgstr ""
+msgstr "Temel yetkiler"
 
 #. module: pos_hr
 #: model_terms:ir.ui.view,arch_db:pos_hr.view_pos_daily_sales_reports_wizard
 msgid ""
-"Can't generate a report per employee! as selected session has no orders "
-"associated with any employee."
+"Cannot generate report per employee: only one employee logged in during this "
+"session."
 msgstr ""
+"Çalışan bazında rapor oluşturulamıyor: Bu oturum sırasında yalnızca bir "
+"çalışan giriş yaptı."
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/overrides/components/closing_popup/closing_popup.xml:0
+#: code:addons/pos_hr/static/src/app/components/popups/closing_popup/closing_popup.xml:0
 msgid "Cash in/out"
-msgstr ""
+msgstr "Nakit giriş/çıkışı"
 
 #. module: pos_hr
 #: model:ir.model.fields,field_description:pos_hr.field_pos_order__employee_id
@@ -98,24 +97,18 @@ msgstr "Kasiyer"
 #. odoo-python
 #: code:addons/pos_hr/models/pos_order.py:0
 msgid "Cashier %s"
-msgstr ""
+msgstr "Kasiyer %s"
 
 #. module: pos_hr
 #: model:ir.model.fields,field_description:pos_hr.field_pos_order__cashier
 msgid "Cashier name"
-msgstr ""
-
-#. module: pos_hr
-#. odoo-javascript
-#: code:addons/pos_hr/static/src/app/select_cashier_mixin.js:0
-msgid "Change Cashier"
-msgstr "Kasiyer Değiştir"
+msgstr "Kasiyer adı"
 
 #. module: pos_hr
 #. odoo-python
 #: code:addons/pos_hr/models/pos_session.py:0
 msgid "Closed Register"
-msgstr ""
+msgstr "Kapalı Kasa"
 
 #. module: pos_hr
 #: model:ir.model,name:pos_hr.model_res_config_settings
@@ -123,22 +116,48 @@ msgid "Config Settings"
 msgstr "Yapılandırma Ayarları"
 
 #. module: pos_hr
+#: model:ir.model,name:pos_hr.model_res_partner
+msgid "Contact"
+msgstr ""
+
+#. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/overrides/components/closing_popup/closing_popup.xml:0
+#: code:addons/pos_hr/static/src/app/components/popups/closing_popup/closing_popup.xml:0
 msgid "Counted"
 msgstr "Sayılan"
 
 #. module: pos_hr
+#: model:ir.model,website_form_label:pos_hr.model_res_partner
+msgid "Create a Customer"
+msgstr ""
+
+#. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/overrides/components/closing_popup/closing_popup.xml:0
+#: code:addons/pos_hr/static/src/app/components/popups/closing_popup/closing_popup.xml:0
 msgid "Difference"
 msgstr "Fark"
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/overrides/screens/login_screen/login_screen.js:0
+#: code:addons/pos_hr/static/src/app/screens/login_screen/login_screen.js:0
 msgid "Discard"
 msgstr "Sil"
+
+#. module: pos_hr
+#: model:ir.model.fields,field_description:pos_hr.field_account_bank_statement_line__display_name
+#: model:ir.model.fields,field_description:pos_hr.field_hr_employee__display_name
+#: model:ir.model.fields,field_description:pos_hr.field_pos_config__display_name
+#: model:ir.model.fields,field_description:pos_hr.field_pos_daily_sales_reports_wizard__display_name
+#: model:ir.model.fields,field_description:pos_hr.field_pos_order__display_name
+#: model:ir.model.fields,field_description:pos_hr.field_pos_payment__display_name
+#: model:ir.model.fields,field_description:pos_hr.field_pos_session__display_name
+#: model:ir.model.fields,field_description:pos_hr.field_product_product__display_name
+#: model:ir.model.fields,field_description:pos_hr.field_report_pos_hr_single_employee_sales_report__display_name
+#: model:ir.model.fields,field_description:pos_hr.field_report_pos_order__display_name
+#: model:ir.model.fields,field_description:pos_hr.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:pos_hr.field_res_partner__display_name
+msgid "Display Name"
+msgstr "İsim Göster"
 
 #. module: pos_hr
 #: model:ir.model,name:pos_hr.model_hr_employee
@@ -150,14 +169,9 @@ msgid "Employee"
 msgstr "Çalışan"
 
 #. module: pos_hr
-#: model:ir.actions.report,name:pos_hr.multi_employee_sales_report_action
-msgid "Employee Sales Details"
-msgstr ""
-
-#. module: pos_hr
 #: model_terms:ir.ui.view,arch_db:pos_hr.single_employee_sales_report
 msgid "Employee Sales Report"
-msgstr ""
+msgstr "Çalışan Satış Raporu"
 
 #. module: pos_hr
 #: model_terms:ir.ui.view,arch_db:pos_hr.single_employee_sales_report
@@ -168,65 +182,108 @@ msgstr "Personel:"
 #. odoo-python
 #: code:addons/pos_hr/models/hr_employee.py:0
 msgid "Employee: %(employee)s - PoS Config(s): %(config_list)s \n"
-msgstr "Çalışan: %(employee)s - PoS Yapılandırmaları: %(config_list)s\n"
+msgstr "Çalışan: %(employee)s - PoS Yapılandırmaları: %(config_list)s \n"
+
+#. module: pos_hr
+#: model:ir.model.fields,help:pos_hr.field_pos_config__advanced_employee_ids
+#: model:ir.model.fields,help:pos_hr.field_res_config_settings__pos_advanced_employee_ids
+msgid ""
+"Employees linked to users with the PoS Manager role are automatically added "
+"to this list"
+msgstr ""
+"Satış Noktası Yöneticisi rolüne sahip kullanıcılara bağlı çalışanlar "
+"otomatik olarak bu listeye eklenir"
 
 #. module: pos_hr
 #: model:ir.model.fields,field_description:pos_hr.field_pos_config__basic_employee_ids
 #: model:ir.model.fields,field_description:pos_hr.field_res_config_settings__pos_basic_employee_ids
 msgid "Employees with basic access"
-msgstr ""
+msgstr "Temel erişime sahip çalışanlar"
 
 #. module: pos_hr
 #: model:ir.model.fields,field_description:pos_hr.field_pos_config__advanced_employee_ids
 #: model:ir.model.fields,field_description:pos_hr.field_res_config_settings__pos_advanced_employee_ids
 msgid "Employees with manager access"
-msgstr ""
+msgstr "Yönetici erişimine sahip çalışanlar"
+
+#. module: pos_hr
+#: model:ir.model.fields,field_description:pos_hr.field_pos_config__minimal_employee_ids
+#: model:ir.model.fields,field_description:pos_hr.field_res_config_settings__pos_minimal_employee_ids
+msgid "Employees with minimal access"
+msgstr "Minimum erişime sahip çalışanlar"
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/overrides/screens/login_screen/login_screen.xml:0
+#: code:addons/pos_hr/static/src/app/screens/login_screen/login_screen.xml:0
 msgid "Enter your PIN"
-msgstr ""
+msgstr "PIN Kodunuzu Girin"
+
+#. module: pos_hr
+#: model:ir.model.fields,field_description:pos_hr.field_account_bank_statement_line__id
+#: model:ir.model.fields,field_description:pos_hr.field_hr_employee__id
+#: model:ir.model.fields,field_description:pos_hr.field_pos_config__id
+#: model:ir.model.fields,field_description:pos_hr.field_pos_daily_sales_reports_wizard__id
+#: model:ir.model.fields,field_description:pos_hr.field_pos_order__id
+#: model:ir.model.fields,field_description:pos_hr.field_pos_payment__id
+#: model:ir.model.fields,field_description:pos_hr.field_pos_session__id
+#: model:ir.model.fields,field_description:pos_hr.field_product_product__id
+#: model:ir.model.fields,field_description:pos_hr.field_report_pos_hr_single_employee_sales_report__id
+#: model:ir.model.fields,field_description:pos_hr.field_report_pos_order__id
+#: model:ir.model.fields,field_description:pos_hr.field_res_config_settings__id
+#: model:ir.model.fields,field_description:pos_hr.field_res_partner__id
+msgid "ID"
+msgstr "ID"
 
 #. module: pos_hr
 #: model:ir.model.fields,help:pos_hr.field_pos_config__basic_employee_ids
+#: model:ir.model.fields,help:pos_hr.field_pos_config__minimal_employee_ids
 #: model:ir.model.fields,help:pos_hr.field_res_config_settings__pos_basic_employee_ids
+#: model:ir.model.fields,help:pos_hr.field_res_config_settings__pos_minimal_employee_ids
 msgid "If left empty, all employees can log in to PoS"
-msgstr ""
-
-#. module: pos_hr
-#: model:ir.model.fields,help:pos_hr.field_pos_config__advanced_employee_ids
-#: model:ir.model.fields,help:pos_hr.field_res_config_settings__pos_advanced_employee_ids
-msgid "If left empty, only Odoo users have extended rights in PoS"
-msgstr ""
+msgstr "Boş bırakılırsa tüm çalışanlar POS'a giriş yapabilir."
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/overrides/components/navbar/navbar.xml:0
+#: code:addons/pos_hr/static/src/app/components/navbar/navbar.xml:0
+#: code:addons/pos_hr/static/src/app/components/popups/cashier_selection_popup/cashier_selection_popup.xml:0
 msgid "Lock"
 msgstr "Kilitle"
 
 #. module: pos_hr
+#: model_terms:ir.ui.view,arch_db:pos_hr.pos_config_form_view_inherit
+#: model_terms:ir.ui.view,arch_db:pos_hr.res_config_settings_view_form
+msgid "Minimal rights"
+msgstr "Minimum haklar"
+
+#. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/app/select_cashier_mixin.js:0
+#: code:addons/pos_hr/static/src/app/utils/select_cashier_mixin.js:0
 msgid "No Cashiers"
+msgstr "Kasiyer Yok"
+
+#. module: pos_hr
+#. odoo-javascript
+#: code:addons/pos_hr/static/src/app/screens/login_screen/login_screen.js:0
+msgid ""
+"Only the cashier linked to the logged-in user (%s) can proceed to the "
+"Backend."
 msgstr ""
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/overrides/screens/login_screen/login_screen.xml:0
+#: code:addons/pos_hr/static/src/app/screens/login_screen/login_screen.xml:0
 msgid "Open Register"
-msgstr ""
+msgstr "Kasayı Açın"
 
 #. module: pos_hr
 #. odoo-python
 #: code:addons/pos_hr/models/pos_session.py:0
 msgid "Opened register"
-msgstr ""
+msgstr "Açık kasa"
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/overrides/components/closing_popup/closing_popup.xml:0
+#: code:addons/pos_hr/static/src/app/components/popups/closing_popup/closing_popup.xml:0
 msgid "Opening"
 msgstr "Açılış"
 
@@ -238,27 +295,21 @@ msgstr "Diğerleri"
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/app/select_cashier_mixin.js:0
+#: code:addons/pos_hr/static/src/app/utils/select_cashier_mixin.js:0
 msgid "PIN not found"
-msgstr ""
+msgstr "PIN bulunamadı"
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/app/select_cashier_mixin.js:0
+#: code:addons/pos_hr/static/src/app/utils/select_cashier_mixin.js:0
 msgid "Password?"
 msgstr "Şifre?"
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/overrides/components/closing_popup/closing_popup.xml:0
+#: code:addons/pos_hr/static/src/app/components/popups/closing_popup/closing_popup.xml:0
 msgid "Payments"
 msgstr "Ödemeler"
-
-#. module: pos_hr
-#. odoo-javascript
-#: code:addons/pos_hr/static/src/overrides/components/closing_popup/closing_popup.js:0
-msgid "Payments in %(paymentMethod)s"
-msgstr ""
 
 #. module: pos_hr
 #: model:ir.model,name:pos_hr.model_pos_config
@@ -268,7 +319,7 @@ msgstr "Satış Noktası Yapılandırması"
 #. module: pos_hr
 #: model:ir.model,name:pos_hr.model_pos_daily_sales_reports_wizard
 msgid "Point of Sale Daily Report"
-msgstr ""
+msgstr "Satış Noktası Günlük Raporu"
 
 #. module: pos_hr
 #: model:ir.model,name:pos_hr.model_pos_order
@@ -291,66 +342,66 @@ msgid "Point of Sale Session"
 msgstr "Satış Noktası Oturumu"
 
 #. module: pos_hr
-#. odoo-javascript
-#: code:addons/pos_hr/static/src/app/print_report_button/print_report_button.xml:0
-msgid "Print"
-msgstr "Yazdır"
-
-#. module: pos_hr
 #: model:ir.model,name:pos_hr.model_product_product
 msgid "Product Variant"
 msgstr "Ürün Varyantı"
 
 #. module: pos_hr
+#. odoo-javascript
+#: code:addons/pos_hr/static/src/app/components/popups/cashier_selection_popup/cashier_selection_popup.xml:0
+msgid "Select Cashier"
+msgstr "Kasiyer Seç"
+
+#. module: pos_hr
 #: model_terms:ir.ui.view,arch_db:pos_hr.pos_config_form_view_inherit
 #: model_terms:ir.ui.view,arch_db:pos_hr.res_config_settings_view_form
 msgid "Select Employee(s)"
-msgstr ""
+msgstr "Çalışan(ları) Seçin"
 
 #. module: pos_hr
 #: model:ir.model,name:pos_hr.model_report_pos_hr_single_employee_sales_report
 msgid "Session sales details for a single employee"
-msgstr ""
+msgstr "Tek bir çalışan için oturum satış detayları"
 
 #. module: pos_hr
 #: model:ir.model.fields,help:pos_hr.field_pos_session__employee_id
 msgid "The employee who currently uses the cash register"
-msgstr ""
+msgstr "Kasayı şu anda kullanan çalışan"
 
 #. module: pos_hr
 #: model:ir.model.fields,help:pos_hr.field_account_bank_statement_line__employee_id
 msgid "The employee who made the cash move."
-msgstr ""
+msgstr "Nakit hareketini gerçekleştiren çalışan."
 
 #. module: pos_hr
 #: model:ir.model.fields,help:pos_hr.field_pos_order__employee_id
 #: model:ir.model.fields,help:pos_hr.field_pos_payment__employee_id
 msgid "The employee who uses the cash register."
-msgstr ""
+msgstr "Kasa kullanan çalışan"
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/app/select_cashier_mixin.js:0
+#: code:addons/pos_hr/static/src/app/utils/select_cashier_mixin.js:0
 msgid "There is no cashier available."
-msgstr ""
+msgstr "Uygun kasiyer bulunmamaktadır."
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/overrides/screens/login_screen/login_screen.xml:0
+#: code:addons/pos_hr/static/src/app/screens/login_screen/login_screen.xml:0
 msgid "Unlock Register"
-msgstr ""
+msgstr "Kasa Kilidini Açın"
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/app/select_cashier_mixin.js:0
+#: code:addons/pos_hr/static/src/app/utils/select_cashier_mixin.js:0
 msgid "Wrong PIN"
 msgstr "Yanlış PIN"
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/overrides/screens/product_screen/order_summary/order_summary.js:0
+#: code:addons/pos_hr/static/src/app/screens/product_screen/order_summary/order_summary.js:0
 msgid "You are not allowed to change the price of a product."
-msgstr ""
+msgstr "Bir ürünün fiyatını değiştirmeye yetkiniz yok."
 
 #. module: pos_hr
 #. odoo-python
@@ -359,5 +410,43 @@ msgid ""
 "You cannot delete an employee that may be used in an active PoS session, "
 "close the session(s) first: \n"
 msgstr ""
-"Etkin bir PoS oturumunda kullanılabilecek bir çalışanı silemezsiniz, önce "
-"oturumları kapatın: \n"
+"Aktif bir PoS oturumunda kullanılabilecek bir çalışanı silemezsiniz; önce "
+"oturumu/oturumları kapatın: \n"
+
+#~ msgid "If left empty, only Odoo users have extended rights in PoS"
+#~ msgstr ""
+#~ "Boş bırakılırsa, yalnızca Odoo kullanıcıları POS'ta genişletilmiş "
+#~ "yetkilere sahip olur"
+
+#~ msgid "Allowed Employees"
+#~ msgstr "İzin Verilen Çalışanlar"
+
+#~ msgid "Change Cashier"
+#~ msgstr "Kasiyer Değiştir"
+
+#~ msgid "Employee: %s - PoS Config(s): %s \n"
+#~ msgstr "Çalışan: %s - PoS Yapılandırmaları: %s\n"
+
+#~ msgid "Employees with access"
+#~ msgstr "Erişimi olan çalışanlar"
+
+#~ msgid "If left empty, all employees can log in to the PoS session"
+#~ msgstr "Boş bırakılırsa, tüm çalışanlar PoS oturumunda oturum açabilir"
+
+#~ msgid "Incorrect Password"
+#~ msgstr "Yanlış Parola"
+
+#~ msgid "Log in to"
+#~ msgstr "Giriş yap"
+
+#~ msgid ""
+#~ "Person who uses the cash register. It can be a reliever, a student or an "
+#~ "interim employee."
+#~ msgstr ""
+#~ "Nakit kasa kullanan kişi. Bu bir öğrenci yada bir personel olabilir."
+
+#~ msgid "Scan your badge"
+#~ msgstr "Rozetinizi Tarayın"
+
+#~ msgid "or"
+#~ msgstr "veya"

@@ -1,8 +1,6 @@
-/** @odoo-module */
-
 import {
     clickOnSave,
-    changeOption,
+    changeOptionInPopover,
     checkIfVisibleOnScreen,
     insertSnippet,
     registerWebsitePreviewTour,
@@ -33,48 +31,57 @@ const scrollDownToMediaList = function () {
     };
 };
 
-registerWebsitePreviewTour("dropdowns_and_header_hide_on_scroll", {
-    url: "/",
-    edition: true,
-    checkDelay: 100,
-}, () => [
-    ...insertSnippet({id: "s_media_list", name: "Media List", groupName: "Content"}),
-    selectHeader(),
-    changeOption("undefined", 'we-select[data-variable="header-scroll-effect"]'),
-    changeOption("undefined", 'we-button[data-name="header_effect_fixed_opt"]'),
+registerWebsitePreviewTour(
+    "dropdowns_and_header_hide_on_scroll",
     {
-        content: "Wait for the modification has been applied",
-        trigger: ".o_we_customize_panel:contains(Select a block on your page to style it.)",
-        timeout: 30000,
+        url: "/",
+        edition: true,
     },
-    {
-        trigger: ":iframe #wrapwrap header.o_header_fixed",
-    },
-    selectHeader(),
-    changeOption("WebsiteLevelColor", 'we-select[data-variable="header-template"] we-toggler'),
-    changeOption("WebsiteLevelColor", 'we-button[data-name="header_sales_two_opt"]'),
-    {
-        trigger: ":iframe .o_header_sales_two_top",
-        timeout: 30000,
-    },
-    {
-        content: "check that header_sales_two_opt is well selected",
-        trigger: ":iframe #wrapwrap header.o_header_fixed div[aria-label=Middle] div[role=search]",
-    },
-    ...clickOnSave(undefined, 30000),
-    ...checkIfUserMenuNotMasked(),
-    // We scroll the page a little because when clicking on the dropdown, the
-    // page needs to scroll to the top first and then open the dropdown menu.
-    scrollDownToMediaList(),
-    ...checkIfUserMenuNotMasked(),
-    // We scroll the page again because when typing in the searchbar input, the
-    // page needs also to scroll to the top first and then open the dropdown
-    // with the search results.
-    scrollDownToMediaList(),
-    {
-        content: "Type a search query into the searchbar input",
-        trigger: ":iframe #wrapwrap header .s_searchbar_input input.search-query",
-        run: "edit a",
-    },
-    checkIfVisibleOnScreen(":iframe #wrapwrap header .s_searchbar_input.show .o_dropdown_menu.show"),
-]);
+    () => [
+        ...insertSnippet({ id: "s_media_list", name: "Media List", groupName: "Content" }),
+        selectHeader(),
+        ...changeOptionInPopover("Header", "Scroll Effect", ".dropdown-item:contains('Fixed')"),
+        {
+            content: "Wait for the option to be applied",
+            trigger: "[data-label='Scroll Effect'] .dropdown-toggle:contains('Fixed')",
+            timeout: 30000,
+        },
+        {
+            trigger: ":iframe #wrapwrap header.o_header_fixed",
+        },
+        selectHeader(),
+        ...changeOptionInPopover(
+            "Header",
+            "Template",
+            ".dropdown-item[data-action-param*=sales_two]"
+        ),
+        {
+            trigger: ":iframe .o_header_sales_two_top",
+            timeout: 30000,
+        },
+        {
+            content: "check that header_sales_two_opt is well selected",
+            trigger:
+                ":iframe #wrapwrap header.o_header_fixed div[aria-label=Middle] div[role=search]",
+        },
+        ...clickOnSave(undefined, 30000),
+        ...checkIfUserMenuNotMasked(),
+        // We scroll the page a little because when clicking on the dropdown,
+        // the page needs to scroll to the top first and then open the dropdown
+        // menu.
+        scrollDownToMediaList(),
+        ...checkIfUserMenuNotMasked(),
+        // We scroll the page again because when typing in the searchbar input,
+        // the page needs also to scroll to the top first and then open the
+        // dropdown with the search results.
+        scrollDownToMediaList(),
+        {
+            content: "Type a search query into the searchbar input",
+            trigger: ":iframe #wrapwrap header .s_searchbar_input input.search-query",
+            run: "edit a",
+        },
+        checkIfVisibleOnScreen(
+            ":iframe #wrapwrap header .s_searchbar_input.show .o_dropdown_menu.show"
+        ),
+    ]
+);

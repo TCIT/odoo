@@ -1,6 +1,7 @@
 import re
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 from odoo.tools.barcode import check_barcode_encoding, get_barcode_check_digit
 
 
@@ -93,11 +94,13 @@ class BarcodeNomenclature(models.Model):
         :param barcode:
         :type barcode: str
         :return: A object containing various information about the barcode, like as:
+
             - code: the barcode
             - type: the barcode's type
             - value: if the id encodes a numerical value, it will be put there
             - base_code: the barcode code with all the encoding parts set to
               zero; the one put on the product in the backend
+
         :rtype: dict
         """
         parsed_result = {
@@ -201,3 +204,12 @@ class BarcodeNomenclature(models.Model):
             'type': 'package',
             'value': sscc,
         }]
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_default(self):
+        default_record = self.env.ref("barcodes.default_barcode_nomenclature", raise_if_not_found=False)
+        if default_record and default_record in self:
+            raise UserError(_(
+                "You cannot delete '%(name)s' because it's the default barcode nomenclature.",
+                name=default_record.display_name
+            ))

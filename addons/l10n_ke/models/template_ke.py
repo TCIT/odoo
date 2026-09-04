@@ -11,11 +11,7 @@ class AccountChartTemplate(models.AbstractModel):
         return {
             'property_account_receivable_id': 'ke1100',
             'property_account_payable_id': 'ke2100',
-            'property_account_expense_categ_id': 'ke5001',
-            'property_account_income_categ_id': 'ke4001',
             'property_stock_valuation_account_id': 'ke1001',
-            'property_stock_account_output_categ_id': 'ke100120',
-            'property_stock_account_input_categ_id': 'ke100110',
             'code_digits': '6',
         }
 
@@ -38,5 +34,18 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_sale_tax_id': 'ST16',
                 'account_purchase_tax_id': 'PT16',
                 'tax_exigibility': 'True',
+                'expense_account_id': 'ke5001',
+                'income_account_id': 'ke4001',
+                'account_stock_journal_id': 'inventory_valuation',
+                'account_stock_valuation_id': 'ke1001',
+            },
+        }
+
+    @template('ke', 'account.account')
+    def _get_ke_account_account(self):
+        return {
+            'ke1001': {
+                'account_stock_expense_id': 'ke5001',
+                'account_stock_variation_id': 'ke500105',
             },
         }

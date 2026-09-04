@@ -1,23 +1,26 @@
-import { _t } from "@web/core/l10n/translation";
+import { Component, onPatched, onWillDestroy, useEffect, useRef, useState } from "@odoo/owl";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
+import { _t } from "@web/core/l10n/translation";
+import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { useSortable } from "@web/core/utils/sortable_owl";
+import { MOVABLE_RECORD_TYPES } from "@web/model/relational_model/dynamic_group_list";
 import { isNull } from "@web/views/utils";
 import { ColumnProgress } from "@web/views/view_components/column_progress";
 import { useBounceButton } from "@web/views/view_hook";
+import { KanbanColumnExamplesDialog } from "./kanban_column_examples_dialog";
 import { KanbanColumnQuickCreate } from "./kanban_column_quick_create";
 import { KanbanHeader } from "./kanban_header";
 import { KanbanRecord } from "./kanban_record";
 import { KanbanRecordQuickCreate } from "./kanban_record_quick_create";
-import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { Component, onPatched, onWillDestroy, onWillPatch, useRef, useState } from "@odoo/owl";
-import { evaluateExpr } from "@web/core/py_js/py";
+import { Widget } from "@web/views/widgets/widget";
+import { ActionHelper } from "@web/views/action_helper";
 
 const DRAGGABLE_GROUP_TYPES = ["many2one"];
-const MOVABLE_RECORD_TYPES = ["char", "boolean", "integer", "selection", "many2one"];
 
 function validateColumnQuickCreateExamples(data) {
     const { allowedGroupBys = [], examples = [], foldField = "" } = data;
@@ -43,20 +46,24 @@ export class KanbanRenderer extends Component {
         KanbanHeader,
         KanbanRecord,
         KanbanRecordQuickCreate,
+        Widget,
+        ActionHelper,
     };
     static props = [
         "archInfo",
-        "Compiler?", // optional in stable for backward compatibility
+        "Compiler",
         "list",
         "deleteRecord",
         "openRecord",
-        "readonly",
+        "readonly?",
         "forceGlobalClick?",
         "noContentHelp?",
         "scrollTop?",
         "canQuickCreate?",
         "quickCreateState?",
         "progressBarState?",
+        "addLabel?",
+        "onAdd?",
     ];
 
     static defaultProps = {
@@ -71,6 +78,7 @@ export class KanbanRenderer extends Component {
          * @type {{ processedIds: string[], columnQuickCreateIsFolded: boolean }}
          */
         this.state = useState({
+            selectionAvailable: false,
             processedIds: [],
             columnQuickCreateIsFolded:
                 !this.props.list.isGrouped || this.props.list.groups.length > 0,
@@ -82,7 +90,7 @@ export class KanbanRenderer extends Component {
         if (this.exampleData) {
             validateColumnQuickCreateExamples(this.exampleData);
         }
-        this.ghostColumns = this.generateGhostColumns();
+        this.lastCheckedRecord = null;
 
         // Sortable
         let dataRecordId;
@@ -98,11 +106,17 @@ export class KanbanRenderer extends Component {
                 groups: () => this.props.list.isGrouped && ".o_kanban_group",
                 connectGroups: () => this.canMoveRecords,
                 cursor: "move",
+                placeholderClasses: ["visible", "opacity-50", "my-2"],
                 // Hooks
                 onDragStart: (params) => {
                     const { element, group } = params;
                     dataRecordId = element.dataset.id;
                     dataGroupId = group && group.dataset.id;
+                    if (this.props.list.selection?.length) {
+                        this.props.list.selection.forEach((record) => {
+                            record.toggleSelection(false);
+                        });
+                    }
                     return this.sortStart(params);
                 },
                 onDragEnd: (params) => this.sortStop(params),
@@ -129,7 +143,11 @@ export class KanbanRenderer extends Component {
         }
 
         useBounceButton(this.rootRef, (clickedEl) => {
-            if (this.props.list.isGrouped ? !this.props.list.recordCount : !this.props.list.count || this.props.list.model.useSampleModel) {
+            if (
+                this.props.list.isGrouped
+                    ? !this.props.list.recordCount
+                    : !this.props.list.count || this.props.list.model.useSampleModel
+            ) {
                 return clickedEl.matches(
                     [
                         ".o_kanban_renderer",
@@ -163,6 +181,10 @@ export class KanbanRenderer extends Component {
         useHotkey(
             "Enter",
             ({ target }) => {
+                if (target.closest(".o_kanban_selection_active") !== null) {
+                    return;
+                }
+
                 if (!target.classList.contains("o_kanban_record")) {
                     return;
                 }
@@ -181,6 +203,16 @@ export class KanbanRenderer extends Component {
             { area: () => this.rootRef.el }
         );
 
+        useHotkey("space", ({ target }) => this.onSpaceKeyPress(target), {
+            area: () => this.rootRef.el,
+            isAvailable: () => !this.props.quickCreateState.groupId,
+        });
+
+        useHotkey("shift+space", ({ target }) => this.onSpaceKeyPress(target, true), {
+            area: () => this.rootRef.el,
+            isAvailable: () => !this.props.quickCreateState.groupId,
+        });
+
         const arrowsOptions = { area: () => this.rootRef.el, allowRepeat: true };
         if (this.env.searchModel) {
             useHotkey(
@@ -196,13 +228,57 @@ export class KanbanRenderer extends Component {
         useHotkey("ArrowDown", ({ area }) => this.focusNextCard(area, "down"), arrowsOptions);
         useHotkey("ArrowLeft", ({ area }) => this.focusNextCard(area, "left"), arrowsOptions);
         useHotkey("ArrowRight", ({ area }) => this.focusNextCard(area, "right"), arrowsOptions);
+        const handleAltKeyDown = (ev) => {
+            if (ev.key === "Alt") {
+                this.state.selectionAvailable = true;
+            }
+        };
+        const handleAltKeyUp = () => {
+            this.state.selectionAvailable = false;
+        };
+        useEffect(
+            () => {
+                window.addEventListener("keydown", handleAltKeyDown);
+                window.addEventListener("keyup", handleAltKeyUp);
+                window.addEventListener("blur", handleAltKeyUp);
+                return () => {
+                    window.removeEventListener("keydown", handleAltKeyDown);
+                    window.removeEventListener("keyup", handleAltKeyUp);
+                    window.removeEventListener("blur", handleAltKeyUp);
+                };
+            },
+            () => []
+        );
 
-        let previousScrollTop = 0;
-        onWillPatch(() => {
-            previousScrollTop = this.rootRef.el.scrollTop;
-        });
+        // After a group is unfolded through onGroupClick, we want to scroll towards
+        // the next group if it exists and is folded, and to the unfolded group
+        // itself otherwise
         onPatched(() => {
-            this.rootRef.el.scrollTop = previousScrollTop;
+            if (this.lastOpenedGroupId) {
+                const groups = this.getGroupsOrRecords();
+                const lastOpenedGroupIndex = groups.findIndex(
+                    (g) => g.group.id === this.lastOpenedGroupId
+                );
+                let groupIdToFocus = this.lastOpenedGroupId;
+                if (
+                    lastOpenedGroupIndex >= 0 &&
+                    lastOpenedGroupIndex < groups.length - 1 &&
+                    groups[lastOpenedGroupIndex + 1].group.isFolded
+                ) {
+                    groupIdToFocus = groups[lastOpenedGroupIndex + 1].group.id;
+                }
+                const groupEl = this.rootRef.el.querySelector(
+                    `.o_kanban_group[data-id="${groupIdToFocus}"]`
+                );
+                if (groupEl) {
+                    const rect = groupEl.getBoundingClientRect();
+                    // Don't scroll if the group to focus is completely inside of the viewport
+                    if (rect.x + rect.width > window.innerWidth) {
+                        groupEl.scrollIntoView({ behavior: "smooth", inline: "end" });
+                    }
+                }
+                delete this.lastOpenedGroupId;
+            }
         });
     }
 
@@ -259,6 +335,12 @@ export class KanbanRenderer extends Component {
         );
     }
 
+    get canShowExamples() {
+        const { allowedGroupBys = [], examples = [] } = this.exampleData || {};
+        const hasExamples = Boolean(examples.length);
+        return hasExamples && allowedGroupBys.includes(this.props.list.groupByField.name);
+    }
+
     get showNoContentHelper() {
         const { model, isGrouped, groupByField, groups } = this.props.list;
         if (model.useSampleModel) {
@@ -276,6 +358,10 @@ export class KanbanRenderer extends Component {
             }
         }
         return !model.hasData();
+    }
+
+    getSelection() {
+        return this.props.list.selection || [];
     }
 
     /**
@@ -331,19 +417,6 @@ export class KanbanRenderer extends Component {
         return count - records.length;
     }
 
-    generateGhostColumns() {
-        let colNames;
-        if (this.exampleData && this.exampleData.ghostColumns) {
-            colNames = this.exampleData.ghostColumns;
-        } else {
-            colNames = [1, 2, 3, 4].map((num) => _t("Column %s", num));
-        }
-        return colNames.map((colName) => ({
-            name: colName,
-            cards: new Array(Math.floor(Math.random() * 4) + 2),
-        }));
-    }
-
     /**
      * @param {string} id
      * @returns {boolean}
@@ -361,8 +434,12 @@ export class KanbanRenderer extends Component {
     // ------------------------------------------------------------------------
 
     canCreateGroup() {
-        const { activeActions } = this.props.archInfo;
-        return activeActions.createGroup && this.props.list.groupByField.type === "many2one";
+        const { activeActions, defaultGroupBy } = this.props.archInfo;
+        return (
+            activeActions.createGroup &&
+            this.props.list.groupByField.type === "many2one" &&
+            this.props.list.groupByField.name === defaultGroupBy?.[0]
+        );
     }
 
     canQuickCreate() {
@@ -387,20 +464,13 @@ export class KanbanRenderer extends Component {
     }
 
     async validateQuickCreate(recordId, mode, group) {
-        this.props.quickCreateState.groupId = false;
-        if (mode === "add") {
-            this.props.quickCreateState.groupId = group.id;
-        }
         const record = await group.addExistingRecord(recordId, true);
-        group.model.bus.trigger("group-updated", {
-            group: group,
-            withProgressBars: true,
-        });
         if (mode === "edit") {
-            await this.props.openRecord(record, "edit");
+            await this.props.openRecord(record);
         } else {
             this.props.progressBarState?.updateCounts(group);
         }
+        this.props.quickCreateState.groupId = mode === "add" ? group.id : false;
     }
 
     cancelQuickCreate() {
@@ -436,12 +506,33 @@ export class KanbanRenderer extends Component {
         }
     }
 
+    toggleSelection(record, isRange = false) {
+        if (isRange && this.lastCheckedRecord) {
+            this.toggleRangeSelection(record);
+        } else {
+            record.toggleSelection();
+        }
+        this.lastCheckedRecord = record;
+    }
+
+    toggleRangeSelection(record) {
+        const { records } = this.props.list;
+        const recordIndex = records.findIndex((e) => e.id === record.id);
+        const lastCheckedRecordIndex = records.findIndex((e) => e.id === this.lastCheckedRecord.id);
+        const start = Math.min(recordIndex, lastCheckedRecordIndex);
+        const end = Math.max(recordIndex, lastCheckedRecordIndex);
+        for (let i = start; i <= end; i++) {
+            records[i].toggleSelection(!record.selected);
+        }
+    }
+
     // ------------------------------------------------------------------------
     // Handlers
     // ------------------------------------------------------------------------
 
     async onGroupClick(group, ev) {
         if (!this.env.isSmall && group.isFolded) {
+            this.lastOpenedGroupId = group.id;
             await group.toggle();
             this.props.scrollTop();
         }
@@ -466,6 +557,30 @@ export class KanbanRenderer extends Component {
         }
     }
 
+    onSpaceKeyPress(target, isRange) {
+        if (target.classList.contains("o_kanban_record")) {
+            const record = this.props.list.records.find((e) => e.id === target.dataset.id);
+            this.toggleSelection(record, isRange);
+        }
+    }
+
+    showExamples() {
+        this.dialog.add(KanbanColumnExamplesDialog, {
+            examples: this.exampleData.examples,
+            applyExamplesText: this.exampleData.applyExamplesText || _t("Use This For My Kanban"),
+            applyExamples: (index) => {
+                const { examples, foldField } = this.exampleData;
+                const { columns, foldedColumns = [] } = examples[index];
+                for (const groupName of columns) {
+                    this.props.list.createGroup(groupName);
+                }
+                for (const groupName of foldedColumns) {
+                    this.props.list.createGroup(groupName, foldField);
+                }
+            },
+        });
+    }
+
     /**
      * @param {string} dataRecordId
      * @param {string} dataGroupId
@@ -482,6 +597,12 @@ export class KanbanRenderer extends Component {
             parent.classList.contains("o_kanban_hover") ||
             parent.dataset.id === element.parentElement.dataset.id
         ) {
+            if (!this.props.list.records.find((r) => r.id === dataRecordId)) {
+                // Race condition: a new rendering has been scheduled/is ongoing but hasn't been
+                // applied to the DOM yet, so the user dropped a record that is no longer referenced
+                // in the model. In that case, we can't to anything else than abort.
+                return;
+            }
             this.toggleProcessing(dataRecordId, true);
 
             parent?.classList.remove("o_kanban_hover");

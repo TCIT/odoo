@@ -1,24 +1,25 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* certificate
-# 
-# Translators:
-# Wil Odoo, 2024
-# Maitê Dietze, 2024
-# 
+# * certificate
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# "Maitê Dietze (madi)" <madi@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:39+0000\n"
-"PO-Revision-Date: 2024-09-29 00:00+0000\n"
-"Last-Translator: Maitê Dietze, 2024\n"
-"Language-Team: Portuguese (Brazil) (https://app.transifex.com/odoo/teams/41243/pt_BR/)\n"
+"POT-Creation-Date: 2026-07-10 17:36+0000\n"
+"PO-Revision-Date: 2026-08-07 01:26+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/odoo-"
+"19/certificate/pt_BR/>\n"
+"Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: pt_BR\n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: certificate
 #. odoo-python
@@ -174,6 +175,11 @@ msgid "Invalid"
 msgstr "Inválido"
 
 #. module: certificate
+#: model:ir.model.fields,field_description:certificate.field_certificate_certificate__issuer_cert_id
+msgid "Issuer Certificate"
+msgstr ""
+
+#. module: certificate
 #: model_terms:ir.ui.view,arch_db:certificate.certificate_key_view_list
 msgid "Key"
 msgstr "Chave"
@@ -217,6 +223,14 @@ msgstr "Erro de carregamento"
 #: code:addons/certificate/models/key.py:0
 msgid "Make sure to use a private key to sign documents."
 msgstr "Certifique-se de usar uma chave privada para assinar documentos."
+
+#. module: certificate
+#. odoo-python
+#: code:addons/certificate/models/key.py:0
+msgid "Make sure to use a public key to verify the signature of documents."
+msgstr ""
+"Certifique-se de usar uma chave pública para verificar a assinatura dos "
+"documentos."
 
 #. module: certificate
 #: model_terms:ir.ui.view,arch_db:certificate.res_config_settings_view_form
@@ -342,19 +356,31 @@ msgstr "O certificado e a chave pública não são compatíveis."
 
 #. module: certificate
 #: model:ir.model.fields,help:certificate.field_certificate_certificate__date_end
-msgid "The date on which the certificate expires (UTC)"
-msgstr "A data em que o certificado expira (UTC)"
+msgid "The date on which the certificate expires"
+msgstr "A data em que o certificado expira"
 
 #. module: certificate
 #: model:ir.model.fields,help:certificate.field_certificate_certificate__date_start
-msgid "The date on which the certificate starts to be valid (UTC)"
-msgstr "A data em que inicia a validade do certificado (UTC)"
+msgid "The date on which the certificate starts to be valid"
+msgstr "A data em que o certificado começa a ser válido"
+
+#. module: certificate
+#. odoo-python
+#: code:addons/certificate/models/key.py:0
+msgid "The key size should be at least 512 bytes."
+msgstr "O tamanho da chave deve ser de pelo menos 512 bytes."
 
 #. module: certificate
 #. odoo-python
 #: code:addons/certificate/models/key.py:0
 msgid "The private key could not be loaded."
 msgstr "A chave privada não pôde ser carregada."
+
+#. module: certificate
+#. odoo-python
+#: code:addons/certificate/models/key.py:0
+msgid "The public exponent should be 65537 (or 3 for legacy purposes)."
+msgstr "O expoente público deve ser 65537 (ou 3 para fins de legado)."
 
 #. module: certificate
 #. odoo-python
@@ -382,6 +408,14 @@ msgid ""
 msgstr ""
 "Não foi possível carregar esse certificado. O conteúdo ou a senha está "
 "incorreto."
+
+#. module: certificate
+#. odoo-python
+#: code:addons/certificate/models/certificate.py:0
+msgid ""
+"This certificate could not be loaded. Please provide the certificate "
+"password."
+msgstr ""
 
 #. module: certificate
 #. odoo-python
@@ -422,8 +456,18 @@ msgstr ""
 #. odoo-python
 #: code:addons/certificate/models/key.py:0
 msgid ""
-"Unsupported asymmetric cryptography algorithm '%s'. Currently supported: EC,"
-" RSA."
+"Unsupported asymmetric cryptography algorithm '%s'. Currently supported for "
+"signature: ED25519, EC and RSA."
+msgstr ""
+"Algoritmo de criptografia assimétrica não suportado “%s ”. Atualmente "
+"suportado para assinatura: ED25519, EC e RSA."
+
+#. module: certificate
+#. odoo-python
+#: code:addons/certificate/models/key.py:0
+msgid ""
+"Unsupported asymmetric cryptography algorithm '%s'. Currently supported: EC, "
+"RSA."
 msgstr ""
 "Algoritmo de criptografia assimétrica não suportado '%s'. Atualmente "
 "suportado: EC, RSA."
@@ -431,12 +475,17 @@ msgstr ""
 #. module: certificate
 #: model:ir.model.fields,help:certificate.field_certificate_certificate__public_key_id
 msgid ""
-"Used to set a public key in case the one self-contained in the certificate is erroneus.\n"
-"                When a public key is set this way, it will be used instead of the one in the certificate.\n"
+"Used to set a public key in case the one self-contained in the certificate "
+"is erroneus.\n"
+"                When a public key is set this way, it will be used instead "
+"of the one in the certificate.\n"
 "             "
 msgstr ""
-"Usado para definir uma chave pública em caso da presente no certificado estar incorreta.\n"
-"As chaves públicas definida dessa forma serão usadas no lugar da chave presente no certificado."
+"Usado para definir uma chave pública em caso da presente no certificado "
+"estar incorreta.\n"
+"As chaves públicas definida dessa forma serão usadas no lugar da chave "
+"presente no certificado.\n"
+"             "
 
 #. module: certificate
 #: model:ir.model.fields,field_description:certificate.field_certificate_certificate__is_valid

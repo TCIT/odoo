@@ -6,19 +6,20 @@ import {
     Many2ManyTagsField,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { TagsList } from "@web/core/tags_list/tags_list";
-import { AvatarMany2XAutocomplete } from "@web/views/fields/relational_utils";
 import { imageUrl } from "@web/core/utils/urls";
 
 export class Many2ManyTagsAvatarField extends Many2ManyTagsField {
     static template = "web.Many2ManyTagsAvatarField";
-    static components = {
-        Many2XAutocomplete: AvatarMany2XAutocomplete,
-        TagsList,
-    };
+    static optionTemplate = "web.Many2ManyTagsAvatarField.option";
     static props = {
         ...Many2ManyTagsField.props,
         withCommand: { type: Boolean, optional: true },
     };
+
+    get specification() {
+        return {};
+    }
+
     getTagProps(record) {
         return {
             ...super.getTagProps(record),
@@ -106,6 +107,7 @@ export class KanbanMany2ManyTagsAvatarFieldTagsList extends TagsList {
             closeOnClickAway: (target) => !target.closest(".modal"),
         });
     }
+
     openPopover(ev) {
         if (this.props.readonly) {
             return;
@@ -120,7 +122,7 @@ export class KanbanMany2ManyTagsAvatarFieldTagsList extends TagsList {
         });
     }
     get canDisplayQuickAssignAvatar() {
-        return !this.props.readonly && !(this.props.tags && this.otherTags.length);
+        return !this.props.readonly;
     }
 }
 

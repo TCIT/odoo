@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 
 
 class BaseLanguageInstall(models.TransientModel):
-    _name = "base.language.install"
+    _name = 'base.language.install'
     _description = "Install Language"
 
     @api.model
@@ -13,8 +12,8 @@ class BaseLanguageInstall(models.TransientModel):
         """ Display the selected language when using the 'Update Terms' action
             from the language list view
         """
-        if self._context.get('active_model') == 'res.lang':
-            return self._context.get('active_ids') or [self._context.get('active_id')]
+        if self.env.context.get('active_model') == 'res.lang':
+            return self.env.context.get('active_ids') or [self.env.context.get('active_id')]
         return False
 
     # add a context on the field itself, to be sure even inactive langs are displayed
@@ -52,11 +51,13 @@ class BaseLanguageInstall(models.TransientModel):
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
-            'context': dict(self._context, active_ids=self.ids),
+            'context': dict(self.env.context, active_ids=self.ids),
             'target': 'new',
             'params': {
-                'message': _("The languages that you selected have been successfully installed.\
-                            Users can choose their favorite language in their preferences."),
+                'message': self.env._(
+                    "The languages that you selected have been successfully installed. "
+                    "Users can choose their favorite language in their preferences."
+                ),
                 'type': 'success',
                 'sticky': False,
                 'next': {'type': 'ir.actions.act_window_close'},

@@ -1,51 +1,62 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* web_tour
-# 
+# * web_tour
+#
 # Translators:
-# Arnau Ros, 2024
-# marcescu, 2024
-# Quim - coopdevs <quim.rebull@coopdevs.org>, 2024
-# jabiri7, 2024
-# Óscar Fonseca <tecnico@pyming.com>, 2024
-# Martin Trigaux, 2024
-# 
+# AncesLatino2004, 2022
+# Lluís Dalmau <lluis.dalmau@guifi.net>, 2022
+# jabelchi, 2022
+# Quim - eccit <quim@eccit.com>, 2022
+# Martin Trigaux, 2022
+# Arnau Ros, 2022
+# marcescu, 2022
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~14.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:49+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Martin Trigaux, 2024\n"
-"Language-Team: Catalan (https://app.transifex.com/odoo/teams/41243/ca/)\n"
+"POT-Creation-Date: 2026-04-10 18:40+0000\n"
+"PO-Revision-Date: 2026-08-02 19:20+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Catalan <https://translate.odoo.com/projects/odoo-19/web_tour/"
+"ca/>\n"
+"Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ca\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 msgid "(recording keyboard)"
-msgstr ""
+msgstr "(gravant el teclat)"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 msgid "(run:"
-msgstr ""
+msgstr "(executar:"
 
 #. module: web_tour
 #: model:ir.model.constraint,message:web_tour.constraint_web_tour_tour_uniq_name
 msgid "A tour already exists with this name . Tour's name must be unique!"
 msgstr ""
+"Ja existeix un recorregut amb aquest nom. El nom del recorregut ha de ser "
+"únic!"
+
+#. module: web_tour
+#: model:ir.model.fields.selection,name:web_tour.selection__web_tour_tour_step__tooltip_position__bottom
+msgid "Bottom"
+msgstr "Fons"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_utils.js:0
+#: code:addons/web_tour/static/src/tour_utils.js:0
 msgid "Click the top left corner to navigate across apps."
-msgstr ""
+msgstr "Fes clic a la part superior esquerra per navegar entre les aplicacions."
 
 #. module: web_tour
 #: model:ir.model.fields,field_description:web_tour.field_web_tour_tour_step__content
@@ -71,17 +82,19 @@ msgstr "Personalitzat"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.js:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.js:0
 msgid "Custom tour '%s' couldn't be saved!"
 msgstr ""
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.js:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.js:0
 msgid "Custom tour '%s' has been added."
 msgstr ""
 
 #. module: web_tour
+#: model:ir.model.fields,field_description:web_tour.field_ir_http__display_name
+#: model:ir.model.fields,field_description:web_tour.field_res_users__display_name
 #: model:ir.model.fields,field_description:web_tour.field_web_tour_tour__display_name
 #: model:ir.model.fields,field_description:web_tour.field_web_tour_tour_step__display_name
 msgid "Display Name"
@@ -98,6 +111,8 @@ msgid "HTTP Routing"
 msgstr "Enrutament HTTP"
 
 #. module: web_tour
+#: model:ir.model.fields,field_description:web_tour.field_ir_http__id
+#: model:ir.model.fields,field_description:web_tour.field_res_users__id
 #: model:ir.model.fields,field_description:web_tour.field_web_tour_tour__id
 #: model:ir.model.fields,field_description:web_tour.field_web_tour_tour_step__id
 msgid "ID"
@@ -127,13 +142,13 @@ msgstr "Nom"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 msgid "Name:"
 msgstr "Nom:"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_service.js:0
+#: code:addons/web_tour/static/src/js/onboarding_item.xml:0
 #: code:addons/web_tour/static/src/widgets/tour_start.xml:0
 #: model:ir.model.fields,field_description:web_tour.field_res_users__tour_enabled
 msgid "Onboarding"
@@ -151,10 +166,10 @@ msgstr ""
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 #: code:addons/web_tour/static/src/views/tour_controller.xml:0
 msgid "Record"
-msgstr "Registre "
+msgstr "Registre"
 
 #. module: web_tour
 #. odoo-javascript
@@ -163,25 +178,42 @@ msgid "Record Tour"
 msgstr ""
 
 #. module: web_tour
+#: model:ir.model.fields.selection,name:web_tour.selection__web_tour_tour_step__tooltip_position__right
+msgid "Right"
+msgstr "Dreta"
+
+#. module: web_tour
 #: model:ir.model.fields,field_description:web_tour.field_web_tour_tour_step__run
 msgid "Run"
 msgstr "Executa"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 msgid "Save"
 msgstr "Desar"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_pointer_state.js:0
+#: code:addons/web_tour/static/src/js/tour_pointer/tour_pointer_state.js:0
 msgid "Scroll down to reach the next step."
 msgstr ""
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_pointer_state.js:0
+#: code:addons/web_tour/static/src/js/tour_pointer/tour_pointer_state.js:0
+msgid "Scroll left to reach the next step."
+msgstr ""
+
+#. module: web_tour
+#. odoo-javascript
+#: code:addons/web_tour/static/src/js/tour_pointer/tour_pointer_state.js:0
+msgid "Scroll right to reach the next step."
+msgstr ""
+
+#. module: web_tour
+#. odoo-javascript
+#: code:addons/web_tour/static/src/js/tour_pointer/tour_pointer_state.js:0
 msgid "Scroll up to reach the next step."
 msgstr ""
 
@@ -214,15 +246,21 @@ msgstr "Pas"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 #: model_terms:ir.ui.view,arch_db:web_tour.tour_form
 msgid "Steps"
 msgstr "Passos"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 msgid "Steps:"
+msgstr ""
+
+#. module: web_tour
+#. odoo-javascript
+#: code:addons/web_tour/static/src/js/tour_pointer/tour_pointer.xml:0
+msgid "Stop Tour"
 msgstr ""
 
 #. module: web_tour
@@ -243,9 +281,19 @@ msgid "Tip"
 msgstr "Propina"
 
 #. module: web_tour
+#: model:ir.model.fields,field_description:web_tour.field_web_tour_tour_step__tooltip_position
+msgid "Tooltip Position"
+msgstr ""
+
+#. module: web_tour
+#: model:ir.model.fields.selection,name:web_tour.selection__web_tour_tour_step__tooltip_position__top
+msgid "Top"
+msgstr "Superior"
+
+#. module: web_tour
 #: model:ir.model.fields,field_description:web_tour.field_web_tour_tour_step__tour_id
 msgid "Tour"
-msgstr ""
+msgstr "Tour"
 
 #. module: web_tour
 #: model:ir.model,name:web_tour.model_web_tour_tour_step
@@ -266,7 +314,7 @@ msgstr "Activació"
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 msgid "Url:"
 msgstr ""
 
@@ -286,13 +334,67 @@ msgid "e.g. My_Tour"
 msgstr ""
 
 #. module: web_tour
+#: model:ir.model.fields.selection,name:web_tour.selection__web_tour_tour_step__tooltip_position__left
+msgid "left"
+msgstr "esquerra"
+
+#. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 msgid "name_of_the_tour"
 msgstr ""
 
 #. module: web_tour
 #. odoo-javascript
-#: code:addons/web_tour/static/src/tour_service/tour_recorder/tour_recorder.xml:0
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
+msgid "n°"
+msgstr ""
+
+#. module: web_tour
+#. odoo-javascript
+#: code:addons/web_tour/static/src/js/tour_recorder/tour_recorder.xml:0
 msgid "trigger"
 msgstr ""
+
+#~ msgid ""
+#~ "<strong><b>Good job!</b> You went through all steps of this tour.</strong>"
+#~ msgstr ""
+#~ "<strong><b>Bon treball!</b> Has fet tots els passos d'aquest recorregut.</"
+#~ "strong>"
+
+#~ msgid "Click on the <i>Home icon</i> to navigate across apps."
+#~ msgstr ""
+#~ "Feu clic a <i>Icona de l'usuari</i> per navegar per les aplicacions."
+
+#~ msgid "Consumed by"
+#~ msgstr "Consumit per"
+
+#~ msgid "Disable Tours"
+#~ msgstr "Inhabilita les visites"
+
+#~ msgid "Onboarding tours"
+#~ msgstr "Visites d'enboarding"
+
+#~ msgid "Open bugger menu."
+#~ msgstr "Obriu el menú del bugger."
+
+#~ msgid "Path"
+#~ msgstr "Ruta"
+
+#~ msgid "Start"
+#~ msgstr "Inicia"
+
+#~ msgid "Start tour"
+#~ msgstr "Començar recorregut"
+
+#~ msgid "Test"
+#~ msgstr "Test"
+
+#~ msgid "Test tour"
+#~ msgstr "Prova la visita"
+
+#~ msgid "Testing tours"
+#~ msgstr "Proves de visites"
+
+#~ msgid "Tour name"
+#~ msgstr "Nom del recorregut"

@@ -1,22 +1,29 @@
-import { Component, useState } from "@odoo/owl";
+import { Component, useSubEnv } from "@odoo/owl";
 
+import { ActionList } from "@mail/core/common/action_list";
+import { useCallActions } from "@mail/discuss/call/common/call_actions";
+
+import { Dropdown } from "@web/core/dropdown/dropdown";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { callActionsRegistry, useCallActions } from "./call_actions";
 
 export class CallMenu extends Component {
     static props = [];
     static template = "discuss.CallMenu";
+    static components = { ActionList, Dropdown };
     setup() {
         super.setup();
-        this.rtc = useState(useService("discuss.rtc"));
-        this.callActions = useCallActions();
+        this.rtc = useService("discuss.rtc");
+        this.callActions = useCallActions({ thread: () => this.rtc.channel });
+        this.isEnterprise = odoo.info && odoo.info.isEnterprise;
+        useSubEnv({ inCallMenu: true });
     }
 
     get icon() {
-        return (
-            callActionsRegistry.get(this.rtc.lastSelfCallAction, undefined)?.icon ?? "fa-microphone"
-        );
+        const res = this.rtc.callActions.find(
+            (action) => action.id === this.rtc.lastSelfCallAction
+        )?.icon;
+        return (typeof res === "function" ? res() : res) ?? "fa fa-microphone";
     }
 }
 

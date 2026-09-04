@@ -1,5 +1,5 @@
 import { useService } from "@web/core/utils/hooks";
-import { uuid } from "../../utils";
+import { uuid } from "@web/core/utils/strings";
 
 import { Component, useState, useRef, useEffect } from "@odoo/owl";
 import { useSortable } from "@web/core/utils/sortable_owl";
@@ -177,15 +177,18 @@ export class PropertyDefinitionSelection extends Component {
         if (event.key === "Enter") {
             const newLabel = event.target.value;
 
-            if (!newLabel || !newLabel.length) {
+            // Event prevented because:
+            // - either the label is empty -> "enter" keydown should be ignored
+            // - or we swap to the "change" handler manually
+            event.preventDefault();
+
+            if (newLabel) {
+                this.onOptionChange(event, optionIndex);
+                this.onOptionCreate(optionIndex + 1);
+            } else {
                 // press enter on an empty option, just ignore it, nothing to save
                 event.stopPropagation();
-                event.preventDefault();
-                return;
             }
-
-            this.onOptionChange(event, optionIndex);
-            this.onOptionCreate(optionIndex + 1);
         } else if (["ArrowUp", "ArrowDown"].includes(event.key)) {
             event.stopPropagation();
             event.preventDefault();

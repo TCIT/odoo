@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tests import tagged
+from odoo import Command
+from odoo.tests import HttpCase, tagged
 
-from odoo.addons.sale.tests.test_sale_product_attribute_value_config import TestSaleProductAttributeValueCommon
-from odoo.addons.website.tools import MockRequest
+from odoo.addons.product.tests.test_product_attribute_value_config import (
+    TestProductAttributeValueCommon,
+)
+from odoo.addons.website_sale.tests.common import MockRequest
 from odoo.addons.website_sale_stock.tests.common import WebsiteSaleStockCommon
 
 
 @tagged('post_install', '-at_install')
 class TestWebsiteSaleStockProductWarehouse(
-    TestSaleProductAttributeValueCommon, WebsiteSaleStockCommon
+    TestProductAttributeValueCommon, HttpCase, WebsiteSaleStockCommon
 ):
 
     @classmethod
@@ -44,16 +47,22 @@ class TestWebsiteSaleStockProductWarehouse(
 
     def test_get_combination_info_free_qty_when_warehouse_is_set(self):
         self.website.warehouse_id = self.warehouse_2
-        combination_info = self.product_A.with_env(self.test_env)._get_combination_info_variant()
-        self.assertEqual(combination_info['free_qty'], 15)
-        combination_info = self.product_B.with_env(self.test_env)._get_combination_info_variant()
-        self.assertEqual(combination_info['free_qty'], 10)
+        test_env = self.test_env
+        with MockRequest(test_env, website=self.website.with_env(test_env)):
+            combination_info = self.product_A.with_env(test_env)._get_combination_info_variant()
+            self.assertEqual(combination_info['free_qty'], 15)
+        with MockRequest(test_env, website=self.website.with_env(test_env)):
+            combination_info = self.product_B.with_env(test_env)._get_combination_info_variant()
+            self.assertEqual(combination_info['free_qty'], 10)
 
     def test_get_combination_info_free_qty_when_no_warehouse_is_set(self):
         self.website.warehouse_id = False
-        combination_info = self.product_A.with_env(self.test_env)._get_combination_info_variant()
+        test_env = self.test_env
+        with MockRequest(test_env, website=self.website.with_env(test_env)):
+            combination_info = self.product_A.with_env(test_env)._get_combination_info_variant()
         self.assertEqual(combination_info['free_qty'], 25)
-        combination_info = self.product_B.with_env(self.test_env)._get_combination_info_variant()
+        with MockRequest(test_env, website=self.website.with_env(test_env)):
+            combination_info = self.product_B.with_env(test_env)._get_combination_info_variant()
         self.assertEqual(combination_info['free_qty'], 10)
 
     def test_02_update_cart_with_multi_warehouses(self):
@@ -62,26 +71,43 @@ class TestWebsiteSaleStockProductWarehouse(
         be returned and the quantity updated to its maximum. """
 
         so = self.env['sale.order'].create({
+            'website_id': self.website.id,
             'partner_id': self.env.user.partner_id.id,
             'order_line': [(0, 0, {
                 'name': self.product_A.name,
                 'product_id': self.product_A.id,
                 'product_uom_qty': 5,
-                'product_uom': self.product_A.uom_id.id,
                 'price_unit': self.product_A.list_price,
             })]
         })
 
-        with MockRequest(self.env, website=self.website, sale_order_id=so.id):
-            website_so = self.website.sale_get_order()
+        with MockRequest(self.env, website=self.website, sale_order_id=so.id) as req:
+            website_so = req.cart
+            self.assertEqual(website_so, so)
             self.assertEqual(
                 website_so.order_line.product_id.virtual_available,
                 25,
                 "This quantity should be based on all warehouses.",
             )
 
-            values = so._cart_update(
-                product_id=self.product_A.id, line_id=so.order_line.id, set_qty=30
-            )
+            values = so._cart_update_line_quantity(line_id=so.order_line.id, quantity=30)
             self.assertTrue(values.get('warning', False))
             self.assertEqual(values.get('quantity'), 25)
+
+    def test_open_shop_when_product_has_no_variants(self):
+        """Test opening the shop page after deleting all variants of product."""
+        product_template = self.product.product_tmpl_id
+        product_template.write({
+            'is_storable': True,
+            'allow_out_of_stock_order': False,
+        })
+
+        self.env['product.template.attribute.line'].create({
+            'product_tmpl_id': product_template.id,
+            'attribute_id': self.ssd_attribute.id,
+            'value_ids': [Command.set((self.ssd_256.id, self.ssd_512.id))],
+        })
+        product_template.product_variant_ids.unlink()
+
+        response = self.url_open('/shop')
+        self.assertEqual(response.status_code, 200)

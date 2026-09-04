@@ -12,17 +12,18 @@ class EventRegistrationAnswer(models.Model):
 
     question_id = fields.Many2one(
         'event.question', ondelete='restrict', required=True,
-        domain="[('event_id', '=', event_id)]")
-    registration_id = fields.Many2one('event.registration', required=True, ondelete='cascade')
+        domain="[('event_ids', 'in', event_id)]")
+    registration_id = fields.Many2one('event.registration', required=True, index=True, ondelete='cascade')
     partner_id = fields.Many2one('res.partner', related='registration_id.partner_id')
     event_id = fields.Many2one('event.event', related='registration_id.event_id')
     question_type = fields.Selection(related='question_id.question_type')
     value_answer_id = fields.Many2one('event.question.answer', string="Suggested answer")
     value_text_box = fields.Text('Text answer')
 
-    _sql_constraints = [
-        ('value_check', "CHECK(value_answer_id IS NOT NULL OR COALESCE(value_text_box, '') <> '')", "There must be a suggested value or a text value.")
-    ]
+    _value_check = models.Constraint(
+        "CHECK(value_answer_id IS NOT NULL OR COALESCE(value_text_box, '') <> '')",
+        'There must be a suggested value or a text value.',
+    )
 
     # for displaying selected answers by attendees in attendees list view
     @api.depends('value_answer_id', 'question_type', 'value_text_box')

@@ -62,7 +62,7 @@
                             <field name="batch_mode" />
                             <div colspan="2">In batch mode, the domain is evaluated globally. If enabled, do not use keyword 'user' in above filter domain.</div>
                             <field name="batch_distinctive_field" invisible="not batch_mode" required="batch_mode"
-                                domain="[('model_id', '=', model_id)]" class="oe_inline" />
+                                domain="[('model_id', '=', model_id)]" class="oe_inline" options="{'no_create': True}"/>
                             <field name="batch_user_expression" invisible="not batch_mode" required="batch_mode" class="oe_inline"
                                 placeholder="e.g. user.partner_id.id"/>
                         </group>
@@ -89,7 +89,7 @@
                 <field name="name"/>
                 <field name="model_id"/>
                 <field name="field_id"/>
-                <group expand="0" string="Group By">
+                <group>
                     <filter string="Model" name="model" domain="[]" context="{'group_by':'model_id'}"/>
                     <filter string="Computation Mode" name="computationmode" domain="[]" context="{'group_by':'computation_mode'}"/>
                 </group>

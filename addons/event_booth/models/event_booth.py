@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
-from odoo.osv import expression
 
 
 class EventBooth(models.Model):
@@ -16,7 +14,7 @@ class EventBooth(models.Model):
 
     # owner
     event_type_id = fields.Many2one(ondelete='set null', required=False)
-    event_id = fields.Many2one('event.event', string='Event', ondelete='cascade', required=True)
+    event_id = fields.Many2one('event.event', string='Event', ondelete='cascade', required=True, index=True)
     # customer
     partner_id = fields.Many2one('res.partner', string='Renter', tracking=True, copy=False)
     contact_name = fields.Char('Renter Name', compute='_compute_contact_name', readonly=False, store=True, copy=False)
@@ -45,18 +43,17 @@ class EventBooth(models.Model):
     def _compute_contact_phone(self):
         for booth in self:
             if not booth.contact_phone:
-                booth.contact_phone = booth.partner_id.phone or booth.partner_id.mobile or False
+                booth.contact_phone = booth.partner_id.phone or False
 
     @api.depends('state')
     def _compute_is_available(self):
         for booth in self:
             booth.is_available = booth.state == 'available'
 
-    def _search_is_available(self, operator, operand):
-        negative = operator in expression.NEGATIVE_TERM_OPERATORS
-        if (negative and operand) or not operand:
-            return [('state', '=', 'unavailable')]
-        return [('state', '=', 'available')]
+    def _search_is_available(self, operator, value):
+        if operator not in ('in', 'not in'):
+            return NotImplemented
+        return [('state', '=', 'available' if operator == 'in' else 'unavailable')]
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -67,25 +64,9 @@ class EventBooth(models.Model):
 
     def write(self, vals):
         to_confirm = self.filtered(lambda booth: booth.state == 'available')
-        wpartner = {}
-        if 'state' in vals or 'partner_id' in vals:
-            wpartner = dict(
-                (booth, booth.partner_id.ids)
-                for booth in self.filtered(lambda booth: booth.partner_id)
-            )
-
         res = super(EventBooth, self).write(vals)
-
-        if vals.get('state') == 'unavailable' or vals.get('partner_id'):
-            for booth in self:
-                booth.message_subscribe(booth.partner_id.ids)
-        for booth in self:
-            if wpartner.get(booth) and booth.partner_id.id not in wpartner[booth]:
-                booth.message_unsubscribe(wpartner[booth])
-
         if vals.get('state') == 'unavailable':
             to_confirm._action_post_confirm(vals)
-
         return res
 
     def _post_confirmation_message(self):

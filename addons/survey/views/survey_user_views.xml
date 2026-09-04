@@ -17,14 +17,15 @@
                 <filter string="In Progress" name="in_progress" domain="[('state', '=', 'in_progress')]"/>
                 <filter name="completed" string="Completed" domain="[('state', '=', 'done')]"/>
                 <separator/>
-                <filter string="Quizz passed" name="scoring_success" domain="[('scoring_success','=', True)]"/>
+                <filter string="Quiz passed" name="scoring_success" domain="[('scoring_success','=', True)]"/>
                 <separator/>
                 <filter string="Tests Only" name="test" domain="[('test_entry','=', True)]"/>
                 <filter string="Exclude Tests" name="not_test" domain="[('test_entry','=', False)]"/>
-                <group expand="0" string="Group By">
+                <group>
                     <filter name="group_by_survey" string="Survey" domain="[]" context="{'group_by': 'survey_id'}"/>
                     <filter string="Email" name="group_by_email" domain="[]" context="{'group_by': 'email'}"/>
                     <filter string="Partner" name="group_by_partner" domain="[]" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Language" name="group_by_lang" domain="[]" context="{'group_by': 'lang_id'}"/>
                 </group>
             </search>
         </field>
@@ -68,7 +69,7 @@
                             <label for="attempts_number" string="Attempt n°" invisible="not is_attempts_limited or test_entry or state != 'done'"/>
                             <div invisible="not is_attempts_limited or test_entry or state != 'done'" class="d-inline-flex">
                                 <field name="attempts_number" nolabel="1"/>
-                                 / 
+                                 /
                                 <field name="attempts_limit" nolabel="1"/>
                             </div>
                             <field name="test_entry" groups="base.group_no_one"/>
@@ -151,7 +152,7 @@
     </record>
 
     <record model="ir.actions.act_window" id="action_survey_user_input">
-        <field name="name">Participations</field>
+        <field name="name">Participants</field>
         <field name="res_model">survey.user_input</field>
         <field name="domain">[('survey_id.survey_type', 'in', ('assessment', 'custom', 'live_session', 'survey'))]</field>
         <field name="view_mode">list,kanban,form</field>
@@ -217,8 +218,9 @@
             <search string="Search User input lines">
                 <field name="user_input_id"/>
                 <field name="survey_id"/>
-                <group expand="1" string="Group By">
+                <group>
                     <filter name="group_by_survey" string="Survey" domain="[]"  context="{'group_by':'survey_id'}"/>
+                    <filter name="group_by_lang" string="Language" domain="[]" context="{'group_by':'lang_id'}"/>
                     <filter name="group_by_user_input" string="User Input" domain="[]"  context="{'group_by':'user_input_id'}"/>
                 </group>
             </search>
@@ -239,7 +241,7 @@
         </field>
     </record>
 
-    <menuitem name="Participations"
+    <menuitem name="Participants"
         id="menu_survey_type_form1"
         action="action_survey_user_input"
         parent="menu_surveys"

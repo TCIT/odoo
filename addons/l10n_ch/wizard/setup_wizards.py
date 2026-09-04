@@ -2,7 +2,7 @@
 from odoo import api, models, fields
 
 
-class SwissSetupBarBankConfigWizard(models.TransientModel):
+class AccountSetupBankManualConfig(models.TransientModel):
     _inherit = 'account.setup.bank.manual.config'
 
     @api.onchange('acc_number')

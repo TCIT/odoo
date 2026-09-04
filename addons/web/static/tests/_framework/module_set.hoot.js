@@ -1,13 +1,22 @@
 // ! WARNING: this module cannot depend on modules not ending with ".hoot" (except libs) !
 
-import { describe, dryRun, globals, start, stop } from "@odoo/hoot";
-import { Deferred, microTick } from "@odoo/hoot-dom";
-import { watchKeys, watchListeners } from "@odoo/hoot-mock";
-import { whenReady } from "@odoo/owl";
+import {
+    Deferred,
+    delay,
+    describe,
+    dryRun,
+    globals,
+    start,
+    stop,
+    watchAddedNodes,
+    watchKeys,
+    watchListeners,
+} from "@odoo/hoot";
 
 import { mockBrowserFactory } from "./mock_browser.hoot";
 import { mockCurrencyFactory } from "./mock_currency.hoot";
-import { TEST_SUFFIX } from "./mock_module_loader";
+import { mockFunctionsFactory } from "./mock_functions.hoot";
+import { mockIndexedDB } from "./mock_indexed_db.hoot";
 import { mockSessionFactory } from "./mock_session.hoot";
 import { makeTemplateFactory } from "./mock_templates.hoot";
 import { mockUserFactory } from "./mock_user.hoot";
@@ -32,16 +41,26 @@ const { define, loader } = odoo;
 //-----------------------------------------------------------------------------
 
 /**
+ * @param {Record<any, any>} object
+ */
+function clearObject(object) {
+    for (const key in object) {
+        delete object[key];
+    }
+}
+
+/**
+ * @param {string} fileSuffix
  * @param {string[]} entryPoints
  * @param {Set<string>} additionalAddons
  */
-const defineModuleSet = async (entryPoints, additionalAddons) => {
+async function defineModuleSet(fileSuffix, entryPoints, additionalAddons) {
     /** @type {ModuleSet} */
     const moduleSet = {};
     if (additionalAddons.has("*")) {
         // Use all addons
         moduleSet.addonsKey = "*";
-        moduleSet.moduleNames = sortedModuleNames.filter((name) => !name.endsWith(TEST_SUFFIX));
+        moduleSet.moduleNames = sortedModuleNames.filter((name) => !name.endsWith(fileSuffix));
     } else {
         // Use subset of addons
         for (const entryPoint of entryPoints) {
@@ -62,7 +81,7 @@ const defineModuleSet = async (entryPoints, additionalAddons) => {
         if (!moduleNamesCache.has(joinedAddons)) {
             moduleNamesCache.set(
                 joinedAddons,
-                sortedModuleNames.filter((name) => !name.endsWith(TEST_SUFFIX) && filter(name))
+                sortedModuleNames.filter((name) => !name.endsWith(fileSuffix) && filter(name))
             );
         }
 
@@ -72,13 +91,14 @@ const defineModuleSet = async (entryPoints, additionalAddons) => {
     }
 
     return moduleSet;
-};
+}
 
 /**
+ * @param {string} fileSuffix
  * @param {string[]} entryPoints
  */
-const describeDrySuite = async (entryPoints) => {
-    const moduleSet = await defineModuleSet(entryPoints, new Set(["*"]));
+async function describeDrySuite(fileSuffix, entryPoints) {
+    const moduleSet = await defineModuleSet(fileSuffix, entryPoints, new Set(["*"]));
     const moduleSetLoader = new ModuleSetLoader(moduleSet);
 
     moduleSetLoader.setup();
@@ -87,7 +107,7 @@ const describeDrySuite = async (entryPoints) => {
         // Run test factory
         describe(getSuitePath(entryPoint), () => {
             // Load entry point module
-            const fullModuleName = entryPoint + TEST_SUFFIX;
+            const fullModuleName = entryPoint + fileSuffix;
             const module = moduleSetLoader.startModule(fullModuleName);
 
             // Check exports (shouldn't have any)
@@ -102,13 +122,13 @@ const describeDrySuite = async (entryPoints) => {
         });
     }
 
-    moduleSetLoader.cleanup();
-};
+    await moduleSetLoader.cleanup();
+}
 
 /**
  * @param {Set<string>} addons
  */
-const fetchDependencies = async (addons) => {
+async function fetchDependencies(addons) {
     // Fetch missing dependencies
     const addonsToFetch = [];
     for (const addon of addons) {
@@ -122,33 +142,47 @@ const fetchDependencies = async (addons) => {
             dependencyBatchPromise = Deferred.resolve().then(() => {
                 const module_names = [...new Set(dependencyBatch)];
                 dependencyBatch = [];
-                return orm("ir.module.module.dependency", "all_dependencies", [], { module_names });
+                return unmockedOrm("ir.module.module.dependency", "all_dependencies", [], {
+                    module_names,
+                });
             });
         }
         dependencyBatch.push(...addonsToFetch);
-        dependencyBatchPromise.then((allDependencies) => {
-            for (const [moduleName, dependencyNames] of Object.entries(allDependencies)) {
-                dependencyCache[moduleName] ||= new Deferred();
-                dependencyCache[moduleName].resolve();
+        dependencyBatchPromise.then(
+            (allDependencies) => {
+                for (const [moduleName, dependencyNames] of Object.entries(allDependencies)) {
+                    dependencyCache[moduleName] ||= new Deferred();
+                    dependencyCache[moduleName].resolve();
 
-                dependencies[moduleName] = dependencyNames.filter(
-                    (dep) => !DEFAULT_ADDONS.includes(dep)
+                    dependencies[moduleName] = dependencyNames.filter(
+                        (dep) => !DEFAULT_ADDONS.includes(dep)
+                    );
+                }
+
+                resolveAddonDependencies(dependencies);
+            },
+            (error) => {
+                const reason = new Error(
+                    `could not fetch the dependencies of ${addonsToFetch.join(", ")}: ${
+                        error.message
+                    }`
                 );
+                for (const addon of addonsToFetch) {
+                    dependencyCache[addon].reject(reason);
+                }
             }
-
-            resolveAddonDependencies(dependencies);
-        });
+        );
     }
 
     await Promise.all([...addons].map((addon) => dependencyCache[addon]));
 
     return getDependencies(addons);
-};
+}
 
 /**
  * @param {string} name
  */
-const findMockFactory = (name) => {
+function findMockFactory(name) {
     if (MODULE_MOCKS_BY_NAME.has(name)) {
         return MODULE_MOCKS_BY_NAME.get(name);
     }
@@ -158,17 +192,79 @@ const findMockFactory = (name) => {
         }
     }
     return null;
-};
+}
+
+/**
+ * Reduce the size of the given field and freeze it.
+ *
+ * @param {Record<string, unknown>>} field
+ */
+function freezeField(field) {
+    delete field.name;
+    if (field.groupable) {
+        delete field.groupable;
+    }
+    if (!field.readonly && !field.related) {
+        delete field.readonly;
+    }
+    if (!field.required) {
+        delete field.required;
+    }
+    if (field.searchable) {
+        delete field.searchable;
+    }
+    if (field.sortable) {
+        delete field.sortable;
+    }
+    if (field.store && !field.related) {
+        delete field.store;
+    }
+    return Object.freeze(field);
+}
+
+/**
+ * Reduce the size of the given model and freeze it.
+ *
+ * @param {Record<string, unknown>>} model
+ */
+function freezeModel(model) {
+    if (model.fields) {
+        for (const [fieldName, field] of Object.entries(model.fields)) {
+            model.fields[fieldName] = freezeField(field);
+        }
+        Object.freeze(model.fields);
+    }
+    if (model.inherit) {
+        if (model.inherit.length) {
+            model.inherit = model.inherit.filter((m) => m !== "base");
+        }
+        if (!model.inherit.length) {
+            delete model.inherit;
+        }
+    }
+    if (model.order === "id") {
+        delete model.order;
+    }
+    if (model.parent_name === "parent_id") {
+        delete model.parent_name;
+    }
+    if (model.rec_name === "name") {
+        delete model.rec_name;
+    }
+    return Object.freeze(model);
+}
 
 /**
  * @param {string} name
  */
-const getAddonName = (name) => name.match(R_PATH_ADDON)?.[1];
+function getAddonName(name) {
+    return name.match(R_PATH_ADDON)?.[1];
+}
 
 /**
  * @param {Iterable<string>} addons
  */
-const getDependencies = (addons) => {
+function getDependencies(addons) {
     const result = new Set(DEFAULT_ADDONS);
     for (const addon of addons) {
         if (DEFAULT_ADDONS.includes(addon)) {
@@ -180,61 +276,34 @@ const getDependencies = (addons) => {
         }
     }
     return result;
-};
+}
 
 /**
  * @param {string} name
  */
-const getSuitePath = (name) => name.replace("../tests/", "");
+function getSuitePath(name) {
+    return name.replace("../tests/", "");
+}
 
 /**
  * Keeps the original definition of a factory.
  *
  * @param {string} name
  */
-const makeFixedFactory = (name) => {
+function makeFixedFactory(name) {
     return () => {
         if (!loader.modules.has(name)) {
             loader.startModule(name);
         }
         return loader.modules.get(name);
     };
-};
-
-/**
- * Toned-down version of the RPC + ORM features since this file cannot depend on
- * them.
- *
- * @param {string} model
- * @param {string} method
- * @param {any[]} args
- * @param {Record<string, any>} kwargs
- */
-const orm = async (model, method, args, kwargs) => {
-    const response = await realFetch(`/web/dataset/call_kw/${model}/${method}`, {
-        body: JSON.stringify({
-            id: nextRpcId++,
-            jsonrpc: "2.0",
-            method: "call",
-            params: { args, kwargs, method, model },
-        }),
-        headers: {
-            "Content-Type": "application/json",
-        },
-        method: "POST",
-    });
-    const { error, result } = await response.json();
-    if (error) {
-        throw error;
-    }
-    return result;
-};
+}
 
 /**
  * @template {Record<string, string[]>} T
  * @param {T} dependencies
  */
-const resolveAddonDependencies = (dependencies) => {
+function resolveAddonDependencies(dependencies) {
     const findJob = () =>
         Object.entries(remaining).find(([, deps]) => deps.every((dep) => dep in solved));
 
@@ -255,86 +324,20 @@ const resolveAddonDependencies = (dependencies) => {
     }
 
     Object.assign(dependencies, solved);
-};
+}
 
-const runTests = async () => {
-    // Find dependency issues
-    const errors = loader.findErrors(loader.factories.keys());
-    delete errors.unloaded; // Only a few modules have been loaded yet => irrelevant
-    if (Object.keys(errors).length) {
-        return loader.reportErrors(errors);
-    }
-
-    // Sort modules to accelerate loading time
-    /** @type {Record<string, Deferred>} */
-    const defs = {};
-    /** @type {string[]} */
-    const testModuleNames = [];
-    for (const [name, { deps }] of loader.factories) {
-        // Register test module
-        if (name.endsWith(TEST_SUFFIX)) {
-            const baseName = name.slice(0, -TEST_SUFFIX.length);
-            testModuleNames.push(baseName);
-        }
-
-        // Register module dependencies
-        const [modDef, ...depDefs] = [name, ...deps].map((dep) => (defs[dep] ||= new Deferred()));
-        Promise.all(depDefs).then(() => {
-            sortedModuleNames.push(name);
-            modDef.resolve();
-        });
-    }
-
-    await Promise.all(Object.values(defs));
-
-    // Dry run
-    const [{ suites }] = await Promise.all([
-        dryRun(() => describeDrySuite(testModuleNames)),
-        whenReady(),
-    ]);
-
-    // Run all test files
-    const filteredSuitePaths = new Set(suites.map((s) => s.fullName));
-    let currentAddonsKey = "";
-    for (const moduleName of testModuleNames) {
-        const suitePath = getSuitePath(moduleName);
-        if (!filteredSuitePaths.has(suitePath)) {
-            continue;
-        }
-
-        const moduleSet = await defineModuleSet([moduleName], new Set());
-        const moduleSetLoader = new ModuleSetLoader(moduleSet);
-
-        if (currentAddonsKey !== moduleSet.addonsKey) {
-            if (moduleSetLoader.modules.has(TEMPLATE_MODULE_NAME)) {
-                // If templates module is available: set URL filter to filter out
-                // static templates and cleanup current processed templates.
-                const templateModule = moduleSetLoader.modules.get(TEMPLATE_MODULE_NAME);
-                templateModule.setUrlFilters(moduleSet.filter ? [moduleSet.filter] : []);
-                templateModule.clearProcessedTemplates();
-            }
-            currentAddonsKey = moduleSet.addonsKey;
-        }
-
-        const suite = describe(suitePath, () => {
-            moduleSetLoader.setup();
-            moduleSetLoader.startModule(moduleName + TEST_SUFFIX);
-        });
-
-        // Run recently added tests
-        const running = await start(suite);
-
-        moduleSetLoader.cleanup();
-        await __gcAndLogMemory(suite.fullName, suite.reporting.tests);
-
-        if (!running) {
-            break;
+/**
+ * @param {Record<string, unknown>>} model
+ */
+function unfreezeModel(model) {
+    const fields = Object.create(null);
+    if (model.fields) {
+        for (const [fieldName, field] of Object.entries(model.fields)) {
+            fields[fieldName] = { ...field };
         }
     }
-
-    await stop();
-    await __gcAndLogMemory("tests done");
-};
+    return { ...model, fields };
+}
 
 /**
  * This method tries to manually run the garbage collector (if exposed) and logs
@@ -350,7 +353,7 @@ const runTests = async () => {
  * @param {string} label
  * @param {number} [testCount]
  */
-const __gcAndLogMemory = async (label, testCount) => {
+async function __gcAndLogMemory(label, testCount) {
     if (typeof window.gc !== "function") {
         return;
     }
@@ -379,11 +382,12 @@ const __gcAndLogMemory = async (label, testCount) => {
         logs.push("- tests:", testCount);
     }
     console.log(...logs);
-};
+}
 
 /** @extends {OdooModuleLoader} */
 class ModuleSetLoader extends loader.constructor {
     cleanups = [];
+    preventGlobalDefine = false;
 
     /**
      * @param {ModuleSet} moduleSet
@@ -417,7 +421,11 @@ class ModuleSetLoader extends loader.constructor {
         return !filter || filter(name) || R_DEFAULT_MODULE.test(name);
     }
 
-    cleanup() {
+    async cleanup() {
+        // Wait for side-effects to be properly caught up by the different "watchers"
+        // (like mutation records).
+        await delay();
+
         odoo.define = define;
         odoo.loader = loader;
 
@@ -431,7 +439,7 @@ class ModuleSetLoader extends loader.constructor {
      * @type {typeof loader["define"]}
      */
     define(name, deps, factory) {
-        if (!loader.factories.has(name)) {
+        if (!this.preventGlobalDefine && !loader.factories.has(name)) {
             // Lazy-loaded modules are added to the main loader for next ModuleSetLoader
             // instances.
             loader.define(name, deps, factory, true);
@@ -447,7 +455,8 @@ class ModuleSetLoader extends loader.constructor {
         this.cleanups.push(
             watchKeys(window.odoo),
             watchKeys(window, ALLOWED_GLOBAL_KEYS),
-            watchListeners()
+            watchListeners(window),
+            watchAddedNodes(window)
         );
 
         // Load module set modules (without entry point)
@@ -482,13 +491,24 @@ class ModuleSetLoader extends loader.constructor {
 
 const ALLOWED_GLOBAL_KEYS = [
     "ace", // Ace editor
+    // Bootstrap.js is voluntarily ignored as it is deprecated
     "Chart", // Chart.js
+    "Cropper", // Cropper.js
+    "DiffMatchPatch", // Diff Match Patch
+    "DOMPurify", // DOMPurify
+    "Diff2Html",
     "FullCalendar", // Full Calendar
     "L", // Leaflet
     "lamejs", // LameJS
     "luxon", // Luxon
-    "odoo",
-    "owl",
+    "odoo", // Odoo global object
+    "owl", // Owl
+    "pdfjsLib", // PDF JS
+    "Popper", // Popper
+    "Prism", // PrismJS
+    "SignaturePad", // Signature Pad
+    "StackTrace", // StackTrace
+    "ZXing", // ZXing
 ];
 const AUTO_INCLUDED_ADDONS = {
     /**
@@ -508,9 +528,11 @@ const MODULE_MOCKS_BY_NAME = new Map([
     ["@web/core/template_inheritance", makeFixedFactory],
     // Other mocks
     ["@web/core/browser/browser", mockBrowserFactory],
+    ["@web/core/utils/indexed_db", mockIndexedDB],
     ["@web/core/currency", mockCurrencyFactory],
     ["@web/core/templates", makeTemplateFactory],
     ["@web/core/user", mockUserFactory],
+    ["@web/core/utils/functions", mockFunctionsFactory],
     ["@web/session", mockSessionFactory],
 ]);
 const MODULE_MOCKS_BY_REGEX = new Map([
@@ -531,7 +553,7 @@ const globalFetchCache = Object.create(null);
 const modelsToFetch = new Set();
 /** @type {Map<string, string[]>} */
 const moduleNamesCache = new Map();
-/** @type {Map<string, Record<string, any>>} */
+/** @type {Map<string, Record<string, unknown>>} */
 const serverModelCache = new Map();
 /** @type {string[]} */
 const sortedModuleNames = [];
@@ -541,9 +563,6 @@ let dependencyBatch = [];
 /** @type {Promise<Record<string, string[]>> | null} */
 let dependencyBatchPromise = null;
 let nextRpcId = 1e9;
-
-// Invoke tests after the module loader finished loading.
-microTick().then(runTests);
 
 //-----------------------------------------------------------------------------
 // Exports
@@ -579,12 +598,16 @@ export async function fetchModelDefinitions(modelNames) {
         const modelDefs = await response.json();
 
         for (const [modelName, modelDef] of Object.entries(modelDefs)) {
-            serverModelCache.set(modelName, modelDef);
+            serverModelCache.set(modelName, freezeModel(modelDef));
             modelsToFetch.delete(modelName);
         }
     }
 
-    return [...modelNames].map((modelName) => [modelName, serverModelCache.get(modelName)]);
+    const result = Object.create(null);
+    for (const modelName of modelNames) {
+        result[modelName] = unfreezeModel(serverModelCache.get(modelName));
+    }
+    return result;
 }
 
 /**
@@ -602,7 +625,7 @@ export function globalCachedFetch(input, init) {
             throw reason;
         });
     }
-    return globalFetchCache[key];
+    return globalFetchCache[key].then((response) => response.clone());
 }
 
 /**
@@ -612,4 +635,138 @@ export function registerModelToFetch(modelName) {
     if (!serverModelCache.has(modelName)) {
         modelsToFetch.add(modelName);
     }
+}
+
+/**
+ * @param {{ fileSuffix?: string }} [options]
+ */
+export async function runTests(options) {
+    const { fileSuffix = "" } = options || {};
+    // Find dependency issues
+    const errors = loader.findErrors(loader.factories.keys());
+    delete errors.unloaded; // Only a few modules have been loaded yet => irrelevant
+    if (Object.keys(errors).length) {
+        return loader.reportErrors(errors);
+    }
+
+    // Sort modules to accelerate loading time
+    /** @type {Record<string, Deferred>} */
+    const defs = {};
+    /** @type {string[]} */
+    const testModuleNames = [];
+    for (const [name, { deps }] of loader.factories) {
+        // Register test module
+        if (name.endsWith(fileSuffix)) {
+            const baseName = name.slice(0, -fileSuffix.length);
+            testModuleNames.push(baseName);
+        }
+
+        // Register module dependencies
+        const [modDef, ...depDefs] = [name, ...deps].map((dep) => (defs[dep] ||= new Deferred()));
+        Promise.all(depDefs).then(() => {
+            sortedModuleNames.push(name);
+            modDef.resolve();
+        });
+    }
+
+    await Promise.all(Object.values(defs));
+
+    // Dry run
+    const { suites } = await dryRun(() => describeDrySuite(fileSuffix, testModuleNames));
+
+    // Run all test files
+    const filteredSuitePaths = new Set(suites.map((s) => s.fullName));
+    let currentAddonsKey = "";
+    let lastSuiteName = null;
+    let lastNumberTests = 0;
+    for (const moduleName of testModuleNames) {
+        if (lastSuiteName) {
+            await __gcAndLogMemory(lastSuiteName, lastNumberTests);
+            lastSuiteName = null;
+        }
+        const suitePath = getSuitePath(moduleName);
+        if (!filteredSuitePaths.has(suitePath)) {
+            continue;
+        }
+
+        const moduleSet = await defineModuleSet(fileSuffix, [moduleName], new Set());
+        const moduleSetLoader = new ModuleSetLoader(moduleSet);
+
+        if (currentAddonsKey !== moduleSet.addonsKey) {
+            if (moduleSetLoader.modules.has(TEMPLATE_MODULE_NAME)) {
+                // If templates module is available: set URL filter to filter out
+                // static templates and cleanup current processed templates.
+                const templateModule = moduleSetLoader.modules.get(TEMPLATE_MODULE_NAME);
+                templateModule.setUrlFilters(moduleSet.filter ? [moduleSet.filter] : []);
+                templateModule.clearProcessedTemplates();
+            }
+            currentAddonsKey = moduleSet.addonsKey;
+        }
+
+        const suite = describe(suitePath, () => {
+            moduleSetLoader.setup();
+            moduleSetLoader.startModule(moduleName + fileSuffix);
+        });
+
+        // Run recently added tests
+        const running = await start(suite);
+
+        await moduleSetLoader.cleanup();
+
+        lastSuiteName = suite.fullName;
+        lastNumberTests = suite.reporting.tests;
+
+        if (!running) {
+            break;
+        }
+    }
+    if (lastSuiteName) {
+        await __gcAndLogMemory(lastSuiteName, lastNumberTests);
+    }
+
+    // Perform final cleanups
+    moduleNamesCache.clear();
+    serverModelCache.clear();
+    clearObject(dependencies);
+    clearObject(dependencyCache);
+    clearObject(globalFetchCache);
+    const templateModule = loader.modules.get(TEMPLATE_MODULE_NAME);
+    if (templateModule) {
+        templateModule.setUrlFilters([]);
+        templateModule.clearProcessedTemplates();
+    }
+
+    await __gcAndLogMemory("tests done");
+
+    // Report last, as the server kills the browser on the result report.
+    await stop();
+}
+
+/**
+ * Toned-down version of the RPC + ORM features since this file cannot depend on
+ * them.
+ *
+ * @param {string} model
+ * @param {string} method
+ * @param {any[]} args
+ * @param {Record<string, any>} kwargs
+ */
+export async function unmockedOrm(model, method, args, kwargs) {
+    const response = await realFetch(`/web/dataset/call_kw/${model}/${method}`, {
+        body: JSON.stringify({
+            id: nextRpcId++,
+            jsonrpc: "2.0",
+            method: "call",
+            params: { args, kwargs, method, model },
+        }),
+        headers: {
+            "Content-Type": "application/json",
+        },
+        method: "POST",
+    });
+    const { error, result } = await response.json();
+    if (error) {
+        throw error;
+    }
+    return result;
 }

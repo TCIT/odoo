@@ -6,7 +6,7 @@ from freezegun import freeze_time
 
 from odoo.tests.common import tagged
 from odoo.addons.hr_holidays.tests.common import TestHrHolidaysCommon
-from odoo.models import ValidationError
+from odoo.exceptions import ValidationError
 
 
 @tagged('negative_time_off')
@@ -18,7 +18,7 @@ class TestNegative(TestHrHolidaysCommon):
         cls.leave_type = cls.env['hr.leave.type'].create({
             'name': 'Limited with negative',
             'leave_validation_type': 'no_validation',
-            'requires_allocation': 'yes',
+            'requires_allocation': True,
             'company_id': cls.company.id,
             'allows_negative': True,
             'max_allowed_negative': 5,
@@ -31,7 +31,7 @@ class TestNegative(TestHrHolidaysCommon):
             'date_to': '2022-12-31',
             'number_of_days': 1,
         })
-        cls.allocation_2022.action_validate()
+        cls.allocation_2022.action_approve()
 
         cls.allocation_2023 = cls.env['hr.leave.allocation'].create({
             'employee_id': cls.employee_emp_id,
@@ -39,7 +39,7 @@ class TestNegative(TestHrHolidaysCommon):
             'date_from': '2023-01-01',
             'number_of_days': 5,
         })
-        cls.allocation_2023.action_validate()
+        cls.allocation_2023.action_approve()
 
     def test_negative_time_off(self):
         with freeze_time('2022-10-02'):

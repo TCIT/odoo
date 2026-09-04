@@ -6,6 +6,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { TagsList } from "@web/core/tags_list/tags_list";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { useTagNavigation } from "@web/core/record_selectors/tag_navigation_hook";
 
 import { Component } from "@odoo/owl";
 
@@ -22,14 +23,10 @@ class PropertyTagsColorListPopover extends Component {
     };
 }
 
-// property tags does not really need timeout because it does not make RPC calls
-export class PropertyTagAutoComplete extends AutoComplete {}
-Object.assign(PropertyTagAutoComplete, { timeout: 0 });
-
 export class PropertyTags extends Component {
     static template = "web.PropertyTags";
     static components = {
-        AutoComplete: PropertyTagAutoComplete,
+        AutoComplete,
         TagsList,
         ColorList,
         Popover: PropertyTagsColorListPopover,
@@ -45,7 +42,6 @@ export class PropertyTags extends Component {
         deleteAction: { type: String },
         readonly: { type: Boolean, optional: true },
         canChangeTags: { type: Boolean, optional: true },
-        checkDefinitionWriteAccess: { type: Function, optional: true },
         // Select a new value
         onValueChange: { type: Function, optional: true },
         // Change the tags definition (can also receive a second
@@ -55,6 +51,9 @@ export class PropertyTags extends Component {
     setup() {
         this.notification = useService("notification");
         this.popover = usePopover(this.constructor.components.Popover);
+        useTagNavigation("propertyTags", {
+            delete: (index) => this.deleteTagByIndex(index),
+        });
     }
 
     /* --------------------------------------------------------
@@ -151,35 +150,31 @@ export class PropertyTags extends Component {
                         if (!request || !request.length) {
                             return [
                                 {
-                                    value: null,
                                     label: _t("Start typing..."),
-                                    classList: "fst-italic",
+                                    cssClass: "fst-italic",
                                 },
                             ];
                         } else if (!this.props.canChangeTags) {
                             return [
                                 {
-                                    value: null,
                                     label: _t("No result"),
-                                    classList: "fst-italic",
+                                    cssClass: "fst-italic",
                                 },
                             ];
                         }
 
                         return [
                             {
-                                value: { toCreate: true, value: request },
                                 label: _t('Create "%s"', request),
-                                classList: "o_field_property_dropdown_add",
+                                cssClass: "o_field_property_dropdown_add",
+                                onSelect: () => this.onTagCreate(request),
                             },
                         ];
                     }
-                    return tagsFiltered.map((tag) => {
-                        return {
-                            value: tag[0],
-                            label: tag[1],
-                        };
-                    });
+                    return tagsFiltered.map((tag) => ({
+                        label: tag[1],
+                        onSelect: () => this.onOptionSelected(tag[0]),
+                    }));
                 },
             },
         ];
@@ -198,18 +193,9 @@ export class PropertyTags extends Component {
      *      - value, to select an existing value
      */
     onOptionSelected(tagValue) {
-        if (!tagValue) {
-            // clicked on "Start typing..."
-            return;
-        }
-
-        if (tagValue.toCreate) {
-            this.onTagCreate(tagValue.value);
-        } else {
-            const selectedTags = this.selectedTags;
-            const newValue = [...selectedTags, tagValue];
-            this.props.onValueChange(newValue);
-        }
+        const selectedTags = this.selectedTags;
+        const newValue = [...selectedTags, tagValue];
+        this.props.onValueChange(newValue);
     }
 
     /**
@@ -223,17 +209,9 @@ export class PropertyTags extends Component {
             return;
         }
 
-        if (!(await this.props.checkDefinitionWriteAccess())) {
-            this.notification.add(
-                _t("You need to be able to edit parent first to add property tags"),
-                { type: "warning" }
-            );
-            return;
-        }
-
         const newValue = newLabel ? newLabel.toLowerCase().replace(" ", "_") : "";
-
         const existingTag = this.props.tags.find((tag) => tag[0] === newValue);
+
         if (existingTag) {
             this.notification.add(_t("This tag is already available"), {
                 type: "warning",
@@ -310,6 +288,15 @@ export class PropertyTags extends Component {
 
         // close the color popover
         this.popover.close();
+    }
+
+    /**
+     * Delete tags by pressing backspace.
+     *
+     * @param {integer} index
+     */
+    deleteTagByIndex(index) {
+        this.onTagDelete(this.tagListItems[index].id);
     }
 }
 

@@ -3,13 +3,14 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import float_is_zero, float_compare
+from odoo.tools import float_is_zero
 
 from itertools import groupby
 from collections import defaultdict
 
+
 class StockPicking(models.Model):
-    _inherit='stock.picking'
+    _inherit = 'stock.picking'
 
     pos_session_id = fields.Many2one('pos.session', index=True)
     pos_order_id = fields.Many2one('pos.order', index=True)
@@ -31,7 +32,7 @@ class StockPicking(models.Model):
         """We'll create some picking based on order_lines"""
 
         pickings = self.env['stock.picking']
-        stockable_lines = lines.filtered(lambda l: l.product_id.type == 'consu' and not float_is_zero(l.qty, precision_rounding=l.product_id.uom_id.rounding))
+        stockable_lines = lines.filtered(lambda l: l.product_id.type == 'consu' and not l.product_id.uom_id.is_zero(l.qty))
         if not stockable_lines:
             return pickings
         positive_lines = stockable_lines.filtered(lambda l: l.qty > 0)
@@ -44,7 +45,6 @@ class StockPicking(models.Model):
             )
 
             positive_picking._create_move_from_pos_order_lines(positive_lines)
-            self.env.flush_all()
             try:
                 with self.env.cr.savepoint():
                     positive_picking._action_done()
@@ -53,6 +53,49 @@ class StockPicking(models.Model):
 
             pickings |= positive_picking
         if negative_lines:
+            refunded_order = negative_lines.mapped('refunded_orderline_id.order_id')
+            if len(refunded_order) == 1:
+                refundable_lines = refunded_order.lines.filtered(
+                    lambda l: l.product_id.type == 'consu' and not l.product_uom_id.is_zero(l.qty)
+                )
+                is_full_refund = all(
+                    float_is_zero(
+                        line.qty - line.refunded_qty,
+                        precision_rounding=line.product_uom_id.rounding,
+                    )
+                    for line in refundable_lines
+                )
+                pickings_to_cancel = refunded_order.picking_ids.filtered(lambda p: p.state not in ('done', 'cancel'))
+                has_done_pickings = refunded_order.picking_ids.filtered(lambda p: p.state == 'done')
+
+                if is_full_refund and pickings_to_cancel and not has_done_pickings:
+                    # Full refund before delivery: cancel the picking
+                    pickings_to_cancel.action_cancel()
+                    return pickings
+                elif not is_full_refund and pickings_to_cancel and not has_done_pickings:
+                    # Partial refund before delivery: reduce the picking quantities
+                    moves_to_reassign = self.env['stock.move']
+                    for negative_line in negative_lines:
+                        refunded_line = negative_line.refunded_orderline_id
+                        moves = pickings_to_cancel.move_ids.filtered(
+                            lambda m: m.product_id == refunded_line.product_id
+                            and m.never_product_template_attribute_value_ids.ids == refunded_line.attribute_value_ids.ids
+                        )
+                        cancel_qty = abs(negative_line.qty)
+                        for move in moves:
+                            new_qty = max(0, move.product_uom_qty - cancel_qty)
+                            if float_is_zero(new_qty, precision_rounding=move.product_uom.rounding):
+                                move._action_cancel()
+                                move.unlink()
+                            else:
+                                move.product_uom_qty = new_qty
+                                moves_to_reassign |= move
+                    # Lowering the demand unreserves the move (chained moves then fall
+                    # back to 'waiting'); re-reserve so the picking stays 'ready'.
+                    moves_to_reassign._action_assign()
+                    self.env.flush_all()
+                    # Skip creating a return picking since nothing was delivered
+                    return pickings
             if picking_type.return_picking_type_id:
                 return_picking_type = picking_type.return_picking_type_id
                 return_location_id = return_picking_type.default_location_dest_id.id
@@ -64,7 +107,6 @@ class StockPicking(models.Model):
                 self._prepare_picking_vals(partner, return_picking_type, location_dest_id, return_location_id)
             )
             negative_picking._create_move_from_pos_order_lines(negative_lines)
-            self.env.flush_all()
             try:
                 with self.env.cr.savepoint():
                     negative_picking._action_done()
@@ -75,7 +117,6 @@ class StockPicking(models.Model):
 
     def _prepare_stock_move_vals(self, first_line, order_lines):
         return {
-            'name': first_line.name,
             'product_uom': first_line.product_id.uom_id.id,
             'picking_id': self.id,
             'picking_type_id': self.picking_type_id.id,
@@ -85,13 +126,24 @@ class StockPicking(models.Model):
             'location_dest_id': self.location_dest_id.id,
             'company_id': self.company_id.id,
             'never_product_template_attribute_value_ids': first_line.attribute_value_ids.filtered(lambda a: a.attribute_id.create_variant == 'no_variant'),
+            'origin_returned_move_id': order_lines.mapped(
+                'refunded_orderline_id.order_id.picking_ids.move_ids'
+            ).filtered(
+                lambda m: m.product_id == first_line.product_id
+                and m.state == 'done'
+                and m.picking_type_id.code == 'outgoing'
+            )[:1].id or False,
         }
 
     def _create_move_from_pos_order_lines(self, lines):
         self.ensure_one()
-        lines_by_product = groupby(sorted(lines, key=lambda l: l.product_id.id), key=lambda l: l.product_id.id)
+
+        def get_grouping_key(line):
+            return (line.product_id.id, tuple(sorted(line.attribute_value_ids.ids)))
+
+        lines_by_product_and_attrs = groupby(sorted(lines, key=get_grouping_key), key=get_grouping_key)
         move_vals = []
-        for dummy, olines in lines_by_product:
+        for _product, olines in lines_by_product_and_attrs:
             order_lines = self.env['pos.order.line'].concat(*olines)
             move_vals.append(self._prepare_stock_move_vals(order_lines[0], order_lines))
         moves = self.env['stock.move'].create(move_vals)
@@ -119,48 +171,33 @@ class StockPicking(models.Model):
         pickings = self.filtered(lambda p: p.picking_type_id != p.picking_type_id.warehouse_id.pos_type_id)
         return super(StockPicking, pickings)._send_confirmation_email()
 
-    def _action_done(self):
-        res = super()._action_done()
-        for rec in self:
-            if rec.picking_type_id.code != 'outgoing':
-                continue
-            if rec.pos_order_id.shipping_date and not rec.pos_order_id.to_invoice:
-                cost_per_account = defaultdict(lambda: 0.0)
-                for line in rec.pos_order_id.lines:
-                    if not line.product_id.is_storable or line.product_id.valuation != 'real_time':
-                        continue
-                    out = line.product_id.categ_id.property_stock_account_output_categ_id
-                    exp = line.product_id._get_product_accounts()['expense']
-                    cost_per_account[(out, exp)] += line.total_cost
-                move_vals = []
-                for (out_acc, exp_acc), cost in cost_per_account.items():
-                    move_vals.append({
-                        'journal_id': rec.pos_order_id.sale_journal.id,
-                        'date': rec.pos_order_id.date_order,
-                        'ref': 'pos_order_'+str(rec.pos_order_id.id),
-                        'partner_id': rec.pos_order_id.partner_id.id,
-                        'line_ids': [
-                            (0, 0, {
-                                'name': rec.pos_order_id.name,
-                                'account_id': exp_acc.id,
-                                'debit': cost,
-                                'credit': 0.0,
-                            }),
-                            (0, 0, {
-                                'name': rec.pos_order_id.name,
-                                'account_id': out_acc.id,
-                                'debit': 0.0,
-                                'credit': cost,
-                            }),
-                        ],
-                    })
-                move = self.env['account.move'].sudo().create(move_vals)
-                move.action_post()
-        return res
 
 class StockPickingType(models.Model):
     _name = 'stock.picking.type'
     _inherit = ['stock.picking.type', 'pos.load.mixin']
+
+    has_stock_reports_to_print = fields.Boolean(compute='_compute_has_stock_reports_to_print')
+
+    @api.depends(
+        'auto_print_delivery_slip',
+        'auto_print_return_slip',
+        'auto_print_reception_report',
+        'auto_print_reception_report_labels',
+        'auto_print_product_labels',
+        'auto_print_lot_labels',
+        'auto_print_packages',
+    )
+    def _compute_has_stock_reports_to_print(self):
+        for record in self:
+            record.has_stock_reports_to_print = (
+                record.auto_print_delivery_slip
+                or record.auto_print_return_slip
+                or record.auto_print_reception_report
+                or record.auto_print_reception_report_labels
+                or record.auto_print_product_labels
+                or record.auto_print_lot_labels
+                or record.auto_print_packages
+            )
 
     @api.depends('warehouse_id')
     def _compute_hide_reservation_method(self):
@@ -179,30 +216,29 @@ class StockPickingType(models.Model):
                 raise ValidationError(_("You cannot archive '%(picking_type)s' as it is used by POS configuration '%(config)s'.", picking_type=picking_type.name, config=pos_config.name))
 
     @api.model
-    def _load_pos_data_domain(self, data):
-        return [('id', '=', data['pos.config']['data'][0]['picking_type_id'])]
+    def _load_pos_data_domain(self, data, config):
+        return [('id', '=', config.picking_type_id.id)]
 
     @api.model
-    def _load_pos_data_fields(self, config_id):
-        return ['id', 'use_create_lots', 'use_existing_lots']
+    def _load_pos_data_fields(self, config):
+        return ['id', 'use_create_lots', 'use_existing_lots', 'has_stock_reports_to_print']
 
-class ProcurementGroup(models.Model):
-    _inherit = 'procurement.group'
-
-    pos_order_id = fields.Many2one('pos.order', 'POS Order')
 
 class StockMove(models.Model):
     _inherit = 'stock.move'
 
     def _get_new_picking_values(self):
-        vals = super(StockMove, self)._get_new_picking_values()
-        vals['pos_session_id'] = self.mapped('group_id.pos_order_id.session_id').id
-        vals['pos_order_id'] = self.mapped('group_id.pos_order_id').id
+        vals = super()._get_new_picking_values()
+        orders = self.reference_ids.pos_order_ids
+        if orders:
+            order = orders.filtered(lambda o: o.is_refund and o.state == 'paid')[:1] or orders[:1]
+            vals['pos_session_id'] = order.session_id.id
+            vals['pos_order_id'] = order.id
         return vals
 
     def _key_assign_picking(self):
         keys = super(StockMove, self)._key_assign_picking()
-        return keys + (self.group_id.pos_order_id,)
+        return keys + (self.reference_ids.pos_order_ids,)
 
     @api.model
     def _prepare_lines_data_dict(self, order_lines):
@@ -227,7 +263,7 @@ class StockMove(models.Model):
             moves_product_ids = set(moves.mapped('product_id').ids)
             lots = lines.pack_lot_ids.filtered(lambda l: l.lot_name and l.product_id.id in moves_product_ids)
             lots_data = set(lots.mapped(lambda l: (l.product_id.id, l.lot_name)))
-            existing_lots = self.env['stock.lot'].search([
+            existing_lots = self.env['stock.lot'].with_context(skip_preprocess_gs1=True).search([
                 '|', ('company_id', '=', False), ('company_id', '=', moves[0].picking_type_id.company_id.id),
                 ('product_id', 'in', lines.product_id.ids),
                 ('name', 'in', lots.mapped('lot_name')),
@@ -285,49 +321,80 @@ class StockMove(models.Model):
         moves_remaining = self - moves_to_assign
         existing_lots = moves_remaining._create_production_lots_for_pos_order(related_order_lines)
         move_lines_to_create = []
-        mls_qties = []
         if are_qties_done:
             for move in moves_remaining:
-                move.move_line_ids.quantity = 0
+                move.move_line_ids.unlink()
                 for line in lines_data[move.product_id.id]['order_lines']:
-                    sum_of_lots = 0
                     for lot in line.pack_lot_ids.filtered(lambda l: l.lot_name):
-                        qty = 1 if line.product_id.tracking == 'serial' else abs(line.qty)
-                        ml_vals = dict(move._prepare_move_line_vals(qty))
+                        qty = self._get_lot_line_qty(line, move, lines_data)
                         if existing_lots:
                             existing_lot = existing_lots.filtered_domain([('product_id', '=', line.product_id.id), ('name', '=', lot.lot_name)])
-                            quant = self.env['stock.quant']
+                            quants = self.env['stock.quant']
                             if existing_lot:
-                                quant = self.env['stock.quant'].search(
+                                quants = self.env['stock.quant'].search(
                                     [('lot_id', '=', existing_lot.id), ('quantity', '>', '0.0'), ('location_id', 'child_of', move.location_id.id)],
                                     order='id desc',
-                                    limit=1
                                 )
-                                if quant:
-                                    ml_vals.update({
-                                        'quant_id': quant.id,
-                                    })
-                                else:
-                                    ml_vals.update({
-                                        'lot_name': existing_lot.name,
-                                        'lot_id': existing_lot.id,
-                                    })
+                            qty_left_to_assign = qty
+                            for quant in quants:
+                                if qty_left_to_assign <= 0:
+                                    break
+                                qty_chg = min(qty_left_to_assign, quant.quantity)
+                                ml_vals = dict(move._prepare_move_line_vals(qty_chg))
+                                qty_left_to_assign -= qty_chg
+                                ml_vals.update({
+                                    'quant_id': quant.id,
+                                })
+                                move_lines_to_create.append(ml_vals)
+                            if qty_left_to_assign > 0:
+                                ml_vals = dict(move._prepare_move_line_vals(qty_left_to_assign))
+                                ml_vals.update({
+                                    'lot_name': existing_lot.name,
+                                    'lot_id': existing_lot.id,
+                                })
+                                move_lines_to_create.append(ml_vals)
                         else:
+                            ml_vals = dict(move._prepare_move_line_vals(qty))
                             ml_vals.update({'lot_name': lot.lot_name})
-                        move_lines_to_create.append(ml_vals)
-                        mls_qties.append(qty)
-                        sum_of_lots += qty
+                            move_lines_to_create.append(ml_vals)
+
             self.env['stock.move.line'].create(move_lines_to_create)
         else:
             for move in moves_remaining:
                 for line in lines_data[move.product_id.id]['order_lines']:
                     for lot in line.pack_lot_ids.filtered(lambda l: l.lot_name):
-                        if line.product_id.tracking == 'serial':
-                            qty = 1
-                        else:
-                            qty = abs(line.qty)
+                        qty = self._get_lot_line_qty(line, move, lines_data)
                         if existing_lots:
                             existing_lot = existing_lots.filtered_domain([('product_id', '=', line.product_id.id), ('name', '=', lot.lot_name)])
                             if existing_lot:
                                 move._update_reserved_quantity(qty, move.location_id, lot_id=existing_lot)
                                 continue
+
+    def _get_lot_line_qty(self, line, move, lines_data):
+        return 1 if line.product_id.tracking == 'serial' else abs(line.qty)
+
+    @api.depends("product_id")
+    def _compute_description_picking(self):
+        super()._compute_description_picking()
+        seen = set()
+        for move in self:
+            if not (pos_order := move.reference_ids.pos_order_ids) or move.description_picking_manual:
+                continue
+
+            product = move.product_id
+            line = pos_order.lines.filtered(
+                lambda l: l.product_id == product
+                and l.id not in seen
+                and any(av.attribute_id.create_variant == "no_variant" or av.is_custom for av in l.attribute_value_ids)
+            )[:1]
+
+            if line and move.description_picking == product.display_name:
+                never_values = line.attribute_value_ids.filtered(
+                    lambda av: av.attribute_id.create_variant == 'no_variant' and not av.is_custom
+                )
+                descriptions = never_values.mapped("display_name")
+                for custom_value in line.custom_attribute_value_ids:
+                    descriptions.append(f"{custom_value.display_name}")
+
+                move.description_picking = "\n".join(descriptions) if descriptions else ""
+                seen.add(line.id)

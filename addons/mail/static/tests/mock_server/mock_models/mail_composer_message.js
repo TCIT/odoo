@@ -1,9 +1,26 @@
 import { models } from "@web/../tests/web_test_helpers";
-import { DEFAULT_MAIL_VIEW_ID } from "./constants";
 
 export class MailComposeMessage extends models.ServerModel {
     _name = "mail.compose.message";
     _views = {
-        [`form,${DEFAULT_MAIL_VIEW_ID}`]: `<form/>`,
+        "form,false": `
+                <form>
+                    <field name="body" widget="html_composer_message"/>
+                    <footer>
+                        <button name="action_send_mail" type="object" string="Send"/>
+                        <button special="cancel" string="Discard"/>
+                    </footer>
+                </form>
+            `,
     };
+
+    action_send_mail() {
+        return {
+            type: "ir.actions.client",
+            tag: "action_send_mail_callback",
+            params: {
+                record_name: "Mitchell Admin",
+            },
+        };
+    }
 }

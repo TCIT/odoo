@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.fields import first, Command
+from odoo.fields import Command
 from odoo.tests import tagged, TransactionCase
 from odoo.tools import float_compare
 
@@ -116,10 +116,25 @@ class TestSeller(TransactionCase):
         msg = "Wrong cost price: LCD Monitor if more than 3 Unit.should be 785 instead of %s" % price
         self.assertEqual(float_compare(price, 785, precision_digits=2), 0, msg)
 
+    def test_31_select_seller(self):
+        """Check that the right seller is selected, even when the decimal precision of
+        Product Price is higher than the precision of the currency.
+        """
+        self.env.ref('product.decimal_price').digits = 3
+        partner = self.asustec
+        product = self.product_consu
+        self.env['product.supplierinfo'].create([{
+            'partner_id': partner.id,
+            'product_tmpl_id': product.product_tmpl_id.id,
+            'price': price,
+        } for price in (0.025, 0.022, 0.020)])
+        price = product._select_seller(partner_id=partner, quantity=201).price
+        self.assertAlmostEqual(price, 0.02, places=3, msg="Lowest price should be returned")
+
     def test_40_seller_min_qty_precision(self):
         """Test that the min_qty has the precision of Product UoM."""
         # Arrange: Change precision digits
-        uom_precision = self.env.ref("product.decimal_product_uom")
+        uom_precision = self.env.ref("uom.decimal_product_uom")
         uom_precision.digits = 3
         product = self.product_service
         product.seller_ids = [
@@ -127,7 +142,7 @@ class TestSeller(TransactionCase):
                 'partner_id': self.asustec.id,
             }),
         ]
-        supplier_info = first(product.seller_ids)
+        supplier_info = product.seller_ids[0]
         precise_value = 1.234
 
         # Act: Set a value for the increased precision

@@ -6,6 +6,7 @@
             <field name="model">blog.blog</field>
             <field name="arch" type="xml">
                 <list string="Blogs">
+                    <field name="sequence" widget="handle"/>
                     <field name="name"/>
                     <field name="blog_post_count"/>
                     <field name="website_id" groups="website.group_multi_website"/>
@@ -46,6 +47,7 @@
         <record id="action_blog_blog" model="ir.actions.act_window">
             <field name="name">Blogs</field>
             <field name="res_model">blog.blog</field>
+            <field name="path">blogs</field>
             <field name="view_mode">list,form</field>
         </record>
 
@@ -83,6 +85,7 @@
         <record id="action_tags" model="ir.actions.act_window">
             <field name="name">Blog Tags</field>
             <field name="res_model">blog.tag</field>
+            <field name="path">blog-tags</field>
             <field name="view_mode">list,form</field>
             <field name="view_id" ref="blog_tag_tree"/>
         </record>
@@ -114,6 +117,7 @@
         <record id="action_tag_category" model="ir.actions.act_window">
             <field name="name">Tag Category</field>
             <field name="res_model">blog.tag.category</field>
+            <field name="path">blog-tag-categories</field>
             <field name="view_mode">list,form</field>
             <field name="view_id" ref="blog_tag_category_tree"/>
         </record>

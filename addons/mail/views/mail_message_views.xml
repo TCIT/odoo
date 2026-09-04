@@ -71,6 +71,8 @@
                                 <group>
                                     <group>
                                         <field name="partner_ids" widget="many2many_tags"/>
+                                        <field name="incoming_email_to"/>
+                                        <field name="incoming_email_cc"/>
                                     </group>
                                     <group>
                                         <field name="notified_partner_ids" widget="many2many_tags"/>
@@ -153,7 +155,7 @@
                                     <div t-else="!webimage" class="o_image o_image_thumbnail" t-att-data-mimetype="record.mimetype.value"/>
                                 </div>
                             </aside>
-                            <main class="o_kanban_details ms-1">
+                            <main class="ms-1">
                                 <div class="o_kanban_details_wrapper d-flex flex-column">
                                     <field name="name" class="text-truncate fw-bold fs-5"/>
                                     <div class="d-flex flex-grow-1 align-items-center">

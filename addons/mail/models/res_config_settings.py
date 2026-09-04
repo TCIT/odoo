@@ -33,12 +33,17 @@ class ResConfigSettings(models.TransientModel):
         config_parameter='mail.use_twilio_rtc_servers',
     )
     twilio_account_sid = fields.Char(
-        'Twilio Account SID',
+        'Account SID',
         config_parameter='mail.twilio_account_sid',
     )
     twilio_account_token = fields.Char(
-        'Twilio Account Auth Token',
+        'Account Auth Token',
         config_parameter='mail.twilio_account_token',
+    )
+    use_sfu_server = fields.Boolean(
+        'Use SFU server',
+        help="If you want to setup SFU server for large group calls.",
+        config_parameter="mail.use_sfu_server",
     )
     sfu_server_url = fields.Char("SFU Server URL", config_parameter="mail.sfu_server_url")
     sfu_server_key = fields.Char("SFU Server key", config_parameter="mail.sfu_server_key", help="Base64 encoded key")
@@ -46,24 +51,10 @@ class ResConfigSettings(models.TransientModel):
     email_secondary_color = fields.Char(related='company_id.email_secondary_color', readonly=False)
 
     tenor_api_key = fields.Char(
-        'Tenor API key',
-        config_parameter='discuss.tenor_api_key',
-        help="Add a Tenor GIF API key to enable GIFs support. https://developers.google.com/tenor/guides/quickstart#setup",
-    )
-    tenor_content_filter = fields.Selection(
-        [('high', 'High'),
-        ('medium', 'Medium'),
-        ('low', 'Low'),
-        ('off', 'Off')],
-        string='Tenor content filter',
-        help="https://developers.google.com/tenor/guides/content-filtering",
-        config_parameter='discuss.tenor_content_filter',
-        default='low',
-    )
-    tenor_gif_limit = fields.Integer(
-        default=8,
-        config_parameter='discuss.tenor_gif_limit',
-        help="Fetch up to the specified number of GIF.",
+        'Klipy API key',
+        config_parameter='discuss.klipy_api_key',
+        help="Add a Klipy GIF API key to enable GIFs support. https://docs.klipy.com/getting-started\n"
+        "If you were using a Tenor GIF API key (service shutdown on June 30, 2026), please replace it here with a Klipy GIF API key",
     )
     google_translate_api_key = fields.Char(
         "Message Translation API Key",

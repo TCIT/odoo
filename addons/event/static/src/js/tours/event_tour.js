@@ -1,8 +1,6 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 
 import EventAdditionalTourSteps from "@event/js/tours/event_steps";
 
@@ -47,10 +45,6 @@ registry.category("web_tour.tours").add('event_tour', {
 }, {
     trigger: '.o_event_form_view input[data-field="date_begin"]',
     content: markup(_t("Open date range picker.<br/>Pick a Start and End date for your event.")),
-    run: "click",
-}, {
-    content: _t("Apply change."),
-    trigger: '.o_datetime_picker .o_datetime_buttons .o_apply',
     run: "click",
 }, {
     trigger: '.o_event_form_view div[name="event_ticket_ids"] .o_field_x2many_list_row_add a',

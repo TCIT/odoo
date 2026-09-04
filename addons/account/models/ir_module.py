@@ -20,7 +20,8 @@ template_module = lambda m: ismodule(m) and m.__name__.split('.')[-1].startswith
 template_class = isclass
 template_function = lambda f: isfunction(f) and hasattr(f, '_l10n_template') and f._l10n_template[1] == 'template_data'
 
-class IrModule(models.Model):
+
+class IrModuleModule(models.Model):
     _inherit = "ir.module.module"
 
     account_templates = fields.Binary(compute='_compute_account_templates', exportable=False)
@@ -82,8 +83,8 @@ class IrModule(models.Model):
             self.env.registry._auto_install_template = try_loading
         return res
 
-    def _load_module_terms(self, modules, langs, overwrite=False, imported_module=False):
-        super()._load_module_terms(modules, langs, overwrite=overwrite, imported_module=imported_module)
+    def _load_module_terms(self, modules, langs, overwrite=False):
+        super()._load_module_terms(modules, langs, overwrite=overwrite)
         if 'account' in modules:
             def load_account_translations(env):
                 env['account.chart.template']._load_translations(langs=langs)

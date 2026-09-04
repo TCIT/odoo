@@ -16,6 +16,12 @@ class WebsiteTest(Home):
     def test_view(self, **kwargs):
         return request.render('test_website.test_view')
 
+    @http.route('/test_view_access_error', type='http', auth='public', website=True, sitemap=False)
+    def test_view_access_error(self, **kwargs):
+        public = self.env.ref('base.public_user')
+        record = self.env.ref('test_website.test_model_exposed_record_not_published')
+        return request.render('test_website.test_view_access_error', {'record': record.with_user(public)})
+
     @http.route('/ignore_args/converteronly/<string:a>', type='http', auth="public", website=True, sitemap=False)
     def test_ignore_args_converter_only(self, a):
         return request.make_response(json.dumps(dict(a=a, kw=None)))
@@ -42,7 +48,7 @@ class WebsiteTest(Home):
 
     @http.route('/multi_company_website', type='http', auth="public", website=True, sitemap=False)
     def test_company_context(self):
-        return request.make_response(json.dumps(request.context.get('allowed_company_ids')))
+        return request.make_response(json.dumps(request.env.context.get('allowed_company_ids')))
 
     @http.route('/test_lang_url/<model("res.country"):country>', type='http', auth='public', website=True, sitemap=False)
     def test_lang_url(self, **kwargs):
@@ -50,7 +56,7 @@ class WebsiteTest(Home):
 
     # Test Session
 
-    @http.route('/test_get_dbname', type='json', auth='public', website=True, sitemap=False)
+    @http.route('/test_get_dbname', type='jsonrpc', auth='public', website=True, sitemap=False)
     def test_get_dbname(self, **kwargs):
         return request.env.cr.dbname
 
@@ -64,7 +70,7 @@ class WebsiteTest(Home):
     def test_user_error_http(self, **kwargs):
         raise UserError("This is a user http test")
 
-    @http.route('/test_user_error_json', type='json', auth='public', website=True, sitemap=False)
+    @http.route('/test_user_error_json', type='jsonrpc', auth='public', website=True, sitemap=False)
     def test_user_error_json(self, **kwargs):
         raise UserError("This is a user rpc test")
 
@@ -72,11 +78,11 @@ class WebsiteTest(Home):
     def test_validation_error_http(self, **kwargs):
         raise ValidationError("This is a validation http test")
 
-    @http.route('/test_validation_error_json', type='json', auth='public', website=True, sitemap=False)
+    @http.route('/test_validation_error_json', type='jsonrpc', auth='public', website=True, sitemap=False)
     def test_validation_error_json(self, **kwargs):
         raise ValidationError("This is a validation rpc test")
 
-    @http.route('/test_access_error_json', type='json', auth='public', website=True, sitemap=False)
+    @http.route('/test_access_error_json', type='jsonrpc', auth='public', website=True, sitemap=False)
     def test_access_error_json(self, **kwargs):
         raise AccessError("This is an access rpc test")
 
@@ -84,7 +90,7 @@ class WebsiteTest(Home):
     def test_access_error_http(self, **kwargs):
         raise AccessError("This is an access http test")
 
-    @http.route('/test_missing_error_json', type='json', auth='public', website=True, sitemap=False)
+    @http.route('/test_missing_error_json', type='jsonrpc', auth='public', website=True, sitemap=False)
     def test_missing_error_json(self, **kwargs):
         raise MissingError("This is a missing rpc test")
 
@@ -92,7 +98,7 @@ class WebsiteTest(Home):
     def test_missing_error_http(self, **kwargs):
         raise MissingError("This is a missing http test")
 
-    @http.route('/test_internal_error_json', type='json', auth='public', website=True, sitemap=False)
+    @http.route('/test_internal_error_json', type='jsonrpc', auth='public', website=True, sitemap=False)
     def test_internal_error_json(self, **kwargs):
         raise werkzeug.exceptions.InternalServerError()
 
@@ -100,7 +106,7 @@ class WebsiteTest(Home):
     def test_internal_error_http(self, **kwargs):
         raise werkzeug.exceptions.InternalServerError()
 
-    @http.route('/test_access_denied_json', type='json', auth='public', website=True, sitemap=False)
+    @http.route('/test_access_denied_json', type='jsonrpc', auth='public', website=True, sitemap=False)
     def test_denied_error_json(self, **kwargs):
         raise AccessDenied("This is an access denied rpc test")
 
@@ -178,3 +184,7 @@ class WebsiteTest(Home):
     ], type='http', auth='public', website=True, sitemap=sitemap_test)
     def test_sitemap(self, rec=None, **kwargs):
         return request.make_response('Sitemap Testing Page')
+
+    @http.route('/test_model/<model("test.model"):test_model>', type='http', auth='public', website=True, sitemap=False)
+    def test_model(self, test_model, **kwargs):
+        return request.render('test_website.test_model_page_layout', {'main_object': test_model, 'test_model': test_model})

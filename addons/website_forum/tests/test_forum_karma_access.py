@@ -10,6 +10,7 @@ from odoo.tools import mute_logger
 
 class TestForumCRUD(TestForumCommon):
 
+    @mute_logger('odoo.addons.base.models.ir_rule')
     def test_crud_rights(self):
         Post = self.env['forum.post']
         Vote = self.env['forum.post.vote']
@@ -94,19 +95,17 @@ class TestForumCRUD(TestForumCommon):
 
         with mute_logger('odoo.sql_db'):
             with self.assertRaises(IntegrityError):
-                with self.cr.savepoint():
-                    # One should not be able to vote more than once on a same post
-                    Vote.with_user(self.user_employee).create({
-                        'post_id': self.admin_post.id,
-                        'vote': '1',
-                    })
+                # One should not be able to vote more than once on a same post
+                Vote.with_user(self.user_employee).create({
+                    'post_id': self.admin_post.id,
+                    'vote': '1',
+                })
             with self.assertRaises(IntegrityError):
-                with self.cr.savepoint():
-                    # One should not be able to vote more than once on a same post
-                    Vote.with_user(self.user_employee).create({
-                        'post_id': self.admin_post.id,
-                        'vote': '1',
-                    })
+                # One should not be able to vote more than once on a same post
+                Vote.with_user(self.user_employee).create({
+                    'post_id': self.admin_post.id,
+                    'vote': '1',
+                })
 
         # One should not be able to create a vote for someone else
         new_employee_vote = Vote.with_user(self.user_employee).create({
@@ -122,6 +121,15 @@ class TestForumCRUD(TestForumCommon):
             'vote': '1',
         })
         self.assertEqual(new_portal_vote.user_id, self.user_portal, 'Creating a vote for someone else should not be allowed. It should create it for yourself instead')
+
+        # One should not be able to access a vote from someone else
+        with self.assertRaises(AccessError):
+            new_employee_vote.with_user(self.user_portal).read(['vote'])
+        with self.assertRaises(AccessError):
+            new_portal_vote.with_user(self.user_employee).read(['vote'])
+
+        # Admins should be able to access all votes
+        (new_employee_vote + new_portal_vote).with_user(self.user_admin).read(['vote'])
 
 
 class TestForumKarma(TestForumCommon):
@@ -182,6 +190,36 @@ class TestForumKarma(TestForumCommon):
             'tag_ids': [(0, 0, {'name': 'Tag42', 'forum_id': self.forum.id})]
         })
         self.assertEqual(self.user_portal.karma, KARMA['post'] + KARMA['gen_que_new'], 'website_forum: wrong karma generation when asking question')
+
+        # check karma done on right forum, using context values
+        self.user_portal.karma = KARMA['post']
+        for karma_value, has_nofollow in [
+            (self.user_portal.karma + 1, True),
+            (self.user_portal.karma, False),
+        ]:
+            with self.subTest(karma_value=karma_value):
+                self.forum.karma_dofollow = karma_value
+                post = Post.with_user(self.user_portal).with_context(default_content='<p>Super <a href="www.link.com">Link</a></p>').create({
+                    'name': "Bypass",
+                    'forum_id': self.forum.id,
+                })
+                if has_nofollow:
+                    self.assertTrue("nofollow" in post.content, 'website_forum: default_content in context should not bypass karma check.')
+                else:
+                    self.assertFalse("nofollow" in post.content, 'website_forum: default_content in context should not bypass karma check.')
+                # reset karma
+                self.user_portal.karma = KARMA['post']
+
+                post = Post.with_user(self.user_portal).with_context(default_forum_id=self.forum.id).create({
+                    'name': "Bypass",
+                    'content': '<p>Super <a href="www.link.com">Link</a></p>',
+                })
+                if has_nofollow:
+                    self.assertTrue("nofollow" in post.content, 'website_forum: default_forum_id in context should not bypass karma check.')
+                else:
+                    self.assertFalse("nofollow" in post.content, 'website_forum: default_forum_id in context should not bypass karma check.')
+                # reset karma
+                self.user_portal.karma = KARMA['post']
 
     def test_close_post_all(self):
         self.user_portal.karma = KARMA['close_all']
@@ -374,7 +412,7 @@ class TestForumKarma(TestForumCommon):
 
     def test_vote(self):
         def check_vote_records_count_and_integrity(expected_total_votes_count):
-            groups = self.env['forum.post.vote'].read_group([], fields=['__count'], groupby=['post_id', 'user_id'], lazy=False)
+            groups = self.env['forum.post.vote'].formatted_read_group([], groupby=['post_id', 'user_id'], aggregates=['__count'])
             self.assertEqual(len(groups), expected_total_votes_count)
             for post_user_group in groups:
                 self.assertEqual(post_user_group['__count'], 1)

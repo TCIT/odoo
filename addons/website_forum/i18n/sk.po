@@ -1,34 +1,44 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_forum
-# 
+# * website_forum
+#
 # Translators:
-# Tomáš Píšek, 2024
-# Wil Odoo, 2024
-# 
+# Filip Hanes <filip.hanes@protonmail.com>, 2022
+# Matus Krnac <matus.krnac@gmail.com>, 2022
+# SAKodoo <sak@odoo.com>, 2022
+# Filip Matúšek <filip.matusek@26house.com>, 2022
+# Damian Brencic <brencicdamian12313@gmail.com>, 2022
+# Rastislav Brencic <rastislav.brencic@azet.sk>, 2022
+# Martin Trigaux, 2022
+# Jaroslav Bosansky <jaro.bosansky@ekoenergo.sk>, 2022
+# Jan Prokop, 2022
+# Tomáš Píšek <Tomas.Pisek@seznam.cz>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Slovak (https://app.transifex.com/odoo/teams/41243/sk/)\n"
+"POT-Creation-Date: 2026-02-20 18:37+0000\n"
+"PO-Revision-Date: 2026-08-07 06:29+0000\n"
+"Last-Translator: Tomáš Píšek <Tomas.Pisek@seznam.cz>\n"
+"Language-Team: Slovak <https://translate.odoo.com/projects/odoo-19/"
+"website_forum/sk/>\n"
+"Language: sk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: sk\n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && "
+"n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid " Flag"
 msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid " Flagged"
 msgstr ""
 
@@ -53,6 +63,19 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_tree
 msgid "# Views"
 msgstr "# Zobrazení"
+
+#. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
+msgid ""
+"%(link_start)sRead the guidelines to know how to gain karma.%(link_end)s"
+msgstr ""
+
+#. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
+msgid "%(score)s karma is required to perform this action."
+msgstr ""
 
 #. module: website_forum
 #. odoo-python
@@ -184,18 +207,6 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_index_tags
 msgid "&amp;nbsp;"
-msgstr "&amp;nbsp;"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
-msgid "'Please enter 2 or more characters'"
-msgstr ""
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
-msgid "'Tags'"
 msgstr ""
 
 #. module: website_forum
@@ -231,17 +242,26 @@ msgstr ""
 "odpoveď"
 
 #. module: website_forum
+#: model_terms:forum.forum,welcome_message:website_forum.forum_help
+msgid ""
+"<a class=\"btn btn-primary forum_register_url o_translate_inline\" href=\"/"
+"web/login\">Sign up</a>"
+msgstr ""
+
+#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
 "<b class=\"d-block \">This answer has been flagged</b>\n"
-"                            As a moderator, you can either validate or reject this answer."
+"                            As a moderator, you can either validate or "
+"reject this answer."
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "<b class=\"d-block\">You have a pending post</b>\n"
-"                        Please wait for a moderator to validate your previous post to be allowed replying questions."
+"                        Please wait for a moderator to validate your "
+"previous post to be allowed replying questions."
 msgstr ""
 
 #. module: website_forum
@@ -276,8 +296,8 @@ msgstr ""
 msgid ""
 "<b>Answers should not start debates</b> This community Q&amp;A is not a "
 "discussion group. Please avoid holding debates in your answers as they tend "
-"to dilute the essence of questions and answers. For brief discussions please"
-" use commenting facility."
+"to dilute the essence of questions and answers. For brief discussions please "
+"use commenting facility."
 msgstr ""
 
 #. module: website_forum
@@ -286,8 +306,8 @@ msgstr ""
 msgid ""
 "<b>Answers shouldn't just point to other Questions</b>. Instead add a "
 "question comment indication \"Possible duplicate of...\". However, it's ok "
-"to include links to other questions or answers providing relevant additional"
-" information."
+"to include links to other questions or answers providing relevant additional "
+"information."
 msgstr ""
 "<b>Odpovede by nemali iba smerovať na ďalšie Otázky</b>. Namiesto toho "
 "pridajte komentár s otázkou \"Možný duplikát...\". Avšak, je v poriadku, ak "
@@ -298,8 +318,8 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just point to other questions</b>.Instead add a comment"
-" indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
+"<b>Answers shouldn't just point to other questions</b>.Instead add a comment "
+"indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
 "include links to other questions or answers providing relevant additional "
 "information."
 msgstr ""
@@ -308,8 +328,8 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the"
-" solution description text in your answer, even if it's just a copy/paste. "
+"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the "
+"solution description text in your answer, even if it's just a copy/paste. "
 "Links are welcome, but should be complementary to answer, referring sources "
 "or additional reading."
 msgstr ""
@@ -319,24 +339,27 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "<b>Before you ask - please make sure to search for a similar question.</b> "
-"You can search questions by their title or tags. It’s also OK to answer your"
-" own question."
+"You can search questions by their title or tags. It’s also OK to answer your "
+"own question."
 msgstr ""
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Please avoid asking questions that are too subjective and "
-"argumentative</b> or not relevant to this community."
+"<b>Please avoid asking questions that are too subjective and argumentative</"
+"b> or not relevant to this community."
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answer
 msgid ""
-"<b>Please try to give a substantial answer.</b> If you wanted to comment on the question or answer, just\n"
-"            <b>use the commenting tool.</b> Please remember that you can always <b>revise your answers</b>\n"
-"            - no need to answer the same question twice. Also, please <b>don't forget to vote</b>\n"
+"<b>Please try to give a substantial answer.</b> If you wanted to comment on "
+"the question or answer, just\n"
+"            <b>use the commenting tool.</b> Please remember that you can "
+"always <b>revise your answers</b>\n"
+"            - no need to answer the same question twice. Also, please "
+"<b>don't forget to vote</b>\n"
 "            - it really helps to select the best questions and answers!"
 msgstr ""
 
@@ -354,7 +377,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.contact
 msgid ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-trophy o-text-gold ms-2\" role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
+"                    <span class=\"fa fa-trophy o-text-gold ms-2\" "
+"role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
 msgstr ""
 
 #. module: website_forum
@@ -410,7 +434,8 @@ msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
-msgid "<i class=\"fa fa-check fa-fw me-1\"/>Try searching for one or two words."
+msgid ""
+"<i class=\"fa fa-check fa-fw me-1\"/>Try searching for one or two words."
 msgstr ""
 
 #. module: website_forum
@@ -426,7 +451,8 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
-msgid "<i class=\"fa fa-check\"/> How to configure TPS and TVQ's canadian taxes?"
+msgid ""
+"<i class=\"fa fa-check\"/> How to configure TPS and TVQ's canadian taxes?"
 msgstr ""
 
 #. module: website_forum
@@ -437,13 +463,6 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
 msgid "<i class=\"fa fa-comments-o me-1\" title=\"Forum\"/>"
-msgstr ""
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
-msgid ""
-"<i class=\"fa fa-ellipsis-h\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"More\"/>"
 msgstr ""
 
 #. module: website_forum
@@ -481,7 +500,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
 "<i class=\"fa fa-pencil\"/>\n"
-"                                Edit<span class=\"d-none d-lg-inline\"> your answer</span>"
+"                                Edit<span class=\"d-none d-lg-inline\"> your "
+"answer</span>"
 msgstr ""
 
 #. module: website_forum
@@ -519,8 +539,8 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid ""
-"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive"
-" votes\" title=\"Positive votes\"/>"
+"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive "
+"votes\" title=\"Positive votes\"/>"
 msgstr ""
 
 #. module: website_forum
@@ -539,7 +559,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.show_flag_validator
 msgid "<i class=\"fa fa-times\"/> Reject"
-msgstr "<i class=\"fa fa-times\"/> Zamietnuť"
+msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
@@ -574,8 +594,10 @@ msgid ""
 msgstr ""
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_sub_nav
-msgid "<i class=\"oi oi-chevron-left small\"/> Back"
+#: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
+msgid ""
+"<i class=\"oi oi-ellipsis-h\" data-bs-toggle=\"tooltip\" data-bs-"
+"placement=\"top\" title=\"More\"/>"
 msgstr ""
 
 #. module: website_forum
@@ -610,7 +632,8 @@ msgstr ""
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
-msgid "<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
+msgid ""
+"<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
 msgstr ""
 
 #. module: website_forum
@@ -629,8 +652,8 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<span class=\"flex-grow-1\">Why can other people edit my "
-"questions/answers?</span>"
+"<span class=\"flex-grow-1\">Why can other people edit my questions/answers?</"
+"span>"
 msgstr ""
 
 #. module: website_forum
@@ -645,24 +668,24 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">select text to format "
-"it.</span>"
+"<span class=\"form-text small text-muted d-block\">select text to format it."
+"</span>"
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">use '/' to insert "
-"images.</span>"
+"<span class=\"form-text small text-muted d-block\">use '/' to insert images."
+"</span>"
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-"
-"lightbulb-o\"/> Tip:</span>"
+"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-lightbulb-"
+"o\"/> Tip:</span>"
 msgstr ""
 
 #. module: website_forum
@@ -752,7 +775,7 @@ msgstr "Prijímanie odpovede"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Access Denied"
 msgstr "Prístup zamietnutý"
 
@@ -942,7 +965,7 @@ msgstr "Archivovaný"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Are you sure you want to delete this comment?"
 msgstr ""
 
@@ -1179,7 +1202,7 @@ msgstr "Môže zobrazovať"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_edit_retag
 msgid "Change question tags"
-msgstr "Zmeniť tagy otázok"
+msgstr "Zmeniť štítky otázok"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_p_4
@@ -1272,7 +1295,7 @@ msgstr "Dôvod zavretia"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__color
 msgid "Color"
-msgstr "Farba"
+msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
@@ -1383,7 +1406,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.actions.act_window,help:website_forum.forum_tag_action
 msgid "Create a new tag"
-msgstr "Vytvoriť nový tag"
+msgstr "Vytvoriť nový štítok"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_sign_up_cta
@@ -1406,7 +1429,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:gamification.badge,description:website_forum.badge_32
 msgid "Created a tag used by 15 questions"
-msgstr "Vytvorený tag bol použitý pri 15 otázkach"
+msgstr "Vytvorený štítok bol použitý pri 15 otázkach"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__create_uid
@@ -1439,18 +1462,21 @@ msgid "Critic"
 msgstr "Kritik"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option_plugin.js:0
 msgid "Date"
 msgstr "Dátum"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
-msgid "Date (high to low)"
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option_plugin.js:0
+msgid "Date (new to old)"
 msgstr ""
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
-msgid "Date (low to high)"
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option_plugin.js:0
+msgid "Date (old to new)"
 msgstr ""
 
 #. module: website_forum
@@ -1470,7 +1496,7 @@ msgstr "Definujte viditeľnosť výzvy v menu"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 #: model_terms:ir.ui.view,arch_db:website_forum.post_comment
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
@@ -1519,9 +1545,10 @@ msgid "Deleted own post with 3 or more upvotes"
 msgstr "Zmazaný vlastný príspevok s 3 alebo viac súhlasnými hlasmi"
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option_plugin.js:0
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__description
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid "Description"
 msgstr "Popis"
@@ -1557,7 +1584,7 @@ msgstr ""
 #: code:addons/website_forum/models/forum_forum.py:0
 #: model_terms:forum.forum,welcome_message:website_forum.forum_help
 msgid "Dismiss"
-msgstr "Zahodiť"
+msgstr ""
 
 #. module: website_forum
 #: model_terms:forum.forum,welcome_message:website_forum.forum_help
@@ -1570,8 +1597,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_reason__display_name
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__display_name
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__display_name
+#: model:ir.model.fields,field_description:website_forum.field_gamification_challenge__display_name
+#: model:ir.model.fields,field_description:website_forum.field_gamification_karma_tracking__display_name
+#: model:ir.model.fields,field_description:website_forum.field_ir_attachment__display_name
+#: model:ir.model.fields,field_description:website_forum.field_res_users__display_name
+#: model:ir.model.fields,field_description:website_forum.field_website__display_name
 msgid "Display Name"
-msgstr "Zobrazovaný Názov"
+msgstr "Zobrazovaný názov"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_user_bio
@@ -1677,7 +1709,7 @@ msgstr ""
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid "Facebook"
-msgstr "Facebook"
+msgstr ""
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_q_3
@@ -1785,7 +1817,7 @@ msgstr "Označil"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.follow
 msgid "Follow"
-msgstr "Odoberať"
+msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
@@ -1825,6 +1857,7 @@ msgstr ""
 
 #. module: website_forum
 #. odoo-python
+#: code:addons/website_forum/controllers/website_forum.py:0
 #: code:addons/website_forum/models/website.py:0
 #: model:ir.actions.act_url,name:website_forum.action_open_forum
 #: model:ir.model,name:website_forum.model_forum_forum
@@ -1857,7 +1890,8 @@ msgid "Forum Name"
 msgstr "Názov fóra"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option_plugin.js:0
 msgid "Forum Page"
 msgstr ""
 
@@ -1880,7 +1914,7 @@ msgstr "Príspevky fóra"
 #. module: website_forum
 #: model:ir.model,name:website_forum.model_forum_tag
 msgid "Forum Tag"
-msgstr "Tag fóra"
+msgstr "Štítok fóra"
 
 #. module: website_forum
 #: model:ir.actions.act_window,name:website_forum.forum_tag_action
@@ -1888,10 +1922,11 @@ msgid "Forum Tags"
 msgstr ""
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option.xml:0
 #: model:ir.actions.act_window,name:website_forum.forum_forum_action
 #: model:ir.ui.menu,name:website_forum.menu_forum_global
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_forum_view_tree
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
 msgid "Forums"
 msgstr "Fóra"
 
@@ -1966,14 +2001,10 @@ msgid "Great Question"
 msgstr "Skvelá otázka"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 msgid "Grid"
 msgstr "Mriežka"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_search
-msgid "Group By"
-msgstr "Zoskupiť podľa"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__faq
@@ -2031,6 +2062,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_reason__id
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__id
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__id
+#: model:ir.model.fields,field_description:website_forum.field_gamification_challenge__id
+#: model:ir.model.fields,field_description:website_forum.field_gamification_karma_tracking__id
+#: model:ir.model.fields,field_description:website_forum.field_ir_attachment__id
+#: model:ir.model.fields,field_description:website_forum.field_res_users__id
+#: model:ir.model.fields,field_description:website_forum.field_website__id
 msgid "ID"
 msgstr "ID"
 
@@ -2082,8 +2118,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "If you fit in one of these example or if your motivation for asking the "
-"question is “I would like to participate in a discussion about ______”, then"
-" you should not be asking here but on our mailing lists. However, if your "
+"question is “I would like to participate in a discussion about ______”, then "
+"you should not be asking here but on our mailing lists. However, if your "
 "motivation is “I would like others to explain ______ to me”, then you are "
 "probably OK."
 msgstr ""
@@ -2095,7 +2131,8 @@ msgid ""
 "            users having a high karma can see offensive posts to moderate\n"
 "            them."
 msgstr ""
-"Ak označíte tento príspevok ako ofenzívny, bude skrytý pre väčšinu používateľov. Iba\n"
+"Ak označíte tento príspevok ako ofenzívny, bude skrytý pre väčšinu "
+"používateľov. Iba\n"
 "používatelia s vysokou karmou môžu vidieť ofenzívne príspevky na ich\n"
 "moderáciu."
 
@@ -2133,7 +2170,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website_forum/static/src/js/tours/website_forum.js:0
 msgid "Insert tags related to your question."
-msgstr "Vložte tagy súvisiace s vašou otázkou."
+msgstr "Vložte štítky súvisiace s vašou otázkou."
 
 #. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_11
@@ -2181,7 +2218,7 @@ msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Karma Error"
 msgstr ""
 
@@ -2223,11 +2260,12 @@ msgstr "Karma na odpojenie odkazu"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post
 msgid "Last Activity"
-msgstr "Posledná aktivita"
+msgstr ""
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__last_post_id
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
 msgid "Last Post"
 msgstr ""
 
@@ -2258,7 +2296,8 @@ msgid "Last activity on"
 msgstr ""
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 msgid "Layout"
 msgstr "Usporiadanie"
 
@@ -2277,10 +2316,11 @@ msgstr ""
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid "LinkedIn"
-msgstr "LinkedIn"
+msgstr ""
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 msgid "List"
 msgstr "Zoznam"
 
@@ -2315,7 +2355,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__message_has_error
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__message_has_error
 msgid "Message Delivery error"
-msgstr "Chyba zobrazovania správ"
+msgstr "Chyba doručenia správy"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__message_ids
@@ -2368,7 +2408,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_index
 msgid "My Favorites"
-msgstr "Moje obľúbené"
+msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_index
@@ -2458,6 +2498,11 @@ msgid "No posts yet"
 msgstr ""
 
 #. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "No results."
+msgstr ""
+
+#. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_dofollow
 msgid "Nofollow links"
 msgstr "Neodberový odkaz"
@@ -2507,7 +2552,7 @@ msgstr "Počet označených príspevkov"
 #: model:ir.model.fields,help:website_forum.field_forum_post__message_needaction_counter
 #: model:ir.model.fields,help:website_forum.field_forum_tag__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr "Počet správ, ktoré vyžadujú akciu"
+msgstr ""
 
 #. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_forum_forum__message_has_error_counter
@@ -2537,19 +2582,13 @@ msgstr "Ofenzívne"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Offensive Post"
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 msgid "Offensive Posts"
-msgstr ""
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
-msgid "Oh no! Please <a href=\"%s\">sign in</a> to perform this action"
 msgstr ""
 
 #. module: website_forum
@@ -2586,11 +2625,16 @@ msgid "Plain Content"
 msgstr "Jednoduchý obsah"
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
+msgid "Please enter 2 or more characters"
+msgstr ""
+
+#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"Please wait for a moderator to validate your previous post before "
-"continuing."
+"Please wait for a moderator to validate your previous post before continuing."
 msgstr ""
 
 #. module: website_forum
@@ -2646,7 +2690,8 @@ msgid "Post Closing Reason"
 msgstr "Dôvod zatvorenia príspevku"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 msgid "Post Count"
 msgstr ""
 
@@ -2716,7 +2761,8 @@ msgstr "Verejné"
 msgid ""
 "Public: Forum is public\n"
 "Signed In: Forum is visible for signed in users\n"
-"Some users: Forum and their content are hidden for non members of selected group"
+"Some users: Forum and their content are hidden for non members of selected "
+"group"
 msgstr ""
 
 #. module: website_forum
@@ -2846,7 +2892,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__rating_ids
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__rating_ids
 msgid "Ratings"
-msgstr "Hodnotenia"
+msgstr ""
 
 #. module: website_forum
 #. odoo-python
@@ -2857,7 +2903,7 @@ msgstr "Re: %s"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "Read: #{question.name}"
+msgid "Read: {{0}}"
 msgstr ""
 
 #. module: website_forum
@@ -2935,7 +2981,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_stats
 msgid "Reply"
-msgstr "Odpoveď"
+msgstr ""
 
 #. module: website_forum
 #. odoo-python
@@ -2989,6 +3035,21 @@ msgstr ""
 #: model:gamification.goal.definition,name:website_forum.definition_scholar
 msgid "Scholar"
 msgstr "Učenec"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "Search"
+msgstr ""
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "Search Answers..."
+msgstr ""
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "Search Questions..."
+msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_search
@@ -3058,8 +3119,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid ""
-"Share this content to increase your chances to be featured on the front page"
-" and attract more visitors."
+"Share this content to increase your chances to be featured on the front page "
+"and attract more visitors."
 msgstr ""
 "Zdieľať tento obsah zvýšte svoje šance byť uvedený na titulnej strane a "
 "prilákať viac návštevníkov."
@@ -3082,11 +3143,10 @@ msgstr ""
 #. module: website_forum
 #. odoo-python
 #: code:addons/website_forum/models/forum_forum.py:0
-#: model_terms:forum.forum,welcome_message:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_sign_up_cta
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_header
 msgid "Sign up"
-msgstr "Registrácia"
+msgstr ""
 
 #. module: website_forum
 #: model:ir.model.fields.selection,name:website_forum.selection__forum_forum__privacy__connected
@@ -3131,13 +3191,13 @@ msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Sorry, you cannot select your own posts as best answer"
 msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Sorry, you cannot vote for your own posts"
 msgstr "Prepáčte, nemôžete hlasovať za svoj vlastný príspevok"
 
@@ -3176,7 +3236,7 @@ msgstr "Študent"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.follow
 msgid "Subscribe"
-msgstr "Odoberať"
+msgstr ""
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_31
@@ -3189,14 +3249,16 @@ msgstr "Podporovateľ"
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_search
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_tag_view_form
 msgid "Tag"
-msgstr "Tag"
+msgstr "Štítok"
 
 #. module: website_forum
 #: model:ir.model.constraint,message:website_forum.constraint_forum_tag_name_uniq
 msgid "Tag name already exists!"
-msgstr "Názov značky už existuje!"
+msgstr ""
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__tag_ids
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__tag_ids
 #: model:ir.ui.menu,name:website_forum.menu_forum_tag_global
@@ -3206,7 +3268,7 @@ msgstr "Názov značky už existuje!"
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_body
 msgid "Tags"
-msgstr "Tagy"
+msgstr "Štítky"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_all_oe_structure_forum_all_top
@@ -3228,11 +3290,6 @@ msgstr "Klasifikátor"
 #: model:gamification.goal.definition,name:website_forum.definition_teacher
 msgid "Teacher"
 msgstr "Učiteľ"
-
-#. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_forum_forum__teaser
-msgid "Teaser"
-msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
@@ -3285,9 +3342,9 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 #: model_terms:ir.ui.view,arch_db:website_forum.faq_karma
 msgid ""
-"Therefore questions and answers can be edited like wiki pages by experienced"
-" users of this site in order to improve the overall quality of the knowledge"
-" base content. Such privileges are granted based on user karma level: you "
+"Therefore questions and answers can be edited like wiki pages by experienced "
+"users of this site in order to improve the overall quality of the knowledge "
+"base content. Such privileges are granted based on user karma level: you "
 "will be able to do the same once your karma gets high enough."
 msgstr ""
 
@@ -3330,13 +3387,13 @@ msgstr "Toto fórum bolo archivované."
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "This post can not be flagged"
 msgstr "Tento príspevok nemôže byť označený"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "This post is already flagged"
 msgstr "Tento príspevok už je označený"
 
@@ -3349,7 +3406,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "This post is currently awaiting moderation and is not published yet.<br/>\n"
-"                    As a moderator you can either <b>Accept</b> or <b>Reject</b> this post."
+"                    As a moderator you can either <b>Accept</b> or "
+"<b>Reject</b> this post."
 msgstr ""
 
 #. module: website_forum
@@ -3359,12 +3417,12 @@ msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "This user hasn't answered any questions yet. <br/>"
+msgid "This user hasn't answered any questions yet."
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "This user hasn't posted any questions yet.<br/>"
+msgid "This user hasn't posted any questions yet."
 msgstr ""
 
 #. module: website_forum
@@ -3400,7 +3458,7 @@ msgstr "Do"
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_body
 msgid "To Validate"
-msgstr "K overeniu"
+msgstr "Na schválnie"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -3456,7 +3514,7 @@ msgstr ""
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid "Twitter"
-msgstr "Twitter"
+msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
@@ -3471,7 +3529,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.follow
 msgid "Unfollow"
-msgstr "Prestať sledovať"
+msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
@@ -3743,12 +3801,12 @@ msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "You have not answered any questions yet. <br/>"
+msgid "You have not answered any questions yet."
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "You have not posted any questions yet. <br/>"
+msgid "You have not posted any questions yet."
 msgstr ""
 
 #. module: website_forum
@@ -3770,9 +3828,9 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"You should only ask practical, answerable questions based on actual problems"
-" that you face. Chatty, open-ended questions diminish the usefulness of this"
-" site and push other questions off the front page."
+"You should only ask practical, answerable questions based on actual problems "
+"that you face. Chatty, open-ended questions diminish the usefulness of this "
+"site and push other questions off the front page."
 msgstr ""
 
 #. module: website_forum
@@ -3814,7 +3872,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.author_box
 msgid "at"
-msgstr "na"
+msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
@@ -3920,8 +3978,7 @@ msgstr "tu"
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid "how to configure or customize Odoo to specific business needs,"
-msgstr ""
-"ako konfigurovať alebo prispôsobiť Odoo špecifickým obchodným potrebám,"
+msgstr "ako konfigurovať alebo prispôsobiť Odoo špecifickým obchodným potrebám,"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -3970,12 +4027,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid "it is a rant disguised as a question: “______ sucks, am I right?”"
 msgstr "je chvastanie maskované ako otázka: “______ je nanič, nemám pravdu?”"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
-msgid "karma is required to perform this action. "
-msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
@@ -4091,8 +4142,7 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid "what's the best way to use Odoo for a specific business need,"
-msgstr ""
-"čo je najlepší spôsob, ako využiť Odoo pre konkrétne obchodné potreby,"
+msgstr "čo je najlepší spôsob, ako využiť Odoo pre konkrétne obchodné potreby,"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.author_box
@@ -4117,4 +4167,158 @@ msgstr "vaša biografia môže byť videná ako nápoveda"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.follow
 msgid "your email..."
-msgstr "Váš email..."
+msgstr ""
+
+#~ msgid "<b> [Offensive]</b>"
+#~ msgstr "<b> [Ofenzívne]</b>"
+
+#~ msgid "<b>[Answer]</b>"
+#~ msgstr "<b>[Odpoveď]</b>"
+
+#~ msgid ""
+#~ "<small class=\"text-muted\">\n"
+#~ "                    Flagged\n"
+#~ "                </small>"
+#~ msgstr ""
+#~ "<small class=\"text-muted\">\n"
+#~ "Označené\n"
+#~ "</small>"
+
+#~ msgid "<span>By </span>"
+#~ msgstr "<span>Od </span>"
+
+#~ msgid "About"
+#~ msgstr "Približne"
+
+#~ msgid "All Tags"
+#~ msgstr "Všetky tagy"
+
+#~ msgid "Allow Bump"
+#~ msgstr "Povoliť posun"
+
+#~ msgid "Answer"
+#~ msgstr "Odpoveď"
+
+#~ msgid "Back"
+#~ msgstr "Späť"
+
+#~ msgid "Bumped on"
+#~ msgstr "Posunuté"
+
+#~ msgid ""
+#~ "Check this box to display a popup for posts older than 10 days without "
+#~ "any given answer. The popup will offer to share it on social networks. "
+#~ "When shared, a question is bumped at the top of the forum."
+#~ msgstr ""
+#~ "Zaškrtnite, ak chcete zobrazovať pop-up okno pre príspevky staršie ako 10 "
+#~ "dní bez akejkoľvek danej odpovede. Pop-up ponúkne jej zdieľať na "
+#~ "sociálnych sieťach. Keď je zdieľaná, otázka bude posunutá do hornej časti "
+#~ "fóra."
+
+#~ msgid "Comment this post..."
+#~ msgstr "Komentovať tento príspevok..."
+
+#~ msgid "Comments"
+#~ msgstr "Komentáre"
+
+#~ msgid "Convert all answers to comments and vice versa"
+#~ msgstr "Skonvertovať všetky odpovede na otázky a naopak"
+
+#~ msgid "Convert own answers to comments and vice versa"
+#~ msgstr "Skonvertovať vlastné odpovede na komentáre a naopak"
+
+#~ msgid "Following"
+#~ msgstr "Odberajúci"
+
+#~ msgid "Group By"
+#~ msgstr "Zoskupiť podľa"
+
+#~ msgid "Hide Intro"
+#~ msgstr "Skryť úvod"
+
+#~ msgid "Karma"
+#~ msgstr "Karma"
+
+#~ msgid "Last activity date"
+#~ msgstr "Dátum poslednej aktivity"
+
+#~ msgid "Menu"
+#~ msgstr "Menu"
+
+#~ msgid "Moderation"
+#~ msgstr "Moderácie"
+
+#~ msgid "More"
+#~ msgstr "Viac"
+
+#~ msgid "Most answered"
+#~ msgstr "Najviac zodpovedané"
+
+#~ msgid "Most voted"
+#~ msgstr "Najviac hlasované"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Počet správ, ktoré vyžadujú akciu"
+
+#~ msgid "Our forums"
+#~ msgstr "Naše fóra"
+
+#~ msgid "People"
+#~ msgstr "Ľudia"
+
+#~ msgid "Post Comment"
+#~ msgstr "Komentár príspevku"
+
+#~ msgid "Register"
+#~ msgstr "Registrovať"
+
+#~ msgid "Restrict publishing to this website."
+#~ msgstr "Obmedzte publikovanie na túto webstránku."
+
+#~ msgid "Return to the question list."
+#~ msgstr "Návrat na zoznam otázok."
+
+#~ msgid "Show"
+#~ msgstr "Zobraziť"
+
+#~ msgid "Sign in"
+#~ msgstr "Prihlásiť sa"
+
+#~ msgid "Sorry you must be logged to flag a post"
+#~ msgstr "Musíte byť prihlásený pre označenie príspevku"
+
+#~ msgid "Sorry you must be logged to vote"
+#~ msgstr "Musíte byť prihlásený na hlasovanie"
+
+#~ msgid "Sorry, anonymous users cannot choose correct answer."
+#~ msgstr "Anonymný používatelia nemôžu vybrať správnu odpoveď."
+
+#~ msgid ""
+#~ "Technical field allowing to bump a question. Writing on this field will "
+#~ "trigger a write on write_date and therefore bump the post. Directly "
+#~ "writing on write_date is currently not supported and this field is a "
+#~ "workaround."
+#~ msgstr ""
+#~ "Technické pole umožňujúce posun otázky. Písanie do tohto poľa spustí "
+#~ "zápis na write_date a tým pádon posunie tento príspevok. Priame "
+#~ "zapisovanie do write_date ni je v súčasnej dobe podporované, a too pole "
+#~ "je riešenie."
+
+#~ msgid ""
+#~ "This community is for professional and enthusiast users, partners and "
+#~ "programmers."
+#~ msgstr ""
+#~ "Táto komunita je pre profesionálnych a nadšených používateľov, partnerov "
+#~ "a programátorov."
+
+#~ msgid "Trending"
+#~ msgstr "Trendy"
+
+#~ msgid "Unlink all comments"
+#~ msgstr "Odpojiť odkazy všetkých komentárov"
+
+#~ msgid "Unlink own comments"
+#~ msgstr "Odpojiť odkazy vlastných komentárov"
+
+#~ msgid "Waiting for validation"
+#~ msgstr "Čaká na potvrdenie"

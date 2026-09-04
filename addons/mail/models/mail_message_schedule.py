@@ -64,10 +64,14 @@ class MailMessageSchedule(models.Model):
         for model, schedules in self._group_by_model().items():
             if model:
                 records = self.env[model].browse(schedules.mapped('mail_message_id.res_id'))
+                existing = records.exists()
             else:
                 records = [self.env['mail.thread']] * len(schedules)
+                existing = records
 
             for record, schedule in zip(records, schedules):
+                if record not in existing:
+                    continue
                 notify_kwargs = dict(default_notify_kwargs or {}, skip_existing=True)
                 try:
                     schedule_notify_kwargs = json.loads(schedule.notification_parameters)
@@ -92,7 +96,8 @@ class MailMessageSchedule(models.Model):
           ``notify_thread``. Those are default values overridden by content of
           ``notification_parameters`` field.
 
-        :return bool: False if no schedule has been found, True otherwise
+        :returns: False if no schedule has been found, True otherwise
+        :rtype: bool
         """
         messages_scheduled = self.search(
             [('mail_message_id', 'in', messages.ids)]
@@ -112,7 +117,8 @@ class MailMessageSchedule(models.Model):
         :param datetime new_datetime: new datetime for sending. New triggers
           are created based on it;
 
-        :return bool: False if no schedule has been found, True otherwise
+        :returns: False if no schedule has been found, True otherwise
+        :rtype: bool
         """
         messages_scheduled = self.search(
             [('mail_message_id', 'in', messages.ids)]

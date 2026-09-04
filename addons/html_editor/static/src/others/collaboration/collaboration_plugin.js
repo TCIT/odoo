@@ -22,9 +22,14 @@ const HISTORY_SNAPSHOT_BUFFER_TIME = 1000 * 10;
  * @property { CollaborationPlugin['setInitialBranchStepId'] } setInitialBranchStepId
  */
 
+/**
+ * @typedef {(() => void)[]} external_history_step_handlers
+ */
+
 export class CollaborationPlugin extends Plugin {
     static id = "collaboration";
     static dependencies = ["history", "selection", "sanitize"];
+    /** @type {import("plugins").EditorResources} */
     resources = {
         /** Handlers */
         history_cleaned_handlers: this.onHistoryClean.bind(this),
@@ -95,7 +100,10 @@ export class CollaborationPlugin extends Plugin {
      */
     getBranchIds() {
         const steps = this.dependencies.history.getHistorySteps();
-        return [this.initialBranchStepId].concat(this.branchStepIds).concat(steps.map((s) => s.id));
+        return (this.initialBranchStepId || "")
+            .split(",")
+            .concat(this.branchStepIds)
+            .concat(steps.map((s) => s.id));
     }
     /**
      * Safely set an attribute on a node.
@@ -120,10 +128,9 @@ export class CollaborationPlugin extends Plugin {
      * @param {Object} newSteps External steps to be applied
      */
     onExternalHistorySteps(newSteps) {
-        this.dependencies.history.disableObserver();
+        let stepIndex = 0;
         const selectionData = this.dependencies.selection.getSelectionData();
 
-        let stepIndex = 0;
         const steps = this.dependencies.history.getHistorySteps();
         for (const newStep of newSteps) {
             // todo: add a test that no 2 history_missing_parent_step_handlers
@@ -135,8 +142,6 @@ export class CollaborationPlugin extends Plugin {
             this.dependencies.history.addExternalStep(newStep, insertIndex);
             stepIndex++;
         }
-
-        this.dependencies.history.enableObserver();
         if (selectionData.documentSelectionIsInEditable) {
             this.dependencies.selection.rectifySelection(selectionData.editableSelection);
         }
@@ -264,7 +269,6 @@ export class CollaborationPlugin extends Plugin {
         this.dependencies.history.resetFromSteps(steps);
         this.snapshots = [{ step: steps[0] }];
         this.branchStepIds = branchStepIds;
-        this.dependencies.history.enableObserver();
 
         // @todo @phoenix: test that the hint are proprely handeled
         // this._handleCommandHint();

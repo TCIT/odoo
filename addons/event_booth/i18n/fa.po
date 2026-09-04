@@ -1,29 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* event_booth
-# 
-# Translators:
-# zakariya moradi, 2025
-# Tiffany Chang, 2025
-# 
+# * event_booth
+#
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Tiffany Chang, 2025\n"
-"Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 14:14+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Persian <https://translate.odoo.com/projects/odoo-19/"
+"event_booth/fa/>\n"
+"Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fa\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: event_booth
 #: model_terms:ir.ui.view,arch_db:event_booth.event_booth_booked_template
 msgid "<b>Renter Email</b>:"
-msgstr "<b>ایمیل مستأجر</b>​​:"
+msgstr "<b>ایمیل مستأجر</b>:"
 
 #. module: event_booth
 #: model_terms:ir.ui.view,arch_db:event_booth.event_booth_booked_template
@@ -44,19 +43,13 @@ msgstr "<span class=\"o_stat_text\">غرفه‌ها</span>"
 #: model_terms:event.booth.category,description:event_booth.event_booth_category_premium
 #: model_terms:event.booth.category,description:event_booth.event_booth_category_standard
 msgid "<span>1 Branded Booth</span>"
-msgstr ""
-"```html\n"
-"<span> 1 غرفه با نام تجاری </span>\n"
-"```"
+msgstr "<span> 1 غرفه با نام تجاری </span>"
 
 #. module: event_booth
 #: model_terms:event.booth.category,description:event_booth.event_booth_category_premium
 #: model_terms:event.booth.category,description:event_booth.event_booth_category_standard
 msgid "<span>1 desk</span>"
-msgstr ""
-"```html\n"
-"<span>۱ میز</span>\n"
-"```"
+msgstr "<span>۱ میز</span>"
 
 #. module: event_booth
 #: model_terms:event.booth.category,description:event_booth.event_booth_category_premium
@@ -67,10 +60,7 @@ msgstr "<span>۱۱ + ۱۰ گذرها</span>"
 #. module: event_booth
 #: model_terms:event.booth.category,description:event_booth.event_booth_category_vip
 msgid "<span>100 words description on website</span>"
-msgstr ""
-"```html\n"
-"<span>۱۰۰ کلمه توضیح در وب‌سایت</span>\n"
-"```"
+msgstr "<span>۱۰۰ کلمه توضیح در وب‌سایت</span>"
 
 #. module: event_booth
 #: model_terms:event.booth.category,description:event_booth.event_booth_category_vip
@@ -102,10 +92,7 @@ msgstr "<span>۴م²</span>"
 #. module: event_booth
 #: model_terms:event.booth.category,description:event_booth.event_booth_category_premium
 msgid "<span>50 words description on website</span>"
-msgstr ""
-"```html\n"
-"<span>توضیحات ۵۰ کلمه‌ای در وبسایت</span>\n"
-"```"
+msgstr "<span>توضیحات ۵۰ کلمه‌ای در وبسایت</span>"
 
 #. module: event_booth
 #: model_terms:event.booth.category,description:event_booth.event_booth_category_vip
@@ -229,8 +216,8 @@ msgid ""
 "Booth categories are used to represent the different types of booths you "
 "rent (Premium Booth, Table and Chairs, ...)"
 msgstr ""
-"دسته‌بندی‌های غرفه برای نمایش انواع مختلف غرفه‌هایی که اجاره می‌دهید استفاده"
-" می‌شود (غرفه پریمیوم، میز و صندلی، ...)"
+"دسته‌بندی‌های غرفه برای نمایش انواع مختلف غرفه‌هایی که اجاره می‌دهید استفاده "
+"می‌شود (غرفه پریمیوم، میز و صندلی، ...)"
 
 #. module: event_booth
 #: model:ir.actions.act_window,name:event_booth.event_booth_action
@@ -291,9 +278,11 @@ msgstr "توصیف"
 #. module: event_booth
 #: model:ir.model.fields,field_description:event_booth.field_event_booth__display_name
 #: model:ir.model.fields,field_description:event_booth.field_event_booth_category__display_name
+#: model:ir.model.fields,field_description:event_booth.field_event_event__display_name
+#: model:ir.model.fields,field_description:event_booth.field_event_type__display_name
 #: model:ir.model.fields,field_description:event_booth.field_event_type_booth__display_name
 msgid "Display Name"
-msgstr "نام نمایش داده شده"
+msgstr "نام نمایشی"
 
 #. module: event_booth
 #: model:ir.model,name:event_booth.model_event_event
@@ -384,12 +373,6 @@ msgid "Gold Booth 3"
 msgstr "غرفه طلایی ۳"
 
 #. module: event_booth
-#: model_terms:ir.ui.view,arch_db:event_booth.event_booth_view_search
-#: model_terms:ir.ui.view,arch_db:event_booth.event_type_booth_view_search
-msgid "Group By"
-msgstr "گروه‌بندی برمبنای"
-
-#. module: event_booth
 #: model:ir.model.fields,field_description:event_booth.field_event_booth__has_message
 msgid "Has Message"
 msgstr "آیا دارای پیام است"
@@ -397,6 +380,8 @@ msgstr "آیا دارای پیام است"
 #. module: event_booth
 #: model:ir.model.fields,field_description:event_booth.field_event_booth__id
 #: model:ir.model.fields,field_description:event_booth.field_event_booth_category__id
+#: model:ir.model.fields,field_description:event_booth.field_event_event__id
+#: model:ir.model.fields,field_description:event_booth.field_event_type__id
 #: model:ir.model.fields,field_description:event_booth.field_event_type_booth__id
 msgid "ID"
 msgstr "شناسه"
@@ -463,7 +448,7 @@ msgstr "آیا دنبال می کند"
 #: model:ir.model.fields,field_description:event_booth.field_event_booth_category__write_uid
 #: model:ir.model.fields,field_description:event_booth.field_event_type_booth__write_uid
 msgid "Last Updated by"
-msgstr "آخرین بروز رسانی توسط"
+msgstr "آخرین تغییر توسط"
 
 #. module: event_booth
 #: model:ir.model.fields,field_description:event_booth.field_event_booth__write_date
@@ -530,7 +515,7 @@ msgstr "تعداد خطاها"
 #. module: event_booth
 #: model:ir.model.fields,help:event_booth.field_event_booth__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr "تعداد پیام هایی که نیاز به اقدام دارند"
+msgstr "تعداد پیام‌های نیازمند اقدام"
 
 #. module: event_booth
 #: model:ir.model.fields,help:event_booth.field_event_booth__message_has_error_counter

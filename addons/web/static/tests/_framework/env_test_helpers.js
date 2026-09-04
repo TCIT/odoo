@@ -1,12 +1,16 @@
 import { after, afterEach, beforeEach, registerDebugInfo } from "@odoo/hoot";
 import { startRouter } from "@web/core/browser/router";
 import { createDebugContext } from "@web/core/debug/debug_context";
-import { translatedTerms, translationLoaded } from "@web/core/l10n/translation";
+import {
+    translatedTerms,
+    translatedTermsGlobal,
+    translationLoaded,
+} from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { pick } from "@web/core/utils/objects";
+import { patch } from "@web/core/utils/patch";
 import { makeEnv, startServices } from "@web/env";
 import { MockServer, makeMockServer } from "./mock_server/mock_server";
-import { patch } from "@web/core/utils/patch";
-import { pick } from "@web/core/utils/objects";
 
 /**
  * @typedef {Record<keyof Services, any>} Dependencies
@@ -78,9 +82,12 @@ export function getService(name) {
  * Makes a mock environment along with a mock server
  *
  * @param {Partial<OdooEnv>} [partialEnv]
+ * @param {{
+ *  makeNew?: boolean;
+ * }} [options]
  */
-export async function makeMockEnv(partialEnv, { makeNew = false } = {}) {
-    if (currentEnv && !makeNew) {
+export async function makeMockEnv(partialEnv, options) {
+    if (currentEnv && !options?.makeNew) {
         throw new Error(
             `cannot create mock environment: a mock environment has already been declared`
         );
@@ -90,27 +97,34 @@ export async function makeMockEnv(partialEnv, { makeNew = false } = {}) {
         await makeMockServer();
     }
 
-    currentEnv = makeEnv();
-    after(() => {
-        currentEnv = null;
+    const env = makeEnv();
+    Object.assign(env, partialEnv, createDebugContext(env)); // This is needed if the views are in debug mode
 
-        // Ideally: should be done in a patch of the localization service, but this
-        // is less intrusive for now.
-        if (translatedTerms[translationLoaded]) {
-            for (const key in translatedTerms) {
-                delete translatedTerms[key];
+    registerDebugInfo("env", env);
+
+    if (!currentEnv) {
+        currentEnv = env;
+        startRouter();
+        after(() => {
+            currentEnv = null;
+
+            // Ideally: should be done in a patch of the localization service, but this
+            // is less intrusive for now.
+            if (translatedTerms[translationLoaded]) {
+                for (const key in translatedTerms) {
+                    delete translatedTerms[key];
+                }
+                for (const key in translatedTermsGlobal) {
+                    delete translatedTermsGlobal[key];
+                }
+                translatedTerms[translationLoaded] = false;
             }
-            translatedTerms[translationLoaded] = false;
-        }
-    });
-    Object.assign(currentEnv, partialEnv, createDebugContext(currentEnv)); // This is needed if the views are in debug mode
+        });
+    }
 
-    registerDebugInfo(currentEnv);
+    await startServices(env);
 
-    startRouter();
-    await startServices(currentEnv);
-
-    return currentEnv;
+    return env;
 }
 
 /**
@@ -150,7 +164,11 @@ export function mockService(name, serviceFactory) {
                     return serviceFactory(env, dependencies);
                 } else {
                     const service = originalService.start(env, dependencies);
-                    patch(service, serviceFactory);
+                    if (service instanceof Promise) {
+                        service.then((value) => patch(value, serviceFactory));
+                    } else {
+                        patch(service, serviceFactory);
+                    }
                     return service;
                 }
             },

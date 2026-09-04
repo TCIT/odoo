@@ -20,6 +20,7 @@ export class RecordAutocomplete extends Component {
         className: { type: String, optional: true },
         fieldString: { type: String, optional: true },
         placeholder: { type: String, optional: true },
+        slots: { optional: true },
     };
     static components = { AutoComplete };
     static template = "web.RecordAutocomplete";
@@ -32,6 +33,7 @@ export class RecordAutocomplete extends Component {
             {
                 placeholder: _t("Loading..."),
                 options: this.loadOptionsSource.bind(this),
+                optionSlot: this.props.slots?.autoCompleteItem ? "option" : undefined,
             },
         ];
     }
@@ -50,18 +52,27 @@ export class RecordAutocomplete extends Component {
             this.lastProm.abort(false);
         }
         this.lastProm = this.search(name, SEARCH_LIMIT + 1);
-        const nameGets = (await this.lastProm).map(([id, label]) => ([id, label ? label.split("\n")[0] : _t("Unnamed")]));
+        const nameGets = (await this.lastProm).map(([id, label]) => [
+            id,
+            label ? label.split("\n")[0] : _t("Unnamed"),
+        ]);
         this.addNames(nameGets);
-        const options = nameGets.map(([value, label]) => ({value, label}));
+        const options = nameGets.map(([id, label]) => ({
+            data: {
+                record: { id, display_name: label },
+            },
+            label,
+            onSelect: () => this.props.update([id]),
+        }));
         if (SEARCH_LIMIT < nameGets.length) {
             options.push({
+                cssClass: "o_m2o_dropdown_option",
                 label: _t("Search More..."),
-                action: this.onSearchMore.bind(this, name),
-                classList: "o_m2o_dropdown_option",
+                onSelect: this.onSearchMore.bind(this, name),
             });
         }
         if (options.length === 0) {
-            options.push({ label: _t("(no result)"), unselectable: true });
+            options.push({ label: _t("(no result)") });
         }
         return options;
     }
@@ -89,8 +100,12 @@ export class RecordAutocomplete extends Component {
             : undefined;
         // fine for now but we don't like this kind of dependence of core to views
         const SelectCreateDialog = registry.category("dialogs").get("select_create");
+        let title = _t("Search");
+        if (fieldString && fieldString.trim()) {
+            title = _t("Search: %s", fieldString);
+        }
         this.addDialog(SelectCreateDialog, {
-            title: _t("Search: %s", fieldString),
+            title,
             dynamicFilters,
             domain: this.getDomain(),
             resModel,
@@ -112,18 +127,11 @@ export class RecordAutocomplete extends Component {
         return domainIds.toList();
     }
 
-    onSelect({ value: resId, action }, params) {
-        if (action) {
-            return action(params);
-        }
-        this.props.update([resId]);
-    }
-
     search(name, limit) {
         const domain = this.getDomain();
         return this.orm.call(this.props.resModel, "name_search", [], {
             name,
-            args: domain,
+            domain: domain,
             limit,
             context: this.props.context || {},
         });

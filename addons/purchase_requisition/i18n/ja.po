@@ -1,55 +1,34 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* purchase_requisition
-# 
+# * purchase_requisition
+#
 # Translators:
-# Tiffany Chang, 2024
-# Wil Odoo, 2024
-# Junko Augias, 2024
-# 
+# Martin Trigaux, 2022
+# Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2023
+# Ryoko Tsuda <ryoko@quartile.co>, 2023
+# Andy Yiu, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Junko Augias (juau)" <juau@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Junko Augias, 2024\n"
-"Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
+"POT-Creation-Date: 2026-04-10 18:39+0000\n"
+"PO-Revision-Date: 2026-08-24 03:13+0000\n"
+"Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-19/"
+"purchase_requisition/ja/>\n"
+"Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ja\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "$50"
-msgstr "$50"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "$500"
-msgstr "$500"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: purchase_requisition
 #: model:ir.actions.report,print_report_name:purchase_requisition.action_report_purchase_requisitions
 msgid "'Purchase Agreement - %s' % (object.name)"
 msgstr "'購買契約 - %s' % (object.name)"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "02/16/2024"
-msgstr "02/16/2024"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "12/25/2024"
-msgstr "12/25/2024"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "2023-09-15"
-msgstr "2023-09-15"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
@@ -79,7 +58,7 @@ msgstr "要アクション"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__active
 msgid "Active"
-msgstr "有効化"
+msgstr "有効"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__activity_ids
@@ -89,22 +68,23 @@ msgstr "活動"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "例外活動文字装飾"
+msgstr "例外の活動を示す装飾"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__activity_state
 msgid "Activity State"
-msgstr "活動状態"
+msgstr "活動ステータス"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__activity_type_icon
 msgid "Activity Type Icon"
-msgstr "活動種別アイコン"
+msgstr "活動タイプアイコン"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_product_supplierinfo__purchase_requisition_id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__requisition_id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__name
+#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_search_inherit
 msgid "Agreement"
 msgstr "契約"
 
@@ -136,6 +116,12 @@ msgid "Alternative Purchase Order"
 msgstr "代替購買オーダ"
 
 #. module: purchase_requisition
+#. odoo-python
+#: code:addons/purchase_requisition/wizard/purchase_requisition_create_alternative.py:0
+msgid "Alternative Purchase Orders"
+msgstr "代替購買オーダ"
+
+#. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_requisition_alternative_warning_form
 msgid "Alternative Warning"
 msgstr "代替警告"
@@ -153,7 +139,7 @@ msgstr "購入契約の例として、包括オーダがあります。"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__analytic_distribution
 msgid "Analytic Distribution"
-msgstr "分析用配分"
+msgstr "分析分配"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__analytic_precision
@@ -190,7 +176,7 @@ msgstr "包括オーダ"
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "Buyer"
-msgstr "購買担当者"
+msgstr "購入者"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_requisition_create_alternative_form
@@ -206,7 +192,7 @@ msgstr "代替をキャンセル"
 #. module: purchase_requisition
 #: model:ir.model.fields.selection,name:purchase_requisition.selection__purchase_requisition__state__cancel
 msgid "Cancelled"
-msgstr "取消済"
+msgstr "キャンセル済"
 
 #. module: purchase_requisition
 #. odoo-python
@@ -215,17 +201,12 @@ msgid "Cancelled by the agreement associated to this quotation."
 msgstr "この見積書に関連した契約によってキャンセルされました。"
 
 #. module: purchase_requisition
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__product_uom_category_id
-msgid "Category"
-msgstr "カテゴリー"
-
-#. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_line_compare_tree
 msgid "Choose"
 msgstr "選択"
 
 #. module: purchase_requisition
-#: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__partner_id
+#: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__partner_ids
 msgid "Choose a vendor for alternative PO"
 msgstr "代替購買オーダ用の仕入先を選択する"
 
@@ -289,24 +270,17 @@ msgstr "プロダクト明細を比較"
 #. module: purchase_requisition
 #: model:ir.model,name:purchase_requisition.model_res_config_settings
 msgid "Config Settings"
-msgstr "コンフィグ設定"
+msgstr "構成設定"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "Confirm"
-msgstr "確認"
+msgstr "確定"
 
 #. module: purchase_requisition
 #: model:ir.model.fields.selection,name:purchase_requisition.selection__purchase_requisition__state__confirmed
 msgid "Confirmed"
-msgstr "確認済"
-
-#. module: purchase_requisition
-#: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_line__product_uom_category_id
-msgid ""
-"Conversion between Units of Measure can only occur if they belong to the "
-"same category. The conversion will be made based on the ratios."
-msgstr "単位間の変換は同じカテゴリに属している場合のみ可能です。変換は比率に基づいて行われます。"
+msgstr "確定済"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__copy_products
@@ -317,18 +291,23 @@ msgstr "プロダクトをコピー"
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_form_inherit
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_requisition_create_alternative_form
 msgid "Create Alternative"
-msgstr "代替を作成する"
+msgstr "代替を作成"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_form_inherit
 msgid ""
-"Create a call for tender by adding alternative requests for quotation to different vendors.\n"
-"                            Make your choice by selecting the best combination of lead time, OTD and/or total amount.\n"
-"                            By comparing product lines you can also decide to order some products from one vendor and others from another vendor."
+"Create a call for tender by adding alternative requests for quotation to "
+"different vendors.                                 Make your choice by "
+"selecting the best combination of lead time, OTD and/or total "
+"amount.                                 By comparing product lines you can "
+"also decide to order some products from one vendor and others from another "
+"vendor."
 msgstr ""
-"異なる仕入先へ代替見積依頼を追加して、入札募集を作成します。\n"
-"                            リードタイム、納期遵守率(OTD)及び／または総額の最適な組み合わせからお選び下さい。\n"
-"                           プロダクト明細を比較することで、ある仕入先にあるプロダクトをオーダし、別の仕入先に別のプロダクトを注文する決定をすることもできます。"
+"異なる仕入先へ代替見積依頼を追加して、入札募集を作成します。"
+"                                リードタイム、納期遵守率(OTD)及び／または総額"
+"の最適な組み合わせからお選び下さい。                                 "
+"プロダクト明細を比較することで、ある仕入先にあるプロダクトをオーダし、別の仕"
+"入先に別のプロダクトを注文する決定をすることもできます。"
 
 #. module: purchase_requisition
 #. odoo-python
@@ -353,11 +332,6 @@ msgstr "作成者"
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__create_date
 msgid "Created on"
 msgstr "作成日"
-
-#. module: purchase_requisition
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__creation_blocked
-msgid "Creation Blocked"
-msgstr "作成がブロックされました"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__currency_id
@@ -386,11 +360,16 @@ msgid "Discard"
 msgstr "破棄"
 
 #. module: purchase_requisition
+#: model:ir.model.fields,field_description:purchase_requisition.field_product_product__display_name
+#: model:ir.model.fields,field_description:purchase_requisition.field_product_supplierinfo__display_name
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_group__display_name
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_line__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_alternative_warning__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__display_name
+#: model:ir.model.fields,field_description:purchase_requisition.field_res_config_settings__display_name
 msgid "Display Name"
 msgstr "表示名"
 
@@ -408,7 +387,7 @@ msgstr "完了"
 #: model:ir.model.fields.selection,name:purchase_requisition.selection__purchase_requisition__state__draft
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
 msgid "Draft"
-msgstr "ドラフt"
+msgstr "下書き"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__date_end
@@ -447,10 +426,12 @@ msgstr "Font awesomeのアイコン 例. fa-tasks"
 #: model_terms:ir.actions.act_window,help:purchase_requisition.action_purchase_requisition
 msgid ""
 "For a blanket order, you can record an agreement for a specific period\n"
-"            (e.g. a year) and you order products within this agreement to benefit\n"
+"            (e.g. a year) and you order products within this agreement to "
+"benefit\n"
 "            from the negotiated prices."
 msgstr ""
-"包括オーダでは、特定の期間（例：1年間）の契約を記録することができ、この契約の範囲内でプロダクトを注文し、交渉された価格の恩恵を受けることができます。"
+"包括オーダでは、特定の期間（例：1年間）の契約を記録することができ、この契約の"
+"範囲内でプロダクトを注文し、交渉された価格の恩恵を受けることができます。"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
@@ -458,28 +439,21 @@ msgid "Future Activities"
 msgstr "今後の活動"
 
 #. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
-msgid "Group By"
-msgstr "グループ化"
-
-#. module: purchase_requisition
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__has_alternatives
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_kpis_tree_inherit_purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_tree_inherit_purchase_requisition
-msgid "Has Alternatives"
-msgstr "代替あり"
-
-#. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__has_message
 msgid "Has Message"
 msgstr "メッセージあり"
 
 #. module: purchase_requisition
+#: model:ir.model.fields,field_description:purchase_requisition.field_product_product__id
+#: model:ir.model.fields,field_description:purchase_requisition.field_product_supplierinfo__id
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_group__id
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_line__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_alternative_warning__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__id
+#: model:ir.model.fields,field_description:purchase_requisition.field_res_config_settings__id
 msgid "ID"
 msgstr "ID"
 
@@ -502,28 +476,20 @@ msgstr "チェックした場合は、新しいメッセージに注意が必要
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__message_has_error
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "チェックした場合は、一部のメッセージに配信エラーが発生されました。"
-
-#. module: purchase_requisition
-#: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__creation_blocked
-msgid ""
-"If the chosen vendor or if any of the products in the original PO have a "
-"blocking warning then we prevent creation of alternative PO. This is because"
-" normally these fields are cleared w/warning message within form view, but "
-"we cannot recreate that in this case."
-msgstr ""
-"選択された仕入先、または元の購買オーダ内のプロダクトにブロック警告がある場合、代替購買オーダの作成は阻止されます。通常、これらのフィールドはフォームビュー内で警告メッセージと共にクリアされますが、この場合はそれを再成できないからです。"
+msgstr "有効にすると、一部のメッセージに配信エラーが発生します。"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__copy_products
 msgid ""
 "If this is checked, the product quantities of the original PO will be copied"
-msgstr "これがチェックされている場合、元の購買オーダのプロダクト数量がコピーされます。"
+msgstr ""
+"これがチェックされている場合、元の購買オーダのプロダクト数量がコピーされます"
+"。"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__message_is_follower
 msgid "Is Follower"
-msgstr "フォロー中　"
+msgstr "フォロー中"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_requisition_alternative_warning_form
@@ -551,7 +517,7 @@ msgstr "最終更新日"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
 msgid "Late Activities"
-msgstr "遅れた活動"
+msgstr "期限超過の活動"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.res_config_settings_view_form_purchase_requisition
@@ -566,7 +532,7 @@ msgstr "既存の見積依頼にリンクする"
 #. module: purchase_requisition
 #: model:res.groups,name:purchase_requisition.group_purchase_alternatives
 msgid "Manage Purchase Alternatives"
-msgstr "購買代替を管理する"
+msgstr "購買代替案を管理"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__message_has_error
@@ -582,6 +548,11 @@ msgstr "メッセージ"
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "Mitchell Admin"
 msgstr "Mitchell Admin"
+
+#. module: purchase_requisition
+#: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
+msgid "My Activities"
+msgstr "自分の活動"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__my_activity_date_deadline
@@ -658,7 +629,7 @@ msgstr "エラー数"
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr "アクションを必要とするメッセージの数"
+msgstr "対応が必要なメッセージ数"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__message_has_error_counter
@@ -699,7 +670,7 @@ msgstr "プロダクト購買用の他の購買オーダ候補"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_alternative_warning__po_ids
 msgid "POs to Confirm"
-msgstr "確認する販売オーダ"
+msgstr "確定待ち購買オーダ"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__product_id
@@ -707,11 +678,6 @@ msgstr "確認する販売オーダ"
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "Product"
 msgstr "プロダクト"
-
-#. module: purchase_requisition
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__product_uom_id
-msgid "Product Unit of Measure"
-msgstr "プロダクト単位"
 
 #. module: purchase_requisition
 #: model:ir.model,name:purchase_requisition.model_product_product
@@ -751,7 +717,7 @@ msgstr "購買契約"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_res_config_settings__group_purchase_alternatives
 msgid "Purchase Alternatives"
-msgstr "購買代替"
+msgstr "購買代替案"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__purchase_group_id
@@ -776,11 +742,6 @@ msgstr "購買オーダ明細"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__purchase_ids
 msgid "Purchase Orders"
-msgstr "購買オーダ"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_search_inherit
-msgid "Purchase Orders with requisition"
 msgstr "購買オーダ"
 
 #. module: purchase_requisition
@@ -857,14 +818,9 @@ msgid "Request for Quotations"
 msgstr "見積依頼"
 
 #. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_search_inherit
-msgid "Requisition"
-msgstr "要求書"
-
-#. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "Reset to Draft"
-msgstr "ドラフトにリセット"
+msgstr "下書きにリセット"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__activity_user_id
@@ -883,8 +839,8 @@ msgstr "購買契約書を検索"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
-msgid "Show all records which has next action date is before today"
-msgstr "次のアクションの日付が今日より前のすべてのレコードを表示"
+msgid "Show all records whose next activity date is past"
+msgstr "次回活動日が過去のすべてのレコードを表示"
 
 #. module: purchase_requisition
 #. odoo-python
@@ -914,7 +870,7 @@ msgstr "新規購買契約を開始"
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
 msgid "Status"
-msgstr "状態"
+msgstr "ステータス"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__activity_state
@@ -925,7 +881,7 @@ msgid ""
 "Planned: Future activities."
 msgstr ""
 "活動に基づくステータス\n"
-"遅延: 期限が既に過ぎています\n"
+"遅延: 期日が既に過ぎています\n"
 "今日: 活動日は今日です\n"
 "予定: 将来の活動。"
 
@@ -956,16 +912,6 @@ msgstr "この代替購買オーダが作成される元の購買オーダ。"
 
 #. module: purchase_requisition
 #. odoo-python
-#: code:addons/purchase_requisition/wizard/purchase_requisition_create_alternative.py:0
-msgid ""
-"The vendor you have selected or at least one of the products you are copying"
-" from the original order has a blocking warning on it and cannot be selected"
-" to create an alternative."
-msgstr ""
-"選択した仕入先、または元のオーダからコピーしているプロダクトの少なくとも1つにブロック警告が表示されており、代替を作成するために選択することはできません。"
-
-#. module: purchase_requisition
-#. odoo-python
 #: code:addons/purchase_requisition/models/purchase.py:0
 msgid "There are no quantities to clear."
 msgstr "クリアする数量がありません。"
@@ -976,13 +922,9 @@ msgstr "クリアする数量がありません。"
 msgid ""
 "There is already an open blanket order for this supplier. We suggest you "
 "complete this open blanket order, instead of creating a new one."
-msgstr "この仕入先には既に包括オーダがあります。新しい契約を作成するのではなく、この未完了の包括オーダを完了させることをお勧めします。"
-
-#. module: purchase_requisition
-#. odoo-python
-#: code:addons/purchase_requisition/wizard/purchase_requisition_create_alternative.py:0
-msgid "This is a blocking warning!\n"
-msgstr "これはブロック警告です！\n"
+msgstr ""
+"この仕入先には既に包括オーダがあります。新しい契約を作成するのではなく、この"
+"未完了の包括オーダを完了させることをお勧めします。"
 
 #. module: purchase_requisition
 #. odoo-python
@@ -990,11 +932,13 @@ msgstr "これはブロック警告です！\n"
 msgid ""
 "To close this purchase requisition, cancel related Requests for Quotation.\n"
 "\n"
-"Imagine the mess if someone confirms these duplicates: double the order, double the trouble :)"
+"Imagine the mess if someone confirms these duplicates: double the order, "
+"double the trouble :)"
 msgstr ""
-"この購買依頼を閉じるには、関連する見積依頼を取消します。\n"
+"この購買依頼を閉じるには、関連する見積依頼をキャンセルします。\n"
 "\n"
-"もし誰かがこれらの重複を確定した場合の混乱を想像してみて下さい: 2重のオーダ、2重のトラブル :)"
+"もし誰かがこれらの重複を確定した場合の混乱を想像してみて下さい: 2重のオーダ、"
+"2重のトラブル :)"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
@@ -1010,9 +954,10 @@ msgstr "合計"
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr "記録上の例外活動の種類。"
+msgstr "レコード上の例外の活動タイプ。"
 
 #. module: purchase_requisition
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__product_uom_id
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "Unit"
 msgstr "単位"
@@ -1024,13 +969,8 @@ msgid "Unit Price"
 msgstr "単価"
 
 #. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
-msgid "UoM"
-msgstr "測定単位"
-
-#. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__vendor_id
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__partner_id
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__partner_ids
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_line_compare_tree
 msgid "Vendor"
 msgstr "仕入先"
@@ -1080,14 +1020,7 @@ msgstr "ウェブサイト通信履歴"
 #. odoo-python
 #: code:addons/purchase_requisition/models/purchase.py:0
 msgid "What about the alternative Requests for Quotations?"
-msgstr "見積依頼の代替案はどうでしょうか？"
-
-#. module: purchase_requisition
-#: model:ir.model.fields,help:purchase_requisition.field_purchase_order__has_alternatives
-msgid ""
-"Whether or not this purchase order is linked to another purchase order as an"
-" alternative."
-msgstr "この購買オーダが代替として他の購買オーダとリンクしているか否か。"
+msgstr "見積依頼の代替案はどうしますか？"
 
 #. module: purchase_requisition
 #: model:ir.model,name:purchase_requisition.model_purchase_requisition_alternative_warning
@@ -1103,7 +1036,7 @@ msgstr "代替購買オーダ用の値プリセットのウィザード"
 #. odoo-python
 #: code:addons/purchase_requisition/models/purchase_requisition.py:0
 msgid "You can only delete draft or cancelled requisitions."
-msgstr "ドラフトまたはキャンセル済の要求しか削除することはできません。"
+msgstr "下書きまたはキャンセル済の要求しか削除することはできません。"
 
 #. module: purchase_requisition
 #. odoo-python
@@ -1111,27 +1044,29 @@ msgstr "ドラフトまたはキャンセル済の要求しか削除すること
 msgid ""
 "You cannot change the Agreement Type or Company of a not draft purchase "
 "agreement."
-msgstr "ドラフトではない購買契約の契約タイプや会社を変更することはできません。"
+msgstr "下書きではない購買契約の契約タイプや会社を変更することはできません。"
 
 #. module: purchase_requisition
 #. odoo-python
 #: code:addons/purchase_requisition/models/purchase_requisition.py:0
 msgid "You cannot confirm a blanket order with lines missing a price."
-msgstr "価格のない明細を含む包括オーダを確認することはできません。"
+msgstr "価格のない明細を含む包括オーダを確定することはできません。"
 
 #. module: purchase_requisition
 #. odoo-python
 #: code:addons/purchase_requisition/models/purchase_requisition.py:0
 msgid "You cannot confirm a blanket order with lines missing a quantity."
-msgstr "数量が不足している明細を含む包括オーダを確認することはできません。"
+msgstr "数量が不足している明細を含む包括オーダを確定することはできません。"
 
 #. module: purchase_requisition
 #. odoo-python
 #: code:addons/purchase_requisition/models/purchase_requisition.py:0
 msgid ""
-"You cannot confirm agreement '%(agreement)s' because it does not contain any"
-" product lines."
-msgstr "プロダクト明細が含まれていないため、'%(agreement)s' を確認することはできません。"
+"You cannot confirm agreement '%(agreement)s' because it does not contain any "
+"product lines."
+msgstr ""
+"プロダクト明細が含まれていないため、'%(agreement)s' を確認することはできませ"
+"ん。"
 
 #. module: purchase_requisition
 #. odoo-python
@@ -1139,9 +1074,167 @@ msgstr "プロダクト明細が含まれていないため、'%(agreement)s' �
 msgid ""
 "You cannot have a negative or unit price of 0 for an already confirmed "
 "blanket order."
-msgstr "すでに確定している包括オーダに対して、マイナスまたは単価を0にすることはできません。"
+msgstr ""
+"すでに確定している包括オーダに対して、マイナスまたは単価を0にすることはできま"
+"せん。"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "e.g. PO0025"
 msgstr "例：PO0025"
+
+#~ msgid "$50"
+#~ msgstr "$50"
+
+#~ msgid "$500"
+#~ msgstr "$500"
+
+#~ msgid "02/16/2024"
+#~ msgstr "02/16/2024"
+
+#~ msgid "12/25/2024"
+#~ msgstr "12/25/2024"
+
+#~ msgid "2023-09-15"
+#~ msgstr "2023-09-15"
+
+#~ msgid "<strong>Date</strong>"
+#~ msgstr "<strong>日付</strong>"
+
+#~ msgid "<strong>Description</strong>"
+#~ msgstr "<strong>説明</strong>"
+
+#~ msgid "<strong>Product UoM</strong>"
+#~ msgstr "<strong>プロダクト単位</strong>"
+
+#~ msgid "<strong>Qty</strong>"
+#~ msgstr "<strong>数量</strong>"
+
+#~ msgid "<strong>Reference </strong>"
+#~ msgstr "<strong>参照 </strong>"
+
+#~ msgid "<strong>Scheduled Date</strong>"
+#~ msgstr "<strong>予定日</strong>"
+
+#~ msgid "<strong>Scheduled Ordering Date:</strong><br/>"
+#~ msgstr "<strong>発注予定日:</strong><br/>"
+
+#~ msgid "<strong>Source:</strong><br/>"
+#~ msgstr "<strong>参照元:</strong><br/>"
+
+#~ msgid "<strong>Vendor </strong>"
+#~ msgstr "<strong>仕入先 </strong>"
+
+#~ msgid "Agreement Deadline"
+#~ msgstr "契約期限"
+
+#~ msgid "Agreement Selection Type"
+#~ msgstr "契約選択タイプ"
+
+#~ msgid "Bid Selection"
+#~ msgstr "応札選択"
+
+#~ msgid "Category"
+#~ msgstr "カテゴリ"
+
+#~ msgid ""
+#~ "Conversion between Units of Measure can only occur if they belong to the "
+#~ "same category. The conversion will be made based on the ratios."
+#~ msgstr ""
+#~ "単位間の変換は同じカテゴリに属している場合のみ可能です。変換は比率に基づい"
+#~ "て行われます。"
+
+#~ msgid "Custom Description"
+#~ msgstr "説明をカスタマイズする"
+
+#~ msgid "Data for new quotations"
+#~ msgstr "新規見積のデータ"
+
+#~ msgid "Delivery Date"
+#~ msgstr "配送日"
+
+#~ msgid "Do not create RfQ lines automatically"
+#~ msgstr "見積依頼の明細行を自動生成しない"
+
+#~ msgid "Group By"
+#~ msgstr "グループ化"
+
+#~ msgid "Lines"
+#~ msgstr "明細"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "アクションを必要とするメッセージの数"
+
+#~ msgid "Ongoing"
+#~ msgstr "選考中"
+
+#~ msgid "Ordered Quantities"
+#~ msgstr "オーダ済数量"
+
+#~ msgid "Price Unit"
+#~ msgstr "価格単位"
+
+#~ msgid "Product Unit of Measure"
+#~ msgstr "プロダクト単位"
+
+#~ msgid "Purchase Agreement Types"
+#~ msgstr "購買契約タイプ"
+
+#~ msgid "Purchase Orders with requisition"
+#~ msgstr "購買オーダ"
+
+#~ msgid "Quantities"
+#~ msgstr "数量"
+
+#~ msgid "Reference:"
+#~ msgstr "参照:"
+
+#~ msgid "Requests for Quotation Details"
+#~ msgstr "見積依頼詳細"
+
+#~ msgid "Requisition"
+#~ msgstr "要求書"
+
+#~ msgid "Scheduled Date"
+#~ msgstr "計画日"
+
+#~ msgid "Select multiple RFQ (non-exclusive)"
+#~ msgstr "複数の見積依頼を選択(非排他)"
+
+#~ msgid "Select only one RFQ (exclusive)"
+#~ msgstr "見積要求を1件のみ選択（排他）"
+
+#~ msgid "Sequence"
+#~ msgstr "付番"
+
+#~ msgid "Set quantities manually"
+#~ msgstr "数量をマニュアルで設定"
+
+#~ msgid "Show all records which has next action date is before today"
+#~ msgstr "次のアクションの日付が今日より前のすべてのレコードを表示する"
+
+#~ msgid "Source Document"
+#~ msgstr "参照元"
+
+#~ msgid "UoM"
+#~ msgstr "単位"
+
+#~ msgid "Use lines of agreement"
+#~ msgstr "契約の明細行を使用"
+
+#~ msgid "Use quantities of agreement"
+#~ msgstr "契約の数量を使用"
+
+#~ msgid "Validate"
+#~ msgstr "検証"
+
+#~ msgid "You cannot confirm the blanket order without price."
+#~ msgstr "価格のない包括注文を確認することはできません。"
+
+#~ msgid "You cannot confirm the blanket order without quantity."
+#~ msgstr "数量のない包括注文を確認することはできません。"
+
+#~ msgid ""
+#~ "You have to cancel or validate every RfQ before closing the purchase "
+#~ "requisition."
+#~ msgstr "購買要求をクローズする前に、見積依頼を取消または検証してください。"

@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from collections import defaultdict
-from odoo import http, _
+from odoo import http
 from odoo.http import request
-from odoo.exceptions import UserError
 
 
 class WebsiteMail(http.Controller):
 
-    @http.route(['/website_mail/follow'], type='json', auth="public", website=True)
+    @http.route(['/website_mail/follow'], type='jsonrpc', auth="public", website=True)
     def website_message_subscribe(self, id=0, object=None, message_is_follower="on", email=False, **post):
         # TDE FIXME: check this method with new followers
-        if not request.env['ir.http']._verify_request_recaptcha_token('website_mail_follow'):
-            raise UserError(_("Suspicious activity detected by Google reCaptcha."))
         res_id = int(id)
         is_follower = message_is_follower == 'on'
         record = request.env[object].browse(res_id).exists()
@@ -26,10 +23,13 @@ class WebsiteMail(http.Controller):
             partner_ids = request.env.user.partner_id.ids
         else:
             # mail_thread method
-            partner_ids = [p.id for p in request.env['mail.thread'].sudo()._mail_find_partner_from_emails([email], records=record.sudo()) if p]
-            if not partner_ids or not partner_ids[0]:
-                name = email.split('@')[0]
-                partner_ids = request.env['res.partner'].sudo().create({'name': name, 'email': email}).ids
+            try:
+                self.env['ir.http']._verify_request_recaptcha_token('website_mail_follow')
+            except Exception:
+                no_create = True
+            else:
+                no_create = False
+            partner_ids = record.sudo()._partner_find_from_emails_single([email], no_create=no_create).ids
         # add or remove follower
         if is_follower:
             record.sudo().message_unsubscribe(partner_ids)
@@ -40,7 +40,7 @@ class WebsiteMail(http.Controller):
             record.sudo().message_subscribe(partner_ids)
             return True
 
-    @http.route(['/website_mail/is_follower'], type='json', auth="public", website=True, readonly=True)
+    @http.route(['/website_mail/is_follower'], type='jsonrpc', auth="public", website=True, readonly=True)
     def is_follower(self, records, **post):
         """ Given a list of `models` containing a list of res_ids, return
             the res_ids for which the user is follower and some practical info.

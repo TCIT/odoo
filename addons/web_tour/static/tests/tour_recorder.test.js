@@ -11,14 +11,14 @@ import {
 } from "@web/../tests/web_test_helpers";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { browser } from "@web/core/browser/browser";
+import { TourRecorder } from "@web_tour/js/tour_recorder/tour_recorder";
 import {
     TOUR_RECORDER_ACTIVE_LOCAL_STORAGE_KEY,
-    TourRecorder,
-} from "@web_tour/tour_service/tour_recorder/tour_recorder";
+    tourRecorderState,
+} from "@web_tour/js/tour_recorder/tour_recorder_state";
 import { Component, xml } from "@odoo/owl";
 import { useAutofocus } from "@web/core/utils/hooks";
 import { WebClient } from "@web/webclient/webclient";
-import { tourRecorderState } from "@web_tour/tour_service/tour_recorder/tour_recorder_state";
 
 describe.current.tags("desktop");
 
@@ -279,9 +279,8 @@ test("Edit input", async () => {
 });
 
 test("Save custom tour", async () => {
-    onRpc("/web/dataset/call_kw/web_tour.tour/create", async (request) => {
-        const { params } = await request.json();
-        const tour = params.args[0][0];
+    onRpc("web_tour.tour", "create", ({ args }) => {
+        const tour = args[0][0];
         expect.step(tour.name);
         expect.step(tour.url);
         expect.step(tour.step_ids.length);
@@ -367,17 +366,17 @@ test("Edit contenteditable", async () => {
 test("Selecting item in autocomplete field through Enter", async () => {
     class Dummy extends Component {
         static components = { AutoComplete };
-        static template = xml`
-            <t>
-                <AutoComplete
-                    id="'autocomplete'"
-                    value="'World'"
-                    sources="[{ options: [{ label: 'World' }, { label: 'Hello' }] }]"
-                    onSelect="() => {}"
-                />
-            </t>
-        `;
+        static template = xml`<AutoComplete id="'autocomplete'" value="'World'" sources="sources"/>`;
         static props = ["*"];
+
+        sources = [
+            {
+                options: [
+                    { label: "World", onSelect() {} },
+                    { label: "Hello", onSelect() {} },
+                ],
+            },
+        ];
     }
 
     expect(".o_tour_recorder").toHaveCount(1);

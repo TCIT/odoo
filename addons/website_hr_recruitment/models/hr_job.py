@@ -1,13 +1,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from werkzeug.urls import url_join
-
 from odoo import api, fields, models, _
 from odoo.tools import mute_logger
+from odoo.tools.urls import urljoin as url_join
 from odoo.tools.translate import html_translate
 
 
-class Job(models.Model):
+class HrJob(models.Model):
     _name = 'hr.job'
     _inherit = [
         'hr.job',
@@ -69,20 +68,23 @@ class Job(models.Model):
             self.is_published = False
 
     def _compute_website_url(self):
-        super(Job, self)._compute_website_url()
+        super()._compute_website_url()
         for job in self:
+            # _slug call will fail with newId records.
+            if not job.id:
+                continue
             job.website_url = f'/jobs/{self.env["ir.http"]._slug(job)}'
 
     def set_open(self):
         self.write({'website_published': False})
-        return super(Job, self).set_open()
+        return super().set_open()
 
     def get_backend_menu_id(self):
         return self.env.ref('hr_recruitment.menu_hr_recruitment_root').id
 
-    def toggle_active(self):
+    def action_archive(self):
         self.filtered('active').website_published = False
-        return super().toggle_active()
+        return super().action_archive()
 
     @api.model
     def _search_get_detail(self, website, order, options):

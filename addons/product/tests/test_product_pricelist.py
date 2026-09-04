@@ -4,7 +4,9 @@
 from datetime import datetime
 import time
 
-from odoo.fields import Command, first
+from odoo.exceptions import ValidationError
+from odoo.fields import Command
+from odoo.tests import Form
 from odoo.tools import float_compare
 
 from odoo.addons.product.tests.common import ProductCommon
@@ -255,7 +257,6 @@ class TestProductPricelist(ProductCommon):
         spam = self.env['product.product'].create({
             'name': '1 tonne of spam',
             'uom_id': self.uom_ton.id,
-            'uom_po_id': self.uom_ton.id,
             'list_price': 100,
             'type': 'consu'
         })
@@ -291,7 +292,6 @@ class TestProductPricelist(ProductCommon):
             'item_ids': [
                 Command.create({
                     'compute_price': 'formula',
-                    'base': 'pricelist',
                 }),
             ] * 101,
         })
@@ -300,9 +300,9 @@ class TestProductPricelist(ProductCommon):
     def test_40_pricelist_item_min_quantity_precision(self):
         """Test that the min_quantity has the precision of Product UoM."""
         # Arrange: Change precision digits
-        uom_precision = self.env.ref("product.decimal_product_uom")
+        uom_precision = self.env.ref("uom.decimal_product_uom")
         uom_precision.digits = 3
-        pricelist_item = first(self.customer_pricelist.item_ids[0])
+        pricelist_item = self.customer_pricelist.item_ids[0]
         precise_value = 1.234
 
         # Act: Set a value for the increased precision
@@ -310,3 +310,64 @@ class TestProductPricelist(ProductCommon):
 
         # Assert: The set value is kept
         self.assertEqual(pricelist_item.min_quantity, precise_value)
+
+    def test_remove_product_on_0_product_variant_applied_on_rule(self):
+        """Test generation of applied on based on rule data"""
+        self.pricelist_item = self.env['product.pricelist.item'].create({
+             'pricelist_id': self.pricelist.id,
+             'applied_on': '0_product_variant',
+             'product_tmpl_id': self.product.product_tmpl_id.id,
+             'product_id': self.product.id,
+             'compute_price': 'fixed',
+             'fixed_price': 50,
+             'base': 'list_price',
+        })
+
+        self.assertEqual(self.pricelist_item.applied_on, '0_product_variant')
+        with Form(self.pricelist_item) as form:
+            form.product_tmpl_id = self.env['product.template']
+        # Test values after on change
+        self.assertFalse(self.pricelist_item.product_tmpl_id)
+        self.assertFalse(self.pricelist_item.product_id)
+        self.assertEqual(self.pricelist_item.applied_on, '3_global')
+
+    def test_pricelist_sync_on_partners(self):
+        ResPartner = self.env['res.partner']
+
+        company_1, company_2 = self.env['res.company'].create([
+            {'name': 'company_1'},
+            {'name': 'company_2'},
+        ])
+
+        test_partner_company = ResPartner.create({
+            'name': 'This company',
+            'is_company': True,
+        })
+        test_partner_company.with_company(company_1).property_product_pricelist = self.business_pricelist.id
+        test_partner_company.with_company(company_2).property_product_pricelist = self.customer_pricelist.id
+
+        child_address = ResPartner.create({
+            'name': 'Contact',
+            'parent_id': test_partner_company.id,
+        })
+        self.assertEqual(
+            child_address.property_product_pricelist,
+            test_partner_company.property_product_pricelist,
+        )
+        self.assertEqual(
+            child_address.with_company(company_1).property_product_pricelist,
+            self.business_pricelist,
+        )
+        self.assertEqual(
+            child_address.with_company(company_2).property_product_pricelist,
+            self.customer_pricelist,
+        )
+
+    def test_no_negative_cost(self):
+        form = Form(self.product)
+        with self.assertRaises(ValidationError):
+            form.standard_price = -5
+
+        form = Form(self.product.product_tmpl_id)
+        with self.assertRaises(ValidationError):
+            form.standard_price = -5

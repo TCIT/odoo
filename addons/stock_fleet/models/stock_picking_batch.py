@@ -1,5 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from datetime import timedelta
+
 from odoo import fields, models, api
 
 
@@ -10,8 +12,9 @@ class StockPickingBatch(models.Model):
     vehicle_category_id = fields.Many2one(
         'fleet.vehicle.model.category', string="Vehicle Category",
         compute='_compute_vehicle_category_id', store=True, readonly=False)
-    dock_id = fields.Many2one('stock.location', string="Dock Location", domain="[('warehouse_id', '=', warehouse_id), ('is_a_dock', '=', True)]",
-                              compute='_compute_dock_id', store=True, readonly=False)
+    allowed_dock_ids = fields.Many2many(related='picking_type_id.dock_ids', string="Allowed Docks")
+    dock_id = fields.Many2one('stock.location', string="Dock", domain="[('id', 'child_of', allowed_dock_ids)]",
+        compute='_compute_dock_id', store=True, readonly=False)
     vehicle_weight_capacity = fields.Float(string="Vehcilce Payload Capacity",
                               related='vehicle_category_id.weight_capacity')
     weight_uom_name = fields.Char(string='Weight unit of measure label', compute='_compute_weight_uom_name')
@@ -24,20 +27,28 @@ class StockPickingBatch(models.Model):
         string="Weight %", compute='_compute_capacity_percentage')
     used_volume_percentage = fields.Float(
         string="Volume %", compute='_compute_capacity_percentage')
-    end_date = fields.Datetime('End Date', default=fields.Datetime.now)
+    end_date = fields.Datetime('End Date', compute='_compute_end_date', store=True)
+    has_dispatch_management = fields.Boolean(string="Dispatch Management", related='picking_type_id.dispatch_management')
 
     # Compute
+    @api.depends('scheduled_date')
+    def _compute_end_date(self):
+        for batch in self:
+            if not batch.end_date or (batch.scheduled_date and batch.end_date < batch.scheduled_date):
+                batch.end_date = batch.scheduled_date + timedelta(hours=1) if batch.scheduled_date else False
+
     @api.depends('vehicle_id')
     def _compute_vehicle_category_id(self):
         for rec in self:
             rec.vehicle_category_id = rec.vehicle_id.category_id
 
-    @api.depends('picking_ids', 'picking_ids.location_id', 'picking_ids.location_dest_id')
+    @api.depends('picking_ids', 'picking_ids.location_id', 'picking_ids.location_dest_id', 'picking_type_id')
     def _compute_dock_id(self):
         for batch in self:
-            if batch.picking_ids:
-                if len(batch.picking_ids.location_id) == 1 and batch.picking_ids.location_id.is_a_dock:
-                    batch.dock_id = batch.picking_ids.location_id
+            if batch.picking_type_id != batch._origin.picking_type_id and batch.dock_id:
+                batch.dock_id = False
+            if batch.picking_ids and len(batch.picking_ids.location_id) == 1 and batch.picking_ids.location_id in batch.allowed_dock_ids:
+                batch.dock_id = batch.picking_ids.location_id
 
     def _compute_weight_uom_name(self):
         self.weight_uom_name = self.env['product.template']._get_weight_uom_name_from_ir_config_parameter()
@@ -62,6 +73,8 @@ class StockPickingBatch(models.Model):
                 batch.used_volume_percentage = 100 * (batch.estimated_shipping_volume / batch.vehicle_volume_capacity)
 
     # CRUD
+
+    @api.model_create_multi
     def create(self, vals_list):
         batches = super().create(vals_list)
         batches.order_on_zip()
@@ -89,3 +102,12 @@ class StockPickingBatch(models.Model):
                 batch.picking_ids.move_ids.write({'location_dest_id': batch.dock_id.id})
             else:
                 batch.picking_ids.move_ids.write({'location_id': batch.dock_id.id})
+
+    def _get_merged_batch_vals(self):
+        self.ensure_one()
+        vals = super()._get_merged_batch_vals()
+        vals.update({
+            'vehicle_id': self.vehicle_id.id,
+            'dock_id': self.dock_id.id,
+        })
+        return vals

@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { rpc } from "@web/core/network/rpc";
 import { useService } from "@web/core/utils/hooks";
 import { View } from "@web/views/view";
@@ -41,7 +39,8 @@ export class BoardAction extends Component {
                 resModel: result.res_model,
                 type: viewMode,
                 display: { controlPanel: false },
-                selectRecord: (resId) => this.selectRecord(result.res_model, resId),
+                selectRecord: (resId, { newWindow } = {}) =>
+                    this.selectRecord(result.res_model, resId, newWindow),
             };
             const view = result.views.find((v) => v[1] === viewMode);
             if (view) {
@@ -59,19 +58,6 @@ export class BoardAction extends Component {
                     const groupBy = this.viewProps.context.group_by;
                     this.viewProps.groupBy = typeof groupBy === "string" ? [groupBy] : groupBy;
                 }
-                if ("comparison" in this.viewProps.context) {
-                    const comparison = this.viewProps.context.comparison;
-                    if (
-                        comparison !== null &&
-                        typeof comparison === "object" &&
-                        "domains" in comparison &&
-                        "fieldName" in comparison
-                    ) {
-                        // Some comparison object with the wrong form might have been stored in db.
-                        // This is why we make the checks on the keys domains and fieldName
-                        this.viewProps.comparison = comparison;
-                    }
-                }
             }
             if (action.domain) {
                 this.viewProps.domain = action.domain;
@@ -81,12 +67,15 @@ export class BoardAction extends Component {
             }
         });
     }
-    selectRecord(resModel, resId) {
-        this.actionService.doAction({
-            type: "ir.actions.act_window",
-            res_model: resModel,
-            views: [[this.formViewId, "form"]],
-            res_id: resId,
-        });
+    selectRecord(resModel, resId, newWindow) {
+        this.actionService.doAction(
+            {
+                type: "ir.actions.act_window",
+                res_model: resModel,
+                views: [[this.formViewId, "form"]],
+                res_id: resId,
+            },
+            { newWindow }
+        );
     }
 }

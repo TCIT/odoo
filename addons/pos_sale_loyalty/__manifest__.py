@@ -5,7 +5,7 @@
 {
     'name': 'POS - Sales Loyality',
     'version': '1.0',
-    'category': 'Hidden',
+    'category': 'Sales/Point of Sale',
     'sequence': 6,
     'summary': 'Link module between pos_sale and pos_loyalty',
     'description': """
@@ -22,5 +22,6 @@ This module correct some behaviors when both module are installed.
             'pos_sale_loyalty/static/tests/tours/**/*',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

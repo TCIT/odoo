@@ -19,7 +19,7 @@ class MissingActionError(UserError):
 
 class Action(Controller):
 
-    @route('/web/action/load', type='json', auth='user', readonly=True)
+    @route('/web/action/load', type='jsonrpc', auth='user', readonly=True)
     def load(self, action_id, context=None):
         if context:
             request.update_context(**context)
@@ -50,7 +50,7 @@ class Action(Controller):
         result = request.env[action_type].sudo().browse([action_id]).read()
         return clean_action(result[0], env=request.env) if result else False
 
-    @route('/web/action/run', type='json', auth="user")
+    @route('/web/action/run', type='jsonrpc', auth="user")
     def run(self, action_id, context=None):
         if context:
             request.update_context(**context)
@@ -58,7 +58,7 @@ class Action(Controller):
         result = action.run()
         return clean_action(result, env=action.env) if result else False
 
-    @route('/web/action/load_breadcrumbs', type='json', auth='user', readonly=True)
+    @route('/web/action/load_breadcrumbs', type='jsonrpc', auth='user', readonly=True)
     def load_breadcrumbs(self, actions):
         results = []
         for idx, action in enumerate(actions):
@@ -87,7 +87,7 @@ class Action(Controller):
                         else:
                             results.append({'display_name': act['display_name']})
                     else:
-                        if act['res_model'] and act['type'] != 'ir.actions.client':
+                        if act.get('res_model') and act['type'] != 'ir.actions.client':
                             request.env[act['res_model']].check_access('read')
                             # action shouldn't be available on its own if it doesn't have multi-record views
                             name = act['display_name'] if any(view[1] != 'form' and view[1] != 'search' for view in act['views']) else None

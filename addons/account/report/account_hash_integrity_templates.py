@@ -4,7 +4,7 @@
 from odoo import api, fields, models
 
 
-class ReportAccountHashIntegrity(models.AbstractModel):
+class ReportAccountReport_Hash_Integrity(models.AbstractModel):
     _name = 'report.account.report_hash_integrity'
     _description = 'Get hash integrity result as PDF.'
 

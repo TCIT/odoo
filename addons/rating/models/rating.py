@@ -9,8 +9,8 @@ from odoo.addons.rating.models import rating_data
 from odoo.tools.misc import file_open
 
 
-class Rating(models.Model):
-    _name = "rating.rating"
+class RatingRating(models.Model):
+    _name = 'rating.rating'
     _description = "Rating"
     _order = 'write_date desc, id desc'
     _rec_name = 'res_name'
@@ -52,15 +52,23 @@ class Rating(models.Model):
     is_internal = fields.Boolean('Visible Internally Only', readonly=False, related='message_id.is_internal', store=True)
     access_token = fields.Char('Security Token', default=_default_access_token)
     consumed = fields.Boolean(string="Filled Rating")
+    rated_on = fields.Datetime(string="Rated On")
 
-    _sql_constraints = [
-        ('rating_range', 'check(rating >= 0 and rating <= 5)', 'Rating should be between 0 and 5'),
-    ]
+    _rating_range = models.Constraint(
+        'check(rating >= 0 and rating <= 5)',
+        'Rating should be between 0 and 5',
+    )
+
+    _consumed_idx = models.Index('(res_model, res_id, write_date) WHERE consumed IS TRUE')
+    _parent_consumed_idx = models.Index('(parent_res_model, parent_res_id, write_date) WHERE consumed IS TRUE')
 
     @api.depends('res_model', 'res_id')
     def _compute_res_name(self):
         for rating in self:
-            name = self.env[rating.res_model].sudo().browse(rating.res_id).display_name
+            if rating.res_model and rating.res_id:
+                name = self.env[rating.res_model].sudo().browse(rating.res_id).display_name
+            else:
+                name = False
             rating.res_name = name or f'{rating.res_model}/{rating.res_id}'
 
     @api.depends('res_model', 'res_id')
@@ -100,9 +108,9 @@ class Rating(models.Model):
             image_path = f'rating/static/src/img/{rating._get_rating_image_filename()}'
             rating.rating_image_url = f'/{image_path}'
             try:
-                rating.rating_image = base64.b64encode(
-                    file_open(image_path, 'rb', filter_ext=('.png',)).read())
-            except (IOError, OSError, FileNotFoundError):
+                with file_open(image_path, 'rb', filter_ext=('.png',)) as f:
+                    rating.rating_image = base64.b64encode(f.read())
+            except OSError:
                 rating.rating_image = False
 
     @api.depends('rating')
@@ -119,17 +127,21 @@ class Rating(models.Model):
         for values in vals_list:
             if values.get('res_model_id') and values.get('res_id'):
                 values.update(self._find_parent_data(values))
+            if 'rating' in values or 'feedback' in values:
+                values['rated_on'] = fields.Datetime.now()
         return super().create(vals_list)
 
-    def write(self, values):
-        if values.get('res_model_id') and values.get('res_id'):
-            values.update(self._find_parent_data(values))
-        return super(Rating, self).write(values)
+    def write(self, vals):
+        if vals.get('res_model_id') and vals.get('res_id'):
+            vals.update(self._find_parent_data(vals))
+        if 'rating' in vals or 'feedback' in vals:
+            vals['rated_on'] = fields.Datetime.now()
+        return super().write(vals)
 
     def unlink(self):
         # OPW-2181568: Delete the chatter message too
         self.env['mail.message'].search([('rating_ids', 'in', self.ids)]).unlink()
-        return super(Rating, self).unlink()
+        return super().unlink()
 
     def _find_parent_data(self, values):
         """ Determine the parent res_model/res_id, based on the values to create or write """
@@ -178,11 +190,12 @@ class Rating(models.Model):
         are classified by model. Ratings not linked to a valid record through
         res_model / res_id are ignored.
 
-        :return dict: for each model having at least one rating in self, have
+        :returns: for each model having at least one rating in self, have
           a sub-dict containing
             * ratings: ratings related to that model;
             * record IDs: records linked to the ratings of that model, in same
               order;
+        :rtype: dict
         """
         data_by_model = {}
         for rating in self.filtered(lambda act: act.res_model and act.res_id):
@@ -195,7 +208,5 @@ class Rating(models.Model):
             data_by_model[rating.res_model]['record_ids'].append(rating.res_id)
         return data_by_model
 
-    def _to_store(self, store: Store, /, *, fields=None):
-        if fields is None:
-            fields = ["rating", "rating_image_url", "rating_text"]
-        store.add(self._name, self._read_format(fields, load=False))
+    def _to_store_defaults(self, target):
+        return ["rating", "rating_image_url", "rating_text"]

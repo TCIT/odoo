@@ -1,27 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* spreadsheet_dashboard_pos_hr
-# 
-# Translators:
-# Gailius Kazlauskas <gailius@vialaurea.lt>, 2024
-# digitouch UAB <digitouchagencyeur@gmail.com>, 2024
-# Martin Trigaux, 2024
-# Audrius Palenskis <audrius.palenskis@gmail.com>, 2024
-# Linas Versada <linaskrisiukenas@gmail.com>, 2024
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:49+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Linas Versada <linaskrisiukenas@gmail.com>, 2024\n"
-"Language-Team: Lithuanian (https://app.transifex.com/odoo/teams/41243/lt/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-02 13:37+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Lithuanian <https://translate.odoo.com/projects/odoo-19/"
+"spreadsheet_dashboard_pos_hr/lt/>\n"
+"Language: lt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: lt\n"
-"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);\n"
+"Plural-Forms: nplurals=3; plural=(n % 10 == 1 && (n % 100 < 11 || n % 100 > "
+"19)) ? 0 : ((n % 10 >= 2 && n % 10 <= 9 && (n % 100 < 11 || n % 100 > 19)) ? "
+"1 : 2);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
@@ -35,28 +32,26 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Current"
-msgstr "Esamas"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Customer"
-msgstr "Klientas"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Date"
-msgstr "Data"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Employee"
-msgstr "Darbuotojas"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
@@ -70,7 +65,7 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Orders"
-msgstr "Užsakymai"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
@@ -83,7 +78,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 msgid "Period"
-msgstr "Laikotarpis"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
@@ -91,49 +86,49 @@ msgstr "Laikotarpis"
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 #: model:spreadsheet.dashboard,name:spreadsheet_dashboard_pos_hr.spreadsheet_dashboard_pos
 msgid "Point of Sale"
-msgstr "Pardavimo taškas"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Previous"
-msgstr "Ankstesnis"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Product"
-msgstr "Produktas"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Responsible"
-msgstr "Atsakingas"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Revenue"
-msgstr "Pajamos"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Session"
-msgstr "Sesija"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Sessions"
-msgstr "Sesijos"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
@@ -144,7 +139,6 @@ msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Top Points of Sale"
 msgstr ""
@@ -172,14 +166,13 @@ msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "Total"
-msgstr "Suma"
+msgstr ""
 
 #. module: spreadsheet_dashboard_pos_hr
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_hr/data/files/pos_sample_dashboard.json:0
 msgid "since last period"
-msgstr "nuo praėjusio laikotarpio"
+msgstr ""

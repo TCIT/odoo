@@ -1,28 +1,29 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* base_import
-# 
+# * base_import
+#
 # Translators:
-# Vangelis Skarmoutsos (SkarmoutsosV) <skarmoutsosv@gmail.com>, 2024
-# Giota Dandidou <giotadandidou@gmail.com>, 2024
-# Stefanos Nikou <stefanos.nikou@gmail.com>, 2024
-# Kostas Goutoudis <goutoudis@gmail.com>, 2024
-# Martin Trigaux, 2024
-# Leonidas Chiotis, 2025
-# 
+# Martin Trigaux, 2018
+# Kostas Goutoudis <goutoudis@gmail.com>, 2018
+# George Tarasidis <george_tarasidis@yahoo.com>, 2018
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# Panagiotis karampaglis <panosdotk@gmail.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:48+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Leonidas Chiotis, 2025\n"
-"Language-Team: Greek (https://app.transifex.com/odoo/teams/41243/el/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-06 09:39+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Greek <https://translate.odoo.com/projects/odoo-19/"
+"base_import/el/>\n"
+"Language: el\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: el\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: base_import
 #. odoo-javascript
@@ -86,8 +87,8 @@ msgstr ""
 #: code:addons/base_import/static/src/import_model.js:0
 msgid ""
 "An unknown issue occurred during import (possibly lost connection, data "
-"limit exceeded or memory limits exceeded). Please retry in case the issue is"
-" transient. If the issue still occurs, try to split the file rather than "
+"limit exceeded or memory limits exceeded). Please retry in case the issue is "
+"transient. If the issue still occurs, try to split the file rather than "
 "import it at once."
 msgstr ""
 
@@ -110,7 +111,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_progress/import_data_progress.xml:0
 msgid "Batch"
-msgstr ""
+msgstr "Παρτίδα"
 
 #. module: base_import
 #. odoo-javascript
@@ -152,8 +153,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"Column %(column)s contains incorrect values. Error in line %(line)d: "
-"%(error)s"
+"Column %(column)s contains incorrect values. Error in line %(line)d: %"
+"(error)s"
 msgstr ""
 
 #. module: base_import
@@ -177,8 +178,7 @@ msgstr "Σχόλια"
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"Could not retrieve URL: %(url)s [%(field_name)s: L%(line_number)d]: "
-"%(error)s"
+"Could not retrieve URL: %(url)s [%(field_name)s: L%(line_number)d]: %(error)s"
 msgstr ""
 
 #. module: base_import
@@ -244,6 +244,7 @@ msgstr ""
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__display_name
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__display_name
+#: model:ir.model.fields,field_description:base_import.field_res_users__display_name
 msgid "Display Name"
 msgstr "Εμφάνιση Ονόματος"
 
@@ -296,8 +297,8 @@ msgstr ""
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
 "Error while importing records: all rows should be of the same size, but the "
-"title row has %(title_row_entries)d entries while the first row has "
-"%(first_row_entries)d. You may need to change the separator character."
+"title row has %(title_row_entries)d entries while the first row has %"
+"(first_row_entries)d. You may need to change the separator character."
 msgstr ""
 
 #. module: base_import
@@ -310,7 +311,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "Everything seems valid."
-msgstr "Όλα φαίνονται έγκυρα"
+msgstr "Όλα φαίνονται έγκυρα."
 
 #. module: base_import
 #. odoo-javascript
@@ -323,6 +324,12 @@ msgstr ""
 #: code:addons/base_import/models/base_import.py:0
 msgid "External ID"
 msgstr "Εξωτερικό Αναγνωριστικό"
+
+#. module: base_import
+#. odoo-python
+#: code:addons/base_import/models/base_import.py:0
+msgid "Field '%(field)s' does not accept date/time values."
+msgstr ""
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__field_name
@@ -390,8 +397,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"Found invalid image data, images should be imported as either URLs or "
-"base64-encoded data."
+"Found invalid image data, images should be imported as either URLs or base64-"
+"encoded data."
 msgstr ""
 
 #. module: base_import
@@ -415,6 +422,7 @@ msgstr "Εδώ είναι η αρχή του αρχείου που δεν μπο
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__id
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__id
+#: model:ir.model.fields,field_description:base_import.field_res_users__id
 msgid "ID"
 msgstr "Κωδικός"
 
@@ -477,6 +485,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_records/import_records.xml:0
 msgid "Import records"
+msgstr ""
+
+#. module: base_import
+#. odoo-javascript
+#: code:addons/base_import/static/src/import_action/import_action.js:0
+msgid "Imported records"
 msgstr ""
 
 #. module: base_import
@@ -768,6 +782,22 @@ msgid "The file will be imported by batches"
 msgstr ""
 
 #. module: base_import
+#. odoo-python
+#: code:addons/base_import/models/base_import.py:0
+msgid ""
+"There was an issue decoding the file using encoding “%s”.\n"
+"This encoding was automatically detected."
+msgstr ""
+
+#. module: base_import
+#. odoo-python
+#: code:addons/base_import/models/base_import.py:0
+msgid ""
+"There was an issue decoding the file using encoding “%s”.\n"
+"This encoding was manually selected."
+msgstr ""
+
+#. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "This column will be concatenated in field"
@@ -800,7 +830,8 @@ msgstr "Παρακολούθηση ιστορικού κατά την εισαγ
 #. module: base_import
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
-msgid "Unable to load \"{extension}\" file: requires Python module \"{modname}\""
+msgid ""
+"Unable to load \"{extension}\" file: requires Python module \"{modname}\""
 msgstr ""
 
 #. module: base_import
@@ -833,18 +864,18 @@ msgstr ""
 #: code:addons/base_import/static/src/import_model.js:0
 msgid ""
 "Use HH for hours in a 24h system, use II in conjonction with 'p' for a 12h "
-"system. You can use a custom format in addition to the suggestions provided."
-" Leave empty to let Odoo guess the format (recommended)"
+"system. You can use a custom format in addition to the suggestions provided. "
+"Leave empty to let Odoo guess the format (recommended)"
 msgstr ""
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid ""
-"Use YYYY to represent the year, MM for the month and DD for the day. Include"
-" separators such as a dot, forward slash or dash. You can use a custom "
-"format in addition to the suggestions provided. Leave empty to let Odoo "
-"guess the format (recommended)"
+"Use YYYY to represent the year, MM for the month and DD for the day. Include "
+"separators such as a dot, forward slash or dash. You can use a custom format "
+"in addition to the suggestions provided. Leave empty to let Odoo guess the "
+"format (recommended)"
 msgstr ""
 
 #. module: base_import
@@ -876,7 +907,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"You can not import images via URL, check with your administrator or support "
+"You can not import file via URL, check with your administrator or support "
 "for the reason."
 msgstr ""
 
@@ -940,3 +971,6 @@ msgstr "δευτερόλεπτα"
 #: code:addons/base_import/models/base_import.py:0
 msgid "unknown error code %s"
 msgstr ""
+
+#~ msgid "Load File"
+#~ msgstr "Φόρτωση Αρχείου"

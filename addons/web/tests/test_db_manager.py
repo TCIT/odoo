@@ -44,8 +44,8 @@ class TestDatabaseOperations(BaseCase):
         )
         self.startPatcher(self.verify_admin_password_patcher)
 
-        self.db_name = config['db_name']
-        self.assertTrue(self.db_name)
+        self.assertEqual(len(config['db_name']), 1)
+        self.db_name = config['db_name'][0]
 
         # monkey-patch db-filter
         self.addCleanup(operator.setitem, config, 'dbfilter', config['dbfilter'])
@@ -221,7 +221,7 @@ class TestDatabaseOperations(BaseCase):
         self.session.cookies['session_id'] = session.sid
 
         # make it possible to inject the registry back
-        patcher = patch.dict(Registry.registries.d, {test_db_name: registry})
+        patcher = patch.dict(Registry.registries, {test_db_name: registry})
         registries = patcher.start()
         self.addCleanup(patcher.stop)
 

@@ -13,6 +13,7 @@ class ResPartnerBank(models.Model):
     display_qr_setting = fields.Boolean(compute='_compute_display_qr_setting')
     include_reference = fields.Boolean(string="Include Reference", help="Include the reference in the QR code.")
     proxy_type = fields.Selection([('none', 'None')], string="Proxy Type", default='none')
+    country_proxy_keys = fields.Char(compute='_compute_country_proxy_keys')
     proxy_value = fields.Char(string="Proxy Value")
 
     @api.model
@@ -27,6 +28,11 @@ class ResPartnerBank(models.Model):
         return remove_accents(string).replace('đ', 'd').replace('Đ', 'D')
 
     @api.depends('country_code')
+    def _compute_country_proxy_keys(self):
+        self.country_proxy_keys = ""
+
+    @api.depends('country_code')
+    @api.depends_context("company")
     def _compute_display_qr_setting(self):
         self.display_qr_setting = False
 
@@ -48,6 +54,9 @@ class ResPartnerBank(models.Model):
     def _get_additional_data_field(self, comment):
         return None
 
+    def _get_merchant_category_code(self):
+        return '0000'
+
     def _get_qr_code_vals_list(self, qr_method, amount, currency, debtor_partner, free_communication, structured_communication):
         tag, merchant_account_info = self._get_merchant_account_info()
         currency_code = CURRENCY_MAPPING[currency.name]
@@ -58,13 +67,14 @@ class ResPartnerBank(models.Model):
         merchant_name = self.partner_id.name and self._remove_accents(self.partner_id.name)[:25] or 'NA'
         merchant_city = self.partner_id.city and self._remove_accents(self.partner_id.city)[:15] or ''
         comment = structured_communication or free_communication or ''
-        comment = re.sub(r'/[^ A-Za-z0-9_@.\/#&+-]+/g', '', self._remove_accents(comment))
+        comment = re.sub(r'[^ A-Za-z0-9_@.\\/#&+-]+', '', self._remove_accents(comment))
         additional_data_field = self._get_additional_data_field(comment) if self.include_reference else None
+        merchant_category_code = self._get_merchant_category_code()
         return [
             (0, '01'),                                                              # Payload Format Indicator
             (1, '12'),                                                              # Dynamic QR Codes
             (tag, merchant_account_info),                                           # Merchant Account Information
-            (52, '0000'),                                                           # Merchant Category Code
+            (52, merchant_category_code),                                           # Merchant Category Code
             (53, currency_code),                                                    # Transaction Currency
             (54, amount),                                                           # Transaction Amount
             (58, self.country_code),                                                # Country Code
@@ -88,6 +98,7 @@ class ResPartnerBank(models.Model):
         if qr_method == 'emv_qr':
             return {
                 'barcode_type': 'QR',
+                'quiet': 0,
                 'width': 128,
                 'height': 128,
                 'humanreadable': 1,

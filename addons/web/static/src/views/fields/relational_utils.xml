@@ -3,10 +3,10 @@
 
 <t t-name="web.X2ManyFieldDialog">
     <Dialog t-props="dialogProps">
-        <FormRenderer record="record" archInfo="archInfo"/>
+        <FormRenderer readonly="readonly" record="record" archInfo="archInfo"/>
         <t t-set-slot="footer">
             <t t-if="footerArchInfo">
-                <FormRenderer record="record" archInfo="footerArchInfo">
+                <FormRenderer readonly="readonly" record="record" archInfo="footerArchInfo">
                     <t t-set-slot="default_buttons">
                         <t t-call="web.X2ManyFieldDialogDefaultButtons"/>
                     </t>
@@ -32,30 +32,15 @@
             t-on-click="onSearchMore"
             t-on-barcode-search="onBarcodeSearch"
         />
-        <AutoComplete t-else=""
-            value="props.value"
-            id="props.id"
-            placeholder="props.placeholder"
-            sources="sources"
-            autoSelect="props.autoSelect"
-            onSelect.bind="onSelect"
-            onInput.bind="onInput"
-            onChange.bind="onChange"
-            dropdown="props.dropdown"
-            autofocus="props.autofocus"
-            resetOnSelect="props.value === ''"
-            onCancel.bind="onCancel"
-        />
+        <AutoComplete t-else="" t-props="autoCompleteProps">
+            <t t-set-slot="option" t-slot-scope="optionScope">
+                <t t-slot="{{ optionScope.data.slotName }}" t-props="optionScope.data" label="optionScope.label">
+                    <t t-out="optionScope.label"/>
+                </t>
+            </t>
+        </AutoComplete>
         <span class="o_dropdown_button" />
     </div>
-</t>
-
-<t t-name="web.AvatarMany2XAutocomplete">
-    <span class="o_avatar_many2x_autocomplete o_avatar d-flex align-items-center">
-        <img t-if="option.value" class="rounded me-1"
-             t-attf-src="/web/image/{{option.resModel}}/{{option.value}}/avatar_128" />
-        <t t-esc="option.label" />
-    </span>
 </t>
 
 <t t-name="web.X2ManyFieldDialogDefaultButtons">
@@ -69,8 +54,9 @@
         </t>
         <button class="btn btn-secondary o_form_button_cancel" t-on-click="discard" data-hotkey="j">Discard</button>
 
-        <t t-if="props.delete">
-            <button class="btn btn-secondary o_btn_remove" t-on-click="remove" data-hotkey="k">
+        <t t-if="props.delete and displayDeleteButton">
+            <button class="btn btn-secondary d-flex flex-nowrap align-items-center justify-content-center gap-1 ms-md-auto o_btn_remove" t-on-click="remove" data-hotkey="k">
+                <i class="fa fa-trash"/>
                 <t t-if="props.deleteButtonLabel" t-out="props.deleteButtonLabel"/>
                 <t t-else="">Remove</t>
             </button>

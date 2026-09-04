@@ -17,7 +17,6 @@ class TestSetTags(TransactionCase):
 
         fc = FakeClass()
 
-        self.assertTrue(hasattr(fc, 'test_tags'))
         self.assertEqual(fc.test_tags, {'at_install', 'standard'})
         self.assertEqual(fc.test_module, 'base')
 
@@ -29,7 +28,6 @@ class TestSetTags(TransactionCase):
 
         fc = FakeClass()
 
-        self.assertTrue(hasattr(fc, 'test_tags'))
         self.assertEqual(fc.test_tags, {'at_install', 'standard'})
         self.assertEqual(fc.test_module, 'base')
 
@@ -165,7 +163,7 @@ class TestSelector(TransactionCase):
         self.assertEqual(set(), tags.exclude)
 
         tags = TagsSelector('/module/tests/test_file.py')  # all standard test of a module
-        self.assertEqual({('standard', None, None, None, 'module.tests.test_file'), }, tags.include)
+        self.assertEqual({('standard', None, None, None, '/module/tests/test_file.py'), }, tags.include)
         self.assertEqual(set(), tags.exclude)
 
         tags = TagsSelector('*/module')  # all tests of a module
@@ -211,6 +209,68 @@ class TestSelector(TransactionCase):
         tags = TagsSelector('*/module,-standard')  # all non standard test of a module
         self.assertEqual({(None, 'module', None, None, None), }, tags.include)  # all in module
         self.assertEqual({('standard', None, None, None, None), }, tags.exclude)  # exept standard ones
+
+        tags = TagsSelector('*/some-paths/with-dash/addons/account/test/test_file.py')  # a filepath with dashes
+        self.assertEqual({(None, None, None, None, '/some-paths/with-dash/addons/account/test/test_file.py'), }, tags.include)
+        tags = TagsSelector('/some/absolute/path/v.3/module.py')
+        self.assertEqual({('standard', None, None, None, '/some/absolute/path/v.3/module.py'), }, tags.include)  # all in module
+
+        tags = TagsSelector('/some/absolute/path/v.3/module.py')
+        self.assertEqual({('standard', None, None, None, '/some/absolute/path/v.3/module.py'), }, tags.include)  # all in module
+
+        tags = TagsSelector('/module.method')
+        self.assertEqual({('standard', 'module', None, 'method', None), }, tags.include)  # all in module
+
+    def test_tags_selector_split(self):
+        self.assertEqual(
+            list(TagsSelector(r'.test_1[param1,param2]').parameters),
+            [(('standard', None, None, 'test_1', None), ('+', r'param1,param2'))],
+        )
+        self.assertEqual(
+            list(TagsSelector(r'.test_1[param1[],param2]').parameters),
+            [(('standard', None, None, 'test_1', None), ('+', r'param1[],param2'))],
+            "[] is balanced and should not split the parameters",
+        )
+        self.assertEqual(
+            list(TagsSelector(r'.test_1[param1,param2[]]').parameters),
+            [(('standard', None, None, 'test_1', None), ('+', r'param1,param2[]'))],
+            "[] is balanced and should not split the parameters",
+        )
+        self.assertEqual(
+            list(TagsSelector(r'.test_1[param1\],param2]').parameters),
+            [(('standard', None, None, 'test_1', None), ('+', r'param1],param2'))],
+            "] can be escaped",
+        )
+        self.assertEqual(
+            list(TagsSelector(r'.test_1[param1\[\],param2]').parameters),
+            [(('standard', None, None, 'test_1', None), ('+', r'param1[],param2'))],
+            "[ and ] can be escaped",
+        )
+        self.assertEqual(
+            list(TagsSelector(r'.test_1[param1,param2\]]').parameters),
+            [(('standard', None, None, 'test_1', None), ('+', r'param1,param2]'))],
+            "] can be escaped in second param",
+        )
+        self.assertEqual(
+            list(TagsSelector(r'.test_1[par\am1,param2]').parameters),
+            [(('standard', None, None, 'test_1', None), ('+', r'par\am1,param2'))],
+            "string containing backslashes should work",
+        )
+        self.assertEqual(
+            list(TagsSelector(r'.test_1[par\\am1,param2]').parameters),
+            [(('standard', None, None, 'test_1', None), ('+', r'par\am1,param2'))],
+            "string containing backslashes can be escaped",
+        )
+        self.assertEqual(
+            list(TagsSelector('.test_1[should paste text and understand \\\\n newlines]').parameters),
+            [(('standard', None, None, 'test_1', None), ('+', 'should paste text and understand \\n newlines'))],
+            "backslashes can be escaped",
+        )
+        self.assertEqual(
+            list(TagsSelector(r'.test_method[test, with brackets\], and backslash\\ ]').parameters),
+            [(('standard', None, None, 'test_method', None), ('+', r'test, with brackets], and backslash\ '))],
+            "backslashes can be escaped",
+        )
 
 
 @tagged('nodatabase')
@@ -354,3 +414,65 @@ class TestSelectorSelection(TransactionCase):
         tags = TagsSelector('standard')
         position = TagsSelector('post_install')
         self.assertTrue(tags.check(post_install_obj) and position.check(post_install_obj))
+
+        # module part
+        tags = TagsSelector('/base')
+        self.assertTrue(tags.check(no_tags_obj), 'Test should match is module path')
+        tags = TagsSelector('/base/tests/test_tests_tags.py')
+        self.assertTrue(tags.check(no_tags_obj), 'Test should match is module path with file')
+
+        tags = TagsSelector('/account/tests/test_tests_tags.py')
+        self.assertFalse(tags.check(no_tags_obj), 'Test should not match another module path with file')
+
+        # absolute path case (used by test-file)
+        tags = TagsSelector(__file__)  # todo fix if . in path
+        self.assertTrue(tags.check(no_tags_obj), 'Test should match its absolute file path')
+        tags = TagsSelector(__file__)
+        self.assertTrue(tags.check(no_tags_obj), 'Test should its absolute file path')
+
+    def test_selector_parser_parameters(self):
+        tags = ','.join([
+            '/base:FakeClassA[failfast=0,filter=-livechat]',
+            #'/base:FakeClassA[filter=[-barecode,-stock_x]]',
+            '/other[notForThisClass]',
+            '-/base:FakeClassA[arg1,arg2]',
+        ])
+        tags = TagsSelector(tags)
+        class FakeClassA(TransactionCase):
+            pass
+
+        fc = FakeClassA()
+        tags.check(fc)
+        self.assertEqual(fc._test_params, [('+', 'failfast=0,filter=-livechat'), ('-', 'arg1,arg2')])
+
+    def test_negative_parameters_translate(self):
+        tags = TagsSelector('.test_negative_parameters_translate')
+        self.assertTrue(tags.check(self), "Sanity check")
+        self.assertEqual(self._test_params, [])
+
+        tags = TagsSelector('/other_module,-.test_negative_parameters_translate[someparam]')
+        self.assertFalse(tags.check(self), "we don't expect a negative parameter to enable the test if not enabled in other tags")
+        self.assertEqual(self._test_params, [])
+
+        tags = TagsSelector('/base,-.test_negative_parameters_translate[someparam]')
+        self.assertTrue(tags.check(self), "A negative parametric tag should not disable the test")
+        self.assertEqual(self._test_params, [('-', 'someparam')])
+
+        tags = TagsSelector('-.test_negative_parameters_translate[someparam]')
+        self.assertTrue(tags.check(self), "we don't expect a single negative parameter to disable the test that should run by edfault")
+        self.assertEqual(self._test_params, [('-', 'someparam')])
+
+        tags = TagsSelector('/base,-.test_negative_parameters_translate')
+        self.assertFalse(tags.check(self), "Sanity check, a negative parametric tag without params still disable the test")
+        self.assertEqual(self._test_params, [])
+
+        tags = TagsSelector('.test_negative_parameters_translate[-someparam]')
+        self.assertTrue(tags.check(self), "A parametric tag should enable test")
+        self.assertEqual(self._test_params, [('+', '-someparam')])
+
+class TestTestClass(BaseCase):
+    def test_canonical_tag(self):
+        self.assertEqual(self.canonical_tag, '/base/tests/test_tests_tags.py:TestTestClass.test_canonical_tag')
+
+    def get_log_metadata(self):
+        self.assertEqual(self.log_metadata['canonical_tag'], '/base/tests/test_tests_tags.py:TestTestClass.test_canonical_tag')

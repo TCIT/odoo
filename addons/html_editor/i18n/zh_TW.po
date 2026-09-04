@@ -1,26 +1,29 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* html_editor
-# 
+# * html_editor
+#
 # Translators:
-# Tiffany Chang, 2024
-# Martin Trigaux, 2024
-# Tony Ng, 2025
 # Wil Odoo, 2025
-# 
+# Tony Ng, 2025
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Tony Ng (ngto)" <ngto@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~18.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:23+0000\n"
-"PO-Revision-Date: 2024-09-29 00:00+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
-"Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
+"POT-Creation-Date: 2026-06-05 19:29+0000\n"
+"PO-Revision-Date: 2026-08-07 00:30+0000\n"
+"Last-Translator: \"Tony Ng (ngto)\" <ngto@odoo.com>\n"
+"Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
+"projects/odoo-19/html_editor/zh_Hant/>\n"
+"Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: html_editor
 #. odoo-javascript
@@ -28,7 +31,9 @@ msgstr ""
 msgid ""
 "'Alt tag' specifies an alternate text for an image, if the image cannot be "
 "displayed (slow connection, missing image, screen reader ...)."
-msgstr "如果無法顯示圖像，則「Alt tag」指定圖像的替代文本（連接速度慢，圖像遺失，螢幕閱讀器......）。"
+msgstr ""
+"如果無法顯示圖像，則「Alt tag」指定圖像的替代文本（連接速度慢，圖像遺失，螢幕"
+"閱讀器......）。"
 
 #. module: html_editor
 #. odoo-javascript
@@ -38,21 +43,15 @@ msgstr "'標題標籤' 當您移動鼠標到圖片上面懸停的時候顯示標
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_description.xml:0
-msgid "(ALT Tag)"
-msgstr "(ALT 標籤)"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_description.xml:0
-msgid "(TITLE Tag)"
-msgstr "(TITLE 標籤)"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "(URL or Embed)"
 msgstr "（網址或嵌入）"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid ", submited by"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -86,27 +85,9 @@ msgstr "5 粒星"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
-msgid "AI"
-msgstr "AI 人工智能"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
-msgid "AI Copywriter"
-msgstr "AI 人工智能文案"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
-msgid "AI Tools"
-msgstr "人工智能工具"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "Accepts"
-msgstr " 接受"
+msgstr "接受"
 
 #. module: html_editor
 #. odoo-python
@@ -118,8 +99,8 @@ msgstr "動作 %s 不是視窗動作，連結預覽未能提供"
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid ""
-"Action %s not found, link preview is not available, please check your url is"
-" correct"
+"Action %s not found, link preview is not available, please check your url is "
+"correct"
 msgstr "找不到操作 %s，無法預覽連結，請檢查網址是否正確"
 
 #. module: html_editor
@@ -161,6 +142,12 @@ msgstr "加入下載方格"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Add a label for your link"
+msgstr "為連結加入標籤"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_plugin.js:0
 msgid "Add a link"
 msgstr "加入連結。"
@@ -174,14 +161,38 @@ msgstr "加入表情符號"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/core/table_of_content/table_of_content.xml:0
-msgid "Add headings in this field to fill the Table of Content"
-msgstr "在此欄位內加入標題，以自動填寫內容目錄"
+msgid "Add headings to fill the Table of Contents"
+msgstr "加入標題，以填寫目錄內容"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/others/embedded_components/plugins/toggle_block_plugin/toggle_block_plugin.js:0
+msgid "Add something inside this toggle"
+msgstr "在此切換按鈕內，加入一些內容"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/others/embedded_components/plugins/caption_plugin/caption_plugin.js:0
+msgid "Add/remove a caption"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Advanced mode"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.js:0
 msgid "Alert"
 msgstr "警示"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/align/align_plugin.js:0
+msgid "Align text"
+msgstr "對齊文字"
 
 #. module: html_editor
 #. odoo-javascript
@@ -209,7 +220,7 @@ msgstr "按輸入的網址讀取網頁時，發生錯誤。"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Angle"
 msgstr "角度"
 
@@ -224,8 +235,21 @@ msgstr "匿名"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 #: code:addons/html_editor/static/src/main/media/image_crop.xml:0
+#: code:addons/html_editor/static/src/main/media/image_description.xml:0
 msgid "Apply"
 msgstr "套用"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/color_ui_plugin.js:0
+msgid "Apply Background Color"
+msgstr "套用背景顏色"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/color_ui_plugin.js:0
+msgid "Apply Font Color"
+msgstr "套用字型顏色"
 
 #. module: html_editor
 #. odoo-javascript
@@ -251,6 +275,12 @@ msgstr "附件網址"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Autoconvert to relative link"
+msgstr "自動轉換為相對連結"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
 msgid "Autoplay"
 msgstr "自動播放"
@@ -263,52 +293,60 @@ msgstr "換回單一欄位結構。"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/color_plugin.js:0
-#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
-msgid "Background Color"
-msgstr "背景顏色"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner"
 msgstr "橫額"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Danger"
 msgstr "橫額-危險"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Info"
 msgstr "橫額-資訊"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Success"
 msgstr "橫額-成功"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Warning"
 msgstr "橫額-警告"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/signature_plugin.js:0
-msgid "Basic Bloc"
-msgstr "基本區塊"
+#: model:ir.model,name:html_editor.model_base
+msgid "Base"
+msgstr "計稅基數"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Big section heading"
 msgstr "大字章節標題。"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Border"
+msgstr "邊框"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Border Size"
+msgstr "邊框大小"
 
 #. module: html_editor
 #. odoo-javascript
@@ -336,23 +374,15 @@ msgstr "次要按鈕"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_translate_dialog.xml:0
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/video_plugin/video_selector_dialog/video_selector_dialog.xml:0
 msgid "Cancel"
 msgstr "取消"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_description.xml:0
-msgid "Change media description and tooltip"
-msgstr "更改媒體說明和工具提示"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
-msgid "ChatGPT"
-msgstr "ChatGPT"
+#: code:addons/html_editor/static/src/others/embedded_components/plugins/caption_plugin/caption_plugin.js:0
+msgid "Caption"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -362,15 +392,27 @@ msgstr "剔選清單"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/x2many_image_field.xml:0
+#: code:addons/html_editor/static/src/fields/x2many_field/x2many_image_field.xml:0
 msgid "Clear"
 msgstr "清除"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/backend/excalidraw/excalidraw.xml:0
-msgid "Click here to update the source"
-msgstr "按一下此處以更新來源"
+#: code:addons/html_editor/static/src/main/table/table_menu.js:0
+msgid "Clear content"
+msgstr "清除內容"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/image_plugin.js:0
+msgid "Click again to reset transformation"
+msgstr "再按一下可重設變換"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/movenode_plugin.js:0
+msgid "Click to select"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -382,8 +424,15 @@ msgstr "關閉"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
+#: code:addons/html_editor/static/src/others/embedded_components/backend/syntax_highlighting/syntax_highlighting.xml:0
 msgid "Code"
 msgstr "程式碼"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/others/embedded_components/backend/syntax_highlighting/code_toolbar.xml:0
+msgid "Code copied to the clipboard."
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -393,29 +442,9 @@ msgstr "程式碼檢視"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid ""
-"Collaborative Links require joining, while Embed Links directly show the "
-"drawing."
-msgstr "協作連結需要加入，而嵌入連結則直接顯示繪圖。"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
 msgid "Columnize"
 msgstr "分欄處理"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.js:0
-msgid "Comparison"
-msgstr "比較"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.js:0
-msgid "Content"
-msgstr "內容"
 
 #. module: html_editor
 #. odoo-javascript
@@ -449,21 +478,21 @@ msgstr "轉換為直欄"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "Copy Link"
-msgstr "複製連結"
+#: code:addons/html_editor/static/src/others/embedded_components/backend/syntax_highlighting/code_toolbar.xml:0
+msgid "Convert to paragraph"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/others/embedded_components/backend/syntax_highlighting/code_toolbar.xml:0
+msgid "Copy"
+msgstr "複製"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "Copy-paste your URL or embed code here"
-msgstr "複製粘貼您的網址或在這裡嵌入代碼"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.js:0
-msgid "Correct"
-msgstr "正確的"
+msgstr "複製並貼上你的網址，或在此處嵌入程式碼"
 
 #. module: html_editor
 #. odoo-javascript
@@ -490,6 +519,16 @@ msgid "Create an URL."
 msgstr "加入網址。"
 
 #. module: html_editor
+#: model:ir.model.fields,field_description:html_editor.field_html_editor_converter_test_sub__create_uid
+msgid "Created by"
+msgstr "建立人員"
+
+#. module: html_editor
+#: model:ir.model.fields,field_description:html_editor.field_html_editor_converter_test_sub__create_date
+msgid "Created on"
+msgstr "建立於"
+
+#. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_crop_plugin.js:0
 msgid "Crop image"
@@ -497,7 +536,7 @@ msgstr "裁剪圖片"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/color_selector.xml:0
+#: code:addons/html_editor/static/src/main/font/color_picker_gradient_tab.xml:0
 #: code:addons/html_editor/static/src/main/link/link_popover.js:0
 msgid "Custom"
 msgstr "自訂"
@@ -510,13 +549,7 @@ msgstr "Dailymotion"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Default"
-msgstr "預設"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/color_selector.xml:0
+#: code:addons/html_editor/static/src/main/font/color_picker_gradient_tab.xml:0
 msgid "Define a custom gradient"
 msgstr "設計自訂漸變色"
 
@@ -534,34 +567,57 @@ msgstr "說明"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Direct download"
+msgstr "直接下載"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 #: code:addons/html_editor/static/src/main/media/image_crop.xml:0
 #: code:addons/html_editor/static/src/main/media/image_description.xml:0
 #: code:addons/html_editor/static/src/main/media/media_dialog/media_dialog.xml:0
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
 msgid "Discard"
 msgstr "捨棄"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/image_selector.xml:0
-msgid ""
-"Discover a world of awesomeness in our copyright-free image haven. No legal "
-"drama, just nice images!"
-msgstr "在我們的無版權費圖片天堂，發現精彩世界！沒有法律糾紛，只有美麗動人的圖片！"
+#: model:ir.model.fields,field_description:html_editor.field_html_editor_converter_test_sub__display_name
+#: model:ir.model.fields,field_description:html_editor.field_html_field_history_mixin__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_attachment__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_http__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_contact__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_date__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_datetime__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_duration__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_float__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_html__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_image__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_integer__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_many2one__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_monetary__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_qweb__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_relative__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_selection__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_text__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_ui_view__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_websocket__display_name
+msgid "Display Name"
+msgstr "顯示名稱"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/file_plugin.js:0
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_media_dialog.js:0
 msgid "Documents"
 msgstr "文件"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_plugin.js:0
-msgid "Drawing Board"
-msgstr "繪圖板"
+#: code:addons/html_editor/static/src/main/movenode_plugin.js:0
+msgid "Drag to move"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -577,7 +633,8 @@ msgstr "錯誤：無法從媒體庫中獲取下載 URL。"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/x2many_image_field.xml:0
+#: code:addons/html_editor/static/src/fields/x2many_field/x2many_image_field.xml:0
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Edit"
 msgstr "編輯"
 
@@ -607,12 +664,6 @@ msgstr "插入 YouTube 影片"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/video_plugin/video_selector_dialog/video_selector_dialog.xml:0
-msgid "Embed a video"
-msgstr "嵌入影片"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_plugin.js:0
 msgid "Embed the image in the document."
 msgstr "將圖片嵌入至文件。"
@@ -637,39 +688,44 @@ msgstr "空白直欄"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.js:0
-msgid "Error"
-msgstr "錯誤"
+#: code:addons/html_editor/static/src/main/toolbar/toolbar_plugin.js:0
+msgid "Expand toolbar"
+msgstr "展開工具列"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Extend to the closest corner"
 msgstr "延伸到最近的角落"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Extend to the closest side"
 msgstr "延伸到最近的一側"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Extend to the farthest corner"
 msgstr "延伸到最遠的角落"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Extend to the farthest side"
 msgstr "延伸到最遠的一側"
 
 #. module: html_editor
+#: model:ir.model,name:html_editor.model_html_field_history_mixin
+msgid "Field html History"
+msgstr "欄位 HTML 歷史"
+
+#. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/file_plugin/file_plugin.js:0
-msgid "File"
-msgstr "文件"
+#: code:addons/html_editor/static/src/main/media/media_dialog/upload_progress_toast/upload_progress_toast.js:0
+msgid "File could not be saved"
+msgstr "未能儲存檔案"
 
 #. module: html_editor
 #. odoo-javascript
@@ -679,21 +735,9 @@ msgstr "文件已上傳"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.js:0
-msgid "Fill"
-msgstr "實色"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.js:0
-msgid "Fill + Rounded"
-msgstr "填充 + 圓角"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
-msgid "First color %"
-msgstr "第一顏色 %"
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Fill Color"
+msgstr "填充顏色"
 
 #. module: html_editor
 #. odoo-javascript
@@ -715,64 +759,20 @@ msgstr "垂直翻轉"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/color_plugin.js:0
-#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
-msgid "Font Color"
-msgstr "文字顏色"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/font_plugin.js:0
-msgid "Font size"
-msgstr "文字大小"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/font_plugin.js:0
-msgid "Font style"
-msgstr "字體樣式"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Format"
 msgstr "文字格式"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.js:0
-msgid "Friendly"
-msgstr "友善"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_prompt_dialog.xml:0
-msgid "Generate Text with AI"
-msgstr "使用 AI 人工智能生成文本"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
-msgid "Generate or transform content with AI."
-msgstr "利用人工智能生成或轉換內容。"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
-msgid "Generating"
-msgstr "正在生成"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
-msgid "Generating an alternative..."
-msgstr "正在生成替換版本⋯"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/color_selector.xml:0
+#: code:addons/html_editor/static/src/main/font/color_picker_gradient_tab.js:0
 msgid "Gradient"
 msgstr "漸變"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_http
+msgid "HTTP Routing"
+msgstr "HTTP 路由"
 
 #. module: html_editor
 #. odoo-javascript
@@ -854,9 +854,9 @@ msgstr "標題 6"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
-msgid "Hide Dailymotion logo"
-msgstr "隱藏Dailymotion標誌"
+#: code:addons/html_editor/static/src/others/embedded_components/plugins/toggle_block_plugin/toggle_block_plugin.js:0
+msgid "Hide Text under foldable toggles"
+msgstr "將文字隱藏在可摺疊切換按鈕之下"
 
 #. module: html_editor
 #. odoo-javascript
@@ -872,15 +872,9 @@ msgstr "隱藏播放器控件"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
-msgid "Hide sharing button"
-msgstr "隱藏分享按鈕"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/plugins/table_of_content_plugin/table_of_content_plugin.js:0
-msgid "Highlight the structure (headings) of this field"
-msgstr "突出顯示此欄位的結構（標題）"
+msgid "Highlight the structure (headings)"
+msgstr "突出結構（標題）"
 
 #. module: html_editor
 #. odoo-javascript
@@ -889,46 +883,56 @@ msgid "History"
 msgstr "過往訂單"
 
 #. module: html_editor
+#: model:ir.model.fields,field_description:html_editor.field_html_field_history_mixin__html_field_history
+msgid "History data"
+msgstr "歷史數據"
+
+#. module: html_editor
+#: model:ir.model.fields,field_description:html_editor.field_html_field_history_mixin__html_field_history_metadata
+msgid "History metadata"
+msgstr "歷史元數據"
+
+#. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/fields/html_field.js:0
 msgid "Html"
 msgstr "Html"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_plugin.js:0
-msgid "Icon"
-msgstr "圖示"
+#: model:ir.model,name:html_editor.model_html_editor_converter_test_sub
+msgid "Html Editor Converter Subtest"
+msgstr ""
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
-msgid "Icon size 1x"
-msgstr "圖示大小 1x"
+#: model:ir.model,name:html_editor.model_html_editor_converter_test
+msgid "Html Editor Converter Test"
+msgstr ""
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
-msgid "Icon size 2x"
-msgstr "圖示大小 2x"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
-msgid "Icon size 3x"
-msgstr "圖示大小 3x"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
-msgid "Icon size 4x"
-msgstr "圖示大小 4x"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
-msgid "Icon size 5x"
-msgstr "圖示大小 5x"
+#: model:ir.model.fields,field_description:html_editor.field_html_editor_converter_test_sub__id
+#: model:ir.model.fields,field_description:html_editor.field_html_field_history_mixin__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_attachment__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_http__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_contact__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_date__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_datetime__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_duration__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_float__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_html__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_image__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_integer__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_many2one__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_monetary__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_qweb__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_relative__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_selection__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_text__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_ui_view__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_websocket__id
+msgid "ID"
+msgstr "識別碼"
 
 #. module: html_editor
 #. odoo-javascript
@@ -941,12 +945,6 @@ msgstr "圖示"
 #: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
 msgid "Illustrations"
 msgstr "插圖"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_plugin.js:0
-msgid "Image"
-msgstr "圖片"
 
 #. module: html_editor
 #: model:ir.model.fields,field_description:html_editor.field_ir_attachment__image_height
@@ -965,41 +963,21 @@ msgstr "圖片寬度"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Image padding"
-msgstr "圖片填充"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/media_dialog.js:0
 msgid "Images"
 msgstr "圖片"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_prompt_dialog.xml:0
+#: code:addons/html_editor/static/src/main/link/link_popover.js:0
+msgid "Indicates the link is sponsored or paid content"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_translate_dialog.xml:0
 msgid "Insert"
 msgstr "插入"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "Insert Drawing"
-msgstr "插入繪圖"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/video_plugin/video_selector_dialog/video_selector_dialog.xml:0
-msgid "Insert Video"
-msgstr "插入影片"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/video_plugin/video_plugin.js:0
-msgid "Insert a Video"
-msgstr "插入影片"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1009,21 +987,21 @@ msgstr "插入危險橫額"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "Insert a drawing board"
-msgstr "插入繪圖板"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/others/dynamic_placeholder_plugin.js:0
 msgid "Insert a field"
 msgstr "插入欄位"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/core/dom_plugin.js:0
+#: code:addons/html_editor/static/src/main/separator_plugin.js:0
 msgid "Insert a horizontal rule separator"
 msgstr "插入水平分隔線。"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/banner_plugin.js:0
+msgid "Insert a monospace banner"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -1069,12 +1047,6 @@ msgstr "向上插入"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_plugin.js:0
-msgid "Insert an Excalidraw Board"
-msgstr "插入 Excalidraw 繪圖板"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Insert an info banner"
 msgstr "插入資訊橫額"
@@ -1093,6 +1065,12 @@ msgstr "插入圖片或圖示"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_plugin.js:0
+msgid "Insert image, icon or video"
+msgstr "插入圖片、圖示或影片"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_menu.js:0
 msgid "Insert left"
 msgstr "向左插入"
@@ -1105,9 +1083,15 @@ msgstr "向右插入"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/signature_plugin.js:0
-msgid "Insert your signature"
-msgstr "加入你的電子簽名。"
+#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
+msgid "Instagram"
+msgstr "Instagram"
+
+#. module: html_editor
+#. odoo-python
+#: code:addons/html_editor/models/ir_ui_view.py:0
+msgid "Invalid field value for %(field_name)s: %(value)s"
+msgstr "欄位值無效。%(field_name)s：%(value)s"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1122,14 +1106,18 @@ msgid "Large"
 msgstr "大"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.js:0
-msgid "Lengthen"
-msgstr "加長"
+#: model:ir.model.fields,field_description:html_editor.field_html_editor_converter_test_sub__write_uid
+msgid "Last Updated by"
+msgstr "最後更新者"
+
+#. module: html_editor
+#: model:ir.model.fields,field_description:html_editor.field_html_editor_converter_test_sub__write_date
+msgid "Last Updated on"
+msgstr "最後更新於"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Linear"
 msgstr "線性"
 
@@ -1142,6 +1130,12 @@ msgstr "連結"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Link Popover"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.js:0
 msgid "Link copied to clipboard."
 msgstr "連結已複製至剪貼簿。"
@@ -1150,8 +1144,7 @@ msgstr "連結已複製至剪貼簿。"
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid ""
-"Link preview is not available because %s, please check if your url is "
-"correct"
+"Link preview is not available because %s, please check if your url is correct"
 msgstr "無法預覽連結，原因是 %s，請檢查網址是否正確"
 
 #. module: html_editor
@@ -1168,8 +1161,7 @@ msgstr "載入更多⋯"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_prompt_dialog.xml:0
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_translate_dialog.xml:0
 #: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
 msgid "Loading..."
@@ -1177,9 +1169,21 @@ msgstr "載入中⋯"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.js:0
+msgid "Logout"
+msgstr "登出"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
 msgid "Loop"
 msgstr "循環"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
+msgid "MM:SS"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -1214,6 +1218,25 @@ msgstr "缺漏檔案"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/powerbox/powerbox_plugin.js:0
+msgid "Modules"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/banner_plugin.js:0
+msgid "Monospace"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/banner_plugin.js:0
+msgid "Monospace Banner"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/powerbox/search_powerbox_plugin.js:0
+#: code:addons/html_editor/static/src/others/embedded_components/backend/video/video.xml:0
 msgid "More options"
 msgstr "更多選項"
 
@@ -1248,6 +1271,11 @@ msgid "My Images"
 msgstr "我的圖片"
 
 #. module: html_editor
+#: model:ir.model.fields,field_description:html_editor.field_html_editor_converter_test_sub__name
+msgid "Name"
+msgstr "名稱"
+
+#. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_plugin.js:0
 msgid "Navigation"
@@ -1256,6 +1284,7 @@ msgstr "資訊存取"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.js:0
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "No URL specified"
 msgstr "未設定網址"
 
@@ -1296,6 +1325,12 @@ msgid "Numbered list"
 msgstr "編號清單"
 
 #. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_dialog/attachment_error.xml:0
+msgid "Ok"
+msgstr "確定"
+
+#. module: html_editor
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid "Oops, it looks like our AI is unreachable!"
@@ -1317,9 +1352,9 @@ msgstr "以新分頁開啟"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "Open in new Window"
-msgstr "在新視窗開啟"
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Open in new tab"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -1331,18 +1366,6 @@ msgstr "優化"
 #: model:ir.model.fields,field_description:html_editor.field_ir_attachment__original_id
 msgid "Original (unoptimized, unresized) attachment"
 msgstr "原始(未優化、未調整大小)附件"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.js:0
-msgid "Outline"
-msgstr "只有外框"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.js:0
-msgid "Outline + Rounded"
-msgstr "輪廓+圓角"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1364,25 +1387,24 @@ msgstr "貼上為網址"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.js:0
-msgid "Persuasive"
-msgstr "加強說服力"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Position X"
 msgstr "位置 X"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Position Y"
 msgstr "位置 Y"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+#: code:addons/html_editor/static/src/main/link/link_popover.js:0
+msgid "Prevents the new page from accessing the original window (security)"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "Preview"
 msgstr "預覽"
@@ -1395,15 +1417,24 @@ msgstr "預覽圖片"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.js:0
-msgid "Professional"
-msgstr "專業的"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/upload_progress_toast/upload_progress_toast.xml:0
 msgid "Progress bar"
 msgstr "進度列"
+
+#. module: html_editor
+#: model:ir.model.fields.selection,name:html_editor.selection__html_editor_converter_test__selection_str__c
+msgid "Qu'est-ce qu'il fout ce maudit pancake, tabernacle ?"
+msgstr "Qu'est-ce qu'il fout ce maudit pancake, tabernacle ?"
+
+#. module: html_editor
+#: model:ir.model.fields.selection,name:html_editor.selection__html_editor_converter_test__selection_str__a
+msgid "Qu'il n'est pas arrivé à Toronto"
+msgstr "Qu'il n'est pas arrivé à Toronto"
+
+#. module: html_editor
+#: model:ir.model.fields.selection,name:html_editor.selection__html_editor_converter_test__selection_str__b
+msgid "Qu'il était supposé arriver à Toronto"
+msgstr "Qu'il était supposé arriver à Toronto"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1412,22 +1443,114 @@ msgid "Quote"
 msgstr "引用"
 
 #. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb
+msgid "Qweb"
+msgstr "Qweb"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field
+msgid "Qweb Field"
+msgstr "Qweb 欄位"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_contact
+msgid "Qweb Field Contact"
+msgstr "Qweb 欄位聯絡人"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_date
+msgid "Qweb Field Date"
+msgstr "Qweb 日期欄位"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_datetime
+msgid "Qweb Field Datetime"
+msgstr "Qweb 日期時間欄位"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_duration
+msgid "Qweb Field Duration"
+msgstr "Qweb 期間欄位"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_float
+msgid "Qweb Field Float"
+msgstr "Qweb 浮點型欄位"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_html
+msgid "Qweb Field HTML"
+msgstr "Qweb HTML欄位"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_image
+msgid "Qweb Field Image"
+msgstr "Qweb 圖像欄位"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_integer
+msgid "Qweb Field Integer"
+msgstr "Qweb 整數欄位"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_many2one
+msgid "Qweb Field Many to One"
+msgstr "Qweb 多對一欄位"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_monetary
+msgid "Qweb Field Monetary"
+msgstr "Qweb 貨幣欄位"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_relative
+msgid "Qweb Field Relative"
+msgstr "Qweb 相關欄位"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_selection
+msgid "Qweb Field Selection"
+msgstr "Qweb 選擇欄位"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_text
+msgid "Qweb Field Text"
+msgstr "Qweb 文字欄位"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_qweb
+msgid "Qweb Field qweb"
+msgstr "Qweb qweb欄位"
+
+#. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Radial"
 msgstr "放射性"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/core/history_plugin.js:0
+msgid "Redo"
+msgstr "取消復原"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/others/embedded_components/backend/video/video.xml:0
+msgid "Remove"
+msgstr "移除"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Remove (DELETE)"
-msgstr "刪除（刪除）"
+msgid "Remove (DELETE) image"
+msgstr "移除圖片（刪除）"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/core/format_plugin.js:0
-msgid "Remove Format"
-msgstr "移除格式"
+msgid "Remove Format (Ctrl + Space)"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -1444,21 +1567,40 @@ msgstr "移除分欄"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.js:0
+msgid "Removes referrer information sent to the target site"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
+#: code:addons/html_editor/static/src/others/embedded_components/backend/video/video.xml:0
+msgid "Replace"
+msgstr "更換"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Replace URL with its title"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Replace URL with its title?"
 msgstr "顯示標題取代網址？"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_plugin.js:0
-msgid "Replace media"
-msgstr "更換媒體"
+#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
+msgid "Replace icon"
+msgstr "取代圖示"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/color_selector.xml:0
-msgid "Reset"
-msgstr "重設"
+#: code:addons/html_editor/static/src/main/media/media_plugin.js:0
+msgid "Replace media"
+msgstr "更換媒體"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1469,32 +1611,56 @@ msgstr "重設圖片"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_menu.js:0
-msgid "Reset Size"
-msgstr "重設大小"
+msgid "Reset column size"
+msgstr "重設欄寬"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/table/table_menu.js:0
+msgid "Reset row size"
+msgstr "重設行高"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/table/table_menu.js:0
+msgid "Reset table size"
+msgstr "重設表格大小"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
+msgid "Resize icon 1x"
+msgstr "調整圖示大小至 1 倍"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
+msgid "Resize icon 2x"
+msgstr "調整圖示大小至 2 倍"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
+msgid "Resize icon 3x"
+msgstr "調整圖示大小至 3 倍"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
+msgid "Resize icon 4x"
+msgstr "調整圖示大小至 4 倍"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
+msgid "Resize icon 5x"
+msgstr "調整圖示大小至 5 倍"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Resize Default"
-msgstr "調整至預設大小"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Resize Full"
-msgstr "調整大小為全螢幕"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Resize Half"
-msgstr "調整大小為一半"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Resize Quarter"
-msgstr "調整大小為四分之一"
+msgid "Resize image"
+msgstr "調整圖片大小"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1516,9 +1682,9 @@ msgstr "向右旋轉"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_description.xml:0
-msgid "Save"
-msgstr "儲存"
+#: code:addons/html_editor/static/src/main/media/media_dialog/search_media.xml:0
+msgid "Search"
+msgstr "搜尋"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1540,9 +1706,21 @@ msgstr "搜尋圖片"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
-msgid "Second color %"
-msgstr "第二顏色 %"
+#: code:addons/html_editor/static/src/main/media/media_dialog/image_selector.xml:0
+msgid "Search the web for royalty-free images"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/icon_color_plugin.js:0
+msgid "Select Background Color"
+msgstr "選擇背景顏色"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/icon_color_plugin.js:0
+msgid "Select Font Color"
+msgstr "選擇字型顏色"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1552,45 +1730,75 @@ msgstr "選取媒體"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_prompt_dialog.xml:0
-msgid "Send a message"
-msgstr "發送訊息"
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Select button shape"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/core/dom_plugin.js:0
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Select button size"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/font_family_plugin.js:0
+msgid "Select font family"
+msgstr "選擇字型"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/font_plugin.js:0
+msgid "Select font size"
+msgstr "選擇字型大小"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/font_plugin.js:0
+msgid "Select font style"
+msgstr "選擇字型樣式"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/core/format_plugin.js:0
+msgid "Selection has no format"
+msgstr "選取的內容並無格式"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/separator_plugin.js:0
 msgid "Separator"
 msgstr "分隔線"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Shape: Circle"
-msgstr "形狀：Circle"
+msgid "Set image padding"
+msgstr "設定圖片內間距"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Shape: Rounded"
-msgstr "形狀：圓角"
+msgid "Set shape: Circle"
+msgstr "設定形狀：圓形"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Shape: Shadow"
-msgstr "形狀：陰影"
+msgid "Set shape: Rounded"
+msgstr "設定形狀：圓角"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Shape: Thumbnail"
-msgstr "形狀：Thumbnail"
+msgid "Set shape: Shadow"
+msgstr "設定形狀：陰影"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.js:0
-msgid "Shorten"
-msgstr "縮短"
+#: code:addons/html_editor/static/src/main/media/image_plugin.js:0
+msgid "Set shape: Thumbnail"
+msgstr "設定形狀：縮圖"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1600,13 +1808,21 @@ msgstr "顯示最佳化圖片"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/signature_plugin.js:0
-msgid "Signature"
-msgstr "簽名"
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid ""
+"Showing all differences between the current version and the selected one "
+"updated by"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "Showing the document as it was on"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Size"
 msgstr "大小"
 
@@ -1623,25 +1839,6 @@ msgid "Small section heading"
 msgstr "細字章節標題。"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/color_selector.xml:0
-msgid "Solid"
-msgstr "實線"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "Something went wrong!"
-msgstr "出現了問題！"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid ""
-"Sorry, we could not find your drawing, please verify that the URL is valid."
-msgstr "抱歉，找不到你的繪圖，請檢查網址是否有效。"
-
-#. module: html_editor
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid "Sorry, we could not generate a response. Please try again later."
@@ -1655,9 +1852,21 @@ msgstr "對不起，你的提示太長了。請嘗試用較少字數表達。"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "Split view"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/star_plugin.js:0
 msgid "Stars"
 msgstr "星"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
+msgid "Start at"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -1687,13 +1896,20 @@ msgstr "切換文稿的行文方向。"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_ui_plugin.js:0
 msgid "Table"
-msgstr "餐桌"
+msgstr "表格"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/others/embedded_components/core/table_of_content/table_of_content.xml:0
 #: code:addons/html_editor/static/src/others/embedded_components/plugins/table_of_content_plugin/table_of_content_plugin.js:0
-msgid "Table Of Content"
-msgstr "目錄"
+msgid "Table of Contents"
+msgstr "內容目錄"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.js:0
+msgid "Tells search engines not to follow this link"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -1703,9 +1919,9 @@ msgstr "文字"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "The Excalidraw URL is not valid."
-msgstr "Excalidraw 網址無效。"
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Text Color"
+msgstr "文字顏色"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1718,6 +1934,30 @@ msgstr "網址看似無效。"
 #: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
 msgid "The URL seems valid."
 msgstr "網址看似有效。"
+
+#. module: html_editor
+#. odoo-python
+#: code:addons/html_editor/models/ir_qweb_fields.py:0
+msgid "The datetime %(value)s does not match the format %(format)s"
+msgstr "日期時間值 %(value)s 不符合 %(format)s 格式"
+
+#. module: html_editor
+#. odoo-python
+#: code:addons/html_editor/tools.py:0
+msgid ""
+"The document was already saved from someone with a different history for "
+"model \"%(model)s\", field \"%(field)s\" with id \"%(id)d\"."
+msgstr ""
+"文件已由其他有不同歷史記錄的人儲存。歷史記錄相異項目：模型 %(model)s、欄位 %"
+"(field)s 連識別碼 %(id)d。"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_dialog/attachment_error.xml:0
+msgid ""
+"The image could not be deleted because it is used in the\n"
+"                following pages or views:"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -1736,12 +1976,6 @@ msgstr "提供的網址無效"
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
 msgid "The provided url is not valid"
 msgstr "提供的網址無效"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_prompt_dialog.xml:0
-msgid "Thinking..."
-msgstr "思考中⋯"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1769,11 +2003,25 @@ msgstr "這個圖像是一個外部圖像"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "This is the current version, nothing to compare."
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_crop.js:0
 msgid ""
 "This type of image is not supported for cropping.<br/>If you want to crop "
 "it, please first download it from the original source and upload it in Odoo."
-msgstr "不支援裁剪這種類型的圖片。<br/>如果您想裁剪它，請先從原始來源下載並在Odoo中上傳。"
+msgstr ""
+"不支援裁剪這種類型的圖片。<br/>如果您想裁剪它，請先從原始來源下載並在Odoo中上"
+"傳。"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/list/list_plugin.js:0
+msgid "Toggle List"
+msgstr "切換列表"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1795,9 +2043,21 @@ msgstr "斜體"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/others/embedded_components/plugins/toggle_block_plugin/toggle_block_plugin.js:0
+msgid "Toggle list"
+msgstr "切換列表"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/core/format_plugin.js:0
 msgid "Toggle strikethrough"
 msgstr "刪除線"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/others/embedded_components/plugins/toggle_block_plugin/toggle_block_plugin.js:0
+msgid "Toggle title"
+msgstr "切換標題"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1825,22 +2085,16 @@ msgstr "轉換圖片（雙擊可重設）"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/language_selector.xml:0
-msgid "Translate"
-msgstr "翻譯"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_translate_dialog.xml:0
+#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_translate_plugin.js:0
 msgid "Translate with AI"
-msgstr ""
+msgstr "AI 翻譯"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_translate_dialog.xml:0
 msgid "Translating..."
-msgstr ""
+msgstr "翻譯中⋯"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1850,7 +2104,19 @@ msgstr "請嘗試使用其他關鍵字搜尋。"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/table/table_menu.js:0
+msgid "Turn into header"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/table/table_menu.js:0
+msgid "Turn into row"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Type"
 msgstr "類型"
 
@@ -1869,20 +2135,26 @@ msgstr "輸入網址"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "Type your link label"
-msgstr "輸入連結標籤"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "URL"
 msgstr "網址"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "Upload File"
-msgstr "上載檔案"
+#: code:addons/html_editor/static/src/main/link/link_plugin.js:0
+msgid "Unable to create a link on the current selection."
+msgstr "未能在目前的選取範圍上建立連結。"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/core/history_plugin.js:0
+msgid "Undo"
+msgstr "復原"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "Unified view"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -1893,7 +2165,6 @@ msgstr "上傳文件"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/file_plugin.js:0
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/file_plugin/file_plugin.js:0
 msgid "Upload a file"
 msgstr "上載檔案"
 
@@ -1904,12 +2175,6 @@ msgid "Upload an image"
 msgstr "上載圖片"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/image_selector.js:0
-msgid "Uploaded image's format is not supported. Try with: "
-msgstr "圖片格式未支援。請使用 "
-
-#. module: html_editor
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid "Uploaded image's format is not supported. Try with: %s"
@@ -1917,9 +2182,15 @@ msgstr "圖片格式未支援。請使用 %s"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/video_plugin/video_plugin.js:0
-msgid "Video Link"
-msgstr "影片連結"
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "Version date"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/table/table_align_plugin.js:0
+msgid "Vertical align table cells content"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -1929,13 +2200,14 @@ msgstr "影片代碼"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/video/video.xml:0
+#: code:addons/html_editor/static/src/others/embedded_components/core/video/readonly_video.xml:0
 msgid "Video player"
 msgstr "影片播放器"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/media_dialog.js:0
+#: code:addons/html_editor/static/src/fields/x2many_field/custom_media_dialog.js:0
+#: code:addons/html_editor/static/src/main/media/video_plugin.js:0
 msgid "Videos"
 msgstr "影片"
 
@@ -1944,6 +2216,29 @@ msgstr "影片"
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
 msgid "Videos are muted when autoplay is enabled"
 msgstr "啟用自動播放時，影片處於靜音狀態"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_ui_view
+msgid "View"
+msgstr "檢視"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "View Content"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "View comparison"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "View content"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -1967,9 +2262,31 @@ msgstr "咦？這裏感覺有點空。按右上角的按鈕上載吧！"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/others/embedded_components/plugins/caption_plugin/caption_plugin.js:0
+msgid "Write a caption..."
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Yes"
 msgstr "是"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_dialog/image_selector.js:0
+msgid ""
+"You can not replace a field by this image. If you want to use this image, "
+"first save it on your computer and then upload it here."
+msgstr ""
+"你不可使用此圖片取代欄位。如果想使用此圖片，請先將它儲存至你的電腦上，然後上"
+"載至此處。"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_dialog/image_selector.xml:0
+msgid "You can not use this image in a field"
+msgstr "你不可在欄位中使用此圖片"
 
 #. module: html_editor
 #. odoo-javascript
@@ -2002,13 +2319,7 @@ msgstr "您需要指定資料或 URL 以建立附件。"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
-msgid "Youku"
-msgstr "Youku"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/video/video.xml:0
+#: code:addons/html_editor/static/src/others/embedded_components/core/video/readonly_video.xml:0
 msgid "Your browser does not support iframe."
 msgstr "你的瀏覽器不支援 iframe。"
 
@@ -2038,33 +2349,21 @@ msgstr "縮小"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "all"
-msgstr "所有"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
-msgid "alternatives..."
-msgstr "替代選擇⋯"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "and"
 msgstr "及"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "database"
-msgstr "資料庫"
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
+msgid "deg"
+msgstr "度"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
-msgid "deg"
-msgstr "度"
+#: code:addons/html_editor/static/src/main/separator_plugin.js:0
+msgid "divider"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -2074,9 +2373,9 @@ msgstr "單據"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "e.g. https://link.excalidraw.com/..."
-msgstr "例：https://link.excalidraw.com/..."
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "e.g. https://www.odoo.com"
+msgstr "例如: https://www.odoo.com"
 
 #. module: html_editor
 #. odoo-javascript
@@ -2086,9 +2385,21 @@ msgstr "檔案"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "media-library"
-msgstr "media-library"
+#: code:addons/html_editor/static/src/main/separator_plugin.js:0
+msgid "line"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "noopener"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "on"
+msgstr "於"
 
 #. module: html_editor
 #. odoo-javascript
@@ -2098,24 +2409,101 @@ msgstr "或"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "px"
+msgstr "px"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/font_plugin.js:0
+msgid "title"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "videos"
 msgstr "影片"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.urlDescription}}"
-msgstr "{{state.urlDescription}}"
+#: model:ir.model,name:html_editor.model_ir_websocket
+msgid "websocket message handling"
+msgstr "WebSocket 訊息處理"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.urlTitle}}"
-msgstr "{{state.urlTitle}}"
+#: code:addons/html_editor/static/src/main/table/table_picker.xml:0
+msgid "x"
+msgstr ""
 
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.url}}"
-msgstr "{{state.url}}"
+#~ msgid "Remove Format"
+#~ msgstr "移除格式"
+
+#~ msgid "Copy Link"
+#~ msgstr "複製連結"
+
+#~ msgid "Shape"
+#~ msgstr "圖形"
+
+#~ msgid "Hide Dailymotion logo"
+#~ msgstr "隱藏Dailymotion標誌"
+
+#~ msgid "Hide sharing button"
+#~ msgstr "隱藏分享按鈕"
+
+#~ msgid "Youku"
+#~ msgstr "Youku"
+
+#~ msgid "Error"
+#~ msgstr "錯誤"
+
+#~ msgid "Open in new window"
+#~ msgstr "在新頁面中打開"
+
+#~ msgid "Basic Bloc"
+#~ msgstr "基本區塊"
+
+#~ msgid "Comparison"
+#~ msgstr "比較"
+
+#~ msgid "Content"
+#~ msgstr "內容"
+
+#~ msgid ""
+#~ "Discover a world of awesomeness in our copyright-free image haven. No "
+#~ "legal drama, just nice images!"
+#~ msgstr ""
+#~ "在我們的無版權費圖片天堂，發現精彩世界！沒有法律糾紛，只有美麗動人的圖片！"
+
+#~ msgid "Embed a video"
+#~ msgstr "嵌入影片"
+
+#~ msgid "Icon"
+#~ msgstr "圖示"
+
+#~ msgid "Image"
+#~ msgstr "圖片"
+
+#~ msgid "Image description"
+#~ msgstr "圖片描述"
+
+#~ msgid "Insert Video"
+#~ msgstr "插入影片"
+
+#~ msgid "Insert a Video"
+#~ msgstr "插入影片"
+
+#~ msgid "Insert your signature"
+#~ msgstr "加入你的電子簽名。"
+
+#~ msgid "Paste or type your URL"
+#~ msgstr "貼上或輸入網址"
+
+#~ msgid "Save"
+#~ msgstr "儲存"
+
+#~ msgid "Signature"
+#~ msgstr "簽名"
+
+#~ msgid "Video Link"
+#~ msgstr "影片連結"

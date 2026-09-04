@@ -6,8 +6,9 @@ import os
 import re
 import shutil
 
-import odoo
-from odoo.tools.config import config
+import odoo.modules
+from odoo import api
+from .config import config
 
 VERSION = 1
 DEFAULT_EXCLUDE = [
@@ -133,11 +134,14 @@ class Cloc(object):
         if not exclude:
             exclude = set()
         for i in filter(None, exclude_list):
+            assert '..' not in i, (
+                f"Invalid exclusion path '{i}': '..' is not allowed. Use a normalized path."
+            )
             exclude.update(str(p) for p in pathlib.Path(path).glob(i))
 
         module_name = os.path.basename(path)
         self.book(module_name)
-        for root, dirs, files in os.walk(path):
+        for root, _dirs, files in os.walk(path):
             for file_name in files:
                 file_path = os.path.join(root, file_name)
 
@@ -160,8 +164,10 @@ class Cloc(object):
 
     def count_modules(self, env):
         # Exclude standard addons paths
-        exclude_heuristic = [odoo.modules.get_module_path(m, display_warning=False) for m in STANDARD_MODULES]
-        exclude_path = set([os.path.dirname(os.path.realpath(m)) for m in exclude_heuristic if m])
+        exclude_path = {
+            m.addons_path for name in STANDARD_MODULES
+            if (m := odoo.modules.Manifest.for_addon(name, display_warning=False))
+        }
 
         domain = [('state', '=', 'installed')]
         # if base_import_module is present
@@ -170,11 +176,9 @@ class Cloc(object):
         module_list = env['ir.module.module'].search(domain).mapped('name')
 
         for module_name in module_list:
-            module_path = os.path.realpath(odoo.modules.get_module_path(module_name))
-            if module_path:
-                if any(module_path.startswith(i) for i in exclude_path):
-                    continue
-                self.count_path(module_path)
+            manifest = odoo.modules.Manifest.for_addon(module_name)
+            if manifest and manifest.addons_path not in exclude_path:
+                self.count_path(manifest.path)
 
     def count_customization(self, env):
         imported_module_sa = ""
@@ -287,10 +291,10 @@ class Cloc(object):
         self.count_customization(env)
 
     def count_database(self, database):
-        registry = odoo.modules.registry.Registry(config['db_name'])
+        registry = odoo.modules.registry.Registry(database)
         with registry.cursor() as cr:
-            uid = odoo.SUPERUSER_ID
-            env = odoo.api.Environment(cr, uid, {})
+            uid = api.SUPERUSER_ID
+            env = api.Environment(cr, uid, {})
             self.count_env(env)
 
     #------------------------------------------------------

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, fields, api
+from odoo import models, fields
 
-class test_model(models.Model):
+
+class Test_ConverterTest_Model(models.Model):
     _name = 'test_converter.test_model'
     _description = 'Test Converter Model'
 
@@ -11,7 +12,7 @@ class test_model(models.Model):
     integer = fields.Integer()
     float = fields.Float()
     numeric = fields.Float(digits=(16, 2))
-    many2one = fields.Many2one('test_converter.test_model.sub', group_expand='_gbf_m2o')
+    many2one = fields.Many2one('test_converter.test_model.sub')
     binary = fields.Binary(attachment=False)
     date = fields.Date()
     datetime = fields.Datetime()
@@ -25,22 +26,14 @@ class test_model(models.Model):
     html = fields.Html()
     text = fields.Text()
 
-    # `base` module does not contains any model that implement the functionality
-    # `group_expand`; test this feature here...
 
-    @api.model
-    def _gbf_m2o(self, subs, domain):
-        sub_ids = subs.sudo()._search([], order=subs._order)
-        return subs.browse(sub_ids)
-
-
-class test_model_sub(models.Model):
+class Test_ConverterTest_ModelSub(models.Model):
     _name = 'test_converter.test_model.sub'
     _description = 'Subtraction For Test Model & Test Converter'
     name = fields.Char()
 
 
-class test_model_monetary(models.Model):
+class Test_ConverterMonetary(models.Model):
     _name = 'test_converter.monetary'
     _description = 'Test Converter Monetary'
     value = fields.Float(digits=(16, 55))

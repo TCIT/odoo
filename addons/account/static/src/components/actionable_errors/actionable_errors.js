@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 import { Component } from "@odoo/owl";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
@@ -14,6 +12,7 @@ export class ActionableErrors extends Component {
     setup() {
         super.setup();
         this.actionService = useService("action");
+        this.orm = useService("orm");
     }
 
     get errorData() {
@@ -23,10 +22,16 @@ export class ActionableErrors extends Component {
     async handleOnClick(errorData){
         if (errorData.action?.view_mode) {
             // view_mode is not handled JS side
-            errorData.action['views'] = [[false, errorData.action.view_mode]];
+            errorData.action['views'] = errorData.action.view_mode.split(',').map(mode => [false, mode]);
             delete errorData.action['view_mode'];
         }
-        this.env.model.action.doAction(errorData.action);
+        if (errorData.action_call) {
+            const [model, method, args] = errorData.action_call;
+            await this.orm.call(model, method, [args]);
+            this.env.model.action.doAction("soft_reload");
+        } else {
+            this.env.model.action.doAction(errorData.action);
+        }
     }
 
     get sortedActionableErrors() {

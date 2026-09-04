@@ -4,7 +4,6 @@ from odoo.exceptions import UserError
 
 
 class AccountTaxGroup(models.Model):
-
     _inherit = 'account.tax.group'
 
     # values from http://www.afip.gob.ar/fe/documentos/otros_Tributos.xlsx
@@ -18,7 +17,7 @@ class AccountTaxGroup(models.Model):
         ('08', '08 - Municipal Taxes Perceptions'),
         ('09', '09 - Other Perceptions'),
         ('99', '99 - Others'),
-    ], string='Tribute AFIP Code', index=True, readonly=True)
+    ], string='Tribute ARCA Code', index=True, readonly=True)
     # values from http://www.afip.gob.ar/fe/documentos/OperacionCondicionIVA.xls
     l10n_ar_vat_afip_code = fields.Selection([
         ('0', 'Not Applicable'),
@@ -30,7 +29,7 @@ class AccountTaxGroup(models.Model):
         ('6', '27%'),
         ('8', '5%'),
         ('9', '2,5%'),
-    ], string='VAT AFIP Code', index=True, readonly=True)
+    ], string='VAT ARCA Code', index=True, readonly=True)
 
     @api.ondelete(at_uninstall=False)
     def check_uninstall_required(self):

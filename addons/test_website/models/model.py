@@ -28,6 +28,7 @@ class TestModel(models.Model):
         sanitize_overridable=True,
         sanitize_attributes=False,
         sanitize_form=False,
+        default="""<div class="o_test_website_description"><p>A simple website description content.</p></div>""",
     )
     tag_id = fields.Many2one('test.tag')
 
@@ -46,8 +47,12 @@ class TestModel(models.Model):
             'order': 'name asc, id desc',
         }
 
+    def open_website_url(self):
+        self.ensure_one()
+        return self.env['website'].get_client_action(f'/test_model/{self.id}')
 
-class TestSubModel(models.Model):
+
+class TestSubmodel(models.Model):
     _name = 'test.submodel'
     _description = 'Website Submodel Test'
 
@@ -79,7 +84,7 @@ class TestModelMultiWebsite(models.Model):
 
 
 class TestModelExposed(models.Model):
-    _name = "test.model.exposed"
+    _name = 'test.model.exposed'
     _inherit = [
         'website.seo.metadata',
         'website.published.mixin',

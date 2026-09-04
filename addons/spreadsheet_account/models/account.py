@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import date
@@ -6,11 +5,11 @@ import calendar
 from dateutil.relativedelta import relativedelta
 
 from odoo import models, api, _
-from odoo.osv import expression
+from odoo.fields import Domain
 from odoo.tools import date_utils
 
 
-class AccountMove(models.Model):
+class AccountAccount(models.Model):
     _inherit = "account.account"
 
     @api.model
@@ -43,55 +42,55 @@ class AccountMove(models.Model):
         return start, end
 
     def _build_spreadsheet_formula_domain(self, formula_params, default_accounts=False):
-        codes = [code for code in formula_params["codes"] if code]
-
-        default_domain = expression.FALSE_DOMAIN
-        if not codes:
-            if not default_accounts:
-                return default_domain
-            default_domain = [('account_type', 'in', ['liability_payable', 'asset_receivable'])]
-
-        company_id = formula_params["company_id"] or self.env.company.id
+        company_id = formula_params.get("company_id") or self.env.company.id
         company = self.env["res.company"].browse(company_id)
-        start, end = self._get_date_period_boundaries(
-            formula_params["date_range"], company
-        )
-        balance_domain = [
+        start, end = self._get_date_period_boundaries(formula_params["date_range"], company)
+
+        balance_domain = Domain([
             ("account_id.include_initial_balance", "=", True),
             ("date", "<=", end),
-        ]
-        pnl_domain = [
+        ])
+        pnl_domain = Domain([
             ("account_id.include_initial_balance", "=", False),
             ("date", ">=", start),
             ("date", "<=", end),
-        ]
-        # It is more optimized to (like) search for code directly in account.account than in account_move_line
-        code_domain = expression.OR(
-            [
-                ("code", "=like", f"{code}%"),
-            ]
-            for code in codes
-        )
-        account_domain = expression.OR([code_domain, default_domain])
-        account_ids = self.env["account.account"].with_company(company_id).search(account_domain).ids
-        code_domain = [("account_id", "in", account_ids)]
-        period_domain = expression.OR([balance_domain, pnl_domain])
-        domain = expression.AND([code_domain, period_domain, [("company_id", "=", company_id)]])
-        if formula_params["include_unposted"]:
-            domain = expression.AND(
-                [domain, [("move_id.state", "!=", "cancel")]]
+        ])
+        period_domain = balance_domain | pnl_domain
+
+        # Determine account domain based on tags or codes
+        if 'account_tag_ids' in formula_params:
+            tag_ids = [int(tag_id) for tag_id in formula_params["account_tag_ids"]]
+            account_id_domain = Domain('account_id.tag_ids', 'in', tag_ids) if tag_ids else Domain.FALSE
+        elif 'codes' in formula_params:
+            codes = [code for code in formula_params.get("codes", []) if code]
+            default_domain = Domain.FALSE
+            if not codes:
+                if not default_accounts:
+                    return default_domain
+                default_domain = Domain('account_type', 'in', ['liability_payable', 'asset_receivable'])
+
+            # It is more optimized to (like) search for code directly in account.account than in account_move_line
+            code_domain = Domain.OR(
+                Domain("code", "=like", f"{code}%")
+                for code in codes
             )
+            account_domain = code_domain | default_domain
+            account_ids = self.env["account.account"].with_company(company_id).search(account_domain).ids
+            account_id_domain = [("account_id", "in", account_ids)]
         else:
-            domain = expression.AND(
-                [domain, [("move_id.state", "=", "posted")]]
-            )
+            account_id_domain = Domain.FALSE
+
+        posted_domain = [("move_id.state", "!=", "cancel")] if formula_params.get("include_unposted") else [("move_id.state", "=", "posted")]
+
+        domain = Domain.AND([account_id_domain, period_domain, [("company_id", "=", company_id)], posted_domain])
+
         partner_ids = [int(partner_id) for partner_id in formula_params.get('partner_ids', []) if partner_id]
         if partner_ids:
-            domain = expression.AND(
-                [domain, [("partner_id", "in", partner_ids)]]
-            )
+            domain &= Domain("partner_id", "in", partner_ids)
+
         return domain
 
+    @api.readonly
     @api.model
     def spreadsheet_move_line_action(self, args):
         domain = self._build_spreadsheet_formula_domain(args, default_accounts=True)
@@ -105,19 +104,21 @@ class AccountMove(models.Model):
             "name": _("Cell Audit"),
         }
 
+    @api.readonly
     @api.model
     def spreadsheet_fetch_debit_credit(self, args_list):
         """Fetch data for ODOO.CREDIT, ODOO.DEBIT and ODOO.BALANCE formulas
-        The input list looks like this:
-        [{
-            date_range: {
-                range_type: "year"
-                year: int
-            },
-            company_id: int
-            codes: str[]
-            include_unposted: bool
-        }]
+        The input list looks like this::
+
+            [{
+                date_range: {
+                    range_type: "year"
+                    year: int
+                },
+                company_id: int
+                codes: str[]
+                include_unposted: bool
+            }]
         """
         results = []
         for args in args_list:
@@ -129,19 +130,21 @@ class AccountMove(models.Model):
 
         return results
 
+    @api.readonly
     @api.model
     def spreadsheet_fetch_residual_amount(self, args_list):
         """Fetch data for ODOO.RESUDUAL formulas
-        The input list looks like this:
-        [{
-            date_range: {
-                range_type: "year"
-                year: int
-            },
-            company_id: int
-            codes: str[]
-            include_unposted: bool
-        }]
+        The input list looks like this::
+
+            [{
+                date_range: {
+                    range_type: "year"
+                    year: int
+                },
+                company_id: int
+                codes: str[]
+                include_unposted: bool
+            }]
         """
         results = []
         for args in args_list:
@@ -156,17 +159,18 @@ class AccountMove(models.Model):
     @api.model
     def spreadsheet_fetch_partner_balance(self, args_list):
         """Fetch data for ODOO.PARTNER.BALANCE formulas
-        The input list looks like this:
-        [{
-            date_range: {
-                range_type: "year"
-                year: int
-            },
-            company_id: int
-            codes: str[]
-            include_unposted: bool
-            partner_ids: int[]
-        }]
+        The input list looks like this::
+
+            [{
+                date_range: {
+                    range_type: "year"
+                    year: int
+                },
+                company_id: int
+                codes: str[]
+                include_unposted: bool
+                partner_ids: int[]
+            }]
         """
         results = []
         for args in args_list:
@@ -195,3 +199,33 @@ class AccountMove(models.Model):
         )
         mapped = dict(data)
         return [mapped.get(account_type, []) for account_type in account_types]
+
+    @api.model
+    def spreadsheet_fetch_balance_tag(self, args_list):
+        """Fetch data for ODOO.BALANCE.TAG formulas
+        The input list looks like this::
+
+            [{
+                account_tag_ids: str[]
+                date_range: {
+                    range_type: "year"
+                    year: int
+                },
+                company_id: int
+                include_unposted: bool
+            }]
+        """
+        results = []
+        for args in args_list:
+            account_tag_ids = [tag_id for tag_id in args.get('account_tag_ids', []) if tag_id]
+            if not account_tag_ids:
+                results.append({'balance': 0})
+                continue
+
+            company_id = args["company_id"] or self.env.company.id
+            domain = self._build_spreadsheet_formula_domain(args)
+            MoveLines = self.env["account.move.line"].with_company(company_id)
+            [(balance,)] = MoveLines._read_group(domain, aggregates=['balance:sum'])
+            results.append({'balance': balance or 0.0})
+
+        return results

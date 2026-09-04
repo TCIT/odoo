@@ -2,7 +2,6 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { EvaluationError, helpers } from "@odoo/o-spreadsheet";
-import { sprintf } from "@web/core/utils/strings";
 
 const { isDateOrDatetimeField } = helpers;
 
@@ -75,7 +74,7 @@ export function parseGroupField(allFields, groupFieldString) {
     fieldName = isPositional ? fieldName.substring(1) : fieldName;
     const field = allFields[fieldName];
     if (field === undefined) {
-        throw new EvaluationError(sprintf(_t("Field %s does not exist"), fieldName));
+        throw new EvaluationError(_t("Field %s does not exist", fieldName));
     }
     if (isDateOrDatetimeField(field)) {
         granularity = granularity || "month";
@@ -91,4 +90,15 @@ export function parseGroupField(allFields, groupFieldString) {
 
 export function domainHasNoRecordAtThisPosition(domain) {
     return domain.some((node) => node.value === "NO_RECORD_AT_THIS_POSITION");
+}
+
+export async function getRelationalFieldDefinition(resModel, fieldName, fieldService) {
+    const { modelsInfo, names } = await fieldService.loadPath(resModel, fieldName);
+    return {
+        ...modelsInfo.at(-1).fieldDefs[fieldName.split(".").at(-1)],
+        string: names
+            .map((name, i) => modelsInfo[i].fieldDefs[name]?.string || _t("Unnamed Field"))
+            .join(" > "),
+        name: fieldName,
+    };
 }

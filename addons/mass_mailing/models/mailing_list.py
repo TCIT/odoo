@@ -7,7 +7,7 @@ from odoo import _, api, Command, fields, models, tools
 from odoo.exceptions import UserError
 
 
-class MassMailingList(models.Model):
+class MailingList(models.Model):
     """Model of a contact list. """
     _name = 'mailing.list'
     _order = 'name'
@@ -120,7 +120,7 @@ class MassMailingList(models.Model):
             if mass_mailings > 0:
                 raise UserError(_("At least one of the mailing list you are trying to archive is used in an ongoing mailing campaign."))
 
-        return super(MassMailingList, self).write(vals)
+        return super().write(vals)
 
     @api.depends('contact_count')
     def _compute_display_name(self):
@@ -263,9 +263,6 @@ class MassMailingList(models.Model):
         if archive:
             (src_lists - self).action_archive()
 
-    def close_dialog(self):
-        return {'type': 'ir.actions.act_window_close'}
-
     # ------------------------------------------------------
     # SUBSCRIPTION MANAGEMENT
     # ------------------------------------------------------
@@ -344,7 +341,7 @@ class MassMailingList(models.Model):
                     _('%(contact_name)s subscribed to the following mailing list(s)', contact_name=contact.display_name),
                     Markup().join(Markup('<li>%s</li>') % name for name in updated.mapped('name')),
                 )
-            contact.with_context(mail_create_nosubscribe=True).message_post(
+            contact.with_context(mail_post_autofollow_author_skip=True).message_post(
                 body=body,
                 subtype_id=self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
             )

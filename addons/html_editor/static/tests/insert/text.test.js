@@ -4,6 +4,7 @@ import { deleteBackward, insertText } from "../_helpers/user_actions";
 import { getContent } from "../_helpers/selection";
 import { execCommand } from "../_helpers/userCommands";
 import { press } from "@odoo/hoot-dom";
+import { unformat } from "../_helpers/format";
 
 describe("collapsed selection", () => {
     test("should insert a char into an empty span without removing the zws", async () => {
@@ -53,19 +54,58 @@ describe("collapsed selection", () => {
                 await press(["ctrl", "a"]);
                 await insertText(editor, "x");
             },
-            contentAfter: "<h1>x[]<br></h1>",
+            contentAfter: "<h1>x[]</h1>",
+        });
+    });
+    test("should insert a char into an empty p and remove the br", async () => {
+        await testEditor({
+            contentBefore: "<p>[]<br></p>",
+            stepFunction: async (editor) => {
+                await insertText(editor, "x");
+            },
+            contentAfter: "<p>x[]</p>",
+        });
+    });
+    test("should insert a char into an p with br and remove the unecessary br", async () => {
+        await testEditor({
+            contentBefore: "<p>abc<br>[]<br></p>",
+            stepFunction: async (editor) => {
+                await insertText(editor, "x");
+            },
+            contentAfter: "<p>abc<br>x[]</p>",
+        });
+    });
+
+    test("should insert text formatted empty node", async () => {
+        await testEditor({
+            contentBefore: unformat(`
+                <div class="o-paragraph">
+                    <strong data-oe-zws-empty-inline="">[]\ufeff</strong>
+                </div>
+            `),
+            stepFunction: async (editor) => {
+                await insertText(editor, "abc");
+            },
+            contentAfterEdit: unformat(`
+                <div class="o-paragraph">
+                    <strong>abc[]</strong>
+                </div>
+            `),
         });
     });
 });
 
 describe("not collapsed selection", () => {
-    test("should insert a character in a fully selected font in a heading, preserving its style", async () => {
+    test("should insert a character in a fully selected font in a heading, preserving its style (1)", async () => {
         await testEditor({
             contentBefore:
                 '<h1><font style="background-color: red;">[abc]</font><br></h1><p>def</p>',
             stepFunction: async (editor) => await insertText(editor, "g"),
             contentAfter: '<h1><font style="background-color: red;">g[]</font><br></h1><p>def</p>',
         });
+    });
+
+    test("should insert a character in a fully selected font in a heading, preserving its style (2)", async () => {
         await testEditor({
             contentBefore:
                 '<h1><font style="background-color: red;">[abc]</font><br></h1><p>def</p>',

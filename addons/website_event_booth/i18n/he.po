@@ -1,33 +1,29 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* website_event_booth
-# 
-# Translators:
-# yael terner, 2024
-# Martin Trigaux, 2024
-# ZVI BLONDER <ZVIBLONDER@gmail.com>, 2024
-# Yihya Hugirat <hugirat@gmail.com>, 2024
-# Lilach Gilliam <lilach.gilliam@gmail.com>, 2024
-# Ha Ketem <haketem@gmail.com>, 2024
-# 
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Ha Ketem <haketem@gmail.com>, 2024\n"
-"Language-Team: Hebrew (https://app.transifex.com/odoo/teams/41243/he/)\n"
+"POT-Creation-Date: 2026-02-27 18:38+0000\n"
+"PO-Revision-Date: 2026-08-02 18:36+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Hebrew <https://translate.odoo.com/projects/odoo-19/"
+"website_event_booth/he/>\n"
+"Language: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: he\n"
-"Plural-Forms: nplurals=3; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: 2;\n"
+"Plural-Forms: nplurals=4; plural=(n == 1) ? 0 : ((n == 2) ? 1 : ((n > 10 && "
+"n % 10 == 0) ? 2 : 3));\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
 msgid ""
-"<i class=\"fa fa-exclamation-triangle me-2\" role=\"img\" aria-label=\"Error\" title=\"Error\"/>\n"
+"<i class=\"fa fa-exclamation-triangle me-2\" role=\"img\" aria-"
+"label=\"Error\" title=\"Error\"/>\n"
 "                    <span class=\"o_wbooth_registration_error_message\"/>"
 msgstr ""
 
@@ -35,7 +31,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid ""
 "<i class=\"fa fa-exclamation-triangle\"/>\n"
-"                                        <span>Sorry, several booths are now sold out. Please change your choices before validating again.</span>"
+"                                        <span>Sorry, several booths are now "
+"sold out. Please change your choices before validating again.</span>"
 msgstr ""
 
 #. module: website_event_booth
@@ -51,7 +48,7 @@ msgstr ""
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid "<span class=\"text-nowrap\">Sold Out</span>"
-msgstr "<span class=\"text-nowrap\">אזל</span>"
+msgstr ""
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
@@ -61,7 +58,7 @@ msgstr ""
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
 msgid "<span>Book my Booths</span>"
-msgstr "<span>הזמנת הדוכנים שלי</span>"
+msgstr ""
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_order_progress
@@ -73,7 +70,7 @@ msgstr ""
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_order_progress
 msgid "<span>Confirmed</span>"
-msgstr "<span>מאושר</span>"
+msgstr ""
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
@@ -81,8 +78,6 @@ msgid ""
 "<span>Email</span>\n"
 "                            <span> *</span>"
 msgstr ""
-"<span>מייל</span>\n"
-"                            <span> *</span>"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
@@ -90,39 +85,46 @@ msgid ""
 "<span>Name</span>\n"
 "                            <span> *</span>"
 msgstr ""
-"<span>שם</span>\n"
-"                            <span> *</span>"
+
+#. module: website_event_booth
+#. odoo-python
+#: code:addons/website_event_booth/models/event_event.py:0
+msgid "Become exhibitor"
+msgstr ""
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_type_view_form
 msgid "Booth Menu Item"
-msgstr "פריט תפריט דוכן"
+msgstr ""
 
 #. module: website_event_booth
 #: model:ir.model.fields,field_description:website_event_booth.field_event_event__booth_menu
 msgid "Booth Register"
-msgstr "רישום דוכן"
+msgstr ""
 
 #. module: website_event_booth
 #. odoo-javascript
 #: code:addons/website_event_booth/static/src/xml/event_booth_registration_templates.xml:0
 msgid "Booth Registration completed!"
-msgstr "רישום דוכן הסתיים!"
+msgstr ""
 
 #. module: website_event_booth
 #. odoo-javascript
-#: code:addons/website_event_booth/static/src/js/booth_register.js:0
+#: code:addons/website_event_booth/static/src/interactions/booth_registration.js:0
 msgid "Booth registration failed."
 msgstr ""
 
 #. module: website_event_booth
 #: model:ir.model.fields,field_description:website_event_booth.field_event_type__booth_menu
 msgid "Booths on Website"
-msgstr "דוכנים באתר"
+msgstr ""
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
-msgid "Check our"
+msgid ""
+"Check our <a class=\"o_translate_inline\" href=\"/event\" title=\"List of "
+"Future Events\" aria-label=\"Link to list of future events\">list of future "
+"events</a>."
 msgstr ""
 
 #. module: website_event_booth
@@ -133,7 +135,7 @@ msgstr ""
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
 msgid "Contact Details"
-msgstr "פרטי איש קשר"
+msgstr ""
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_order_progress
@@ -145,22 +147,29 @@ msgstr ""
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid "Contact Us"
-msgstr "צור קשר"
+msgstr ""
+
+#. module: website_event_booth
+#: model:ir.model.fields,field_description:website_event_booth.field_event_event__display_name
+#: model:ir.model.fields,field_description:website_event_booth.field_event_type__display_name
+#: model:ir.model.fields,field_description:website_event_booth.field_website_event_menu__display_name
+msgid "Display Name"
+msgstr ""
 
 #. module: website_event_booth
 #: model:ir.model,name:website_event_booth.model_event_event
 msgid "Event"
-msgstr "אירוע"
+msgstr ""
 
 #. module: website_event_booth
 #: model:ir.model.fields.selection,name:website_event_booth.selection__website_event_menu__menu_type__booth
 msgid "Event Booth Menus"
-msgstr "תפריטי דוכן אירוע"
+msgstr ""
 
 #. module: website_event_booth
 #: model:ir.model.fields,field_description:website_event_booth.field_event_event__booth_menu_ids
 msgid "Event Booths Menus"
-msgstr "תפריטי דוכני אירוע"
+msgstr ""
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
@@ -170,25 +179,36 @@ msgstr ""
 #. module: website_event_booth
 #: model:ir.model,name:website_event_booth.model_event_type
 msgid "Event Template"
-msgstr "תבנית אירוע"
+msgstr ""
 
 #. module: website_event_booth
 #: model:ir.model.fields,field_description:website_event_booth.field_event_event__exhibition_map
 msgid "Exhibition Map"
-msgstr "מפת אולם"
+msgstr ""
 
 #. module: website_event_booth
-#. odoo-python
-#: code:addons/website_event_booth/models/event_event.py:0
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
 msgid "Get A Booth"
-msgstr "מציאת דוכן"
+msgstr ""
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
 msgid "Go back"
-msgstr "חזור"
+msgstr ""
+
+#. module: website_event_booth
+#: model:ir.model.fields,field_description:website_event_booth.field_event_event__id
+#: model:ir.model.fields,field_description:website_event_booth.field_event_type__id
+#: model:ir.model.fields,field_description:website_event_booth.field_website_event_menu__id
+msgid "ID"
+msgstr ""
+
+#. module: website_event_booth
+#. odoo-javascript
+#: code:addons/website_event_booth/static/src/interactions/booth_registration.js:0
+msgid "It looks like your email is already in our system."
+msgstr ""
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
@@ -196,33 +216,28 @@ msgid "It's no longer possible to book a booth."
 msgstr ""
 
 #. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
-msgid "Link to list of future events"
-msgstr ""
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
-msgid "List of Future Events"
-msgstr ""
-
-#. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid "Location"
-msgstr "מיקום"
+msgstr ""
 
 #. module: website_event_booth
 #: model:ir.model.fields,field_description:website_event_booth.field_website_event_menu__menu_type
 msgid "Menu Type"
-msgstr "סוג תפריט"
+msgstr ""
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
 msgid "Phone"
-msgstr "טלפון"
+msgstr ""
+
+#. module: website_event_booth
+#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
+msgid "Please Sign In or Create an Account."
+msgstr ""
 
 #. module: website_event_booth
 #. odoo-javascript
-#: code:addons/website_event_booth/static/src/js/booth_register.js:0
+#: code:addons/website_event_booth/static/src/interactions/booth_registration.js:0
 msgid "Please fill out the form correctly."
 msgstr ""
 
@@ -234,11 +249,11 @@ msgstr ""
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid "Sorry, all the booths are sold out."
-msgstr "סליחה, כל הדוכנים הוזמנו."
+msgstr ""
 
 #. module: website_event_booth
 #. odoo-javascript
-#: code:addons/website_event_booth/static/src/js/booth_register.js:0
+#: code:addons/website_event_booth/static/src/interactions/booth_registration.js:0
 msgid "The booth category doesn't exist."
 msgstr ""
 
@@ -250,14 +265,9 @@ msgstr ""
 #. module: website_event_booth
 #: model:ir.model,name:website_event_booth.model_website_event_menu
 msgid "Website Event Menu"
-msgstr "תפריט אירועים באתר האינטרנט"
+msgstr ""
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid "if you have any question."
-msgstr "אם יש לך שאלות."
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
-msgid "list of future events"
-msgstr "רשימת אירועים עתידיים"
+msgstr ""

@@ -1,7 +1,5 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 
 registry.category("web_tour.tours").add('survey_tour_test_survey_form_triggers', {
     url: '/odoo',
@@ -130,6 +128,12 @@ registry.category("web_tour.tours").add('survey_tour_test_survey_form_triggers',
         run: "click",
     },
     ...changeTab("options"),
+    {
+        trigger: ".modal .modal-content .o_field_widget[name=triggering_answer_ids] input",
+        run() {
+            this.anchor.scrollIntoView(true);
+        }
+    },
     {
         content: "Add a second trigger to confirm we can now use Question 2 again",
         trigger: ".modal .modal-content .o_field_widget[name=triggering_answer_ids] input",

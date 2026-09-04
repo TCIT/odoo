@@ -1,7 +1,8 @@
-import * as ProductScreen from "@point_of_sale/../tests/tours/utils/product_screen_util";
-import * as Chrome from "@point_of_sale/../tests/tours/utils/chrome_util";
-import * as PaymentScreen from "@point_of_sale/../tests/tours/utils/payment_screen_util";
-import * as Dialog from "@point_of_sale/../tests/tours/utils/dialog_util";
+import * as ProductScreen from "@point_of_sale/../tests/pos/tours/utils/product_screen_util";
+import * as Chrome from "@point_of_sale/../tests/pos/tours/utils/chrome_util";
+import * as PaymentScreen from "@point_of_sale/../tests/pos/tours/utils/payment_screen_util";
+import * as ReceiptScreen from "@point_of_sale/../tests/pos/tours/utils/receipt_screen_util";
+import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
 import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("OnlinePaymentErrorsTour", {
@@ -10,7 +11,7 @@ registry.category("web_tour.tours").add("OnlinePaymentErrorsTour", {
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
             ProductScreen.addOrderline("Letter Tray", "10"),
-            ProductScreen.selectedOrderlineHas("Letter Tray", "10.0"),
+            ProductScreen.selectedOrderlineHas("Letter Tray", "10"),
             ProductScreen.clickPayButton(),
             PaymentScreen.totalIs("48.0"),
             PaymentScreen.emptyPaymentlines("48.0"),
@@ -56,5 +57,97 @@ registry.category("web_tour.tours").add("OnlinePaymentErrorsTour", {
             // successfully confirming the dialog would imply that the error popup is actually shown
             // Online payment line is now automatically deleted after the error popup
             Dialog.confirm(),
+        ].flat(),
+});
+
+registry
+    .category("web_tour.tours")
+    .add("test_online_payment_amount_updated_after_order_modification", {
+        steps: () =>
+            [
+                Chrome.startPoS(),
+                Dialog.confirm("Open Register"),
+                ProductScreen.addOrderline("Letter Tray", "10"),
+                ProductScreen.selectedOrderlineHas("Letter Tray", "10.0"),
+                ProductScreen.clickPayButton(),
+                PaymentScreen.totalIs("48.0"),
+
+                PaymentScreen.clickPaymentMethod("Online payment"),
+                PaymentScreen.selectedPaymentlineHas("Online payment", "48.0"),
+                // Remove the online payment line so the order can be modified.
+                PaymentScreen.clickPaymentline("Online payment", "48.0"),
+                PaymentScreen.clickPaymentlineDelButton("Online payment", "48.0"),
+
+                PaymentScreen.clickBackToProductScreen(),
+                ProductScreen.clickOrderline("Letter Tray", "10.0"),
+                ProductScreen.clickNumpad("2", "0"),
+                ProductScreen.selectedOrderlineHas("Letter Tray", "20.0"),
+                ProductScreen.clickPayButton(),
+                PaymentScreen.totalIs("96.0"),
+
+                PaymentScreen.clickPaymentMethod("Online payment"),
+                PaymentScreen.selectedPaymentlineHas("Online payment", "96.0"),
+                PaymentScreen.validateButtonIsHighlighted(true),
+                PaymentScreen.clickValidate(),
+                Dialog.is({ title: "Scan to Pay" }),
+            ].flat(),
+    });
+
+registry.category("web_tour.tours").add("test_selected_customer_after_adding_payment_sync", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.addOrderline("Letter Tray", "10"),
+            ProductScreen.selectedOrderlineHas("Letter Tray", "10.0"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.totalIs("48.0"),
+            PaymentScreen.emptyPaymentlines("48.0"),
+            PaymentScreen.clickPaymentMethod("Online payment"),
+            PaymentScreen.selectedPaymentlineHas("Online payment", "48.0"),
+            PaymentScreen.clickPartnerButton(),
+            PaymentScreen.clickCustomer("A simple PoS man!"),
+            PaymentScreen.validateButtonIsHighlighted(true),
+            PaymentScreen.clickValidate(),
+            Dialog.is("Scan to Pay"),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_payment_method_customer_required", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.addOrderline("Letter Tray", "1"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.totalIs("4.80"),
+            PaymentScreen.clickPaymentMethod("Online payment"),
+            PaymentScreen.selectedPaymentlineHas("Online payment", "4.80"),
+            PaymentScreen.validateButtonIsHighlighted(false),
+            PaymentScreen.clickPartnerButton(),
+            PaymentScreen.clickCustomer("A Test Partner"),
+            PaymentScreen.validateButtonIsHighlighted(true),
+            PaymentScreen.clickValidate(),
+            Dialog.is({ title: "Payment provider requirement" }),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("RestaurantOnlinePaymentTour", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.addOrderline("Letter Tray", "1"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Online payment", true, { amount: "4.80" }),
+            PaymentScreen.clickBackToProductScreen(),
+            ProductScreen.clickDisplayedProduct("Letter Tray"),
+            ProductScreen.selectedOrderlineHas("Letter Tray", "2.0"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.totalIs("9.60"),
+            PaymentScreen.clickPaymentlineDelButton("Online payment", "4.80"),
+            PaymentScreen.clickPaymentMethod("Cash"),
+            PaymentScreen.clickValidate(),
+            ReceiptScreen.isShown(),
         ].flat(),
 });

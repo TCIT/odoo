@@ -5,22 +5,31 @@ import { deleteForward } from "../_helpers/user_actions";
 
 describe("Selection collapsed", () => {
     describe("Basic", () => {
-        test("should do nothing", async () => {
+        test("should do nothing (1)", async () => {
             await testEditor({
                 contentBefore: "<ul><li>[]<br></li></ul>",
                 stepFunction: deleteForward,
                 contentAfter: "<ul><li>[]<br></li></ul>",
             });
+        });
+
+        test("should do nothing (2)", async () => {
             await testEditor({
                 contentBefore: '<ul><li class="oe-nested"><ul><li>abc[]</li></ul></li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul><li class="oe-nested"><ul><li>abc[]</li></ul></li></ul>',
             });
+        });
+
+        test("should do nothing (3)", async () => {
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li>[]<br></li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li>[]<br></li></ul>',
             });
+        });
+
+        test("should do nothing (4)", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">abc[]</li></ul></li></ul>',
@@ -54,12 +63,15 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should remove the only character in a list", async () => {
+        test("should remove the only character in a list (1)", async () => {
             await testEditor({
                 contentBefore: "<ul><li>[]a</li></ul>",
                 stepFunction: deleteForward,
                 contentAfter: "<ul><li>[]<br></li></ul>",
             });
+        });
+
+        test("should remove the only character in a list (2)", async () => {
             await testEditor({
                 contentBefore: "<ul><li><p>[]a</p></li></ul>",
                 stepFunction: deleteForward,
@@ -67,18 +79,24 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should merge a list item with its next list item", async () => {
+        test("should merge a list item with its next list item (1)", async () => {
             await testEditor({
                 contentBefore: "<ul><li>abc[]</li><li>def</li></ul>",
                 stepFunction: deleteForward,
                 contentAfter: "<ul><li>abc[]def</li></ul>",
             });
+        });
+
+        test("should merge a list item with its next list item (2)", async () => {
             // With another list item before.
             await testEditor({
                 contentBefore: "<ul><li>abc</li><li>def[]</li><li>ghi</li></ul>",
                 stepFunction: deleteForward,
                 contentAfter: "<ul><li>abc</li><li>def[]ghi</li></ul>",
             });
+        });
+
+        test("should merge a list item with its next list item (3)", async () => {
             // Where the list item to merge into is empty, with an
             // empty list item before.
             await testEditor({
@@ -100,8 +118,7 @@ describe("Selection collapsed", () => {
             await testEditor({
                 contentBefore: unformat(`
                             <ul>
-                                <li>a</li>
-                                <li class="oe-nested">
+                                <li><p>a</p>
                                     <ul>
                                         <li>b[]</li>
                                     </ul>
@@ -119,8 +136,7 @@ describe("Selection collapsed", () => {
                 stepFunction: deleteForward,
                 contentAfter: unformat(`
                             <ul>
-                                <li>a</li>
-                                <li class="oe-nested">
+                                <li><p>a</p>
                                     <ul>
                                         <li>b[]c</li>
                                         <li>d</li>
@@ -135,8 +151,7 @@ describe("Selection collapsed", () => {
             await testEditor({
                 contentBefore: unformat(`
                             <ol>
-                                <li>a</li>
-                                <li class="oe-nested">
+                                <li><p>a</p>
                                     <ol>
                                         <li>b</li>
                                     </ol>
@@ -155,14 +170,12 @@ describe("Selection collapsed", () => {
                 stepFunction: deleteForward,
                 contentAfter: unformat(`
                             <ol>
-                                <li>a</li>
-                                <li class="oe-nested">
+                                <li><p>a</p>
                                     <ol>
                                         <li>b</li>
                                     </ol>
                                 </li>
-                                <li>c[]d</li>
-                                <li class="oe-nested">
+                                <li><p>c[]d</p>
                                     <ol>
                                         <li>e</li>
                                     </ol>
@@ -184,8 +197,7 @@ describe("Selection collapsed", () => {
             await testEditor({
                 contentBefore: unformat(`
                             <ol>
-                                <li>a</li>
-                                <li class="oe-nested">
+                                <li><p>a</p>
                                     <ul>
                                         <li>b[]</li>
                                     </ul>
@@ -203,8 +215,7 @@ describe("Selection collapsed", () => {
                 stepFunction: deleteForward,
                 contentAfter: unformat(`
                             <ol>
-                                <li>a</li>
-                                <li class="oe-nested">
+                                <li><p>a</p>
                                     <ul>
                                         <li>b[]c</li>
                                     </ul>
@@ -251,12 +262,15 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should remove the only character in a checklist", async () => {
+        test("should remove the only character in a checklist (1)", async () => {
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li class="o_checked">[]a</li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li class="o_checked">[]<br></li></ul>',
             });
+        });
+
+        test("should remove the only character in a checklist (2)", async () => {
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li class="o_checked"><p>[]a</p></li></ul>',
                 stepFunction: deleteForward,
@@ -265,13 +279,16 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should merge a checklist item with its next list item", async () => {
+        test("should merge a checklist item with its next list item (1)", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li class="o_checked">abc[]</li><li>def</li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li class="o_checked">abc[]def</li></ul>',
             });
+        });
+
+        test("should merge a checklist item with its next list item (2)", async () => {
             // With another list item before.
             await testEditor({
                 contentBefore:
@@ -280,6 +297,9 @@ describe("Selection collapsed", () => {
                 contentAfter:
                     '<ul class="o_checklist"><li class="o_checked">abc</li><li>def[]ghi</li></ul>',
             });
+        });
+
+        test("should merge a checklist item with its next list item (3)", async () => {
             // Where the list item to merge into is empty, with an
             // empty list item before.
             await testEditor({
@@ -304,8 +324,7 @@ describe("Selection collapsed", () => {
             await testEditor({
                 contentBefore: unformat(`
                             <ul class="o_checklist">
-                                <li class="o_checked">a</li>
-                                <li class="oe-nested">
+                                <li><p>a</p>
                                     <ul class="o_checklist">
                                         <li class="o_checked">b[]</li>
                                     </ul>
@@ -323,8 +342,7 @@ describe("Selection collapsed", () => {
                 stepFunction: deleteForward,
                 contentAfter: unformat(`
                             <ul class="o_checklist">
-                                <li class="o_checked">a</li>
-                                <li class="oe-nested">
+                                <li><p>a</p>
                                     <ul class="o_checklist">
                                         <li class="o_checked">b[]c</li>
                                         <li>d</li>
@@ -339,8 +357,7 @@ describe("Selection collapsed", () => {
             await testEditor({
                 contentBefore: unformat(`
                             <ul class="o_checklist">
-                                <li class="o_checked">a</li>
-                                <li class="oe-nested">
+                                <li><p>a</p>
                                     <ul class="o_checklist">
                                         <li class="o_checked">b</li>
                                     </ul>
@@ -359,14 +376,12 @@ describe("Selection collapsed", () => {
                 stepFunction: deleteForward,
                 contentAfter: unformat(`
                             <ul class="o_checklist">
-                                <li class="o_checked">a</li>
-                                <li class="oe-nested">
+                                <li><p>a</p>
                                     <ul class="o_checklist">
                                         <li class="o_checked">b</li>
                                     </ul>
                                 </li>
-                                <li class="o_checked">c[]d</li>
-                                <li class="oe-nested">
+                                <li class="o_checked o_checked_has_nested_list"><p>c[]d</p>
                                     <ul class="o_checklist">
                                         <li>e</li>
                                     </ul>
@@ -390,8 +405,7 @@ describe("Selection collapsed", () => {
             await testEditor({
                 contentBefore: unformat(`
                             <ul class="o_checklist">
-                                <li class="o_checked">a</li>
-                                <li class="oe-nested">
+                                <li><p>a</p>
                                     <ul>
                                         <li class="o_checked">b[]</li>
                                     </ul>
@@ -409,8 +423,7 @@ describe("Selection collapsed", () => {
                 stepFunction: deleteForward,
                 contentAfter: unformat(`
                             <ul class="o_checklist">
-                                <li class="o_checked">a</li>
-                                <li class="oe-nested">
+                                <li><p>a</p>
                                     <ul>
                                         <li class="o_checked">b[]c</li>
                                     </ul>
@@ -428,25 +441,24 @@ describe("Selection collapsed", () => {
         });
     });
     describe("Indented", () => {
-        test("should merge an indented list item into a non-indented list item 1", async () => {
+        test("should merge an indented list item into a non-indented list item 1 (1)", async () => {
             await testEditor({
-                contentBefore:
-                    '<ol><li>abc[]</li><li class="oe-nested"><ol><li>def</li><li>ghi</li></ol></li></ol>',
+                contentBefore: "<ol><li><p>abc[]</p><ol><li>def</li><li>ghi</li></ol></li></ol>",
                 stepFunction: async (editor) => {
                     deleteForward(editor);
                 },
-                contentAfter:
-                    '<ol><li>abc[]def</li><li class="oe-nested"><ol><li>ghi</li></ol></li></ol>',
+                contentAfter: "<ol><li><p>abc[]def</p><ol><li>ghi</li></ol></li></ol>",
             });
+        });
+
+        test("should merge an indented list item into a non-indented list item 1 (2)", async () => {
             await testEditor({
-                contentBefore:
-                    '<ol><li>2bc[]</li><li class="oe-nested"><ol><li>def</li><li>ghi</li></ol></li></ol>',
+                contentBefore: "<ol><li><p>2bc[]</p><ol><li>def</li><li>ghi</li></ol></li></ol>",
                 stepFunction: async (editor) => {
                     deleteForward(editor);
                     deleteForward(editor);
                 },
-                contentAfter:
-                    '<ol><li>2bc[]ef</li><li class="oe-nested"><ol><li>ghi</li></ol></li></ol>',
+                contentAfter: "<ol><li><p>2bc[]ef</p><ol><li>ghi</li></ol></li></ol>",
             });
         });
 
@@ -461,36 +473,35 @@ describe("Selection collapsed", () => {
 
         test("should merge the only item in an indented list into a non-indented list item and remove the now empty indented list", async () => {
             await testEditor({
-                contentBefore:
-                    '<ul><li>abc[]</li><li class="oe-nested"><ul><li>def</li></ul></li></ul>',
+                contentBefore: "<ul><li><p>abc[]</p><ul><li>def</li></ul></li></ul>",
                 stepFunction: async (editor) => {
                     deleteForward(editor);
                     deleteForward(editor);
                 },
-                contentAfter: "<ul><li>abc[]ef</li></ul>",
+                contentAfter: "<ul><li><p>abc[]ef</p></li></ul>",
             });
         });
 
         test("should merge an indented list item into a non-indented list item", async () => {
             await testEditor({
                 contentBefore:
-                    '<ul class="o_checklist"><li>abc[]</li><li class="oe-nested"><ul class="o_checklist"><li>def</li><li class="o_checked">ghi</li></ul></li></ul>',
+                    '<ul class="o_checklist"><li><p>abc[]</p><ul class="o_checklist"><li>def</li><li class="o_checked">ghi</li></ul></li></ul>',
                 stepFunction: async (editor) => {
                     deleteForward(editor);
                 },
                 contentAfter:
-                    '<ul class="o_checklist"><li>abc[]def</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">ghi</li></ul></li></ul>',
+                    '<ul class="o_checklist"><li><p>abc[]def</p><ul class="o_checklist"><li class="o_checked">ghi</li></ul></li></ul>',
             });
         });
 
         test("should merge the only item in an indented list into a non-indented list item and remove the now empty indented list (2)", async () => {
             await testEditor({
                 contentBefore:
-                    '<ul class="o_checklist"><li>abc[]</li><li class="oe-nested"><ul class="o_checklist"><li>def</li></ul></li></ul>',
+                    '<ul class="o_checklist"><li><p>abc[]</p><ul class="o_checklist"><li>def</li></ul></li></ul>',
                 stepFunction: async (editor) => {
                     deleteForward(editor);
                 },
-                contentAfter: '<ul class="o_checklist"><li>abc[]def</li></ul>',
+                contentAfter: '<ul class="o_checklist"><li><p>abc[]def</p></li></ul>',
             });
         });
     });
@@ -565,7 +576,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should treat two blocks in a checklist item (checked/unchecked) as two list items and merge them", async () => {
+        test("should treat two blocks in a checklist item (checked/unchecked) as two list items and merge them (1)", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li class="o_checked"><h1>abc</h1></li><li><h2>def[]</h2><h3>ghi</h3></li><li class="o_checked"><h4>klm</h4></li></ul>',
@@ -575,6 +586,9 @@ describe("Selection collapsed", () => {
                 contentAfter:
                     '<ul class="o_checklist"><li class="o_checked"><h1>abc</h1></li><li><h2>def[]ghi</h2></li><li class="o_checked"><h4>klm</h4></li></ul>',
             });
+        });
+
+        test("should treat two blocks in a checklist item (checked/unchecked) as two list items and merge them (2)", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li class="o_checked"><h1>abc</h1></li><li class="o_checked"><h2>def[]</h2><h3>ghi</h3></li><li><h4>klm</h4></li></ul>',
@@ -597,7 +611,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should merge a bold list item (checked/unchecked) into a non-formatted list item", async () => {
+        test("should merge a bold list item (checked/unchecked) into a non-formatted list item (1)", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li class="o_checked">abc</li><li class="o_checked"><b>de</b>fg[]</li><li class="o_checked"><b>hij</b>klm</li><li class="o_checked">nop</li></ul>',
@@ -606,6 +620,9 @@ describe("Selection collapsed", () => {
                 contentAfter:
                     '<ul class="o_checklist"><li class="o_checked">abc</li><li class="o_checked"><b>de</b>fg[]<b>hij</b>klm</li><li class="o_checked">nop</li></ul>',
             });
+        });
+
+        test("should merge a bold list item (checked/unchecked) into a non-formatted list item (2)", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li class="o_checked">abc</li><li class="o_checked"><b>de</b>fg[]</li><li><b>hij</b>klm</li><li class="o_checked">nop</li></ul>',
@@ -614,6 +631,9 @@ describe("Selection collapsed", () => {
                 contentAfter:
                     '<ul class="o_checklist"><li class="o_checked">abc</li><li class="o_checked"><b>de</b>fg[]<b>hij</b>klm</li><li class="o_checked">nop</li></ul>',
             });
+        });
+
+        test("should merge a bold list item (checked/unchecked) into a non-formatted list item (3)", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li>abc</li><li><b>de</b>fg[]</li><li class="o_checked"><b>hij</b>klm</li><li>nop</li></ul>',
@@ -624,13 +644,16 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should merge a paragraph starting with bold text into a checklist item with ending without formatting", async () => {
+        test("should merge a paragraph starting with bold text into a checklist item with ending without formatting (1)", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li><i>abc</i>def[]</li></ul><p><b>ghi</b>jkl</p>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li><i>abc</i>def[]<b>ghi</b>jkl</li></ul>',
             });
+        });
+
+        test("should merge a paragraph starting with bold text into a checklist item with ending without formatting (2)", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li class="o_checked"><i>abc</i>def[]</li></ul><p><b>ghi</b>jkl</p>',
@@ -641,7 +664,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should merge a paragraph starting with bold text into a checklist item with ending with italic text", async () => {
+        test("should merge a paragraph starting with bold text into a checklist item with ending with italic text (1)", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li><b>abc</b><i>def[]</i></li></ul><p><b>ghi</b>jkl</p>',
@@ -649,6 +672,9 @@ describe("Selection collapsed", () => {
                 contentAfter:
                     '<ul class="o_checklist"><li><b>abc</b><i>def[]</i><b>ghi</b>jkl</li></ul>',
             });
+        });
+
+        test("should merge a paragraph starting with bold text into a checklist item with ending with italic text (2)", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li class="o_checked"><b>abc</b><i>def[]</i></li></ul><p><b>ghi</b>jkl</p>',
@@ -688,13 +714,16 @@ describe("Selection not collapsed", () => {
     // Note: All tests on ordered lists should be duplicated
     // with unordered lists and checklists, and vice versae.
     describe("Ordered", () => {
-        test("should delete text within a list item", async () => {
+        test("should delete text within a list item (1)", async () => {
             // Forward selection
             await testEditor({
                 contentBefore: "<ol><li>ab[cd]ef</li></ol>",
                 stepFunction: deleteForward,
                 contentAfter: "<ol><li>ab[]ef</li></ol>",
             });
+        });
+
+        test("should delete text within a list item (2)", async () => {
             // Backward selection
             await testEditor({
                 contentBefore: "<ol><li>ab]cd[ef</li></ol>",
@@ -703,13 +732,16 @@ describe("Selection not collapsed", () => {
             });
         });
 
-        test("should delete all the text in a list item", async () => {
+        test("should delete all the text in a list item (1)", async () => {
             // Forward selection
             await testEditor({
                 contentBefore: "<ol><li>[abc]</li></ol>",
                 stepFunction: deleteForward,
                 contentAfter: "<ol><li>[]<br></li></ol>",
             });
+        });
+
+        test("should delete all the text in a list item (2)", async () => {
             // Backward selection
             await testEditor({
                 contentBefore: "<ol><li>]abc[</li></ol>",
@@ -718,13 +750,16 @@ describe("Selection not collapsed", () => {
             });
         });
 
-        test("should delete across two list items", async () => {
+        test("should delete across two list items (1)", async () => {
             // Forward selection
             await testEditor({
                 contentBefore: "<ol><li>ab[cd</li><li>ef]gh</li></ol>",
                 stepFunction: deleteForward,
                 contentAfter: "<ol><li>ab[]gh</li></ol>",
             });
+        });
+
+        test("should delete across two list items (2)", async () => {
             // Backward selection
             await testEditor({
                 contentBefore: "<ol><li>ab]cd</li><li>ef[gh</li></ol>",
@@ -733,30 +768,34 @@ describe("Selection not collapsed", () => {
             });
         });
 
-        test("should delete across an unindented list item and an indented list item", async () => {
+        test("should delete across an unindented list item and an indented list item (1)", async () => {
             // Forward selection
             await testEditor({
-                contentBefore:
-                    '<ol><li>ab[cd</li><li class="oe-nested"><ol><li>ef]gh</li></ol></li></ol>',
+                contentBefore: "<ol><li><p>ab[cd</p><ol><li>ef]gh</li></ol></li></ol>",
                 stepFunction: deleteForward,
-                contentAfter: "<ol><li>ab[]gh</li></ol>",
-            });
-            // Backward selection
-            await testEditor({
-                contentBefore:
-                    '<ol><li>ab]cd</li><li class="oe-nested"><ol><li>ef[gh</li></ol></li></ol>',
-                stepFunction: deleteForward,
-                contentAfter: "<ol><li>ab[]gh</li></ol>",
+                contentAfter: "<ol><li><p>ab[]gh</p></li></ol>",
             });
         });
 
-        test("should delete a list", async () => {
+        test("should delete across an unindented list item and an indented list item (2)", async () => {
+            // Backward selection
+            await testEditor({
+                contentBefore: "<ol><li><p>ab]cd</p><ol><li>ef[gh</li></ol></li></ol>",
+                stepFunction: deleteForward,
+                contentAfter: "<ol><li><p>ab[]gh</p></li></ol>",
+            });
+        });
+
+        test("should delete a list (1)", async () => {
             // Forward selection
             await testEditor({
                 contentBefore: "<p>abc[</p><ol><li><p>def]</p></li></ol>",
                 stepFunction: deleteForward,
                 contentAfter: "<p>abc[]</p>",
             });
+        });
+
+        test("should delete a list (2)", async () => {
             // Backward selection
             await testEditor({
                 contentBefore: "<p>abc]</p><ol><li><p>def[</p></li></ol>",
@@ -765,7 +804,7 @@ describe("Selection not collapsed", () => {
             });
         });
 
-        test("should merge the contents of a list item within a block into a heading, and leave the rest of its list as it is", async () => {
+        test("should merge the contents of a list item within a block into a heading, and leave the rest of its list as it is (1)", async () => {
             // Forward selection
             await testEditor({
                 contentBefore:
@@ -774,6 +813,9 @@ describe("Selection not collapsed", () => {
                 contentAfter:
                     '<h1>a[]i</h1><custom-block style="display:block;"><ol><li>jk</li></ol></custom-block>',
             });
+        });
+
+        test("should merge the contents of a list item within a block into a heading, and leave the rest of its list as it is (2)", async () => {
             // Backward selection
             await testEditor({
                 contentBefore:
@@ -786,13 +828,16 @@ describe("Selection not collapsed", () => {
     });
 
     describe("Unordered", () => {
-        test("should delete text within a list item", async () => {
+        test("should delete text within a list item (1)", async () => {
             // Forward selection
             await testEditor({
                 contentBefore: "<ul><li>ab[cd]ef</li></ul>",
                 stepFunction: deleteForward,
                 contentAfter: "<ul><li>ab[]ef</li></ul>",
             });
+        });
+
+        test("should delete text within a list item (2)", async () => {
             // Backward selection
             await testEditor({
                 contentBefore: "<ul><li>ab]cd[ef</li></ul>",
@@ -801,13 +846,16 @@ describe("Selection not collapsed", () => {
             });
         });
 
-        test("should delete all the text in a list item", async () => {
+        test("should delete all the text in a list item (1)", async () => {
             // Forward selection
             await testEditor({
                 contentBefore: "<ul><li>[abc]</li></ul>",
                 stepFunction: deleteForward,
                 contentAfter: "<ul><li>[]<br></li></ul>",
             });
+        });
+
+        test("should delete all the text in a list item (2)", async () => {
             // Backward selection
             await testEditor({
                 contentBefore: "<ul><li>]abc[</li></ul>",
@@ -816,13 +864,16 @@ describe("Selection not collapsed", () => {
             });
         });
 
-        test("should delete across two list items", async () => {
+        test("should delete across two list items (1)", async () => {
             // Forward selection
             await testEditor({
                 contentBefore: "<ul><li>ab[cd</li><li>ef]gh</li></ul>",
                 stepFunction: deleteForward,
                 contentAfter: "<ul><li>ab[]gh</li></ul>",
             });
+        });
+
+        test("should delete across two list items (2)", async () => {
             // Backward selection
             await testEditor({
                 contentBefore: "<ul><li>ab]cd</li><li>ef[gh</li></ul>",
@@ -831,30 +882,34 @@ describe("Selection not collapsed", () => {
             });
         });
 
-        test("should delete across an unindented list item and an indented list item", async () => {
+        test("should delete across an unindented list item and an indented list item (1)", async () => {
             // Forward selection
             await testEditor({
-                contentBefore:
-                    '<ul><li>ab[cd</li><li class="oe-nested"><ul><li>ef]gh</li></ul></li></ul>',
+                contentBefore: "<ul><li><p>ab[cd</p><ul><li>ef]gh</li></ul></li></ul>",
                 stepFunction: deleteForward,
-                contentAfter: "<ul><li>ab[]gh</li></ul>",
-            });
-            // Backward selection
-            await testEditor({
-                contentBefore:
-                    '<ul><li>ab]cd</li><li class="oe-nested"><ul><li>ef[gh</li></ul></li></ul>',
-                stepFunction: deleteForward,
-                contentAfter: "<ul><li>ab[]gh</li></ul>",
+                contentAfter: "<ul><li><p>ab[]gh</p></li></ul>",
             });
         });
 
-        test("should delete a list", async () => {
+        test("should delete across an unindented list item and an indented list item (2)", async () => {
+            // Backward selection
+            await testEditor({
+                contentBefore: "<ul><li><p>ab]cd</p><ul><li>ef[gh</li></ul></li></ul>",
+                stepFunction: deleteForward,
+                contentAfter: "<ul><li><p>ab[]gh</p></li></ul>",
+            });
+        });
+
+        test("should delete a list (1)", async () => {
             // Forward selection
             await testEditor({
                 contentBefore: "<p>abc[</p><ul><li><p>def]</p></li></ul>",
                 stepFunction: deleteForward,
                 contentAfter: "<p>abc[]</p>",
             });
+        });
+
+        test("should delete a list (2)", async () => {
             // Backward selection
             await testEditor({
                 contentBefore: "<p>abc]</p><ul><li><p>def[</p></li></ul>",
@@ -863,7 +918,7 @@ describe("Selection not collapsed", () => {
             });
         });
 
-        test("should merge the contents of a list item within a block into a heading, and leave the rest of its list as it is", async () => {
+        test("should merge the contents of a list item within a block into a heading, and leave the rest of its list as it is (1)", async () => {
             // Forward selection
             await testEditor({
                 contentBefore:
@@ -872,6 +927,9 @@ describe("Selection not collapsed", () => {
                 contentAfter:
                     '<h1>a[]i</h1><custom-block style="display: block;"><ul><li>jk</li></ul></custom-block>',
             });
+        });
+
+        test("should merge the contents of a list item within a block into a heading, and leave the rest of its list as it is (2)", async () => {
             // Backward selection
             await testEditor({
                 contentBefore:
@@ -883,24 +941,35 @@ describe("Selection not collapsed", () => {
         });
     });
     describe("Checklist", () => {
-        test("should delete text within a checklist item", async () => {
+        test("should delete text within a checklist item (1)", async () => {
             // Forward selection
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li class="o_checked">ab[cd]ef</li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li class="o_checked">ab[]ef</li></ul>',
             });
+        });
+
+        test("should delete text within a checklist item (2)", async () => {
+            // Forward selection
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li>ab[cd]ef</li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li>ab[]ef</li></ul>',
             });
+        });
+
+        test("should delete text within a checklist item (3)", async () => {
             // Backward selection
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li class="o_checked">ab]cd[ef</li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li class="o_checked">ab[]ef</li></ul>',
             });
+        });
+
+        test("should delete text within a checklist item (4)", async () => {
+            // Backward selection
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li>ab]cd[ef</li></ul>',
                 stepFunction: deleteForward,
@@ -908,24 +977,35 @@ describe("Selection not collapsed", () => {
             });
         });
 
-        test("should delete all the text in a checklist item", async () => {
+        test("should delete all the text in a checklist item (1)", async () => {
             // Forward selection
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li class="o_checked">[abc]</li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li class="o_checked">[]<br></li></ul>',
             });
+        });
+
+        test("should delete all the text in a checklist item (2)", async () => {
+            // Forward selection
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li>[abc]</li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li>[]<br></li></ul>',
             });
+        });
+
+        test("should delete all the text in a checklist item (3)", async () => {
             // Backward selection
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li class="o_checked">]abc[</li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li class="o_checked">[]<br></li></ul>',
             });
+        });
+
+        test("should delete all the text in a checklist item (4)", async () => {
+            // Backward selection
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li>]abc[</li></ul>',
                 stepFunction: deleteForward,
@@ -933,127 +1013,159 @@ describe("Selection not collapsed", () => {
             });
         });
 
-        test("should delete across two list items", async () => {
-            // Forward selection
+        describe("should delete across two list items", () => {});
+        // Forward selection
+        test("should delete across two list items (1)", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li class="o_checked">ab[cd</li><li class="o_checked">ef]gh</li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
             });
+        });
+        test("should delete across two list items (2)", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li class="o_checked">ab[cd</li><li>ef]gh</li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
             });
+        });
+        test("should delete across two list items (3)", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li>ab[cd</li><li class="o_checked">ef]gh</li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li>ab[]gh</li></ul>',
             });
+        });
+        test("should delete across two list items (4)", async () => {
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li>ab[cd</li><li>ef]gh</li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li>ab[]gh</li></ul>',
             });
-            // Backward selection
+        });
+        // Backward selection
+        test("should delete across two list items (5)", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li class="o_checked">ab]cd</li><li class="o_checked">ef[gh</li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
             });
+        });
+        test("should delete across two list items (6)", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li>ab]cd</li><li class="o_checked">ef[gh</li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li>ab[]gh</li></ul>',
             });
+        });
+        test("should delete across two list items (7)", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li class="o_checked">ab]cd</li><li>ef[gh</li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
             });
+        });
+        test("should delete across two list items (8)", async () => {
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li>ab]cd</li><li>ef[gh</li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li>ab[]gh</li></ul>',
             });
         });
+    });
 
-        test("should delete across an unindented list item and an indented list item", async () => {
-            // Forward selection
+    describe("should delete across an unindented list item and an indented list item", () => {
+        // Forward selection
+        test("should delete across an unindented list item and an indented list item (1)", async () => {
             await testEditor({
                 contentBefore:
-                    '<ul class="o_checklist"><li class="o_checked">ab[cd</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">ef]gh</li></ul></li></ul>',
+                    '<ul class="o_checklist"><li><p>ab[cd</p><ul class="o_checklist"><li class="o_checked">ef]gh</li></ul></li></ul>',
                 stepFunction: deleteForward,
-                contentAfter: '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
+                contentAfter: '<ul class="o_checklist"><li><p>ab[]gh</p></li></ul>',
             });
+        });
+        test("should delete across an unindented list item and an indented list item (2)", async () => {
             await testEditor({
                 contentBefore:
-                    '<ul class="o_checklist"><li>ab[cd</li><li class="oe-nested"><ul class="o_checklist"><li>ef]gh</li></ul></li></ul>',
+                    '<ul class="o_checklist"><li><p>ab[cd</p><ul class="o_checklist"><li>ef]gh</li></ul></li></ul>',
                 stepFunction: deleteForward,
                 // The indented list's parent gets rendered as
                 // checked because its only child is checked.
-                contentAfter: '<ul class="o_checklist"><li>ab[]gh</li></ul>',
+                contentAfter: '<ul class="o_checklist"><li><p>ab[]gh</p></li></ul>',
             });
+        });
+        test("should delete across an unindented list item and an indented list item (3)", async () => {
             await testEditor({
                 contentBefore:
-                    '<ul class="o_checklist"><li>ab[cd</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">ef]gh</li></ul></li></ul>',
+                    '<ul class="o_checklist"><li><p>ab[cd</p><ul class="o_checklist"><li class="o_checked">ef]gh</li></ul></li></ul>',
                 stepFunction: deleteForward,
                 // The indented list's parent gets rendered as
                 // checked because its only child is checked. When
                 // we remove that child, the checklist gets
                 // unchecked because it becomes independant again.
-                contentAfter: '<ul class="o_checklist"><li>ab[]gh</li></ul>',
+                contentAfter: '<ul class="o_checklist"><li><p>ab[]gh</p></li></ul>',
             });
-            // Backward selection
+        });
+        // Backward selection
+        test("should delete across an unindented list item and an indented list item (4)", async () => {
             await testEditor({
                 contentBefore:
-                    '<ul class="o_checklist"><li class="o_checked">ab]cd</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">ef[gh</li></ul></li></ul>',
+                    '<ul class="o_checklist"><li><p>ab]cd</p><ul class="o_checklist"><li class="o_checked">ef[gh</li></ul></li></ul>',
                 stepFunction: deleteForward,
-                contentAfter: '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
+                contentAfter: '<ul class="o_checklist"><li><p>ab[]gh</p></li></ul>',
             });
+        });
+        test("should delete across an unindented list item and an indented list item (5)", async () => {
             await testEditor({
                 contentBefore:
-                    '<ul class="o_checklist"><li>ab]cd</li><li class="oe-nested"><ul class="o_checklist"><li>ef[gh</li></ul></li></ul>',
+                    '<ul class="o_checklist"><li><p>ab]cd</p><ul class="o_checklist"><li>ef[gh</li></ul></li></ul>',
                 stepFunction: deleteForward,
                 // The indented list's parent gets rendered as
                 // checked because its only child is checked.
-                contentAfter: '<ul class="o_checklist"><li>ab[]gh</li></ul>',
+                contentAfter: '<ul class="o_checklist"><li><p>ab[]gh</p></li></ul>',
             });
+        });
+        test("should delete across an unindented list item and an indented list item (6)", async () => {
             await testEditor({
                 contentBefore:
-                    '<ul class="o_checklist"><li>ab]cd</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">ef[gh</li></ul></li></ul>',
+                    '<ul class="o_checklist"><li><p>ab]cd</p><ul class="o_checklist"><li class="o_checked">ef[gh</li></ul></li></ul>',
                 stepFunction: deleteForward,
                 // The indented list's parent gets rendered as
                 // checked because its only child is checked. When
                 // we remove that child, the checklist gets
                 // unchecked because it becomes independant again.
-                contentAfter: '<ul class="o_checklist"><li>ab[]gh</li></ul>',
+                contentAfter: '<ul class="o_checklist"><li><p>ab[]gh</p></li></ul>',
             });
         });
+    });
 
-        test("should delete a checklist", async () => {
-            // Forward selection
-            await testEditor({
-                contentBefore: '<p>abc[</p><ul class="o_checklist"><li><p>def]</p></li></ul>',
-                stepFunction: deleteForward,
-                contentAfter: "<p>abc[]</p>",
-            });
-            // Backward selection
-            await testEditor({
-                contentBefore: '<p>abc]</p><ul class="o_checklist"><li><p>def[</p></li></ul>',
-                stepFunction: deleteForward,
-                contentAfter: "<p>abc[]</p>",
-            });
+    test("should delete a checklist (1)", async () => {
+        // Forward selection
+        await testEditor({
+            contentBefore: '<p>abc[</p><ul class="o_checklist"><li><p>def]</p></li></ul>',
+            stepFunction: deleteForward,
+            contentAfter: "<p>abc[]</p>",
         });
+    });
 
-        test("should merge the contents of a checklist item within a block into a heading, and leave the rest of its list as it is", async () => {
-            // Forward selection
+    test("should delete a checklist (2)", async () => {
+        // Backward selection
+        await testEditor({
+            contentBefore: '<p>abc]</p><ul class="o_checklist"><li><p>def[</p></li></ul>',
+            stepFunction: deleteForward,
+            contentAfter: "<p>abc[]</p>",
+        });
+    });
+
+    describe("should merge the contents of a checklist item within a block into a heading, and leave the rest of its list as it is", () => {
+        // Forward selection
+        test("should merge the contents of a checklist item within a block into a heading, and leave the rest of its list as it is (1)", async () => {
             await testEditor({
                 contentBefore:
                     '<h1>a[b</h1><p>de</p><custom-block style="display: block;"><ul class="o_checklist"><li class="o_checked">fg</li><li>h]i</li><li class="o_checked">jk</li></ul></custom-block>',
@@ -1061,6 +1173,8 @@ describe("Selection not collapsed", () => {
                 contentAfter:
                     '<h1>a[]i</h1><custom-block style="display: block;"><ul class="o_checklist"><li class="o_checked">jk</li></ul></custom-block>',
             });
+        });
+        test("should merge the contents of a checklist item within a block into a heading, and leave the rest of its list as it is (2)", async () => {
             await testEditor({
                 contentBefore:
                     '<h1>a[b</h1><p>de</p><custom-block style="display: block;"><ul class="o_checklist"><li>fg</li><li>h]i</li><li class="o_checked">jk</li></ul></custom-block>',
@@ -1068,6 +1182,8 @@ describe("Selection not collapsed", () => {
                 contentAfter:
                     '<h1>a[]i</h1><custom-block style="display: block;"><ul class="o_checklist"><li class="o_checked">jk</li></ul></custom-block>',
             });
+        });
+        test("should merge the contents of a checklist item within a block into a heading, and leave the rest of its list as it is (3)", async () => {
             await testEditor({
                 contentBefore:
                     '<h1>a[b</h1><p>de</p><custom-block style="display: block;"><ul class="o_checklist"><li class="o_checked">fg</li><li>h]i</li><li>jk</li></ul></custom-block>',
@@ -1075,6 +1191,8 @@ describe("Selection not collapsed", () => {
                 contentAfter:
                     '<h1>a[]i</h1><custom-block style="display: block;"><ul class="o_checklist"><li>jk</li></ul></custom-block>',
             });
+        });
+        test("should merge the contents of a checklist item within a block into a heading, and leave the rest of its list as it is (4)", async () => {
             await testEditor({
                 contentBefore:
                     '<h1>a[b</h1><p>de</p><custom-block style="display: block;"><ul class="o_checklist"><li>fg</li><li>h]i</li><li>jk</li></ul></custom-block>',
@@ -1082,7 +1200,9 @@ describe("Selection not collapsed", () => {
                 contentAfter:
                     '<h1>a[]i</h1><custom-block style="display: block;"><ul class="o_checklist"><li>jk</li></ul></custom-block>',
             });
-            // Backward selection
+        });
+        // Backward selection
+        test("should merge the contents of a checklist item within a block into a heading, and leave the rest of its list as it is (5)", async () => {
             await testEditor({
                 contentBefore:
                     '<h1>a]b</h1><p>de</p><custom-block style="display: block;"><ul class="o_checklist"><li>fg</li><li class="o_checked">h[i</li><li class="o_checked">jk</li></ul></custom-block>',
@@ -1090,6 +1210,8 @@ describe("Selection not collapsed", () => {
                 contentAfter:
                     '<h1>a[]i</h1><custom-block style="display: block;"><ul class="o_checklist"><li class="o_checked">jk</li></ul></custom-block>',
             });
+        });
+        test("should merge the contents of a checklist item within a block into a heading, and leave the rest of its list as it is (6)", async () => {
             await testEditor({
                 contentBefore:
                     '<h1>a]b</h1><p>de</p><custom-block style="display: block;"><ul class="o_checklist"><li>fg</li><li>h[i</li><li class="o_checked">jk</li></ul></custom-block>',
@@ -1097,6 +1219,8 @@ describe("Selection not collapsed", () => {
                 contentAfter:
                     '<h1>a[]i</h1><custom-block style="display: block;"><ul class="o_checklist"><li class="o_checked">jk</li></ul></custom-block>',
             });
+        });
+        test("should merge the contents of a checklist item within a block into a heading, and leave the rest of its list as it is (7)", async () => {
             await testEditor({
                 contentBefore:
                     '<h1>a]b</h1><p>de</p><custom-block style="display: block;"><ul class="o_checklist"><li>fg</li><li class="o_checked">h[i</li><li>jk</li></ul></custom-block>',
@@ -1104,6 +1228,8 @@ describe("Selection not collapsed", () => {
                 contentAfter:
                     '<h1>a[]i</h1><custom-block style="display: block;"><ul class="o_checklist"><li>jk</li></ul></custom-block>',
             });
+        });
+        test("should merge the contents of a checklist item within a block into a heading, and leave the rest of its list as it is (8)", async () => {
             await testEditor({
                 contentBefore:
                     '<h1>a]b</h1><p>de</p><custom-block style="display: block;"><ul class="o_checklist"><li>fg</li><li>h[i</li><li>jk</li></ul></custom-block>',
@@ -1115,13 +1241,16 @@ describe("Selection not collapsed", () => {
     });
     describe("Mixed", () => {
         describe("Ordered to unordered", () => {
-            test("should delete across an ordered list and an unordered list", async () => {
+            test("should delete across an ordered list and an unordered list (1)", async () => {
                 // Forward selection
                 await testEditor({
                     contentBefore: "<ol><li>ab[cd</li></ol><ul><li>ef]gh</li></ul>",
                     stepFunction: deleteForward,
                     contentAfter: "<ol><li>ab[]gh</li></ol>",
                 });
+            });
+
+            test("should delete across an ordered list and an unordered list (2)", async () => {
                 // Backward selection
                 await testEditor({
                     contentBefore: "<ol><li>ab]cd</li></ol><ul><li>ef[gh</li></ul>",
@@ -1130,30 +1259,34 @@ describe("Selection not collapsed", () => {
                 });
             });
 
-            test("should delete across an ordered list item and an unordered list item within an ordered list", async () => {
+            test("should delete across an ordered list item and an unordered list item within an ordered list (1)", async () => {
                 // Forward selection
                 await testEditor({
-                    contentBefore:
-                        '<ol><li>ab[cd</li><li class="oe-nested"><ul><li>ef]gh</li></ul></li></ol>',
+                    contentBefore: "<ol><li><p>ab[cd</p><ul><li>ef]gh</li></ul></li></ol>",
                     stepFunction: deleteForward,
-                    contentAfter: "<ol><li>ab[]gh</li></ol>",
-                });
-                // Backward selection
-                await testEditor({
-                    contentBefore:
-                        '<ol><li>ab]cd</li><li class="oe-nested"><ul><li>ef[gh</li></ul></li></ol>',
-                    stepFunction: deleteForward,
-                    contentAfter: "<ol><li>ab[]gh</li></ol>",
+                    contentAfter: "<ol><li><p>ab[]gh</p></li></ol>",
                 });
             });
 
-            test("should delete an ordered list and an unordered list", async () => {
+            test("should delete across an ordered list item and an unordered list item within an ordered list (2)", async () => {
+                // Backward selection
+                await testEditor({
+                    contentBefore: "<ol><li><p>ab]cd</p><ul><li>ef[gh</li></ul></li></ol>",
+                    stepFunction: deleteForward,
+                    contentAfter: "<ol><li><p>ab[]gh</p></li></ol>",
+                });
+            });
+
+            test("should delete an ordered list and an unordered list (1)", async () => {
                 // Forward selection
                 await testEditor({
                     contentBefore: "<p>ab[</p><ul><li>cd</li></ul><ol><li>ef]</li></ol>",
                     stepFunction: deleteForward,
                     contentAfter: "<p>ab[]</p>",
                 });
+            });
+
+            test("should delete an ordered list and an unordered list (2)", async () => {
                 // Backward selection
                 await testEditor({
                     contentBefore: "<p>ab]</p><ul><li>cd</li></ul><ol><li>ef[</li></ol>",
@@ -1163,13 +1296,16 @@ describe("Selection not collapsed", () => {
             });
         });
         describe("Unordered to ordered", () => {
-            test("should delete across an unordered list and an ordered list", async () => {
+            test("should delete across an unordered list and an ordered list (1)", async () => {
                 // Forward selection
                 await testEditor({
                     contentBefore: "<ul><li>ab[cd</li></ul><ol><li>ef]gh</li></ol>",
                     stepFunction: deleteForward,
                     contentAfter: "<ul><li>ab[]gh</li></ul>",
                 });
+            });
+
+            test("should delete across an unordered list and an ordered list (2)", async () => {
                 // Backward selection
                 await testEditor({
                     contentBefore: "<ul><li>ab]cd</li></ul><ol><li>ef[gh</li></ol>",
@@ -1178,30 +1314,34 @@ describe("Selection not collapsed", () => {
                 });
             });
 
-            test("should delete across an unordered list item and an ordered list item within an unordered list", async () => {
+            test("should delete across an unordered list item and an ordered list item within an unordered list (1)", async () => {
                 // Forward selection
                 await testEditor({
-                    contentBefore:
-                        '<ul><li>ab[cd</li><li class="oe-nested"><ol><li>ef]gh</li></ol></li></ul>',
+                    contentBefore: "<ul><li><p>ab[cd</p><ol><li>ef]gh</li></ol></li></ul>",
                     stepFunction: deleteForward,
-                    contentAfter: "<ul><li>ab[]gh</li></ul>",
-                });
-                // Backward selection
-                await testEditor({
-                    contentBefore:
-                        '<ul><li>ab]cd</li><li class="oe-nested"><ol><li>ef[gh</li></ol></li></ul>',
-                    stepFunction: deleteForward,
-                    contentAfter: "<ul><li>ab[]gh</li></ul>",
+                    contentAfter: "<ul><li><p>ab[]gh</p></li></ul>",
                 });
             });
 
-            test("should delete an ordered list and an unordered list", async () => {
+            test("should delete across an unordered list item and an ordered list item within an unordered list (2)", async () => {
+                // Backward selection
+                await testEditor({
+                    contentBefore: "<ul><li><p>ab]cd</p><ol><li>ef[gh</li></ol></li></ul>",
+                    stepFunction: deleteForward,
+                    contentAfter: "<ul><li><p>ab[]gh</p></li></ul>",
+                });
+            });
+
+            test("should delete an ordered list and an unordered list (1)", async () => {
                 // Forward selection
                 await testEditor({
                     contentBefore: "<p>ab[</p><ol><li>cd</li></ol><ul><li>ef]</li></ul>",
                     stepFunction: deleteForward,
                     contentAfter: "<p>ab[]</p>",
                 });
+            });
+
+            test("should delete an ordered list and an unordered list (2)", async () => {
                 // Backward selection
                 await testEditor({
                     contentBefore: "<p>ab]</p><ol><li>cd</li></ol><ul><li>ef[</li></ul>",
@@ -1218,7 +1358,8 @@ describe("Selection not collapsed", () => {
                         contentBefore:
                             '<ul class="o_checklist"><li class="o_checked">ab[cd</li></ul><ul><li class="o_checked">ef]gh</li></ul>',
                         stepFunction: deleteForward,
-                        contentAfter: '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
+                        contentAfter:
+                            '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
                     });
                 });
                 test("should delete across an checklist list and an unordered list (2)", async () => {
@@ -1230,11 +1371,12 @@ describe("Selection not collapsed", () => {
                     });
                 });
                 test("should delete across an checklist list and an unordered list (3)", async () => {
-                await testEditor({
+                    await testEditor({
                         contentBefore:
                             '<ul class="o_checklist"><li class="o_checked">ab[cd</li></ul><ul><li>ef]gh</li></ul>',
                         stepFunction: deleteForward,
-                        contentAfter: '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
+                        contentAfter:
+                            '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
                     });
                 });
                 test("should delete across an checklist list and an unordered list (4)", async () => {
@@ -1251,11 +1393,12 @@ describe("Selection not collapsed", () => {
                         contentBefore:
                             '<ul class="o_checklist"><li class="o_checked">ab]cd</li></ul><ul><li class="o_checked">ef[gh</li></ul>',
                         stepFunction: deleteForward,
-                        contentAfter: '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
+                        contentAfter:
+                            '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
                     });
                 });
                 test("should delete across an checklist list and an unordered list (6)", async () => {
-                await testEditor({
+                    await testEditor({
                         contentBefore:
                             '<ul class="o_checklist"><li>ab]cd</li></ul><ul><li class="o_checked">ef[gh</li></ul>',
                         stepFunction: deleteForward,
@@ -1267,7 +1410,8 @@ describe("Selection not collapsed", () => {
                         contentBefore:
                             '<ul class="o_checklist"><li class="o_checked">ab]cd</li></ul><ul><li>ef[gh</li></ul>',
                         stepFunction: deleteForward,
-                        contentAfter: '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
+                        contentAfter:
+                            '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
                     });
                 });
                 test("should delete across an checklist list and an unordered list (8)", async () => {
@@ -1280,36 +1424,44 @@ describe("Selection not collapsed", () => {
                 });
             });
 
-            test("should delete across an checklist list item and an unordered list item within an checklist list", async () => {
+            describe("should delete across an checklist list item and an unordered list item within an checklist list", () => {
                 // Forward selection
-                await testEditor({
-                    contentBefore:
-                        '<ul class="o_checklist"><li class="o_checked">ab[cd</li><li class="oe-nested"><ul><li class="o_checked">ef]gh</li></ul></li></ul>',
-                    stepFunction: deleteForward,
-                    contentAfter: '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
+                test("should delete across an checklist list item and an unordered list item within an checklist list (1)", async () => {
+                    await testEditor({
+                        contentBefore:
+                            '<ul class="o_checklist"><li><p>ab[cd</p><ul><li class="o_checked">ef]gh</li></ul></li></ul>',
+                        stepFunction: deleteForward,
+                        contentAfter: '<ul class="o_checklist"><li><p>ab[]gh</p></li></ul>',
+                    });
                 });
-                await testEditor({
-                    contentBefore:
-                        '<ul class="o_checklist"><li>ab[cd</li><li class="oe-nested"><ul><li>ef]gh</li></ul></li></ul>',
-                    stepFunction: deleteForward,
-                    contentAfter: '<ul class="o_checklist"><li>ab[]gh</li></ul>',
+                test("should delete across an checklist list item and an unordered list item within an checklist list (2)", async () => {
+                    await testEditor({
+                        contentBefore:
+                            '<ul class="o_checklist"><li><p>ab[cd</p><ul><li>ef]gh</li></ul></li></ul>',
+                        stepFunction: deleteForward,
+                        contentAfter: '<ul class="o_checklist"><li><p>ab[]gh</p></li></ul>',
+                    });
                 });
                 // Backward selection
-                await testEditor({
-                    contentBefore:
-                        '<ul class="o_checklist"><li class="o_checked">ab]cd</li><li class="oe-nested"><ul><li class="o_checked">ef[gh</li></ul></li></ul>',
-                    stepFunction: deleteForward,
-                    contentAfter: '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
+                test("should delete across an checklist list item and an unordered list item within an checklist list (3)", async () => {
+                    await testEditor({
+                        contentBefore:
+                            '<ul class="o_checklist"><li><p>ab]cd</p><ul><li class="o_checked">ef[gh</li></ul></li></ul>',
+                        stepFunction: deleteForward,
+                        contentAfter: '<ul class="o_checklist"><li><p>ab[]gh</p></li></ul>',
+                    });
                 });
-                await testEditor({
-                    contentBefore:
-                        '<ul class="o_checklist"><li>ab]cd</li><li class="oe-nested"><ul><li>ef[gh</li></ul></li></ul>',
-                    stepFunction: deleteForward,
-                    contentAfter: '<ul class="o_checklist"><li>ab[]gh</li></ul>',
+                test("should delete across an checklist list item and an unordered list item within an checklist list (4)", async () => {
+                    await testEditor({
+                        contentBefore:
+                            '<ul class="o_checklist"><li><p>ab]cd</p><ul><li>ef[gh</li></ul></li></ul>',
+                        stepFunction: deleteForward,
+                        contentAfter: '<ul class="o_checklist"><li><p>ab[]gh</p></li></ul>',
+                    });
                 });
             });
 
-            test("should delete an checklist list and an unordered list", async () => {
+            test("should delete an checklist list and an unordered list (1)", async () => {
                 // Forward selection
                 await testEditor({
                     contentBefore:
@@ -1317,6 +1469,9 @@ describe("Selection not collapsed", () => {
                     stepFunction: deleteForward,
                     contentAfter: "<p>ab[]</p>",
                 });
+            });
+
+            test("should delete an checklist list and an unordered list (2)", async () => {
                 // Backward selection
                 await testEditor({
                     contentBefore:
@@ -1327,7 +1482,7 @@ describe("Selection not collapsed", () => {
             });
         });
         describe("Unordered to checklist", () => {
-            test("should delete across an unordered list and an checklist list", async () => {
+            test("should delete across an unordered list and an checklist list (1)", async () => {
                 // Forward selection
                 await testEditor({
                     contentBefore:
@@ -1335,6 +1490,9 @@ describe("Selection not collapsed", () => {
                     stepFunction: deleteForward,
                     contentAfter: "<ul><li>ab[]gh</li></ul>",
                 });
+            });
+
+            test("should delete across an unordered list and an checklist list (2)", async () => {
                 // Backward selection
                 await testEditor({
                     contentBefore:
@@ -1344,24 +1502,27 @@ describe("Selection not collapsed", () => {
                 });
             });
 
-            test("should delete across an unordered list item and an checklist list item within an unordered list", async () => {
+            test("should delete across an unordered list item and an checklist list item within an unordered list (1)", async () => {
                 // Forward selection
                 await testEditor({
                     contentBefore:
-                        '<ul><li>ab[cd</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">ef]gh</li></ul></li></ul>',
+                        '<ul><li><p>ab[cd</p><ul class="o_checklist"><li class="o_checked">ef]gh</li></ul></li></ul>',
                     stepFunction: deleteForward,
-                    contentAfter: "<ul><li>ab[]gh</li></ul>",
-                });
-                // Backward selection
-                await testEditor({
-                    contentBefore:
-                        '<ul><li>ab]cd</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">ef[gh</li></ul></li></ul>',
-                    stepFunction: deleteForward,
-                    contentAfter: "<ul><li>ab[]gh</li></ul>",
+                    contentAfter: "<ul><li><p>ab[]gh</p></li></ul>",
                 });
             });
 
-            test("should delete an checklist list and an unordered list", async () => {
+            test("should delete across an unordered list item and an checklist list item within an unordered list (2)", async () => {
+                // Backward selection
+                await testEditor({
+                    contentBefore:
+                        '<ul><li><p>ab]cd</p><ul class="o_checklist"><li class="o_checked">ef[gh</li></ul></li></ul>',
+                    stepFunction: deleteForward,
+                    contentAfter: "<ul><li><p>ab[]gh</p></li></ul>",
+                });
+            });
+
+            test("should delete an checklist list and an unordered list (1)", async () => {
                 // Forward selection
                 await testEditor({
                     contentBefore:
@@ -1369,6 +1530,9 @@ describe("Selection not collapsed", () => {
                     stepFunction: deleteForward,
                     contentAfter: "<p>ab[]</p>",
                 });
+            });
+
+            test("should delete an checklist list and an unordered list (2)", async () => {
                 // Backward selection
                 await testEditor({
                     contentBefore:

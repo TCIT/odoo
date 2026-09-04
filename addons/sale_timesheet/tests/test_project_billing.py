@@ -3,6 +3,7 @@
 from odoo.addons.sale_timesheet.tests.common import TestCommonSaleTimesheet
 from odoo.fields import Command
 from odoo.tests import Form, tagged
+from odoo.addons.mail.tests.common import mail_new_test_user
 
 @tagged('post_install', '-at_install')
 class TestProjectBilling(TestCommonSaleTimesheet):
@@ -87,6 +88,13 @@ class TestProjectBilling(TestCommonSaleTimesheet):
             'sale_line_id': cls.so1_line_deliver_no_task.id,
             'employee_id': cls.employee_user.id,
         })
+        cls.project_sale_manager = mail_new_test_user(
+            cls.env,
+            name='Project Manager',
+            login='project_manager',
+            email='project_manager@example.com',
+            groups='project.group_project_manager,sales_team.group_sale_manager',
+        )
 
     def test_billing_employee_rate(self):
         """ Check task and subtask creation, and timesheeting in a project billed at 'employee rate'. Then move the task into a 'task rate' project. """
@@ -301,7 +309,7 @@ class TestProjectBilling(TestCommonSaleTimesheet):
             3) Create an employee mapping in this project
             4) Check if the partner_id and pricing_type fields have been changed
         """
-        with Form(self.env['project.project']) as project_form:
+        with Form(self.env['project.project'].with_user(self.project_sale_manager)) as project_form:
             project_form.name = 'Test Billable Project'
             project_form.allow_billable = True
             # `sale_line_employee_ids` is not visible if `partner_id` is not set
@@ -316,3 +324,43 @@ class TestProjectBilling(TestCommonSaleTimesheet):
             self.assertEqual(project_form.partner_id, self.so.partner_id, 'The partner should be the one defined the SO linked to the SOL defined in the mapping.')
             project = project_form.save()
             self.assertEqual(project.pricing_type, 'employee_rate', 'Since there is a mapping in this project, the pricing type should be employee rate.')
+
+    def test_take_into_account_invoicing_app_legacy(self):
+        """ Test the timesheets linked to a invoice determined as a invoiced imported form app legacy
+            are still considered as billed even if the state of those invoices is cancelled.
+
+            Since the account_accountant module is not in the dependencies of sale_timesheet module,
+            this test will manually set the state and payment_status to be in the same condition
+            than the feature "Invoicing Switch Threshold".
+        """
+        timesheet1 = self.env['account.analytic.line'].create({
+            'name': '/',
+            'project_id': self.project_task_rate.id,
+            'unit_amount': 1,
+            'so_line': self.so1_line_deliver_no_task.id,
+            'is_so_line_edited': True,
+            'employee_id': self.employee_user.id,
+        })
+
+        self.assertEqual(self.so1_line_deliver_no_task.qty_delivered, timesheet1.unit_amount)
+        invoice1 = self.sale_order_1._create_invoices()[0]
+        invoice1.action_post()
+
+        self.assertEqual(self.so1_line_deliver_no_task.qty_invoiced, 1)
+        self.assertEqual(timesheet1.timesheet_invoice_id, invoice1)
+
+        timesheet2 = self.env['account.analytic.line'].create({
+            'project_id': self.project_task_rate.id,
+            'unit_amount': 2,
+            'so_line': self.so1_line_deliver_no_task.id,
+            'is_so_line_edited': True,
+            'employee_id': self.employee_user.id,
+        })
+        self.assertEqual(self.so1_line_deliver_no_task.qty_delivered, timesheet1.unit_amount + timesheet2.unit_amount)
+        invoice1.write({'state': 'cancel', 'payment_state': 'invoicing_legacy'})
+        self.assertEqual(self.so1_line_deliver_no_task.qty_invoiced, timesheet1.unit_amount)
+        invoice2 = self.sale_order_1._create_invoices()[0]
+        invoice2.action_post()
+        self.assertEqual(self.so1_line_deliver_no_task.qty_invoiced, timesheet1.unit_amount + timesheet2.unit_amount)
+        self.assertEqual(timesheet1.timesheet_invoice_id, invoice1)
+        self.assertEqual(timesheet2.timesheet_invoice_id, invoice2)

@@ -3,7 +3,6 @@ from odoo import api, fields, models
 
 
 class AccountTax(models.Model):
-
     _inherit = 'account.tax'
 
     l10n_ar_type_tax_use = fields.Selection(
@@ -35,7 +34,7 @@ class AccountTax(models.Model):
         string='WTH Sequence',
         copy=False, check_company=True,
         help='If no sequence provided then it will be required for you to enter withholding number when registering one.')
-    l10n_ar_code = fields.Char('AFIP Code')
+    l10n_ar_code = fields.Char('ARCA Code')
     l10n_ar_non_taxable_amount = fields.Float(
         string='Non Taxable Amount',
         digits='Account',
@@ -54,16 +53,19 @@ class AccountTax(models.Model):
     @api.depends('type_tax_use', 'l10n_ar_withholding_payment_type')
     def _compute_l10n_ar_type_tax_use(self):
         for tax in self:
-            if tax.type_tax_use in ('sale', 'purchase'):
-                tax.l10n_ar_type_tax_use = tax.type_tax_use
-            elif tax.l10n_ar_withholding_payment_type in ('supplier', 'customer'):
-                tax.l10n_ar_type_tax_use = tax.l10n_ar_withholding_payment_type
+            if tax.country_code == 'AR':
+                if tax.type_tax_use in ('sale', 'purchase'):
+                    tax.l10n_ar_type_tax_use = tax.type_tax_use
+                elif tax.l10n_ar_withholding_payment_type in ('supplier', 'customer'):
+                    tax.l10n_ar_type_tax_use = tax.l10n_ar_withholding_payment_type
+                else:
+                    tax.l10n_ar_type_tax_use = 'none'
             else:
                 tax.l10n_ar_type_tax_use = 'none'
 
     @api.onchange('l10n_ar_type_tax_use')
     def _inverse_l10n_ar_type_tax_use(self):
-        for tax in self:
+        for tax in self.filtered(lambda t: t.country_code == 'AR'):
             if tax.l10n_ar_type_tax_use in ('sale', 'purchase'):
                 tax.type_tax_use = tax.l10n_ar_type_tax_use
                 tax.l10n_ar_tax_type = False
@@ -76,3 +78,15 @@ class AccountTax(models.Model):
                     tax.l10n_ar_withholding_payment_type = False
                     tax.l10n_ar_tax_type = False
                 tax.type_tax_use = 'none'
+
+    def _prepare_base_line_tax_repartition_grouping_key(self, base_line, base_line_grouping_key, tax_data, tax_rep_data):
+        """ Override to keep withholding lines with a 0% tax.
+        These lines are important for the Argentinian localization and as the withholding table is not editable,
+        if they are removed, then there's no way to re-add them afterwards.
+        """
+        res = super()._prepare_base_line_tax_repartition_grouping_key(base_line, base_line_grouping_key, tax_data, tax_rep_data)
+        record = base_line['record']
+        if isinstance(record, models.Model) and record._name == "account.move.line":
+            if any(tax.country_code == 'AR' and tax.l10n_ar_withholding_payment_type for tax in record.tax_ids):
+                res["__keep_zero_line"] = True
+        return res

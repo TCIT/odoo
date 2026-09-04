@@ -21,7 +21,7 @@ export const IMAGE_MIMETYPES = [
 export const IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".jpe", ".png", ".svg", ".gif", ".webp"];
 
 class RemoveButton extends Component {
-    static template = xml`<i class="fa fa-trash o_existing_attachment_remove position-absolute top-0 end-0 p-2 bg-white-25 cursor-pointer opacity-0 opacity-100-hover z-index-1 transition-base" t-att-title="removeTitle" role="img" t-att-aria-label="removeTitle" t-on-click="this.remove"/>`;
+    static template = xml`<i class="fa fa-trash o_existing_attachment_remove position-absolute top-0 end-0 p-2 bg-white-25 cursor-pointer opacity-0 opacity-100-hover z-1 transition-base" t-att-title="removeTitle" role="img" t-att-aria-label="removeTitle" t-on-click="this.remove"/>`;
     static props = ["model?", "remove"];
     setup() {
         this.removeTitle = _t("This file is attached to the current record.");
@@ -38,25 +38,7 @@ class RemoveButton extends Component {
 
 export class AttachmentError extends Component {
     static components = { Dialog };
-    static template = xml`
-        <Dialog title="title">
-            <div class="form-text">
-                <p>The image could not be deleted because it is used in the
-                    following pages or views:</p>
-                <ul t-foreach="props.views"  t-as="view" t-key="view.id">
-                    <li>
-                        <a t-att-href="'/odoo/ir.ui.view/' + window.encodeURIComponent(view.id)">
-                            <t t-esc="view.name"/>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <t t-set-slot="footer">
-                <button class="btn btn-primary" t-on-click="() => this.props.close()">
-                    Ok
-                </button>
-            </t>
-        </Dialog>`;
+    static template = "html_editor.AttachmentError";
     static props = ["views", "close"];
     setup() {
         this.title = _t("Alert");
@@ -77,7 +59,7 @@ export class Attachment extends Component {
         this.dialogs.add(ConfirmationDialog, {
             body: _t("Are you sure you want to delete this file?"),
             confirm: async () => {
-                const prevented = await rpc("/web_editor/attachment/remove", {
+                const prevented = await rpc("/html_editor/attachment/remove", {
                     ids: [this.props.id],
                 });
                 if (!Object.keys(prevented).length) {
@@ -129,6 +111,16 @@ export class FileSelectorControlPanel extends Component {
         this.debouncedValidateUrl = useDebounced(this.props.validateUrl, 500);
 
         this.fileInput = useRef("file-input");
+        const urlInputRef = useRef("urlInput");
+
+        useEffect(
+            () => {
+                if (this.state.showUrlInput) {
+                    urlInputRef.el.focus();
+                }
+            },
+            () => [this.state.showUrlInput]
+        );
     }
 
     get showSearchServiceSelect() {
@@ -169,7 +161,10 @@ export class FileSelectorControlPanel extends Component {
             return;
         }
         await this.props.uploadFiles(inputFiles);
-        this.fileInput.el.value = "";
+        const fileInputEl = this.fileInput.el;
+        if (fileInputEl) {
+            fileInputEl.value = "";
+        }
     }
 }
 
@@ -363,7 +358,9 @@ export class FileSelector extends Component {
             .then(async (result) => {
                 const blob = await result.blob();
                 blob.id = new Date().getTime();
-                blob.name = new URL(url).pathname.split("/").findLast((s) => s);
+                blob.name = new URL(url, window.location.href).pathname
+                    .split("/")
+                    .findLast((s) => s);
                 await this.uploadFiles([blob]);
             })
             .catch(async () => {
@@ -376,27 +373,30 @@ export class FileSelector extends Component {
                         this.notificationService.add(
                             _t("An error occurred while fetching the entered URL."),
                             {
-                                title: _t("Error"),
+                                type: "danger",
                                 sticky: true,
                             }
                         );
                         resolve();
                     };
                     imageEl.onload = () => {
-                        this.uploadService
-                            .uploadUrl(
-                                url,
-                                {
-                                    resModel: this.props.resModel,
-                                    resId: this.props.resId,
-                                },
-                                (attachment) => this.onUploaded(attachment)
-                            )
-                            .then(resolve);
+                        this.onLoadUploadedUrl(url, resolve);
                     };
                     imageEl.src = url;
                 });
             });
+    }
+
+    async onLoadUploadedUrl(url, resolve) {
+        await this.uploadService.uploadUrl(
+            url,
+            {
+                resModel: this.props.resModel,
+                resId: this.props.resId,
+            },
+            (attachment) => this.onUploaded(attachment)
+        );
+        resolve();
     }
 
     async onUploaded(attachment) {
@@ -469,9 +469,9 @@ export class FileSelector extends Component {
         if (firstHiddenAttachmentEl) {
             const attachmentBottom = firstHiddenAttachmentEl.getBoundingClientRect().bottom;
             const attachmentIndex = attachmentEls.indexOf(firstHiddenAttachmentEl);
-            const firstNextRowAttachmentEl = attachmentEls.slice(attachmentIndex).find((el) => {
-                return el.getBoundingClientRect().bottom > attachmentBottom;
-            });
+            const firstNextRowAttachmentEl = attachmentEls
+                .slice(attachmentIndex)
+                .find((el) => el.getBoundingClientRect().bottom > attachmentBottom);
             scrollToEl = firstNextRowAttachmentEl || scrollToEl;
         }
         scrollToEl.scrollIntoView({ block: "end", inline: "nearest", behavior: "smooth" });

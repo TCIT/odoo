@@ -12,5 +12,11 @@ class MrpProduction(models.Model):
         # Take the price unit of the reception move
         last_done_receipt = finished_move.move_dest_ids.filtered(lambda m: m.state == 'done')[-1:]
         if last_done_receipt.is_subcontract:
-            self.extra_cost = next(iter(last_done_receipt._get_price_unit().values()))
+            quantity = last_done_receipt.quantity
+            bill_data = last_done_receipt._get_value_from_account_move(quantity)
+            po_data = last_done_receipt._get_value_from_quotation(quantity - bill_data['quantity'])
+            if not bill_data['value'] and not po_data['value']:
+                self.extra_cost = last_done_receipt.price_unit
+            else:
+                self.extra_cost = (bill_data['value'] + po_data['value']) / quantity
         return super()._cal_price(consumed_moves=consumed_moves)

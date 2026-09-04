@@ -4,13 +4,22 @@
 from odoo import _, fields, models
 from odoo.exceptions import UserError
 
+
 class PosConfig(models.Model):
     _inherit = 'pos.config'
 
     # NOTE: this funtions acts as a m2m field with loyalty.program model. We do this to handle an excpetional use case:
     # When no PoS is specified at a loyalty program form, this program is applied to every PoS (instead of none)
     def _get_program_ids(self):
-        return self.env['loyalty.program'].search(['&', ('pos_ok', '=', True), '|', ('pos_config_ids', '=', self.id), ('pos_config_ids', '=', False)])
+        today = fields.Date.context_today(self)
+        return self.env['loyalty.program'].search([
+            ('pos_ok', '=', True),
+            '|', ('pos_config_ids', '=', self.id), ('pos_config_ids', '=', False),
+            '|', ('date_from', '=', False), ('date_from', '<=', today),
+            '|', ('date_to', '=', False), ('date_to', '>=', today),
+            '|', ('pricelist_ids', '=', False), ('pricelist_ids', 'in', self._get_available_pricelists().ids),
+            ('currency_id', '=', self.currency_id.id)
+        ]).filtered(lambda p: not p.limit_usage or p.sudo().total_order_count < p.max_usage)
 
     def _check_before_creating_new_session(self):
         self.ensure_one()
@@ -40,7 +49,7 @@ class PosConfig(models.Model):
 
         if invalid_reward_products_msg:
             prefix_error_msg = _("To continue, make the following reward products available in Point of Sale.")
-            raise UserError(f"{prefix_error_msg}\n{invalid_reward_products_msg}")
+            raise UserError(f"{prefix_error_msg}\n{invalid_reward_products_msg}")  # pylint: disable=missing-gettext
         if gift_card_programs:
             for gc_program in gift_card_programs:
                 # Do not allow a gift card program with more than one rule or reward, and check that they make sense
@@ -83,7 +92,7 @@ class PosConfig(models.Model):
         if (
             (coupon.expiration_date and coupon.expiration_date < check_date)
             or (program.date_to and program.date_to < today_date)
-            or (program.limit_usage and program.total_order_count >= program.max_usage)
+            or (program.limit_usage and program.sudo().total_order_count >= program.max_usage)
         ):
             error_message = _("This coupon is expired (%s).", code)
         elif program.date_from and program.date_from > today_date:
@@ -113,6 +122,7 @@ class PosConfig(models.Model):
                 'coupon_id': coupon.id,
                 'coupon_partner_id': coupon.partner_id.id,
                 'points': coupon.points,
+                'points_display': coupon.points_display,
                 'has_source_order': coupon._has_source_order(),
             },
         }

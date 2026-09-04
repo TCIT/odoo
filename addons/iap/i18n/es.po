@@ -1,25 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* iap
-# 
+# * iap
+#
 # Translators:
-# Pablo Rojas <rojaspablo88@gmail.com>, 2024
-# Wil Odoo, 2024
-# Larissa Manderfeld, 2024
-# 
+# Martin Trigaux, 2022
+# Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~15.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Larissa Manderfeld, 2024\n"
-"Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 17:38+0000\n"
+"Last-Translator: \"Noemi Pla Garcia (nopl)\" <nopl@odoo.com>\n"
+"Language-Team: Spanish <https://translate.odoo.com/projects/odoo-19/iap/es/>"
+"\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: es\n"
-"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
+"0) ? 1 : 2);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: iap
 #: model_terms:ir.ui.view,arch_db:iap.iap_account_view_form
@@ -45,8 +48,8 @@ msgstr "Token de la cuenta"
 msgid ""
 "Account token is your authentication key for this service. Do not share it."
 msgstr ""
-"El token de su cuenta es su clave de autenticación para este servicio. No lo"
-" comparta."
+"El token de su cuenta es su clave de autenticación para este servicio. No lo "
+"comparta."
 
 #. module: iap
 #. odoo-python
@@ -67,18 +70,6 @@ msgstr "Saldo"
 #: model:ir.model.fields.selection,name:iap.selection__iap_account__state__banned
 msgid "Banned"
 msgstr "Prohibido"
-
-#. module: iap
-#. odoo-javascript
-#: code:addons/iap/static/src/js/insufficient_credit_error_handler.js:0
-msgid "Buy credits"
-msgstr "Comprar créditos"
-
-#. module: iap
-#. odoo-javascript
-#: code:addons/iap/static/src/xml/iap_templates.xml:0
-msgid "Cancel"
-msgstr "Cancelar"
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__company_ids
@@ -110,9 +101,10 @@ msgstr "Descripción"
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__display_name
+#: model:ir.model.fields,field_description:iap.field_iap_enrich_api__display_name
 #: model:ir.model.fields,field_description:iap.field_iap_service__display_name
 msgid "Display Name"
-msgstr "Nombre mostrado"
+msgstr "Nombre para mostrar"
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__warning_user_ids
@@ -128,8 +120,8 @@ msgstr "Umbral de alerta por correo electrónico"
 #: model:iap.service,description:iap.iap_service_reveal
 msgid ""
 "Get quality leads and opportunities: convert your website visitors into "
-"leads, generate leads based on a set of criteria and enrich the company data"
-" of your opportunities."
+"leads, generate leads based on a set of criteria and enrich the company data "
+"of your opportunities."
 msgstr ""
 "Obtenga leads y oportunidades de calidad: convierta a los visitantes de su "
 "sitio web en leads, genere leads basándose en un conjunto de criterios y "
@@ -165,15 +157,10 @@ msgstr "Servicio IAP"
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__id
+#: model:ir.model.fields,field_description:iap.field_iap_enrich_api__id
 #: model:ir.model.fields,field_description:iap.field_iap_service__id
 msgid "ID"
 msgstr "ID"
-
-#. module: iap
-#. odoo-javascript
-#: code:addons/iap/static/src/xml/iap_templates.xml:0
-msgid "Insufficient credit to perform this service."
-msgstr "Crédito insuficiente para ejecutar este servicio."
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_service__integer_balance
@@ -205,9 +192,15 @@ msgid "Name"
 msgstr "Nombre"
 
 #. module: iap
+#. odoo-python
+#: code:addons/iap/models/iap_account.py:0
+msgid "No service exists with the provided technical name"
+msgstr "No existe ningún servicio con el nombre técnico proporcionado"
+
+#. module: iap
 #: model_terms:ir.ui.view,arch_db:iap.res_config_settings_view_form
 msgid "Odoo IAP"
-msgstr "Odoo IAP"
+msgstr "IAP de Odoo"
 
 #. module: iap
 #. odoo-python
@@ -246,12 +239,6 @@ msgid "Service Locked"
 msgstr "Servicio bloqueado"
 
 #. module: iap
-#. odoo-javascript
-#: code:addons/iap/static/src/js/insufficient_credit_error_handler.js:0
-msgid "Start a Trial at Odoo"
-msgstr "Comenzar una prueba en Odoo"
-
-#. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__state
 msgid "State"
 msgstr "Estado"
@@ -261,6 +248,12 @@ msgstr "Estado"
 #: model:ir.model.fields,field_description:iap.field_iap_service__technical_name
 msgid "Technical Name"
 msgstr "Nombre técnico"
+
+#. module: iap
+#. odoo-python
+#: code:addons/iap/models/iap_account.py:0
+msgid "The IAP token provided is invalid or empty."
+msgstr "El token IAP proporcionado no es válido o está vacío."
 
 #. module: iap
 #. odoo-python
@@ -293,3 +286,32 @@ msgstr "Ver mis servicios"
 #: model_terms:ir.ui.view,arch_db:iap.res_config_settings_view_form
 msgid "View your IAP Services and recharge your credits"
 msgstr "Vea sus servicios de IAP y recargue sus créditos"
+
+#~ msgid "Buy credits"
+#~ msgstr "Comprar créditos"
+
+#~ msgid "Cancel"
+#~ msgstr "Cancelar"
+
+#~ msgid "Config Settings"
+#~ msgstr "Opciones de configuración"
+
+#~ msgid "Insufficient credit to perform this service."
+#~ msgstr "Crédito insuficiente para ejecutar este servicio."
+
+#~ msgid "Open IAP Account"
+#~ msgstr "Abrir cuenta IAP"
+
+#~ msgid "Service Name"
+#~ msgstr "Nombre del servicio"
+
+#~ msgid "Start a Trial at Odoo"
+#~ msgstr "Comenzar una prueba en Odoo"
+
+#~ msgid ""
+#~ "The url that this service requested returned an error. Please contact the "
+#~ "author of the app. The url it tried to contact was %s"
+#~ msgstr ""
+#~ "La url que solicitó este servicio reportó un error. Por favor, pontee en "
+#~ "contacto con el autor de la aplicación. La url que intentaste utilizar "
+#~ "es%s "

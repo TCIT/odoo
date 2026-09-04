@@ -15,8 +15,7 @@ class AccountChartTemplate(models.AbstractModel):
             'code_digits': '6',
             'property_account_receivable_id': 'a400',
             'property_account_payable_id': 'a440',
-            'property_account_expense_categ_id': 'a600',
-            'property_account_income_categ_id': 'a7000',
+            'downpayment_account_id': 'a46',
         }
 
     @template('be', 'res.company')
@@ -35,9 +34,14 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_journal_early_pay_discount_gain_account_id': 'a757000',
                 'account_sale_tax_id': 'attn_VAT-OUT-21-L',
                 'account_purchase_tax_id': 'attn_VAT-IN-V81-21',
+                'account_purchase_receipt_fiscal_position_id': 'fiscal_position_template_6',
                 'default_cash_difference_income_account_id': 'a757100',
                 'default_cash_difference_expense_account_id': 'a657100',
                 'transfer_account_id': 'a58',
+                'expense_account_id': 'a600',
+                'income_account_id': 'a7000',
+                'account_stock_journal_id': 'inventory_valuation',
+                'account_stock_valuation_id': 'a300',
             },
         }
 
@@ -65,18 +69,26 @@ class AccountChartTemplate(models.AbstractModel):
                 'name@nl': 'Betalingskorting',
                 'name@de': 'Skonto',
             },
-            'frais_bancaires_htva_template': {
-                'name': 'Bank Fees (No VAT)',
-                'line_ids': [
-                    Command.create({
-                        'account_id': 'a6560',
-                        'amount_type': 'percentage',
-                        'amount_string': '100',
-                        'label': 'Bank Fees (No VAT)',
-                    }),
-                ],
-                'name@fr': 'Frais bancaires (Hors TVA)',
-                'name@nl': 'Bankkosten (Geen BTW)',
-                'name@de': 'Bankgebühren (Ohne MwSt.)',
+        }
+
+    def _get_bank_fees_reco_account(self, company):
+        # Belgian account for the bank fees reco model. We need to be as precise
+        # as possible in case it's modified so it's missing and not replaced.
+        be_account = self.with_company(company).ref('a6560', raise_if_not_found=False)
+        return be_account or super()._get_bank_fees_reco_account(company)
+
+    def _post_load_data(self, template_code, company, template_data):
+        super()._post_load_data(template_code, company, template_data)
+        if template_code in ('be_comp', 'be_asso') and \
+                (purchase_journal := self.ref('purchase', raise_if_not_found=False)) and \
+                (non_deductible_account := self.ref('a416', raise_if_not_found=False)):
+            purchase_journal.non_deductible_account_id = non_deductible_account
+
+    @template('be', 'account.account')
+    def _get_be_account_account(self):
+        return {
+            'a300': {
+                'account_stock_expense_id': 'a600',
+                'account_stock_variation_id': 'a6090',
             },
         }

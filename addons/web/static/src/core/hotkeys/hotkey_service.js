@@ -16,7 +16,7 @@ import { getVisibleElements } from "../utils/ui";
  *  allow registration to perform no matter the UI active element
  * @property {() => HTMLElement} [area]
  *  adds a restricted operating area for this hotkey
- * @property {() => boolean} [isAvailable]
+ * @property {(target: HTMLElement) => boolean} [isAvailable]
  *  adds a validation before calling the hotkey registration's callback
  * @property {() => HTMLElement} [withOverlay]
  *  provides the element on which the overlay should be displayed
@@ -47,7 +47,7 @@ const NAV_KEYS = [
     "space",
 ];
 const MODIFIERS = ["alt", "control", "shift"];
-const AUTHORIZED_KEYS = [...ALPHANUM_KEYS, ...NAV_KEYS, "escape"];
+const AUTHORIZED_KEYS = [...ALPHANUM_KEYS, ...NAV_KEYS, "escape", "<", ">"];
 
 /**
  * Get the actual hotkey being pressed.
@@ -165,8 +165,9 @@ export const hotkeyService = {
 
             // Special case: open hotkey overlays
             if (!overlaysVisible && hotkey === hotkeyService.overlayModifier) {
-                addHotkeyOverlays(activeElement);
-                event.preventDefault();
+                if (addHotkeyOverlays(activeElement)) {
+                    event.preventDefault();
+                }
                 return;
             }
 
@@ -240,7 +241,7 @@ export const hotkeyService = {
                     (reg.allowRepeat || !isRepeated) &&
                     (reg.bypassEditableProtection || !shouldProtectEditable) &&
                     (reg.global || reg.activeElement === activeElement) &&
-                    (!reg.isAvailable || reg.isAvailable()) &&
+                    (!reg.isAvailable || reg.isAvailable(target)) &&
                     (!reg.area || (target && reg.area() && reg.area().contains(target)))
             );
 
@@ -303,6 +304,7 @@ export const hotkeyService = {
         /**
          * Add the hotkey overlays respecting the ui active element.
          * @param {HTMLElement} activeElement
+         * @returns {boolean} true if overlays were actually displayed
          */
         function addHotkeyOverlays(activeElement) {
             // Gather the hotkeys to overlay registered through the useHotkey hook.
@@ -327,6 +329,9 @@ export const hotkeyService = {
             ).map((el) => ({ hotkey: el.dataset.hotkey, el }));
 
             const items = [...hotkeysFromDomToHighlight, ...hotkeysFromHookToHighlight];
+            if (!items.length) {
+                return false;
+            }
             for (const item of items) {
                 const hotkey = item.hotkey;
                 const overlay = document.createElement("div");
@@ -366,6 +371,7 @@ export const hotkeyService = {
                 overlayParent.appendChild(overlay);
             }
             overlaysVisible = true;
+            return true;
         }
 
         /**

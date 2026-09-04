@@ -7,7 +7,7 @@ from odoo import models, fields, _
 from odoo.exceptions import ValidationError, UserError
 
 
-class CloudStorageSettings(models.TransientModel):
+class ResConfigSettings(models.TransientModel):
     """
     Instructions:
     cloud_storage_azure_account_name, cloud_storage_azure_container_name:

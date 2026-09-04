@@ -4,7 +4,7 @@
 from odoo import _, api, fields, models
 
 
-class EmbeddedSlide(models.Model):
+class SlideEmbed(models.Model):
     """ Embedding in third party websites. Track view count, generate statistics. """
     _name = 'slide.embed'
     _description = 'Embedded Slides View Counter'

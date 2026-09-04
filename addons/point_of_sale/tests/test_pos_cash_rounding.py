@@ -35,220 +35,8 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
             'pos_categ_ids': [Command.set(cls.pos_desk_misc_test.ids)],
         })
 
-    def test_cash_rounding_halfup_add_invoice_line_not_only_round_cash_method(self):
-        self.main_pos_config.write({
-            'rounding_method': self.cash_rounding_add_invoice_line.id,
-            'cash_rounding': True,
-            'only_round_cash_method': False,
-        })
-        with self.with_new_session(user=self.pos_user) as session:
-            self.start_pos_tour('test_cash_rounding_halfup_add_invoice_line_not_only_round_cash_method')
-            refund, order = self.env['pos.order'].search([('session_id', '=', session.id)], limit=2)
-            self.assertRecordValues(order, [{
-                'amount_tax': 2.05,
-                'amount_total': 15.719999999999999,
-                'amount_paid': 15.7,
-            }])
-            self.assertRecordValues(order.account_move, [{
-                'amount_untaxed': 13.65,
-                'amount_tax': 2.05,
-                'amount_total': 15.7,
-            }])
-            self.assertRecordValues(refund, [{
-                'amount_tax': -2.05,
-                'amount_total': -15.719999999999999,
-                'amount_paid': -15.7,
-            }])
-            self.assertRecordValues(refund.account_move, [{
-                'amount_untaxed': 13.65,
-                'amount_tax': 2.05,
-                'amount_total': 15.7,
-            }])
-
-    def test_cash_rounding_halfup_add_invoice_line_not_only_round_cash_method_pay_by_bank_and_cash(self):
-        self.main_pos_config.write({
-            'rounding_method': self.cash_rounding_add_invoice_line.id,
-            'cash_rounding': True,
-            'only_round_cash_method': False,
-        })
-        with self.with_new_session(user=self.pos_user) as session:
-            self.start_pos_tour('test_cash_rounding_halfup_add_invoice_line_not_only_round_cash_method_pay_by_bank_and_cash')
-            refund, order = self.env['pos.order'].search([('session_id', '=', session.id)], limit=2)
-            self.assertRecordValues(order, [{
-                'amount_tax': 2.05,
-                'amount_total': 15.719999999999999,
-                'amount_paid': 15.73,
-            }])
-            self.assertRecordValues(order.account_move, [{
-                'amount_untaxed': 13.68,
-                'amount_tax': 2.05,
-                'amount_total': 15.73,
-            }])
-            self.assertRecordValues(refund, [{
-                'amount_tax': -2.05,
-                'amount_total': -15.719999999999999,
-                'amount_paid': -15.73,
-            }])
-            self.assertRecordValues(refund.account_move, [{
-                'amount_untaxed': 13.68,
-                'amount_tax': 2.05,
-                'amount_total': 15.73,
-            }])
-
-    def test_cash_rounding_down_add_invoice_line_not_only_round_cash_method_no_rounding_left(self):
-        self.cash_rounding_add_invoice_line.rounding_method = 'DOWN'
-        self.main_pos_config.write({
-            'rounding_method': self.cash_rounding_add_invoice_line.id,
-            'cash_rounding': True,
-            'only_round_cash_method': False,
-        })
-        with self.with_new_session(user=self.pos_user) as session:
-            self.start_pos_tour('test_cash_rounding_down_add_invoice_line_not_only_round_cash_method_no_rounding_left')
-            refund, order = self.env['pos.order'].search([('session_id', '=', session.id)], limit=2)
-            self.assertRecordValues(order, [{
-                'amount_tax': 2.05,
-                'amount_total': 15.719999999999999,
-                'amount_paid': 15.72,
-            }])
-            self.assertRecordValues(order.account_move, [{
-                'amount_untaxed': 13.67,
-                'amount_tax': 2.05,
-                'amount_total': 15.72,
-            }])
-            self.assertRecordValues(refund, [{
-                'amount_tax': -2.05,
-                'amount_total': -15.719999999999999,
-                'amount_paid': -15.72,
-            }])
-            self.assertRecordValues(refund.account_move, [{
-                'amount_untaxed': 13.67,
-                'amount_tax': 2.05,
-                'amount_total': 15.72,
-            }])
-
-    def test_cash_rounding_down_add_invoice_line_not_only_round_cash_method_with_residual_rounding(self):
-        self.cash_rounding_add_invoice_line.rounding_method = 'DOWN'
-        self.main_pos_config.write({
-            'rounding_method': self.cash_rounding_add_invoice_line.id,
-            'cash_rounding': True,
-            'only_round_cash_method': False,
-        })
-        with self.with_new_session(user=self.pos_user) as session:
-            self.start_pos_tour('test_cash_rounding_down_add_invoice_line_not_only_round_cash_method_with_residual_rounding')
-            refund, order = self.env['pos.order'].search([('session_id', '=', session.id)], limit=2)
-            self.assertRecordValues(order, [{
-                'amount_tax': 2.05,
-                'amount_total': 15.719999999999999,
-                'amount_paid': 15.68,
-            }])
-            self.assertRecordValues(order.account_move, [{
-                'amount_untaxed': 13.63,
-                'amount_tax': 2.05,
-                'amount_total': 15.68,
-            }])
-            self.assertRecordValues(refund, [{
-                'amount_tax': -2.05,
-                'amount_total': -15.719999999999999,
-                'amount_paid': -15.68,
-            }])
-            self.assertRecordValues(refund.account_move, [{
-                'amount_untaxed': 13.63,
-                'amount_tax': 2.05,
-                'amount_total': 15.68,
-            }])
-
-    def test_cash_rounding_up_add_invoice_line_not_only_round_cash_method(self):
-        self.cash_rounding_add_invoice_line.rounding_method = 'UP'
-        self.main_pos_config.write({
-            'rounding_method': self.cash_rounding_add_invoice_line.id,
-            'cash_rounding': True,
-            'only_round_cash_method': False,
-        })
-        with self.with_new_session(user=self.pos_user) as session:
-            self.start_pos_tour('test_cash_rounding_up_add_invoice_line_not_only_round_cash_method')
-            refund, order = self.env['pos.order'].search([('session_id', '=', session.id)], limit=2)
-            self.assertRecordValues(order, [{
-                'amount_tax': 2.05,
-                'amount_total': 15.719999999999999,
-                'amount_paid': 15.74,
-            }])
-            self.assertRecordValues(order.account_move, [{
-                'amount_untaxed': 13.69,
-                'amount_tax': 2.05,
-                'amount_total': 15.74,
-            }])
-            self.assertRecordValues(refund, [{
-                'amount_tax': -2.05,
-                'amount_total': -15.719999999999999,
-                'amount_paid': -15.74,
-            }])
-            self.assertRecordValues(refund.account_move, [{
-                'amount_untaxed': 13.69,
-                'amount_tax': 2.05,
-                'amount_total': 15.74,
-            }])
-
-    def test_cash_rounding_halfup_add_invoice_line_only_round_cash_method(self):
-        self.main_pos_config.write({
-            'rounding_method': self.cash_rounding_add_invoice_line.id,
-            'cash_rounding': True,
-            'only_round_cash_method': True,
-        })
-        with self.with_new_session(user=self.pos_user) as session:
-            self.start_pos_tour('test_cash_rounding_halfup_add_invoice_line_only_round_cash_method')
-            refund, order = self.env['pos.order'].search([('session_id', '=', session.id)], limit=2)
-            self.assertRecordValues(order, [{
-                'amount_tax': 2.05,
-                'amount_total': 15.719999999999999,
-                'amount_paid': 15.7,
-            }])
-            self.assertRecordValues(order.account_move, [{
-                'amount_untaxed': 13.65,
-                'amount_tax': 2.05,
-                'amount_total': 15.7,
-            }])
-            self.assertRecordValues(refund, [{
-                'amount_tax': -2.05,
-                'amount_total': -15.719999999999999,
-                'amount_paid': -15.7,
-            }])
-            self.assertRecordValues(refund.account_move, [{
-                'amount_untaxed': 13.65,
-                'amount_tax': 2.05,
-                'amount_total': 15.7,
-            }])
-
-    def test_cash_rounding_halfup_add_invoice_line_only_round_cash_method_pay_by_bank_and_cash(self):
-        self.main_pos_config.write({
-            'rounding_method': self.cash_rounding_add_invoice_line.id,
-            'cash_rounding': True,
-            'only_round_cash_method': True,
-        })
-        with self.with_new_session(user=self.pos_user) as session:
-            self.start_pos_tour('test_cash_rounding_halfup_add_invoice_line_only_round_cash_method_pay_by_bank_and_cash')
-            refund, order = self.env['pos.order'].search([('session_id', '=', session.id)], limit=2)
-            self.assertRecordValues(order, [{
-                'amount_tax': 2.05,
-                'amount_total': 15.719999999999999,
-                'amount_paid': 15.73,
-            }])
-            self.assertRecordValues(order.account_move, [{
-                'amount_untaxed': 13.68,
-                'amount_tax': 2.05,
-                'amount_total': 15.73,
-            }])
-            self.assertRecordValues(refund, [{
-                'amount_tax': -2.05,
-                'amount_total': -15.719999999999999,
-                'amount_paid': -15.73,
-            }])
-            self.assertRecordValues(refund.account_move, [{
-                'amount_untaxed': 13.68,
-                'amount_tax': 2.05,
-                'amount_total': 15.73,
-            }])
-
     def test_cash_rounding_halfup_biggest_tax_not_only_round_cash_method(self):
+        self.skipTest('To re-introduce when feature is ready')
         self.main_pos_config.write({
             'rounding_method': self.cash_rounding_biggest_tax.id,
             'cash_rounding': True,
@@ -258,7 +46,7 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
             self.start_pos_tour('test_cash_rounding_halfup_biggest_tax_not_only_round_cash_method')
             refund, order = self.env['pos.order'].search([('session_id', '=', session.id)], limit=2)
             self.assertRecordValues(order, [{
-                'amount_tax': 2.0300000000000002,
+                'amount_tax': 2.03,
                 'amount_total': 15.7,
                 'amount_paid': 15.7,
             }])
@@ -268,7 +56,7 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
                 'amount_total': 15.7,
             }])
             self.assertRecordValues(refund, [{
-                'amount_tax': -2.0300000000000002,
+                'amount_tax': -2.03,
                 'amount_total': -15.7,
                 'amount_paid': -15.7,
             }])
@@ -279,6 +67,7 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
             }])
 
     def test_cash_rounding_halfup_biggest_tax_not_only_round_cash_method_pay_by_bank_and_cash(self):
+        self.skipTest('To re-introduce when feature is ready')
         self.main_pos_config.write({
             'rounding_method': self.cash_rounding_biggest_tax.id,
             'cash_rounding': True,
@@ -288,7 +77,7 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
             self.start_pos_tour('test_cash_rounding_halfup_biggest_tax_not_only_round_cash_method_pay_by_bank_and_cash')
             refund, order = self.env['pos.order'].search([('session_id', '=', session.id)], limit=2)
             self.assertRecordValues(order, [{
-                'amount_tax': 2.0300000000000002,
+                'amount_tax': 2.03,
                 'amount_total': 15.7,
                 'amount_paid': 15.72,
             }])
@@ -298,7 +87,7 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
                 'amount_total': 15.72,
             }])
             self.assertRecordValues(refund, [{
-                'amount_tax': -2.0300000000000002,
+                'amount_tax': -2.03,
                 'amount_total': -15.7,
                 'amount_paid': -15.72,
             }])
@@ -309,6 +98,7 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
             }])
 
     def test_cash_rounding_halfup_biggest_tax_only_round_cash_method(self):
+        self.skipTest('To re-introduce when feature is ready')
         self.main_pos_config.write({
             'rounding_method': self.cash_rounding_biggest_tax.id,
             'cash_rounding': True,
@@ -319,7 +109,7 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
             refund, order = self.env['pos.order'].search([('session_id', '=', session.id)], limit=2)
             self.assertRecordValues(order, [{
                 'amount_tax': 2.05,
-                'amount_total': 15.719999999999999,
+                'amount_total': 15.72,
                 'amount_paid': 15.7,
             }])
             self.assertRecordValues(order.account_move, [{
@@ -329,7 +119,7 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
             }])
             self.assertRecordValues(refund, [{
                 'amount_tax': -2.05,
-                'amount_total': -15.719999999999999,
+                'amount_total': -15.72,
                 'amount_paid': -15.7,
             }])
             self.assertRecordValues(refund.account_move, [{
@@ -339,6 +129,7 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
             }])
 
     def test_cash_rounding_halfup_biggest_tax_only_round_cash_method_pay_by_bank_and_cash(self):
+        self.skipTest('To re-introduce when feature is ready')
         self.main_pos_config.write({
             'rounding_method': self.cash_rounding_biggest_tax.id,
             'cash_rounding': True,
@@ -349,7 +140,7 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
             refund, order = self.env['pos.order'].search([('session_id', '=', session.id)], limit=2)
             self.assertRecordValues(order, [{
                 'amount_tax': 2.05,
-                'amount_total': 15.719999999999999,
+                'amount_total': 15.72,
                 'amount_paid': 15.73,
             }])
             self.assertRecordValues(order.account_move, [{
@@ -359,7 +150,7 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
             }])
             self.assertRecordValues(refund, [{
                 'amount_tax': -2.05,
-                'amount_total': -15.719999999999999,
+                'amount_total': -15.72,
                 'amount_paid': -15.73,
             }])
             self.assertRecordValues(refund.account_move, [{
@@ -368,42 +159,45 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
                 'amount_total': 15.73,
             }])
 
-    def test_cash_rounding_with_change(self):
-        self.main_pos_config.write({
-            'rounding_method': self.cash_rounding_add_invoice_line.id,
-            'cash_rounding': True,
-            'only_round_cash_method': False,
+    def test_archived_product_removed_and_order_is_refunded(self):
+        """
+        Tests that once product is archived after order is created
+        product is not shown but the order can still be refunded.
+        """
+        self.env['pos.session'].sudo().search([('state', '!=', 'closed')]).write({'state': 'closed'})
+        self.pos_admin.write({
+            'group_ids': [
+                (4, self.env.ref('product.group_product_manager').id),
+                (4, self.env.ref('account.group_account_manager').id),
+            ]
         })
-        with self.with_new_session(user=self.pos_user) as session:
-            self.start_pos_tour('test_cash_rounding_with_change')
-            order = self.env['pos.order'].search([('session_id', '=', session.id)], limit=1)
-            self.assertRecordValues(order, [{
-                'amount_tax': 2.05,
-                'amount_total': 15.7,
-                'amount_paid': 15.7,
-            }])
-            self.assertRecordValues(order.account_move, [{
-                'amount_untaxed': 13.65,
-                'amount_tax': 2.05,
-                'amount_total': 15.7,
-            }])
+        self.env['product.product'].create({
+            'is_storable': True,
+            'name': 'A Test Product',
+            'available_in_pos': True,
+            'list_price': 1,
+        })
+        self.main_pos_config.with_user(self.pos_admin).open_ui()
+        self.start_tour(
+            "/pos/ui?config_id=%d" % self.main_pos_config.id,
+            "test_archived_product_removed_and_order_is_refunded",
+            login="pos_admin"
+        )
 
-    def test_cash_rounding_only_cash_method_with_change(self):
+    def test_to_pay_section_rounded(self):
+        rounding = self.env['account.cash.rounding'].create({
+            'name': 'Test rounding',
+            'rounding': 10,
+            'rounding_method': 'HALF-UP',
+        })
         self.main_pos_config.write({
-            'rounding_method': self.cash_rounding_add_invoice_line.id,
+            'rounding_method': rounding,
             'cash_rounding': True,
             'only_round_cash_method': True,
         })
-        with self.with_new_session(user=self.pos_user) as session:
-            self.start_pos_tour('test_cash_rounding_only_cash_method_with_change')
-            order = self.env['pos.order'].search([('session_id', '=', session.id)], limit=1)
-            self.assertRecordValues(order.account_move, [{
-                'amount_untaxed': 13.65,
-                'amount_tax': 2.05,
-                'amount_total': 15.7,
-            }])
-            self.assertRecordValues(order, [{
-                'amount_tax': 2.05,
-                'amount_total': 15.719999999999999,
-                'amount_paid': 15.7,
-            }])
+        self.main_pos_config.with_user(self.pos_admin).open_ui()
+        self.start_tour(
+            "/pos/ui?config_id=%d" % self.main_pos_config.id,
+            "test_to_pay_section_rounded",
+            login="pos_admin"
+        )

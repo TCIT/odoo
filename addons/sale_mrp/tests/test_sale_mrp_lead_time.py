@@ -14,7 +14,7 @@ class TestSaleMrpLeadTime(TestStockCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.env.ref('stock.route_warehouse0_mto').active = True
+        cls.route_mto.active = True
         # Update the product_1 with type, route, Manufacturing Lead Time and Customer Lead Time
         with Form(cls.product_1) as p1:
             # `type` is invisible in the view,
@@ -63,8 +63,7 @@ class TestSaleMrpLeadTime(TestStockCommon):
         company = self.env.ref('base.main_company')
 
         # Update company with Manufacturing Lead Time and Sales Safety Days
-        company.write({'manufacturing_lead': 3.0,
-                       'security_lead': 3.0})
+        company.security_lead = 3
 
         # Create sale order of product_1
         order_form = Form(self.env['sale.order'])
@@ -95,7 +94,7 @@ class TestSaleMrpLeadTime(TestStockCommon):
         )
 
         # Check schedule date and deadline of manufacturing order
-        mo_date_start = out_date - timedelta(days=manufacturing_order.bom_id.produce_delay) - timedelta(days=company.manufacturing_lead)
+        mo_date_start = out_date - timedelta(days=manufacturing_order.bom_id.produce_delay)
         self.assertAlmostEqual(
             fields.Datetime.from_string(manufacturing_order.date_start), mo_date_start,
             delta=timedelta(seconds=1),
@@ -107,7 +106,7 @@ class TestSaleMrpLeadTime(TestStockCommon):
             msg="Deadline date of manufacturing order should be equal to the deadline of sale picking"
         )
 
-    def test_01_product_route_level_delays(self):
+    def test_01_product_route_mrp_delays(self):
         """ In order to check schedule dates, set product's Manufacturing Lead Time
             and Customer Lead Time and also set warehouse route's delay."""
 
@@ -129,10 +128,10 @@ class TestSaleMrpLeadTime(TestStockCommon):
         order.action_confirm()
 
         # Run scheduler
-        self.env['procurement.group'].run_scheduler()
+        self.env['stock.rule'].run_scheduler()
 
         # Check manufacturing order created or not
-        manufacturing_order = self.env['mrp.production'].search([('product_id', '=', self.product_1.id)]) 
+        manufacturing_order = self.env['mrp.production'].search([('product_id', '=', self.product_1.id)])
         self.assertTrue(manufacturing_order, 'Manufacturing order should be created.')
 
         # Check the picking crated or not
@@ -168,7 +167,7 @@ class TestSaleMrpLeadTime(TestStockCommon):
         )
 
         # Check schedule date and deadline date of manufacturing order
-        mo_date_start = out_date - timedelta(days=manufacturing_order.bom_id.produce_delay) - timedelta(days=warehouse.delivery_route_id.rule_ids[0].delay) - timedelta(days=self.env.ref('base.main_company').manufacturing_lead)
+        mo_date_start = out_date - timedelta(days=manufacturing_order.bom_id.produce_delay) - timedelta(days=warehouse.delivery_route_id.rule_ids[0].delay)
         self.assertAlmostEqual(
             fields.Datetime.from_string(manufacturing_order.date_start), mo_date_start,
             delta=timedelta(seconds=1),

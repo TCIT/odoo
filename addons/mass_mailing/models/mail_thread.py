@@ -15,9 +15,9 @@ class MailThread(models.AbstractModel):
 
     @api.model
     def _message_route_process(self, message, message_dict, routes):
-        """ Override to update the parent mailing traces. The parent is found
-        by using the References header of the incoming message and looking for
-        matching message_id in mailing.trace. """
+        # Override to update the parent mailing traces. The parent is found
+        # by using the References header of the incoming message and looking for
+        # matching message_id in mailing.trace.
         if routes:
             # even if 'reply_to' in ref (cfr mail/mail_thread) that indicates a new thread redirection
             # (aka bypass alias configuration in gateway) consider it as a reply for statistics purpose
@@ -46,14 +46,14 @@ class MailThread(models.AbstractModel):
 
     @api.model
     def _routing_handle_bounce(self, email_message, message_dict):
-        """ In addition, an auto blacklist rule check if the email can be blacklisted
-        to avoid sending mails indefinitely to this email address.
-        This rule checks if the email bounced too much. If this is the case,
-        the email address is added to the blacklist in order to avoid continuing
-        to send mass_mail to that email address. If it bounced too much times
-        in the last month and the bounced are at least separated by one week,
-        to avoid blacklist someone because of a temporary mail server error,
-        then the email is considered as invalid and is blacklisted."""
+        # In addition, an auto blacklist rule check if the email can be blacklisted
+        # to avoid sending mails indefinitely to this email address.
+        # This rule checks if the email bounced too much. If this is the case,
+        # the email address is added to the blacklist in order to avoid continuing
+        # to send mass_mail to that email address. If it bounced too much times
+        # in the last month and the bounced are at least separated by one week,
+        # to avoid blacklist someone because of a temporary mail server error,
+        # then the email is considered as invalid and is blacklisted.
         super(MailThread, self)._routing_handle_bounce(email_message, message_dict)
 
         bounced_email = message_dict['bounced_email']
@@ -61,9 +61,15 @@ class MailThread(models.AbstractModel):
         bounced_partner = message_dict['bounced_partner']
 
         if bounced_msg_ids:
-            self.env['mailing.trace'].set_bounced(
+            bounced_traces = self.env['mailing.trace'].set_bounced(
                 domain=[('message_id', 'in', bounced_msg_ids)],
                 bounce_message=tools.html2plaintext(message_dict.get('body') or ''))
+            # some bounce traces may have been unhandled due to being sent from an email not matching the destination email
+            for model, traces in bounced_traces.grouped('model').items():
+                if missed_bounce_traces := traces.filtered(lambda trace: trace.email != bounced_email):
+                    self.env[model].browse(
+                        missed_bounce_traces.mapped('res_id'),
+                    ).exists()._message_receive_bounce(bounced_email, bounced_partner)
         if bounced_email:
             three_months_ago = fields.Datetime.to_string(datetime.datetime.now() - datetime.timedelta(weeks=13))
             stats = self.env['mailing.trace'].search(['&', '&', ('trace_status', '=', 'bounce'), ('write_date', '>', three_months_ago), ('email', '=ilike', bounced_email)]).mapped('write_date')
@@ -76,10 +82,6 @@ class MailThread(models.AbstractModel):
 
     @api.model
     def message_new(self, msg_dict, custom_values=None):
-        """ Overrides mail_thread message_new that is called by the mailgateway
-            through message_process.
-            This override updates the document according to the email.
-        """
         defaults = {}
 
         if isinstance(self, self.pool['utm.mixin']):

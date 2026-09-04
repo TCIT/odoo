@@ -4,7 +4,7 @@
 from odoo import fields, models
 
 
-class Uom(models.Model):
+class UomUom(models.Model):
     _inherit = 'uom.uom'
 
     def _unprotected_uom_xml_ids(self):
@@ -13,6 +13,7 @@ class Uom(models.Model):
         # from deletion (and warn in case of modification)
         return [
             "product_uom_dozen",
+            "product_uom_pack_6",
         ]
 
     # widget used in the webclient when this unit is the one used to encode timesheets.

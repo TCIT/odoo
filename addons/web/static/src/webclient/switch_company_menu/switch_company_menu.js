@@ -7,22 +7,30 @@ import { Component, useChildSubEnv, useRef, useState } from "@odoo/owl";
 import { useCommand } from "@web/core/commands/command_hook";
 import { _t } from "@web/core/l10n/translation";
 import { symmetricalDifference } from "@web/core/utils/arrays";
-import { useChildRef, useService } from "@web/core/utils/hooks";
+import { useBus, useChildRef, useService } from "@web/core/utils/hooks";
 import { SwitchCompanyItem } from "@web/webclient/switch_company_menu/switch_company_item";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
+import { user, userBus } from "@web/core/user";
+import { router } from "@web/core/browser/router";
+
+function getCompany(cid) {
+    return user.allowedCompaniesWithAncestors.find((c) => c.id === cid);
+}
 
 export class CompanySelector {
-    constructor(companyService, dropdownState) {
-        this.companyService = companyService;
+    constructor(actionService, dropdownState) {
+        this.actionService = actionService;
         this.dropdownState = dropdownState;
-        this.selectedCompaniesIds = companyService.activeCompanyIds.slice();
+        this.selectedCompaniesIds = user.activeCompanies.map((c) => c.id);
     }
 
     get hasSelectionChanged() {
         return (
-            symmetricalDifference(this.selectedCompaniesIds, this.companyService.activeCompanyIds)
-                .length > 0
+            symmetricalDifference(
+                this.selectedCompaniesIds,
+                user.activeCompanies.map((c) => c.id)
+            ).length > 0
         );
     }
 
@@ -48,47 +56,87 @@ export class CompanySelector {
         }
     }
 
-    apply() {
-        this.companyService.setCompanies(this.selectedCompaniesIds, false);
+    async apply() {
+        user.activateCompanies(this.selectedCompaniesIds, {
+            includeChildCompanies: false,
+            reload: false,
+        });
+
+        const controller = this.actionService.currentController;
+        const state = {};
+        const options = { reload: true };
+        if (controller?.props.resId && controller?.props.resModel) {
+            const hasReadRights = await user.checkAccessRight(
+                controller.props.resModel,
+                "read",
+                controller.props.resId
+            );
+
+            if (!hasReadRights) {
+                options.replace = true;
+                state.actionStack = router.current.actionStack.slice(0, -1);
+            }
+        }
+
+        router.pushState(state, options);
     }
 
     reset() {
-        this.selectedCompaniesIds = this.companyService.activeCompanyIds.slice();
+        this.selectedCompaniesIds = user.activeCompanies.map((c) => c.id);
     }
 
-    selectAll() {
-        if (this.selectedCompaniesIds.length > 0) {
-            this.selectedCompaniesIds.splice(0, this.selectedCompaniesIds.length);
-        } else {
-            const newIds = Object.values(this.companyService.allowedCompanies).map((c) => c.id);
-            this.selectedCompaniesIds.splice(0, this.selectedCompaniesIds.length, ...newIds);
+    selectAll(companyIds) {
+        let shouldSelectAll = true;
+
+        // If any company is selected, just unselect all
+        for (let i = this.selectedCompaniesIds.length - 1; i >= 0; i--) {
+            if (companyIds.includes(this.selectedCompaniesIds[i])) {
+                this.selectedCompaniesIds.splice(i, 1);
+                shouldSelectAll = false;
+            }
+        }
+
+        // If no company is selected, select all
+        if (shouldSelectAll) {
+            for (const companyId of companyIds) {
+                if (!this.selectedCompaniesIds.includes(companyId)) {
+                    this.selectedCompaniesIds.push(companyId);
+                }
+            }
         }
     }
 
     _selectCompany(companyId, unshift = false) {
-        if (!this.selectedCompaniesIds.includes(companyId)) {
-            if (unshift) {
+        if (this._isCompanyAllowed(companyId)) {
+            if (!this.selectedCompaniesIds.includes(companyId)) {
+                if (unshift) {
+                    this.selectedCompaniesIds.unshift(companyId);
+                } else {
+                    this.selectedCompaniesIds.push(companyId);
+                }
+            } else if (unshift) {
+                const index = this.selectedCompaniesIds.findIndex((c) => c === companyId);
+                this.selectedCompaniesIds.splice(index, 1);
                 this.selectedCompaniesIds.unshift(companyId);
-            } else {
-                this.selectedCompaniesIds.push(companyId);
             }
-        } else if (unshift) {
-            const index = this.selectedCompaniesIds.findIndex((c) => c === companyId);
-            this.selectedCompaniesIds.splice(index, 1);
-            this.selectedCompaniesIds.unshift(companyId);
         }
+
         this._getBranches(companyId).forEach((companyId) => this._selectCompany(companyId));
     }
 
     _deselectCompany(companyId) {
         if (this.selectedCompaniesIds.includes(companyId)) {
             this.selectedCompaniesIds.splice(this.selectedCompaniesIds.indexOf(companyId), 1);
-            this._getBranches(companyId).forEach((companyId) => this._deselectCompany(companyId));
         }
+        this._getBranches(companyId).forEach((companyId) => this._deselectCompany(companyId));
     }
 
     _getBranches(companyId) {
-        return this.companyService.getCompany(companyId).child_ids || [];
+        return getCompany(companyId).child_ids || [];
+    }
+
+    _isCompanyAllowed(companyId) {
+        return user.allowedCompanies.some((c) => c.id == companyId);
     }
 
     _isSingleCompanyMode() {
@@ -98,7 +146,7 @@ export class CompanySelector {
 
         const getActiveCompany = (companyId) => {
             const isActive = this.selectedCompaniesIds.includes(companyId);
-            return isActive ? this.companyService.getCompany(companyId) : null;
+            return isActive ? getCompany(companyId) : null;
         };
 
         let rootCompany = undefined;
@@ -143,10 +191,11 @@ export class SwitchCompanyMenu extends Component {
 
     setup() {
         this.dropdown = useDropdownState();
-        this.companyService = useService("company");
+        this.user = user;
+        const actionService = useService("action");
 
         this.companySelector = useState(
-            new this.constructor.CompanySelector(this.companyService, this.dropdown)
+            new this.constructor.CompanySelector(actionService, this.dropdown)
         );
         useChildSubEnv({ companySelector: this.companySelector });
 
@@ -160,29 +209,34 @@ export class SwitchCompanyMenu extends Component {
         });
 
         useCommand(_t("Switch Company"), () => this.dropdown.open(), { hotkey: "alt+shift+u" });
+        useBus(userBus, "ACTIVE_COMPANIES_CHANGED", () => {
+            this.companySelector.reset();
+        });
 
         this.containerRef = useChildRef();
         this.navigationOptions = {
             hotkeys: {
-                space: (index, items) => {
-                    if (!items[index]) {
+                space: (navigator) => {
+                    const navItem = navigator.activeItem;
+                    if (!navItem) {
                         return;
                     }
-                    if (items[index].el.classList.contains("o_switch_company_item")) {
-                        const companyId = parseInt(items[index].el.dataset.companyId);
+                    if (navItem.el.classList.contains("o_switch_company_item")) {
+                        const companyId = parseInt(navItem.el.dataset.companyId);
                         this.companySelector.switchCompany("toggle", companyId);
                     }
                 },
-                enter: (index, items) => {
-                    if (!items[index]) {
+                enter: (navigator) => {
+                    const navItem = navigator.activeItem;
+                    if (!navItem) {
                         return;
                     }
-                    if (items[index].el.classList.contains("o_switch_company_item")) {
-                        const companyId = parseInt(items[index].el.dataset.companyId);
+                    if (navItem.el.classList.contains("o_switch_company_item")) {
+                        const companyId = parseInt(navItem.el.dataset.companyId);
                         this.companySelector.switchCompany("loginto", companyId);
                         this.dropdown.close();
                     } else {
-                        items[index].select();
+                        navItem.select();
                     }
                 },
             },
@@ -190,36 +244,22 @@ export class SwitchCompanyMenu extends Component {
     }
 
     get hasLotsOfCompanies() {
-        return Object.values(this.companyService.allowedCompaniesWithAncestors).length > 9;
+        return user.allowedCompaniesWithAncestors.length > 9;
     }
 
-    get companiesEntries() {
-        const companies = [];
+    get visibleCompanies() {
+        return this.state.visibleCompanies;
+    }
 
-        const addCompany = (company, level = 0) => {
-            if (this.matchSearch(company.name)) {
-                companies.push({ company, level });
-            }
-
-            if (company.child_ids) {
-                for (const companyId of company.child_ids) {
-                    addCompany(this.companyService.getCompany(companyId), level + 1);
-                }
-            }
-        };
-
-        Object.values(this.companyService.allowedCompaniesWithAncestors)
-            .filter((c) => !c.parent_id)
-            .sort((c1, c2) => c1.sequence - c2.sequence)
-            .forEach((c) => addCompany(c));
-
-        return companies;
+    get hasSelectedCompanies() {
+        return this.visibleCompanies.some((c) =>
+            this.companySelector.isCompanySelected(c.company.id)
+        );
     }
 
     get selectAllClass() {
         if (
-            this.companySelector.selectedCompaniesIds.length >=
-            Object.values(this.companyService.allowedCompanies).length
+            this.visibleCompanies.every((c) => this.companySelector.isCompanySelected(c.company.id))
         ) {
             return "btn-link text-primary";
         } else {
@@ -229,25 +269,51 @@ export class SwitchCompanyMenu extends Component {
 
     get selectAllIcon() {
         if (
-            this.companySelector.selectedCompaniesIds.length >=
-            Object.values(this.companyService.allowedCompanies).length
+            this.visibleCompanies.every((c) => this.companySelector.isCompanySelected(c.company.id))
         ) {
             return "fa-check-square text-primary";
-        } else if (this.companySelector.selectedCompaniesIds.length > 0) {
+        } else if (
+            this.visibleCompanies.some((c) => this.companySelector.isCompanySelected(c.company.id))
+        ) {
             return "fa-minus-square-o";
         } else {
             return "fa-square-o";
         }
     }
 
+    computeVisibleCompanies() {
+        const companies = [];
+
+        const addCompany = (company, level = 0) => {
+            if (this.matchSearch(company.name)) {
+                companies.push({ company, level });
+            }
+
+            if (company.child_ids) {
+                for (const companyId of company.child_ids) {
+                    addCompany(getCompany(companyId), level + 1);
+                }
+            }
+        };
+
+        user.allowedCompaniesWithAncestors
+            .filter((c) => !c.parent_id)
+            .sort((c1, c2) => c1.sequence - c2.sequence)
+            .forEach((c) => addCompany(c));
+
+        return companies;
+    }
+
     resetState() {
         this.state.searchFilter = "";
         this.state.showFilter = this.hasLotsOfCompanies;
+        this.state.visibleCompanies = this.computeVisibleCompanies();
     }
 
     onSearch(ev) {
         this.state.searchFilter = ev.target.value;
         this.state.showFilter = true;
+        this.state.visibleCompanies = this.computeVisibleCompanies();
     }
 
     matchSearch(companyName) {
@@ -281,8 +347,13 @@ export class SwitchCompanyMenu extends Component {
         this.companySelector.apply();
     }
 
+    selectAll() {
+        const companyIds = this.visibleCompanies.map((entry) => entry.company.id);
+        this.companySelector.selectAll(companyIds);
+    }
+
     get isSingleCompany() {
-        return Object.values(this.companyService.allowedCompaniesWithAncestors ?? {}).length === 1;
+        return user.allowedCompaniesWithAncestors.length === 1;
     }
 }
 

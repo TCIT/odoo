@@ -7,23 +7,31 @@ from odoo import models
 class StockMove(models.Model):
     _inherit = "stock.move"
 
-    def _prepare_procurement_values(self):
-        vals = super()._prepare_procurement_values()
-        partner = self.group_id.partner_id
-        if not vals.get('partner_id') and partner and self.location_id.is_subcontracting_location:
-            vals['partner_id'] = partner.id
-        return vals
-
     def _is_purchase_return(self):
         res = super()._is_purchase_return()
         return res or self._is_dropshipped_returned()
 
     def _is_dropshipped(self):
         res = super()._is_dropshipped()
-        return res or (
+        return (
+            res
+            # subcontractor -> customer
+            or (
                 self.partner_id.property_stock_subcontractor.parent_path
-                and self.partner_id.property_stock_subcontractor.parent_path in self.location_id.parent_path
-                and self.location_dest_id.usage == 'customer'
+                and (
+                    (
+                        self.partner_id.property_stock_subcontractor.parent_path
+                        in self.location_id.parent_path
+                        and self.location_dest_id.usage == "customer"
+                    )
+                    # Vendor -> subcontractor location
+                    or (
+                        self.partner_id.property_stock_subcontractor.parent_path
+                        in self.location_dest_id.parent_path
+                        and self.location_id.usage == "supplier"
+                    )
+                )
+            )
         )
 
     def _is_dropshipped_returned(self):
@@ -33,3 +41,10 @@ class StockMove(models.Model):
                 and self.partner_id.property_stock_subcontractor.parent_path
                 and self.partner_id.property_stock_subcontractor.parent_path in self.location_dest_id.parent_path
         )
+
+    def _get_value_from_account_move(self, quantity, at_date=None):
+        if not self.env.context.get('valuation_without_extra') and self.is_subcontract and self._is_dropshipped() and self.purchase_line_id:
+            last_subcontract_production_move = self.move_orig_ids.production_id.move_finished_ids[:1]
+            if last_subcontract_production_move:
+                return last_subcontract_production_move._get_value_from_account_move(quantity, at_date=at_date)
+        return super()._get_value_from_account_move(quantity, at_date=at_date)

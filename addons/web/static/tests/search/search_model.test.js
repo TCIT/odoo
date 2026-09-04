@@ -46,10 +46,6 @@ class Foo extends models.Model {
         definition_record: "bar",
         definition_record_field: "child_properties",
     });
-
-    _views = {
-        search: `<search/>`,
-    };
 }
 
 class Partner extends models.Model {
@@ -109,9 +105,6 @@ class Partner extends models.Model {
             category_id: 7,
         },
     ];
-    _views = {
-        search: `<search/>`,
-    };
 }
 
 class Company extends models.Model {
@@ -209,7 +202,6 @@ test("parsing one filter tag with default_period date attribute", async () => {
             </search>
         `,
     });
-    const dateFilterId = model.getSearchItems((f) => f.type === "dateFilter")[0].id;
     expect(sanitizeSearchItems(model)).toEqual([
         {
             defaultGeneratorIds: ["year", "year-1"],
@@ -227,18 +219,6 @@ test("parsing one filter tag with default_period date attribute", async () => {
                 startYear: -2,
             },
         },
-        {
-            comparisonOptionId: "previous_period",
-            dateFilterId,
-            description: "Date: Previous Period",
-            type: "comparison",
-        },
-        {
-            comparisonOptionId: "previous_year",
-            dateFilterId,
-            description: "Date: Previous Year",
-            type: "comparison",
-        },
     ]);
 });
 
@@ -246,7 +226,7 @@ test("parsing date filter with start_month, end_month, start_year, end_year attr
     const model = await createSearchModel({
         searchViewArch: `
             <search>
-                <filter 
+                <filter
                     name="date_filter"
                     string="Date"
                     date="date_field"
@@ -258,7 +238,6 @@ test("parsing date filter with start_month, end_month, start_year, end_year attr
             </search>
         `,
     });
-    const dateFilterId = model.getSearchItems((f) => f.type === "dateFilter")[0].id;
     expect(sanitizeSearchItems(model)).toEqual([
         {
             defaultGeneratorIds: ["month-1"],
@@ -276,18 +255,6 @@ test("parsing date filter with start_month, end_month, start_year, end_year attr
                 startYear: -1,
             },
         },
-        {
-            comparisonOptionId: "previous_period",
-            dateFilterId,
-            description: "Date: Previous Period",
-            type: "comparison",
-        },
-        {
-            comparisonOptionId: "previous_year",
-            dateFilterId,
-            description: "Date: Previous Year",
-            type: "comparison",
-        },
     ]);
 });
 
@@ -302,7 +269,6 @@ test("parsing date filter with custom options", async () => {
             </search>
         `,
     });
-    const dateFilterId = model.getSearchItems((f) => f.type === "dateFilter")[0].id;
     expect(sanitizeSearchItems(model)).toEqual([
         {
             defaultGeneratorIds: ["month"],
@@ -333,18 +299,6 @@ test("parsing date filter with custom options", async () => {
             },
             type: "dateFilter",
         },
-        {
-            comparisonOptionId: "previous_period",
-            dateFilterId,
-            description: "Date: Previous Period",
-            type: "comparison",
-        },
-        {
-            comparisonOptionId: "previous_year",
-            dateFilterId,
-            description: "Date: Previous Year",
-            type: "comparison",
-        },
     ]);
 });
 
@@ -356,7 +310,6 @@ test("parsing one filter tag with date attribute ", async () => {
             </search>
         `,
     });
-    const dateFilterId = model.getSearchItems((f) => f.type === "dateFilter")[0].id;
     expect(sanitizeSearchItems(model)).toEqual([
         {
             defaultGeneratorIds: ["month"],
@@ -373,18 +326,6 @@ test("parsing one filter tag with date attribute ", async () => {
                 startYear: -2,
             },
             type: "dateFilter",
-        },
-        {
-            comparisonOptionId: "previous_period",
-            dateFilterId,
-            description: "Date: Previous Period",
-            type: "comparison",
-        },
-        {
-            comparisonOptionId: "previous_year",
-            dateFilterId,
-            description: "Date: Previous Year",
-            type: "comparison",
         },
     ]);
 });
@@ -547,6 +488,7 @@ test("parsing a searchpanel field select one", async () => {
             activeValueId: false,
             color: null,
             description: "res.company",
+            depth: 0,
             empty: false,
             enableCounters: false,
             expand: false,
@@ -753,7 +695,7 @@ test("process favorite filters", async () => {
     const model = await createSearchModel({
         irFilters: [
             {
-                user_id: [2, "Mitchell Admin"],
+                user_ids: [2],
                 name: "Sorted filter",
                 id: 5,
                 context: `{"group_by":["foo","bar"]}`,
@@ -771,6 +713,7 @@ test("process favorite filters", async () => {
             description: "Sorted filter",
             domain: "[('user_id', '=', uid)]",
             groupBys: ["foo", "bar"],
+            isInvalid: false,
             orderBy: [
                 {
                     asc: true,
@@ -784,7 +727,7 @@ test("process favorite filters", async () => {
             removable: true,
             serverSideId: 5,
             type: "favorite",
-            userId: 2,
+            userIds: [2],
         },
     ]);
 });

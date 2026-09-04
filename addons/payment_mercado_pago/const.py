@@ -1,35 +1,52 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.tools import LazyTranslate
+
+
 _lt = LazyTranslate(__name__)
 
+PROXY_URL = 'https://mercadopago.api.odoo.com/api/mercado_pago'
 
-# Currency codes of the currencies supported by Mercado Pago in ISO 4217 format.
-# See https://api.mercadopago.com/currencies. Last seen online: 2024-10-29.
-SUPPORTED_CURRENCIES = [
-    'ARS',  # Argentinian Peso
-    'BOB',  # Boliviano
-    'BRL',  # Real
-    'CLF',  # Fomento Unity
-    'CLP',  # Chilean Peso
-    'COP',  # Colombian Peso
-    'CRC',  # Colon
-    'CUC',  # Cuban Convertible Peso
-    'CUP',  # Cuban Peso
-    'DOP',  # Dominican Peso
-    'EUR',  # Euro
-    'GTQ',  # Guatemalan Quetzal
-    'HNL',  # Lempira
-    'MXN',  # Mexican Peso
-    'NIO',  # Cordoba
-    'PAB',  # Balboa
-    'PEN',  # Sol
-    'PYG',  # Guarani
-    'USD',  # US Dollars
-    'UYU',  # Uruguayan Peso
-    'VEF',  # Strong Bolivar
-    'VES',  # Sovereign Bolivar
-]
+PAYMENT_RETURN_ROUTE = '/payment/mercado_pago/return'
+OAUTH_RETURN_ROUTE = '/payment/mercado_pago/oauth/return'
+WEBHOOK_ROUTE = '/payment/mercado_pago/webhook'
+
+
+# The countries supported by Mercado Pago.
+SUPPORTED_COUNTRIES = {
+    'AR',
+    'BR',
+    'CL',
+    'CO',
+    'MX',
+    'PE',
+    'UY',
+}
+
+# Mapping of country codes to the locales supported by the Mercado Pago Bricks SDK. The locale is
+# bound to the country rather than the language (each supported country has a single locale, e.g.
+# Brazil is always pt-BR), so the website language's country part is enough to resolve it.
+# See https://www.mercadopago.com/developers/en/docs/checkout-bricks/additional-content/localization.
+COUNTRY_LOCALES = {
+    "AR": "es-AR",
+    "BR": "pt-BR",
+    "CL": "es-CL",
+    "CO": "es-CO",
+    "MX": "es-MX",
+    "PE": "es-PE",
+    "UY": "es-UY",
+}
+
+# Mapping of country codes to corresponding currency codes.
+CURRENCY_MAPPING = {
+    'AR': 'ARS',  # Argentina - Argentine Peso
+    'BR': 'BRL',  # Brazil - Brazilian Real
+    'CL': 'CLP',  # Chile - Chilean Peso
+    'CO': 'COP',  # Colombia - Colombian Peso
+    'MX': 'MXN',  # Mexico - Mexican Peso
+    'PE': 'PEN',  # Peru - Peruvian Sol
+    'UY': 'UYU',  # Uruguay - Uruguayan Peso
+}
 
 # Set of currencies where Mercado Pago's minor units deviates from the ISO 4217 standard.
 # See https://www.six-group.com/dam/download/financial-information/data-center/iso-currrency/lists/list-one.xls
@@ -45,6 +62,7 @@ DEFAULT_PAYMENT_METHOD_CODES = {
     # Primary payment methods.
     'card',
     # Brand payment methods.
+    'amex',
     'visa',
     'mastercard',
     'argencard',
@@ -67,6 +85,8 @@ DEFAULT_PAYMENT_METHOD_CODES = {
 PAYMENT_METHODS_MAPPING = {
     'card': 'debit_card,credit_card,prepaid_card',
     'paypal': 'digital_wallet',
+    'mastercard': 'master',
+    'mercado_pago_wallet': 'mercado_pago',
 }
 
 # Mapping of transaction states to Mercado Pago payment statuses.

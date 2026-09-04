@@ -1,28 +1,30 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* product_margin
-# 
+# * product_margin
+#
 # Translators:
-# Petko Karamotchev, 2024
-# aleksandar ivanov, 2024
-# Martin Trigaux, 2024
-# Albena Mincheva <albena_vicheva@abv.bg>, 2024
-# Maria Boyadjieva <marabo2000@gmail.com>, 2024
-# KeyVillage, 2024
-# 
+# Nikola Iliev, 2023
+# aleksandar ivanov, 2023
+# Martin Trigaux, 2023
+# Albena Mincheva <albena_vicheva@abv.bg>, 2023
+# Maria Boyadjieva <marabo2000@gmail.com>, 2023
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: KeyVillage, 2024\n"
-"Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-03 04:56+0000\n"
+"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"Language-Team: Bulgarian <https://translate.odoo.com/projects/odoo-19/"
+"product_margin/bg/>\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: product_margin
 #: model:ir.model.fields,field_description:product_margin.field_product_product__purchase_num_invoiced
@@ -52,17 +54,17 @@ msgstr "Средна цена във фактури за продажба."
 #. module: product_margin
 #: model:ir.model.fields,help:product_margin.field_product_product__purchase_avg_price
 msgid "Avg. Price in Vendor Bills"
-msgstr ""
+msgstr "Средна цена във фактури за покупка"
 
 #. module: product_margin
 #: model:ir.model.fields,field_description:product_margin.field_product_product__purchase_avg_price
 msgid "Avg. Purchase Unit Price"
-msgstr ""
+msgstr "Средна единична цена на покупка"
 
 #. module: product_margin
 #: model:ir.model.fields,field_description:product_margin.field_product_product__sale_avg_price
 msgid "Avg. Sale Unit Price"
-msgstr ""
+msgstr "Средна единична цена на продажба"
 
 #. module: product_margin
 #: model_terms:ir.ui.view,arch_db:product_margin.view_product_margin_form
@@ -82,7 +84,7 @@ msgstr "Цена по каталога"
 #. module: product_margin
 #: model:ir.model.fields,field_description:product_margin.field_product_margin__create_uid
 msgid "Created by"
-msgstr "Създаден от"
+msgstr "Създадено от"
 
 #. module: product_margin
 #: model:ir.model.fields,field_description:product_margin.field_product_margin__create_date
@@ -91,6 +93,7 @@ msgstr "Създадено на"
 
 #. module: product_margin
 #: model:ir.model.fields,field_description:product_margin.field_product_margin__display_name
+#: model:ir.model.fields,field_description:product_margin.field_product_product__display_name
 msgid "Display Name"
 msgstr "Име за показване"
 
@@ -142,6 +145,7 @@ msgstr "Обща информация"
 
 #. module: product_margin
 #: model:ir.model.fields,field_description:product_margin.field_product_margin__id
+#: model:ir.model.fields,field_description:product_margin.field_product_product__id
 msgid "ID"
 msgstr "ID"
 
@@ -212,12 +216,16 @@ msgstr "Продуктов марж"
 #. odoo-python
 #: code:addons/product_margin/wizard/product_margin.py:0
 #: model:ir.actions.act_window,name:product_margin.product_margin_act_window
-#: model:ir.ui.menu,name:product_margin.menu_action_product_margin
 #: model_terms:ir.ui.view,arch_db:product_margin.view_product_margin_form
 #: model_terms:ir.ui.view,arch_db:product_margin.view_product_margin_graph
 #: model_terms:ir.ui.view,arch_db:product_margin.view_product_margin_tree
 msgid "Product Margins"
-msgstr "Маржове на продукти "
+msgstr "Маржове на продукти"
+
+#. module: product_margin
+#: model:ir.ui.menu,name:product_margin.menu_action_product_margin
+msgid "Product Margins…"
+msgstr "Маржове на продукти…"
 
 #. module: product_margin
 #: model:ir.model,name:product_margin.model_product_product
@@ -273,13 +281,12 @@ msgstr ""
 #: model:ir.model.fields,help:product_margin.field_product_product__total_cost
 msgid "Sum of Multiplication of Invoice price and quantity of Vendor Bills "
 msgstr ""
-"Сума от умножението на фактурната цена и количеството фактури за покупка"
+"Сума от умножението на фактурната цена и количеството фактури за покупка "
 
 #. module: product_margin
 #: model:ir.model.fields,help:product_margin.field_product_product__sale_expected
 msgid ""
-"Sum of Multiplication of Sale Catalog price and quantity of Customer "
-"Invoices"
+"Sum of Multiplication of Sale Catalog price and quantity of Customer Invoices"
 msgstr ""
 "Сума от умножението на продажната каталожна цена и количеството фактури за "
 "продажба"
@@ -330,4 +337,10 @@ msgstr "Оборот"
 #. module: product_margin
 #: model:ir.model.fields,help:product_margin.field_product_product__total_margin
 msgid "Turnover - Total cost"
-msgstr ""
+msgstr "Оборот - общ разход"
+
+#~ msgid "Last Modified on"
+#~ msgstr "Последна промяна на"
+
+#~ msgid "Turnover - Standard price"
+#~ msgstr "Оборот - стандартна цена"

@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 
 
-class HrEmployeDeleteWizard(models.TransientModel):
+class HrEmployeeDeleteWizard(models.TransientModel):
     _name = 'hr.employee.delete.wizard'
     _description = 'Employee Delete Wizard'
 
@@ -30,8 +29,6 @@ class HrEmployeDeleteWizard(models.TransientModel):
 
     def action_archive(self):
         self.ensure_one()
-        if len(self.employee_ids) != 1:
-            return self.employee_ids.toggle_active()
         return {
             'name': _('Employee Termination'),
             'type': 'ir.actions.act_window',
@@ -40,9 +37,9 @@ class HrEmployeDeleteWizard(models.TransientModel):
             'view_mode': 'form',
             'target': 'new',
             'context': {
-                'active_id': self.employee_ids.id,
-                'toggle_active': True,
-            }
+                'active_ids': self.employee_ids.ids,
+                'employee_termination': True,
+            },
         }
 
     def action_confirm_delete(self):

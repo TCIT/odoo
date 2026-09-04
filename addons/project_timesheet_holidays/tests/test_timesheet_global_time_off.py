@@ -12,7 +12,7 @@ from odoo.exceptions import UserError
 class TestTimesheetGlobalTimeOff(common.TransactionCase):
 
     def setUp(self):
-        super(TestTimesheetGlobalTimeOff, self).setUp()
+        super().setUp()
         # Creates 1 test company and a calendar for employees that
         # work part time. Then creates an employee per calendar (one
         # for the standard calendar and one for the one we created)
@@ -111,6 +111,30 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         global_time_off.unlink()
 
         self.assertFalse(leave_task.timesheet_ids.ids)
+
+    def test_timesheet_creation_multi_company(self):
+        """
+        Check timesheet generation is limited to the company of the public holiday in a multi-company
+        environment with a shared working schedule between companies.
+        """
+        self.test_company.resource_calendar_id.write({'company_id': False})
+        self.env['hr.employee'].create({
+            'name': 'Employee Company 2',
+            'company_id': self.test_company_2.id,
+            'resource_calendar_id': self.test_company.resource_calendar_id.id,
+        })
+
+        # Create Public Holiday with both companies selected
+        global_time_off_test_company = self.env['resource.calendar.leaves'].with_context(allowed_company_ids=[self.test_company.id, self.test_company_2.id]).create({
+            'name': 'Test',
+            'calendar_id': self.test_company.resource_calendar_id.id,
+            'date_from': datetime(2021, 1, 4, 7, 0, 0, 0),
+            'date_to': datetime(2021, 1, 4, 19, 0, 0, 0),
+        })
+
+        self.assertEqual(global_time_off_test_company.company_id, self.test_company)
+        self.assertEqual(global_time_off_test_company.timesheet_ids.mapped('employee_id'), self.full_time_employee + self.full_time_employee_2,
+                         'Timesheets should have been created only for employees of the first company')
 
     @freeze_time('2022-01-01 08:00:00')
     def test_timesheet_creation_and_deletion_on_employee_archive(self):
@@ -215,14 +239,20 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         # So we need to check that the timesheets don't have more than 8 hours per day.
         self.assertEqual(leave_task.effective_hours, 80)
 
-    def test_search_is_timeoff_task(self):
-        """ Test the search method on is_timeoff_task
-        with and without any hr.leave.type with timesheet_task_id defined"""
-        leaves_types_with_task_id = self.env['hr.leave.type'].search([('timesheet_task_id', '!=', False)])
-        self.env['project.task'].search([('is_timeoff_task', '!=', False)])
+    def test_timeoff_task_creation_with_global_leave(self):
+        """ Test the search method on is_timeoff_task"""
+        task_count = self.env['project.task'].search_count([('is_timeoff_task', '!=', False)])
 
-        leaves_types_with_task_id.write({'timesheet_task_id': False})
-        self.env['project.task'].search([('is_timeoff_task', '!=', False)])
+        # Create a leave and validate it
+        self.env['resource.calendar.leaves'].create({
+            'name': 'Test',
+            'calendar_id': self.test_company.resource_calendar_id.id,
+            'date_from': datetime(2021, 1, 4, 7, 0, 0, 0),
+            'date_to': datetime(2021, 1, 8, 18, 0, 0, 0),
+        })
+
+        new_task_count = self.env['project.task'].search_count([('is_timeoff_task', '!=', False)])
+        self.assertEqual(task_count + 1, new_task_count)
 
     def test_timesheet_creation_for_global_time_off_wo_calendar(self):
         leave_start_datetime = datetime(2021, 1, 4, 7, 0)  # This is a monday
@@ -403,6 +433,7 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         test_user = self.env['res.users'].with_company(self.test_company).create({
             'name': 'Jonathan Doe',
             'login': 'jdoe@example.com',
+            'group_ids': self.env.ref('hr_timesheet.group_hr_timesheet_user'),
         })
         test_user.with_company(self.test_company).action_create_employee()
         test_user.employee_id.write({
@@ -419,17 +450,14 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         hr_leave_start_datetime = datetime(next_monday.year, next_monday.month, next_monday.day, 8, 0, 0) # monday next week
         hr_leave_end_datetime = hr_leave_start_datetime + timedelta(days=4, hours=9) # friday next week
 
-        self.env.company = self.test_company
+        self.env = self.env(context=dict(self.env.context, allowed_company_ids=self.test_company.ids))
 
         internal_project = self.test_company.internal_project_id
         internal_task_leaves = self.test_company.leave_timesheet_task_id
 
         hr_leave_type_with_ts = self.env['hr.leave.type'].create({
             'name': 'Leave Type with timesheet generation',
-            'requires_allocation': 'no',
-            'timesheet_generate': True,
-            'timesheet_project_id': internal_project.id,
-            'timesheet_task_id': internal_task_leaves.id,
+            'requires_allocation': False,
         })
 
         # create and validate a leave for full time employee
@@ -441,12 +469,12 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
             'request_date_from': hr_leave_start_datetime,
             'request_date_to': hr_leave_end_datetime,
         })
-        holiday.sudo().action_validate()
+        holiday.sudo().action_approve()
         self.assertEqual(len(holiday.timesheet_ids), 5)
 
-        # create overlapping global time off
-        global_leave_start_datetime = hr_leave_start_datetime + timedelta(days=2)
-        global_leave_end_datetime = global_leave_start_datetime + timedelta(hours=9)
+        # create overlapping global time off, with some margin over working day to account for different timezones
+        global_leave_start_datetime = hr_leave_start_datetime + timedelta(days=2, hours=-3)
+        global_leave_end_datetime = global_leave_start_datetime + timedelta(hours=12)
 
         global_time_off = self.env['resource.calendar.leaves'].create({
             'name': 'Public Holiday',
@@ -484,7 +512,7 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
             'request_date_from': hr_leave_start_datetime,
             'request_date_to': hr_leave_end_datetime,
         })
-        holiday2.sudo().action_validate()
+        holiday2.sudo().action_approve()
 
         # recreate the global time off
         global_time_off = self.env['resource.calendar.leaves'].create({
@@ -510,6 +538,24 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         self.assertTrue(global_time_off.timesheet_ids.filtered(lambda r: r.employee_id == test_user.employee_id))
         self.assertTrue(gto_without_calendar.timesheet_ids.filtered(lambda r: r.employee_id == test_user.employee_id))
 
+        # create a new leave at same dates
+        holiday3 = HrLeave.with_user(test_user).create({
+            'name': 'Leave 3',
+            'employee_id': test_user.employee_id.id,
+            'holiday_status_id': hr_leave_type_with_ts.id,
+            'request_date_from': hr_leave_start_datetime,
+            'request_date_to': hr_leave_end_datetime,
+        })
+        holiday3.sudo().action_approve()
+
+        self.assertEqual(len(holiday3.timesheet_ids), 3)
+        global_time_off.unlink()
+        self.assertEqual(len(holiday3.timesheet_ids), 4)
+        gto_without_calendar.calendar_id = self.part_time_calendar
+        self.assertFalse(gto_without_calendar.timesheet_ids.filtered(lambda r: r.employee_id == test_user.employee_id))
+        self.assertEqual(len(holiday3.timesheet_ids), 5)
+        self.assertEqual(sum(holiday3.timesheet_ids.mapped('unit_amount')), 40)
+
     def test_unlink_timesheet_with_global_time_off(self):
         leave_start = datetime(2025, 1, 1, 7, 0)
         leave_end = datetime(2025, 1, 1, 18, 0)
@@ -528,3 +574,44 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
 
         with self.assertRaises(UserError):
             timesheet.unlink()
+
+    def test_timesheet_generation_on_public_holiday_creation_with_global_working_schedule(self):
+        """ Test that public holidays are included in the global working schedule (company should be False)
+            when a global time off is created.
+        """
+        self.part_time_calendar.company_id = False
+        self.env['resource.calendar.leaves'].with_company(self.part_time_employee.company_id).create({
+            'name': 'Public Holiday',
+            'date_from': datetime(2021, 1, 4, 0, 0, 0),
+            'date_to': datetime(2021, 1, 4, 23, 59, 59),
+        })
+        timesheet_count = self.env['account.analytic.line'].search_count([('employee_id', '=', self.part_time_employee.id)])
+        self.assertEqual(timesheet_count, 1, "A timesheet should have been generated for the employee with a global working "
+                                              "schedule when a new public holiday is created")
+
+    def test_timesheet_generation_on_public_holiday_creation_with_flexible_hours(self):
+        """ Test that public holidays timesheet duration match the hours per days value for flexible
+        """
+
+        self.flexible_calendar = self.env['resource.calendar'].create({
+            'name': 'Flexible Calendar',
+            'hours_per_day': 7.0,
+            'hours_per_week': 7.0,
+            'full_time_required_hours': 7.0,
+            'flexible_hours': True,
+            'company_id': self.test_company.id,
+        })
+
+        self.flexible_employee = self.env['hr.employee'].create({
+            'name': 'Flexible',
+            'company_id': self.test_company.id,
+            'resource_calendar_id': self.flexible_calendar.id,
+        })
+
+        self.env['resource.calendar.leaves'].with_company(self.test_company).create({
+            'name': 'Public Holiday',
+            'date_from': datetime(2021, 1, 4, 0, 0, 0),
+            'date_to': datetime(2021, 1, 4, 23, 59, 59),
+        })
+        timesheet = self.env['account.analytic.line'].search([('employee_id', '=', self.flexible_employee.id)])
+        self.assertEqual(timesheet.unit_amount, self.flexible_calendar.hours_per_day)

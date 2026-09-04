@@ -28,7 +28,7 @@
             <menuitem
                 name="My Tasks"
                 id="menu_project_management_my_tasks"
-                action="action_server_view_my_task"
+                action="action_view_my_task"
                 sequence="1"
             />
             <menuitem
@@ -53,7 +53,6 @@
                 name="Customer Ratings"
                 id="rating_rating_menu_project"
                 action="rating_rating_action_project_report"
-                groups="project.group_project_rating"
                 sequence="51"
             />
 
@@ -102,6 +101,11 @@
                 name="Tags"
                 id="menu_project_tags_act"
                 action="project_tags_action"
+            />
+            <menuitem
+                name="Project Roles"
+                id="project_menu_config_project_roles"
+                action="project_roles_action"
             />
             <menuitem
                 name="Activity Types"

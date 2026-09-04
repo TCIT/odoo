@@ -36,7 +36,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
 
     @staticmethod
     def _get_amount_to_pay(order_to_pay_sudo):
-        if order_to_pay_sudo.state in ('paid', 'done', 'invoiced'):
+        if order_to_pay_sudo.state in ('paid', 'done'):
             return 0.0
         amount = order_to_pay_sudo._get_checked_next_online_payment_amount()
         if amount and PaymentPortal._is_valid_amount(amount, order_to_pay_sudo.currency_id):
@@ -96,7 +96,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
 
         user_sudo = request.env.user
         if not pos_order_sudo.partner_id:
-            user_sudo = request.env.ref('base.public_user')
+            user_sudo = pos_order_sudo.company_id._get_public_user()
         logged_in = not user_sudo._is_public()
         partner_sudo = pos_order_sudo.partner_id or self._get_partner_sudo(user_sudo)
         if not partner_sudo:
@@ -158,7 +158,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
     def _render_pay(self, rendering_context):
         return request.render('pos_online_payment.pay', rendering_context)
 
-    @http.route('/pos/pay/transaction/<int:pos_order_id>', type='json', auth='public', website=True, sitemap=False)
+    @http.route('/pos/pay/transaction/<int:pos_order_id>', type='jsonrpc', auth='public', website=True, sitemap=False)
     def pos_order_pay_transaction(self, pos_order_id, access_token=None, **kwargs):
         """ Behaves like payment.PaymentPortal.payment_transaction but for POS online payment.
 
@@ -178,7 +178,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
         exit_route = request.httprequest.args.get('exit_route')
         user_sudo = request.env.user
         if not pos_order_sudo.partner_id:
-            user_sudo = request.env.ref('base.public_user')
+            user_sudo = pos_order_sudo.company_id._get_public_user()
         logged_in = not user_sudo._is_public()
         partner_sudo = pos_order_sudo.partner_id or self._get_partner_sudo(user_sudo)
         if not partner_sudo:
@@ -289,6 +289,8 @@ class PaymentPortal(payment_portal.PaymentPortal):
         tx_sudo._process_pos_online_payment()
 
         rendering_context['state'] = 'success'
+        if exit_route:
+            return request.redirect(exit_route)
         return self._render_pay_confirmation(rendering_context)
 
     def _render_pay_confirmation(self, rendering_context):

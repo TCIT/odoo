@@ -13,10 +13,10 @@ class ResUsers(models.Model):
 
     website_id = fields.Many2one('website', related='partner_id.website_id', store=True, related_sudo=False, readonly=False)
 
-    _sql_constraints = [
-        # Partial constraint, complemented by a python constraint (see below).
-        ('login_key', 'unique (login, website_id)', 'You can not have two users with the same login!'),
-    ]
+    _login_key = models.Constraint(
+        'unique (login, website_id)',
+        'You can not have two users with the same login!',
+    )
 
     @api.constrains('login', 'website_id')
     def _check_login(self):
@@ -38,12 +38,12 @@ class ResUsers(models.Model):
     @api.model
     def _get_login_domain(self, login):
         website = self.env['website'].get_current_website()
-        return super(ResUsers, self)._get_login_domain(login) + website.website_domain()
+        return super()._get_login_domain(login) & website.website_domain()
 
     @api.model
     def _get_email_domain(self, email):
         website = self.env['website'].get_current_website()
-        return super()._get_email_domain(email) + website.website_domain()
+        return super()._get_email_domain(email) & website.website_domain()
 
     @api.model
     def _get_login_order(self):
@@ -67,8 +67,7 @@ class ResUsers(models.Model):
         current_website = self.env['website'].sudo().get_current_website()
         return current_website.auth_signup_uninvited or super(ResUsers, self)._get_signup_invitation_scope()
 
-    @classmethod
-    def authenticate(cls, db, credential, user_agent_env):
+    def authenticate(self, credential, user_agent_env):
         """ Override to link the logged in user's res.partner to website.visitor.
         If a visitor already exists for that user, assign it data from the
         current anonymous visitor (if exists).
@@ -77,9 +76,9 @@ class ResUsers(models.Model):
         visitor_pre_authenticate_sudo = None
         if request and request.env:
             visitor_pre_authenticate_sudo = request.env['website.visitor']._get_visitor_from_request()
-        auth_info = super().authenticate(db, credential, user_agent_env)
+        auth_info = super().authenticate(credential, user_agent_env)
         if auth_info.get('uid') and visitor_pre_authenticate_sudo:
-            env = api.Environment(request.env.cr, auth_info['uid'], {})
+            env = self.env(user=auth_info['uid'])
             user_partner = env.user.partner_id
             visitor_current_user_sudo = env['website.visitor'].sudo().search([
                 ('partner_id', '=', user_partner.id)
@@ -95,9 +94,14 @@ class ResUsers(models.Model):
                 visitor_pre_authenticate_sudo._update_visitor_last_visit()
         return auth_info
 
-    @api.constrains('groups_id')
-    def _check_one_user_type(self):
-        super()._check_one_user_type()
-        internal_users = self.env.ref('base.group_user').users & self
+    @api.constrains('group_ids')
+    def _check_disjoint_groups(self):
+        super()._check_disjoint_groups()
+        internal_users = self.env.ref('base.group_user').all_user_ids & self
         if any(user.website_id for user in internal_users):
             raise ValidationError(_("Remove website on related partner before they become internal user."))
+
+    # The model inherits the publishing fields from res.partner, this implements
+    # the required method.
+    def website_publish_button(self):
+        return self.partner_id.website_publish_button()

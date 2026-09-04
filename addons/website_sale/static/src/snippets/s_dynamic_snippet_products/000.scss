@@ -1,94 +1,96 @@
-// class name are dynamically added.
-// If you don't find it with a grep, don't consider it as useless without extra check.
+.s_dynamic_snippet_products {
+    // RTL chevron rotation
+    .o_rtl & {
+        --o-chevron-rtl-rotate: 180deg;
+    }
 
-.s_product_product_centered {
-    .card {
-        overflow: visible;
-        margin-top: 6rem;
-        padding-top: 6rem;
+    // Adjusts carousel arrows' aligments
+    @mixin o-aligns-controlers {
 
-        img {
-            height: 12rem;
+        .carousel-control-next,
+        .carousel-control-prev {
+            aspect-ratio: var(--o-wsale-card-thumb-aspect-ratio, 1/1);
+            width: var(--o-wsale-dynamic-snippet-col-size) !important;
+            --o-wsale-dynamic-snippet-control-scale: 0.2;
+            transform: scaleX(.2);
+            bottom: auto;
+            isolation: isolate;
+            padding-top: 1rem;
+
+            .oi {
+                transform: scaleX(5) rotate(var(--o-chevron-rtl-rotate, 0deg));
+            }
+        }
+
+        .carousel-control-next {
+            transform-origin: center right;
+        }
+
+        .carousel-control-prev {
+            transform-origin: center left;
         }
     }
 
-    .o_carousel_product_img_link {
-        max-width: 75%;
-        margin-top: -12rem;
-        left: 0;
-        right: 0;
-    }
-}
+    // Adapts arrow container width
+    @mixin o-adapts-col-size {
+        .carousel {
+            --o-wsale-dynamic-snippet-col-size: var(--o-carousel-item-width-percentage);
 
-.s_product_product_banner {
-    img {
-        max-height: 400px;
-    }
-}
+            &:where(:has(.col-6)) {
+                --o-wsale-dynamic-snippet-col-size: 50%;
+            }
 
-.s_product_product_horizontal_card img {
-    img {
-        height: 100%;
-    }
-}
-
-@include media-breakpoint-down(lg) {
-    .s_product_product_horizontal_card img {
-        height: 12rem;
-    }
-}
-
-.o_dynamic_product_hovered {
-    img {
-        transition: transform 250ms ease;
-    }
-    &:hover img {
-        transform: scale(1.15);
-    }
-}
-.o_carousel_multiple_rows {
-    .row {
-        padding: 1rem;
-    }
-}
-
-// Cover image
-img.o_img_product_cover {
-    object-fit: cover;
-}
-// Force the image to have a square ratio
-img.o_img_product_square {
-    aspect-ratio: 1 / 1;
-}
-
-.o_card_group {
-    > .row {
-        padding-left: $grid-gutter-width / 2;
-        padding-right: $grid-gutter-width / 2;
-        > div {
-            padding: 0 !important;
-            &:first-child > .o_carousel_product_card{
-                border-left: $card-border-width solid $card-border-color !important;
+            &:where(:has(.col-3)) {
+                --o-wsale-dynamic-snippet-col-size: 25%;
             }
         }
-        &:first-child {
-            .o_carousel_product_card {
-                border-top: $card-border-width solid $card-border-color !important;
-            }
-            > div:first-child .o_carousel_product_card {
-                @include border-top-start-radius($border-radius-lg !important);
-            }
-            > div:last-child .o_carousel_product_card {
-                @include border-top-end-radius($border-radius-lg !important);
+    }
+    .s_dynamic_snippet_row.row {
+        --gutter-x: var(--o-wsale-products-grid-gap, 16px);
+    }
+
+    .carousel-item {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    &.o_wsale_products_opt_design_grid .s_dynamic_snippet_row.row {
+        --gutter-x: 0;
+        --o-wsale-card-border-width: 1px 1px 1px 0;
+
+        > div:first-of-type {
+            --o-wsale-card-border-width: 1px;
+        }
+    }
+
+    // Applies arrows' alignment except when title is on the left + desktop
+    &:where(.o_wsale_products_opt_design_thumbs) {
+        &:not(:has(.s_dynamic_snippet_title_aside)) {
+            @include o-aligns-controlers;
+            @include o-adapts-col-size;
+        }
+
+        @include media-breakpoint-down(lg) {
+            &:has(.s_dynamic_snippet_title_aside) {
+                @include o-aligns-controlers;
+                @include o-adapts-col-size;
             }
         }
-        &:last-child {
-            > div:first-child .o_carousel_product_card {
-                @include border-bottom-start-radius($border-radius-lg !important);
-            }
-            > div:last-child .o_carousel_product_card {
-                @include border-bottom-end-radius($border-radius-lg !important);
-            }
+    }
+
+    // Prevent scroll jump when snippet is re-rendered outside of viewport
+    .oe_product_cart {
+        content-visibility: visible;
+    }
+}
+.s_dynamic_snippet_products .container-fluid .s_dynamic_snippet_title_aside + .s_dynamic_snippet_content {
+    @include media-breakpoint-up(md) {
+        // Prevented horizontal overflow of control buttons.
+        .carousel-control-prev {
+            transform: translateX(50%) scaleX(var(--o-wsale-dynamic-snippet-control-scale, 1));
+        }
+        .carousel-control-next {
+            transform: translateX(-50%) scaleX(var(--o-wsale-dynamic-snippet-control-scale, 1));
         }
     }
 }

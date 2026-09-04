@@ -14,6 +14,7 @@
                 <head>
                     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
                     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                     <title><t t-esc="channel_name"/> Livechat Support Page</title>
 
                     <!-- Call the external Bundle to render the css, js, and js loader tags -->
@@ -61,11 +62,13 @@
                             text-shadow: 0 1px 0 rgba(34, 52, 72, 0.2);
                             text-align: center;
                         }
-                        .main h1 {
-                            font-size: 54px;
+                        .channel_name {
+                            font-size: clamp(2.5rem, 6vw, 3.5rem);
+                            overflow-wrap: break-word;
                         }
                         .main div {
                             font-style: italic;
+                            font-size: 1rem;
                         }
                     </style>
                 </head>
@@ -100,10 +103,11 @@
                 }
                 odoo.__session_info__ = Object.assign(odoo.__session_info__, {
                     livechatData: {
-                        isAvailable: <t t-out="'true' if info['available'] else 'false'"/>,
+                        can_load_livechat: <t t-out="'true' if info['available'] else 'false'"/>,
                         serverUrl: "<t t-out="info['server_url']"/>",
                         options: <t t-out="json.dumps(info.get('options', {}))"/>,
                     },
+                    test_mode: <t t-out="'true' if test_mode_enabled else 'false'"/>,
                 });
             </t>
         </template>

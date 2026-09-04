@@ -1,34 +1,18 @@
-import { Component } from "@odoo/owl";
+import { Component, useEffect, useRef } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
-import { useService } from "@web/core/utils/hooks";
 import { toolbarButtonProps } from "@html_editor/main/toolbar/toolbar";
+import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 
 export class ImageDescription extends Component {
     static components = { Dialog };
     static props = {
-        getDescription: Function,
-        getTooltip: Function,
-        updateImageDescription: Function,
         ...toolbarButtonProps,
+        openImageDescriptionPopover: Function,
     };
     static template = "html_editor.ImageDescription";
-
-    setup() {
-        this.dialog = useService("dialog");
-    }
-
-    openDescriptionDialog() {
-        this.dialog.add(ImageDescriptionDialog, {
-            description: this.props.getDescription(),
-            onConfirm: (description, tooltip) =>
-                this.props.updateImageDescription({ description, tooltip }),
-            tooltip: this.props.getTooltip(),
-        });
-    }
 }
 
-class ImageDescriptionDialog extends Component {
-    static components = { Dialog };
+export class ImageDescriptionPopover extends Component {
     static props = {
         close: Function,
         description: {
@@ -41,17 +25,23 @@ class ImageDescriptionDialog extends Component {
             optional: true,
         },
     };
-    static template = "html_editor.ImageDescriptionDialog";
+    static template = "html_editor.ImageDescriptionPopover";
 
     setup() {
         this.state = {
             description: this.props.description,
             tooltip: this.props.tooltip,
         };
+        this.inputRef = useRef("description");
+        useEffect(
+            (el) => el?.focus(),
+            () => [this.inputRef.el]
+        );
+        useHotkey("escape", () => this.props.close());
     }
 
     onSave() {
-        this.props.onConfirm(this.state.description, this.state.tooltip);
+        this.props.onConfirm(this.state.description || "", this.state.tooltip || "");
         this.props.close();
     }
 }

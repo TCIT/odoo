@@ -1,30 +1,31 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_payment
-# 
+# * account_payment
+#
 # Translators:
-# Насан-Очир <nasaaskii@gmail.com>, 2024
-# Batmunkh Ganbat <batmunkh.g@bumanit.mn>, 2024
-# Batmunkh Ganbat <batmunkh2522@gmail.com>, 2024
-# hish, 2024
-# Otgonbayar.A <gobi.mn@gmail.com>, 2024
-# Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2024
-# Гэрэлтцог Цогтбаатар, 2024
-# Martin Trigaux, 2024
-# 
+# hish, 2022
+# Batmunkh Ganbat <batmunkh.g@bumanit.mn>, 2022
+# Otgonbayar.A <gobi.mn@gmail.com>, 2022
+# tserendavaa tsogtoo <tseegii011929@gmail.com>, 2022
+# Батмөнх Ганбат <batmunkh2522@gmail.com>, 2022
+# Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:48+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Martin Trigaux, 2024\n"
-"Language-Team: Mongolian (https://app.transifex.com/odoo/teams/41243/mn/)\n"
+"POT-Creation-Date: 2026-05-29 17:36+0000\n"
+"PO-Revision-Date: 2026-08-04 04:17+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Mongolian <https://translate.odoo.com/projects/odoo-19/"
+"account_payment/mn/>\n"
+"Language: mn\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: mn\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: account_payment
 #. odoo-python
@@ -36,7 +37,7 @@ msgstr ""
 
 #. module: account_payment
 #. odoo-javascript
-#: code:addons/account_payment/static/src/js/portal_my_invoices_payment.js:0
+#: code:addons/account_payment/static/src/interactions/portal_my_invoices_payment_list.js:0
 msgid "%s day(s) overdue"
 msgstr ""
 
@@ -76,7 +77,7 @@ msgstr ""
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
 msgid "<i class=\"fa fa-fw fa-check-circle\"/> Paid"
-msgstr "<i class=\"fa fa-fw fa-check-circle\"/> Төлөгдсөн"
+msgstr "<i class=\"fa fa-fw fa-check-circle\"/> Төлөх"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
@@ -109,8 +110,10 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_payment.payment_refund_wizard_view_form
 msgid ""
 "<strong>Warning!</strong> There is a refund pending for this payment.\n"
-"                        Wait a moment for it to be processed. If the refund is still pending in a\n"
-"                        few minutes, please check your payment provider configuration."
+"                        Wait a moment for it to be processed. If the refund "
+"is still pending in a\n"
+"                        few minutes, please check your payment provider "
+"configuration."
 msgstr ""
 
 #. module: account_payment
@@ -122,8 +125,8 @@ msgstr ""
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
 msgid ""
-"A payment has already been made on this invoice, please make sure to not pay"
-" twice."
+"A payment has already been made on this invoice, please make sure to not pay "
+"twice."
 msgstr ""
 
 #. module: account_payment
@@ -137,11 +140,6 @@ msgstr ""
 #: code:addons/account_payment/models/account_payment.py:0
 msgid "A token is required to create a new payment transaction."
 msgstr "Шинэ төлбөрийн гүйлгээг хийхийн тулд токен шаардлагатай."
-
-#. module: account_payment
-#: model:onboarding.onboarding.step,button_text:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Activate Stripe"
-msgstr ""
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
@@ -181,6 +179,11 @@ msgid "Authorized Transactions"
 msgstr "Хянагдсан гүйлгээ"
 
 #. module: account_payment
+#: model:ir.model,name:account_payment.model_account_bank_statement_line
+msgid "Bank Statement Line"
+msgstr ""
+
+#. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.account_invoice_view_form_inherit_payment
 msgid "Capture Transaction"
 msgstr "Гүйлгээг барьж авах"
@@ -191,11 +194,6 @@ msgstr "Гүйлгээг барьж авах"
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment_paid
 msgid "Close"
 msgstr "Хаах"
-
-#. module: account_payment
-#: model:ir.model.fields,field_description:account_payment.field_account_payment_register__payment_method_code
-msgid "Code"
-msgstr "Код"
 
 #. module: account_payment
 #: model:ir.model,name:account_payment.model_res_config_settings
@@ -223,7 +221,18 @@ msgid "Discount Date"
 msgstr "Хөнгөлөлтийн Огноо"
 
 #. module: account_payment
+#: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_journal__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_move__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method_line__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_register__display_name
+#: model:ir.model.fields,field_description:account_payment.field_payment_link_wizard__display_name
+#: model:ir.model.fields,field_description:account_payment.field_payment_provider__display_name
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__display_name
+#: model:ir.model.fields,field_description:account_payment.field_payment_transaction__display_name
+#: model:ir.model.fields,field_description:account_payment.field_res_config_settings__display_name
 msgid "Display Name"
 msgstr "Дэлгэрэнгүй нэр"
 
@@ -252,11 +261,6 @@ msgid "Early Payment Discount of"
 msgstr ""
 
 #. module: account_payment
-#: model:onboarding.onboarding.step,description:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Enable credit & debit card payments supported by Stripe."
-msgstr ""
-
-#. module: account_payment
 #: model:ir.model.fields.selection,name:account_payment.selection__payment_refund_wizard__support_refund__full_only
 msgid "Full Only"
 msgstr ""
@@ -282,7 +286,18 @@ msgid "Has a pending refund"
 msgstr ""
 
 #. module: account_payment
+#: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__id
+#: model:ir.model.fields,field_description:account_payment.field_account_journal__id
+#: model:ir.model.fields,field_description:account_payment.field_account_move__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method_line__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_register__id
+#: model:ir.model.fields,field_description:account_payment.field_payment_link_wizard__id
+#: model:ir.model.fields,field_description:account_payment.field_payment_provider__id
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__id
+#: model:ir.model.fields,field_description:account_payment.field_payment_transaction__id
+#: model:ir.model.fields,field_description:account_payment.field_res_config_settings__id
 msgid "ID"
 msgstr "ID"
 
@@ -378,18 +393,9 @@ msgid ""
 msgstr ""
 
 #. module: account_payment
-#: model:onboarding.onboarding.step,step_image_alt:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Onboarding Online Payments"
-msgstr ""
-
-#. module: account_payment
-#: model:ir.model,name:account_payment.model_onboarding_onboarding_step
-msgid "Onboarding Step"
-msgstr ""
-
-#. module: account_payment
-#: model:onboarding.onboarding.step,title:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Online Payments"
+#. odoo-python
+#: code:addons/account_payment/wizards/payment_link_wizard.py:0
+msgid "Online payment option is not enabled in Configuration."
 msgstr ""
 
 #. module: account_payment
@@ -582,11 +588,6 @@ msgid "State"
 msgstr "Төлөв"
 
 #. module: account_payment
-#: model:onboarding.onboarding.step,done_text:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Step Completed!"
-msgstr "Алхам дууссан!"
-
-#. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_payment__suitable_payment_token_ids
 #: model:ir.model.fields,field_description:account_payment.field_account_payment_register__suitable_payment_token_ids
 msgid "Suitable Payment Token"
@@ -613,9 +614,7 @@ msgstr ""
 #. module: account_payment
 #. odoo-python
 #: code:addons/account_payment/models/payment_transaction.py:0
-msgid ""
-"The payment related to the transaction with reference %(ref)s has been "
-"posted: %(link)s"
+msgid "The payment related to transaction %(ref)s has been posted: %(link)s"
 msgstr ""
 
 #. module: account_payment
@@ -627,6 +626,18 @@ msgstr ""
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_account_payment__source_payment_id
 msgid "The source payment of related refund payments"
+msgstr ""
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "There are pending transactions for this invoice."
+msgstr ""
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "There is no amount to be paid."
 msgstr ""
 
 #. module: account_payment
@@ -654,8 +665,27 @@ msgid "There was en error processing your payment: invalid credit card ID."
 msgstr "Таны төлбөрийг гүйцэлдүүлэхэд алдаа үүслээ: хүчингүй кредит карт."
 
 #. module: account_payment
-#: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment_paid
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This invoice cannot be paid online."
+msgstr ""
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
 msgid "This invoice has already been paid."
+msgstr ""
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This invoice isn't posted."
+msgstr ""
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This is not an outgoing invoice."
 msgstr ""
 
 #. module: account_payment
@@ -690,7 +720,8 @@ msgstr "Гүйлгээ буцаалт"
 #. odoo-python
 #: code:addons/account_payment/models/account_payment_method_line.py:0
 msgid ""
-"You can't delete a payment method that is linked to a provider in the enabled or test state.\n"
+"You can't delete a payment method that is linked to a provider in the "
+"enabled or test state.\n"
 "Linked providers(s): %s"
 msgstr ""
 
@@ -712,13 +743,13 @@ msgstr ""
 
 #. module: account_payment
 #. odoo-javascript
-#: code:addons/account_payment/static/src/js/portal_my_invoices_payment.js:0
+#: code:addons/account_payment/static/src/interactions/portal_my_invoices_payment_list.js:0
 msgid "due in %s day(s)"
 msgstr ""
 
 #. module: account_payment
 #. odoo-javascript
-#: code:addons/account_payment/static/src/js/portal_my_invoices_payment.js:0
+#: code:addons/account_payment/static/src/interactions/portal_my_invoices_payment_list.js:0
 msgid "due today"
 msgstr ""
 
@@ -731,3 +762,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid "overdue"
 msgstr ""
+
+#~ msgid "Code"
+#~ msgstr "Дансны код"
+
+#~ msgid "Pay with"
+#~ msgstr "Төлөх"
+
+#~ msgid "Register Payment"
+#~ msgstr "Төлбөр бүртгэх"

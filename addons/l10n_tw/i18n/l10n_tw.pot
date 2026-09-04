@@ -4,16 +4,66 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.0+e\n"
+"Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-26 10:11+0000\n"
-"PO-Revision-Date: 2022-04-26 10:11+0000\n"
+"POT-Creation-Date: 2026-01-30 19:11+0000\n"
+"PO-Revision-Date: 2026-01-30 19:11+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: l10n_tw
+#: model:account.report,name:l10n_tw.l10n_tw_tax_report_401
+msgid "401 Tax Report"
+msgstr ""
+
+#. module: l10n_tw
+#: model:account.report,name:l10n_tw.l10n_tw_tax_report_403
+msgid "403 Tax Report"
+msgstr ""
+
+#. module: l10n_tw
+#: model:account.report,name:l10n_tw.l10n_tw_tax_report_404
+msgid "404 Tax Report"
+msgstr ""
+
+#. module: l10n_tw
+#: model:ir.model,name:l10n_tw.model_account_chart_template
+msgid "Account Chart Template"
+msgstr ""
+
+#. module: l10n_tw
+#: model:account.report.column,name:l10n_tw.l10n_tw_tax_report_401_balance
+#: model:account.report.column,name:l10n_tw.l10n_tw_tax_report_403_balance
+#: model:account.report.column,name:l10n_tw.l10n_tw_tax_report_404_balance
+msgid "Balance"
+msgstr ""
+
+#. module: l10n_tw
+#. odoo-python
+#: code:addons/l10n_tw/models/template_tw.py:0
+msgid "Cash"
+msgstr ""
+
+#. module: l10n_tw
+#: model:ir.model.fields,field_description:l10n_tw.field_account_chart_template__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: l10n_tw
+#: model:ir.model.fields,field_description:l10n_tw.field_account_chart_template__id
+msgid "ID"
+msgstr ""
+
+#. module: l10n_tw
+#: model:account.report.column,name:l10n_tw.l10n_tw_tax_report_401_tax
+#: model:account.report.column,name:l10n_tw.l10n_tw_tax_report_403_tax
+#: model:account.report.column,name:l10n_tw.l10n_tw_tax_report_404_tax
+msgid "Tax"
+msgstr ""
 
 #. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_206
@@ -362,11 +412,6 @@ msgid "南投市"
 msgstr ""
 
 #. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_ntc
-msgid "南投縣"
-msgstr ""
-
-#. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_819
 msgid "南沙群島"
 msgstr ""
@@ -397,28 +442,8 @@ msgid "古坑鄉"
 msgstr ""
 
 #. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_tcc
-msgid "台中市"
-msgstr ""
-
-#. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_tpc
-msgid "台北市"
-msgstr ""
-
-#. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_tnh
-msgid "台南市"
-msgstr ""
-
-#. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_950
 msgid "台東市"
-msgstr ""
-
-#. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_tth
-msgid "台東縣"
 msgstr ""
 
 #. module: l10n_tw
@@ -467,16 +492,6 @@ msgid "善化區"
 msgstr ""
 
 #. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_cic
-msgid "嘉義市"
-msgstr ""
-
-#. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_cih
-msgid "嘉義縣"
-msgstr ""
-
-#. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_654
 msgid "四湖鄉"
 msgstr ""
@@ -519,11 +534,6 @@ msgstr ""
 #. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_523
 msgid "埤頭鄉"
-msgstr ""
-
-#. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_klc
-msgid "基隆市"
 msgstr ""
 
 #. module: l10n_tw
@@ -698,11 +708,6 @@ msgid "宜蘭市"
 msgstr ""
 
 #. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_ilh
-msgid "宜蘭縣"
-msgstr ""
-
-#. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_983
 msgid "富里鄉"
 msgstr ""
@@ -730,11 +735,6 @@ msgstr ""
 #. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_900
 msgid "屏東市"
-msgstr ""
-
-#. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_pth
-msgid "屏東縣"
 msgstr ""
 
 #. module: l10n_tw
@@ -803,11 +803,6 @@ msgid "彰化市"
 msgstr ""
 
 #. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_chh
-msgid "彰化縣"
-msgstr ""
-
-#. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_731
 msgid "後壁區"
 msgstr ""
@@ -850,11 +845,6 @@ msgstr ""
 #. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_712
 msgid "新化區"
-msgstr ""
-
-#. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_ntpc
-msgid "新北市"
 msgstr ""
 
 #. module: l10n_tw
@@ -905,16 +895,6 @@ msgstr ""
 #. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_426
 msgid "新社區"
-msgstr ""
-
-#. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_hct
-msgid "新竹市"
-msgstr ""
-
-#. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_hch
-msgid "新竹縣"
 msgstr ""
 
 #. module: l10n_tw
@@ -1063,11 +1043,6 @@ msgstr ""
 #. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_330
 msgid "桃園區"
-msgstr ""
-
-#. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_tyc
-msgid "桃園市"
 msgstr ""
 
 #. module: l10n_tw
@@ -1258,11 +1233,6 @@ msgstr ""
 #. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_920
 msgid "潮州鎮"
-msgstr ""
-
-#. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_phc
-msgid "澎湖縣"
 msgstr ""
 
 #. module: l10n_tw
@@ -1496,11 +1466,6 @@ msgid "花蓮市"
 msgstr ""
 
 #. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_hlh
-msgid "花蓮縣"
-msgstr ""
-
-#. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_528
 msgid "芳苑鄉"
 msgstr ""
@@ -1518,11 +1483,6 @@ msgstr ""
 #. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_360
 msgid "苗栗市"
-msgstr ""
-
-#. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_mlh
-msgid "苗栗縣"
 msgstr ""
 
 #. module: l10n_tw
@@ -1677,11 +1637,6 @@ msgid "造橋鄉"
 msgstr ""
 
 #. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_lcc
-msgid "連江縣"
-msgstr ""
-
-#. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_966
 msgid "達仁鄉"
 msgstr ""
@@ -1724,11 +1679,6 @@ msgstr ""
 #. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_891
 msgid "金湖鎮"
-msgstr ""
-
-#. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_kmc
-msgid "金門縣"
 msgstr ""
 
 #. module: l10n_tw
@@ -1787,11 +1737,6 @@ msgid "雙溪區"
 msgstr ""
 
 #. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_ylh
-msgid "雲林縣"
-msgstr ""
-
-#. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_902
 msgid "霧台鄉"
 msgstr ""
@@ -1829,11 +1774,6 @@ msgstr ""
 #. module: l10n_tw
 #: model:res.city,name:l10n_tw.city_tw_906
 msgid "高樹鄉"
-msgstr ""
-
-#. module: l10n_tw
-#: model:res.country.state,name:l10n_tw.state_tw_khc
-msgid "高雄市"
 msgstr ""
 
 #. module: l10n_tw

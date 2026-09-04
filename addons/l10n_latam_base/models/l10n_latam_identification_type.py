@@ -1,10 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models, fields, api
-from odoo.osv import expression
 
 
-class L10nLatamIdentificationType(models.Model):
+class L10n_LatamIdentificationType(models.Model):
     _name = 'l10n_latam.identification.type'
     _description = "Identification Types"
     _order = 'sequence'

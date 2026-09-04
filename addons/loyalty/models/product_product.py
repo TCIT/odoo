@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import _, api, models
@@ -11,9 +10,12 @@ class ProductProduct(models.Model):
     def write(self, vals):
         if not vals.get('active', True) and any(product.active for product in self):
             # Prevent archiving products used for giving rewards
-            rewards = self.env['loyalty.reward'].sudo().search(
-                [('discount_line_product_id', 'in', self.ids), ('active', '=', True)], limit=1
-            )
+            rewards = self.env['loyalty.reward'].sudo().search([
+                ('active', '=', True),
+                '|',
+                ('discount_line_product_id', 'in', self.ids),
+                ('discount_product_ids', 'in', self.ids),
+            ], limit=1)
             if rewards:
                 raise ValidationError(_("This product may not be archived. It is being used for an active promotion program."))
         return super().write(vals)

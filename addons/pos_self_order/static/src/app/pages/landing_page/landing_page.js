@@ -1,9 +1,10 @@
 /* global Carousel */
 
 import { Component, onMounted, onWillStart, onWillUnmount, useRef } from "@odoo/owl";
-import { useSelfOrder } from "@pos_self_order/app/self_order_service";
+import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
 import { useService } from "@web/core/utils/hooks";
 import { LanguagePopup } from "@pos_self_order/app/components/language_popup/language_popup";
+import { session } from "@web/session";
 
 export class LandingPage extends Component {
     static template = "pos_self_order.LandingPage";
@@ -34,9 +35,12 @@ export class LandingPage extends Component {
                 const carousel = new Carousel(this.carouselRef.el);
 
                 // prevent traceback when no image is set
-                this.carouselInterval = setInterval(() => {
-                    carousel.next();
-                }, 5000);
+                this.carouselInterval = setInterval(
+                    () => {
+                        carousel.next();
+                    },
+                    session.test_mode ? 100 : 5000
+                );
             }
         });
 
@@ -103,15 +107,18 @@ export class LandingPage extends Component {
         ) {
             return;
         }
-        if (
-            this.selfOrder.config.self_ordering_takeaway &&
-            !this.selfOrder.orderTakeAwayState[this.selfOrder.currentOrder.uuid] &&
-            this.selfOrder.ordering
-        ) {
-            this.router.navigate("location");
-        } else {
-            this.router.navigate("product_list");
+
+        if (this.selfOrder.config.use_presets && !this.selfOrder.currentOrder.preset_id) {
+            const availablePresets = this.selfOrder.availablePresets;
+            if (availablePresets.length === 1) {
+                this.selfOrder.currentOrder.setPreset(availablePresets[0]);
+            } else {
+                this.router.navigate("location");
+                return;
+            }
         }
+
+        this.router.navigate("product_list");
     }
 
     openLanguages() {

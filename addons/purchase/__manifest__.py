@@ -4,7 +4,7 @@
 {
     'name': 'Purchase',
     'version': '1.2',
-    'category': 'Inventory/Purchase',
+    'category': 'Supply Chain/Purchase',
     'sequence': 35,
     'summary': 'Purchase orders, tenders and agreements',
     'website': 'https://www.odoo.com/app/purchase',
@@ -29,7 +29,6 @@
         'views/portal_templates.xml',
         'report/purchase_order_templates.xml',
         'report/purchase_quotation_templates.xml',
-        'views/product_packaging_views.xml',
         'views/analytic_account_views.xml',
         'wizard/bill_to_po_wizard_views.xml',
         'data/purchase_tour.xml',
@@ -48,11 +47,16 @@
             'purchase/static/src/js/tours/purchase.js',
             'purchase/static/src/js/tours/purchase_steps.js',
             'purchase/static/src/**/*.xml',
+            'purchase/static/src/**/*.scss',
         ],
         'web.assets_frontend': [
-            'purchase/static/src/js/purchase_datetimepicker.js',
-            'purchase/static/src/js/purchase_portal_sidebar.js',
+            'purchase/static/src/interactions/**/*',
+            'purchase/static/src/scss/purchase_portal.scss',
+        ],
+        'web.assets_tests': [
+            'purchase/static/tests/tours/**/*',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

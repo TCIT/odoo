@@ -3,6 +3,7 @@
 
 from odoo.tests import Form
 from odoo.addons.mrp.tests.common import TestMrpCommon
+from odoo import Command
 
 
 class TestMultistepManufacturing(TestMrpCommon):
@@ -12,13 +13,13 @@ class TestMultistepManufacturing(TestMrpCommon):
         super().setUpClass()
 
         # Required for `uom_id ` to be visible in the view
-        cls.env.user.groups_id += cls.env.ref('uom.group_uom')
+        cls.env.user.group_ids += cls.env.ref('uom.group_uom')
         # Required for `manufacture_steps` to be visible in the view
-        cls.env.user.groups_id += cls.env.ref('stock.group_adv_location')
+        cls.env.user.group_ids += cls.env.ref('stock.group_adv_location')
         # Required for `product_id` to be visible in the view
-        cls.env.user.groups_id += cls.env.ref('product.group_product_variant')
+        cls._enable_variants()
 
-        cls.env.ref('stock.route_warehouse0_mto').active = True
+        cls.route_mto.active = True
         cls.MrpProduction = cls.env['mrp.production']
         # Create warehouse
         warehouse_form = Form(cls.env['stock.warehouse'])
@@ -33,7 +34,6 @@ class TestMultistepManufacturing(TestMrpCommon):
         product_form = Form(cls.env['product.product'])
         product_form.name = 'Stick'
         product_form.uom_id = cls.uom_unit
-        product_form.uom_po_id = cls.uom_unit
         product_form.route_ids.clear()
         product_form.route_ids.add(cls.warehouse.manufacture_pull_id.route_id)
         product_form.route_ids.add(cls.warehouse.mto_pull_id.route_id)
@@ -43,12 +43,10 @@ class TestMultistepManufacturing(TestMrpCommon):
         product_form = Form(cls.env['product.product'])
         product_form.name = 'Raw Stick'
         product_form.uom_id = cls.uom_unit
-        product_form.uom_po_id = cls.uom_unit
         cls.product_raw = product_form.save()
 
         # Create bom for manufactured product
         bom_product_form = Form(cls.env['mrp.bom'])
-        bom_product_form.product_id = cls.product_manu
         bom_product_form.product_tmpl_id = cls.product_manu.product_tmpl_id
         bom_product_form.product_qty = 1.0
         bom_product_form.type = 'normal'
@@ -66,7 +64,6 @@ class TestMultistepManufacturing(TestMrpCommon):
             line.name = cls.product_manu.name
             line.product_id = cls.product_manu
             line.product_uom_qty = 1.0
-            line.product_uom = cls.uom_unit
             line.price_unit = 10.0
         cls.sale_order = sale_form.save()
 
@@ -121,7 +118,6 @@ class TestMultistepManufacturing(TestMrpCommon):
 
         # New BoM for raw material product, it will generate another Production order i.e. child Production order
         bom_product_form = Form(self.env['mrp.bom'])
-        bom_product_form.product_id = self.product_raw
         bom_product_form.product_tmpl_id = self.product_raw.product_tmpl_id
         bom_product_form.product_qty = 1.0
         with bom_product_form.bom_line_ids.new() as bom_line:
@@ -158,3 +154,140 @@ class TestMultistepManufacturing(TestMrpCommon):
 
         self.assertEqual(self.sale_order.action_view_mrp_production()['res_id'], mo.id)
         self.assertEqual(mo.action_view_sale_orders()['res_id'], self.sale_order.id)
+
+    def test_sales_order_with_mto_manufacturing(self):
+        self.route_mto.active = True
+        warehouse = self.warehouse_1
+        warehouse.manufacture_steps = 'pbm_sam'
+        prod1 = self.env['product.product'].create({
+            'name': 'elct1',
+            'type': 'consu',
+            'route_ids': [(6, 0, [
+                warehouse.manufacture_pull_id.route_id.id,
+                warehouse.mto_pull_id.route_id.id
+            ])],
+        })
+        prod2 = self.env['product.product'].create({
+            'name': 'elct2',
+            'type': 'consu',
+            'route_ids': [(6, 0, [
+                warehouse.manufacture_pull_id.route_id.id,
+                warehouse.mto_pull_id.route_id.id
+            ])],
+        })
+        partner = self.env['res.partner'].create({'name': 'Steve Buscemi'})
+        so = self.env['sale.order'].create({
+            'partner_id': partner.id,
+            'order_line': [(0, 0, {'product_id': prod1.id, 'product_uom_qty': 1}),
+                           (0, 0, {'product_id': prod2.id, 'product_uom_qty': 1})],
+            'client_order_ref': 'Test Reference'
+        })
+        so.action_confirm()
+
+    def test_mto_cancel_3_steps_mo(self):
+        '''
+        In 3 step manufacturing, test that when the MO gets cancelled, the
+        delivery (to the client) can be made from stock.
+        '''
+        self.warehouse.manufacture_steps = 'pbm_sam'
+        self.sale_order.order_line.product_id.is_storable = True
+        self.env['stock.quant']._update_available_quantity(
+            self.sale_order.order_line.product_id,
+            self.sale_order.warehouse_id.lot_stock_id,
+            10
+        )
+        self.sale_order.action_confirm()
+        self.assertEqual(self.sale_order.picking_ids.state, 'waiting')
+        self.assertEqual(self.sale_order.picking_ids.move_ids.procure_method, 'make_to_order')
+        mo = self.sale_order.mrp_production_ids
+        self.assertTrue(mo)
+        self.assertEqual(self.sale_order.picking_ids.move_ids.move_orig_ids, mo.move_finished_ids)
+        mo.action_cancel()
+        self.assertEqual(self.sale_order.picking_ids.state, 'confirmed')
+        self.assertFalse(self.sale_order.picking_ids.move_ids.move_orig_ids)
+        self.sale_order.picking_ids.action_assign()
+        self.assertEqual(self.sale_order.picking_ids.move_ids.quantity, 1.0)
+
+    def test_rr_triggered_mos_shared_pick(self):
+        """Test that a single PBM picking is created for multiple MOs triggered by reordering rules
+        from the same SO and that its properly linked to these MOs.
+        """
+        self.warehouse.manufacture_steps = "pbm"
+        self.warehouse.mto_pull_id.route_id.rule_ids.procure_method = "make_to_stock"
+
+        product_1, product_2, raw_1, raw_2 = self.env["product.product"].create([
+            {"name": "product 1", "uom_id": self.uom_unit.id, "is_storable": True},
+            {"name": "product 2", "uom_id": self.uom_unit.id, "is_storable": True},
+            {"name": "raw 1", "uom_id": self.uom_unit.id, "is_storable": True},
+            {"name": "raw 2", "uom_id": self.uom_unit.id, "is_storable": True},
+        ])
+        bom_1, bom_2 = self.env["mrp.bom"].create([{
+                "product_tmpl_id": product_1.product_tmpl_id.id,
+                "product_qty": 1.0,
+                "type": "normal",
+                "bom_line_ids": [
+                    Command.create({"product_id": raw_1.id, "product_qty": 2}),
+                ],
+            }, {
+                "product_tmpl_id": product_2.product_tmpl_id.id,
+                "product_qty": 1.0,
+                "type": "normal",
+                "bom_line_ids": [
+                    Command.create({"product_id": raw_2.id, "product_qty": 2}),
+                ],
+        }])
+        self.env["stock.warehouse.orderpoint"].create([{
+                "name": "Orderpoint for P1",
+                "product_id": product_1.id,
+                "product_min_qty": 0,
+                "product_max_qty": 0,
+                "route_id": self.warehouse.manufacture_pull_id.route_id.id,
+                "bom_id": bom_1.id,
+                "warehouse_id": self.warehouse.id,
+            }, {
+                "name": "Orderpoint for P2",
+                "product_id": product_2.id,
+                "product_min_qty": 0,
+                "product_max_qty": 0,
+                "route_id": self.warehouse.manufacture_pull_id.route_id.id,
+                "bom_id": bom_2.id,
+                "warehouse_id": self.warehouse.id,
+        }])
+
+        partner = self.env["res.partner"].create({"name": "My Picking Production Test Partner"})
+        so = self.env["sale.order"].create({
+            "partner_id": partner.id,
+            "picking_policy": "direct",
+            "warehouse_id": self.warehouse.id,
+            "order_line": [
+                Command.create({
+                    "name": product_1.name,
+                    "product_id": product_1.id,
+                    "product_uom_qty": 1.0,
+                    "price_unit": 10.0,
+                }),
+                Command.create({
+                    "name": product_2.name,
+                    "product_id": product_2.id,
+                    "product_uom_qty": 1.0,
+                    "price_unit": 10.0,
+                }),
+            ],
+        })
+        so.action_confirm()
+        self.assertEqual(so.mrp_production_count, 2, "There should be 2 manufactured orders linked to this sale order.")
+        self.assertEqual(len(so.mrp_production_ids.picking_ids), 2, "There should only be 2 pick components transfer for the 2 manufacturing orders.")
+        self.assertEqual(len(so.mrp_production_ids.picking_ids.production_ids), 2, "There should be 2 manufacture orders linked to the 2 pick components transfers.")
+
+    def test_duplicate_mo_smartbutton_consistency(self):
+        """
+        Test that duplicating a Manufacturing Order (MO) created
+        from a Sales Order does not keep the original sales link
+        """
+        self.warehouse.manufacture_steps = 'mrp_one_step'
+        self.sale_order.action_confirm()
+        mo = self.sale_order.mrp_production_ids
+        self.assertEqual(self.sale_order.mrp_production_count, 1)
+        self.assertEqual(mo.sale_order_count, 1)
+        duplicate_mo = mo.copy()
+        self.assertEqual(duplicate_mo.sale_order_count, 0)

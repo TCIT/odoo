@@ -1,5 +1,3 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-import odoo
 import sys
 import optparse
 import logging
@@ -8,7 +6,7 @@ from collections import defaultdict
 
 from . import Command
 from odoo.modules.registry import Registry
-from odoo.tools import SQL
+from odoo.tools import SQL, config
 
 _logger = logging.getLogger(__name__)
 
@@ -71,7 +69,7 @@ class Obfuscate(Command):
         return SQL("""CASE WHEN starts_with(%(field_name)s, 'odoo_cyph_') THEN pgp_sym_decrypt(decode(substring(%(field_name)s, 11)::text, 'base64'), %(pwd)s) ELSE %(field_name)s END""", field_name=sql_field, pwd=password)
 
     def check_field(self, table, field):
-        qry = "SELECT udt_name FROM information_schema.columns WHERE table_name=%s AND column_name=%s"
+        qry = "SELECT udt_name FROM information_schema.columns WHERE table_name=%s AND column_name=%s AND table_schema = current_schema"
         self.cr.execute(qry, [table, field])
         if self.cr.rowcount == 1:
             res = self.cr.fetchone()
@@ -83,7 +81,10 @@ class Obfuscate(Command):
         return False
 
     def get_all_fields(self):
-        qry = "SELECT table_name, column_name FROM information_schema.columns WHERE table_schema='public' AND udt_name IN ['text', 'varchar', 'jsonb'] AND NOT table_name LIKE 'ir_%' ORDER BY 1,2"
+        qry = (
+            "SELECT table_name, column_name FROM information_schema.columns"
+            " WHERE table_schema = current_schema AND udt_name IN ('text', 'varchar', 'jsonb') AND NOT table_name LIKE 'ir_%' ORDER BY 1,2"
+        )
         self.cr.execute(qry)
         return self.cr.fetchall()
 
@@ -133,7 +134,8 @@ class Obfuscate(Command):
         return True
 
     def run(self, cmdargs):
-        parser = odoo.tools.config.parser
+        parser = config.parser
+        parser.prog = self.prog
         group = optparse.OptionGroup(parser, "Obfuscate Configuration")
         group.add_option('--pwd', dest="pwd", default=False, help="Cypher password")
         group.add_option('--fields', dest="fields", default=False, help="List of table.columns to obfuscate/unobfuscate: table1.column1,table2.column1,table2.column2")
@@ -152,14 +154,20 @@ class Obfuscate(Command):
             sys.exit(parser.print_help())
 
         try:
-            opt = odoo.tools.config.parse_config(cmdargs, setup_logging=True)
+            opt = config.parse_config(cmdargs, setup_logging=True)
             if not opt.pwd:
                 _logger.error("--pwd is required")
                 sys.exit("ERROR: --pwd is required")
             if opt.allfields and not opt.unobfuscate:
                 _logger.error("--allfields can only be used in unobfuscate mode")
                 sys.exit("ERROR: --allfields can only be used in unobfuscate mode")
-            self.dbname = odoo.tools.config['db_name']
+            if not opt.db_name:
+                _logger.error('Obfuscate command needs a database name. Use "-d" argument')
+                sys.exit('ERROR: Obfuscate command needs a database name. Use "-d" argument')
+            if len(opt.db_name) > 1:
+                _logger.error("-d/--database has multiple databases, please provide a single one")
+                sys.exit("ERROR: -d/--database has multiple databases, please provide a single one")
+            self.dbname = config['db_name'][0]
             self.registry = Registry(self.dbname)
             with self.registry.cursor() as cr:
                 self.cr = cr

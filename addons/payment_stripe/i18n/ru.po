@@ -1,27 +1,32 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* payment_stripe
-# 
+# * payment_stripe
+#
 # Translators:
-# Wil Odoo, 2024
-# 
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Anastasiia Koroleva (koan)" <koan@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Russian (https://app.transifex.com/odoo/teams/41243/ru/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-03 10:31+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Russian <https://translate.odoo.com/projects/odoo-19/"
+"payment_stripe/ru/>\n"
+"Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ru\n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
+"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: payment_stripe
 #. odoo-javascript
-#: code:addons/payment_stripe/static/src/js/payment_form.js:0
+#: code:addons/payment_stripe/static/src/interactions/payment_form.js:0
 msgid "Cannot display the payment form"
 msgstr "Невозможно отобразить форму оплаты"
 
@@ -36,16 +41,17 @@ msgid "Connect Stripe"
 msgstr "Подключить Stripe"
 
 #. module: payment_stripe
-#. odoo-python
-#: code:addons/payment_stripe/models/payment_provider.py:0
-msgid "Could not establish the connection to the API."
-msgstr "Не удалось установить соединение с API."
-
-#. module: payment_stripe
 #. odoo-javascript
-#: code:addons/payment_stripe/static/src/js/express_checkout_form.js:0
+#: code:addons/payment_stripe/static/src/interactions/express_checkout.js:0
 msgid "Delivery"
 msgstr "Доставка"
+
+#. module: payment_stripe
+#: model:ir.model.fields,field_description:payment_stripe.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:payment_stripe.field_payment_token__display_name
+#: model:ir.model.fields,field_description:payment_stripe.field_payment_transaction__display_name
+msgid "Display Name"
+msgstr "Display Name"
 
 #. module: payment_stripe
 #: model_terms:ir.ui.view,arch_db:payment_stripe.payment_provider_form
@@ -54,7 +60,7 @@ msgstr "Включите Apple Pay"
 
 #. module: payment_stripe
 #. odoo-javascript
-#: code:addons/payment_stripe/static/src/js/express_checkout_form.js:0
+#: code:addons/payment_stripe/static/src/interactions/express_checkout.js:0
 msgid "Free Shipping"
 msgstr "Бесплатная доставка"
 
@@ -69,6 +75,13 @@ msgid "Get your Secret and Publishable keys"
 msgstr "Получите секретный и публикуемый ключи"
 
 #. module: payment_stripe
+#: model:ir.model.fields,field_description:payment_stripe.field_payment_provider__id
+#: model:ir.model.fields,field_description:payment_stripe.field_payment_token__id
+#: model:ir.model.fields,field_description:payment_stripe.field_payment_transaction__id
+msgid "ID"
+msgstr "ID"
+
+#. module: payment_stripe
 #: model:ir.model.fields,help:payment_stripe.field_payment_provider__stripe_webhook_secret
 msgid ""
 "If a webhook is enabled on your Stripe account, this signing secret must be "
@@ -79,15 +92,9 @@ msgstr ""
 
 #. module: payment_stripe
 #. odoo-javascript
-#: code:addons/payment_stripe/static/src/js/payment_form.js:0
+#: code:addons/payment_stripe/static/src/interactions/payment_form.js:0
 msgid "Incorrect payment details"
 msgstr "Неверные платежные реквизиты"
-
-#. module: payment_stripe
-#. odoo-python
-#: code:addons/payment_stripe/models/payment_transaction.py:0
-msgid "No transaction found matching reference %s."
-msgstr "Не найдено ни одной транзакции, соответствующей ссылке %s."
 
 #. module: payment_stripe
 #. odoo-python
@@ -103,9 +110,7 @@ msgstr "Поставщик платежей"
 #. module: payment_stripe
 #: model:ir.actions.act_window,name:payment_stripe.action_payment_provider_onboarding
 msgid "Payment Providers"
-msgstr ""
-"Выберите поставщиков платежных услуг и включите способы оплаты при "
-"оформлении заказа"
+msgstr "Платежные провайдеры"
 
 #. module: payment_stripe
 #: model:ir.model,name:payment_stripe.model_payment_token
@@ -119,7 +124,7 @@ msgstr "Платеж"
 
 #. module: payment_stripe
 #. odoo-javascript
-#: code:addons/payment_stripe/static/src/js/payment_form.js:0
+#: code:addons/payment_stripe/static/src/interactions/payment_form.js:0
 msgid "Payment processing failed"
 msgstr "Обработка платежа не удалась"
 
@@ -137,20 +142,14 @@ msgstr "Публичный ключ"
 #. module: payment_stripe
 #. odoo-python
 #: code:addons/payment_stripe/models/payment_transaction.py:0
-msgid "Received data with invalid intent status: %s"
-msgstr "Получены данные с недопустимым статусом намерения: %s"
+msgid "Received data with invalid intent status: %s."
+msgstr "Received data with invalid intent status: %s."
 
 #. module: payment_stripe
 #. odoo-python
 #: code:addons/payment_stripe/models/payment_transaction.py:0
 msgid "Received data with missing intent status."
 msgstr "Получены данные с отсутствующим статусом намерения."
-
-#. module: payment_stripe
-#. odoo-python
-#: code:addons/payment_stripe/models/payment_transaction.py:0
-msgid "Received data with missing merchant reference"
-msgstr "Полученные данные с отсутствующей ссылкой на продавца"
 
 #. module: payment_stripe
 #: model:ir.model.fields,field_description:payment_stripe.field_payment_provider__stripe_secret_key
@@ -184,38 +183,6 @@ msgstr "Идентификатор метода оплаты Stripe"
 
 #. module: payment_stripe
 #. odoo-python
-#: code:addons/payment_stripe/models/payment_provider.py:0
-msgid "Stripe Proxy error: %(error)s"
-msgstr "Ошибка Stripe Proxy: %(error)s"
-
-#. module: payment_stripe
-#. odoo-python
-#: code:addons/payment_stripe/models/payment_provider.py:0
-msgid "Stripe Proxy: An error occurred when communicating with the proxy."
-msgstr ""
-"Прокси-сервер Stripe: Произошла ошибка при взаимодействии с прокси-сервером."
-
-#. module: payment_stripe
-#. odoo-python
-#: code:addons/payment_stripe/models/payment_provider.py:0
-msgid "Stripe Proxy: Could not establish the connection."
-msgstr "Stripe Proxy: Не удалось установить соединение."
-
-#. module: payment_stripe
-#. odoo-python
-#: code:addons/payment_stripe/models/payment_provider.py:0
-#: code:addons/payment_stripe/models/payment_transaction.py:0
-msgid ""
-"The communication with the API failed.\n"
-"Stripe gave us the following info about the problem:\n"
-"'%s'"
-msgstr ""
-"Не удалось установить связь с API.\n"
-"Stripe предоставила нам следующую информацию о проблеме:\n"
-"'%s'"
-
-#. module: payment_stripe
-#. odoo-python
 #: code:addons/payment_stripe/models/payment_transaction.py:0
 msgid "The customer left the payment page."
 msgstr "Клиент покинул страницу оплаты."
@@ -232,20 +199,14 @@ msgid ""
 "The refund did not go through. Please log into your Stripe Dashboard to get "
 "more information on that matter, and address any accounting discrepancies."
 msgstr ""
-"Возврат средств не был осуществлен. Пожалуйста, войдите в свою панель Stripe"
-" Dashboard, чтобы получить дополнительную информацию по этому вопросу и "
+"Возврат средств не был осуществлен. Пожалуйста, войдите в свою панель Stripe "
+"Dashboard, чтобы получить дополнительную информацию по этому вопросу и "
 "устранить все бухгалтерские несоответствия."
 
 #. module: payment_stripe
 #: model:ir.model.fields,help:payment_stripe.field_payment_provider__code
 msgid "The technical code of this payment provider."
 msgstr "Технический код данного провайдера платежей."
-
-#. module: payment_stripe
-#. odoo-python
-#: code:addons/payment_stripe/models/payment_transaction.py:0
-msgid "The transaction is not linked to a token."
-msgstr "Транзакция не привязана к токену."
 
 #. module: payment_stripe
 #. odoo-python
@@ -277,8 +238,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/payment_stripe/models/payment_provider.py:0
 msgid ""
-"You cannot set the provider state to Enabled until your onboarding to Stripe"
-" is completed."
+"You cannot set the provider state to Enabled until your onboarding to Stripe "
+"is completed."
 msgstr ""
 "Вы не можете установить состояние провайдера на Enabled до тех пор, пока не "
 "завершится процесс подключения к Stripe."
@@ -287,8 +248,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/payment_stripe/models/payment_provider.py:0
 msgid ""
-"You cannot set the provider to Test Mode while it is linked with your Stripe"
-" account."
+"You cannot set the provider to Test Mode while it is linked with your Stripe "
+"account."
 msgstr ""
 "Вы не можете перевести провайдера в тестовый режим, пока он связан с вашим "
 "аккаунтом Stripe."
@@ -301,7 +262,7 @@ msgstr "Ваш вебхук Stripe уже настроен."
 
 #. module: payment_stripe
 #. odoo-javascript
-#: code:addons/payment_stripe/static/src/js/express_checkout_form.js:0
+#: code:addons/payment_stripe/static/src/interactions/express_checkout.js:0
 msgid "Your order"
 msgstr "Ваш заказ"
 
@@ -310,3 +271,38 @@ msgstr "Ваш заказ"
 #: code:addons/payment_stripe/models/payment_provider.py:0
 msgid "Your web domain was successfully verified."
 msgstr "Ваш веб-домен был успешно проверен."
+
+#~ msgid "Could not establish the connection to the API."
+#~ msgstr "Не удалось установить соединение с API."
+
+#~ msgid "No transaction found matching reference %s."
+#~ msgstr "Не найдено ни одной транзакции, соответствующей ссылке %s."
+
+#~ msgid "Received data with invalid intent status: %s"
+#~ msgstr "Получены данные с недопустимым статусом намерения: %s"
+
+#~ msgid "Received data with missing merchant reference"
+#~ msgstr "Полученные данные с отсутствующей ссылкой на продавца"
+
+#~ msgid "Stripe Proxy error: %(error)s"
+#~ msgstr "Ошибка Stripe Proxy: %(error)s"
+
+#~ msgid "Stripe Proxy: An error occurred when communicating with the proxy."
+#~ msgstr ""
+#~ "Прокси-сервер Stripe: Произошла ошибка при взаимодействии с прокси-"
+#~ "сервером."
+
+#~ msgid "Stripe Proxy: Could not establish the connection."
+#~ msgstr "Stripe Proxy: Не удалось установить соединение."
+
+#~ msgid ""
+#~ "The communication with the API failed.\n"
+#~ "Stripe gave us the following info about the problem:\n"
+#~ "'%s'"
+#~ msgstr ""
+#~ "Не удалось установить связь с API.\n"
+#~ "Stripe предоставила нам следующую информацию о проблеме:\n"
+#~ "'%s'"
+
+#~ msgid "The transaction is not linked to a token."
+#~ msgstr "Транзакция не привязана к токену."

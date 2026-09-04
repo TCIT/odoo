@@ -14,7 +14,6 @@
             "@web/*": ["addons/web/static/src/*"],
             "@web_enterprise/*": ["web_enterprise/static/src/*"],
             "@web_unsplash/*": ["addons/web_unsplash/static/src/*"],
-            "@web_editor/*": ["addons/web_editor/static/src/*"],
             "@web_tour/*": ["addons/web_tour/static/src/*"],
             "@web_gantt/*": ["web_gantt/static/src/*"],
             "@web_cohort/*": ["web_cohort/static/src/*"],
@@ -28,7 +27,9 @@
             "@spreadsheet/*": ["addons/spreadsheet/static/src/*"],
             "@whatsapp/*": ["addons/whatsapp/static/src/*"],
 
+            "@website/*": ["addons/website/static/src/*"],
             "@html_editor/*": ["addons/html_editor/static/src/*"],
+            "@html_builder/*": ["addons/html_builder/static/src/*"],
             "@point_of_sale/*": ["addons/point_of_sale/static/src/*"],
             "@hw_posbox_homepage/*": ["addons/hw_posbox_homepage/static/src/*"],
             "@l10n_ar_pos/*": ["addons/l10n_ar_pos/static/src/*"],
@@ -40,7 +41,6 @@
             "@l10n_sa_pos/*": ["addons/l10n_sa_pos/static/src/*"],
             "@pos_adyen/*": ["addons/pos_adyen/static/src/*"],
             "@pos_discount/*": ["addons/pos_discount/static/src/*"],
-            "@pos_epson_printer/*": ["addons/pos_epson_printer/static/src/*"],
             "@pos_hr/*": ["addons/pos_hr/static/src/*"],
             "@pos_hr_restaurant/*": ["addons/pos_hr_restaurant/static/src/*"],
             "@pos_loyalty/*": ["addons/pos_loyalty/static/src/*"],
@@ -49,7 +49,6 @@
             "@pos_online_payment_self_order/*": [
                 "addons/pos_online_payment_self_order/static/src/*"
             ],
-            "@pos_paytm/*": ["addons/pos_paytm/static/src/*"],
             "@pos_restaurant/*": ["addons/pos_restaurant/static/src/*"],
             "@pos_restaurant_adyen/*": ["addons/pos_restaurant_adyen/static/src/*"],
             "@pos_restaurant_stripe/*": ["addons/pos_restaurant_stripe/static/src/*"],
@@ -61,7 +60,6 @@
             "@pos_self_order_epson_printer/*": ["addons/pos_self_order_epson_printer/static/src/*"],
             "@pos_self_order_sale/*": ["addons/pos_self_order_sale/static/src/*"],
             "@pos_self_order_stripe/*": ["addons/pos_self_order_stripe/static/src/*"],
-            "@pos_six/*": ["addons/pos_six/static/src/*"],
             "@pos_stripe/*": ["addons/pos_stripe/static/src/*"],
             "@spreadsheet_dashboard_pos_hr/*": ["addons/spreadsheet_dashboard_pos_hr/static/src/*"],
 
@@ -77,12 +75,11 @@
             "@pos_hr_mobile/*": ["pos_hr_mobile/static/src/*"],
             "@pos_iot/*": ["pos_iot/static/src/*"],
             "@pos_iot_six/*": ["pos_iot_six/static/src/*"],
-            "@pos_l10n_se/*": ["pos_l10n_se/static/src/*"],
+            "@l10n_se_pos/*": ["l10n_se_pos/static/src/*"],
             "@pos_online_payment_self_order_preparation_display/*": [
                 "pos_online_payment_self_order_preparation_display/static/src/*"
             ],
             "@pos_order_tracking_display/*": ["pos_order_tracking_display/static/src/*"],
-            "@pos_preparation_display/*": ["pos_preparation_display/static/src/*"],
             "@pos_restaurant_appointment/*": ["pos_restaurant_appointment/static/src/*"],
             "@pos_restaurant_preparation_display/*": [
                 "pos_restaurant_preparation_display/static/src/*"
@@ -93,7 +90,9 @@
                 "pos_self_order_preparation_display/static/src/*"
             ],
             "@pos_settle_due/*": ["pos_settle_due/static/src/*"],
+            "@pos_tyro/*": ["pos_tyro/static/src/*"],
             "@whatsapp_pos/*": ["whatsapp_pos/static/src/*"],
+            "@pos_cashmatic/*": ["pos_cashmatic/static/src/*"],
 
             "@test_mail/*": ["addons/test_mail/static/src/*"]
         }

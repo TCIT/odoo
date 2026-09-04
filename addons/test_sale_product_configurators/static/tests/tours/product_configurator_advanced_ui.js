@@ -1,7 +1,5 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 import configuratorTourUtils from "@sale/js/tours/product_configurator_tour_utils";
 import tourUtils from "@sale/js/tours/tour_utils";
 
@@ -24,17 +22,21 @@ registry.category("web_tour.tours").add('sale_product_configurator_advanced_tour
         configuratorTourUtils.assertProductNameContains("Custom, White, PAV9, PAV5, PAV1"),
         {
             trigger: configuratorTourUtils.optionalProductSelector("Conference Chair (TEST) (Steel)"),
-            run: function () {
-                optionVariantImage =
-                    configuratorTourUtils.optionalProductImageSrc("Conference Chair (TEST) (Steel)")
+            run({ queryOne }) {
+                optionVariantImage = configuratorTourUtils.optionalProductImageSrc(
+                    queryOne,
+                    "Conference Chair (TEST) (Steel)"
+                );
             }
         },
         configuratorTourUtils.selectAttribute("Conference Chair", "Legs", "Aluminium"),
         {
             trigger: configuratorTourUtils.optionalProductSelector("Conference Chair (TEST) (Aluminium)"),
-            run: function () {
-                const newOptionVariantImage =
-                    configuratorTourUtils.optionalProductImageSrc("Conference Chair (TEST) (Aluminium)")
+            run({ queryOne }) {
+                const newOptionVariantImage = configuratorTourUtils.optionalProductImageSrc(
+                    queryOne,
+                    "Conference Chair (TEST) (Aluminium)"
+                );
                 if (newOptionVariantImage === optionVariantImage) {
                     console.error("The variant image wasn't updated");
                 }

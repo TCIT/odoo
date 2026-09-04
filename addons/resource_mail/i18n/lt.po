@@ -1,31 +1,58 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* resource_mail
-# 
-# Translators:
-# Audrius Palenskis <audrius.palenskis@gmail.com>, 2024
-# Jonas Zinkevicius <jozi@odoo.com>, 2024
-# Linas Versada <linaskrisiukenas@gmail.com>, 2024
-# 
+# * resource_mail
+#
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.2alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-12 10:37+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Linas Versada <linaskrisiukenas@gmail.com>, 2024\n"
-"Language-Team: Lithuanian (https://app.transifex.com/odoo/teams/41243/lt/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 18:58+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Lithuanian <https://translate.odoo.com/projects/odoo-19/"
+"resource_mail/lt/>\n"
+"Language: lt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: lt\n"
-"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);\n"
+"Plural-Forms: nplurals=3; plural=(n % 10 == 1 && (n % 100 < 11 || n % 100 > "
+"19)) ? 0 : ((n % 10 >= 2 && n % 10 <= 9 && (n % 100 < 11 || n % 100 > 19)) ? "
+"1 : 2);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: resource_mail
 #. odoo-javascript
 #: code:addons/resource_mail/static/src/components/avatar_card_resource/avatar_card_resource_popover.xml:0
 msgid "Bot"
 msgstr ""
+
+#. module: resource_mail
+#. odoo-javascript
+#: code:addons/resource_mail/static/src/components/avatar_card_resource/avatar_card_resource_popover.xml:0
+msgid "Busy"
+msgstr "Užimtas"
+
+#. module: resource_mail
+#: model:ir.model.fields,field_description:resource_mail.field_resource_resource__color
+msgid "Color"
+msgstr "Spalva"
+
+#. module: resource_mail
+#: model:ir.model.fields,field_description:resource_mail.field_resource_resource__display_name
+msgid "Display Name"
+msgstr "Rodomas pavadinimas"
+
+#. module: resource_mail
+#. odoo-javascript
+#: code:addons/resource_mail/static/src/views/fields/many2many_avatar_resource/many2many_avatar_resource_field.js:0
+msgid "Human"
+msgstr "Žmogiškasis"
+
+#. module: resource_mail
+#: model:ir.model.fields,field_description:resource_mail.field_resource_resource__id
+msgid "ID"
+msgstr "ID"
 
 #. module: resource_mail
 #: model:ir.model.fields,field_description:resource_mail.field_resource_resource__im_status
@@ -37,6 +64,12 @@ msgstr "IM būsena"
 #: code:addons/resource_mail/static/src/components/avatar_card_resource/avatar_card_resource_popover.xml:0
 msgid "Idle"
 msgstr "Pasyvus"
+
+#. module: resource_mail
+#. odoo-javascript
+#: code:addons/resource_mail/static/src/views/fields/many2many_avatar_resource/many2many_avatar_resource_field.js:0
+msgid "Material"
+msgstr "Daiktinis"
 
 #. module: resource_mail
 #. odoo-javascript
@@ -65,6 +98,12 @@ msgstr "Ištekliai"
 #. odoo-javascript
 #: code:addons/resource_mail/static/src/components/avatar_card_resource/avatar_card_resource_popover.xml:0
 msgid "User is a bot"
+msgstr ""
+
+#. module: resource_mail
+#. odoo-javascript
+#: code:addons/resource_mail/static/src/components/avatar_card_resource/avatar_card_resource_popover.xml:0
+msgid "User is busy"
 msgstr ""
 
 #. module: resource_mail

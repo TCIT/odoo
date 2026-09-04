@@ -3,6 +3,7 @@ import base64
 import binascii
 from datetime import time
 import logging
+import math
 import re
 from io import BytesIO
 
@@ -13,7 +14,7 @@ from PIL import Image
 from lxml import etree, html
 
 from odoo import api, fields, models, tools
-from odoo.tools import posix_to_ldml, float_utils, format_date, format_duration
+from odoo.tools import posix_to_ldml, float_is_zero, float_utils, format_date, format_duration
 from odoo.tools.mail import safe_attrs
 from odoo.tools.misc import get_lang, babel_locale_parse
 from odoo.tools.mimetypes import guess_mimetype
@@ -43,7 +44,8 @@ def nl2br_enclose(string: str, enclosure_tag: str = 'div') -> Markup:
 # QWeb Fields converters
 #--------------------------------------------------------------------
 
-class FieldConverter(models.AbstractModel):
+
+class IrQwebField(models.AbstractModel):
     """ Used to convert a t-field specification into an output HTML field.
 
     :meth:`~.to_html` is the entry point of this conversion from QWeb, it:
@@ -58,19 +60,53 @@ class FieldConverter(models.AbstractModel):
 
     @api.model
     def get_available_options(self):
-        """
-            Get the available option informations.
+        """ Get the available option informations.
 
-            Returns a dict of dict with:
-            * key equal to the option key.
-            * dict: type, params, name, description, default_value
-            * type:
-                'string'
-                'integer'
-                'float'
-                'model' (e.g. 'res.partner')
-                'array'
-                'selection' (e.g. [key1, key2...])
+        :rtype: dict[str, dict[str, Any]]
+        :return: A dictionnary that maps option names' to their settings.
+
+            The settings are dict themselves and have the following keys:
+
+            type
+
+                Guaranteed, one of ``'string'``, ``'integer'``, ``'float'``,
+                ``'model'``, ``'array'``, or ``'selection'``.
+
+            string
+
+                Guaranteed
+
+            description
+
+                Optional
+
+            required
+
+                Optional, is assumed ``False`` when absent, otherwise
+                is either ``True`` or a string.
+
+            params
+
+                Optional
+
+            default_value
+
+                Optional, the default value, as a json-friendly type.
+
+            Example::
+
+                {
+                    <option>: {
+                        # guaranteed
+                        'type': ...,
+                        'string': ...,
+                        # optional
+                        'default_value': ...,
+                        'description': ...,
+                        'params': ...,
+                        'required': ...,
+                    }
+                }
         """
         return {}
 
@@ -146,14 +182,14 @@ class FieldConverter(models.AbstractModel):
         return self.env['res.lang'].browse(get_lang(self.env).id)
 
 
-class IntegerConverter(models.AbstractModel):
+class IrQwebFieldInteger(models.AbstractModel):
     _name = 'ir.qweb.field.integer'
     _description = 'Qweb Field Integer'
-    _inherit = 'ir.qweb.field'
+    _inherit = ['ir.qweb.field']
 
     @api.model
     def get_available_options(self):
-        options = super(IntegerConverter, self).get_available_options()
+        options = super().get_available_options()
         options.update(
             format_decimalized_number=dict(type='boolean', string=_('Decimalized number')),
             precision_digits=dict(type='integer', string=_('Precision Digits')),
@@ -167,14 +203,14 @@ class IntegerConverter(models.AbstractModel):
         return self.user_lang().format('%d', value, grouping=True).replace(r'-', '-\N{ZERO WIDTH NO-BREAK SPACE}')
 
 
-class FloatConverter(models.AbstractModel):
+class IrQwebFieldFloat(models.AbstractModel):
     _name = 'ir.qweb.field.float'
     _description = 'Qweb Field Float'
-    _inherit = 'ir.qweb.field'
+    _inherit = ['ir.qweb.field']
 
     @api.model
     def get_available_options(self):
-        options = super(FloatConverter, self).get_available_options()
+        options = super().get_available_options()
         options.update(
             precision=dict(type='integer', string=_('Rounding precision')),
         )
@@ -182,44 +218,52 @@ class FloatConverter(models.AbstractModel):
 
     @api.model
     def value_to_html(self, value, options):
+        min_precision = options.get('min_precision')
         if 'decimal_precision' in options:
             precision = self.env['decimal.precision'].precision_get(options['decimal_precision'])
+        elif options.get('precision') is None:
+            int_digits = int(math.log10(abs(value))) + 1 if value != 0 else 1
+            # Within 15 digits, we have a float with no parasite digits.
+            # 14 is chosen here, as float_round will add a digit when performing its computations.
+            max_dec_digits = max(14 - int_digits, 0)
+            # We display maximum 6 decimal digits or the number of significant decimal digits if it's lower
+            precision = min(6, max_dec_digits)
+            min_precision = min_precision or 1
         else:
             precision = options['precision']
 
-        if precision is None:
-            fmt = '%f'
-        else:
-            value = float_utils.float_round(value, precision_digits=precision)
-            fmt = '%.{precision}f'.format(precision=precision)
+        fmt = f'%.{precision}f'
+        if min_precision and min_precision < precision:
+            _, dec_part = float_utils.float_split_str(value, precision)
+            digits_count = len(dec_part.rstrip('0'))
+            if digits_count < min_precision:
+                fmt = f'%.{min_precision}f'
+            elif digits_count < precision:
+                fmt = f'%.{digits_count}f'
 
-        formatted = self.user_lang().format(fmt, value, grouping=True).replace(r'-', '-\N{ZERO WIDTH NO-BREAK SPACE}')
-
-        # %f does not strip trailing zeroes. %g does but its precision causes
-        # it to switch to scientific notation starting at a million *and* to
-        # strip decimals. So use %f and if no precision was specified manually
-        # strip trailing 0.
-        if precision is None:
-            formatted = re.sub(r'(?:(0|\d+?)0+)$', r'\1', formatted)
-
-        return formatted
+        value = float_utils.float_round(value, precision_digits=precision)
+        return self.user_lang().format(fmt, value, grouping=True).replace(r'-', '-\N{ZERO WIDTH NO-BREAK SPACE}')
 
     @api.model
     def record_to_html(self, record, field_name, options):
+        field = record._fields[field_name]
         if 'precision' not in options and 'decimal_precision' not in options:
-            _, precision = record._fields[field_name].get_digits(record.env) or (None, None)
+            _, precision = field.get_digits(record.env) or (None, None)
             options = dict(options, precision=precision)
-        return super(FloatConverter, self).record_to_html(record, field_name, options)
+        if 'min_precision' not in options and hasattr(field, 'get_min_display_digits'):
+            min_precision = field.get_min_display_digits(record.env)
+            options = dict(options, min_precision=min_precision)
+        return super().record_to_html(record, field_name, options)
 
 
-class DateConverter(models.AbstractModel):
+class IrQwebFieldDate(models.AbstractModel):
     _name = 'ir.qweb.field.date'
     _description = 'Qweb Field Date'
-    _inherit = 'ir.qweb.field'
+    _inherit = ['ir.qweb.field']
 
     @api.model
     def get_available_options(self):
-        options = super(DateConverter, self).get_available_options()
+        options = super().get_available_options()
         options.update(
             format=dict(type='string', string=_('Date format'))
         )
@@ -230,14 +274,14 @@ class DateConverter(models.AbstractModel):
         return format_date(self.env, value, date_format=options.get('format'))
 
 
-class DateTimeConverter(models.AbstractModel):
+class IrQwebFieldDatetime(models.AbstractModel):
     _name = 'ir.qweb.field.datetime'
     _description = 'Qweb Field Datetime'
-    _inherit = 'ir.qweb.field'
+    _inherit = ['ir.qweb.field']
 
     @api.model
     def get_available_options(self):
-        options = super(DateTimeConverter, self).get_available_options()
+        options = super().get_available_options()
         options.update(
             format=dict(type='string', string=_('Pattern to format')),
             tz_name=dict(type='char', string=_('Optional timezone name')),
@@ -288,10 +332,10 @@ class DateTimeConverter(models.AbstractModel):
             return babel.dates.format_datetime(value, format=pattern, tzinfo=tzinfo, locale=locale)
 
 
-class TextConverter(models.AbstractModel):
+class IrQwebFieldText(models.AbstractModel):
     _name = 'ir.qweb.field.text'
     _description = 'Qweb Field Text'
-    _inherit = 'ir.qweb.field'
+    _inherit = ['ir.qweb.field']
 
     @api.model
     def value_to_html(self, value, options):
@@ -301,14 +345,14 @@ class TextConverter(models.AbstractModel):
         return nl2br(value) if value else ''
 
 
-class SelectionConverter(models.AbstractModel):
+class IrQwebFieldSelection(models.AbstractModel):
     _name = 'ir.qweb.field.selection'
     _description = 'Qweb Field Selection'
-    _inherit = 'ir.qweb.field'
+    _inherit = ['ir.qweb.field']
 
     @api.model
     def get_available_options(self):
-        options = super(SelectionConverter, self).get_available_options()
+        options = super().get_available_options()
         options.update(
             selection=dict(type='selection', string=_('Selection'), description=_('By default the widget uses the field information'), required=True)
         )
@@ -321,19 +365,19 @@ class SelectionConverter(models.AbstractModel):
     def value_to_html(self, value, options):
         if not value:
             return ''
-        return escape(options['selection'][value] or '')
+        return escape(options['selection'].get(value, value) or '')
 
     @api.model
     def record_to_html(self, record, field_name, options):
         if 'selection' not in options:
             options = dict(options, selection=dict(record._fields[field_name].get_description(self.env)['selection']))
-        return super(SelectionConverter, self).record_to_html(record, field_name, options)
+        return super().record_to_html(record, field_name, options)
 
 
-class ManyToOneConverter(models.AbstractModel):
+class IrQwebFieldMany2one(models.AbstractModel):
     _name = 'ir.qweb.field.many2one'
     _description = 'Qweb Field Many to One'
-    _inherit = 'ir.qweb.field'
+    _inherit = ['ir.qweb.field']
 
     @api.model
     def value_to_html(self, value, options):
@@ -345,10 +389,10 @@ class ManyToOneConverter(models.AbstractModel):
         return nl2br(value)
 
 
-class ManyToManyConverter(models.AbstractModel):
+class IrQwebFieldMany2many(models.AbstractModel):
     _name = 'ir.qweb.field.many2many'
     _description = 'Qweb field many2many'
-    _inherit = 'ir.qweb.field'
+    _inherit = ['ir.qweb.field']
 
     @api.model
     def value_to_html(self, value, options):
@@ -358,10 +402,23 @@ class ManyToManyConverter(models.AbstractModel):
         return nl2br(text)
 
 
-class HTMLConverter(models.AbstractModel):
+class IrQwebFieldOne2many(models.AbstractModel):
+    _name = 'ir.qweb.field.one2many'
+    _description = 'Qweb field one2many'
+    _inherit = ['ir.qweb.field']
+
+    @api.model
+    def value_to_html(self, value, options):
+        if not value:
+            return False
+        text = ', '.join(value.sudo().mapped('display_name'))
+        return nl2br(text)
+
+
+class IrQwebFieldHtml(models.AbstractModel):
     _name = 'ir.qweb.field.html'
     _description = 'Qweb Field HTML'
-    _inherit = 'ir.qweb.field'
+    _inherit = ['ir.qweb.field']
 
     @api.model
     def value_to_html(self, value, options):
@@ -378,7 +435,7 @@ class HTMLConverter(models.AbstractModel):
         return Markup(etree.tostring(body, encoding='unicode', method='html')[6:-7])
 
 
-class ImageConverter(models.AbstractModel):
+class IrQwebFieldImage(models.AbstractModel):
     """ ``image`` widget rendering, inserts a data:uri-using image tag in the
     document. May be overridden by e.g. the website module to generate links
     instead.
@@ -389,7 +446,7 @@ class ImageConverter(models.AbstractModel):
     """
     _name = 'ir.qweb.field.image'
     _description = 'Qweb Field Image'
-    _inherit = 'ir.qweb.field'
+    _inherit = ['ir.qweb.field']
 
     @api.model
     def _get_src_data_b64(self, value, options):
@@ -398,36 +455,40 @@ class ImageConverter(models.AbstractModel):
         except binascii.Error:
             raise ValueError("Invalid image content") from None
 
-        if img_b64 and guess_mimetype(img_b64, '') == 'image/webp':
+        mimetype = guess_mimetype(img_b64, '') if img_b64 else None
+        if mimetype == 'image/webp':
             return self.env["ir.qweb"]._get_converted_image_data_uri(value)
+        elif mimetype != "image/svg+xml":
+            try:
+                image = Image.open(BytesIO(img_b64))
+                image.verify()
+                mimetype = Image.MIME[image.format]
+            except OSError as exc:
+                raise ValueError("Non-image binary fields can not be converted to HTML") from exc
+            except Exception as exc:  # noqa: BLE001
+                raise ValueError("Invalid image content") from exc
 
-        try:
-            image = Image.open(BytesIO(img_b64))
-            image.verify()
-        except IOError:
-            raise ValueError("Non-image binary fields can not be converted to HTML") from None
-        except: # image.verify() throws "suitable exceptions", I have no idea what they are
-            raise ValueError("Invalid image content") from None
-
-        return "data:%s;base64,%s" % (Image.MIME[image.format], value.decode('ascii'))
+        return "data:%s;base64,%s" % (mimetype, value.decode('ascii'))
 
     @api.model
     def value_to_html(self, value, options):
         return Markup('<img src="%s">') % self._get_src_data_b64(value, options)
 
-class ImageUrlConverter(models.AbstractModel):
+
+class IrQwebFieldImage_Url(models.AbstractModel):
     """ ``image_url`` widget rendering, inserts an image tag in the
     document.
     """
     _name = 'ir.qweb.field.image_url'
     _description = 'Qweb Field Image'
-    _inherit = 'ir.qweb.field.image'
+    _inherit = ['ir.qweb.field.image']
 
     @api.model
     def value_to_html(self, value, options):
-        return Markup('<img src="%s">' % (value))
+        return Markup('<img src="%s">') % (value)
 
-class MonetaryConverter(models.AbstractModel):
+
+class IrQwebFieldMonetary(models.AbstractModel):
     """ ``monetary`` converter, has a mandatory option
     ``display_currency`` only if field is not of type Monetary.
     Otherwise, if we are in presence of a monetary field, the field definition must
@@ -443,11 +504,11 @@ class MonetaryConverter(models.AbstractModel):
     """
     _name = 'ir.qweb.field.monetary'
     _description = 'Qweb Field Monetary'
-    _inherit = 'ir.qweb.field'
+    _inherit = ['ir.qweb.field']
 
     @api.model
     def get_available_options(self):
-        options = super(MonetaryConverter, self).get_available_options()
+        options = super().get_available_options()
         options.update(
             from_currency=dict(type='model', params='res.currency', string=_('Original currency')),
             display_currency=dict(type='model', params='res.currency', string=_('Display currency'), required="value_to_html"),
@@ -478,6 +539,9 @@ class MonetaryConverter(models.AbstractModel):
             else:
                 company = self.env.company
             value = options['from_currency']._convert(value, display_currency, company, date)
+
+        if float_is_zero(value, precision_digits=display_currency.decimal_places):
+            value = 0.0
 
         lang = self.user_lang()
         formatted_amount = lang.format(fmt, display_currency.round(value), grouping=True)\
@@ -512,11 +576,11 @@ class MonetaryConverter(models.AbstractModel):
             if currency_fields:
                 options['display_currency'] = record[currency_fields[0]]
         if 'date' not in options:
-            options['date'] = record._context.get('date')
+            options['date'] = record.env.context.get('date')
         if 'company_id' not in options:
-            options['company_id'] = record._context.get('company_id')
+            options['company_id'] = record.env.context.get('company_id')
 
-        return super(MonetaryConverter, self).record_to_html(record, field_name, options)
+        return super().record_to_html(record, field_name, options)
 
 
 TIMEDELTA_UNITS = (
@@ -530,7 +594,7 @@ TIMEDELTA_UNITS = (
 )
 
 
-class FloatTimeConverter(models.AbstractModel):
+class IrQwebFieldFloat_Time(models.AbstractModel):
     """ ``float_time`` converter, to display integral or fractional values as
     human-readable time spans (e.g. 1.5 as "01:30").
 
@@ -538,14 +602,14 @@ class FloatTimeConverter(models.AbstractModel):
     """
     _name = 'ir.qweb.field.float_time'
     _description = 'Qweb Field Float Time'
-    _inherit = 'ir.qweb.field'
+    _inherit = ['ir.qweb.field']
 
     @api.model
     def value_to_html(self, value, options):
         return format_duration(value)
 
 
-class TimeConverter(models.AbstractModel):
+class IrQwebFieldTime(models.AbstractModel):
     """ ``time`` converter, to display integer or fractional value as
     human-readable time (e.g. 1.5 as "1:30 AM"). The unit of this value
     is in hours.
@@ -554,7 +618,7 @@ class TimeConverter(models.AbstractModel):
     """
     _name = 'ir.qweb.field.time'
     _description = 'QWeb Field Time'
-    _inherit = 'ir.qweb.field'
+    _inherit = ['ir.qweb.field']
 
     @api.model
     def value_to_html(self, value, options):
@@ -571,7 +635,7 @@ class TimeConverter(models.AbstractModel):
         return babel.dates.format_time(t, format=pattern, tzinfo=None, locale=locale)
 
 
-class DurationConverter(models.AbstractModel):
+class IrQwebFieldDuration(models.AbstractModel):
     """ ``duration`` converter, to display integral or fractional values as
     human-readable time spans (e.g. 1.5 as "1 hour 30 minutes").
 
@@ -589,11 +653,11 @@ class DurationConverter(models.AbstractModel):
     """
     _name = 'ir.qweb.field.duration'
     _description = 'Qweb Field Duration'
-    _inherit = 'ir.qweb.field'
+    _inherit = ['ir.qweb.field']
 
     @api.model
     def get_available_options(self):
-        options = super(DurationConverter, self).get_available_options()
+        options = super().get_available_options()
         unit = [(value, str(label)) for value, label, ratio in TIMEDELTA_UNITS]
         options.update(
             digital=dict(type="boolean", string=_('Digital formatting')),
@@ -637,7 +701,7 @@ class DurationConverter(models.AbstractModel):
             sign = '-'
 
         if options.get('digital'):
-            for unit, label, secs_per_unit in TIMEDELTA_UNITS:
+            for _unit, _label, secs_per_unit in TIMEDELTA_UNITS:
                 if secs_per_unit > 3600:
                     continue
                 v, r = divmod(r, secs_per_unit)
@@ -646,7 +710,7 @@ class DurationConverter(models.AbstractModel):
                 sections.append(u"%02.0f" % int(round(v)))
             return sign + u':'.join(sections)
 
-        for unit, label, secs_per_unit in TIMEDELTA_UNITS:
+        for _unit, _label, secs_per_unit in TIMEDELTA_UNITS:
             v, r = divmod(r, secs_per_unit)
             if not v:
                 continue
@@ -678,14 +742,14 @@ class DurationConverter(models.AbstractModel):
         return u' '.join(sections)
 
 
-class RelativeDatetimeConverter(models.AbstractModel):
+class IrQwebFieldRelative(models.AbstractModel):
     _name = 'ir.qweb.field.relative'
     _description = 'Qweb Field Relative'
-    _inherit = 'ir.qweb.field'
+    _inherit = ['ir.qweb.field']
 
     @api.model
     def get_available_options(self):
-        options = super(RelativeDatetimeConverter, self).get_available_options()
+        options = super().get_available_options()
         options.update(
             now=dict(type='datetime', string=_('Reference date'), description=_('Date to compare with the field value, by default use the current date.'))
         )
@@ -707,21 +771,21 @@ class RelativeDatetimeConverter(models.AbstractModel):
     def record_to_html(self, record, field_name, options):
         if 'now' not in options:
             options = dict(options, now=record._fields[field_name].now())
-        return super(RelativeDatetimeConverter, self).record_to_html(record, field_name, options)
+        return super().record_to_html(record, field_name, options)
 
 
-class BarcodeConverter(models.AbstractModel):
+class IrQwebFieldBarcode(models.AbstractModel):
     """ ``barcode`` widget rendering, inserts a data:uri-using image tag in the
     document. May be overridden by e.g. the website module to generate links
     instead.
     """
     _name = 'ir.qweb.field.barcode'
     _description = 'Qweb Field Barcode'
-    _inherit = 'ir.qweb.field'
+    _inherit = ['ir.qweb.field']
 
     @api.model
     def get_available_options(self):
-        options = super(BarcodeConverter, self).get_available_options()
+        options = super().get_available_options()
         options.update(
             symbology=dict(type='string', string=_('Barcode symbology'), description=_('Barcode type, eg: UPCA, EAN13, Code128'), default_value='Code128'),
             width=dict(type='integer', string=_('Width'), default_value=600),
@@ -754,19 +818,18 @@ class BarcodeConverter(models.AbstractModel):
         return Markup(html.tostring(img_element, encoding='unicode'))
 
 
-class Contact(models.AbstractModel):
+class IrQwebFieldContact(models.AbstractModel):
     _name = 'ir.qweb.field.contact'
     _description = 'Qweb Field Contact'
-    _inherit = 'ir.qweb.field.many2one'
+    _inherit = ['ir.qweb.field.many2one']
 
     @api.model
     def get_available_options(self):
-        options = super(Contact, self).get_available_options()
+        options = super().get_available_options()
         contact_fields = [
             {'field_name': 'name', 'label': _('Name'), 'default': True},
             {'field_name': 'address', 'label': _('Address'), 'default': True},
             {'field_name': 'phone', 'label': _('Phone'), 'default': True},
-            {'field_name': 'mobile', 'label': _('Mobile'), 'default': True},
             {'field_name': 'email', 'label': _('Email'), 'default': True},
             {'field_name': 'vat', 'label': _('VAT')},
         ]
@@ -796,7 +859,7 @@ class Contact(models.AbstractModel):
                 return self.env['ir.qweb']._render('base.no_contact', val, **template_options)
             return ''
 
-        opf = options.get('fields') or ["name", "address", "phone", "mobile", "email"]
+        opf = options.get('fields') or ["name", "address", "phone", "email"]
         sep = options.get('separator')
         if sep:
             opsep = escape(sep)
@@ -819,7 +882,6 @@ class Contact(models.AbstractModel):
             'name': display_name.split("\n")[0],
             'address': address,
             'phone': value.phone,
-            'mobile': value.mobile,
             'city': value.city,
             'country_id': value.country_id.display_name,
             'website': value.website,
@@ -833,10 +895,10 @@ class Contact(models.AbstractModel):
         return self.env['ir.qweb']._render('base.contact', val, minimal_qcontext=True)
 
 
-class QwebView(models.AbstractModel):
+class IrQwebFieldQweb(models.AbstractModel):
     _name = 'ir.qweb.field.qweb'
     _description = 'Qweb Field qweb'
-    _inherit = 'ir.qweb.field.many2one'
+    _inherit = ['ir.qweb.field.many2one']
 
     @api.model
     def record_to_html(self, record, field_name, options):

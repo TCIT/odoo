@@ -50,6 +50,8 @@ class TestSaleMatrixUi(TestMatrixCommon):
         # Also disable all pricelists that could impact the price
         self.env['product.pricelist'].search([]).write({'active': False})
 
+        self.env['product.pricelist'].search([]).unlink()
+
         # Set the template as configurable by matrix.
         self.matrix_template.product_add_mode = "matrix"
 

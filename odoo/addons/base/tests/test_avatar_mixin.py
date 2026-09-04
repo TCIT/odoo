@@ -4,6 +4,7 @@
 from base64 import b64decode
 
 from odoo.tests.common import TransactionCase
+from odoo.tools.mimetypes import guess_mimetype
 
 class TestAvatarMixin(TransactionCase):
 
@@ -31,7 +32,8 @@ class TestAvatarMixin(TransactionCase):
         self.external_partner = self.env['res.partner'].create({
             'name': 'Josh Demo',
             'email': 'josh.brown23@example.com',
-            'image_1920': False
+            'image_1920': False,
+            'create_date': '2015-11-12 00:00:00',
         })
 
     def test_partner_has_avatar_even_if_it_has_no_image(self):
@@ -43,19 +45,34 @@ class TestAvatarMixin(TransactionCase):
 
     def test_content_of_generated_partner_avatar(self):
         expectedAvatar = (
-            "<?xml version='1.0' encoding='UTF-8' ?>"
-            "<svg height='180' width='180' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"
-            "<rect fill='hsl(184, 40%, 45%)' height='180' width='180'/>"
-            "<text fill='#ffffff' font-size='96' text-anchor='middle' x='90' y='125' font-family='sans-serif'>M</text>"
+            '<?xml version="1.0" encoding="UTF-8" ?>'
+            '<svg height="180" width="180" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">'
+            '<rect fill="hsl(184, 40%, 45%)" height="180" width="180"/>'
+            '<text fill="#ffffff" font-size="96" text-anchor="middle" x="90" y="125" font-family="sans-serif">M</text>'
             "</svg>"
         )
         self.assertEqual(expectedAvatar, b64decode(self.user_without_image.partner_id.avatar_1920).decode('utf-8'))
+
+    def test_generated_partner_avatar_mimetype(self):
+        # the XML declaration must use double-quoted attributes: some
+        # libmagic versions/databases misdetect a single-quoted declaration
+        # as text/xml instead of image/svg+xml, which made browsers download
+        # the auto-generated avatar instead of rendering it inline.
+        avatar = b64decode(self.user_without_image.partner_id.avatar_1920)
+        self.assertEqual(guess_mimetype(avatar), 'image/svg+xml')
 
     def test_partner_without_name_has_default_placeholder_image_as_avatar(self):
         self.assertEqual(self.user_without_name.partner_id._avatar_get_placeholder(), b64decode(self.user_without_name.partner_id.avatar_1920))
 
     def test_external_partner_has_default_placeholder_image_as_avatar(self):
-        self.assertEqual(self.external_partner._avatar_get_placeholder(), b64decode(self.external_partner.avatar_1920))
+        expectedAvatar = (
+            '<?xml version="1.0" encoding="UTF-8" ?>'
+            '<svg height="180" width="180" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">'
+            '<rect fill="hsl(71, 48%, 45%)" height="180" width="180"/>'
+            '<text fill="#ffffff" font-size="96" text-anchor="middle" x="90" y="125" font-family="sans-serif">J</text>'
+            "</svg>"
+        )
+        self.assertEqual(expectedAvatar, b64decode(self.external_partner.avatar_1920).decode('utf-8'))
 
     def test_partner_and_user_have_the_same_avatar(self):
         self.assertEqual(self.user_without_image.partner_id.avatar_1920, self.user_without_image.avatar_1920)

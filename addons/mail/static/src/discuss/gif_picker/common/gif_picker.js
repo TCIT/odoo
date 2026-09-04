@@ -1,9 +1,16 @@
-import { Component, onWillStart, useState, useEffect } from "@odoo/owl";
+import { Gif } from "@mail/core/common/gif";
 import { useOnBottomScrolled, useSequential } from "@mail/utils/common/hooks";
+
+import { Component, onWillStart, useState, useEffect } from "@odoo/owl";
 import { user } from "@web/core/user";
 import { useService, useAutofocus } from "@web/core/utils/hooks";
 import { useDebounced } from "@web/core/utils/timing";
 import { rpc } from "@web/core/network/rpc";
+import { PICKER_PROPS, usePicker } from "@web/core/emoji_picker/emoji_picker";
+
+export function useGifPicker(...args) {
+    return usePicker(GifPicker, ...args);
+}
 
 /**
  * @typedef {Object} TenorCategory
@@ -47,19 +54,19 @@ import { rpc } from "@web/core/network/rpc";
 
 export class GifPicker extends Component {
     static template = "discuss.GifPicker";
-    static props = ["PICKERS?", "className?", "close?", "onSelect", "state?"];
+    static props = PICKER_PROPS;
+    static components = { Gif };
 
     setup() {
         super.setup();
         this.orm = useService("orm");
-        this.store = useState(useService("mail.store"));
+        this.store = useService("mail.store");
         this.sequential = useSequential();
-        useAutofocus();
+        this.inputRef = useAutofocus();
         useOnBottomScrolled(
             "scroller",
             () => {
                 if (!this.state.showCategories) {
-                    this.state.loadingGif = true;
                     if (!this.showFavorite) {
                         this.search();
                     } else {
@@ -96,12 +103,13 @@ export class GifPicker extends Component {
                 /** Size, in pixel, of the column. */
                 columnSize: 0,
             },
+            focused: false,
         });
         this.loadFavoritesDebounced = useDebounced(this.loadFavorites, 200);
         onWillStart(() => {
             this.loadCategories();
         });
-        if (this.store.self.type === "partner") {
+        if (this.store.self_partner) {
             onWillStart(() => {
                 this.loadFavorites();
             });
@@ -112,7 +120,6 @@ export class GifPicker extends Component {
                     return;
                 }
                 this.clear();
-                this.state.loadingGif = true;
                 this.search();
                 if (this.searchTerm) {
                     this.closeCategories();
@@ -141,6 +148,9 @@ export class GifPicker extends Component {
     }
 
     async loadCategories() {
+        if (!this.store.hasGifPickerFeature) {
+            return;
+        }
         try {
             let { language, region } = new Intl.Locale(user.lang);
             if (!region && language === "sr") {
@@ -244,7 +254,8 @@ export class GifPicker extends Component {
      */
     async onClickCategory(category) {
         this.clear();
-        this.props.state.searchTerm = category.searchterm;
+        this.searchTerm = category.searchterm;
+        this.inputRef.el?.focus();
         this.closeCategories();
     }
 
@@ -265,6 +276,9 @@ export class GifPicker extends Component {
     }
 
     async loadFavorites() {
+        if (!this.store.hasGifPickerFeature) {
+            return;
+        }
         this.state.loadingGif = true;
         try {
             const [results] = await rpc(

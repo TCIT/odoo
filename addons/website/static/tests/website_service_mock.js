@@ -1,8 +1,6 @@
-/** @odoo-module */
-
 import { patch } from "@web/core/utils/patch";
-import { registry } from '@web/core/registry';
-import { utils, clearRegistryWithCleanup } from '@web/../tests/helpers/mock_env';
+import { registry } from "@web/core/registry";
+import { utils, clearRegistryWithCleanup } from "@web/../tests/helpers/mock_env";
 
 const { prepareRegistriesWithCleanup } = utils;
 
@@ -21,7 +19,7 @@ function makeFakeWebsiteService() {
                 },
                 async fetchUserGroups() {},
             };
-        }
+        },
     };
 }
 
@@ -35,16 +33,16 @@ function makeFakeWebsiteCustomMenusService() {
                     return sections;
                 },
             };
-        }
+        },
     };
 }
 
-const serviceRegistry = registry.category('services');
+const serviceRegistry = registry.category("services");
 patch(utils, {
     prepareRegistriesWithCleanup() {
         prepareRegistriesWithCleanup(...arguments);
-        serviceRegistry.add('website', makeFakeWebsiteService());
-        serviceRegistry.add('website_custom_menus', makeFakeWebsiteCustomMenusService());
-        clearRegistryWithCleanup(registry.category('website_systray'));
+        serviceRegistry.add("website", makeFakeWebsiteService());
+        serviceRegistry.add("website_custom_menus", makeFakeWebsiteCustomMenusService());
+        clearRegistryWithCleanup(registry.category("website_systray"));
     },
 });

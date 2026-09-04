@@ -8,9 +8,10 @@ from odoo.addons.spreadsheet.utils.formatting import (
 )
 
 
-class Lang(models.Model):
+class ResLang(models.Model):
     _inherit = "res.lang"
 
+    @api.readonly
     @api.model
     def get_locales_for_spreadsheet(self):
         """Return the list of locales available for a spreadsheet."""
@@ -22,7 +23,7 @@ class Lang(models.Model):
     @api.model
     def _get_user_spreadsheet_locale(self):
         """Convert the odoo lang to a spreadsheet locale."""
-        lang = self._lang_get(self.env.user.lang)
+        lang = self._lang_get(self.env.user.lang or 'en_US')
         return lang._odoo_lang_to_spreadsheet_locale()
 
     def _odoo_lang_to_spreadsheet_locale(self):

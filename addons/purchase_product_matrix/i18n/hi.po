@@ -1,28 +1,34 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* purchase_product_matrix
-# 
-# Translators:
-# Wil Odoo, 2024
-# 
+# * purchase_product_matrix
+#
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Hindi (https://app.transifex.com/odoo/teams/41243/hi/)\n"
+"POT-Creation-Date: 2026-06-12 17:37+0000\n"
+"PO-Revision-Date: 2026-08-06 23:33+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Hindi <https://translate.odoo.com/projects/odoo-19/"
+"purchase_product_matrix/hi/>\n"
+"Language: hi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: hi\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order_line__product_template_attribute_value_ids
 msgid "Attribute Values"
 msgstr ""
+
+#. module: purchase_product_matrix
+#: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order__display_name
+#: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order_line__display_name
+msgid "Display Name"
+msgstr "डिस्प्ले का नाम"
 
 #. module: purchase_product_matrix
 #. odoo-javascript
@@ -33,7 +39,7 @@ msgstr ""
 #. module: purchase_product_matrix
 #: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order__grid
 msgid "Grid"
-msgstr ""
+msgstr "ग्रिड"
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order__grid_product_tmpl_id
@@ -44,6 +50,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order__grid_update
 msgid "Grid Update"
 msgstr ""
+
+#. module: purchase_product_matrix
+#: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order__id
+#: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order_line__id
+msgid "ID"
+msgstr "आईडी"
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,help:purchase_product_matrix.field_purchase_order__report_grids
@@ -65,17 +77,12 @@ msgstr ""
 #. module: purchase_product_matrix
 #: model_terms:ir.ui.view,arch_db:purchase_product_matrix.purchase_order_form_matrix
 msgid "Product"
-msgstr "उत्पाद"
+msgstr "प्रॉडक्ट"
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order_line__product_template_id
 msgid "Product Template"
 msgstr "उत्पाद  प्रारूप"
-
-#. module: purchase_product_matrix
-#: model:ir.model.fields,field_description:purchase_product_matrix.field_purchase_order_line__product_no_variant_attribute_value_ids
-msgid "Product attribute values that do not create variants"
-msgstr ""
 
 #. module: purchase_product_matrix
 #: model:ir.model,name:purchase_product_matrix.model_purchase_order
@@ -85,7 +92,7 @@ msgstr "खरीद आदेश"
 #. module: purchase_product_matrix
 #: model:ir.model,name:purchase_product_matrix.model_purchase_order_line
 msgid "Purchase Order Line"
-msgstr ""
+msgstr "परचेज़ ऑर्डर लाइन"
 
 #. module: purchase_product_matrix
 #: model:ir.model.fields,help:purchase_product_matrix.field_purchase_order__grid_product_tmpl_id

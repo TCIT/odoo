@@ -94,7 +94,7 @@ class TestAccountMoveOutRefundOnchanges(AccountTestInvoicingCommon):
             'date_maturity': False,
         }
         cls.term_line_vals_1 = {
-            'name': '',
+            'name': False,
             'product_id': False,
             'account_id': cls.company_data['default_account_receivable'].id,
             'partner_id': cls.partner_a.id,
@@ -435,7 +435,7 @@ class TestAccountMoveOutRefundOnchanges(AccountTestInvoicingCommon):
 
     def test_out_refund_line_onchange_cash_rounding_1(self):
         # Required for `invoice_cash_rounding_id` to be visible in the view
-        self.env.user.groups_id += self.env.ref('account.group_cash_rounding')
+        self.env.user.group_ids += self.env.ref('account.group_cash_rounding')
         # Test 'add_invoice_line' rounding
         move_form = Form(self.invoice)
         # Add a cash rounding having 'add_invoice_line'.
@@ -590,6 +590,8 @@ class TestAccountMoveOutRefundOnchanges(AccountTestInvoicingCommon):
         })
 
     def test_out_refund_line_onchange_currency_1(self):
+        self.other_currency.rounding = 0.001
+
         move_form = Form(self.invoice)
         move_form.currency_id = self.other_currency
         move_form.save()
@@ -684,7 +686,7 @@ class TestAccountMoveOutRefundOnchanges(AccountTestInvoicingCommon):
             {
                 **self.product_line_vals_1,
                 'quantity': 0.1,
-                'price_unit': 0.05,
+                'price_unit': 0.045,
                 'price_subtotal': 0.005,
                 'price_total': 0.006,
                 'currency_id': self.other_currency.id,
@@ -734,11 +736,11 @@ class TestAccountMoveOutRefundOnchanges(AccountTestInvoicingCommon):
             {
                 **self.product_line_vals_1,
                 'quantity': 0.1,
-                'price_unit': 0.05,
-                'price_subtotal': 0.01,
-                'price_total': 0.01,
-                'amount_currency': 0.01,
-                'debit': 0.01,
+                'price_unit': 0.045,
+                'price_subtotal': 0.0,
+                'price_total': 0.0,
+                'amount_currency': 0.0,
+                'debit': 0.0,
             },
             self.product_line_vals_2,
             {
@@ -749,17 +751,17 @@ class TestAccountMoveOutRefundOnchanges(AccountTestInvoicingCommon):
             self.tax_line_vals_2,
             {
                 **self.term_line_vals_1,
-                'amount_currency': -260.01,
-                'credit': 260.01,
+                'amount_currency': -260.0,
+                'credit': 260.0,
                 'date_maturity': fields.Date.from_string('2016-01-01'),
             },
         ], {
             **self.move_vals,
             'currency_id': self.company_data['currency'].id,
             'date': fields.Date.from_string('2016-01-01'),
-            'amount_untaxed': 200.01,
+            'amount_untaxed': 200.0,
             'amount_tax': 60.0,
-            'amount_total': 260.01,
+            'amount_total': 260.0,
         })
 
     def test_out_refund_create_1(self):
@@ -1165,7 +1167,6 @@ class TestAccountMoveOutRefundOnchanges(AccountTestInvoicingCommon):
         # check caba move
         partial_rec = invoice.mapped('line_ids.matched_debit_ids')
         caba_move = self.env['account.move'].search([('tax_cash_basis_rec_id', '=', partial_rec.id)])
-        # all amls with tax_tag should all have tax_tag_invert at False since the caba move comes from an invoice refund
         expected_values = [
             {
                 'tax_line_id': False,
@@ -1175,7 +1176,6 @@ class TestAccountMoveOutRefundOnchanges(AccountTestInvoicingCommon):
                 'account_id': not_default_income_account.id,
                 'debit': 0.0,
                 'credit': 1000.0,
-                'tax_tag_invert': False,
             },
             {
                 'tax_line_id': False,
@@ -1185,7 +1185,6 @@ class TestAccountMoveOutRefundOnchanges(AccountTestInvoicingCommon):
                 'account_id': not_default_income_account.id,
                 'debit': 1000.0,
                 'credit': 0.0,
-                'tax_tag_invert': False,
             },
             {
                 'tax_line_id': False,
@@ -1195,7 +1194,6 @@ class TestAccountMoveOutRefundOnchanges(AccountTestInvoicingCommon):
                 'account_id': default_income_account.id,
                 'debit': 300.0,
                 'credit': 0.0,
-                'tax_tag_invert': False,
             },
             {
                 'tax_line_id': False,
@@ -1205,7 +1203,6 @@ class TestAccountMoveOutRefundOnchanges(AccountTestInvoicingCommon):
                 'account_id': default_income_account.id,
                 'debit': 0.0,
                 'credit': 300.0,
-                'tax_tag_invert': False,
             },
             {
                 'tax_line_id': False,
@@ -1215,7 +1212,6 @@ class TestAccountMoveOutRefundOnchanges(AccountTestInvoicingCommon):
                 'account_id': tax_waiting_account.id,
                 'debit': 0.0,
                 'credit': 70.0,
-                'tax_tag_invert': False,
             },
             {
                 'tax_line_id': tax.id,
@@ -1225,7 +1221,6 @@ class TestAccountMoveOutRefundOnchanges(AccountTestInvoicingCommon):
                 'account_id': tax_final_account.id,
                 'debit': 70.0,
                 'credit': 0.0,
-                'tax_tag_invert': False,
             },
         ]
         self.assertRecordValues(caba_move.line_ids, expected_values)

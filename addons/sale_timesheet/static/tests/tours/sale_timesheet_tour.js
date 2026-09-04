@@ -1,11 +1,8 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 import tourUtils from "@sale/js/tours/tour_utils";
 
 import { markup } from "@odoo/owl";
-import { queryText } from "@odoo/hoot-dom";
 
 registry.category("web_tour.tours").add('sale_timesheet_tour', {
     url: '/odoo',
@@ -35,6 +32,12 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
     content: 'Add a new project.',
     run: "click",
 }, {
+    isActive: ['button.o-kanban-button-new.dropdown'], // if the project template dropdown is active
+    trigger: 'button.o-dropdown-item:contains("New Project")',
+    content: 'Let\'s create a regular project.',
+    tooltipPosition: 'right',
+    run: "click",
+}, {
     trigger: '.o_field_widget.o_project_name input',
     content: 'Select your project name (e.g. Project for Freeman)',
     run: "edit Project for Freeman",
@@ -46,6 +49,26 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
     content: 'Click on Create button to create and enter to this newest project.',
     run: "click",
 }, {
+    trigger: ".breadcrumb-item.o_back_button",
+    run: "click",
+}, {
+    trigger: ".o_kanban_record:contains('Project for Freeman')",
+}, {
+    trigger: ".o_switch_view.o_list",
+    run: "click",
+}, {
+    trigger: "tr.o_data_row td[name='name']:contains('Project for Freeman')",
+    run: "click",
+}, {
+    trigger: ".nav-link:contains('Settings')",
+    run: "click",
+}, {
+    trigger: "div[name='allow_milestones'] input",
+    run: "click",
+}, {
+    trigger: "button[name='action_view_tasks']",
+    run: "click",
+}, {
     trigger: 'div.o_kanban_header > div:first-child input',
     content: 'Select a name of your kanban column (e.g. To Do)',
     run: "edit To Do",
@@ -53,7 +76,10 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
     trigger: 'button.o_kanban_add',
     content: 'Click on Add button to create the column.',
     run: "click",
-}, {
+},{
+    content: "wait the new column is created",
+    trigger: ".o_kanban_renderer .o_kanban_group .o_kanban_header_title:contains(to do)",
+},{
     trigger: 'button.o-kanban-button-new',
     content: 'Click on Create button to create a task into your project.',
     run: "click",
@@ -117,7 +143,7 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
 }, {
     trigger: 'div[name="order_line"]',
     content: 'Check if the quantity delivered is equal to 1 hour.',
-    run: function () {
+    run({ queryFirst }) {
         const header = this.anchor.querySelectorAll("thead > tr");
         if (!header || header.length === 0)
             console.error('No Sales Order Item is found in the Sales Order.');
@@ -128,8 +154,8 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
             if (th.dataset && th.dataset.name === 'qty_delivered')
                 index = i;
         }
-        const qtyDelivered = queryText(`tbody > tr:first-child > td.o_data_cell:eq(${index})`, { root: this.anchor });
-        if (qtyDelivered !== "1.00")
+        const qtyDelivered = queryFirst(`tbody > tr:first-child > td.o_data_cell:eq(${index})`, { root: this.anchor });
+        if (qtyDelivered.textContent !== "1.00")
             console.error('The quantity delivered on this Sales Order Item should be equal to 1.00 hour. qtyDelivered = ' + qtyDelivered);
     },
 }, {
@@ -143,6 +169,12 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
 }, {
     trigger: 'button.o_list_button_add',
     content: 'Click on Create button to create a new project and see the different configuration available for the project.',
+    run: "click",
+}, {
+    isActive: ['button.o_list_button_add.dropdown'], // if the project template dropdown is active
+    trigger: 'button.o-dropdown-item:contains("New Project")',
+    content: 'Let\'s create a regular project.',
+    tooltipPosition: 'right',
     run: "click",
 },
 {
@@ -214,14 +246,11 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
     content: 'Select Project main menu',
     run: "click",
 }, {
-    content: 'Open the project dropdown',
-    trigger: ".o_kanban_record:contains(Project for Freeman)",
-    run: "hover && click .o_kanban_record:contains(Project for Freeman) .o_dropdown_kanban .dropdown-toggle",
-}, {
-    trigger: '.dropdown-menu a:contains("Settings")',
-    content: 'Start editing the project',
+    trigger: ".o_switch_view.o_list",
     run: "click",
-    // timer: 300,
+}, {
+    trigger: "tr.o_data_row td[name='name']:contains('Project for Freeman')",
+    run: "click",
 }, {
     trigger: 'div[name="partner_id"] input',
     content: markup('Add the customer for this project to select an SO and SOL for this customer <i>(e.g. Brandon Freeman)</i>.'),
@@ -247,8 +276,8 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
     content: 'Select the first item on the autocomplete dropdown',
     run: "click",
 }, {
-    trigger: '.o_back_button',
-    content: 'Go back to the kanban view the project created',
+    trigger: '[data-menu-xmlid="project.menu_projects"]',
+    content: 'Select Project main menu',
     run: "click",
 }, {
     trigger: '.o_kanban_record:contains("Project for Freeman")',
@@ -259,8 +288,7 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
     content: 'Open embedded actions',
     run: "click",
 }, {
-    trigger: ".o_embedded_actions button i.fa-sliders",
-    content: "Open embedded actions dropdown",
+    trigger: "span.o-dropdown-item:contains('Top Menu')",
     run: "click",
 }, {
     trigger: ".o-dropdown-item div span:contains('Dashboard')",
@@ -274,24 +302,24 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
     trigger: ".o_rightpanel_section[name='profitability'] .o_rightpanel_title:contains('Profitability')",
     content: 'Check the user sees Profitability section',
 }, {
-    trigger: ".o_rightpanel_section[name='profitability'] .o_rightpanel_data > .o_rightpanel_subsection:eq(0) > table > thead > tr > th:eq(0):contains('Revenues')",
+    trigger: ".o_rightpanel_section[name='profitability'] .o_rightpanel_data > div > .o_rightpanel_subsection:eq(0) > table > thead > tr > th:eq(0):contains('Revenues')",
     content: 'Check the user sees Profitability subsection row',
 }, {
-    trigger: "button.fa-caret-right",
+    trigger: "button.o_group_caret:has(.fa-caret-right)",
     content: 'Check that the dropdown button is present',
     run: "click",
 }, {
     trigger: "th:contains('Sales Order Items')",
     content: 'Check that the sale items section is present',
 }, {
-    trigger: "button.fa-caret-down",
+    trigger: "button.o_group_caret:has(.fa-caret-down)",
     content: 'Check that the button has changed',
     run: "click",
 }, {
-    trigger: ".o_rightpanel_section[name='profitability'] .o_rightpanel_data > .o_rightpanel_subsection:eq(1) > table > thead > tr > th:eq(0):contains('Costs')",
+    trigger: ".o_rightpanel_section[name='profitability'] .o_rightpanel_data > div > .o_rightpanel_subsection:eq(1) > table > thead > tr > th:eq(0):contains('Costs')",
     content: 'Check the user sees Profitability subsection row',
 }, {
-    trigger: ".o_rightpanel_section[name='profitability'] .o_rightpanel_data > .o_rightpanel_subsection:eq(2) > table > thead > tr > th:eq(0):contains('Total')",
+    trigger: ".o_rightpanel_section[name='profitability'] .o_rightpanel_data > div > .o_rightpanel_subsection:eq(2) > table > thead > tr > th:eq(0):contains('Total')",
     content: 'Check the user sees Profitability subsection row',
 }, {
     trigger: ".o_rightpanel_section[name='milestones'] .o_rightpanel_title:contains('Milestones')",
@@ -302,16 +330,22 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
     content: "Add a first milestone",
     run: "click",
 }, {
+    trigger: ".o_list_button_add",
+    content: "Add a first milestone",
+    run: "click",
+}, {
     trigger: "div.o_field_widget[name=name] input",
-    content: "Edit new Milestone",
     run: "edit New milestone",
 }, {
     trigger: "input[data-field=deadline]",
     content: "Edit new Milestone",
     run: "edit 12/12/2099",
 }, {
-    trigger: ".modal-footer button",
+    trigger: ".o_list_button_save",
     content: "Save new Milestone",
+    run: "click",
+}, {
+    trigger: ".breadcrumb-item.o_back_button",
     run: "click",
 }, {
     trigger: ".o-kanban-button-new",

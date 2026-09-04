@@ -1,58 +1,68 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* barcodes
-# 
+# * barcodes
+#
 # Translators:
-# emre oktem, 2024
-# Güven YILMAZ <guvenyilmaz@outlook.com.tr>, 2024
-# Yedigen, 2024
-# Sinem Cil, 2024
-# Ediz Duman <neps1192@gmail.com>, 2024
-# Martin Trigaux, 2024
-# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2024
-# Murat Kaplan <muratk@projetgrup.com>, 2024
-# Umur Akın <umura@projetgrup.com>, 2024
-# Ahmet Altinisik <aaltinisik@altinkaya.com.tr>, 2024
-# Tugay Hatıl <tugayh@projetgrup.com>, 2024
-# Cengiz Cokay Global Nonwoven, 2025
-# 
+# Ayhan KIZILTAN <akiziltan76@hotmail.com>, 2022
+# Yedigen, 2022
+# Martin Trigaux, 2022
+# Levent Karakaş <levent@mektup.at>, 2022
+# Murat Kaplan <muratk@projetgrup.com>, 2022
+# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2022
+# Ediz Duman <neps1192@gmail.com>, 2022
+# Umur Akın <umura@projetgrup.com>, 2022
+# Ahmet Altinisik <aaltinisik@altinkaya.com.tr>, 2022
+# Tugay Hatıl <tugayh@projetgrup.com>, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# DeepL <noreply-mt-deepl@weblate.org>, 2025.
+# Odoo Turkish Import <dyki+tr@odoo.com>, 2025, 2026.
+# "Malaz Siddig Elsayed Abuidris (msea)" <msea@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:40+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Cengiz Cokay Global Nonwoven, 2025\n"
-"Language-Team: Turkish (https://app.transifex.com/odoo/teams/41243/tr/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-06 20:57+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-19/barcodes/"
+"tr/>\n"
+"Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: tr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: barcodes
 #. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 msgid " '*' is not a valid Regex Barcode Pattern. Did you mean '.*'?"
-msgstr ""
+msgstr " '*' geçerli bir Regex Barkod Kalıbı değildir. '.*' mi demek istediniz?"
 
 #. module: barcodes
 #: model_terms:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_form
 msgid ""
-"<i>Barcodes Nomenclatures</i> define how barcodes are recognized and categorized.\n"
-"                                When a barcode is scanned it is associated to the <i>first</i> rule with a matching\n"
-"                                pattern. The pattern syntax is that of regular expression, and a barcode is matched\n"
-"                                if the regular expression matches a prefix of the barcode."
+"<i>Barcodes Nomenclatures</i> define how barcodes are recognized and "
+"categorized.\n"
+"                                When a barcode is scanned it is associated "
+"to the <i>first</i> rule with a matching\n"
+"                                pattern. The pattern syntax is that of "
+"regular expression, and a barcode is matched\n"
+"                                if the regular expression matches a prefix "
+"of the barcode."
 msgstr ""
-"<i>Barkod Kural Setleri</i> Barkodların nasıl tanınacağını ve kategorize edileceğini belirlemeye yarar.\n"
-"                                Bir barkod okutulduğunda  <i>önce</i> kural setinde bir kalıpla eşleştirilir. Barkod kalıbının eşleştirmesinde düzenli ifadeler kullanılır.\n"
-"                                "
+"<i>Barkod Kural Setleri</i> Barkodların nasıl tanınacağını ve kategorize "
+"edileceğini belirlemeye yarar.\n"
+"                                Bir barkod okutulduğunda  <i>önce</i> kural "
+"setinde bir kalıpla eşleştirilir. Barkod kalıbının eşleştirmesinde düzenli "
+"ifadeler kullanılır."
 
 #. module: barcodes
 #: model_terms:ir.actions.act_window,help:barcodes.action_barcode_nomenclature_form
 msgid ""
-"A barcode nomenclature defines how the point of sale identify and interprets"
-" barcodes"
+"A barcode nomenclature defines how the point of sale identify and interprets "
+"barcodes"
 msgstr ""
 "Bir barkod kural seti, barkodları nasıl belirlediğini ve yorumladığını "
 "tanımlar."
@@ -87,6 +97,12 @@ msgstr "Bu barkod kural seti için bir iç kimlik."
 #: model:ir.model.fields.selection,name:barcodes.selection__barcode_rule__encoding__any
 msgid "Any"
 msgstr "Hiç"
+
+#. module: barcodes
+#. odoo-javascript
+#: code:addons/barcodes/static/src/components/manual_barcode.xml:0
+msgid "Apply"
+msgstr "Uygula"
 
 #. module: barcodes
 #. odoo-javascript
@@ -133,7 +149,7 @@ msgstr "Barcode Tarandı"
 #. odoo-javascript
 #: code:addons/barcodes/static/src/barcode_handlers.js:0
 msgid "Barcode: %(barcode)s"
-msgstr ""
+msgstr "Barkod: %(barcode)s"
 
 #. module: barcodes
 #: model:ir.model,name:barcodes.model_res_company
@@ -155,6 +171,9 @@ msgstr "Oluşturuldu"
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__display_name
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__display_name
+#: model:ir.model.fields,field_description:barcodes.field_barcodes_barcode_events_mixin__display_name
+#: model:ir.model.fields,field_description:barcodes.field_ir_http__display_name
+#: model:ir.model.fields,field_description:barcodes.field_res_company__display_name
 msgid "Display Name"
 msgstr "İsim Göster"
 
@@ -179,6 +198,12 @@ msgid "Encoding"
 msgstr "Kodlama"
 
 #. module: barcodes
+#. odoo-javascript
+#: code:addons/barcodes/static/src/components/manual_barcode.js:0
+msgid "Enter a barcode..."
+msgstr "Bir barkod girin..."
+
+#. module: barcodes
 #: model:ir.model,name:barcodes.model_ir_http
 msgid "HTTP Routing"
 msgstr "HTTP Yönlendirme"
@@ -186,8 +211,21 @@ msgstr "HTTP Yönlendirme"
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__id
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__id
+#: model:ir.model.fields,field_description:barcodes.field_barcodes_barcode_events_mixin__id
+#: model:ir.model.fields,field_description:barcodes.field_ir_http__id
+#: model:ir.model.fields,field_description:barcodes.field_res_company__id
 msgid "ID"
 msgstr "ID"
+
+#. module: barcodes
+#. odoo-python
+#: code:addons/barcodes/models/barcode_events_mixin.py:0
+msgid ""
+"In order to use barcodes.barcode_events_mixin, method on_barcode_scanned "
+"must be implemented"
+msgstr ""
+"barcodes.barcode_events_mixin kullanmak için on_barcode_scanned yöntemi "
+"uygulanmalıdır"
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__write_uid
@@ -214,13 +252,27 @@ msgstr "Sınıflandırma"
 #. module: barcodes
 #: model_terms:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_form
 msgid ""
-"Patterns can also define how numerical values, such as weight or price, can be\n"
-"                                encoded into the barcode. They are indicated by <code>{NNN}</code> where the N's\n"
-"                                define where the number's digits are encoded. Floats are also supported with the\n"
-"                                decimals indicated with D's, such as <code>{NNNDD}</code>. In these cases,\n"
-"                                the barcode field on the associated records <i>must</i> show these digits as\n"
+"Patterns can also define how numerical values, such as weight or price, can "
+"be\n"
+"                                encoded into the barcode. They are indicated "
+"by <code>{NNN}</code> where the N's\n"
+"                                define where the number's digits are "
+"encoded. Floats are also supported with the\n"
+"                                decimals indicated with D's, such as "
+"<code>{NNNDD}</code>. In these cases,\n"
+"                                the barcode field on the associated records "
+"<i>must</i> show these digits as\n"
 "                                zeroes."
 msgstr ""
+"Kalıplar ayrıca ağırlık veya fiyat gibi sayısal değerlerin nasıl\n"
+"                                barkod içine kodlanacağını da tanımlar. "
+"Bunlar <code>{NNN}</code> ile gösterilir; burada N'ler\n"
+"                                sayının rakamlarının nerede kodlanacağını "
+"tanımlar. Ondalık değerler de desteklenir ve ondalık basamaklar D harfiyle "
+"ifade edilir; örneğin <code>{NNNDD}</code>  gibi. Bu durumlarda,\n"
+"                                ilişkili kayıtlardaki barkod alanı bu "
+"rakamları sıfır \n"
+" olarak <i> göstermelidir </i>"
 
 #. module: barcodes
 #. odoo-javascript
@@ -264,7 +316,7 @@ msgstr "Barkod eşleşme kalıbı"
 #: code:addons/barcodes/models/barcode_rule.py:0
 msgid ""
 "The barcode pattern %(pattern)s does not lead to a valid regular expression."
-msgstr ""
+msgstr "%(pattern)s barkod deseni geçerli bir düzenli ifadeye yol açmaz."
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_nomenclature__rule_ids
@@ -283,8 +335,8 @@ msgid ""
 "There is a syntax error in the barcode pattern %(pattern)s: a rule can only "
 "contain one pair of braces."
 msgstr ""
-"%(pattern)sbarkod modelinde söz dizimi hatası mevcut: bir kural yalnızca bir"
-" çift parantez içerebilir."
+"%(pattern)sbarkod modelinde söz dizimi hatası mevcut: bir kural yalnızca bir "
+"çift parantez içerebilir."
 
 #. module: barcodes
 #. odoo-python
@@ -323,8 +375,8 @@ msgstr "Tip"
 #: model:ir.model.fields,help:barcodes.field_barcode_nomenclature__upc_ean_conv
 msgid ""
 "UPC Codes can be converted to EAN by prefixing them with a zero. This "
-"setting determines if a UPC/EAN barcode should be automatically converted in"
-" one way or another when trying to match a rule with the other encoding."
+"setting determines if a UPC/EAN barcode should be automatically converted in "
+"one way or another when trying to match a rule with the other encoding."
 msgstr ""
 "UPC kodları, sıfır ön eki ile  EAN 'a dönüştürülebilir. Bu ayar, diğer "
 "kodlamayla bir kuralı eşleştirmeye çalışırken bir UPC / EAN barkodunun "
@@ -358,8 +410,7 @@ msgstr "Bilinmeyen barkod komutu"
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_rule__sequence
-msgid ""
-"Used to order rules such that rules with a smaller sequence match first"
+msgid "Used to order rules such that rules with a smaller sequence match first"
 msgstr ""
 "Barkod kurallarını önceliklendirmek için kullanılır. Küçük değerli kurallar "
 "öncelikle değerlendirilir."
@@ -368,3 +419,15 @@ msgstr ""
 #: model:ir.model.fields,help:barcodes.field_barcodes_barcode_events_mixin___barcode_scanned
 msgid "Value of the last barcode scanned."
 msgstr "Son taranan barkodun değeri"
+
+#. module: barcodes
+#. odoo-python
+#: code:addons/barcodes/models/barcode_nomenclature.py:0
+msgid ""
+"You cannot delete '%(name)s' because it's the default barcode nomenclature."
+msgstr ""
+"Varsayılan barkod isimlendirmesi olduğu için '%(name)s' adresini "
+"silemezsiniz."
+
+#~ msgid "Barcode: "
+#~ msgstr "Barkod:"

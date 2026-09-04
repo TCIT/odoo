@@ -28,6 +28,8 @@ from . import ir_logging
 from . import ir_module
 from . import ir_demo
 from . import ir_demo_failure
+from . import properties_base_definition
+from . import properties_base_definition_mixin
 from . import report_layout
 from . import report_paperformat
 
@@ -42,6 +44,8 @@ from . import res_bank
 from . import res_config
 from . import res_currency
 from . import res_company
+from . import res_groups_privilege
+from . import res_groups
 from . import res_users
 from . import res_users_settings
 from . import res_users_deletion

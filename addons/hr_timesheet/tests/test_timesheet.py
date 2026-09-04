@@ -2,9 +2,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from lxml import etree
+from unittest.mock import patch
 
+from odoo import fields
 from odoo.fields import Command
-from odoo.tests import Form, TransactionCase
+from odoo.tests import Form, TransactionCase, new_test_user
 from odoo.exceptions import AccessError, RedirectWarning, UserError, ValidationError
 
 
@@ -63,19 +65,19 @@ class TestCommonTimesheet(TransactionCase):
             'name': 'User Employee',
             'login': 'user_employee',
             'email': 'useremployee@test.com',
-            'groups_id': [(6, 0, [cls.env.ref('hr_timesheet.group_hr_timesheet_user').id])],
+            'group_ids': [(6, 0, [cls.env.ref('hr_timesheet.group_hr_timesheet_user').id])],
         })
         cls.user_employee2 = cls.env['res.users'].create({
             'name': 'User Employee 2',
             'login': 'user_employee2',
             'email': 'useremployee2@test.com',
-            'groups_id': [(6, 0, [cls.env.ref('hr_timesheet.group_hr_timesheet_user').id])],
+            'group_ids': [(6, 0, [cls.env.ref('hr_timesheet.group_hr_timesheet_user').id])],
         })
         cls.user_manager = cls.env['res.users'].create({
             'name': 'User Officer',
             'login': 'user_manager',
             'email': 'usermanager@test.com',
-            'groups_id': [(6, 0, [cls.env.ref('hr_timesheet.group_timesheet_manager').id])],
+            'group_ids': [(6, 0, [cls.env.ref('hr_timesheet.group_timesheet_manager').id])],
         })
         # employees
         cls.empl_employee = cls.env['hr.employee'].create({
@@ -93,12 +95,32 @@ class TestCommonTimesheet(TransactionCase):
             'user_id': cls.user_manager.id,
             'employee_type': 'freelance',
         })
+        cls.project = cls.env['project.project'].create({
+            'name': 'Test Project',
+            'privacy_visibility': 'followers',
+            'task_ids': [Command.create({
+                'name': 'Test Task',
+            })],
+        })
+        cls.timesheet = cls.env['account.analytic.line'].create({
+            'name': 'Test Timesheet',
+            'project_id': cls.project.id,
+            'task_id': cls.project.task_ids[0].id,
+            'employee_id':   cls.empl_employee.id,
+        })
+        cls.timesheet_manager_no_project_user = new_test_user(
+            cls.env,
+            login='no_project_user',
+            groups='hr_timesheet.group_timesheet_manager'
+        )
 
 
 class TestTimesheet(TestCommonTimesheet):
 
     def setUp(self):
-        super(TestTimesheet, self).setUp()
+        super().setUp()
+        # Make sure to clean the plan fields
+        self.env.registry._setup_models__(self.env.cr)
 
         # Crappy hack to disable the rule from timesheet grid, if it exists
         # The registry doesn't contain the field timesheet_manager_id.
@@ -289,6 +311,16 @@ class TestTimesheet(TestCommonTimesheet):
                 'project_id': False
             })
 
+    def test_favorite_project_id(self):
+        """ Test that user without previous timesheets and without
+        access to the internal project has no favorite project. """
+
+        # make internal project accessible to invited internal users only
+        self.env.company.internal_project_id.privacy_visibility = 'followers'
+
+        favorite_project = self.env['account.analytic.line'].with_user(self.user_employee)._get_favorite_project_id()
+        self.assertFalse(favorite_project, "A user without timesheet and without access to the internal project should have no favorite project.")
+
     def test_recompute_amount_for_multiple_timesheets(self):
         """ Check that amount is recomputed correctly when setting unit_amount for multiple timesheets at once. """
         Timesheet = self.env['account.analytic.line']
@@ -354,7 +386,7 @@ class TestTimesheet(TestCommonTimesheet):
         project_manager = self.env['res.users'].create({
             'name': 'user_project_manager',
             'login': 'user_project_manager',
-            'groups_id': [(6, 0, [self.ref('project.group_project_manager')])],
+            'group_ids': [(6, 0, [self.ref('project.group_project_manager')])],
         })
 
         project = self.env['project.project'].create({
@@ -389,6 +421,14 @@ class TestTimesheet(TestCommonTimesheet):
         })
 
         self.assertEqual(timesheet.project_id, second_project, 'The project_id of non-validated timesheet should have changed')
+
+    def test_compute_display_name(self):
+        self.timesheet.with_user(self.timesheet_manager_no_project_user)._compute_display_name()
+        self.assertEqual(
+            self.timesheet.display_name,
+            "Test Project - Test Task",
+            "Display name should be correctly computed without raising AccessError."
+        )
 
     def test_create_timesheet_employee_not_in_company(self):
         ''' ts.employee_id only if the user has an employee in the company or one employee for all companies.
@@ -615,9 +655,26 @@ class TestTimesheet(TestCommonTimesheet):
             'unit_amount': 8,
             'employee_id': self.empl_employee2.id
         })
+        project_update_hrs = self.env['project.update'].create({
+            'name': 'Project update 1',
+            'project_id': project.id,
+            'status': 'on_track',
+        })
+        self.assertEqual(project_update_hrs.timesheet_time, 8, "Timesheet time should be 8 hours for new project update")
+        # Clear cached computed project values before the UoM change
+        self.env['project.project'].invalidate_model()
         self.env.company.timesheet_encode_uom_id = self.env.ref('uom.product_uom_day')
-        self.assertEqual(project.total_timesheet_time, 8, "Total timesheet time should be 8 hours")
+        self.assertEqual(project.total_timesheet_time, 1, "Total timesheet time should be 1 day")
+        project.allocated_hours = 0.0
+        panel_data = project.get_panel_data()
+        self.assertEqual(panel_data['buttons'][1]['number'], "1 Days", "Should display '1 Days'")
         self.assertEqual(project.timesheet_encode_uom_id, self.env.company.timesheet_encode_uom_id, "Timesheet encode uom should be the one from the company of the env, since the project has no company.")
+        project_update_days = self.env['project.update'].create({
+            'name': 'Project update 2',
+            'project_id': project.id,
+            'status': 'on_track',
+        })
+        self.assertEqual(project_update_days.timesheet_time, 1, "Timesheet time should be 1 day for new project update")
 
     def test_unlink_task_with_timesheet(self):
         self.env['account.analytic.line'].create({
@@ -764,3 +821,278 @@ class TestTimesheet(TestCommonTimesheet):
                 'project_id': self.project_customer.id,
                 'employee_id': self.empl_employee.id,
             })
+
+    def test_project_update_reflects_task_allocated_hours_and_timesheet(self):
+        """
+        Check if the project update is according to the project's allocated hours and timesheet.
+        Step:
+          1) set 10 allocated hours in the project_customer
+          2) add timesheet 2 hour in task1
+          3) create project update and verfity
+          4) repeat step 1 but allocated hour 12
+          5) add timesheet 3 hour in task2
+          6) repeat step 4
+          8) add timesheet 10 hour in task2
+          9) repeat step 4
+        """
+        def create_timesheet(task, hours):
+            self.env['account.analytic.line'].create({
+                'name': 'Timesheet',
+                'task_id': task.id,
+                'unit_amount': hours,
+                'employee_id': self.empl_employee.id,
+            })
+
+        def create_project_update():
+            update_form = Form(self.env['project.update'].with_context({'default_project_id': self.project_customer.id}))
+            update_form.name = "Test"
+            update_project = update_form.save()
+
+            return [update_project.allocated_time, update_project.timesheet_time, update_project.timesheet_percentage]
+
+        self.project_customer.allocated_hours = 10
+        create_timesheet(self.task1, 2)
+        project_update_vals_list = create_project_update()
+        self.assertListEqual(project_update_vals_list, [10, 2, 20])
+
+        self.project_customer.allocated_hours = 12
+        create_timesheet(self.task2, 3)
+        project_update_vals_list = create_project_update()
+        self.assertListEqual(project_update_vals_list, [12, 5, 42])
+
+        create_timesheet(self.task2, 10)
+        project_update_vals_list = create_project_update()
+        self.assertListEqual(project_update_vals_list, [12, 15, 125])
+
+    def test_calendar_display_name(self):
+        timesheet = self.env['account.analytic.line'].create({
+            'name': 'Timesheet',
+            'unit_amount': 1,
+            'project_id': self.project_customer.id,
+            'employee_id': self.empl_employee.id,
+        })
+        self.assertEqual(timesheet.calendar_display_name, f"{self.project_customer.name} (1h)")
+        timesheet.unit_amount = 1.5
+        timesheet.invalidate_recordset(['calendar_display_name'])
+        self.assertEqual(timesheet.calendar_display_name, f"{self.project_customer.name} (1h30)")
+        timesheet.unit_amount = 8
+        timesheet.company_id.timesheet_encode_uom_id = self.env.ref('uom.product_uom_day')
+        timesheet.invalidate_recordset(['calendar_display_name'])
+        self.assertEqual(timesheet.calendar_display_name, f"{self.project_customer.name} (1d)")
+        timesheet.unit_amount = 12
+        timesheet.invalidate_recordset(['calendar_display_name'])
+        self.assertEqual(timesheet.calendar_display_name, f"{self.project_customer.name} (1.5d)")
+
+    def test_multi_create_timesheets_from_calendar(self):
+        """
+        Simulate creating timesheets using the multi-create feature in the calendar view
+        """
+        HrTimesheet = self.env['account.analytic.line'].with_context(timesheet_calendar=True)
+
+        timesheet = HrTimesheet.create({
+            'project_id': self.project_customer.id,
+            'unit_amount': 1,
+            'employee_id': self.empl_employee.id,
+            'date': '2025-05-26',
+        })
+        self.assertTrue(timesheet, "The timesheet should be created without errors")
+        self.assertEqual(timesheet.employee_id, self.empl_employee)
+        self.assertEqual(fields.Date.to_string(timesheet.date), '2025-05-26')
+
+        timesheet = HrTimesheet.create({
+            'project_id': self.project_customer.id,
+            'unit_amount': 1,
+            'employee_id': self.empl_employee.id,
+            'date': '2025-05-25',   # Sunday
+        })
+        self.assertFalse(timesheet, "The timesheet should not get created on a weekend")
+
+        calendar = self.env['resource.calendar'].with_company(self.env.company).create({
+            'name': "part time",
+            'hours_per_day': 8.0,
+            'attendance_ids': [
+                (0, 0, {'name': "Monday Morning", 'dayofweek': '0', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': "Monday Lunch", 'dayofweek': '0', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
+                (0, 0, {'name': "Monday Evening", 'dayofweek': '0', 'hour_from': 13, 'hour_to': 17, 'day_period': 'afternoon'}),
+                (0, 0, {'name': "Thursday Morning", 'dayofweek': '3', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': "Thursday Lunch", 'dayofweek': '3', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
+                (0, 0, {'name': "Thursday Evening", 'dayofweek': '3', 'hour_from': 13, 'hour_to': 17, 'day_period': 'afternoon'}),
+                (0, 0, {'name': "Friday Morning", 'dayofweek': '4', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': "Friday Lunch", 'dayofweek': '4', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
+                (0, 0, {'name': "Friday Evening", 'dayofweek': '4', 'hour_from': 13, 'hour_to': 17, 'day_period': 'afternoon'}),
+            ],
+        })
+
+        self.empl_employee.resource_calendar_id = calendar
+        self.empl_employee2.resource_calendar_id = calendar
+        with patch.object(self.env.registry['bus.bus'], '_sendone') as mock_send:
+            def create_timesheet_records(days):
+                return HrTimesheet.create([{
+                    'project_id': self.project_customer.id,
+                    'unit_amount': 1,
+                    'date': f'2025-05-{day}',
+                    'employee_id': employee.id,
+                } for day in days for employee in (self.empl_employee, self.empl_employee2)])
+
+            def assert_notification(mock_send, notification_type, message):
+                mock_send.assert_called_with(self.env.user.partner_id, 'simple_notification', {
+                    'type': notification_type,
+                    'message': message,
+                })
+                mock_send.reset_mock()
+
+            timesheets = create_timesheet_records(('25', '26', '27'))
+            self.assertEqual(len(timesheets), 2)
+            self.assertEqual(fields.Date.to_string(timesheets[0].date), '2025-05-26', "The timesheet creation should skip non-working days")
+            self.assertEqual(fields.Date.to_string(timesheets[1].date), '2025-05-26', "The timesheet creation should skip non-working days")
+            assert_notification(mock_send, 'danger', "Some timesheets were not created: employees aren’t working on the selected days")
+
+            timesheets = create_timesheet_records(('18', '25'))
+            self.assertEqual(len(timesheets), 0)
+            assert_notification(mock_send, 'danger', "No timesheets created: employees aren’t working on the selected days")
+
+            timesheets = create_timesheet_records(('8', '9'))
+            self.assertEqual(len(timesheets), 4)
+            assert_notification(mock_send, 'success', "Timesheets successfully created")
+
+    def test_keep_create_account_values_at_timesheet_creation(self):
+        field_name = self.analytic_plan._column_name()
+        analytic_account, another_account = self.env['account.analytic.account'].create([
+            {
+                'name': 'Analytic Account',
+                'partner_id': self.partner.id,
+                'plan_id': self.analytic_plan.id,
+                'code': 'TEST',
+            },
+            {
+                 'name': 'Another Analytic Account',
+                 'partner_id': self.partner.id,
+                 'plan_id': self.analytic_plan.id,
+                 'code': 'TEST2',
+            },
+       ])
+
+        self.project_customer.write({
+            field_name: another_account.id,
+        })
+
+        line = self.env['account.analytic.line'].create({
+            'name': 'Timesheet',
+            'unit_amount': 1,
+            'project_id': self.project_customer.id,
+            field_name: analytic_account.id,
+            'employee_id': self.empl_employee.id,
+        })
+        self.assertEqual(line[field_name].id, analytic_account.id, f"The value of {field_name} shouldn't get overwritten by the project's account")
+
+    def test_keep_write_account_values_at_timesheet_update(self):
+        field_name = self.analytic_plan._column_name()
+        analytic_account, another_account = self.env['account.analytic.account'].create([
+            {
+                'name': 'Analytic Account',
+                'partner_id': self.partner.id,
+                'plan_id': self.analytic_plan.id,
+                'code': 'TEST',
+            },
+            {
+                'name': 'Another Analytic Account',
+                'partner_id': self.partner.id,
+                'plan_id': self.analytic_plan.id,
+                'code': 'TEST2',
+            },
+        ])
+
+        self.project_customer.write({
+            field_name: another_account.id,
+        })
+
+        line = self.env['account.analytic.line'].create({
+            'name': 'Timesheet',
+            'unit_amount': 1,
+            'employee_id': self.empl_employee.id,
+        })
+
+        line.write({
+            'project_id': self.project_customer.id,
+            field_name: analytic_account.id
+        })
+        self.assertEqual(line[field_name].id, analytic_account.id, f"The value of {field_name} shouldn't get overwritten by the project's account")
+
+    def test_split_analytic_dynamic_update(self):
+        self.empl_employee.hourly_cost = 10.0
+        another_account = self.project.account_id.copy()
+
+        line = self.env['account.analytic.line'].create({
+            'name': 'Timesheet',
+            'unit_amount': 1,
+            'project_id': self.project_customer.id,
+            'account_id': self.project.account_id.id,
+            'employee_id': self.empl_employee.id,
+        })
+        self.assertEqual(line.amount, -10)
+        line.analytic_distribution = {
+            f"{self.project.account_id.id}": 50,
+            f"{another_account.id}": 50,
+        }
+        self.assertEqual(line.amount, -5)  # the line is split in 2
+
+    def test_log_timesheet_with_user_has_two_employees_from_different_companies(self):
+        company_2 = self.env['res.company'].create({'name': 'Company 2'})
+        self.env['hr.employee'].with_company(company_2).create({
+            'name': 'Employee 2',
+            'user_id': self.user_manager.id,
+        })
+        timesheet = self.env['account.analytic.line'].create({
+            'project_id': self.project.id,
+            'user_id': self.user_manager.id,
+        })
+        self.assertEqual(timesheet.company_id, self.env.company)
+
+    def test_is_project_overtime_filter(self):
+        self.project.allocated_hours = 3.0
+        self.assertEqual(self.project.remaining_hours, 3.0)
+        task_1, task_2 = self.env['project.task'].create([
+            {
+                'name': 'Task 1',
+                'project_id': self.project.id,
+            },
+            {
+                'name': 'Task 2 (done)',
+                'project_id': self.project.id,
+                'state': '1_done',
+            }
+        ])
+        self.env['account.analytic.line'].create([
+            {
+                'name': 'Timesheet Task 1',
+                'unit_amount': 2.0,
+                'project_id': self.project.id,
+                'employee_id': self.empl_employee.id,
+                'task_id': task_1.id,
+            },
+            {
+                'name': 'Timesheet Task 2 (done)',
+                'unit_amount': 2.0,
+                'project_id': self.project.id,
+                'employee_id': self.empl_employee.id,
+                'task_id': task_2.id,
+            },
+        ])
+        self.assertRecordValues(self.project, [{
+            'is_project_overtime': True,
+            'remaining_hours': -1.0
+        }])
+        self.project.flush_model()  # Ensures the `project.allocated_hours` is saved in the database
+        self.assertIn(
+            self.project,
+            self.env['project.project'].search([('is_project_overtime', '=', True)])
+        )
+
+    def test_task_reset_on_project_change(self):
+        """ Changing the project_id of a timesheet should reset its task_id
+            if the task doesn't belong to the new project"""
+
+        self.assertTrue(self.timesheet.task_id)
+        self.timesheet.write({'project_id': self.project_customer.id})
+        self.assertFalse(self.timesheet.task_id)
+        self.assertEqual(self.timesheet.project_id, self.project_customer)

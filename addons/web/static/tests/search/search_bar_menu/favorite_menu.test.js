@@ -1,34 +1,25 @@
 import { after, expect, test } from "@odoo/hoot";
 import { queryFirst } from "@odoo/hoot-dom";
 import { mockDate } from "@odoo/hoot-mock";
-import { Component, onWillUpdateProps, xml } from "@odoo/owl";
 import { editValue } from "@web/../tests/core/tree_editor/condition_tree_editor_test_helpers";
 import {
     contains,
-    deleteFavorite,
-    editFavoriteName,
+    editFavorite,
     getFacetTexts,
-    getService,
     isItemSelected,
-    mountWithCleanup,
+    mockService,
     mountWithSearch,
     onRpc,
-    patchWithCleanup,
-    saveFavorite,
-    serverState,
     toggleMenuItem,
-    toggleSaveFavorite,
     toggleSearchBarMenu,
 } from "@web/../tests/web_test_helpers";
-import { Foo, defineSearchBarModels } from "./models";
+import { defineSearchBarModels } from "./models";
 
 import { registry } from "@web/core/registry";
 import { SearchBar } from "@web/search/search_bar/search_bar";
 import { SearchBarMenu } from "@web/search/search_bar_menu/search_bar_menu";
-import { WebClient } from "@web/webclient/webclient";
 
 const favoriteMenuRegistry = registry.category("favoriteMenu");
-const viewsRegistry = registry.category("views");
 
 defineSearchBarModels();
 
@@ -79,31 +70,8 @@ test("simple rendering with no favorite", async () => {
     expect(`.o_favorite_menu .o_add_favorite`).toHaveCount(1);
 });
 
-test("delete an active favorite", async () => {
-    class ToyController extends Component {
-        static components = { SearchBar };
-        static template = xml`<div><SearchBar/></div>`;
-        static props = ["*"];
-
-        setup() {
-            expect(this.props.domain).toEqual([["foo", "=", "qsdf"]]);
-            onWillUpdateProps((nextProps) => {
-                expect.step("props updated");
-                expect(nextProps.domain).toEqual([]);
-            });
-        }
-    }
-
-    patchWithCleanup(serverState.view_info, {
-        toy: { multi_record: true, display_name: "Toy", icon: "fab fa-android" },
-    });
-    viewsRegistry.add("toy", {
-        type: "toy",
-        Controller: ToyController,
-    });
-    after(() => viewsRegistry.remove("toy"));
-    Foo._views.toy = `<toy/>`;
-    Foo._filters = [
+test("edit an active favorite", async () => {
+    const irFilters = [
         {
             context: "{}",
             domain: "[['foo', '=', 'qsdf']]",
@@ -111,27 +79,32 @@ test("delete an active favorite", async () => {
             is_default: true,
             name: "My favorite",
             sort: "[]",
-            user_id: [2, "Mitchell Admin"],
+            user_ids: [2],
         },
     ];
-
-    onRpc("unlink", () => {
-        expect.step("deleteFavorite");
-        return true;
+    mockService("action", {
+        doAction(action) {
+            expect.step("edit favorite");
+            expect(action).toEqual({
+                context: {
+                    form_view_ref: "base.ir_filters_view_edit_form",
+                },
+                type: "ir.actions.act_window",
+                res_model: "ir.filters",
+                views: [[false, "form"]],
+                res_id: 7,
+            });
+        },
     });
-
-    const webClient = await mountWithCleanup(WebClient);
-
-    const clearCacheListener = () => expect.step("CLEAR-CACHES");
-    webClient.env.bus.addEventListener("CLEAR-CACHES", clearCacheListener);
-    after(() => webClient.env.bus.removeEventListener("CLEAR-CACHES", clearCacheListener));
-
-    await getService("action").doAction({
-        name: "Action",
-        res_model: "foo",
-        type: "ir.actions.act_window",
-        views: [[false, "toy"]],
+    await mountWithSearch(SearchBar, {
+        resModel: "foo",
+        searchMenuTypes: ["favorite"],
+        searchViewId: false,
+        searchViewArch: `<search/>`,
+        irFilters,
     });
+    expect(getFacetTexts()).toEqual(["My favorite"]);
+
     await toggleSearchBarMenu();
     const favorite = queryFirst`.o_favorite_menu .dropdown-item`;
     expect(favorite).toHaveText("My favorite");
@@ -140,14 +113,8 @@ test("delete an active favorite", async () => {
     expect(getFacetTexts()).toEqual(["My favorite"]);
     expect(queryFirst`.o_favorite_menu .o_menu_item`).toHaveClass("selected");
 
-    await deleteFavorite("My favorite");
-    expect.verifySteps([]);
-
-    await contains(`div.o_dialog footer button`).click();
-    expect(getFacetTexts()).toEqual([]);
-    expect(".o_favorite_menu .o_menu_item").toHaveCount(1);
-    expect(".o_favorite_menu .o_add_favorite").toHaveCount(1);
-    expect.verifySteps(["deleteFavorite", "CLEAR-CACHES", "props updated"]);
+    await editFavorite("My favorite");
+    expect.verifySteps(["edit favorite"]);
 });
 
 test("default favorite is not activated if activateFavorite is set to false", async () => {
@@ -163,7 +130,7 @@ test("default favorite is not activated if activateFavorite is set to false", as
                 is_default: true,
                 name: "My favorite",
                 sort: "[]",
-                user_id: [2, "Mitchell Admin"],
+                user_ids: [2],
             },
         ],
         activateFavorite: false,
@@ -174,29 +141,22 @@ test("default favorite is not activated if activateFavorite is set to false", as
     expect(getFacetTexts()).toEqual([]);
 });
 
-test(`toggle favorite correctly clears filter, groupbys, comparison and field "options"`, async () => {
+test(`toggle favorite correctly clears filter, groupbys and field "options"`, async () => {
     mockDate("2019-07-31T13:43:00");
 
     const searchBar = await mountWithSearch(SearchBar, {
         resModel: "foo",
-        searchMenuTypes: ["filter", "groupBy", "comparison", "favorite"],
+        searchMenuTypes: ["filter", "groupBy", "favorite"],
         searchViewId: false,
         irFilters: [
             {
-                context: `
-                        {
-                            "group_by": ["foo"],
-                            "comparison": {
-                                "favorite comparison content": "bla bla..."
-                            },
-                         }
-                    `,
+                context: `{"group_by": ["foo"]}`,
                 domain: "['!', ['foo', '=', 'qsdf']]",
                 id: 7,
                 is_default: false,
                 name: "My favorite",
                 sort: "[]",
-                user_id: [2, "Mitchell Admin"],
+                user_ids: [2],
             },
         ],
         searchViewArch: `
@@ -220,33 +180,14 @@ test(`toggle favorite correctly clears filter, groupbys, comparison and field "o
         ["date_field", "<=", "2019-12-31"],
     ]);
     expect(searchBar.env.searchModel.groupBy).toEqual(["date_field:month"]);
-    expect(searchBar.env.searchModel.getFullComparison()).toBe(null);
     expect(getFacetTexts()).toEqual([
         "Foo\na",
         "Date Field Filter: 2019",
         "Date Field Groupby: Month",
     ]);
 
-    // activate a comparison
-    await toggleSearchBarMenu();
-    await toggleMenuItem("Date Field Filter: Previous Period");
-    expect(searchBar.env.searchModel.domain).toEqual([["foo", "ilike", "a"]]);
-    expect(searchBar.env.searchModel.groupBy).toEqual(["date_field:month"]);
-    expect(searchBar.env.searchModel.getFullComparison()).toEqual({
-        comparisonId: "previous_period",
-        comparisonRange: [
-            "&",
-            ["date_field", ">=", "2018-01-01"],
-            ["date_field", "<=", "2018-12-31"],
-        ],
-        comparisonRangeDescription: "2018",
-        fieldDescription: "Date Field Filter",
-        fieldName: "date_field",
-        range: ["&", ["date_field", ">=", "2019-01-01"], ["date_field", "<=", "2019-12-31"]],
-        rangeDescription: "2019",
-    });
-
     // activate the unique existing favorite
+    await toggleSearchBarMenu();
     const favorite = queryFirst`.o_favorite_menu .dropdown-item`;
     expect(favorite).toHaveText("My favorite");
     expect(favorite).toHaveAttribute("role", "menuitemcheckbox");
@@ -256,9 +197,6 @@ test(`toggle favorite correctly clears filter, groupbys, comparison and field "o
     expect(favorite).toHaveProperty("ariaChecked", "true");
     expect(searchBar.env.searchModel.domain).toEqual(["!", ["foo", "=", "qsdf"]]);
     expect(searchBar.env.searchModel.groupBy).toEqual(["foo"]);
-    expect(searchBar.env.searchModel.getFullComparison()).toEqual({
-        "favorite comparison content": "bla bla...",
-    });
     expect(getFacetTexts()).toEqual(["My favorite"]);
 });
 
@@ -271,7 +209,7 @@ test("edit a favorite with a groupby", async () => {
             is_default: true,
             name: "My favorite",
             sort: "[]",
-            user_id: [2, "Mitchell Admin"],
+            user_ids: [2],
         },
     ];
 
@@ -294,21 +232,15 @@ test("edit a favorite with a groupby", async () => {
     await editValue("abcde");
     await contains(`.modal footer button`).click();
     expect(`.modal`).toHaveCount(0);
-    expect(getFacetTexts()).toEqual(["Bar", "Foo contains abcde"]);
+    expect(getFacetTexts()).toEqual(["Foo contains abcde", "Bar"]);
 
     await toggleSearchBarMenu();
     expect(`.o_group_by_menu .o_menu_item:not(.o_add_custom_group_menu)`).toHaveCount(0);
 });
 
-test("shared favorites are grouped under a dropdown if there are more than 10", async () => {
-    onRpc("create_or_replace", ({ args, route }) => {
-        expect.step(route);
-        const irFilter = args[0];
-        expect(irFilter.domain).toBe(`[]`);
-        return 10; // fake serverSideId
-    });
+test("shared favorites are partially shown if there is more than 4", async () => {
     const irFilters = [];
-    for (let i = 1; i < 11; i++) {
+    for (let i = 1; i < 6; i++) {
         irFilters.push({
             context: "{}",
             domain: "[('foo', '=', 'a')]",
@@ -316,6 +248,7 @@ test("shared favorites are grouped under a dropdown if there are more than 10", 
             is_default: false,
             name: "My favorite" + i,
             sort: "[]",
+            user_ids: [],
         });
     }
     await mountWithSearch(SearchBarMenu, {
@@ -326,14 +259,48 @@ test("shared favorites are grouped under a dropdown if there are more than 10", 
         activateFavorite: false,
     });
     await toggleSearchBarMenu();
-    expect(".o_favorite_menu .o-dropdown-item").toHaveCount(10);
-    await toggleSaveFavorite();
-    await editFavoriteName("My favorite11");
-    await contains(".o-checkbox:eq(1)").click();
-    await saveFavorite();
-    expect.verifySteps(["/web/dataset/call_kw/ir.filters/create_or_replace"]);
-    expect(".o_favorite_menu .o-dropdown-item").toHaveCount(0);
-    expect(".o_favorite_menu .o_menu_item:contains(Shared filters)").toHaveCount(1);
-    await contains(".o_favorite_menu .o_menu_item:contains(Shared filters)").click();
-    expect(".o_favorite_menu .o-dropdown-item").toHaveCount(11);
+    expect(".o_favorite_menu .o_favorite_item").toHaveCount(3);
+    expect(".o_favorite_menu .o_expand_shared_favorites").toHaveCount(1);
+    await contains(".o_favorite_menu .o_expand_shared_favorites").click();
+    expect(".o_favorite_menu .o_expand_shared_favorites").toHaveCount(0);
+    expect(".o_favorite_menu .o_favorite_item").toHaveCount(5);
+});
+
+test("display unparseable filter", async () => {
+    const irFilters = [
+        {
+            context: "{123}", // unparseable context
+            domain: "[('foo', '=', 'a')]",
+            id: 987,
+            is_default: false,
+            name: "My favorite",
+            sort: "[]",
+            user_ids: [],
+        },
+    ];
+
+    mockService("action", {
+        doAction(action) {
+            expect.step(`doAction ${action.res_model}: ${action.res_id}`);
+        },
+    });
+
+    const searchBarMenu = await mountWithSearch(SearchBarMenu, {
+        resModel: "foo",
+        searchMenuTypes: ["favorite"],
+        searchViewId: false,
+        irFilters,
+        activateFavorite: false,
+    });
+    await toggleSearchBarMenu();
+    expect(".o_favorite_menu .o_favorite_item").toHaveCount(1);
+    expect(".o_favorite_menu .o_favorite_item span[title]").toHaveAttribute(
+        "data-tooltip",
+        "Disabled due to invalid configuration"
+    );
+    expect(".o_favorite_menu .o_favorite_item span[title]").toHaveClass("text-muted");
+    await contains(".o_favorite_menu .o_favorite_item").click();
+    expect(searchBarMenu.env.searchModel.domain).toEqual([]);
+    await editFavorite("My favorite");
+    expect.verifySteps(["doAction ir.filters: 987"]);
 });

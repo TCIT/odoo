@@ -18,11 +18,10 @@
     Best regards,
     <t t-if="user.signature">
         <br />
-        <t t-out="user.signature or ''">--<br/>Mitchell Admin</t>
+        <div>--<br/><t t-out="user.signature or ''">Mitchell Admin</t></div>
     </t>
 </div>
         </field>
-            <field name="lang">{{ object.partner_id.lang }}</field>
             <field name="auto_delete" eval="True"/>
         </record>
 
@@ -30,10 +29,10 @@
         <record id="rating_project_request_email_template" model="mail.template">
             <field name="name">Project: Task Rating Request</field>
             <field name="model_id" ref="project.model_project_task"/>
-            <field name="active" eval="False"/>
             <field name="subject">{{ object.project_id.company_id.name or user.env.company.name }}: Satisfaction Survey</field>
             <field name="email_from">{{ (object._rating_get_operator().email_formatted if object._rating_get_operator() else user.email_formatted) }}</field>
             <field name="partner_to" >{{ object._rating_get_partner().id }}</field>
+            <field name="use_default_to" eval="False"/>
             <field name="description">Set this template on a project stage to request feedback from your customers. Enable the "customer ratings" feature on the project</field>
             <field name="body_html" type="html">
 <div>
@@ -67,17 +66,17 @@
                         <tr>
                             <td>
                                 <a t-attf-href="/rate/{{ access_token }}/5" t-att-class="'pe-none' if object._rating_get_operator() else ''">
-                                    <img alt="Satisfied" src="/rating/static/src/img/rating_5.png" title="Satisfied"/>
+                                    <img alt="Happy" src="/rating/static/src/img/rating_5.png" title="Happy"/>
                                 </a>
                             </td>
                             <td>
                                 <a t-attf-href="/rate/{{ access_token }}/3" t-att-class="'pe-none' if object._rating_get_operator() else ''">
-                                    <img alt="Okay" src="/rating/static/src/img/rating_3.png" title="Okay"/>
+                                    <img alt="Neutral" src="/rating/static/src/img/rating_3.png" title="Neutral"/>
                                 </a>
                             </td>
                             <td>
                                 <a t-attf-href="/rate/{{ access_token }}/1" t-att-class="'pe-none' if object._rating_get_operator() else ''">
-                                    <img alt="Dissatisfied" src="/rating/static/src/img/rating_1.png" title="Dissatisfied"/>
+                                    <img alt="Unhappy" src="/rating/static/src/img/rating_1.png" title="Unhappy"/>
                                 </a>
                             </td>
                         </tr>
@@ -87,11 +86,11 @@
         </td></tr>
         <tr><td valign="top" style="font-size: 13px;">
             We appreciate your feedback. It helps us improve continuously.
-            <t t-if="object.project_id.rating_status == 'stage'">
+            <t t-if="object.stage_id.rating_status == 'stage'">
                 <br/><span style="margin: 0; font-size: 12px; opacity: 0.5; color: #454748;">This satisfaction survey has been sent because your task has been moved to the <b t-out="object.stage_id.name or ''">In progress</b> stage</span>
             </t>
-            <t t-if="object.project_id.rating_status == 'periodic'">
-                <br/><span style="margin: 0; font-size: 12px; opacity: 0.5; color: #454748;">This satisfaction survey is sent <b t-out="object.project_id.rating_status_period or ''">weekly</b> as long as the task is in the <b t-out="object.stage_id.name or ''">In progress</b> stage.</span>
+            <t t-if="object.stage_id.rating_status == 'periodic'">
+                <br/><span style="margin: 0; font-size: 12px; opacity: 0.5; color: #454748;">This satisfaction survey is sent <b t-out="object.stage_id.rating_status_period or ''">weekly</b> as long as the task is in the <b t-out="object.stage_id.name or ''">In progress</b> stage.</span>
             </t>
         </td></tr>
         <tr><td><br/>Best regards,</td></tr>

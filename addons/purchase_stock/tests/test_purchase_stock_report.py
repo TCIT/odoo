@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from datetime import datetime, timedelta
+
+from odoo import Command
 from odoo.tests import Form
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.stock.tests.test_report import TestReportsCommon
@@ -19,10 +22,10 @@ class TestPurchaseStockReports(TestReportsCommon):
 
         # Checks the report.
         report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        draft_picking_qty_in = docs['draft_picking_qty']['in']
-        draft_purchase_qty = docs['draft_purchase_qty']
-        pending_qty_in = docs['qty']['in']
-        self.assertEqual(len(lines), 0, "Must have 0 line for now.")
+        draft_picking_qty_in = self.sum_dicts(docs['product'], 'draft_picking_qty')['in']
+        draft_purchase_qty = self.sum_dicts(docs['product'], 'draft_purchase_qty')['in']
+        pending_qty_in = self.sum_dicts(docs['product'], 'qty')['in']
+        self.assertEqual(len(lines), 1, "Must have 1 line for now.")
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 5)
         self.assertEqual(pending_qty_in, 5)
@@ -30,13 +33,13 @@ class TestPurchaseStockReports(TestReportsCommon):
         # Confirms the PO and checks the report again.
         po.button_confirm()
         report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        draft_picking_qty_in = docs['draft_picking_qty']['in']
-        draft_purchase_qty = docs['draft_purchase_qty']
-        pending_qty_in = docs['qty']['in']
-        self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0]['document_in']['id'], po.id)
-        self.assertEqual(lines[0]['quantity'], 5)
-        self.assertEqual(lines[0]['document_out'], False)
+        draft_picking_qty_in = self.sum_dicts(docs['product'], 'draft_picking_qty')['in']
+        draft_purchase_qty = self.sum_dicts(docs['product'], 'draft_purchase_qty')['in']
+        pending_qty_in = self.sum_dicts(docs['product'], 'qty')['in']
+        self.assertEqual(len(lines), 2)
+        self.assertEqual(lines[1]['document_in']['id'], po.id)
+        self.assertEqual(lines[1]['quantity'], 5)
+        self.assertEqual(lines[1]['document_out'], False)
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 0)
         self.assertEqual(pending_qty_in, 0)
@@ -45,10 +48,10 @@ class TestPurchaseStockReports(TestReportsCommon):
         receipt = po.picking_ids
         receipt.button_validate()
         report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        draft_picking_qty_in = docs['draft_picking_qty']['in']
-        draft_purchase_qty = docs['draft_purchase_qty']
-        pending_qty_in = docs['qty']['in']
-        self.assertEqual(len(lines), 0)
+        draft_picking_qty_in = self.sum_dicts(docs['product'], 'draft_picking_qty')['in']
+        draft_purchase_qty = self.sum_dicts(docs['product'], 'draft_purchase_qty')['in']
+        pending_qty_in = self.sum_dicts(docs['product'], 'qty')['in']
+        self.assertEqual(len(lines), 1)
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 0)
         self.assertEqual(pending_qty_in, 0)
@@ -60,12 +63,12 @@ class TestPurchaseStockReports(TestReportsCommon):
         po = po_form.save()
         # Checks the report.
         report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        draft_picking_qty_in = docs['draft_picking_qty']['in']
-        draft_purchase_qty = docs['draft_purchase_qty']
-        pending_qty_in = docs['qty']['in']
-        self.assertEqual(len(lines), 1, "Must have 1 line for now.")
-        self.assertEqual(lines[0]['document_in']['id'], po.id)
-        self.assertEqual(lines[0]['quantity'], 5)
+        draft_picking_qty_in = self.sum_dicts(docs['product'], 'draft_picking_qty')['in']
+        draft_purchase_qty = self.sum_dicts(docs['product'], 'draft_purchase_qty')['in']
+        pending_qty_in = self.sum_dicts(docs['product'], 'qty')['in']
+        self.assertEqual(len(lines), 2, "Must have 2 line for now.")
+        self.assertEqual(lines[1]['document_in']['id'], po.id)
+        self.assertEqual(lines[1]['quantity'], 5)
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 0)
         self.assertEqual(pending_qty_in, 0)
@@ -76,8 +79,8 @@ class TestPurchaseStockReports(TestReportsCommon):
         """
         grp_multi_loc = self.env.ref('stock.group_stock_multi_locations')
         grp_multi_routes = self.env.ref('stock.group_adv_location')
-        self.env.user.write({'groups_id': [(4, grp_multi_loc.id)]})
-        self.env.user.write({'groups_id': [(4, grp_multi_routes.id)]})
+        self.env.user.write({'group_ids': [(4, grp_multi_loc.id)]})
+        self.env.user.write({'group_ids': [(4, grp_multi_routes.id)]})
         # Configure warehouse.
         warehouse = self.env.ref('stock.warehouse0')
         warehouse.reception_steps = 'three_steps'
@@ -91,10 +94,10 @@ class TestPurchaseStockReports(TestReportsCommon):
 
         # Checks the report -> Must be empty for now, just display some pending qty.
         report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        draft_picking_qty_in = docs['draft_picking_qty']['in']
-        draft_purchase_qty = docs['draft_purchase_qty']
-        pending_qty_in = docs['qty']['in']
-        self.assertEqual(len(lines), 0, "Must have 0 line for now.")
+        draft_picking_qty_in = self.sum_dicts(docs['product'], 'draft_picking_qty')['in']
+        draft_purchase_qty = self.sum_dicts(docs['product'], 'draft_purchase_qty')['in']
+        pending_qty_in = self.sum_dicts(docs['product'], 'qty')['in']
+        self.assertEqual(len(lines), 1, "Must have 1 line for now.")
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 4)
         self.assertEqual(pending_qty_in, 4)
@@ -102,13 +105,13 @@ class TestPurchaseStockReports(TestReportsCommon):
         # Confirms the PO and checks the report again.
         po.button_confirm()
         report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        draft_picking_qty_in = docs['draft_picking_qty']['in']
-        draft_purchase_qty = docs['draft_purchase_qty']
-        pending_qty_in = docs['qty']['in']
-        self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0]['document_in']['id'], po.id)
-        self.assertEqual(lines[0]['quantity'], 4)
-        self.assertEqual(lines[0]['document_out'], False)
+        draft_picking_qty_in = self.sum_dicts(docs['product'], 'draft_picking_qty')['in']
+        draft_purchase_qty = self.sum_dicts(docs['product'], 'draft_purchase_qty')['in']
+        pending_qty_in = self.sum_dicts(docs['product'], 'qty')['in']
+        self.assertEqual(len(lines), 2)
+        self.assertEqual(lines[1]['document_in']['id'], po.id)
+        self.assertEqual(lines[1]['quantity'], 4)
+        self.assertEqual(lines[1]['document_out'], False)
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 0)
         self.assertEqual(pending_qty_in, 0)
@@ -118,10 +121,10 @@ class TestPurchaseStockReports(TestReportsCommon):
         # Receives 4 products.
         receipt.button_validate()
         report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        draft_picking_qty_in = docs['draft_picking_qty']['in']
-        draft_purchase_qty = docs['draft_purchase_qty']
-        pending_qty_in = docs['qty']['in']
-        self.assertEqual(len(lines), 0)
+        draft_picking_qty_in = self.sum_dicts(docs['product'], 'draft_picking_qty')['in']
+        draft_purchase_qty = self.sum_dicts(docs['product'], 'draft_purchase_qty')['in']
+        pending_qty_in = self.sum_dicts(docs['product'], 'qty')['in']
+        self.assertEqual(len(lines), 1)
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 0)
         self.assertEqual(pending_qty_in, 0)
@@ -133,12 +136,12 @@ class TestPurchaseStockReports(TestReportsCommon):
         po = po_form.save()
         # Checks the report.
         report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        draft_picking_qty_in = docs['draft_picking_qty']['in']
-        draft_purchase_qty = docs['draft_purchase_qty']
-        pending_qty_in = docs['qty']['in']
-        self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0]['document_in']['id'], po.id)
-        self.assertEqual(lines[0]['quantity'], 6)
+        draft_picking_qty_in = self.sum_dicts(docs['product'], 'draft_picking_qty')['in']
+        draft_purchase_qty = self.sum_dicts(docs['product'], 'draft_purchase_qty')['in']
+        pending_qty_in = self.sum_dicts(docs['product'], 'qty')['in']
+        self.assertEqual(len(lines), 2)
+        self.assertEqual(lines[1]['document_in']['id'], po.id)
+        self.assertEqual(lines[1]['quantity'], 6)
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 0)
         self.assertEqual(pending_qty_in, 0)
@@ -161,7 +164,7 @@ class TestPurchaseStockReports(TestReportsCommon):
         for po in [po1, po2]:
             context = po.order_line[0].action_product_forecast_report()['context']
             _, _, lines = self.get_report_forecast(product_template_ids=self.product_template.ids, context=context)
-            for line in lines:
+            for line in lines[1:]:
                 if line['document_in']['id'] == po.id:
                     self.assertTrue(line['is_matched'], "The corresponding PO line should be matched in the forecast report.")
                 else:
@@ -197,7 +200,33 @@ class TestPurchaseStockReports(TestReportsCommon):
         po.with_user(basic_purchase_user).button_confirm()
 
         docs = self.get_report_forecast(product_template_ids=self.product_template.ids)[1]
-        self.assertEqual(docs['draft_purchase_qty'], 150)
+        draft_purchase_qty = self.sum_dicts(docs['product'], 'draft_purchase_qty')['in']
+        self.assertEqual(draft_purchase_qty, 150)
+
+    def test_purchase_report_effective_days_to_arrival(self):
+        """ Test that 'Effective Days To Arrival' counts the days between the
+        order confirmation date and the effective receipt date.
+        """
+        po = self.env['purchase.order'].create({
+            'partner_id': self.partner.id,
+            'date_order': datetime.now() - timedelta(days=10),
+            'order_line': [Command.create({
+                'product_id': self.product.id,
+                'product_qty': 1,
+                'date_planned': datetime.now() + timedelta(days=5),
+            })],
+        })
+        po.button_confirm()
+        po.picking_ids.button_validate()
+
+        po.flush_model()
+        po.picking_ids.flush_recordset(['date_done'])
+        report = self.env['purchase.report'].formatted_read_group(
+            [('order_id', '=', po.id)],
+            ['order_id'],
+            ['days_to_arrival:avg'],
+        )
+        self.assertEqual(round(report[0]['days_to_arrival:avg']), 10)
 
     def test_vendor_delay_report_with_uom(self):
         """
@@ -229,14 +258,14 @@ class TestPurchaseStockReports(TestReportsCommon):
         receipt.move_ids.picked = True
         receipt.button_validate()
 
-        data = self.env['vendor.delay.report'].read_group(
+        data = self.env['vendor.delay.report'].formatted_read_group(
             [('partner_id', '=', self.partner.id)],
-            ['product_id', 'on_time_rate', 'qty_on_time', 'qty_total'],
             ['product_id'],
+            ['on_time_rate:sum', 'qty_on_time:sum', 'qty_total:sum'],
         )[0]
-        self.assertEqual(data['qty_on_time'], 12)
-        self.assertEqual(data['qty_total'], 12)
-        self.assertEqual(data['on_time_rate'], 100)
+        self.assertEqual(data['qty_on_time:sum'], 12)
+        self.assertEqual(data['qty_total:sum'], 12)
+        self.assertEqual(data['on_time_rate:sum'], 100)
 
     def test_vendor_delay_report_with_multi_location(self):
         """
@@ -286,14 +315,14 @@ class TestPurchaseStockReports(TestReportsCommon):
         receipt.move_ids.picked = True
         receipt.button_validate()
 
-        data = self.env['vendor.delay.report'].read_group(
+        data = self.env['vendor.delay.report'].formatted_read_group(
             [('partner_id', '=', self.partner.id)],
-            ['product_id', 'on_time_rate', 'qty_on_time', 'qty_total'],
             ['product_id'],
+            ['on_time_rate:sum', 'qty_on_time:sum', 'qty_total:sum'],
         )[0]
-        self.assertEqual(data['qty_on_time'], 10)
-        self.assertEqual(data['qty_total'], 10)
-        self.assertEqual(data['on_time_rate'], 100)
+        self.assertEqual(data['qty_on_time:sum'], 10)
+        self.assertEqual(data['qty_total:sum'], 10)
+        self.assertEqual(data['on_time_rate:sum'], 100)
 
     def test_vendor_delay_report_with_backorder(self):
         """
@@ -316,14 +345,14 @@ class TestPurchaseStockReports(TestReportsCommon):
         receipt01_move.quantity = 6
         Form.from_action(self.env, receipt01.button_validate()).save().process()
 
-        data = self.env['vendor.delay.report'].read_group(
+        data = self.env['vendor.delay.report'].formatted_read_group(
             [('partner_id', '=', self.partner.id)],
-            ['product_id', 'on_time_rate', 'qty_on_time', 'qty_total'],
             ['product_id'],
+            ['on_time_rate:sum', 'qty_on_time:sum', 'qty_total:sum'],
         )[0]
-        self.assertEqual(data['qty_on_time'], 6)
-        self.assertEqual(data['qty_total'], 10)
-        self.assertEqual(data['on_time_rate'], 60)
+        self.assertEqual(data['qty_on_time:sum'], 6)
+        self.assertEqual(data['qty_total:sum'], 10)
+        self.assertEqual(data['on_time_rate:sum'], 60)
 
         receipt02 = receipt01.backorder_ids
         receipt02.move_ids.quantity = 4
@@ -331,20 +360,61 @@ class TestPurchaseStockReports(TestReportsCommon):
         receipt02.button_validate()
 
         (receipt01 | receipt02).move_ids.invalidate_recordset()
-        data = self.env['vendor.delay.report'].read_group(
+        data = self.env['vendor.delay.report'].formatted_read_group(
             [('partner_id', '=', self.partner.id)],
-            ['product_id', 'on_time_rate', 'qty_on_time', 'qty_total'],
             ['product_id'],
+            ['on_time_rate:sum', 'qty_on_time:sum', 'qty_total:sum'],
         )[0]
-        self.assertEqual(data['qty_on_time'], 10)
-        self.assertEqual(data['qty_total'], 10)
-        self.assertEqual(data['on_time_rate'], 100)
+        self.assertEqual(data['qty_on_time:sum'], 10)
+        self.assertEqual(data['qty_total:sum'], 10)
+        self.assertEqual(data['on_time_rate:sum'], 100)
 
     def test_vendor_delay_report_without_backorder(self):
         """
+        PO with two lines:
+        - 10 units of product with category
+        - 10 units of product without category
+        Receive 6 units for each line without backorder
+        -> 60% received for each product.
+        The vendor delay report should include both products
+        even if one has no category.
+        """
+        product_no_categ = self.env['product.product'].create({
+            'name': 'Product without category',
+        })
+        po_form = Form(self.env['purchase.order'])
+        po_form.partner_id = self.partner
+        with po_form.order_line.new() as line:
+            line.product_id = self.product
+            line.product_qty = 10
+        with po_form.order_line.new() as line:
+            line.product_id = product_no_categ
+            line.product_qty = 10
+        po = po_form.save()
+        po.button_confirm()
+
+        receipt = po.picking_ids
+        receipt_moves = receipt.move_ids
+        receipt_moves.quantity = 6
+        receipt_moves.picked = True
+        Form.from_action(self.env, receipt.button_validate()).save().process_cancel_backorder()
+
+        data = self.env['vendor.delay.report'].formatted_read_group(
+            [('partner_id', '=', self.partner.id)],
+            ['product_id'],
+            ['on_time_rate:sum', 'qty_on_time:sum', 'qty_total:sum'],
+        )
+        self.assertEqual(
+            [(rec['qty_on_time:sum'], rec['qty_total:sum'], rec['on_time_rate:sum']) for rec in data],
+            [(6, 10, 60), (6, 10, 60)]
+        )
+
+    def test_vendor_delay_report_with_duplicate_receipt_without_backorder(self):
+        """
         PO 10 units x P
         Receive 6 x P without backorder
-        -> 60% received
+        Duplicate picking with remaining 4 x P
+        -> 100% received
         """
         po_form = Form(self.env['purchase.order'])
         po_form.partner_id = self.partner
@@ -355,16 +425,19 @@ class TestPurchaseStockReports(TestReportsCommon):
         po.button_confirm()
 
         receipt01 = po.picking_ids
-        receipt01_move = receipt01.move_ids
-        receipt01_move.quantity = 6
-        receipt01_move.picked = True
-        Form.from_action(self.env, receipt01.button_validate()).save().process_cancel_backorder()
-
-        data = self.env['vendor.delay.report'].read_group(
+        receipt01.move_ids.quantity = 6
+        action = receipt01.button_validate()
+        Form(self.env[action['res_model']].with_context(action['context'])).save().process_cancel_backorder()
+        receipt02 = receipt01.copy()
+        receipt02.move_ids.write({
+            'product_uom_qty': 4,
+        })
+        receipt02.button_validate()
+        data = self.env['vendor.delay.report'].web_read_group(
             [('partner_id', '=', self.partner.id)],
-            ['product_id', 'on_time_rate', 'qty_on_time', 'qty_total'],
             ['product_id'],
-        )[0]
-        self.assertEqual(data['qty_on_time'], 6)
-        self.assertEqual(data['qty_total'], 10)
-        self.assertEqual(data['on_time_rate'], 60)
+            ['on_time_rate:sum', 'qty_on_time:sum', 'qty_total:sum'],
+        )['groups'][0]
+        self.assertEqual(data['qty_total:sum'], 10)
+        self.assertEqual(data['qty_on_time:sum'], 10)
+        self.assertEqual(data['on_time_rate:sum'], 100)

@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
 
 from odoo.tests import HttpCase, tagged
-from odoo.addons.website.tools import MockRequest
+
+from odoo.addons.http_routing.tests.common import MockRequest
+
 
 _logger = logging.getLogger(__name__)
 
@@ -59,3 +60,28 @@ class TestSnippets(HttpCase):
 
         self.start_tour('/', 'website_sale.products_snippet_recently_viewed', login='admin')
         self.assertEqual(before_tour_product_ids, website_visitor.product_ids.ids, "There shouldn't be any new product in recently viewed after this tour")
+
+    def test_website_category_url(self):
+        # Create a public category with a cover image
+        category = self.env['product.public.category'].create({
+            'name': "Test Category",
+        })
+
+        self.env.company.website_id = False
+        website = self.env.ref('website.default_website')
+        website.update({
+            'domain': "http://www.example.com",
+            'company_id': self.env.company.id,
+        })
+
+        # Simulate a request with correct context
+        with MockRequest(self.env, website=website):
+            original_get_base_url = self.env['product.public.category'].sudo().get_base_url()
+            data = self.env['website.snippet.filter'].sudo()._prepare_category_list_data(
+                parent_id=category.id,
+            )
+
+        # Assert that the returned cover_image use absolute URL without domain
+        self.assertTrue(data[0]['cover_image'].startswith('/'))
+        self.assertNotIn(original_get_base_url, data[0]['cover_image'])
+        self.assertNotIn(website.domain, data[0]['cover_image'])

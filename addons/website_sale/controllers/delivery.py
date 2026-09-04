@@ -11,14 +11,14 @@ from odoo.addons.website_sale.controllers.main import WebsiteSale
 class Delivery(WebsiteSale):
     _express_checkout_delivery_route = '/shop/express/shipping_address_change'
 
-    @route('/shop/delivery_methods', type='json', auth='public', website=True)
+    @route('/shop/delivery_methods', type='jsonrpc', auth='public', website=True)
     def shop_delivery_methods(self):
         """ Fetch available delivery methods and render them in the delivery form.
 
         :return: The rendered delivery form.
         :rtype: str
         """
-        order_sudo = request.website.sale_get_order()
+        order_sudo = request.cart
         values = {
             'delivery_methods': order_sudo._get_delivery_methods(),
             'selected_dm_id': order_sudo.carrier_id.id,
@@ -31,7 +31,7 @@ class Delivery(WebsiteSale):
         """ Hook to update values used for rendering the website_sale.delivery_form template. """
         return {}
 
-    @route('/shop/set_delivery_method', type='json', auth='public', website=True)
+    @route('/shop/set_delivery_method', type='jsonrpc', auth='public', website=True)
     def shop_set_delivery_method(self, dm_id=None, **kwargs):
         """ Set the delivery method on the current order and return the order summary values.
 
@@ -42,12 +42,11 @@ class Delivery(WebsiteSale):
         :return: The order summary values, if any.
         :rtype: dict
         """
-        order_sudo = request.website.sale_get_order()
-        if not order_sudo:
+        if not (order_sudo := request.cart):
             return {}
 
         dm_id = int(dm_id)
-        if dm_id != order_sudo.carrier_id.id:
+        if dm_id in order_sudo._get_delivery_methods().ids and dm_id != order_sudo.carrier_id.id:
             for tx_sudo in order_sudo.transaction_ids:
                 if tx_sudo.state not in ('draft', 'cancel', 'error'):
                     raise UserError(_(
@@ -72,6 +71,7 @@ class Delivery(WebsiteSale):
         return {
             'success': True,
             'is_free_delivery': not bool(order.amount_delivery),
+            'compute_price_after_delivery': order.carrier_id.invoice_policy == 'real',
             'amount_delivery': Monetary.value_to_html(
                 order.amount_delivery, {'display_currency': currency}
             ),
@@ -86,7 +86,7 @@ class Delivery(WebsiteSale):
             ),
         }
 
-    @route('/shop/get_delivery_rate', type='json', auth='public', methods=['POST'], website=True)
+    @route('/shop/get_delivery_rate', type='jsonrpc', auth='public', methods=['POST'], website=True)
     def shop_get_delivery_rate(self, dm_id):
         """ Return the delivery rate data for the given delivery method.
 
@@ -94,11 +94,10 @@ class Delivery(WebsiteSale):
         :return: The delivery rate data.
         :rtype: dict
         """
-        order = request.website.sale_get_order()
-        if not order:
+        if not (order_sudo := request.cart):
             raise ValidationError(_("Your cart is empty."))
 
-        if int(dm_id) not in order._get_delivery_methods().ids:
+        if int(dm_id) not in order_sudo._get_delivery_methods().ids:
             raise UserError(_(
                 "It seems that a delivery method is not compatible with your address. Please"
                 " refresh the page and try again."
@@ -106,29 +105,30 @@ class Delivery(WebsiteSale):
 
         Monetary = request.env['ir.qweb.field.monetary']
         delivery_method = request.env['delivery.carrier'].sudo().browse(int(dm_id)).exists()
-        rate = Delivery._get_rate(delivery_method, order)
+        rate = Delivery._get_rate(delivery_method, order_sudo)
         if rate['success']:
             rate['amount_delivery'] = Monetary.value_to_html(
-                rate['price'], {'display_currency': order.currency_id}
+                rate['price'], {'display_currency': order_sudo.currency_id}
             )
             rate['is_free_delivery'] = not bool(rate['price'])
+            rate['compute_price_after_delivery'] = delivery_method.invoice_policy == 'real'
         else:
             rate['amount_delivery'] = Monetary.value_to_html(
-                0.0, {'display_currency': order.currency_id}
+                0.0, {'display_currency': order_sudo.currency_id}
             )
         return rate
 
-    @route('/website_sale/set_pickup_location', type='json', auth='public', website=True)
+    @route('/website_sale/set_pickup_location', type='jsonrpc', auth='public', website=True)
     def website_sale_set_pickup_location(self, pickup_location_data):
         """ Fetch the order from the request and set the pickup location on the current order.
 
         :param str pickup_location_data: The JSON-formatted pickup location address.
         :return: None
         """
-        order_sudo = request.website.sale_get_order()
+        order_sudo = request.cart
         order_sudo._set_pickup_location(pickup_location_data)
 
-    @route('/website_sale/get_pickup_locations', type='json', auth='public', website=True)
+    @route('/website_sale/get_pickup_locations', type='jsonrpc', auth='public', website=True)
     def website_sale_get_pickup_locations(self, zip_code=None, **kwargs):
         """ Fetch the order from the request and return the pickup locations close to the zip code.
 
@@ -138,11 +138,11 @@ class Delivery(WebsiteSale):
         :return: The close pickup locations data.
         :rtype: dict
         """
-        order_sudo = request.website.sale_get_order()
+        order_sudo = request.cart
         country = order_sudo.partner_shipping_id.country_id
         return order_sudo._get_pickup_locations(zip_code, country, **kwargs)
 
-    @route(_express_checkout_delivery_route, type='json', auth='public', website=True)
+    @route(_express_checkout_delivery_route, type='jsonrpc', auth='public', website=True)
     def express_checkout_process_delivery_address(self, partial_delivery_address):
         """ Process the shipping address and return the available delivery methods.
 
@@ -154,8 +154,7 @@ class Delivery(WebsiteSale):
         :return: The available delivery methods, sorted by lowest price.
         :rtype: dict
         """
-        order_sudo = request.website.sale_get_order()
-        if not order_sudo:
+        if not (order_sudo := request.cart):
             return []
 
         self._include_country_and_state_in_address(partial_delivery_address)
@@ -177,9 +176,9 @@ class Delivery(WebsiteSale):
             # Pricelists are recomputed every time the partner is changed. We don't want to
             # recompute the price with another pricelist at this state since the customer has
             # already accepted the amount and validated the payment.
-            with request.env.protecting(['pricelist_id'], order_sudo):
+            with request.env.protecting([order_sudo._fields['pricelist_id']], order_sudo):
                 order_sudo.partner_id = new_partner_sudo
-        elif order_sudo.partner_shipping_id.name.endswith(order_sudo.name):
+        elif order_sudo.name in order_sudo.partner_shipping_id.name:
             order_sudo.partner_shipping_id.write(partial_delivery_address)
             # TODO VFE TODO VCR do we want to trigger cart recomputation here ?
             # order_sudo._update_address(
@@ -205,17 +204,30 @@ class Delivery(WebsiteSale):
                 order_sudo=order_sudo,
             )
 
-        # Return the list of delivery methods available for the sales order.
-        return sorted([{
+        sorted_delivery_methods = sorted([{
             'id': dm.id,
             'name': dm.name,
             'description': dm.website_description,
             'minorAmount': payment_utils.to_minor_currency_units(price, order_sudo.currency_id),
-        } for dm, price in Delivery._get_delivery_methods_express_checkout(order_sudo).items()
+        } for dm, price in self._get_delivery_methods_express_checkout(order_sudo).items()
         ], key=lambda dm: dm['minorAmount'])
 
-    @staticmethod
-    def _get_delivery_methods_express_checkout(order_sudo):
+        # Preselect the cheapest method imitating the behavior of the express checkout form.
+        if (
+            sorted_delivery_methods
+            and order_sudo.carrier_id.id != sorted_delivery_methods[0]['id']
+            and (cheapest_dm := next((
+                dm for dm in order_sudo._get_delivery_methods()
+                if dm.id == sorted_delivery_methods[0]['id']), None
+            ))
+        ):
+            order_sudo._set_delivery_method(cheapest_dm)
+
+        # Return the list of delivery methods available for the sales order.
+        return {'delivery_methods': sorted_delivery_methods}
+
+    @classmethod
+    def _get_delivery_methods_express_checkout(cls, order_sudo):
         """ Return available delivery methods and their prices for the given order.
 
         :param sale.order order_sudo: The sudoed sales order.

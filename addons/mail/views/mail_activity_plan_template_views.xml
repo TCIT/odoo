@@ -6,7 +6,7 @@
             <field name="model">mail.activity.plan.template</field>
             <field name="arch" type="xml">
                 <list string="Activities">
-                    <field name="activity_type_id" context="{'form_view_ref': 'mail.mail_activity_type_form_inherit'}"/>
+                    <field name="activity_type_id"/>
                     <field name="summary" placeholder="e.g. Discuss Proposal"/>
                     <field name="responsible_type"/>
                     <field name="delay_count"/>
@@ -25,10 +25,10 @@
                     <field name="res_model" invisible="1"/>
                     <sheet>
                         <group>
-                            <field name="activity_type_id" context="{'form_view_ref': 'mail.mail_activity_type_form_inherit'}"/>
+                            <field name="activity_type_id"/>
                             <field name="summary" placeholder="e.g. Discuss Proposal"/>
                             <field name="responsible_type"/>
-                            <field name="responsible_id" invisible="responsible_type != 'other'"/>
+                            <field name="responsible_id" invisible="responsible_type != 'other'" required="responsible_type == 'other'"/>
                             <label for="delay_count"/>
                             <div>
                                 <field class="oe_inline pe-1 o_input_3ch" name="delay_count"/>
@@ -36,7 +36,7 @@
                                 <field class="oe_inline" name="delay_from"/>
                             </div>
                         </group>
-                        <field name="note" nolabel="1" class="oe-bordered-editor" placeholder="e.g. Log a note"/>
+                        <field name="note" nolabel="1" class="oe-bordered-editor" placeholder="e.g. Log a note" options="{'embedded_components': false}"/>
                     </sheet>
                 </form>
             </field>

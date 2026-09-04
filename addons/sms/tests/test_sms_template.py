@@ -73,7 +73,7 @@ class TestSmsTemplateAccessRights(TransactionCase):
     @users('user_employee')
     def test_sms_template_rendering_restricted(self):
         self.env['ir.config_parameter'].sudo().set_param('mail.restrict.template.rendering', True)
-        self.basic_user.groups_id -= self.env.ref('mail.group_mail_template_editor')
+        self.basic_user.group_ids -= self.env.ref('mail.group_mail_template_editor')
 
         sms_composer = self.env['sms.composer'].create({
             'composition_mode': 'comment',
@@ -114,9 +114,7 @@ class TestSMSTemplateReset(TransactionCase):
 
     def _load(self, module, filepath):
         # pylint: disable=no-value-for-parameter
-        convert_file(self.env, module='sms',
-                     filename=filepath,
-                     idref={}, mode='init', noupdate=False, kind='test')
+        convert_file(self.env, module='sms', filename=filepath, idref={}, mode='init', noupdate=False)
 
     def test_sms_template_reset(self):
         self._load('sms', 'tests/test_sms_template.xml')

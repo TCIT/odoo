@@ -17,6 +17,7 @@
                             <button class="btn-link p-0" icon="oi-arrow-right" name="custom_link_action" type="object" string="Home buttons"/>
                             <button class="btn-link p-0" icon="oi-arrow-right" name="generate_qr_codes_page" type="object" string="Print QR Codes" invisible="not pos_self_ordering_mode in ['consultation', 'mobile']"/>
                             <button class="btn-link p-0" icon="oi-arrow-right" name="generate_qr_codes_zip" type="object" string="Download QR Codes" invisible="not pos_self_ordering_mode in ['consultation', 'mobile']"/>
+                            <button class="btn-link p-0" icon="oi-arrow-right" name="get_pos_qr_stands" type="object" string="Free Metal / Wood Stands" invisible="not pos_self_ordering_mode in ['consultation', 'mobile']"/>
                             <button groups="base.group_no_one" class="btn-link p-0" icon="oi-arrow-right" name="update_access_tokens" type="object" string="Reset QR Codes" invisible="not pos_self_ordering_mode in ['consultation', 'mobile']"/>
                         </div>
                         <div class="content-group row mt-4" invisible="not pos_self_ordering_mode in ['kiosk', 'mobile']">
@@ -50,17 +51,15 @@
                             <button name="%(base.action_view_base_language_install)d" icon="oi-arrow-right" type="action" string="Add Languages" class="btn-link"/>
                         </div>
                     </setting>
-                    <setting string="Customize Header" help="Add an image to brand your header." invisible="pos_self_ordering_mode == 'nothing'">
-                        <field name="pos_self_ordering_image_brand_name" invisible ="1"/>
-                        <field name="pos_self_ordering_image_brand" class="w-100" filename="pos_self_ordering_image_brand_name"/>
-                    </setting>
-                    <setting string="Allow takeout order" help="Allow self-order customers to set their order for takeout." invisible="not pos_self_ordering_mode in ['mobile', 'kiosk'] or not pos_takeaway">
-                        <field name="pos_self_ordering_takeaway"/>
+                    <setting string="Background" help="Personalize the Kiosk background" invisible="pos_self_ordering_mode == 'nothing'">
+                        <field name="pos_self_ordering_image_background_ids"
+                               class="w-100" widget="many2many_binary"
+                               options="{'accepted_file_extensions': 'image/*', 'number_of_files': 1}" />
                     </setting>
                 </block>
             </block>
 
-            <block id="restaurant_section" position="attributes">
+            <block id="pos_interface_section" position="attributes">
                 <attribute name="invisible">is_kiosk_mode</attribute>
             </block>
 
@@ -84,16 +83,60 @@
                 <attribute name="invisible">is_kiosk_mode</attribute>
             </xpath>
 
-            <setting id="multiple_employee_session" position="attributes">
-                <attribute name="invisible">is_kiosk_mode</attribute>
-            </setting>
-
             <setting id="margin_and_cost" position="attributes">
                 <attribute name="invisible">is_kiosk_mode</attribute>
             </setting>
 
             <setting id="flexible_taxes" position="attributes">
-                <attribute name="invisible">is_kiosk_mode or pos_takeaway</attribute>
+                <attribute name="invisible">is_kiosk_mode</attribute>
+            </setting>
+
+            <setting id="multiple_prices_setting" position="attributes">
+                <attribute name="invisible">is_kiosk_mode</attribute>
+            </setting>
+
+            <setting id="is_restaurant" position="attributes">
+                <attribute name="invisible">is_kiosk_mode</attribute>
+            </setting>
+
+            <setting id="set_maximum_difference" position="attributes">
+                <attribute name="invisible">is_kiosk_mode</attribute>
+            </setting>
+
+            <setting id="order_edit_tracking" position="attributes">
+                <attribute name="invisible">is_kiosk_mode</attribute>
+            </setting>
+
+            <setting id="pos-avatax" position="attributes">
+                <attribute name="invisible">is_kiosk_mode</attribute>
+            </setting>
+
+            <setting id="pos_global_discount" position="attributes">
+                <attribute name="invisible">is_kiosk_mode</attribute>
+            </setting>
+
+            <setting id="pos_pricer" position="attributes">
+                <attribute name="invisible">is_kiosk_mode</attribute>
+            </setting>
+
+            <setting id="pos-loyalty" position="attributes">
+                <attribute name="invisible">is_kiosk_mode</attribute>
+            </setting>
+
+            <setting id="basic_receipt" position="attributes">
+                <attribute name="invisible">is_kiosk_mode</attribute>
+            </setting>
+
+            <setting id="iface_orderline_notes" position="attributes">
+                <attribute name="invisible">is_kiosk_mode</attribute>
+            </setting>
+
+            <setting id="ship_later" position="attributes">
+                <attribute name="invisible">is_kiosk_mode</attribute>
+            </setting>
+
+            <setting id="barcode_scanner" position="attributes">
+                <attribute name="invisible">is_kiosk_mode</attribute>
             </setting>
         </field>
     </record>

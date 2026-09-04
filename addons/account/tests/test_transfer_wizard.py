@@ -17,7 +17,7 @@ class TestTransferWizard(AccountTestInvoicingCommon):
         cls.company = cls.company_data['company']
         cls.receivable_account = cls.company_data['default_account_receivable']
         cls.payable_account = cls.company_data['default_account_payable']
-        cls.accounts = cls.env['account.account'].search([('reconcile', '=', False), ('company_ids', '=', cls.company.id)], limit=5)
+        cls.accounts = cls.env['account.account'].search([('reconcile', '=', False), ('currency_id', '=', False), ('company_ids', '=', cls.company.id)], limit=5)
         cls.journal = cls.company_data['default_journal_misc']
 
         # Set rate for base currency to 1
@@ -234,7 +234,7 @@ class TestTransferWizard(AccountTestInvoicingCommon):
                 }),
                 Command.create({
                     'account_id': self.payable_account.id,
-                    'balance': -460,
+                    'balance': -400,
                 }),
             ]
         })
@@ -242,8 +242,7 @@ class TestTransferWizard(AccountTestInvoicingCommon):
 
         self.assertRecordValues(move_with_tax.line_ids, [
             {'balance': 400, 'account_id': account_with_tax.id},
-            {'balance': -460, 'account_id': self.payable_account.id},
-            {'balance': 60, 'account_id': self.company_data['default_account_tax_purchase'].id},
+            {'balance': -400, 'account_id': self.payable_account.id},
         ])
 
         # Open the transfer wizard

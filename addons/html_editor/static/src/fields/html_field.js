@@ -1,10 +1,13 @@
+import { HtmlUpgradeManager } from "@html_editor/html_migrations/html_upgrade_manager";
+import { stripVersion } from "@html_editor/html_migrations/html_migrations_utils";
 import { stripHistoryIds } from "@html_editor/others/collaboration/collaboration_odoo_plugin";
 import {
     COLLABORATION_PLUGINS,
-    DYNAMIC_PLACEHOLDER_PLUGINS,
     EMBEDDED_COMPONENT_PLUGINS,
     MAIN_PLUGINS,
+    NO_EMBEDDED_COMPONENTS_FALLBACK_PLUGINS,
 } from "@html_editor/plugin_sets";
+import { DYNAMIC_PLACEHOLDER_PLUGINS } from "@html_editor/backend/plugin_sets";
 import {
     MAIN_EMBEDDINGS,
     READONLY_MAIN_EMBEDDINGS,
@@ -20,9 +23,13 @@ import { useBus, useService } from "@web/core/utils/hooks";
 import { useRecordObserver } from "@web/model/relational_model/utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { TranslationButton } from "@web/views/fields/translation_button";
-import { HtmlViewer } from "./html_viewer";
+import { HtmlViewer } from "@html_editor/components/html_viewer/html_viewer";
+import { EditorVersionPlugin } from "@html_editor/core/editor_version_plugin";
 import { withSequence } from "@html_editor/utils/resource";
 import { fixInvalidHTML, instanceofMarkup } from "@html_editor/utils/sanitize";
+import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
+
+const HTML_FIELD_METADATA_ATTRIBUTES = ["data-last-history-steps"];
 
 /**
  * Check whether the current value contains nodes that would break
@@ -48,6 +55,7 @@ export class HtmlField extends Component {
         collaborativeTrigger: { type: String, optional: true },
         dynamicPlaceholder: { type: Boolean, optional: true, default: false },
         dynamicPlaceholderModelReferenceField: { type: String, optional: true },
+        migrateHTML: { type: Boolean, optional: true },
         cssReadonlyAssetId: { type: String, optional: true },
         sandboxedPreview: { type: Boolean, optional: true },
         codeview: { type: Boolean, optional: true },
@@ -64,6 +72,7 @@ export class HtmlField extends Component {
     };
 
     setup() {
+        this.htmlUpgradeManager = new HtmlUpgradeManager();
         this.mutex = new Mutex();
 
         this.codeViewRef = useRef("codeView");
@@ -77,13 +86,17 @@ export class HtmlField extends Component {
         this.ormService = useService("orm");
 
         this.isDirty = false;
+        this.lastChangeId = 0;
         this.state = useState({
             key: 0,
             showCodeView: false,
-            containsComplexHTML: computeContainsComplexHTML(this.value),
+            containsComplexHTML: computeContainsComplexHTML(
+                this.props.record.data[this.props.name]
+            ),
         });
 
         useRecordObserver((record) => {
+            const key = this.state.key;
             // Reset Wysiwyg when we discard or onchange value
             const newValue = fixInvalidHTML(record.data[this.props.name]);
             if (!this.isDirty) {
@@ -93,6 +106,10 @@ export class HtmlField extends Component {
                     this.state.containsComplexHTML = computeContainsComplexHTML(newValue);
                     this.lastValue = value;
                 }
+            }
+            if (key === this.state.key && record.resId !== this.props.record.resId) {
+                // Ensure key is reset for 2 different records with identical html values
+                this.state.key++;
             }
         });
         useRecordObserver((record) => {
@@ -105,8 +122,14 @@ export class HtmlField extends Component {
     }
 
     get value() {
-        const value = this.props.record.data[this.props.name];
-        const newVal = fixInvalidHTML(value);
+        const value = this.props.record.data[this.props.name] || "";
+        let newVal = fixInvalidHTML(value);
+        if (this.props.migrateHTML) {
+            newVal = this.htmlUpgradeManager.processForUpgrade(newVal, {
+                containsComplexHTML: this.state.containsComplexHTML,
+                env: this.env,
+            });
+        }
         if (instanceofMarkup(value)) {
             return markup(newVal);
         }
@@ -134,20 +157,41 @@ export class HtmlField extends Component {
         if (this.props.isCollaborative) {
             stripHistoryIds(element);
         }
+        stripVersion(element);
     }
 
-    async updateValue(value) {
+    async updateValue(value, { changeId } = { changeId: this.lastChangeId }) {
         this.lastValue = normalizeHTML(value, this.clearElementToCompare.bind(this));
-        this.isDirty = false;
-        await this.props.record.update({ [this.props.name]: value }).catch(() => {
-            this.isDirty = true;
-        });
+        await this.props.record.update({ [this.props.name]: value }).then(
+            () => {
+                if (this.lastChangeId === changeId) {
+                    this.isDirty = false;
+                }
+            },
+            () => {}
+        );
         this.props.record.model.bus.trigger("FIELD_IS_DIRTY", this.isDirty);
     }
 
     async getEditorContent() {
-        await this.editor.shared.media.savePendingImages();
-        return this.editor.getElContent();
+        const content = this.editor.getElContent();
+        const oldSrcToNewSrcMap = await this.editor.shared.imageSave?.savePendingImages(content);
+        // Update the actual editable if still in the DOM.
+        if (this.editor.editable && oldSrcToNewSrcMap) {
+            this.editor.editable
+                .querySelectorAll(".o_b64_image_to_save, .o_modified_image_to_save")
+                .forEach((unsavedImage) => {
+                    const oldSrc = unsavedImage.getAttribute("src");
+                    if (oldSrcToNewSrcMap.has(oldSrc)) {
+                        unsavedImage.setAttribute("src", oldSrcToNewSrcMap.get(oldSrc));
+                    }
+                    unsavedImage.classList.remove(
+                        "o_b64_image_to_save",
+                        "o_modified_image_to_save"
+                    );
+                });
+        }
+        return content;
     }
 
     async _commitChanges({ urgent }) {
@@ -162,19 +206,20 @@ export class HtmlField extends Component {
             if (urgent) {
                 await this.updateValue(this.editor.getContent());
             }
+            const changeId = this.lastChangeId;
             const el = await this.getEditorContent();
             const content = el.innerHTML;
             this.clearElementToCompare(el);
             const comparisonValue = el.innerHTML;
             if (!urgent || (urgent && this.lastValue !== comparisonValue)) {
-                await this.updateValue(content);
+                await this.updateValue(content, { changeId });
             }
         }
     }
 
     async commitChanges({ urgent } = {}) {
         if (urgent) {
-            this._commitChanges({ urgent });
+            return this._commitChanges({ urgent });
         } else {
             return this.mutex.exec(() => this._commitChanges({ urgent }));
         }
@@ -186,6 +231,12 @@ export class HtmlField extends Component {
 
     onChange() {
         this.isDirty = true;
+        // Keep track of every change individually to avoid resetting dirtiness
+        // after committing a change if another change occurred in the meantime.
+        this.lastChangeId++;
+        // Ensure that FormController.beforeLeave is able to save record
+        // changes.
+        this.props.record.setDirty();
         this.props.record.model.bus.trigger("FIELD_IS_DIRTY", true);
     }
 
@@ -206,10 +257,13 @@ export class HtmlField extends Component {
         const config = {
             content: this.value,
             Plugins: [
+                ...(this.props.migrateHTML ? [EditorVersionPlugin] : []),
                 ...MAIN_PLUGINS,
                 ...(this.props.isCollaborative ? COLLABORATION_PLUGINS : []),
                 ...(this.props.dynamicPlaceholder ? DYNAMIC_PLACEHOLDER_PLUGINS : []),
-                ...(this.props.embeddedComponents ? EMBEDDED_COMPONENT_PLUGINS : []),
+                ...(this.props.embeddedComponents
+                    ? EMBEDDED_COMPONENT_PLUGINS
+                    : NO_EMBEDDED_COMPONENTS_FALLBACK_PLUGINS),
             ],
             classList: this.classList,
             onChange: this.onChange.bind(this),
@@ -225,42 +279,45 @@ export class HtmlField extends Component {
                 peerId: this.generateId(),
             },
             dropImageAsAttachment: true, // @todo @phoenix always true ?
-            dynamicPlaceholder: this.dynamicPlaceholder,
+            dynamicPlaceholder: this.props.dynamicPlaceholder,
             dynamicPlaceholderResModel:
                 this.props.record.data[this.props.dynamicPlaceholderModelReferenceField || "model"],
             direction: localization.direction || "ltr",
             getRecordInfo: () => {
-                const { resModel, resId } = this.props.record;
-                return { resModel, resId };
+                const { resModel, resId, data, fields, id } = this.props.record;
+                return { resModel, resId, data, fields, id };
             },
             resources: {},
             ...this.props.editorConfig,
         };
 
-        if (!("baseContainer" in config)) {
-            config.baseContainer = "DIV";
+        if (!("baseContainers" in config)) {
+            config.baseContainers = ["DIV", "P"];
         }
 
         if (this.props.embeddedComponents) {
-            // TODO @engagement: fill this array with default/base components
             config.resources.embedded_components = [...MAIN_EMBEDDINGS];
+            config.embeddedComponentInfo = { app: this.__owl__.app, env: this.env };
         }
 
         const { sanitize_tags, sanitize } = this.props.record.fields[this.props.name];
         if (
-            !("disableVideo" in config) &&
+            !("allowVideo" in config) &&
+            !this.props.embeddedComponents &&
             (sanitize_tags || (sanitize_tags === undefined && sanitize))
         ) {
-            config.disableVideo = true; // Tag-sanitized fields remove videos.
+            config.allowVideo = false; // Tag-sanitized fields remove videos.
         }
         if (this.props.codeview) {
             config.resources = {
+                ...config.resources,
                 user_commands: [
                     {
                         id: "codeview",
-                        title: _t("Code view"),
+                        description: _t("Code view"),
                         icon: "fa-code",
                         run: this.toggleCodeView.bind(this),
+                        isAvailable: isHtmlContentSupported,
                     },
                 ],
                 toolbar_groups: withSequence(100, {
@@ -309,28 +366,51 @@ export const htmlField = {
         }
         if (options.height) {
             editorConfig.height = `${options.height}px`;
+            editorConfig.classList = ["overflow-auto"];
         }
-        if ("disableImage" in options) {
-            editorConfig.disableImage = Boolean(options.disableImage);
+        if ("allowImage" in options) {
+            editorConfig.allowImage = Boolean(options.allowImage);
         }
-        if ("disableVideo" in options) {
-            editorConfig.disableVideo = Boolean(options.disableVideo);
+        if ("allowMediaDocuments" in options) {
+            editorConfig.allowMediaDocuments = Boolean(options.allowMediaDocuments);
         }
-        if ("disableFile" in options) {
-            editorConfig.disableFile = Boolean(options.disableFile);
+        if ("allowVideo" in options) {
+            editorConfig.allowVideo = Boolean(options.allowVideo);
         }
-        if ("baseContainer" in options) {
-            editorConfig.baseContainer = options.baseContainer;
+        if ("allowFile" in options) {
+            editorConfig.allowFile = Boolean(options.allowFile);
+        }
+        if ("allowChecklist" in options) {
+            editorConfig.allowChecklist = Boolean(options.allowChecklist);
+        }
+        if ("allowAttachmentCreation" in options) {
+            editorConfig.allowImage = Boolean(options.allowAttachmentCreation);
+            editorConfig.allowFile = Boolean(options.allowAttachmentCreation);
+        }
+        if ("baseContainers" in options) {
+            editorConfig.baseContainers = options.baseContainers;
+        }
+        if ("cleanEmptyStructuralContainers" in options) {
+            editorConfig.cleanEmptyStructuralContainers = Boolean(
+                options.cleanEmptyStructuralContainers
+            );
+        }
+        if ("debouncePowerbuttons" in options) {
+            editorConfig.debouncePowerbuttons = Boolean(options.debouncePowerbuttons);
+        }
+        if ("debounceHints" in options) {
+            editorConfig.debounceHints = Boolean(options.debounceHints);
         }
         return {
             editorConfig,
             isCollaborative: options.collaborative,
             collaborativeTrigger: options.collaborative_trigger,
+            migrateHTML: "migrateHTML" in options ? Boolean(options.migrateHTML) : true,
             dynamicPlaceholder: options.dynamic_placeholder,
             dynamicPlaceholderModelReferenceField:
                 options.dynamic_placeholder_model_reference_field,
             embeddedComponents:
-                "embedded_components" in options ? options.embedded_components : true,
+                "embedded_components" in options ? Boolean(options.embedded_components) : true,
             sandboxedPreview: Boolean(options.sandboxedPreview),
             cssReadonlyAssetId: options.cssReadonly,
             codeview: Boolean(odoo.debug && options.codeview),
@@ -339,3 +419,23 @@ export const htmlField = {
 };
 
 registry.category("fields").add("html", htmlField, { force: true });
+
+export function getHtmlFieldMetadata(content) {
+    const metadata = {};
+    for (const attribute of HTML_FIELD_METADATA_ATTRIBUTES) {
+        const regex = new RegExp(`${attribute}\\s*=\\s*"([^"]+)"`);
+        metadata[attribute] = content.match(regex)?.[1];
+    }
+    return metadata;
+}
+export function setHtmlFieldMetadata(content, metadata) {
+    const htmlContent = content.toString() || "<div></div>";
+    const parser = new DOMParser();
+    const contentDocument = parser.parseFromString(htmlContent, "text/html");
+    for (const [attribute, value] of Object.entries(metadata)) {
+        if (value) {
+            contentDocument.body.firstChild.setAttribute(attribute, value);
+        }
+    }
+    return contentDocument.body.innerHTML;
+}

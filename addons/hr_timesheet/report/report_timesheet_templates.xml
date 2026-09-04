@@ -118,7 +118,7 @@
     <template id="report_timesheet">
         <t t-call="web.html_container">
             <t t-call="web.internal_layout">
-                <t t-set="company" t-value="docs.project_id.company_id if len(docs.project_id) == 1 else docs.env.company"/>
+                <t t-set="company" t-value="docs.project_id.sudo().company_id if len(docs.project_id) == 1 else docs.env.company"/>
                 <t t-set="show_task" t-value="bool(docs.task_id)"/>
                 <t t-set="show_project" t-value="len(docs.project_id) > 1"/>
                 <div class="page">
@@ -128,7 +128,7 @@
                             <h2>
                                 <span>Timesheets
                                     <t t-if="len(docs.project_id) == 1">
-                                        for the <t t-out="docs.project_id.name">Research and Development</t> Project
+                                        for the <t t-out="docs.project_id.sudo().name">Research and Development</t> Project
                                     </t>
                                 </span>
                             </h2>
@@ -188,6 +188,7 @@
     <record id="timesheet_report_task" model="ir.actions.report">
         <field name="name">Timesheets</field>
         <field name="model">project.task</field>
+        <field name="group_ids" eval="[(4,ref('hr_timesheet.group_hr_timesheet_user'))]"/>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">hr_timesheet.report_project_task_timesheet</field>
         <field name="report_file">report_timesheet_task</field>
@@ -204,6 +205,7 @@
     <record id="timesheet_report_project" model="ir.actions.report">
         <field name="name">Timesheets</field>
         <field name="model">project.project</field>
+        <field name="group_ids" eval="[(4,ref('hr_timesheet.group_hr_timesheet_user'))]"/>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">hr_timesheet.report_timesheet_project</field>
         <field name="report_file">report_timesheet_project</field>

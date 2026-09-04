@@ -1,24 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* web_unsplash
-# 
+# * web_unsplash
+#
 # Translators:
-# Wil Odoo, 2024
-# Junko Augias, 2024
-# 
+# Martin Trigaux, 2022
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Junko Augias (juau)" <juau@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Junko Augias, 2024\n"
-"Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
+"POT-Creation-Date: 2026-05-08 17:36+0000\n"
+"PO-Revision-Date: 2026-08-07 00:23+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-19/"
+"web_unsplash/ja/>\n"
+"Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ja\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: web_unsplash
 #: model:ir.model.fields,field_description:web_unsplash.field_res_config_settings__unsplash_access_key
@@ -39,14 +42,16 @@ msgid "Apply"
 msgstr "適用"
 
 #. module: web_unsplash
-#: model:ir.model,name:web_unsplash.model_ir_attachment
-msgid "Attachment"
-msgstr "添付ファイル"
-
-#. module: web_unsplash
 #: model:ir.model,name:web_unsplash.model_res_config_settings
 msgid "Config Settings"
-msgstr "コンフィグ設定"
+msgstr "構成設定"
+
+#. module: web_unsplash
+#: model:ir.model.fields,field_description:web_unsplash.field_ir_qweb_field_image__display_name
+#: model:ir.model.fields,field_description:web_unsplash.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:web_unsplash.field_res_users__display_name
+msgid "Display Name"
+msgstr "表示名"
 
 #. module: web_unsplash
 #. odoo-python
@@ -72,6 +77,13 @@ msgid "Get an Access key"
 msgstr "アクセスキーを取得"
 
 #. module: web_unsplash
+#: model:ir.model.fields,field_description:web_unsplash.field_ir_qweb_field_image__id
+#: model:ir.model.fields,field_description:web_unsplash.field_res_config_settings__id
+#: model:ir.model.fields,field_description:web_unsplash.field_res_users__id
+msgid "ID"
+msgstr "ID"
+
+#. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/unsplash_credentials/unsplash_credentials.xml:0
 msgid "Paste your access key here"
@@ -86,21 +98,18 @@ msgstr "アプリケーションIDをここに貼り付けて下さい。"
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/media_dialog/media_dialog.xml:0
-#: code:addons/web_unsplash/static/src/media_dialog_legacy/image_selector.xml:0
 msgid "Photos (via Unsplash)"
 msgstr "写真 (Unsplash経由)"
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/media_dialog/image_selector_patch.js:0
-#: code:addons/web_unsplash/static/src/media_dialog_legacy/image_selector.js:0
 msgid "Please check your Unsplash access key and application ID."
 msgstr "アクセスキーとアプリケーションIDを確認して下さい。"
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/media_dialog/image_selector_patch.js:0
-#: code:addons/web_unsplash/static/src/media_dialog_legacy/image_selector.js:0
 msgid "Please check your internet connection or contact administrator."
 msgstr "インターネット接続を確認するか、管理者にお問い合わせ下さい。"
 
@@ -112,37 +121,34 @@ msgstr "Qwebフィールド画像"
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/media_dialog/image_selector_patch.js:0
-#: code:addons/web_unsplash/static/src/media_dialog_legacy/image_selector.js:0
 msgid "Search is temporarily unavailable"
 msgstr "検索は一時的に利用できません"
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/media_dialog/image_selector_patch.js:0
-#: code:addons/web_unsplash/static/src/media_dialog_legacy/image_selector.js:0
 msgid "Setup Unsplash to access royalty free photos."
 msgstr "Unsplashを設定して、ロイヤリティフリーの写真にアクセスしましょう。"
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/media_dialog/image_selector_patch.js:0
-#: code:addons/web_unsplash/static/src/media_dialog_legacy/image_selector.js:0
 msgid "Something went wrong"
 msgstr "何かの問題が発生しました。"
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/media_dialog/image_selector_patch.js:0
-#: code:addons/web_unsplash/static/src/media_dialog_legacy/image_selector.js:0
 msgid ""
-"The max number of searches is exceeded. Please retry in an hour or extend to"
-" a better account."
-msgstr "最大検索数を超えています。1時間後に再試行するか、より良いアカウントに変更して下さい。"
+"The max number of searches is exceeded. Please retry in an hour or extend to "
+"a better account."
+msgstr ""
+"最大検索数を超えています。1時間後に再試行するか、より良いアカウントに変更して"
+"下さい。"
 
 #. module: web_unsplash
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/media_dialog/image_selector_patch.js:0
-#: code:addons/web_unsplash/static/src/media_dialog_legacy/image_selector.js:0
 msgid "Unauthorized Key"
 msgstr "未承認キー"
 
@@ -150,7 +156,7 @@ msgstr "未承認キー"
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/unsplash_service.js:0
 msgid "Uploading %(count)s '%(query)s' images."
-msgstr " %(count)s '%(query)s' 画像をアップロードしています。"
+msgstr "%(count)s '%(query)s' 画像をアップロードしています。"
 
 #. module: web_unsplash
 #. odoo-javascript
@@ -173,7 +179,7 @@ msgstr "と貼付け"
 #. odoo-javascript
 #: code:addons/web_unsplash/static/src/unsplash_credentials/unsplash_credentials.xml:0
 msgid "and paste it here:"
-msgstr "そしてここに貼付け"
+msgstr "そして、ここに貼り付けてください："
 
 #. module: web_unsplash
 #. odoo-javascript
@@ -181,9 +187,5 @@ msgstr "そしてここに貼付け"
 msgid "here:"
 msgstr "ここ:"
 
-#. module: web_unsplash
-#. odoo-javascript
-#: code:addons/web_unsplash/static/src/media_dialog/media_dialog.xml:0
-#: code:addons/web_unsplash/static/src/media_dialog_legacy/image_selector.xml:0
-msgid "unsplash"
-msgstr "unsplash"
+#~ msgid "Attachment"
+#~ msgstr "添付ファイル"

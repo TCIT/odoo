@@ -1,14 +1,24 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models, fields, api, tools
-from odoo.osv import expression
 
 
 class PosOrder(models.Model):
     _inherit = 'pos.order'
 
     use_self_order_online_payment = fields.Boolean(compute='_compute_use_self_order_online_payment', store=True, readonly=True)
+
+    def get_order_to_print(self):
+        self.ensure_one()
+
+        # Lock the line
+        self.env.cr.execute("SELECT id FROM pos_order WHERE id = %s FOR UPDATE NOWAIT", (self.id,))
+
+        if self.nb_print > 0:
+            raise ValueError("This order has already been printed automatically.")
+
+        self.nb_print += 1
+        return self.read_pos_data([], self.config_id.id)
 
     @api.depends('config_id.self_order_online_payment_method_id')
     def _compute_use_self_order_online_payment(self):
@@ -32,7 +42,7 @@ class PosOrder(models.Model):
 
         can_change_self_order_domain = [('state', '=', 'draft')]
         if vals['use_self_order_online_payment']:
-            can_change_self_order_domain = expression.AND([can_change_self_order_domain, [('config_id.self_order_online_payment_method_id', '!=', False)]])
+            can_change_self_order_domain += [('config_id.self_order_online_payment_method_id', '!=', False)]
 
         can_change_self_order_orders = self.filtered_domain(can_change_self_order_domain)
         cannot_change_self_order_orders = self - can_change_self_order_orders
@@ -66,3 +76,19 @@ class PosOrder(models.Model):
             # flow is cancelled, and the default flow is self order if it is configured.
             self.use_self_order_online_payment = tools.float_is_zero(next_online_payment_amount, precision_rounding=self.currency_id.rounding) and self.config_id.self_order_online_payment_method_id
         return res
+
+    def _send_notification_online_payment_status(self, status):
+        self.config_id._notify("ONLINE_PAYMENT_STATUS", {
+            'status': status,  # progress, success, fail
+            'order_id': self.id,
+        })
+
+    def _load_pos_self_data_fields(self, config):
+        result = super()._load_pos_self_data_fields(config)
+        return result + ['online_payment_method_id', 'next_online_payment_amount']
+
+    @api.model
+    def _check_pos_order(self, pos_config, order, device_type, table=None):
+        data = super()._check_pos_order(pos_config, order, device_type, table)
+        data['use_self_order_online_payment'] = order.get('use_self_order_online_payment')
+        return data

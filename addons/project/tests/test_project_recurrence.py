@@ -18,13 +18,13 @@ class TestProjectRecurrence(TransactionCase):
         user_group_project_recurring_task = cls.env.ref('project.group_project_recurring_tasks')
         Users = cls.env['res.users'].with_context({'no_reset_password': True})
 
-        cls.env.user.groups_id += user_group_project_recurring_task
+        cls.env.user.group_ids += user_group_project_recurring_task
         cls.user_projectuser = Users.create({
             'name': 'Armande ProjectUser',
             'login': 'armandel',
             'password': 'armandel',
             'email': 'armande.projectuser@example.com',
-            'groups_id': [(6, 0, [user_group_employee.id, user_group_project_user.id, user_group_project_recurring_task.id])]
+            'group_ids': [(6, 0, [user_group_employee.id, user_group_project_user.id, user_group_project_recurring_task.id])]
         })
 
         cls.stage_a = cls.env['project.task.type'].create({'name': 'a'})
@@ -34,7 +34,8 @@ class TestProjectRecurrence(TransactionCase):
             'type_ids': [
                 (4, cls.stage_a.id),
                 (4, cls.stage_b.id),
-            ]
+            ],
+            'allow_recurring_tasks': True,
         })
         cls.user = cls.env['res.users'].create({
             'name': 'Recurring Project User',
@@ -112,32 +113,26 @@ class TestProjectRecurrence(TransactionCase):
             form.repeat_type = 'until'
             form.repeat_until = self.date_01_01 + relativedelta(months=1, days=1)
             form.date_deadline = self.date_01_01
-            with form.child_ids.new() as subtask_form:
-                subtask_form.name = 'test subtask'
             task = form.save()
 
-        task.state = '1_done'
+        with freeze_time(self.date_01_01 + relativedelta(days=30)):
+            task.state = '1_done'
         self.assertEqual(len(task.recurrence_id.task_ids), 2, "Since this is before repeat_until, next occurrence should have been created")
 
         last_recurring_task = task.recurrence_id.task_ids.filtered(lambda t: t != task)
-        last_recurring_task.state = '1_done'
+        with freeze_time(self.date_01_01 + relativedelta(days=32)):
+            last_recurring_task.state = '1_done'
         self.assertEqual(len(task.recurrence_id.task_ids), 2, "Since this is after repeat_until, next occurrence shouldn't have been created")
-        self.assertEqual(len(task.recurrence_id.task_ids.child_ids), 2, "2 subtasks should have been created")
 
     def test_recurring_settings_change(self):
-        self.env['res.config.settings'] \
-            .create({'group_project_recurring_tasks': True}) \
-            .execute()
         test_task = self.env['project.task'].create({
             'name': "Recurring Task",
             'project_id': self.project_recurring.id,
             'recurring_task': True,
         })
-        self.assertTrue(test_task.recurring_task, 'The "Recurring" feature should be enabled from settings.')
-        self.env['res.config.settings'] \
-            .create({'group_project_recurring_tasks': False}) \
-            .execute()
-        self.assertFalse(test_task.recurring_task, 'The "Recurring" feature should not be enabled by default.')
+        self.assertTrue(test_task.recurring_task, 'The "Recurring" feature of the task should be enabled.')
+        self.project_recurring.allow_recurring_tasks = False
+        self.assertFalse(test_task.recurring_task, 'The "Recurring" feature of the task should be disabled when the project is not recurring anymore.')
 
     def test_disabling_recurrence(self):
         """
@@ -167,6 +162,35 @@ class TestProjectRecurrence(TransactionCase):
 
         self.assertFalse(any((task_a + task_b + task_c).mapped('recurring_task')),
                          "All tasks in the recurrence should have their recurrence disabled")
+
+    def test_deleting_last_recurring_task(self):
+        """
+        Deleting the last task of a recurrence suite should disable the recurrence
+        option on the tasks remaining in that suite
+        """
+        with freeze_time(self.date_01_01):
+            form = Form(self.env['project.task'])
+            form.name = 'test recurring task'
+            form.project_id = self.project_recurring
+            form.recurring_task = True
+            form.repeat_interval = 5
+            form.repeat_unit = 'day'
+            form.repeat_type = 'forever'
+            task = form.save()
+
+        with freeze_time(self.date_01_01 + relativedelta(day=1)):
+            task.state = '1_done'
+            other_task = self.project_recurring.task_ids - task
+
+        with freeze_time(self.date_01_01 + relativedelta(day=2)):
+            other_task.state = '1_done'
+
+        task_c, task_b, task_a = self.env['project.task'].search([('project_id', '=', self.project_recurring.id)])
+
+        task_c.unlink()
+
+        self.assertFalse(any((task_a + task_b).mapped('recurring_task')),
+                         "The tasks left in the recurrence should have their recurrence disabled")
 
     @users('armandel')
     def test_closed_recurring_task(self):
@@ -238,9 +262,10 @@ class TestProjectRecurrence(TransactionCase):
         self.assertNotEqual(parent_task.id, parent_task_copy.id, 'The generated recurring task should be different than the original one')
 
         # Newly created nodes from recurrence
-        parent_copy_node1 = parent_task_copy.child_ids[0]
-        parent_copy_node2 = parent_task_copy.child_ids[1].child_ids
-        parent_copy_node3 = parent_task_copy.child_ids[2]
+        copied_children = parent_task_copy.child_ids.sorted('id')
+        parent_copy_node1 = copied_children[0]
+        parent_copy_node2 = copied_children[1].child_ids
+        parent_copy_node3 = copied_children[2]
 
         # The nodes and dependencies ids of the orginal and newly created nodes should be different
         self.assertNotEqual(node1.id, parent_copy_node1.id, 'The original and copied node1 should be different')
@@ -278,3 +303,126 @@ class TestProjectRecurrence(TransactionCase):
 
         self.assertEqual(len(side_task1.depend_on_ids), 0)
         self.assertCountEqual(side_task2.depend_on_ids.ids, [node3.id, parent_copy_node3.id], 'SideTask2 - Node3 and SideTask2 - Node3copy relations should be present')
+
+    def test_next_occurrence_batch_call(self):
+        tasks = self.env['project.task'].with_context({'mail_create_nolog': True}).create([
+            {
+                'name': 'Recurring Task 1',
+                'project_id': self.project_recurring.id,
+                'recurring_task': True,
+                'repeat_unit': 'week',
+                'repeat_type': 'forever',
+                'date_deadline': "2023-01-01 00:00:00",
+                'child_ids': [
+                    Command.create({
+                        'name': 'R1 Sub Task 1',
+                        'project_id': self.project_recurring.id,
+                        'date_deadline': "2023-01-02 00:00:00",
+                        'child_ids': [
+                            Command.create({
+                                'name': 'R1 Sub Task 2',
+                                'project_id': self.project_recurring.id,
+                                'date_deadline': "2023-01-03 00:00:00",
+                            })
+                        ],
+                    }),
+                ],
+            },
+            {
+                'name': 'Recurring Task 2',
+                'project_id': self.project_recurring.id,
+                'recurring_task': True,
+                'repeat_unit': 'week',
+                'repeat_type': 'forever',
+                'date_deadline': "2023-01-04 00:00:00",
+                'child_ids': [
+                    Command.create({
+                        'name': 'R2 Sub Task',
+                        'project_id': self.project_recurring.id,
+                        'date_deadline': "2023-01-05 00:00:00",
+                    }),
+                ],
+            },
+        ])
+        tasks_copy = self.env['project.task.recurrence']._create_next_occurrences(tasks)
+        # Every date should be 1 week later
+        self.assertEqual(datetime(2023, 1, 8, 0, 0), tasks_copy[0].date_deadline)
+        self.assertEqual(datetime(2023, 1, 9, 0, 0), tasks_copy[0].child_ids.date_deadline)
+        self.assertEqual(datetime(2023, 1, 10, 0, 0), tasks_copy[0].child_ids.child_ids.date_deadline)
+        self.assertEqual(datetime(2023, 1, 11, 0, 0), tasks_copy[1].date_deadline)
+        self.assertEqual(datetime(2023, 1, 12, 0, 0), tasks_copy[1].child_ids.date_deadline)
+
+    def test_recurrent_tasks_without_archive_user(self):
+        task = self.env['project.task'].create({
+            'project_id': self.project_recurring.id,
+            'name': 'Test task',
+            'stage_id': self.stage_b.id,
+            'user_ids': [Command.set([self.user.id, self.user_projectuser.id])],
+            'recurring_task': True,
+            'repeat_type': 'forever',
+        })
+        self.user_projectuser.action_archive()
+        task.write({'state': '1_done'})
+        self.assertEqual((task.recurrence_id.task_ids - task).user_ids, self.user)
+
+    def test_recurrent_sub_tasks_without_archive_user(self):
+        """
+        Test the behavior of recurring tasks when a user assigned to a child task is archived.
+        Steps:
+        1. Create a parent task with a recurring rule.
+        2. Add a child task with assigned users.
+        3. Archive one of the users assigned to the child task.
+        4. Complete the parent task to generate a recurring task.
+        5. Verify the new task excludes archived users.
+        """
+        parent_task = self.env['project.task'].create({
+            'project_id': self.project_recurring.id,
+            'name': 'Task A',
+            'stage_id': self.stage_b.id,
+            'recurring_task': True,
+            'repeat_type': 'forever',
+            'child_ids': [Command.create({
+                'project_id': self.project_recurring.id,
+                'name': 'Sub task A',
+                'stage_id': self.stage_b.id,
+                'user_ids': [Command.set([self.user.id, self.user_projectuser.id])],
+            })],
+        })
+        self.user_projectuser.action_archive()
+        parent_task.write({'state': '1_done'})
+        self.assertEqual((parent_task.recurrence_id.task_ids - parent_task).child_ids.user_ids, self.user)
+
+    def test_close_recurring_task_private_project(self):
+        """
+            Test that an assigned employee to a recurrent task can close it
+            even when they don't have access to the project.
+
+            Test Case:
+            ==========
+            1) Create a private project with a parent task and a recurrent subtask.
+            2) assign an employee to the subtask.
+            3) Ensure the employee can close the subtask even if they don't have
+               access to the project.
+        """
+        employee = self.env['res.users'].create({
+            'name': 'Employee',
+            'login': 'employee',
+            'email': 'employee@odoo.com',
+            'group_ids': [(6, 0, [self.env.ref('project.group_project_user').id])],
+        })
+        private_project = self.env['project.project'].create({
+            'name': 'Private Project',
+            'privacy_visibility': 'followers',
+        })
+        task = self.env['project.task'].create({
+            'name': 'Parent Task',
+            'project_id': private_project.id,
+            'user_ids': [(4, employee.id)],
+            'recurring_task': True,
+            'repeat_type': 'forever',
+            'state': '01_in_progress',
+        })
+
+        self.env.invalidate_all()
+        task.with_user(employee).write({'state': '1_done'})
+        self.assertEqual(task.state, '1_done', "The employee should be able to mark the task as done.")

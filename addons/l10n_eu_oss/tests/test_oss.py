@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import Command
+from odoo.exceptions import RedirectWarning
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.addons.l10n_eu_oss.models.eu_tag_map import EU_TAG_MAP
 from odoo.tests import tagged
@@ -60,11 +61,25 @@ class TestOSSBelgium(AccountTestInvoicingCommon):
                     .filtered(lambda x: x.repartition_type == 'base')\
                     .tag_ids
 
-                expected_tag_id = self.env.ref(report_expression_xml_id)\
-                    ._get_matching_tags()\
-                    .filtered(lambda t: not t.tax_negate)
+                expected_tag_id = self.env.ref(report_expression_xml_id)._get_matching_tags()
 
                 self.assertIn(expected_tag_id, oss_tag_id, f"{doc_type} tag from Belgian CoA not correctly linked")
+
+    def test_oss_tax_copied_name(self):
+        """
+        This test ensures that when refreshing the mapping, if a tax that already exists has to be created, it is created
+        with (Copy) in the name instead of stopping the refresh process.
+        """
+        self.sub_child_company._map_eu_taxes()
+        # get the fiscal position for another eu country
+        another_eu_country = (self.env.ref('base.europe').country_ids - self.company_data['company'].country_id)[0]
+        fpos = self.env['account.fiscal.position'].search([('country_id', '=', another_eu_country.id)], limit=1)
+        original_name = fpos.tax_ids[0].name
+        fpos.unlink()
+        self.sub_child_company._map_eu_taxes()
+        fpos = self.env['account.fiscal.position'].search([('country_id', '=', another_eu_country.id)], limit=1)
+        new_name = fpos.tax_ids[0].name
+        self.assertEqual(new_name, f"{original_name} (Copy)", "The tax name should be the same as the original one with (Copy) appended to it.")
 
 
 @tagged('post_install', 'post_install_l10n', '-at_install')
@@ -93,11 +108,21 @@ class TestOSSSpain(AccountTestInvoicingCommon):
                     .filtered(lambda x: x.repartition_type == 'base')\
                     .tag_ids
 
-                expected_tag_id = self.env.ref(tag_xml_id)\
-                    ._get_matching_tags()\
-                    .filtered(lambda t: not t.tax_negate)
+                expected_tag_id = self.env.ref(tag_xml_id)._get_matching_tags()
 
                 self.assertIn(expected_tag_id, oss_tag_id, f"{doc_type} tag from Spanish CoA not correctly linked")
+
+    def test_l10n_es_type_oss_tax(self):
+        """
+        Test that the foreign oss taxes generate with l10n_es_type as no_sujeto_loc
+        """
+        if self.env['ir.module.module']._get('l10n_es').state != 'installed':
+            self.skipTest(reason="L10n_es is required for this test.")
+
+        another_eu_country_code = (self.env.ref('base.europe').country_ids - self.company_data['company'].country_id)[0].code
+        tax_oss = self.env['account.tax'].search([('name', 'ilike', f'%"{another_eu_country_code}"%')], limit=1)
+
+        self.assertEqual(tax_oss.l10n_es_type, 'no_sujeto_loc')
 
 
 @tagged('post_install', 'post_install_l10n', '-at_install')
@@ -132,6 +157,7 @@ class TestOSSUSA(AccountTestInvoicingCommon):
         self.env.user.company_id, self.env.user.company_ids = self.sub_child_company, self.sub_child_company
 
         foreign_country = self.env.ref('base.be')
+        foreign_state = self.env.ref('base.state_be_1')
         self.sub_child_company.country_id = foreign_country
         self.sub_child_company.account_fiscal_country_id = self.sub_child_company.country_id
         self.sub_child_company.vat = "BE0477472701"
@@ -140,6 +166,7 @@ class TestOSSUSA(AccountTestInvoicingCommon):
             "name": "sub branch BE foreign VAT",
             "auto_apply": True,
             "country_id": foreign_country.id,
+            "state_ids": foreign_state.ids,
             "foreign_vat": "BE0477472701",
             "company_id": self.sub_child_company.id,
         })
@@ -172,3 +199,17 @@ class TestOSSMap(AccountTestInvoicingCommon):
                 with self.subTest(chart_template=chart_template, tax_report_line_xml_id=tax_report_line_xml_id):
                     tag = self.env.ref(tax_report_line_xml_id, raise_if_not_found=False)
                     self.assertIsNotNone(tag, f"The following xml_id is incorrect in EU_TAG_MAP.py: {tax_report_line_xml_id}")
+
+    def test_oss_missing_account_in_tax_groups(self):
+        """ Checks that a warning is thrown in case of missing payable
+        and receivable accounts from all company's tax groups instead
+        of traceback error.
+        """
+        company = self.company_data['company']
+        TaxGroup = self.env['account.tax.group']
+        for tax_group in TaxGroup.search(TaxGroup._check_company_domain(company)):
+            tax_group.tax_payable_account_id = False
+            tax_group.tax_receivable_account_id = False
+
+        with self.assertRaises(RedirectWarning):
+            company._map_eu_taxes()

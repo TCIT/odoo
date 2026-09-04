@@ -13,11 +13,11 @@ class MailThread(models.AbstractModel):
     _mail_post_token_field = 'access_token' # token field for external posts, to be overridden
 
     website_message_ids = fields.One2many('mail.message', 'res_id', string='Website Messages',
-        domain=lambda self: [('model', '=', self._name), ('message_type', 'in', ('comment', 'email', 'email_outgoing'))],
-        auto_join=True,
+        domain=lambda self: [('model', '=', self._name), ('message_type', 'in', ('comment', 'email', 'email_outgoing', 'auto_comment', 'out_of_office'))],
+        bypass_search_access=True,
         help="Website communication history")
 
-    def _notify_get_recipients_groups(self, message, model_description, msg_vals=None):
+    def _notify_get_recipients_groups(self, message, model_description, msg_vals=False):
         groups = super()._notify_get_recipients_groups(
             message, model_description, msg_vals=msg_vals
         )
@@ -67,9 +67,6 @@ class MailThread(models.AbstractModel):
 
         This is used to determine who is opening the link
         to be able for the recipient to post messages on the document's portal view.
-
-        :param str email:
-            Email of the recipient that opened the link.
         """
         self.ensure_one()
         # check token field exists
@@ -93,12 +90,14 @@ class MailThread(models.AbstractModel):
         return False
 
     @api.model
-    def _get_thread_with_access(self, thread_id, mode="read", **kwargs):
-        if thread := super()._get_thread_with_access(thread_id, mode, **kwargs):
+    def _get_allowed_access_params(self):
+        return super()._get_allowed_access_params() | {'hash', 'pid', 'token'}
+
+    @api.model
+    def _get_thread_with_access(self, thread_id, *, hash=None, pid=None, token=None, **kwargs):
+        if thread := super()._get_thread_with_access(thread_id, hash=hash, pid=pid, token=token, **kwargs):
             return thread
         thread = self.browse(thread_id).sudo()
-        if validate_thread_with_hash_pid(thread, kwargs.get("hash"), kwargs.get("pid")):
-            return thread
-        if validate_thread_with_token(thread, kwargs.get("token")):
+        if validate_thread_with_hash_pid(thread, hash, pid) or validate_thread_with_token(thread, token):
             return thread
         return self.browse()

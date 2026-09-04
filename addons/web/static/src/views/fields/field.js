@@ -14,6 +14,28 @@ const isSmall = utils.isSmall;
 const viewRegistry = registry.category("views");
 const fieldRegistry = registry.category("fields");
 
+const validFieldTypes = [
+    "binary",
+    "boolean",
+    "json",
+    "integer",
+    "float",
+    "monetary",
+    "properties",
+    "properties_definition",
+    "reference",
+    "many2one_reference",
+    "many2one",
+    "one2many",
+    "many2many",
+    "selection",
+    "date",
+    "datetime",
+    "char",
+    "text",
+    "html",
+];
+
 const supportedInfoValidation = {
     type: Array,
     element: Object,
@@ -30,6 +52,12 @@ const supportedInfoValidation = {
             shape: { label: String, value: String },
             optional: true,
         },
+        /**
+         * If true, the listed fields come from the relation.
+         * e.g.: the field is a relational one like many2many_tags, so
+         * property 'field' will search on the relation.
+         * */
+        isRelationalField: { type: Boolean, optional: false },
     },
     optional: true,
 };
@@ -39,7 +67,12 @@ fieldRegistry.addValidation({
     displayName: { type: String, optional: true },
     supportedAttributes: supportedInfoValidation,
     supportedOptions: supportedInfoValidation,
-    supportedTypes: { type: Array, element: String, optional: true },
+    supportedTypes: {
+        type: Array,
+        element: String,
+        optional: true,
+        validate: (array) => array.every((x) => validFieldTypes.includes(x)),
+    },
     extractProps: { type: Function, optional: true },
     isEmpty: { type: Function, optional: true },
     isValid: { type: Function, optional: true }, // Override the validation for the validation visual feedbacks
@@ -99,6 +132,9 @@ export function getFieldFromRegistry(fieldType, widget, viewType, jsClass) {
     if (widget) {
         const field = findInRegistry(widget);
         if (field) {
+            if (field.supportedTypes && !field.supportedTypes?.includes(fieldType)) {
+                console.warn(`The widget: ${widget} don't support the type ${fieldType}`);
+            }
             return field;
         }
         console.warn(`Missing widget: ${widget} for field of type ${fieldType}`);
@@ -129,13 +165,13 @@ export function fieldVisualFeedback(field, record, fieldName, fieldInfo) {
 }
 
 export function getPropertyFieldInfo(propertyField) {
-    const { name, relatedPropertyField, string, type } = propertyField;
+    const { name, relatedPropertyField, string, type, widget } = propertyField;
 
     const fieldInfo = {
         name,
         string,
         type,
-        widget: type,
+        widget: widget || type,
         options: {},
         column_invisible: "False",
         invisible: "False",
@@ -304,7 +340,7 @@ export class Field extends Component {
                 fieldInfo.views = views;
             }
         }
-        if (fields[name].type === "many2one_reference") {
+        if (["many2one", "many2one_reference"].includes(fields[name].type)) {
             let relatedFields = fieldInfo.field.relatedFields;
             if (relatedFields) {
                 relatedFields = Object.fromEntries(relatedFields.map((f) => [f.name, f]));
@@ -388,6 +424,11 @@ export class Field extends Component {
                         ...fieldInfo,
                         attrs: { ...fieldInfo.attrs, ...this.props.attrs },
                     };
+                }
+                if (fieldInfo.attrs.placeholder || fieldInfo.options.placeholder_field) {
+                    fieldInfo.placeholder =
+                        record.data[fieldInfo.options.placeholder_field] ||
+                        fieldInfo.attrs.placeholder;
                 }
 
                 const dynamicInfo = {

@@ -1,5 +1,5 @@
 import { LunchKanbanRenderer } from "@lunch/views/kanban";
-import { defineMailModels } from "@mail/../tests/mail_test_helpers";
+import { defineMailModels, mailModels } from "@mail/../tests/mail_test_helpers";
 import { describe, expect, test } from "@odoo/hoot";
 import {
     contains,
@@ -14,6 +14,7 @@ import {
 const lunchInfos = {
     username: "Johnny Hache",
     wallet: 12.05,
+    wallet_with_config: 12.05,
     is_manager: false,
     currency: {
         symbol: "€",
@@ -25,11 +26,10 @@ const lunchInfos = {
 };
 
 async function mountLunchView() {
-    return await mountView(
-        Object.assign({
-            type: "kanban",
-            resModel: "lunch.product",
-            arch: `
+    return mountView({
+        type: "kanban",
+        resModel: "lunch.product",
+        arch: `
             <kanban js_class="lunch_kanban">
                 <templates>
                     <t t-name="card">
@@ -38,8 +38,7 @@ async function mountLunchView() {
                     </t>
                 </templates>
             </kanban>`,
-        })
-    );
+    });
 }
 
 class Product extends models.Model {
@@ -88,17 +87,15 @@ class Order extends models.Model {
     };
 }
 
-const mailModels = defineMailModels();
+defineMailModels();
 defineModels([Product, Location, Order]);
 
 describe.current.tags("desktop");
 
-onRpc("/lunch/user_location_get", () => {
-    return Location._records[0].id;
+onRpc("/lunch/user_location_get", function () {
+    return this.env["lunch.location"][0].id;
 });
-onRpc("/lunch/infos", () => {
-    return lunchInfos;
-});
+onRpc("/lunch/infos", () => lunchInfos);
 
 test("Basic rendering", async () => {
     await mountLunchView();
@@ -137,12 +134,8 @@ test("Basic rendering with alerts", async () => {
             },
         ],
     };
-    onRpc("/lunch/user_location_get", () => {
-        return userInfos.user_location[0];
-    });
-    onRpc("/lunch/infos", () => {
-        return userInfos;
-    });
+    onRpc("/lunch/user_location_get", () => userInfos.user_location[0]);
+    onRpc("/lunch/infos", () => userInfos);
 
     await mountLunchView();
 
@@ -154,9 +147,7 @@ test("Location change", async () => {
     expect.assertions(3);
 
     const userInfos = { ...lunchInfos };
-    onRpc("/lunch/user_location_get", () => {
-        return userInfos.user_location[0];
-    });
+    onRpc("/lunch/user_location_get", () => userInfos.user_location[0]);
     onRpc("/lunch/user_location_set", async (request) => {
         const { params } = await request.json();
         expect(params.location_id).toBe(2);
@@ -178,14 +169,14 @@ test("Location change", async () => {
 
 test("Manager: user change", async () => {
     expect.assertions(8);
-    mailModels
-        .find((m) => m.name === "ResUsers")
-        ._records.push({ id: 1, name: "Johnny Hache" }, { id: 2, name: "David Elora" });
+
+    mailModels.ResUsers._records.push(
+        { id: 1, name: "Johnny Hache" },
+        { id: 2, name: "David Elora" }
+    );
     let userInfos = { ...lunchInfos, is_manager: true };
     let expectedUserId = false; // false as we are requesting for the current user
-    onRpc("/lunch/user_location_get", () => {
-        return userInfos.user_location[0];
-    });
+    onRpc("/lunch/user_location_get", () => userInfos.user_location[0]);
     onRpc("/lunch/infos", async (request) => {
         const { params } = await request.json();
         expect(expectedUserId).toBe(params.user_id);
@@ -212,9 +203,11 @@ test("Manager: user change", async () => {
     expect(".lunch_user .dropdown-item:contains(David Elora)").toHaveCount(1);
 
     expectedUserId = 2;
-    await contains(".lunch_user li:not(.o_m2o_dropdown_option) .dropdown-item:eq(3)").click();
+    await contains(
+        ".lunch_user li:not(.o_m2o_dropdown_option) .dropdown-item:contains('David Elora')"
+    ).click();
 
-    expect(".o_lunch_banner .w-100 > .d-flex > span:nth-child(2)").toHaveText("-10000.00\n€", {
+    expect(".o_lunch_banner span[name='o_lunch_balance']").toHaveText("Available Balance\n-10000.00€", {
         message: "David Elora is poor",
     });
 
@@ -247,12 +240,8 @@ test("Trash existing order", async () => {
         paid_subtotal: "0",
         unpaid_subtotal: "4.95",
     };
-    onRpc("/lunch/user_location_get", () => {
-        return userInfos.user_location[0];
-    });
-    onRpc("/lunch/infos", () => {
-        return userInfos;
-    });
+    onRpc("/lunch/user_location_get", () => userInfos.user_location[0]);
+    onRpc("/lunch/infos", () => userInfos);
     onRpc("/lunch/trash", () => {
         userInfos = {
             ...userInfos,
@@ -264,20 +253,20 @@ test("Trash existing order", async () => {
     });
     await mountLunchView();
 
-    expect("div.o_lunch_banner > .row > div").toHaveCount(3);
-    expect("div.o_lunch_banner > .row > div:nth-child(2) button.fa-trash").toHaveCount(1, {
-        message: "should have trash icon",
+    expect("div.o_lunch_banner > div > div").toHaveCount(3);
+    expect("div.o_lunch_banner div[name='o_lunch_order_buttons'] > button:contains(Clear Order)").toHaveCount(1, {
+        message: "should have clear order button",
     });
-    expect("div.o_lunch_banner > .row > div:nth-child(2) table > tr").toHaveCount(1, {
+    expect("div.o_lunch_banner li[name='o_lunch_order_line']").toHaveCount(1, {
         message: "should have one order line",
     });
 
-    expect("div.o_lunch_banner > .row > div:nth-child(3) button:contains(Order Now)").toHaveCount(
+    expect("div.o_lunch_banner div[name='o_lunch_order_buttons'] > button:contains(Order Now)").toHaveCount(
         1
     );
 
-    await contains("div.o_lunch_banner > .row > div:nth-child(2) button.fa-trash").click();
-    expect("div.o_lunch_banner > .row > div").toHaveCount(1);
+    await contains("div.o_lunch_banner > div button:contains(Clear Order)").click();
+    expect("div.o_lunch_banner li[name='o_lunch_order_line']").toHaveCount(0);
 });
 
 test("Change existing order", async () => {
@@ -302,15 +291,10 @@ test("Change existing order", async () => {
         paid_subtotal: "0",
         unpaid_subtotal: "4.95",
     };
-    onRpc("/lunch/user_location_get", () => {
-        return userInfos.user_location[0];
-    });
-    onRpc("/lunch/infos", () => {
-        return userInfos;
-    });
-    onRpc("/web/dataset/call_kw/lunch.order/update_quantity", async (request) => {
-        const { params } = await request.json();
-        expect(params.args[1]).toBe(1, { message: "should increment order quantity by 1" });
+    onRpc("/lunch/user_location_get", () => userInfos.user_location[0]);
+    onRpc("/lunch/infos", () => userInfos);
+    onRpc("lunch.order", "update_quantity", ({ args }) => {
+        expect(args[1]).toBe(1, { message: "should increment order quantity by 1" });
         userInfos = {
             ...userInfos,
             lines: [
@@ -329,7 +313,7 @@ test("Change existing order", async () => {
     });
     await mountLunchView();
 
-    await contains("div.o_lunch_banner > .row > div:nth-child(2) span.fa-plus-circle").click();
+    await contains("div.o_lunch_banner li[name='o_lunch_order_line']:contains(Big Plate) i.oi-plus").click();
 });
 
 test("Confirm existing order", async () => {
@@ -354,12 +338,8 @@ test("Confirm existing order", async () => {
         paid_subtotal: "0",
         unpaid_subtotal: "4.95",
     };
-    onRpc("/lunch/user_location_get", () => {
-        return userInfos.user_location[0];
-    });
-    onRpc("/lunch/infos", () => {
-        return userInfos;
-    });
+    onRpc("/lunch/user_location_get", () => userInfos.user_location[0]);
+    onRpc("/lunch/infos", () => userInfos);
     onRpc("/lunch/pay", async (request) => {
         const { params } = await request.json();
         expect(params.user_id).toBe(false); // Should confirm order of current user
@@ -378,11 +358,11 @@ test("Confirm existing order", async () => {
         return true;
     });
     await mountLunchView();
-    expect(".o_lunch_banner .w-100 > .d-flex > span:nth-child(2)").toHaveText("12.05\n€");
+    expect("div.o_lunch_banner span[name='o_lunch_balance'] span:nth-child(2)").toHaveText("12.05€");
 
-    await contains("div.o_lunch_banner > .row > div:nth-child(3) button").click();
+    await contains("div.o_lunch_banner div[name='o_lunch_order_buttons'] > button:contains(Order Now)").click();
 
-    expect(".o_lunch_banner .w-100 > .d-flex > span:nth-child(2)").toHaveText("7.10\n€", {
+    expect("div.o_lunch_banner span[name='o_lunch_balance'] span:nth-child(2)").toHaveText("7.10€", {
         message: "Wallet should update",
     });
 });

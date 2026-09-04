@@ -1,9 +1,11 @@
-import { Component, useRef, useState } from "@odoo/owl";
+import { Component, useEffect, useRef, useState } from "@odoo/owl";
+import { download } from "@web/core/network/download";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { hidePDFJSButtons } from "@web/core/utils/pdfjs";
 
 /**
  * @typedef {Object} File
- * @property {string} displayName
+ * @property {string} name
  * @property {string} downloadUrl
  * @property {boolean} [isImage]
  * @property {boolean} [isPdf]
@@ -32,6 +34,7 @@ export class FileViewer extends Component {
         useAutofocus();
         this.imageRef = useRef("image");
         this.zoomerRef = useRef("zoomer");
+        this.iframeViewerPdfRef = useRef("iframeViewerPdf");
 
         this.isDragging = false;
         this.dragStartX = 0;
@@ -53,12 +56,29 @@ export class FileViewer extends Component {
             imageLoaded: false,
             scale: 1,
             angle: 0,
+            isIframeLoaded: false,
         });
-        this.ui = useState(useService("ui"));
+        this.ui = useService("ui");
+        useEffect(
+            (el) => {
+                if (el) {
+                    hidePDFJSButtons(this.iframeViewerPdfRef.el, {
+                        hideDownload: true,
+                    });
+                }
+            },
+            () => [this.iframeViewerPdfRef.el]
+        );
     }
 
     onImageLoaded() {
         this.state.imageLoaded = true;
+    }
+
+    onIframeLoaded(ev) {
+        requestAnimationFrame(() => {
+            this.state.isIframeLoaded = true;
+        });
     }
 
     close() {
@@ -222,29 +242,23 @@ export class FileViewer extends Component {
         } else {
             style += "max-height: 100%; max-width: 100%;";
         }
+        style += `background: repeating-conic-gradient(#ccc 0deg 90deg, #fff 90deg 180deg) 50% / 20px 20px;`;
         return style;
     }
 
     onClickPrint() {
-        const printWindow = window.open("about:blank", "_new");
-        printWindow.document.open();
-        printWindow.document.write(`
-                <html>
-                    <head>
-                        <script>
-                            function onloadImage() {
-                                setTimeout('printImage()', 10);
-                            }
-                            function printImage() {
-                                window.print();
-                                window.close();
-                            }
-                        </script>
-                    </head>
-                    <body onload='onloadImage()'>
-                        <img src="${this.state.file.defaultSource}" alt=""/>
-                    </body>
-                </html>`);
-        printWindow.document.close();
+        const printWindow = window.open();
+        const image = printWindow.document.createElement("img");
+        image.setAttribute("onload", "window.print(); setTimeout(window.close, 10)");
+        image.setAttribute("onerror", "window.print(); setTimeout(window.close, 10)");
+        image.src = this.state.file.defaultSource;
+        printWindow.document.body.appendChild(image);
+    }
+
+    onClickDownload() {
+        download({
+            data: {},
+            url: this.state.file.downloadUrl,
+        });
     }
 }

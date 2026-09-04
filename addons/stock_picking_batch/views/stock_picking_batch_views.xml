@@ -24,6 +24,7 @@
         <field name="arch" type="xml">
             <xpath expr="//list" position="attributes">
                 <attribute name="delete">0</attribute>
+                <attribute name="create">false</attribute>
             </xpath>
             <xpath expr="//field[@name='product_id']" position="after">
                 <field name="picking_id"
@@ -32,8 +33,13 @@
                     domain="[('id', 'in', parent.picking_ids)]"
                     options="{'no_create_edit': True}"/>
             </xpath>
-            <xpath expr="//field[@name='quantity']" position="attributes">
-                <attribute name="readonly">1</attribute>
+            <xpath expr="//field[@name='picked']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='product_uom']" position="after">
+                <field name="picked" optional="hide"/>
+                <button name="action_show_details" type="object" title="Details"
+                        icon="fa-list" invisible="not show_details_visible"/>
             </xpath>
         </field>
     </record>
@@ -43,22 +49,34 @@
         <field name="model">stock.move.line</field>
         <field name="arch" type="xml">
             <list editable="top" decoration-muted="state == 'cancel'" string="Move Lines" default_order="location_id">
+                <header>
+                    <button class="btn-primary" name="action_put_in_pack" type="object" string="Put in Pack" groups="stock.group_tracking_lot"/>
+                </header>
                 <field name="tracking" column_invisible="True"/>
                 <field name="state" column_invisible="True"/>
                 <field name="company_id" column_invisible="True"/>
                 <field name="product_id" context="{'default_is_storable': True}" required="1" readonly="id"/>
                 <field name="picking_id" required="1" readonly="id"
-                    options="{'no_create_edit': True}" domain="[('id', 'in', parent.picking_ids)]"/>
-                <field name="lot_id"   groups="stock.group_production_lot" readonly="tracking not in ['lot', 'serial']" column_invisible="parent.show_lots_text" />
-                <field name="lot_name" groups="stock.group_production_lot" readonly="tracking not in ['lot', 'serial']" column_invisible="not parent.show_lots_text"/>
-                <field name="location_id"/>
+                    options="{'no_create_edit': True}" domain="[('id', 'in', context.get('picking_ids', []))]"/>
+                <field name="lot_id"   groups="stock.group_production_lot" readonly="tracking not in ['lot', 'serial']" column_invisible="context.get('picking_code') != 'incoming' or context.get('show_lots_text')"/>
+                <field name="lot_name" string="Lot/Serial Number" groups="stock.group_production_lot"
+                       readonly="tracking not in ['lot', 'serial']" column_invisible="context.get('picking_code') != 'incoming' or not context.get('show_lots_text')"/>
+                <field name="package_id" groups="stock.group_tracking_lot" column_invisible="True" context="{'show_src_package': 1}"/>
+                <field name="quant_id" column_invisible="context.get('picking_code') == 'incoming'"
+                        domain="[('product_id', '=', product_id), ('location_id', 'child_of', picking_location_id)]"
+                        context="{'default_location_id': location_id, 'default_product_id': product_id, 'search_view_ref': 'stock.quant_search_view', 'list_view_ref': 'stock.view_stock_quant_tree_simple', 'form_view_ref': 'stock.view_stock_quant_form', 'readonly_form': False, 'show_src_package': 1}"
+                        readonly="state in ('done', 'cancel') and is_locked"
+                        widget="pick_from"
+                        options="{'no_open': True}"/>
+                <field name="location_id" column_invisible="True"/>
                 <field name="location_dest_id"/>
-                <field name="package_id" groups="stock.group_tracking_lot"/>
-                <field name="result_package_id" groups="stock.group_tracking_lot"/>
-                <field name="product_uom_id" options="{'no_create': True}"
-                    groups="uom.group_uom" readonly="1" force_save="1"/>
+                <field name="result_package_id" groups="stock.group_tracking_lot" widget="package_m2o" context="{'show_dest_package': 1}"/>
                 <field name="quantity"/>
+                <field name="product_uom_id" options="{'no_create': True}" widget="many2one_uom"
+                    groups="uom.group_uom" readonly="1" force_save="1"/>
                 <field name="company_id" groups="base.group_multi_company" force_save="1"/>
+                <field name="is_locked" column_invisible="True"/>
+                <field name="picking_location_id" column_invisible="True"/>
             </list>
         </field>
     </record>
@@ -75,22 +93,38 @@
                 <field name="is_wave" invisible="1"/>
                 <field name="show_lots_text" invisible="1"/>
                 <header>
-                    <button name="action_confirm" invisible="state != 'draft'" string="Confirm" type="object" class="oe_highlight"/>
+                    <button name="action_confirm" invisible="state != 'draft'" string="Confirm" type="object" class="oe_highlight" data-hotkey="q"/>
                     <button name="action_done" string="Validate" type="object" class="oe_highlight"
-                        invisible="state != 'in_progress' or show_check_availability"/>
+                        invisible="not picking_ids or state != 'in_progress' or show_check_availability" data-hotkey="v"/>
                     <button name="action_assign" string="Check Availability" type="object" class="oe_highlight"
-                        invisible="state != 'in_progress' or not show_check_availability"/>
+                        invisible="state != 'in_progress' or not show_check_availability" data-hotkey="w"/>
                     <button name="action_done" string="Validate" type="object"
-                        invisible="state != 'in_progress' or not show_check_availability"/>
+                        invisible="not picking_ids or state != 'in_progress' or not show_check_availability" data-hotkey="v"/>
                     <button name="action_assign" string="Check Availability" type="object"
-                        invisible="state != 'draft' or not show_check_availability"/>
-                    <button name="action_print" invisible="state not in ('in_progress', 'done')" string="Print" type="object"/>
-                    <button string="Print Labels" type="object" name="action_open_label_layout"/>
-                    <button name="action_cancel" string="Cancel" type="object" invisible="state != 'in_progress'"/>
+                        invisible="state != 'draft' or not show_check_availability" data-hotkey="w"/>
+                    <button name="action_print" invisible="state not in ('in_progress', 'done')" string="Print" type="object" data-hotkey="o"/>
+                    <button string="Print Labels" type="object" name="action_open_label_layout" data-hotkey="shift+o"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state != 'in_progress'" data-hotkey="x"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,done"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
+                        <button name="action_see_packages" string="Packages" type="object"
+                            class="oe_stat_button" icon="fa-cubes"
+                            groups="stock.group_tracking_lot">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Packages</span>
+                            </div>
+                        </button>
+                        <button name="action_batch_detailed_operations"
+                                class="oe_stat_button"
+                                icon="fa-bars"
+                                type="object"
+                                help="List view of detailed operations">
+                                <div class="o_form_field o_stat_info">
+                                    <span class="o_stat_text">Moves</span>
+                                </div>
+                        </button>
                         <button name="action_view_reception_report" string="Allocation" type="object"
                             class="oe_stat_button" icon="fa-list"
                             invisible="not show_allocation"
@@ -103,23 +137,21 @@
                         <group id="batch_delivery_data">
                             <field name="user_id" readonly="state not in ['draft', 'in_progress']"/>
                             <field name="picking_type_id" readonly="state != 'draft'"/>
-                            <field name="company_id" groups="base.group_multi_company" readonly="picking_ids" force_save="1"/>
                             <field name="scheduled_date" readonly="state in ['cancel', 'done']"/>
                             <field name="description"/>
                         </group>
                         <field name="properties" nolabel="1" columns="2" hideAddButton="1"/>
                     </group>
                     <notebook>
-                        <page string="Detailed Operations" name="page_detailed_operations" invisible="state == 'draft'">
-                            <field name="move_line_ids" context="{'list_view_ref': 'stock_picking_batch.view_move_line_tree'}" readonly="state not in ['draft', 'in_progress']"/>
-                            <button class="oe_highlight" name="action_put_in_pack" type="object" string="Put in Pack" invisible="state in ('draft', 'done', 'cancel')" groups="stock.group_tracking_lot"/>
-                        </page>
                         <page string="Operations" name="page_operations" invisible="state == 'draft'">
-                            <field name="move_ids" context="{'list_view_ref': 'stock_picking_batch.view_picking_move_tree_inherited'}"/>
+                            <field name="move_ids" readonly="state == 'done'" context="{'list_view_ref': 'stock_picking_batch.view_picking_move_tree_inherited'}"/>
+                            <button class="oe_highlight float-end" name="action_put_in_pack" type="object" string="Put in Pack" invisible="state in ('draft', 'done', 'cancel')" groups="stock.group_tracking_lot"/>
                         </page>
                         <page string="Transfers" name="page_transfers">
                             <field name="allowed_picking_ids" invisible="1"/>
-                            <field name="picking_ids" widget="many2many" mode="list,kanban"
+                            <field name="picking_ids" widget="stock_picking_many2many" mode="list,kanban" invisible="not is_wave"
+                                context="{'form_view_ref': 'stock_picking_batch.view_picking_form_inherited', 'list_view_ref': 'stock_picking_batch.stock_picking_view_batch_tree_ref'}" readonly="state not in ['draft', 'in_progress']"/>
+                            <field name="picking_ids" widget="many2many" mode="list,kanban" invisible="is_wave"
                                 context="{'form_view_ref': 'stock_picking_batch.view_picking_form_inherited', 'list_view_ref': 'stock_picking_batch.stock_picking_view_batch_tree_ref'}" readonly="state not in ['draft', 'in_progress']"/>
                         </page>
                     </notebook>
@@ -199,14 +231,17 @@
                 <filter name="in_progress" string="In Progress" domain="[('state', '=', 'in_progress')]" help="Batch Transfers not finished"/>
                 <filter name="done" string="Done" domain="[('state', '=', 'done')]"/>
                 <separator/>
+                <filter invisible="1" string="My Activities" name="filter_activities_my"
+                    domain="[('activity_user_id', '=', uid)]"/>
+                <separator invisible="1"/>
                 <filter invisible="1" string="Late Activities" name="activities_overdue"
-                    domain="[('my_activity_date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
-                    help="Show all records which has next action date is before today"/>
+                    domain="[('my_activity_date_deadline', '&lt;', 'today')]"
+                    help="Show all records whose next activity date is past"/>
                 <filter invisible="1" string="Today Activities" name="activities_today"
-                    domain="[('my_activity_date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                    domain="[('my_activity_date_deadline', '=', 'today')]"/>
                 <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
-                    domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
-                <group expand="0" string="Group By">
+                    domain="[('my_activity_date_deadline', '&gt;', 'today')]"/>
+                <group>
                     <filter string="Responsible" name="user" domain="[]" context="{'group_by': 'user_id'}"/>
                     <filter string="State" name="state" domain="[]" context="{'group_by': 'state'}"/>
                 </group>
@@ -217,6 +252,7 @@
     <record id="stock_picking_batch_action" model="ir.actions.act_window">
         <field name="name">Batch Transfers</field>
         <field name="res_model">stock.picking.batch</field>
+        <field name="path">batch-transfers</field>
         <field name="view_mode">list,kanban,form</field>
         <field name="domain">[('is_wave', '=', False)]</field>
         <field name="context">{'search_default_draft': True, 'search_default_in_progress': True}</field>
@@ -282,11 +318,23 @@
         <field name="name">Unreserve</field>
         <field name="model_id" ref="stock_picking_batch.model_stock_picking_batch"/>
         <field name="binding_model_id" ref="stock_picking_batch.model_stock_picking_batch"/>
-        <field name="binding_view_types">list,form</field>
+        <field name="binding_view_types">list,kanban,form</field>
         <field name="state">code</field>
         <field name="code">
         if records:
             records.picking_ids.do_unreserve()
+        </field>
+    </record>
+
+    <record id="action_merge_batch_picking" model="ir.actions.server">
+        <field name="name">Merge</field>
+        <field name="model_id" ref="stock_picking_batch.model_stock_picking_batch"/>
+        <field name="binding_model_id" ref="stock_picking_batch.model_stock_picking_batch"/>
+        <field name="binding_view_types">list,kanban</field>
+        <field name="state">code</field>
+        <field name="code">
+        if records:
+            action = records.action_merge()
         </field>
     </record>
 </odoo>

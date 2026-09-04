@@ -1,60 +1,58 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_forum
-# 
+# * website_forum
+#
 # Translators:
-# eriiikgt, 2024
-# Marc Tormo i Bochaca <mtbochaca@gmail.com>, 2024
-# Albert Parera, 2024
-# Sandra Franch <sandra.franch@upc.edu>, 2024
-# Xavier, 2024
-# José Cabrera Lozano <jose.cabrera@edukative.es>, 2024
-# Carles Antoli <carlesantoli@hotmail.com>, 2024
-# oscaryuu, 2024
-# Óscar Fonseca <tecnico@pyming.com>, 2024
-# RGB Consulting <odoo@rgbconsulting.com>, 2024
-# martioodo hola, 2024
-# Ivan Espinola, 2024
-# Jonatan Gk, 2024
-# Arnau Ros, 2024
-# M Palau <mpalau@tda.ad>, 2024
-# Iván Infantes Castarnado, 2024
-# Manel Fernandez Ramirez <manelfera@outlook.com>, 2024
-# Martin Trigaux, 2024
-# marcescu, 2024
-# Pete M, 2024
-# Susanna Pujol, 2024
-# Quim - coopdevs <quim.rebull@coopdevs.org>, 2024
-# Josep Anton Belchi, 2024
-# jabiri7, 2024
-# Juande Gutierrez <juni55mcyt@gmail.com>, 2024
-# Noemi Pla, 2025
-# 
+# Sandra Franch <sandra.franch@upc.edu>, 2022
+# José Cabrera Lozano <jose.cabrera@edukative.es>, 2022
+# RGB Consulting <odoo@rgbconsulting.com>, 2022
+# Susanna Pujol, 2022
+# Jonatan Gk, 2022
+# Pete M, 2022
+# Marc Tormo i Bochaca <mtbochaca@gmail.com>, 2022
+# M Palau <mpalau@tda.ad>, 2022
+# marcescu, 2022
+# eriiikgt, 2022
+# Carles Antoli <carlesantoli@hotmail.com>, 2022
+# Manel Fernandez Ramirez <manelfera@outlook.com>, 2022
+# oscaryuu, 2022
+# Arnau Ros, 2022
+# Quim - eccit <quim@eccit.com>, 2022
+# jabelchi, 2022
+# jabiri7, 2022
+# Martin Trigaux, 2022
+# Ivan Espinola, 2023
+# Óscar Fonseca <tecnico@extreme-micro.com>, 2023
+# martioodo hola, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Noemi Pla, 2025\n"
-"Language-Team: Catalan (https://app.transifex.com/odoo/teams/41243/ca/)\n"
+"POT-Creation-Date: 2026-02-20 18:37+0000\n"
+"PO-Revision-Date: 2026-08-02 17:51+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Catalan <https://translate.odoo.com/projects/odoo-19/"
+"website_forum/ca/>\n"
+"Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ca\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid " Flag"
-msgstr "Marca"
+msgstr " Marca"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid " Flagged"
-msgstr "Marcat"
+msgstr " Marcat"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__total_answers
@@ -77,6 +75,19 @@ msgstr "# Publicacions"
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_tree
 msgid "# Views"
 msgstr "# Visualitzacions"
+
+#. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
+msgid ""
+"%(link_start)sRead the guidelines to know how to gain karma.%(link_end)s"
+msgstr ""
+
+#. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
+msgid "%(score)s karma is required to perform this action."
+msgstr ""
 
 #. module: website_forum
 #. odoo-python
@@ -211,24 +222,11 @@ msgid "&amp;nbsp;"
 msgstr "&amp;nbsp;"
 
 #. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
-msgid "'Please enter 2 or more characters'"
-msgstr ""
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
-msgid "'Tags'"
-msgstr ""
-
-#. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid "(The above section was adapted from Stackoverflow’s FAQ.)"
 msgstr ""
-"(La secció anterior s'ha adaptat de les Preguntes Freqüents de "
-"Stackoverflow)"
+"(La secció anterior s'ha adaptat de les Preguntes Freqüents de Stackoverflow)"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_forum_view_form
@@ -257,20 +255,32 @@ msgstr ""
 "        resposta"
 
 #. module: website_forum
+#: model_terms:forum.forum,welcome_message:website_forum.forum_help
+msgid ""
+"<a class=\"btn btn-primary forum_register_url o_translate_inline\" href=\"/"
+"web/login\">Sign up</a>"
+msgstr ""
+"<a class=\"btn btn-primary forum_register_url o_translate_inline\" href=\"/"
+"web/login\">Registrar-se</a>"
+
+#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
 "<b class=\"d-block \">This answer has been flagged</b>\n"
-"                            As a moderator, you can either validate or reject this answer."
+"                            As a moderator, you can either validate or "
+"reject this answer."
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "<b class=\"d-block\">You have a pending post</b>\n"
-"                        Please wait for a moderator to validate your previous post to be allowed replying questions."
+"                        Please wait for a moderator to validate your "
+"previous post to be allowed replying questions."
 msgstr ""
 "<b class=\"d-block\">Teniu una publicació pendent</b>\n"
-"                        Si us plau, espereu que un moderador validi la vostra publicació anterior per poder respondre preguntes."
+"                        Si us plau, espereu que un moderador validi la "
+"vostra publicació anterior per poder respondre preguntes."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -289,8 +299,8 @@ msgid ""
 "<b>Answers should not add or expand questions</b>. Instead, either edit the "
 "question or add a comment."
 msgstr ""
-"<b>Les respostes no han d'afegir o ampliar preguntes</b>. En comptes d'això,"
-" editeu la pregunta o afegiu un comentari."
+"<b>Les respostes no han d'afegir o ampliar preguntes</b>. En comptes d'això, "
+"editeu la pregunta o afegiu un comentari."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -299,8 +309,8 @@ msgid ""
 "<b>Answers should not comment other answers</b>. Instead add a comment on "
 "the other answers."
 msgstr ""
-"<b>Les respostes no han de comentar altres respostes</b>. En el seu lloc pot"
-" afegir un comentari sobre les altres respostes. "
+"<b>Les respostes no han de comentar altres respostes</b>. En el seu lloc pot "
+"afegir un comentari sobre les altres respostes."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -308,12 +318,12 @@ msgstr ""
 msgid ""
 "<b>Answers should not start debates</b> This community Q&amp;A is not a "
 "discussion group. Please avoid holding debates in your answers as they tend "
-"to dilute the essence of questions and answers. For brief discussions please"
-" use commenting facility."
+"to dilute the essence of questions and answers. For brief discussions please "
+"use commenting facility."
 msgstr ""
 "<b>Les respostes no haurien d'iniciar els debats</b> Aquesta comunitat "
-"Qamp;A no és un grup de discussió. Si us plau, evitin celebrar debats en les"
-" seves respostes, ja que tendeixen a diluir l'essència de les preguntes i "
+"Qamp;A no és un grup de discussió. Si us plau, evitin celebrar debats en les "
+"seves respostes, ja que tendeixen a diluir l'essència de les preguntes i "
 "respostes. Per a breus debats, si us plau, utilitzi la possibilitat de "
 "comentar."
 
@@ -323,48 +333,48 @@ msgstr ""
 msgid ""
 "<b>Answers shouldn't just point to other Questions</b>. Instead add a "
 "question comment indication \"Possible duplicate of...\". However, it's ok "
-"to include links to other questions or answers providing relevant additional"
-" information."
+"to include links to other questions or answers providing relevant additional "
+"information."
 msgstr ""
 "<b>Les respostes no han d'apuntar a altres preguntes </b>. En lloc d'afegir "
 "un comentari indicant \"Possible duplicació de...\" es pot incloure un "
-"enllaç a altres preguntes o respostes que aportin informació rellevant. "
+"enllaç a altres preguntes o respostes que aportin informació rellevant."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just point to other questions</b>.Instead add a comment"
-" indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
+"<b>Answers shouldn't just point to other questions</b>.Instead add a comment "
+"indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
 "include links to other questions or answers providing relevant additional "
 "information."
 msgstr ""
 "<b>Les respostes no haurien d'apuntar només a altres preguntes</b>.En "
-"comptes d'això, afegiu un comentari indicant <i>\"Possible duplicat "
-"de...\"</i>. No obstant això, està bé incloure enllaços a altres preguntes o"
-" respostes que proporcionin informació addicional rellevant."
+"comptes d'això, afegiu un comentari indicant <i>\"Possible duplicat de...\"</"
+"i>. No obstant això, està bé incloure enllaços a altres preguntes o "
+"respostes que proporcionin informació addicional rellevant."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the"
-" solution description text in your answer, even if it's just a copy/paste. "
+"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the "
+"solution description text in your answer, even if it's just a copy/paste. "
 "Links are welcome, but should be complementary to answer, referring sources "
 "or additional reading."
 msgstr ""
 "<b>Les respostes no poden contenir només un enllaç a la solució</b>. En "
 "canvi, es pot donar la solució afegint un text a la resposta encara que "
 "sigui un copiar/pegar. Els enllaços són benvinguts però han de ser "
-"complementaris a la resposta o a les referències. "
+"complementaris a la resposta o a les referències."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "<b>Before you ask - please make sure to search for a similar question.</b> "
-"You can search questions by their title or tags. It’s also OK to answer your"
-" own question."
+"You can search questions by their title or tags. It’s also OK to answer your "
+"own question."
 msgstr ""
 "<b>Abans de preguntar - assegureu-vos de cercar una pregunta similar.</b> "
 "Podeu cercar preguntes pel seu títol o etiquetes. També està bé respondre a "
@@ -374,8 +384,8 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Please avoid asking questions that are too subjective and "
-"argumentative</b> or not relevant to this community."
+"<b>Please avoid asking questions that are too subjective and argumentative</"
+"b> or not relevant to this community."
 msgstr ""
 "<b>Si us plau eviteu preguntes massa subjectives i argumentatives</b> o que "
 "no siguin rellevants per aquesta comunitat."
@@ -383,22 +393,27 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answer
 msgid ""
-"<b>Please try to give a substantial answer.</b> If you wanted to comment on the question or answer, just\n"
-"            <b>use the commenting tool.</b> Please remember that you can always <b>revise your answers</b>\n"
-"            - no need to answer the same question twice. Also, please <b>don't forget to vote</b>\n"
+"<b>Please try to give a substantial answer.</b> If you wanted to comment on "
+"the question or answer, just\n"
+"            <b>use the commenting tool.</b> Please remember that you can "
+"always <b>revise your answers</b>\n"
+"            - no need to answer the same question twice. Also, please "
+"<b>don't forget to vote</b>\n"
 "            - it really helps to select the best questions and answers!"
 msgstr ""
-"<b>Si us plau, intenteu donar una resposta substancial.</b> Si voleu comentar la pregunta o la resposta, només\n"
-"            <b>utilitza l'eina de comentaris.</b> Recordeu que sempre podeu <b>revisar les vostres respostes</b>\n"
-"            - no cal respondre a la mateixa pregunta dues vegades. A més, <b>no oblideu votar</b>\n"
+"<b>Si us plau, intenteu donar una resposta substancial.</b> Si voleu "
+"comentar la pregunta o la resposta, només\n"
+"            <b>utilitza l'eina de comentaris.</b> Recordeu que sempre podeu "
+"<b>revisar les vostres respostes</b>\n"
+"            - no cal respondre a la mateixa pregunta dues vegades. A més, <b>"
+"no oblideu votar</b>\n"
 "            - realment ajuda a seleccionar les millors preguntes i respostes!"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.faq_karma
 msgid "<b>Why can other people edit my questions/answers?</b>"
 msgstr ""
-"<b>Per què altres persones poden modificar les meves "
-"preguntes/respostes?</b>"
+"<b>Per què altres persones poden modificar les meves preguntes/respostes?</b>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
@@ -409,7 +424,8 @@ msgstr "<b>Ja teniu una publicació pendent.</b><br/>"
 #: model_terms:ir.ui.view,arch_db:website_forum.contact
 msgid ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-trophy o-text-gold ms-2\" role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
+"                    <span class=\"fa fa-trophy o-text-gold ms-2\" "
+"role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
 msgstr ""
 
 #. module: website_forum
@@ -465,7 +481,8 @@ msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
-msgid "<i class=\"fa fa-check fa-fw me-1\"/>Try searching for one or two words."
+msgid ""
+"<i class=\"fa fa-check fa-fw me-1\"/>Try searching for one or two words."
 msgstr ""
 
 #. module: website_forum
@@ -481,7 +498,8 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
-msgid "<i class=\"fa fa-check\"/> How to configure TPS and TVQ's canadian taxes?"
+msgid ""
+"<i class=\"fa fa-check\"/> How to configure TPS and TVQ's canadian taxes?"
 msgstr ""
 "<i class=\"fa fa-check\"/> Com configurar els impostos canadencs de TPS i "
 "TVQ?"
@@ -495,13 +513,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
 msgid "<i class=\"fa fa-comments-o me-1\" title=\"Forum\"/>"
 msgstr "<i class=\"fa fa-comments-o me-1\" title=\"Forum\"/>"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
-msgid ""
-"<i class=\"fa fa-ellipsis-h\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"More\"/>"
-msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
@@ -538,10 +549,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
 "<i class=\"fa fa-pencil\"/>\n"
-"                                Edit<span class=\"d-none d-lg-inline\"> your answer</span>"
+"                                Edit<span class=\"d-none d-lg-inline\"> your "
+"answer</span>"
 msgstr ""
 "<i class=\"fa fa-pencil\"/>\n"
-"                                Modifiqueu<span class=\"d-none d-lg-inline\"> la vostra resposta</span>"
+"                                Modifiqueu<span class=\"d-none d-lg-"
+"inline\"> la vostra resposta</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post
@@ -580,11 +593,11 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid ""
-"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive"
-" votes\" title=\"Positive votes\"/>"
+"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive "
+"votes\" title=\"Positive votes\"/>"
 msgstr ""
-"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive"
-" votes\" title=\"Positive votes\"/>"
+"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive "
+"votes\" title=\"Positive votes\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -639,8 +652,10 @@ msgid ""
 msgstr ""
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_sub_nav
-msgid "<i class=\"oi oi-chevron-left small\"/> Back"
+#: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
+msgid ""
+"<i class=\"oi oi-ellipsis-h\" data-bs-toggle=\"tooltip\" data-bs-"
+"placement=\"top\" title=\"More\"/>"
 msgstr ""
 
 #. module: website_forum
@@ -675,7 +690,8 @@ msgstr ""
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
-msgid "<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
+msgid ""
+"<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
 msgstr ""
 
 #. module: website_forum
@@ -694,8 +710,8 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<span class=\"flex-grow-1\">Why can other people edit my "
-"questions/answers?</span>"
+"<span class=\"flex-grow-1\">Why can other people edit my questions/answers?</"
+"span>"
 msgstr ""
 
 #. module: website_forum
@@ -710,24 +726,24 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">select text to format "
-"it.</span>"
+"<span class=\"form-text small text-muted d-block\">select text to format it."
+"</span>"
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">use '/' to insert "
-"images.</span>"
+"<span class=\"form-text small text-muted d-block\">use '/' to insert images."
+"</span>"
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-"
-"lightbulb-o\"/> Tip:</span>"
+"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-lightbulb-"
+"o\"/> Tip:</span>"
 msgstr ""
 
 #. module: website_forum
@@ -755,8 +771,8 @@ msgstr ""
 #: model_terms:web_tour.tour,rainbow_man_message:website_forum.question
 msgid "<span><b>Good job!</b> You went through all steps of this tour.</span>"
 msgstr ""
-"<span><b>Bona feina!</b> Has completat tots els passos d'aquest "
-"recorregut.</span>"
+"<span><b>Bona feina!</b> Has completat tots els passos d'aquest recorregut.</"
+"span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -819,7 +835,7 @@ msgstr "Acceptant una resposta"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Access Denied"
 msgstr "Accés denegat"
 
@@ -862,7 +878,7 @@ msgid ""
 msgstr ""
 "Després de publicar, l'usuari rebrà una proposta per a que comparteixi una "
 "pregunta o una resposta a les xarxes socials, per propagar el contingut del "
-"forum a la xarxa social. "
+"forum a la xarxa social."
 
 #. module: website_forum
 #. odoo-python
@@ -1009,7 +1025,7 @@ msgstr "Arxivat"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Are you sure you want to delete this comment?"
 msgstr ""
 
@@ -1506,19 +1522,22 @@ msgid "Critic"
 msgstr "Crítica"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option_plugin.js:0
 msgid "Date"
 msgstr "Data"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
-msgid "Date (high to low)"
-msgstr "Data (major a menor)"
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option_plugin.js:0
+msgid "Date (new to old)"
+msgstr "Data (nova a antiga)"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
-msgid "Date (low to high)"
-msgstr "Data (menor a major)"
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option_plugin.js:0
+msgid "Date (old to new)"
+msgstr "Data (antiga a nova)"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__default_order
@@ -1537,7 +1556,7 @@ msgstr "Defineix la visibilitat del repte mitjançant els menús"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 #: model_terms:ir.ui.view,arch_db:website_forum.post_comment
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
@@ -1586,9 +1605,10 @@ msgid "Deleted own post with 3 or more upvotes"
 msgstr "S'ha eliminat la pròpia publicació amb 3 o més vots positius"
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option_plugin.js:0
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__description
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid "Description"
 msgstr "Descripció"
@@ -1637,6 +1657,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_reason__display_name
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__display_name
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__display_name
+#: model:ir.model.fields,field_description:website_forum.field_gamification_challenge__display_name
+#: model:ir.model.fields,field_description:website_forum.field_gamification_karma_tracking__display_name
+#: model:ir.model.fields,field_description:website_forum.field_ir_attachment__display_name
+#: model:ir.model.fields,field_description:website_forum.field_res_users__display_name
+#: model:ir.model.fields,field_description:website_forum.field_website__display_name
 msgid "Display Name"
 msgstr "Nom mostrat"
 
@@ -1707,7 +1732,7 @@ msgstr ""
 #: model:gamification.challenge,name:website_forum.challenge_editor
 #: model:gamification.goal.definition,name:website_forum.definition_editor
 msgid "Editor"
-msgstr "Editor "
+msgstr "Editor"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_editor
@@ -1792,7 +1817,7 @@ msgstr "Preguntes preferides"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_body
 msgid "Favourites"
-msgstr "Favorits "
+msgstr "Favorits"
 
 #. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_forum_post__last_activity_date
@@ -1898,6 +1923,7 @@ msgstr ""
 
 #. module: website_forum
 #. odoo-python
+#: code:addons/website_forum/controllers/website_forum.py:0
 #: code:addons/website_forum/models/website.py:0
 #: model:ir.actions.act_url,name:website_forum.action_open_forum
 #: model:ir.model,name:website_forum.model_forum_forum
@@ -1930,7 +1956,8 @@ msgid "Forum Name"
 msgstr "Nom del fórum"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option_plugin.js:0
 msgid "Forum Page"
 msgstr "Pàgina del fòrum"
 
@@ -1961,10 +1988,11 @@ msgid "Forum Tags"
 msgstr ""
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option.xml:0
 #: model:ir.actions.act_window,name:website_forum.forum_forum_action
 #: model:ir.ui.menu,name:website_forum.menu_forum_global
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_forum_view_tree
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
 msgid "Forums"
 msgstr "Fòrums"
 
@@ -2039,14 +2067,10 @@ msgid "Great Question"
 msgstr "Gran pregunta"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 msgid "Grid"
 msgstr "Graella"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_search
-msgid "Group By"
-msgstr "Agrupar per"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__faq
@@ -2104,6 +2128,11 @@ msgstr "Aquí hi ha una taula amb els privilegis i el nivell del karma"
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_reason__id
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__id
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__id
+#: model:ir.model.fields,field_description:website_forum.field_gamification_challenge__id
+#: model:ir.model.fields,field_description:website_forum.field_gamification_karma_tracking__id
+#: model:ir.model.fields,field_description:website_forum.field_ir_attachment__id
+#: model:ir.model.fields,field_description:website_forum.field_res_users__id
+#: model:ir.model.fields,field_description:website_forum.field_website__id
 msgid "ID"
 msgstr "ID"
 
@@ -2112,8 +2141,7 @@ msgstr "ID"
 #: model:ir.model.fields,help:website_forum.field_forum_post__message_needaction
 #: model:ir.model.fields,help:website_forum.field_forum_tag__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr ""
-"Si està marcat, hi ha nous missatges que requereixen la vostra atenció."
+msgstr "Si està marcat, hi ha nous missatges que requereixen la vostra atenció."
 
 #. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_forum_forum__message_has_error
@@ -2131,7 +2159,7 @@ msgid ""
 "If the author has not enough karma, a nofollow attribute is added to links"
 msgstr ""
 "Si l'autor no té karma suficient, un atribut de no seguiment s'afegeix als "
-"enllaços "
+"enllaços"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -2148,7 +2176,8 @@ msgid ""
 "            users having a high karma can see closed posts to moderate\n"
 "            them."
 msgstr ""
-"Si tanques aquesta publicació, aquesta no serà visibile per a la majoria d'usuaris. Només\n"
+"Si tanques aquesta publicació, aquesta no serà visibile per a la majoria "
+"d'usuaris. Només\n"
 "els usuaris amb el karma alt poden veure publicacions tancades\n"
 "per moderar-les."
 
@@ -2157,8 +2186,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "If you fit in one of these example or if your motivation for asking the "
-"question is “I would like to participate in a discussion about ______”, then"
-" you should not be asking here but on our mailing lists. However, if your "
+"question is “I would like to participate in a discussion about ______”, then "
+"you should not be asking here but on our mailing lists. However, if your "
 "motivation is “I would like others to explain ______ to me”, then you are "
 "probably OK."
 msgstr ""
@@ -2175,8 +2204,10 @@ msgid ""
 "            users having a high karma can see offensive posts to moderate\n"
 "            them."
 msgstr ""
-"Si marqueu aquesta publicació com a ofensiva, s'ocultarà per a la majoria dels usuaris. Només\n"
-"            els usuaris que tenen un karma alt poden veure publicacions ofensives per moderar\n"
+"Si marqueu aquesta publicació com a ofensiva, s'ocultarà per a la majoria "
+"dels usuaris. Només\n"
+"            els usuaris que tenen un karma alt poden veure publicacions "
+"ofensives per moderar\n"
 "            Ells."
 
 #. module: website_forum
@@ -2261,7 +2292,7 @@ msgstr "No està permès votar per la seva pròpia publicació."
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Karma Error"
 msgstr "Error del Karma"
 
@@ -2306,8 +2337,9 @@ msgid "Last Activity"
 msgstr "Última activitat"
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__last_post_id
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
 msgid "Last Post"
 msgstr "Última publicació"
 
@@ -2338,7 +2370,8 @@ msgid "Last activity on"
 msgstr ""
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 msgid "Layout"
 msgstr "Disseny"
 
@@ -2360,7 +2393,8 @@ msgid "LinkedIn"
 msgstr "LinkedIn"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 msgid "List"
 msgstr "Llista"
 
@@ -2538,6 +2572,11 @@ msgid "No posts yet"
 msgstr ""
 
 #. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "No results."
+msgstr ""
+
+#. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_dofollow
 msgid "Nofollow links"
 msgstr "No seguir enllaços"
@@ -2587,7 +2626,7 @@ msgstr "Nombre de publicacions marcades"
 #: model:ir.model.fields,help:website_forum.field_forum_post__message_needaction_counter
 #: model:ir.model.fields,help:website_forum.field_forum_tag__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr "Nombre de missatges que requereixen una acció"
+msgstr "Nombre de missatges que requereixen acció"
 
 #. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_forum_forum__message_has_error_counter
@@ -2617,7 +2656,7 @@ msgstr "Ofensiu"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Offensive Post"
 msgstr "Publicació ofensiva"
 
@@ -2628,20 +2667,14 @@ msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
-msgid "Oh no! Please <a href=\"%s\">sign in</a> to perform this action"
-msgstr ""
-
-#. module: website_forum
-#. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid "On average,"
-msgstr "Com a mitjana, "
+msgstr "Com a mitjana,"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
 msgid "Oops!"
-msgstr ""
+msgstr "Vaja!"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_forum_view_form
@@ -2666,11 +2699,16 @@ msgid "Plain Content"
 msgstr "Contingut net"
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
+msgid "Please enter 2 or more characters"
+msgstr ""
+
+#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"Please wait for a moderator to validate your previous post before "
-"continuing."
+"Please wait for a moderator to validate your previous post before continuing."
 msgstr ""
 "Espereu que un moderador validi la vostra publicació anterior abans de "
 "continuar."
@@ -2728,7 +2766,8 @@ msgid "Post Closing Reason"
 msgstr "Motiu del tancament de la publicació"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 msgid "Post Count"
 msgstr "Comptador de publicacions"
 
@@ -2799,11 +2838,13 @@ msgstr "Públic"
 msgid ""
 "Public: Forum is public\n"
 "Signed In: Forum is visible for signed in users\n"
-"Some users: Forum and their content are hidden for non members of selected group"
+"Some users: Forum and their content are hidden for non members of selected "
+"group"
 msgstr ""
 "Públic: El fòrum és públic\n"
 "Sessió iniciada: El fòrum és visible pels usuaris autenticats\n"
-"Alguns usuaris: El fòrum i el seu contingut són ocults pels usuaris no membres d'un grup seleccionat"
+"Alguns usuaris: El fòrum i el seu contingut són ocults pels usuaris no "
+"membres d'un grup seleccionat"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_25
@@ -2945,8 +2986,8 @@ msgstr "Re: %s"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "Read: #{question.name}"
-msgstr "Lectura: #{question.name}"
+msgid "Read: {{0}}"
+msgstr ""
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__closed_reason_id
@@ -3040,7 +3081,7 @@ msgstr "Respon a la pròpia pregunta"
 #: model:ir.model.fields,help:website_forum.field_forum_forum__website_id
 #: model:ir.model.fields,help:website_forum.field_forum_post__website_id
 msgid "Restrict to a specific website."
-msgstr ""
+msgstr "Restringir a un lloc web específic."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.profile_access_denied
@@ -3077,6 +3118,21 @@ msgstr "Desar els canvis"
 #: model:gamification.goal.definition,name:website_forum.definition_scholar
 msgid "Scholar"
 msgstr "Erudit"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "Search"
+msgstr "Entrada a cercar"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "Search Answers..."
+msgstr ""
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "Search Questions..."
+msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_search
@@ -3146,8 +3202,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid ""
-"Share this content to increase your chances to be featured on the front page"
-" and attract more visitors."
+"Share this content to increase your chances to be featured on the front page "
+"and attract more visitors."
 msgstr ""
 "Compartiu aquest contingut per augmentar les vostres possibilitats de ser "
 "presentat a la portada i atreure més visitants."
@@ -3170,7 +3226,6 @@ msgstr "S'estan mostrant els resultats de"
 #. module: website_forum
 #. odoo-python
 #: code:addons/website_forum/models/forum_forum.py:0
-#: model_terms:forum.forum,welcome_message:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_sign_up_cta
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_header
 msgid "Sign up"
@@ -3219,13 +3274,13 @@ msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Sorry, you cannot select your own posts as best answer"
 msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Sorry, you cannot vote for your own posts"
 msgstr "No podeu votar les vostres pròpies publicacions"
 
@@ -3285,6 +3340,8 @@ msgid "Tag name already exists!"
 msgstr "¡El nom de l'etiqueta ja existeix!"
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__tag_ids
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__tag_ids
 #: model:ir.ui.menu,name:website_forum.menu_forum_tag_global
@@ -3316,11 +3373,6 @@ msgstr "Taxonomista"
 #: model:gamification.goal.definition,name:website_forum.definition_teacher
 msgid "Teacher"
 msgstr "Mestra"
-
-#. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_forum_forum__teaser
-msgid "Teaser"
-msgstr "Teaser"
 
 #. module: website_forum
 #. odoo-javascript
@@ -3375,9 +3427,9 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 #: model_terms:ir.ui.view,arch_db:website_forum.faq_karma
 msgid ""
-"Therefore questions and answers can be edited like wiki pages by experienced"
-" users of this site in order to improve the overall quality of the knowledge"
-" base content. Such privileges are granted based on user karma level: you "
+"Therefore questions and answers can be edited like wiki pages by experienced "
+"users of this site in order to improve the overall quality of the knowledge "
+"base content. Such privileges are granted based on user karma level: you "
 "will be able to do the same once your karma gets high enough."
 msgstr ""
 "Per tant, les preguntes i respostes es poden editar com a pàgines wiki per "
@@ -3415,8 +3467,8 @@ msgid ""
 "represents number of votes for a post, and 'days' is number of days since "
 "the post creation"
 msgstr ""
-"Aquesta fórmula s'utilitza per ordenar per rellevància. La variable \"vots\""
-" representa el nombre de vots per a una publicació, i \"dies\" és el nombre "
+"Aquesta fórmula s'utilitza per ordenar per rellevància. La variable \"vots\" "
+"representa el nombre de vots per a una publicació, i \"dies\" és el nombre "
 "de dies des de la creació de la publicació"
 
 #. module: website_forum
@@ -3426,13 +3478,13 @@ msgstr "S'ha arxivat aquest fòrum."
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "This post can not be flagged"
 msgstr "Aquesta publicació no es pot marcar"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "This post is already flagged"
 msgstr "Aquesta publicació ja està marcada"
 
@@ -3445,7 +3497,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "This post is currently awaiting moderation and is not published yet.<br/>\n"
-"                    As a moderator you can either <b>Accept</b> or <b>Reject</b> this post."
+"                    As a moderator you can either <b>Accept</b> or "
+"<b>Reject</b> this post."
 msgstr ""
 
 #. module: website_forum
@@ -3455,12 +3508,12 @@ msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "This user hasn't answered any questions yet. <br/>"
+msgid "This user hasn't answered any questions yet."
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "This user hasn't posted any questions yet.<br/>"
+msgid "This user hasn't posted any questions yet."
 msgstr ""
 
 #. module: website_forum
@@ -3506,7 +3559,7 @@ msgid ""
 "asking subjective questions where …"
 msgstr ""
 "Per evitar que la vostra pregunta sigui senyalada i possiblement eliminada, "
-"eviteu fer preguntes subjectives on..."
+"eviteu fer preguntes subjectives on…"
 
 #. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_9
@@ -3793,9 +3846,9 @@ msgid ""
 msgstr ""
 "Quan una pregunta o resposta és votada, l'usuari que els va publicar "
 "guanyarà alguns punts, que s'anomenen \"punts de karma\". Aquests punts "
-"serveixen com a mesura aproximada de la confiança de la comunitat per a "
-"ell/ella. Diverses tasques de moderació s'assignen gradualment als usuaris "
-"en funció d'aquests punts."
+"serveixen com a mesura aproximada de la confiança de la comunitat per a ell/"
+"ella. Diverses tasques de moderació s'assignen gradualment als usuaris en "
+"funció d'aquests punts."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
@@ -3846,12 +3899,12 @@ msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "You have not answered any questions yet. <br/>"
+msgid "You have not answered any questions yet."
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "You have not posted any questions yet. <br/>"
+msgid "You have not posted any questions yet."
 msgstr ""
 
 #. module: website_forum
@@ -3873,9 +3926,9 @@ msgstr "Cal tenir el karma suficient per a modificar les etiquetes"
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"You should only ask practical, answerable questions based on actual problems"
-" that you face. Chatty, open-ended questions diminish the usefulness of this"
-" site and push other questions off the front page."
+"You should only ask practical, answerable questions based on actual problems "
+"that you face. Chatty, open-ended questions diminish the usefulness of this "
+"site and push other questions off the front page."
 msgstr ""
 "Només ha de fer preguntes pràctiques i de resposta basades en els problemes "
 "reals als quals s'enfronta. Les preguntes xatejades i obertes disminueixen "
@@ -4005,8 +4058,8 @@ msgid ""
 "has been posted and require your validation. Click here to access the "
 "question :"
 msgstr ""
-"s'ha publicat i requereix la vostra validació. Feu clic aquí per a accedir a"
-" la pregunta:"
+"s'ha publicat i requereix la vostra validació. Feu clic aquí per a accedir a "
+"la pregunta:"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_template_new_answer
@@ -4080,12 +4133,6 @@ msgstr "en comptes d'això."
 msgid "it is a rant disguised as a question: “______ sucks, am I right?”"
 msgstr ""
 "és una crítica disfressada com una pregunta: “______ maleït , tinc raó?”"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
-msgid "karma is required to perform this action. "
-msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
@@ -4229,3 +4276,510 @@ msgstr "la vostra biografia es pot veure com un consell d'eina"
 #: model_terms:ir.ui.view,arch_db:website_forum.follow
 msgid "your email..."
 msgstr "correu electrònic"
+
+#~ msgid "%d karma required to unlink a comment."
+#~ msgstr "Cal %d karma per desenllaçar un comentari."
+
+#~ msgid "&amp;nbsp;and&amp;nbsp;"
+#~ msgstr "&amp;nbsp;i&amp;nbsp;"
+
+#~ msgid ", by"
+#~ msgstr ", per"
+
+#~ msgid ", consider <b>adding an example</b>."
+#~ msgstr ", considereu <b>afegir un exemple</b>."
+
+#~ msgid "0 Answers"
+#~ msgstr "0 respostes"
+
+#~ msgid "<b> [Offensive]</b>"
+#~ msgstr "<b> [Ofensiva]</b>"
+
+#~ msgid "<b>Tags</b> I Follow"
+#~ msgstr "<b>Etiquetes</b> I Follow"
+
+#~ msgid ""
+#~ "<b>This forum is empty.</b><br/>\n"
+#~ "                    Be the first one asking a question"
+#~ msgstr ""
+#~ "<b>Aquest fòrum està buit.</b><br/>\n"
+#~ "                    Sigueu el primer que faci una pregunta"
+
+#~ msgid "<b>What kinds of questions can I ask here?</b>"
+#~ msgstr "<b>Quin tipus de preguntes puc fer aquí?</b>"
+
+#~ msgid "<b>What should I avoid in my answers?</b>"
+#~ msgstr "<b>Que hauria d'evitar en les meves respostes?</b>"
+
+#~ msgid "<b>What should I avoid in my questions?</b>"
+#~ msgstr "<b>que deberia evitar en mis preguntas?</b>"
+
+#~ msgid "<b>[Answer]</b>"
+#~ msgstr "<b>[Resposta]</b>"
+
+#~ msgid ""
+#~ "<b>|</b>\n"
+#~ "                    <span class=\"fa fa-trophy bg-gold ms-2\" "
+#~ "role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
+#~ msgstr ""
+#~ "<b> </b>\n"
+#~ "                    <span class=\"fa fa-trophy bg-gold ms-2\" "
+#~ "role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
+
+#~ msgid "<em class=\"d-block mb-2\">or</em>"
+#~ msgstr "<em class=\"d-block mb-2\">o</em>"
+
+#~ msgid "<i class=\" fa fa-comment text-muted me-1\"/>Comment"
+#~ msgstr "<i class=\" fa fa-comment text-muted me-1\"/>Comentari"
+
+#~ msgid "<i class=\"fa fa-bell fa-fw\"/> Followed Posts"
+#~ msgstr "<i class=\"fa fa-bell fa-fw\"/> Publicacions seguides"
+
+#~ msgid "<i class=\"fa fa-bug\"/> Filter Tool"
+#~ msgstr "Eina de filtres <i class=\"fa fa-bug\"/>"
+
+#~ msgid ""
+#~ "<i class=\"fa fa-check text-success d-block display-2\"/>\n"
+#~ "            <b>You've Completely Caught Up!</b><br/>"
+#~ msgstr ""
+#~ "<i class=\"fa fa-check text-success d-block display-2\"/>\n"
+#~ "            <b>Heu acabat d'agafar!</b><br/>"
+
+#~ msgid "<i class=\"fa fa-check-square-o fa-fw\"/> To Validate"
+#~ msgstr "<i class=\"fa fa-check-square-o fa-fw\"/> Per validar"
+
+#~ msgid "<i class=\"fa fa-flag fa-fw\"/> Flagged"
+#~ msgstr "<i class=\"fa fa-flag fa-fw\"/> marcat"
+
+#~ msgid ""
+#~ "<i class=\"fa fa-flag ms-4 mr4\"/>\n"
+#~ "                                    Flagged"
+#~ msgstr ""
+#~ "<i class=\"fa fa-flag ms-4 mr4\"/>\n"
+#~ "                                    Marcat"
+
+#~ msgid "<i class=\"fa fa-question-circle-o fa-fw\"/> My Posts"
+#~ msgstr "<i class=\"fa fa-question-circle-o fa-fw\"/> Les meves publicacions"
+
+#~ msgid "<i class=\"fa fa-reply me-1\"/>Answer"
+#~ msgstr "<i class=\"fa fa-reply me-1\"/>Resposta"
+
+#~ msgid "<i class=\"fa fa-share-alt text-muted me-1\"/>Share"
+#~ msgstr "<i class=\"fa fa-share-alt text-muted me-1\"/>Share"
+
+#~ msgid ""
+#~ "<i class=\"fa fa-share-alt text-muted\"/>\n"
+#~ "                                Share"
+#~ msgstr ""
+#~ "<i class=\"fa fa-share-alt text-muted\"/>\n"
+#~ "                                Comparteix"
+
+#~ msgid "<i class=\"fa fa-star fa-fw\"/> Favourites"
+#~ msgstr "<i class=\"fa fa-star fa-fw\"/> Favourits"
+
+#~ msgid "<i class=\"fa fa-tags fa-fw\"/> Followed Tags"
+#~ msgstr "<i class=\"fa fa-tags fa-fw\"/> Etiquetes seguides"
+
+#~ msgid ""
+#~ "<small class=\"text-muted\">\n"
+#~ "                    Flagged\n"
+#~ "                </small>"
+#~ msgstr ""
+#~ "<small class=\"text-muted\">\n"
+#~ "                    Marcada\n"
+#~ "                </small>"
+
+#~ msgid "<span class=\"badge text-bg-info\">Closed</span>"
+#~ msgstr "<span class=\"badge text-bg-info\">Tancat</span>"
+
+#~ msgid ""
+#~ "<span class=\"fa fa-trophy bg-bronze ms-2\" role=\"img\" aria-"
+#~ "label=\"Bronze badge\" title=\"Bronze badge\"/>"
+#~ msgstr ""
+#~ "<span class=\"fa fa-trophy bg-bronze ms-2\" role=\"img\" aria-"
+#~ "label=\"Bronze badge\" title=\"Bronze badge\"/>"
+
+#~ msgid ""
+#~ "<span class=\"fa fa-trophy bg-silver ms-2\" role=\"img\" aria-"
+#~ "label=\"Silver badge\" title=\"Silver badge\"/>"
+#~ msgstr ""
+#~ "<span class=\"fa fa-trophy bg-silver ms-2\" role=\"img\" aria-"
+#~ "label=\"Silver badge\" title=\"Silver badge\"/>"
+
+#~ msgid "<span class=\"fw-bold\">No answer posted yet.</span>"
+#~ msgstr "<span class=\"fw-bold\">Encara no s'ha enviat cap resposta.</span>"
+
+#~ msgid "<span class=\"fw-bold\">No question posted yet.</span>"
+#~ msgstr "<span class=\"fw-bold\">Cap pregunta publicada encara.</span>"
+
+#~ msgid "<span class=\"mx-1 d-none d-sm-inline\">&amp;nbsp;|</span>"
+#~ msgstr "<span class=\"mx-1 d-none d-sm-inline\">amp;nbsp;;</span>"
+
+#~ msgid "<span class=\"mx-1 text-400 d-none d-lg-block\">|</span>"
+#~ msgstr "<span class=\"mx-1 text-400 d-none d-lg-block\">|</span>"
+
+#~ msgid "<span class=\"mx-1\">|</span>"
+#~ msgstr "<span class=\"mx-1\"> </span>"
+
+#~ msgid ""
+#~ "<span class=\"mx-1\">|</span>\n"
+#~ "                    <i class=\"fa fa-star\"/>"
+#~ msgstr ""
+#~ "<span class=\"mx-1\"> </span>\n"
+#~ "                    <i class=\"fa fa-star\"/>"
+
+#~ msgid "<span class=\"mx-3  mx-lg-2 text-400 d-none d-md-inline\">|</span>"
+#~ msgstr "<span class=\"mx-3  mx-lg-2 text-400 d-none d-md-inline\">|</span>"
+
+#~ msgid "<span class=\"navbar-text me-1\">Go to:</span>"
+#~ msgstr "<span class=\"navbar-text me-1\">Ves a:</span>"
+
+#~ msgid "<span class=\"navbar-text me-3\">Show Tags Starting By</span>"
+#~ msgstr ""
+#~ "<span class=\"navbar-text me-3\">Mostra les etiquetes començant per</span>"
+
+#~ msgid ""
+#~ "<span class=\"o_wforum_answer_correct_badge border small border-success "
+#~ "rounded-pill fw-bold text-success ms-2 px-2\">\n"
+#~ "                            Best Answer\n"
+#~ "                        </span>"
+#~ msgstr ""
+#~ "<span class=\"o_wforum_answer_correct_badge border small border-success "
+#~ "rounded-pill fw-bold text-success ms-2 px-2\">\n"
+#~ "                            Millor resposta\n"
+#~ "                        </span>"
+
+#~ msgid "<span>By </span>"
+#~ msgstr "<span>Per </span>"
+
+#~ msgid "A clear, explicit and concise title"
+#~ msgstr "Un títol clar, explícit i concís"
+
+#~ msgid "About"
+#~ msgstr "Quant a"
+
+#~ msgid "All Forums"
+#~ msgstr "Tots els fòrums"
+
+#~ msgid "All Tags"
+#~ msgstr "Totes les etiquetes"
+
+#~ msgid "Allow Bump"
+#~ msgstr "Permetre destacar"
+
+#~ msgid "Amazing! There are no unanswered questions left!"
+#~ msgstr "Increïble! No queden preguntes sense resposta!"
+
+#~ msgid "Answer"
+#~ msgstr "Resposta"
+
+#~ msgid "Back"
+#~ msgstr "Enrere"
+
+#~ msgid "Be less specific in your wording for a wider search result"
+#~ msgstr ""
+#~ "Sigueu menys específic en la vostra redacció per a obtenir un resultat de "
+#~ "cerca més ampli"
+
+#~ msgid "Browse All"
+#~ msgstr "Mostrar tot"
+
+#~ msgid "Bumped on"
+#~ msgstr "Destacar"
+
+#~ msgid ""
+#~ "Check this box to display a popup for posts older than 10 days without "
+#~ "any given answer. The popup will offer to share it on social networks. "
+#~ "When shared, a question is bumped at the top of the forum."
+#~ msgstr ""
+#~ "Comprova aquesta caixa per veure un pop-up que mostri les publicacions "
+#~ "que portin 10 dies sense resposta. El pop-up oferirà compartir-ho en "
+#~ "xarxes socials. Quan es comparteixi, la pregunta es trobarà a la part "
+#~ "superior del fòrum. "
+
+#~ msgid "Check your spelling and try again"
+#~ msgstr "Comproveu l'ortografia i torneu-ho a provar"
+
+#~ msgid "Click to answer."
+#~ msgstr "Faci clic per a respondre."
+
+#~ msgid "Close Post"
+#~ msgstr "Tancar publicació"
+
+#~ msgid "Comment this post..."
+#~ msgstr "Comentar aquesta publicació "
+
+#~ msgid "Comments"
+#~ msgstr "Comentaris"
+
+#~ msgid "Convert all answers to comments and vice versa"
+#~ msgstr "Convertir totes les respostes a comentaris i viceversa"
+
+#~ msgid "Convert as a answer"
+#~ msgstr "Convertir a resposta"
+
+#~ msgid "Convert as a comment"
+#~ msgstr "Convertir com a comentari"
+
+#~ msgid "Convert own answers to comments and vice versa"
+#~ msgstr "Convertir comentaris en respostes i viceversa"
+
+#~ msgid "Date (high to low)"
+#~ msgstr "Data (major a menor)"
+
+#~ msgid "Date (low to high)"
+#~ msgstr "Data (menor a major)"
+
+#~ msgid "Edit Forum in Backend"
+#~ msgstr "Modificar fòrum al backend"
+
+#~ msgid ""
+#~ "Example\n"
+#~ "                        <i class=\"fa fa-question-circle\"/>"
+#~ msgstr ""
+#~ "Exemple\n"
+#~ "                        <i class=\"fa fa-question-circle\"/>"
+
+#~ msgid "Following"
+#~ msgstr "Seguint"
+
+#~ msgid "Group By"
+#~ msgstr "Agrupar per"
+
+#~ msgid "Hide Intro"
+#~ msgstr "Amagar introducció"
+
+#~ msgid "I'm <b>Following</b>"
+#~ msgstr "Sóc <b>Seguint</b>"
+
+#~ msgid "I'm Following"
+#~ msgstr "Estic seguint"
+
+#~ msgid "Karma"
+#~ msgstr "Karma"
+
+#~ msgid "Last Post:"
+#~ msgstr "Últim missatge:"
+
+#~ msgid "Last activity date"
+#~ msgstr "Data última activitat"
+
+#~ msgid "Menu"
+#~ msgstr "Menú"
+
+#~ msgid "Moderation"
+#~ msgstr "Moderació"
+
+#~ msgid "More"
+#~ msgstr "Més"
+
+#~ msgid "Most answered"
+#~ msgstr "Més contestat"
+
+#~ msgid "Most voted"
+#~ msgstr "El més votat"
+
+#~ msgid ""
+#~ "Move this question to the top of the list by sharing it on social "
+#~ "networks."
+#~ msgstr ""
+#~ "Mou aquesta pregunta al capdamunt de la llista compartint-la a les xarxes "
+#~ "socials."
+
+#~ msgid "My <b>Favourites</b>"
+#~ msgstr "Els meus <b>preferits</b>"
+
+#~ msgid "My <b>Posts</b>"
+#~ msgstr "Les meves <b>publicacions</b>"
+
+#~ msgid "My Favourites"
+#~ msgstr "Favorits"
+
+#~ msgid "No activities yet!"
+#~ msgstr "Encara no hi ha activitats"
+
+#~ msgid "No favourite questions in this forum (yet).<br/>"
+#~ msgstr "No hi ha preguntes preferides en aquest fòrum (encara).<br/>"
+
+#~ msgid "No flagged posts"
+#~ msgstr "No hi ha publicacions marcades"
+
+#~ msgid "No post to be validated"
+#~ msgstr "No hi ha cap publicació per validar"
+
+#~ msgid "No tags"
+#~ msgstr "Sense etiquetes"
+
+#~ msgid "No vote given by you yet!"
+#~ msgstr "Encara no ha votat vostè!"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Nombre de missatges que requereixen una acció"
+
+#~ msgid "Only one answer per question is allowed"
+#~ msgstr "Només es permet una resposta per pregunta"
+
+#~ msgid "Order by"
+#~ msgstr "Ordena per"
+
+#~ msgid "Our forums"
+#~ msgstr "Els nostres fòrums"
+
+#~ msgid "People"
+#~ msgstr "Gent"
+
+#~ msgid "Post Comment"
+#~ msgstr "Publicar un comentari"
+
+#~ msgid "Posts:"
+#~ msgstr "Publicacions:"
+
+#~ msgid "Question by"
+#~ msgstr "Pregunta per"
+
+#~ msgid "Read the guidelines to know how to gain karma."
+#~ msgstr "Llegiu les directrius per saber com guanyar el karma."
+
+#~ msgid "Read: #{question.name}"
+#~ msgstr "Lectura: #{question.name}"
+
+#~ msgid "Register"
+#~ msgstr "Registre"
+
+#~ msgid "Restrict publishing to this website."
+#~ msgstr "Restringir les publicacions en aquest portal web."
+
+#~ msgid "Return to the forum."
+#~ msgstr "Torna al fòrum."
+
+#~ msgid "Return to the question list."
+#~ msgstr "Tornar a la llista de preguntes."
+
+#~ msgid "Search Tips"
+#~ msgstr "Consells de cerca"
+
+#~ msgid "See"
+#~ msgstr "Veure"
+
+#~ msgid "Show"
+#~ msgstr "Mostrar"
+
+#~ msgid "Show Tags Starting By"
+#~ msgstr "Mostra les etiquetes que comencen per"
+
+#~ msgid "Sign in"
+#~ msgstr "Registra entrada"
+
+#~ msgid "Sorry you must be logged in to perform this action"
+#~ msgstr "És necessari estar connectat per poder realitzar aquesta acció"
+
+#~ msgid "Sorry you must be logged to flag a post"
+#~ msgstr "És necessari estar connectat al portal per marcar una publicació"
+
+#~ msgid "Sorry you must be logged to vote"
+#~ msgstr "És necessari estar connectat per votar"
+
+#~ msgid "Sorry, anonymous users cannot choose correct answer."
+#~ msgstr "Els usuaris anònims no poden triar la resposta correcta."
+
+#~ msgid "Sorry, we could not find any <b>%s</b> result <b>%s</b> %s%s%s."
+#~ msgstr "No s'ha pogut trobar cap <b>%s</b> resultat <b>%s</b> %s%s%s."
+
+#~ msgid "Tags I Follow"
+#~ msgstr "Etiquetes que seguiu"
+
+#~ msgid "Teaser"
+#~ msgstr "Teaser"
+
+#~ msgid ""
+#~ "Technical field allowing to bump a question. Writing on this field will "
+#~ "trigger a write on write_date and therefore bump the post. Directly "
+#~ "writing on write_date is currently not supported and this field is a "
+#~ "workaround."
+#~ msgstr ""
+#~ "Camp tècnic que permet respondre una pregunta. Escriure en aquest camp "
+#~ "desencadenarà una escriptura en data d'escriptura i, per tant, saltarà la "
+#~ "publicació. Actualment no s'admet escriure directament en data "
+#~ "d'escriptura i aquest camp és una solució temporal."
+
+#~ msgid ""
+#~ "This community is for professional and enthusiast users, partners and "
+#~ "programmers."
+#~ msgstr ""
+#~ "Aquesta comunitat és per a usuaris professionals i entusiastes, contactes "
+#~ "i programadors."
+
+#~ msgid "Toggle favorite status"
+#~ msgstr "Commuta l'estat preferit"
+
+#~ msgid "Topics"
+#~ msgstr "Temes"
+
+#~ msgid "Trending"
+#~ msgstr "Tendent"
+
+#~ msgid "Try searching for one or two words"
+#~ msgstr "Intenta cercar una o dues paraules"
+
+#~ msgid "Unlink all comments"
+#~ msgstr "Desvincula tots els comentaris"
+
+#~ msgid "Unlink own comments"
+#~ msgstr "Desvincula els comentaris propis"
+
+#~ msgid "Waiting for validation"
+#~ msgstr "En espera de ser validat"
+
+#~ msgid "Waiting post"
+#~ msgstr "S'està esperant la publicació"
+
+#~ msgid "You have no posts in this forum (yet)."
+#~ msgstr "No teniu publicacions en aquest fòrum (encara)."
+
+#~ msgid "You're not following any topic in this forum (yet).<br/>"
+#~ msgstr "No esteu seguint cap tema d'aquest fòrum (encara).<br/>"
+
+#~ msgid "[Closed]"
+#~ msgstr "[Tancat]"
+
+#~ msgid "[Deleted]"
+#~ msgstr "[Esborrat]"
+
+#~ msgid "[Offensive]"
+#~ msgstr "[Ofensiu]"
+
+#~ msgid "activity date"
+#~ msgstr "data activitat"
+
+#~ msgid "in your followed list"
+#~ msgstr "a la vostra llista de seguiment"
+
+#~ msgid "most answered"
+#~ msgstr "més respostes"
+
+#~ msgid "most voted"
+#~ msgstr "més votats"
+
+#~ msgid "newest"
+#~ msgstr "més recent"
+
+#~ msgid "solved"
+#~ msgstr "resolt"
+
+#~ msgid "to partecipate"
+#~ msgstr "partecipació"
+
+#~ msgid "trending"
+#~ msgstr "tendència"
+
+#~ msgid "unanswered"
+#~ msgstr "sense resposta"
+
+#~ msgid "unsolved"
+#~ msgstr "no solucionat"
+
+#~ msgid "| Flagged"
+#~ msgstr "ged Marcat"
+
+#~ msgid "圾 Text"
+#~ msgstr "圾 Text"

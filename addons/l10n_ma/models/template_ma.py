@@ -12,8 +12,6 @@ class AccountChartTemplate(models.AbstractModel):
             'code_digits': '6',
             'property_account_receivable_id': 'pcg_34211',
             'property_account_payable_id': 'pcg_44111',
-            'property_account_income_categ_id': 'pcg_7111',
-            'property_account_expense_categ_id': 'pcg_6111',
             'display_invoice_amount_total_words': True,
         }
 
@@ -35,6 +33,31 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_journal_early_pay_discount_loss_account_id': 'pcg_63862',
                 'account_sale_tax_id': 'vat_out_20_80',
                 'account_purchase_tax_id': 'vat_in_20_146',
+                'income_account_id': 'pcg_7111',
+                'expense_account_id': 'pcg_6111',
                 'tax_exigibility': 'True',
+                'account_stock_journal_id': 'inventory_valuation',
+                'account_stock_valuation_id': 'pcg_31211',
             },
         }
+
+    @template('ma', 'account.account')
+    def _get_ma_account_account(self):
+        return {
+            'pcg_31211': {
+                'account_stock_expense_id': 'pcg_61211',
+                'account_stock_variation_id': 'pcg_61241',
+            },
+        }
+
+    def _post_load_data(self, template_code, company, template_data):
+        super()._post_load_data(template_code, company, template_data)
+        if template_code == 'ma':
+            # The COA (Chart of Accounts) data is loaded after the initial compute methods are called.
+            # During initial journal setup, the payment methods and accounts may not exist yet,
+            # causing the payment method lines to not be properly configured.
+            # We call these helper methods again in _post_load_data to ensure all payment method lines
+            # are correctly assigned once all COA data is fully available.
+            bank_journals = company.bank_journal_ids
+            bank_journals._assign_outsanding_account_to_payment_method_lines('inbound', chart_template='ma')
+            bank_journals._assign_outsanding_account_to_payment_method_lines('outbound', chart_template='ma')

@@ -1,10 +1,22 @@
 import { Plugin } from "@html_editor/plugin";
-import { closestBlock } from "@html_editor/utils/blocks";
+import { closestBlock, isBlock } from "@html_editor/utils/blocks";
 import { splitTextNode } from "@html_editor/utils/dom";
-import { isEditorTab, isTextNode, isZWS } from "@html_editor/utils/dom_info";
-import { descendants, getAdjacentPreviousSiblings } from "@html_editor/utils/dom_traversal";
+import {
+    isEditorTab,
+    isParagraphRelatedElement,
+    isTextNode,
+    isZWS,
+} from "@html_editor/utils/dom_info";
+import {
+    descendants,
+    getAdjacentPreviousSiblings,
+    closestElement,
+    firstLeaf,
+    selectElements,
+} from "@html_editor/utils/dom_traversal";
 import { parseHTML } from "@html_editor/utils/html";
 import { DIRECTIONS, childNodeIndex } from "@html_editor/utils/position";
+import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
 
 const tabHtml = '<span class="oe-tabs" contenteditable="false">\u0009</span>\u200B';
 const GRID_COLUMN_WIDTH = 40; //@todo Configurable?
@@ -28,26 +40,37 @@ function isIndentationTab(tab) {
  * @property { TabulationPlugin['outdentBlocks'] } outdentBlocks
  */
 
+/**
+ * @typedef {(() => void | true)[]} shift_tab_overrides
+ * @typedef {(() => void | true)[]} tab_overrides
+ */
+
 export class TabulationPlugin extends Plugin {
     static id = "tabulation";
     static dependencies = ["dom", "selection", "history", "delete"];
     static shared = ["indentBlocks", "outdentBlocks"];
+    /** @type {import("plugins").EditorResources} */
     resources = {
         user_commands: [
-            { id: "tab", run: this.handleTab.bind(this) },
-            { id: "shiftTab", run: this.handleShiftTab.bind(this) },
+            {
+                id: "tab",
+                run: this.handleTab.bind(this),
+                isAvailable: isHtmlContentSupported,
+            },
+            {
+                id: "shiftTab",
+                run: this.handleShiftTab.bind(this),
+                isAvailable: isHtmlContentSupported,
+            },
         ],
         shortcuts: [
             { hotkey: "tab", commandId: "tab" },
             { hotkey: "shift+tab", commandId: "shiftTab" },
         ],
+        content_not_editable_providers: (rootEl) => [...selectElements(rootEl, ".oe-tabs")],
+        contenteditable_to_remove_selector: "span.oe-tabs",
 
         /** Handlers */
-        clean_for_save_handlers: ({ root }) => {
-            for (const tab of root.querySelectorAll("span.oe-tabs")) {
-                tab.removeAttribute("contenteditable");
-            }
-        },
         normalize_handlers: this.normalize.bind(this),
 
         /** Overrides */
@@ -65,8 +88,8 @@ export class TabulationPlugin extends Plugin {
         if (selection.isCollapsed) {
             this.insertTab();
         } else {
-            const traversedBlocks = this.dependencies.selection.getTraversedBlocks();
-            this.indentBlocks(traversedBlocks);
+            const targetedBlocks = this.dependencies.selection.getTargetedBlocks();
+            this.indentBlocks(targetedBlocks);
         }
         this.dependencies.history.addStep();
     }
@@ -75,13 +98,23 @@ export class TabulationPlugin extends Plugin {
         if (this.delegateTo("shift_tab_overrides")) {
             return;
         }
-        const traversedBlocks = this.dependencies.selection.getTraversedBlocks();
-        this.outdentBlocks(traversedBlocks);
+        const targetedBlocks = this.dependencies.selection.getTargetedBlocks();
+        this.outdentBlocks(targetedBlocks);
         this.dependencies.history.addStep();
     }
 
     insertTab() {
-        this.dependencies.dom.insert(parseHTML(this.document, tabHtml));
+        const selection = this.dependencies.selection.getEditableSelection();
+        const element = closestElement(selection.anchorNode);
+        const isSelectionAtStart =
+            firstLeaf(element) === selection.anchorNode &&
+            (selection.anchorOffset === 0 || element.textContent === "\u200B");
+        const tab = parseHTML(this.document, tabHtml);
+        if (isSelectionAtStart && !isBlock(element)) {
+            element.before(tab);
+        } else {
+            this.dependencies.dom.insert(tab);
+        }
     }
 
     /**
@@ -90,7 +123,12 @@ export class TabulationPlugin extends Plugin {
     indentBlocks(blocks) {
         const selectionToRestore = this.dependencies.selection.getEditableSelection();
         const tab = parseHTML(this.document, tabHtml);
-        for (const block of blocks) {
+        const indentableBlocks = [...blocks].filter(
+            (block) =>
+                block.isContentEditable &&
+                (isParagraphRelatedElement(block) || block.tagName === "BLOCKQUOTE")
+        );
+        for (const block of indentableBlocks) {
             block.prepend(tab.cloneNode(true));
         }
         this.dependencies.selection.setSelection(selectionToRestore, { normalize: false });
@@ -214,9 +252,6 @@ export class TabulationPlugin extends Plugin {
         }
     }
     normalize(el) {
-        for (const tab of el.querySelectorAll(".oe-tabs")) {
-            tab.setAttribute("contenteditable", "false");
-        }
         this.alignTabs(el);
     }
 }

@@ -1,25 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* payment_xendit
-# 
-# Translators:
-# Tiffany Chang, 2024
-# Wil Odoo, 2024
-# Rasareeyar Lappiam, 2024
-# 
+# * payment_xendit
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Rasareeyar Lappiam, 2024\n"
-"Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
+"POT-Creation-Date: 2026-05-01 17:37+0000\n"
+"PO-Revision-Date: 2026-08-07 23:49+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Thai <https://translate.odoo.com/projects/odoo-19/"
+"payment_xendit/th/>\n"
+"Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: th\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: payment_xendit
 #. odoo-python
@@ -27,8 +26,7 @@ msgstr ""
 msgid ""
 "An error occurred during the processing of your payment (%s). Please try "
 "again."
-msgstr ""
-"เกิดข้อผิดพลาดระหว่างการประมวลผลการชำระเงินของคุณ (%s) กรุณาลองอีกครั้ง"
+msgstr "เกิดข้อผิดพลาดระหว่างการประมวลผลการชำระเงินของคุณ (%s) กรุณาลองอีกครั้ง"
 
 #. module: payment_xendit
 #: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
@@ -56,10 +54,10 @@ msgid "Code"
 msgstr "โค้ด"
 
 #. module: payment_xendit
-#. odoo-python
-#: code:addons/payment_xendit/models/payment_provider.py:0
-msgid "Could not establish the connection to the API."
-msgstr "ไม่สามารถสร้างการเชื่อมต่อกับ API ได้"
+#: model:ir.model.fields,field_description:payment_xendit.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:payment_xendit.field_payment_transaction__display_name
+msgid "Display Name"
+msgstr "แสดงชื่อ"
 
 #. module: payment_xendit
 #: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
@@ -72,20 +70,26 @@ msgid "Expiration"
 msgstr "สิ้นสุด"
 
 #. module: payment_xendit
+#: model:ir.model.fields,field_description:payment_xendit.field_payment_provider__id
+#: model:ir.model.fields,field_description:payment_xendit.field_payment_transaction__id
+msgid "ID"
+msgstr "ไอดี"
+
+#. module: payment_xendit
 #. odoo-javascript
-#: code:addons/payment_xendit/static/src/js/payment_form.js:0
+#: code:addons/payment_xendit/static/src/interactions/payment_form.js:0
 msgid "Invalid CVN"
 msgstr ""
 
 #. module: payment_xendit
 #. odoo-javascript
-#: code:addons/payment_xendit/static/src/js/payment_form.js:0
+#: code:addons/payment_xendit/static/src/interactions/payment_form.js:0
 msgid "Invalid Card Number"
 msgstr ""
 
 #. module: payment_xendit
 #. odoo-javascript
-#: code:addons/payment_xendit/static/src/js/payment_form.js:0
+#: code:addons/payment_xendit/static/src/interactions/payment_form.js:0
 msgid "Invalid Date"
 msgstr ""
 
@@ -100,12 +104,6 @@ msgid "MM"
 msgstr "MM"
 
 #. module: payment_xendit
-#. odoo-python
-#: code:addons/payment_xendit/models/payment_transaction.py:0
-msgid "No transaction found matching reference %s."
-msgstr "ไม่พบธุรกรรมที่ตรงกับการอ้างอิง %s"
-
-#. module: payment_xendit
 #: model:ir.model,name:payment_xendit.model_payment_provider
 msgid "Payment Provider"
 msgstr "ผู้ให้บริการชำระเงิน"
@@ -117,7 +115,7 @@ msgstr "ธุรกรรมสำหรับการชำระเงิน
 
 #. module: payment_xendit
 #. odoo-javascript
-#: code:addons/payment_xendit/static/src/js/payment_form.js:0
+#: code:addons/payment_xendit/static/src/interactions/payment_form.js:0
 msgid "Payment processing failed"
 msgstr "การประมวลผลการชำระเงินล้มเหลว"
 
@@ -132,12 +130,6 @@ msgid "Public Key"
 msgstr "คีย์สาธารณะ"
 
 #. module: payment_xendit
-#. odoo-python
-#: code:addons/payment_xendit/models/payment_transaction.py:0
-msgid "Received data with missing reference."
-msgstr "ได้รับข้อมูลโดยไม่มีการอ้างอิง"
-
-#. module: payment_xendit
 #: model_terms:ir.ui.view,arch_db:payment_xendit.payment_provider_form_xendit
 msgid "Secret Key"
 msgstr "คีย์ลับ"
@@ -149,22 +141,14 @@ msgstr ""
 
 #. module: payment_xendit
 #. odoo-python
-#: code:addons/payment_xendit/models/payment_provider.py:0
-msgid ""
-"The communication with the API failed. Xendit gave us the following "
-"information: '%s'"
-msgstr "การสื่อสารกับ API ล้มเหลว Xendit ให้ข้อมูลต่อไปนี้กับเรา: '%s'"
+#: code:addons/payment_xendit/controllers/main.py:0
+msgid "The access token doesn't match the transaction reference."
+msgstr ""
 
 #. module: payment_xendit
 #: model:ir.model.fields,help:payment_xendit.field_payment_provider__code
 msgid "The technical code of this payment provider."
 msgstr "รหัสทางเทคนิคของผู้ให้บริการชำระเงินรายนี้"
-
-#. module: payment_xendit
-#. odoo-python
-#: code:addons/payment_xendit/models/payment_transaction.py:0
-msgid "The transaction is not linked to a token."
-msgstr "ธุรกรรมไม่ได้เชื่อมโยงกับโทเค็น"
 
 #. module: payment_xendit
 #: model_terms:ir.ui.view,arch_db:payment_xendit.payment_provider_form_xendit
@@ -200,3 +184,20 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
 msgid "john.smith@example.com"
 msgstr "john.smith@example.com"
+
+#~ msgid "Could not establish the connection to the API."
+#~ msgstr "ไม่สามารถสร้างการเชื่อมต่อกับ API ได้"
+
+#~ msgid "No transaction found matching reference %s."
+#~ msgstr "ไม่พบธุรกรรมที่ตรงกับการอ้างอิง %s"
+
+#~ msgid "Received data with missing reference."
+#~ msgstr "ได้รับข้อมูลโดยไม่มีการอ้างอิง"
+
+#~ msgid ""
+#~ "The communication with the API failed. Xendit gave us the following "
+#~ "information: '%s'"
+#~ msgstr "การสื่อสารกับ API ล้มเหลว Xendit ให้ข้อมูลต่อไปนี้กับเรา: '%s'"
+
+#~ msgid "The transaction is not linked to a token."
+#~ msgstr "ธุรกรรมไม่ได้เชื่อมโยงกับโทเค็น"

@@ -70,7 +70,7 @@ class DropdownNestingState {
  * close itself when the active element is the same as the current
  * dropdown to separate dropdowns in different dialogs.
  *
- * @param {import("@web/core/dropdown/dropdown").DropdownState} state
+ * @param {import("@web/core/dropdown/dropdown_hooks").DropdownState} state
  * @returns
  */
 export function useDropdownNesting(state) {
@@ -105,40 +105,41 @@ export function useDropdownNesting(state) {
         current.remove();
     });
 
+    const isDropdown = (target) => target && target.classList.contains("o-dropdown");
+    const isRTL = () => localization.direction === "rtl";
+
     return {
         get hasParent() {
             return Boolean(current.parent);
         },
         /**@type {import("@web/core/navigation/navigation").NavigationOptions} */
         navigationOptions: {
-            onEnabled: (items) => {
-                if (current.parent) {
-                    items[0]?.focus();
-                }
-            },
-            onMouseEnter: (item) => {
-                if (item.target.classList.contains("o-dropdown")) {
-                    item.select();
+            onUpdated: (navigator) => {
+                if (current.parent && !navigator.activeItem) {
+                    navigator.items[0]?.setActive();
                 }
             },
             hotkeys: {
                 escape: () => current.close(),
-                arrowleft: (index, items) => {
-                    if (
-                        localization.direction === "rtl" &&
-                        items[index]?.target.classList.contains("o-dropdown")
-                    ) {
-                        items[index]?.select();
-                    } else if (current.parent) {
-                        current.close();
-                    }
+                arrowleft: {
+                    isAvailable: () => true,
+                    callback: (navigator) => {
+                        if (isRTL() && isDropdown(navigator.activeItem?.target)) {
+                            navigator.activeItem?.select();
+                        } else if (current.parent) {
+                            current.close();
+                        }
+                    },
                 },
-                arrowright: (index, items) => {
-                    if (localization.direction === "rtl" && current.parent) {
-                        current.close();
-                    } else if (items[index]?.target.classList.contains("o-dropdown")) {
-                        items[index]?.select();
-                    }
+                arrowright: {
+                    isAvailable: () => true,
+                    callback: (navigator) => {
+                        if (isRTL() && current.parent) {
+                            current.close();
+                        } else if (isDropdown(navigator.activeItem?.target)) {
+                            navigator.activeItem?.select();
+                        }
+                    },
                 },
             },
         },

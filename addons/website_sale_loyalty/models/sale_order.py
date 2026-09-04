@@ -5,8 +5,8 @@ from datetime import timedelta
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+from odoo.fields import Domain
 from odoo.http import request
-from odoo.osv import expression
 
 
 class SaleOrder(models.Model):
@@ -23,7 +23,7 @@ class SaleOrder(models.Model):
                 if leaf[0] != 'sale_ok':
                     continue
                 res[idx] = ('ecommerce_ok', '=', True)
-                return expression.AND([res, [('website_id', 'in', (self.website_id.id, False))]])
+                return Domain.AND([res, [('website_id', 'in', (self.website_id.id, False))]])
         return res
 
     def _get_trigger_domain(self):
@@ -34,8 +34,11 @@ class SaleOrder(models.Model):
                 if leaf[0] != 'program_id.sale_ok':
                     continue
                 res[idx] = ('program_id.ecommerce_ok', '=', True)
-                return expression.AND([res, [('program_id.website_id', 'in', (self.website_id.id, False))]])
+                return Domain.AND([res, [('program_id.website_id', 'in', (self.website_id.id, False))]])
         return res
+
+    def _get_program_timezone(self):
+        return self.website_id.salesperson_id.tz or super()._get_program_timezone()
 
     def _try_pending_coupon(self):
         if not request:
@@ -99,7 +102,7 @@ class SaleOrder(models.Model):
             products with different taxes.
             In this case, each taxes will have their own discount line. This is required
             to have correct amount of taxes according to the discount.
-            But we wan't these lines to be `visually` merged into a single one in the
+            But we want these lines to be `visually` merged into a single one in the
             e-commerce since the end user should only see one discount line.
             This is only possible since we don't show taxes in cart.
             eg:
@@ -124,14 +127,14 @@ class SaleOrder(models.Model):
                     continue
                 new_lines += self.env['sale.order.line'].new({
                     'product_id': lines[0].product_id.id,
-                    'tax_id': False,
+                    'tax_ids': False,
                     'price_unit': sum(lines.mapped('price_unit')),
                     'price_subtotal': sum(lines.mapped('price_subtotal')),
                     'price_total': sum(lines.mapped('price_total')),
                     'discount': 0.0,
                     'name': lines[0].name_short if lines.reward_id.reward_type != 'product' else lines[0].name,
                     'product_uom_qty': 1,
-                    'product_uom': lines[0].product_uom.id,
+                    'product_uom_id': lines[0].product_uom_id.id,
                     'order_id': order.id,
                     'is_reward_line': True,
                     'coupon_id': lines.coupon_id,
@@ -168,18 +171,27 @@ class SaleOrder(models.Model):
         super()._remove_delivery_line()
         self._update_programs_and_rewards()
 
-    def _cart_update(self, product_id, line_id=None, add_qty=0, set_qty=0, **kwargs):
-        line = self.order_line.filtered(lambda sol: sol.product_id.id == product_id)[:1]
-        reward_id = line.reward_id
-        if set_qty == 0 and line.coupon_id and reward_id and reward_id.reward_type == 'discount':
-            # Force the deletion of the line even if it's a temporary record created by new()
-            line_id = line.id
-        res = super()._cart_update(
-            product_id, line_id=line_id, add_qty=add_qty, set_qty=set_qty, **kwargs
-        )
+    def _cart_update_order_line(self, order_line, quantity, **kwargs):
+        if (
+            quantity <= 0
+            and order_line.coupon_id
+            and order_line.reward_id
+        ):
+            # When a reward line is deleted we remove it from the auto claimable rewards
+            order_line = order_line.with_context(website_sale_loyalty_delete=True)
+
+        return super()._cart_update_order_line(order_line, quantity, **kwargs)
+
+    def _verify_cart_after_update(self):
+        super()._verify_cart_after_update()
         self._update_programs_and_rewards()
         self._auto_apply_rewards()
-        return res
+        if request:  # In case the rewards application modifies the cart quantity
+            request.session['website_sale_cart_quantity'] = self.cart_quantity
+
+    def _get_non_delivery_lines(self):
+        """Override of `website_sale` to exclude delivery reward lines."""
+        return super()._get_non_delivery_lines() - self._get_free_shipping_lines()
 
     def _get_free_shipping_lines(self):
         self.ensure_one()
@@ -195,7 +207,7 @@ class SaleOrder(models.Model):
         """Remove coupons from abandonned ecommerce order."""
         ICP = self.env['ir.config_parameter']
         validity = ICP.get_param('website_sale_coupon.abandonned_coupon_validity', 4)
-        validity = fields.Datetime.to_string(fields.datetime.now() - timedelta(days=int(validity)))
+        validity = fields.Datetime.to_string(fields.Datetime.now() - timedelta(days=int(validity)))
         so_to_reset = self.env['sale.order'].search([
             ('state', '=', 'draft'),
             ('write_date', '<', validity),
@@ -220,7 +232,7 @@ class SaleOrder(models.Model):
         global_discount_reward = self._get_applied_global_discount()
         for coupon in loyality_cards:
             points = self._get_real_points_for_coupon(coupon)
-            for reward in coupon.program_id.reward_ids:
+            for reward in coupon.program_id.reward_ids - self.order_line.reward_id:
                 if (
                     reward.is_global_discount
                     and global_discount_reward
@@ -238,11 +250,15 @@ class SaleOrder(models.Model):
                         res[coupon] = reward
         return res
 
-    def _cart_find_product_line(self, product_id, line_id=None, **kwargs):
-        """ Override to filter out reward lines from the cart lines.
+    def _cart_find_product_line(self, *args, **kwargs):
+        # Filter out reward lines, they shouldn't be modified by standard _cart_add logic.
+        # This kind of lines is handled by _update_programs_and_rewards and _auto_apply_rewards.
+        return super()._cart_find_product_line(*args, **kwargs).filtered(
+            lambda sol: not sol.is_reward_line
+        )
 
-        These are handled by the _update_programs_and_rewards and _auto_apply_rewards methods.
-        """
-        lines = super()._cart_find_product_line(product_id, line_id, **kwargs)
-        lines = lines.filtered(lambda l: not l.is_reward_line) if not line_id else lines
-        return lines
+    def _recompute_cart(self):
+        """Recompute cart with loyalty programs and rewards applied."""
+        self._update_programs_and_rewards()
+        self._auto_apply_rewards()
+        super()._recompute_cart()

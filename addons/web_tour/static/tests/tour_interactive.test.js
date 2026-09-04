@@ -1,8 +1,18 @@
 /** @odoo-module **/
 
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
-import { click, hover, leave, queryFirst, waitFor } from "@odoo/hoot-dom";
-import { advanceTime, animationFrame, runAllTimers } from "@odoo/hoot-mock";
+import {
+    click,
+    hover,
+    leave,
+    queryFirst,
+    waitFor,
+    press,
+    Deferred,
+    edit,
+    waitForNone,
+} from "@odoo/hoot-dom";
+import { advanceTime, animationFrame, disableAnimations, runAllTimers } from "@odoo/hoot-mock";
 import { Component, useState, xml } from "@odoo/owl";
 import {
     contains,
@@ -10,17 +20,43 @@ import {
     mountWithCleanup,
     onRpc,
     patchWithCleanup,
+    models,
+    fields,
+    defineModels,
 } from "@web/../tests/web_test_helpers";
 import { browser } from "@web/core/browser/browser";
 import { Dialog } from "@web/core/dialog/dialog";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
+import { WebClient } from "@web/webclient/webclient";
 
 describe.current.tags("desktop");
 
+class Partner extends models.Model {
+    _name = "partner";
+
+    m2o = fields.Many2one({ relation: "product" });
+
+    _views = {
+        form: `<form>
+            <field name="m2o"/>
+        </form>`,
+    };
+}
+
+class Product extends models.Model {
+    _name = "product";
+
+    name = fields.Char();
+
+    _records = [{ name: "A" }, { name: "B" }];
+}
+
+defineModels([Partner, Product]);
+
 class Counter extends Component {
     static props = ["*"];
-    static template = xml/*html*/ `
+    static template = xml /*html*/ `
         <div class="counter">
             <div class="interval">
                 <input type="number" t-model.number="state.interval" />
@@ -49,27 +85,22 @@ beforeEach(() => {
         log: () => {},
         dir: () => {},
     });
-    onRpc("/web/dataset/call_kw/web_tour.tour/consume", async (request) => {
-        const { params } = await request.json();
-        tourConsumed.push(params.args[0]);
+    onRpc("web_tour.tour", "consume", ({ args }) => {
+        tourConsumed.push(args[0]);
         const nextTour = tourRegistry
             .getEntries()
             .filter(([tourName]) => !tourConsumed.includes(tourName))
             .at(0);
         return (nextTour && { name: nextTour.at(0) }) || false;
     });
-    onRpc("/web/dataset/call_kw/res.users/switch_tour_enabled", async () => {
-        return true;
-    });
-    onRpc("/web/dataset/call_kw/web_tour.tour/get_tour_json_by_name", async () => {
-        return {
-            name: "tour1",
-            steps: [
-                { trigger: "button.foo", run: "click" },
-                { trigger: "button.bar", run: "click" },
-            ],
-        };
-    });
+    onRpc("res.users", "switch_tour_enabled", () => true);
+    onRpc("web_tour.tour", "get_tour_json_by_name", () => ({
+        name: "tour1",
+        steps: [
+            { trigger: "button.foo", run: "click" },
+            { trigger: "button.bar", run: "click" },
+        ],
+    }));
 });
 
 test("points to next step", async () => {
@@ -110,7 +141,7 @@ test("next step with new anchor at same position", async () => {
     class Dummy extends Component {
         static props = ["*"];
         state = useState({ bool: true });
-        static template = xml/*html*/ `
+        static template = xml /*html*/ `
             <button class="foo w-100" t-if="state.bool" t-on-click="() => { state.bool = false; }">Foo</button>
             <button class="bar w-100" t-if="!state.bool">Bar</button>
         `;
@@ -118,7 +149,7 @@ test("next step with new anchor at same position", async () => {
     class Root extends Component {
         static props = ["*"];
         static components = { Dummy };
-        static template = xml/*html*/ `
+        static template = xml /*html*/ `
             <t>
                 <Dummy />
             </t>
@@ -159,7 +190,7 @@ test("pointer is added on top of overlay's stack", async () => {
     registry.category("web_tour.tours").add("tour1", {
         steps: () => [
             { trigger: ".modal .a", run: "click" },
-            { trigger: ".btn-primary", run: "click" },
+            { trigger: ".modal .btn-close", run: "click" },
         ],
     });
     class DummyDialog extends Component {
@@ -193,7 +224,7 @@ test("pointer is added on top of overlay's stack", async () => {
     await animationFrame();
     expect(".o_tour_pointer").toHaveCount(1);
 
-    await click(".btn-primary");
+    await click(".modal .btn-close");
     await animationFrame();
     expect(".o_tour_pointer").toHaveCount(0);
 });
@@ -202,7 +233,7 @@ test("registering test tour after service is started doesn't auto-start the tour
     patchWithCleanup(session, { tour_enabled: true });
     class Root extends Component {
         static components = { Counter };
-        static template = xml/*html*/ `
+        static template = xml /*html*/ `
                 <t>
                     <Counter />
                 </t>
@@ -242,7 +273,7 @@ test("hovering to the anchor element should show the content and not when conten
     class Root extends Component {
         static props = ["*"];
         static components = { Counter };
-        static template = xml/*html*/ `
+        static template = xml /*html*/ `
             <t>
                 <Counter />
                 <button class="other">Pogačar</button>
@@ -257,7 +288,7 @@ test("hovering to the anchor element should show the content and not when conten
     await contains("button.inc").hover();
     await animationFrame();
     expect(".o_tour_pointer_content:not(.invisible)").toHaveCount(1);
-    expect(".o_tour_pointer_content:not(.invisible)").toHaveText("content");
+    expect(".o_tour_pointer_content:not(.invisible) span").toHaveText("content");
     await contains(".other").hover();
     await animationFrame();
     expect(".o_tour_pointer_content.invisible").toHaveCount(1);
@@ -294,7 +325,7 @@ test("should show only 1 pointer at a time", async () => {
     class Root extends Component {
         static props = ["*"];
         static components = { Counter };
-        static template = xml/*html*/ `
+        static template = xml /*html*/ `
             <t>
                 <Counter />
             </t>
@@ -329,7 +360,7 @@ test("perform edit on next step", async () => {
     class Root extends Component {
         static props = ["*"];
         static components = { Counter };
-        static template = xml/*html*/ `
+        static template = xml /*html*/ `
             <t>
                 <Counter />
             </t>
@@ -349,11 +380,7 @@ test("perform edit on next step", async () => {
 });
 
 test("scrolling to next step should update the pointer's height", async (assert) => {
-    patchWithCleanup(Element.prototype, {
-        scrollIntoView(options) {
-            super.scrollIntoView({ ...options, behavior: "instant" });
-        },
-    });
+    disableAnimations();
 
     const content = "Click this pretty button to increment this magnificent counter !";
     registry.category("web_tour.tours").add("tour_de_france", {
@@ -368,7 +395,7 @@ test("scrolling to next step should update the pointer's height", async (assert)
     class Root extends Component {
         static props = ["*"];
         static components = { Counter };
-        static template = xml/*html*/ `
+        static template = xml /*html*/ `
             <div class="scrollable-parent" style="overflow-y: scroll; height: 150px;">
                 <Counter />
                 <div class="bottom-filler" style="height: 300px" />
@@ -388,7 +415,7 @@ test("scrolling to next step should update the pointer's height", async (assert)
     expect(firstOpenWidth).toBe("28px");
 
     await contains("button.inc").hover();
-    expect(".o_tour_pointer").toHaveText(content);
+    expect(".o_tour_pointer span").toHaveText(content);
     expect(".o_tour_pointer").toHaveClass("o_open");
     await contains(".interval input").hover();
     expect(".o_tour_pointer").not.toHaveClass("o_open");
@@ -400,7 +427,7 @@ test("scrolling to next step should update the pointer's height", async (assert)
     expect(".o_tour_pointer").toHaveCount(1);
     await contains(".o_tour_pointer").hover();
     await animationFrame();
-    expect(".o_tour_pointer").toHaveText("Scroll up to reach the next step.");
+    expect(".o_tour_pointer span").toHaveText("Scroll up to reach the next step.");
     await contains(".o_tour_pointer").click();
 
     await runAllTimers();
@@ -413,7 +440,7 @@ test("scrolling to next step should update the pointer's height", async (assert)
     await contains("button.inc").hover();
     await animationFrame();
     expect(".o_tour_pointer").toHaveClass("o_open");
-    expect(".o_tour_pointer").toHaveText(content);
+    expect(".o_tour_pointer span").toHaveText(content);
     await contains(".interval input").hover();
     const secondOpenHeight = queryFirst(".o_tour_pointer").style.height;
     const secondOpenWidth = queryFirst(".o_tour_pointer").style.width;
@@ -426,20 +453,20 @@ test("scrolling to next step should update the pointer's height", async (assert)
 });
 
 test("scroller pointer to reach next step", async () => {
-    patchWithCleanup(Element.prototype, {
-        scrollIntoView(options) {
-            super.scrollIntoView({ ...options, behavior: "instant" });
-        },
-    });
+    disableAnimations();
 
     registry.category("web_tour.tours").add("tour_des_flandres", {
-        steps: () => [{ trigger: "button.inc", content: "Click to increment", run: "click" }],
+        steps: () => [
+            { trigger: "button.inc", content: "Click to increment", run: "click" },
+            { trigger: "button.test", run: "click" },
+        ],
     });
     class Root extends Component {
         static props = ["*"];
         static components = { Counter };
-        static template = xml/*html*/ `
+        static template = xml /*html*/ `
             <div class="scrollable-parent" style="overflow-y: scroll; height: 150px;">
+                <button class="test">Test me</button>
                 <div class="top-filler" style="height: 500px" />
                 <Counter />
                 <div class="bottom-filler" style="height: 500px" />
@@ -462,9 +489,72 @@ test("scroller pointer to reach next step", async () => {
     expect(".counter .value").toHaveText("0");
 
     await click("button.inc");
-    await animationFrame();
+    await advanceTime(1000);
 
     expect(".counter .value").toHaveText("1");
+    expect(".o_tour_pointer").toHaveCount(1);
+
+    await hover(".o_tour_pointer:empty");
+    await click(waitFor(".o_tour_pointer:contains(Scroll up to reach the next step.)"));
+    await advanceTime(1000);
+
+    await click("button.test");
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(0);
+});
+
+test("scroller pointer to reach next step (X axis)", async () => {
+    patchWithCleanup(Element.prototype, {
+        scrollIntoView(options) {
+            super.scrollIntoView({ ...options, behavior: "instant" });
+        },
+    });
+
+    registry.category("web_tour.tours").add("tour_des_flandres", {
+        steps: () => [
+            { trigger: "button.inc", content: "Click to increment", run: "click" },
+            { trigger: "button.test", run: "click" },
+        ],
+    });
+    class Root extends Component {
+        static props = ["*"];
+        static components = { Counter };
+        static template = xml /*html*/ `
+            <div class="scrollable-parent d-flex flex-row" style="overflow-x: scroll; width: 300px;">
+                <button class="test">Test me</button>
+                <div class="left-filler" style="min-width: 500px" />
+                <Counter />
+                <div class="right-filler" style="min-width: 500px" />
+            </div>
+        `;
+    }
+
+    await mountWithCleanup(Root);
+    await getService("tour_service").startTour("tour_des_flandres", { mode: "manual" });
+    await advanceTime(1000);
+
+    await hover(".o_tour_pointer:empty");
+    await click(waitFor(".o_tour_pointer:contains(Scroll right to reach the next step.)"));
+    await leave();
+    await advanceTime(1000);
+
+    await hover(".o_tour_pointer:empty");
+    await waitFor(".o_tour_pointer:contains(Click to increment)");
+
+    expect(".counter .value").toHaveText("0");
+
+    await click("button.inc");
+    await advanceTime(1000);
+
+    expect(".counter .value").toHaveText("1");
+    expect(".o_tour_pointer").toHaveCount(1);
+
+    await hover(".o_tour_pointer:empty");
+    await click(waitFor(".o_tour_pointer:contains(Scroll left to reach the next step.)"));
+    await advanceTime(1000);
+
+    await click("button.test");
+    await animationFrame();
     expect(".o_tour_pointer").toHaveCount(0);
 });
 
@@ -511,7 +601,7 @@ test("manual tour with inactive steps", async () => {
     class Root extends Component {
         static props = ["*"];
         static components = { Counter };
-        static template = xml/*html*/ `
+        static template = xml /*html*/ `
             <t>
                 <Counter />
             </t>
@@ -557,7 +647,7 @@ test("manual tour with alternative trigger", async () => {
     });
     class Root extends Component {
         static components = {};
-        static template = xml/*html*/ `
+        static template = xml /*html*/ `
             <t>
                 <div class="container">
                     <button class="button0">0, hello</button>
@@ -630,7 +720,7 @@ test("Tour backward when the pointed element disappear and ignore warn step", as
     registry.category("web_tour.tours").add("tour1", {
         steps: () => [
             { trigger: "button.foo", run: "click" },
-            { trigger: "button.bar" },
+            { trigger: "button.foo" },
             { trigger: "button.bar", run: "click" },
         ],
     });
@@ -667,7 +757,7 @@ test("Tour backward when the pointed element disappear and ignore warn step", as
     await contains("button.bar").click();
     await animationFrame();
     expect(".o_tour_pointer").toHaveCount(0);
-    expect.verifySteps(["Step 'button.bar' ignored.", "Step 'button.bar' ignored."]);
+    expect.verifySteps(["Step 'button.foo' ignored.", "Step 'button.foo' ignored."]);
 });
 
 test("Tour started by the URL", async () => {
@@ -764,7 +854,7 @@ test("check tooltip position", async () => {
     });
     class Root extends Component {
         static components = {};
-        static template = xml/*html*/ `
+        static template = xml /*html*/ `
             <t>
                 <div class="container">
                     <div class="p-3"><button class="button0">Button 0</button></div>
@@ -836,7 +926,7 @@ test("check rainbowManMessage", async () => {
     });
     class Root extends Component {
         static components = {};
-        static template = xml/*html*/ `
+        static template = xml /*html*/ `
             <t>
                 <div class="container">
                     <div class="p-3"><button class="button0">Button 0</button></div>
@@ -872,7 +962,7 @@ test("check alternative trigger that appear after the initial trigger", async ()
     });
     class Root extends Component {
         static components = {};
-        static template = xml/*html*/ `
+        static template = xml /*html*/ `
             <t>
                 <div class="container">
                     <div class="p-3"><button class="button0">Button 0</button></div>
@@ -891,4 +981,300 @@ test("check alternative trigger that appear after the initial trigger", async ()
     queryFirst(".add_button").appendChild(otherButton);
     await contains(".button1").click();
     expect(".o_tour_pointer").toHaveCount(0);
+});
+
+test("validating edit step on autocomplete by selecting autocomplete item", async () => {
+    registry.category("web_tour.tours").add("rainbow_tour", {
+        steps: () => [
+            {
+                trigger: ".o-autocomplete--input",
+                run: "edit A",
+            },
+            {
+                trigger: ".o_form_button_save",
+                run: "click",
+            },
+        ],
+    });
+
+    await mountWithCleanup(WebClient);
+
+    await getService("action").doAction({
+        res_model: "partner",
+        type: "ir.actions.act_window",
+        views: [[false, "form"]],
+    });
+    getService("tour_service").startTour("rainbow_tour", { mode: "manual" });
+    await animationFrame();
+
+    expect(".o_tour_pointer").toHaveCount(1);
+    await contains(".o-autocomplete--input").click();
+    await contains(".o-autocomplete--dropdown-item:first-child").click();
+    expect(".o_tour_pointer").toHaveCount(1);
+    await contains(".o_form_button_save").click();
+    expect(".o_tour_pointer").toHaveCount(0);
+});
+
+test("validating edit step on autocomplete by selecting autocomplete item (validate automatically autocomplete item step)", async () => {
+    registry.category("web_tour.tours").add("rainbow_tour", {
+        steps: () => [
+            {
+                trigger: ".o-autocomplete--input",
+                run: "edit A",
+            },
+            {
+                trigger: ".o-autocomplete--dropdown-item:first-child",
+                run: "click",
+            },
+            {
+                trigger: ".o_form_button_save",
+                run: "click",
+            },
+        ],
+    });
+
+    await mountWithCleanup(WebClient);
+
+    await getService("action").doAction({
+        res_model: "partner",
+        type: "ir.actions.act_window",
+        views: [[false, "form"]],
+    });
+    getService("tour_service").startTour("rainbow_tour", { mode: "manual" });
+    await animationFrame();
+
+    expect(".o_tour_pointer").toHaveCount(1);
+    await contains(".o-autocomplete--input").click();
+    await contains(".o-autocomplete--dropdown-item:first-child").click();
+    expect(".o_tour_pointer").toHaveCount(1);
+    await contains(".o_form_button_save").click();
+    expect(".o_tour_pointer").toHaveCount(0);
+});
+
+test("validating click on autocomplete item by pressing Enter", async () => {
+    registry.category("web_tour.tours").add("rainbow_tour", {
+        steps: () => [
+            {
+                trigger: ".o-autocomplete--input",
+                run: "click",
+            },
+            {
+                trigger: ".o-autocomplete--dropdown-item:first-child",
+                run: "click",
+            },
+            {
+                trigger: ".o_form_button_save",
+                run: "click",
+            },
+        ],
+    });
+
+    await mountWithCleanup(WebClient);
+
+    await getService("action").doAction({
+        res_model: "partner",
+        type: "ir.actions.act_window",
+        views: [[false, "form"]],
+    });
+    getService("tour_service").startTour("rainbow_tour", { mode: "manual" });
+    await animationFrame();
+
+    expect(".o_tour_pointer").toHaveCount(1);
+    await contains(".o-autocomplete--input").click();
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(1);
+    await press("Enter");
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(1);
+    await contains(".o_form_button_save").click();
+    expect(".o_tour_pointer").toHaveCount(0);
+});
+
+test("Tour don't backward when dropdown loading", async () => {
+    Product._records = [{ name: "Harry test 1" }, { name: "Harry test 2" }];
+    registry.category("web_tour.tours").add("rainbow_tour", {
+        steps: () => [
+            {
+                trigger: ".o-autocomplete--input",
+                run: "click",
+            },
+            {
+                trigger: ".o-autocomplete--dropdown-item:eq(1)",
+                run: "click",
+            },
+            {
+                trigger: ".o_form_button_save",
+                run: "click",
+            },
+        ],
+    });
+
+    const def = new Deferred();
+    let makeItLag = false;
+    await mountWithCleanup(WebClient);
+
+    await getService("action").doAction({
+        res_model: "partner",
+        type: "ir.actions.act_window",
+        views: [[false, "form"]],
+    });
+
+    onRpc("product", "web_name_search", async () => {
+        if (makeItLag) {
+            await def;
+        }
+    });
+
+    getService("tour_service").startTour("rainbow_tour", { mode: "manual" });
+    await animationFrame();
+
+    expect(".o_tour_pointer").toHaveCount(1);
+    await contains(".o-autocomplete--input").click();
+    await waitFor(".o-autocomplete--dropdown-item:eq(1)");
+    makeItLag = true;
+    await edit("Harry");
+    await advanceTime(400);
+    await waitFor(".o_loading");
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(0);
+    def.resolve();
+
+    await waitFor(".o-autocomplete--dropdown-item:eq(1)");
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(1);
+    await contains(".o-autocomplete--dropdown-item:eq(1)").click();
+    expect(".o_tour_pointer").toHaveCount(1);
+    await contains(".o_form_button_save").click();
+    expect(".o_tour_pointer").toHaveCount(0);
+});
+
+test("Don't backward when action manager is busy", async () => {
+    registry.category("web_tour.tours").add("tour1", {
+        steps: () => [
+            { trigger: "button.foo", run: "click" },
+            { trigger: "button.bar", run: "click" },
+        ],
+    });
+
+    class Dummy extends Component {
+        static props = ["*"];
+        state = useState({ bool: true });
+        static components = {};
+        static template = xml`
+            <button class="fool w-100" t-on-click="() => { state.bool = true; }">You fool</button>
+            <button class="foo w-100" t-if="state.bool" t-on-click="() => { state.bool = false; }">Foo</button>
+            <button class="bar w-100" t-if="!state.bool">Bar</button>
+        `;
+    }
+
+    const comp = await mountWithCleanup(Dummy);
+
+    await getService("tour_service").startTour("tour1", { mode: "manual" });
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(1);
+
+    await contains("button.foo").click();
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(1);
+
+    comp.env.bus.trigger("ACTION_MANAGER:UPDATE");
+    await animationFrame();
+
+    await contains("button.fool").click();
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(0);
+
+    await contains("button.foo").click();
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(1);
+
+    comp.env.bus.trigger("ACTION_MANAGER:UI-UPDATED");
+
+    await contains("button.fool").click();
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(1);
+
+    await contains("button.foo").click();
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(1);
+
+    await contains("button.bar").click();
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(0);
+});
+
+test("pointer hidden when trigger is behind overlay", async () => {
+    registry.category("web_tour.tours").add("tour1", {
+        steps: () => [{ trigger: "button.foo", run: "click" }],
+    });
+
+    class DummyDialog extends Component {
+        static props = ["*"];
+        static components = { Dialog };
+        static template = xml`
+            <Dialog>
+                <button class="a">A</button>
+            </Dialog>
+        `;
+    }
+
+    class Dummy extends Component {
+        static props = ["*"];
+        static components = {};
+        static template = xml`
+            <button class="foo w-100">Foo</button>
+        `;
+    }
+
+    await mountWithCleanup(Dummy);
+
+    await getService("tour_service").startTour("tour1", { mode: "manual" });
+    await waitFor(".o_tour_pointer");
+    getService("dialog").add(DummyDialog, {});
+    await waitFor(".modal");
+    await waitForNone(".o_tour_pointer");
+    await contains(".modal .btn-close").click();
+    await waitFor(".o_tour_pointer");
+    // Finalize the dummy tour to avoid leaving in a dirty state
+    await contains("button.foo").click();
+});
+
+test("pointer in active element", async () => {
+    registry.category("web_tour.tours").add("tour1", {
+        steps: () => [
+            { trigger: "button.foo", run: "click" },
+            { trigger: "button.a", run: "click" },
+        ],
+    });
+
+    class DummyDialog extends Component {
+        static props = ["*"];
+        static components = { Dialog };
+        static template = xml`
+            <Dialog>
+                <button class="a">A</button>
+            </Dialog>
+        `;
+    }
+
+    class Dummy extends Component {
+        static props = ["*"];
+        static components = {};
+        static template = xml`
+            <button class="foo w-100" t-on-click="this.click">Foo</button>
+        `;
+
+        click() {
+            getService("dialog").add(DummyDialog, {});
+        }
+    }
+
+    await mountWithCleanup(Dummy);
+    await getService("tour_service").startTour("tour1", { mode: "manual" });
+    await waitFor(".o_tour_pointer");
+    await contains(".foo").click();
+    await waitFor(".modal");
+    await waitFor(".o_tour_pointer");
+    await contains(".modal .a").click();
+    await waitForNone(".o_tour_pointer");
 });

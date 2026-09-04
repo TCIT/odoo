@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add('website_sale_stock_message_after_close_onfigurator_modal_with_optional_products', {
@@ -9,6 +7,7 @@ registry.category("web_tour.tours").add('website_sale_stock_message_after_close_
         content: "Select Customizable Desk",
         trigger: '.oe_product_cart a:contains("Product With Optional (TEST)")',
         run: "click",
+        expectUnloadPage: true,
     }, {
         content: "Check that the stock quantity is displayed and correct",
         trigger: '#threshold_message:contains("30")',
@@ -22,7 +21,7 @@ registry.category("web_tour.tours").add('website_sale_stock_message_after_close_
     },
     {
         content: "Continue shoppping",
-        trigger: 'button:contains(Continue Shopping)',
+        trigger: 'button[name="website_sale_product_configurator_continue_button"]',
         run: 'click',
     }, {
         content: "Check that the stock quantity is displayed and correct after adding to cart",
@@ -38,6 +37,7 @@ registry.category("web_tour.tours").add('website_sale_stock_message_after_close_
         content: "Select Office Lamp",
         trigger: '.oe_product_cart a:contains("Product Without Optional (TEST)")',
         run: "click",
+        expectUnloadPage: true,
     }, {
         content: "Check that the stock quantity is displayed and correct",
         trigger: '#threshold_message:contains("30")',

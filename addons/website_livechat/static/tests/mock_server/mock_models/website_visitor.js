@@ -1,15 +1,10 @@
 import { mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
 
-import { Command, fields, models, serverState } from "@web/../tests/web_test_helpers";
+import { Command, serverState } from "@web/../tests/web_test_helpers";
+import { websiteModels } from "@website/../tests/helpers";
 
-export class WebsiteVisitor extends models.ServerModel {
-    _name = "website.visitor";
-
-    country_id = fields.Many2one({ relation: "res.country", string: "Country" }); // FIXME: somehow not fetched properly
-    history = fields.Char();
-    lang_id = fields.Many2one({ relation: "res.lang", string: "Language" }); // FIXME: somehow not fetched properly
-    name = fields.Char({ string: "Name" }); // FIXME: somehow not fetched
-    partner_id = fields.Many2one({ relation: "res.partner", string: "Contact" }); // FIXME: somehow not fetched properly
+export class WebsiteVisitor extends websiteModels.WebsiteVisitor {
+    _inherit = "website.visitor";
 
     /** @param {integer[]} ids */
     action_send_chat_request(ids) {
@@ -26,17 +21,20 @@ export class WebsiteVisitor extends models.ServerModel {
 
         const visitors = this.browse(ids);
         for (const visitor of visitors) {
+            const operator = this.env.user;
             const country = visitor.country_id ? ResCountry.browse(visitor.country_id) : undefined;
-            const visitor_name = `${visitor.display_name}${country ? `(${country.name})` : ""}`;
+            const visitor_name = `Visitor #${visitor.id}${country ? ` (${country.name})` : ""}`;
             const membersToAdd = [Command.create({ partner_id: serverState.partnerId })];
             if (visitor.partner_id) {
                 membersToAdd.push(Command.create({ partner_id: visitor.partner_id }));
             }
             const livechatId = DiscussChannel.create({
-                anonymous_name: visitor_name,
                 channel_member_ids: membersToAdd,
                 channel_type: "livechat",
                 livechat_operator_id: serverState.partnerId,
+                name: `${visitor_name}, ${
+                    operator.livechat_username ? operator.livechat_username : operator.name
+                }`,
             });
             if (!visitor.partner_id) {
                 const guestId = MailGuest.create({ name: `Visitor #${visitor.id}` });
@@ -45,11 +43,14 @@ export class WebsiteVisitor extends models.ServerModel {
                 });
             }
             const [partner] = ResPartner.read(serverState.partnerId);
+            const channel = DiscussChannel.browse(livechatId);
             // notify operator
             BusBus._sendone(
                 partner,
-                "website_livechat.send_chat_request",
-                new mailDataHelpers.Store(DiscussChannel.browse(livechatId)).get_result()
+                "mail.record/insert",
+                new mailDataHelpers.Store(channel)
+                    .add(channel, { open_chat_window: true })
+                    .get_result()
             );
         }
     }

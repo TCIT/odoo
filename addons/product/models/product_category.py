@@ -2,11 +2,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import ValidationError
 
 
 class ProductCategory(models.Model):
-    _name = "product.category"
+    _name = 'product.category'
     _inherit = ['mail.thread']
     _description = "Product Category"
     _parent_name = "parent_id"
@@ -60,14 +60,10 @@ class ProductCategory(models.Model):
         for record in self:
             record.display_name = record.name
 
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_default_category(self):
-        main_category = self.env.ref('product.product_category_all', raise_if_not_found=False)
-        if main_category and main_category in self:
-            raise UserError(_("You cannot delete this product category, it is the default generic category."))
-        expense_category = self.env.ref('product.cat_expense', raise_if_not_found=False)
-        if expense_category and expense_category in self:
-            raise UserError(_("You cannot delete the %s product category.", expense_category.name))
-        saleable_category = self.env.ref('product.product_category_1', raise_if_not_found=False)
-        if saleable_category and saleable_category in self:
-            raise UserError(_("You cannot delete the %s product category.", saleable_category.name))
+    def copy_data(self, default=None):
+        default = dict(default or {})
+        vals_list = super().copy_data(default=default)
+        if 'name' not in default:
+            for category, vals in zip(self, vals_list):
+                vals['name'] = _("%s (copy)", category.name)
+        return vals_list

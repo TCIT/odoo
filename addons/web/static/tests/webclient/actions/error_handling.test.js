@@ -41,8 +41,7 @@ class Partner extends models.Model {
                     </t>
                 </templates>
             </kanban>`,
-        "form,false": `<form><field name="display_name"/></form>`,
-        "search,false": `<search/>`,
+        form: `<form><field name="display_name"/></form>`,
     };
 }
 
@@ -142,7 +141,7 @@ test("connection lost when opening form view from kanban", async () => {
             // impact on other tests (see connectionLostNotifRemove)
             return true;
         }
-        throw Error(); // simulate a ConnectionLost error
+        throw new Error(); // simulate a ConnectionLost error
     });
     await contains(".o_kanban_record").click();
     expect(".o_kanban_view").toHaveCount(1);
@@ -154,6 +153,7 @@ test("connection lost when opening form view from kanban", async () => {
         "/web/action/load",
         "get_views",
         "web_search_read",
+        "has_group",
         "/web/dataset/call_kw/partner/web_read", // from mockFetch
         "/web/dataset/call_kw/partner/web_search_read", // from mockFetch
     ]);
@@ -164,13 +164,31 @@ test("connection lost when opening form view from kanban", async () => {
     await runAllTimers();
     await animationFrame();
     expect.verifySteps(["/web/webclient/version_info"]);
+    expect.verifyErrors([Error, Error]);
 });
 
 test.tags("desktop");
 test("connection lost when coming back to kanban from form", async () => {
     expect.errors(1);
 
-    stepAllNetworkCalls();
+    let offline = false;
+    onRpc(
+        "/*",
+        (req) => {
+            const url = new URL(req.url).pathname;
+            if (!url.startsWith("/web/webclient/translations")) {
+                expect.step(url);
+            }
+            if (url === "/web/webclient/version_info") {
+                // simulate a connection restore
+                return true;
+            }
+            if (offline) {
+                throw new Error(); // simulate a ConnectionLost error
+            }
+        },
+        { pure: true }
+    );
 
     await mountWithCleanup(WebClient);
     await getService("action").doAction(1);
@@ -179,36 +197,36 @@ test("connection lost when coming back to kanban from form", async () => {
     await contains(".o_kanban_record").click();
     expect(".o_form_view").toHaveCount(1);
 
-    mockFetch((input) => {
-        expect.step(input);
-        if (input === "/web/webclient/version_info") {
-            // simulate a connection restore at the end of the test, to have no
-            // impact on other tests (see connectionLostNotifRemove)
-            return true;
-        }
-        throw Error(); // simulate a ConnectionLost error
-    });
+    offline = true;
     await contains(".o_breadcrumb .o_back_button a").click();
     await animationFrame();
-    expect(".o_form_view").toHaveCount(1);
+    expect(".o_form_view").toHaveCount(0);
+    expect(".o_kanban_view").toHaveCount(1);
+    expect(".o_kanban_view .o_kanban_renderer").toHaveCount(1);
+    expect(".o_kanban_view .o_kanban_record:not(.o_kanban_ghost)").toHaveCount(2);
     expect(".o_notification").toHaveCount(1);
     expect(".o_notification").toHaveText("Connection lost. Trying to reconnect...");
     expect.verifySteps([
-        "/web/webclient/translations",
         "/web/webclient/load_menus",
         "/web/action/load",
-        "get_views",
-        "web_search_read",
-        "web_read",
-        "/web/dataset/call_kw/partner/web_search_read", // from mockFetch
+        "/web/dataset/call_kw/partner/get_views",
+        "/web/dataset/call_kw/partner/web_search_read",
+        "/web/dataset/call_kw/res.users/has_group",
+        "/web/dataset/call_kw/partner/web_read",
+        "/web/dataset/call_kw/partner/web_search_read",
     ]);
     await animationFrame();
     expect.verifySteps([]); // doesn't indefinitely try to reload the list
 
-    // cleanup
     await runAllTimers();
     await animationFrame();
     expect.verifySteps(["/web/webclient/version_info"]);
+    expect.verifyErrors([Error]);
+
+    offline = false;
+    await contains(".o_searchview .o_searchview_icon").click();
+    expect(".o_kanban_view .o_kanban_record:not(.o_kanban_ghost)").toHaveCount(2);
+    expect.verifySteps(["/web/dataset/call_kw/partner/web_search_read"]);
 });
 
 test("error on onMounted", async () => {
@@ -224,8 +242,7 @@ test("error on onMounted", async () => {
                     </t>
                 </templates>
             </kanban>`,
-        "form,false": `<form><field name="display_name"/><field name="bar"/></form>`,
-        "search,false": `<search/>`,
+        form: `<form><field name="display_name"/><field name="bar"/></form>`,
     };
     stepAllNetworkCalls();
     patchWithCleanup(BooleanField.prototype, {
@@ -257,6 +274,7 @@ test("error on onMounted", async () => {
         "/web/action/load",
         "get_views",
         "web_search_read",
+        "has_group",
     ]);
 
     await contains(".o_kanban_record").click();

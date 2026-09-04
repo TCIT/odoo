@@ -1,8 +1,8 @@
 import { Component, onWillStart, onWillUpdateProps, useState } from "@odoo/owl";
-import { KeepLast } from "@web/core/utils/concurrency";
-import { ModelFieldSelectorPopover } from "./model_field_selector_popover";
-import { useLoadFieldInfo, useLoadPathDescription } from "./utils";
 import { usePopover } from "@web/core/popover/popover_hook";
+import { KeepLast } from "@web/core/utils/concurrency";
+import { useService } from "@web/core/utils/hooks";
+import { ModelFieldSelectorPopover } from "./model_field_selector_popover";
 
 export class ModelFieldSelector extends Component {
     static template = "web._ModelFieldSelector";
@@ -14,10 +14,12 @@ export class ModelFieldSelector extends Component {
         path: { optional: true },
         allowEmpty: { type: Boolean, optional: true },
         readonly: { type: Boolean, optional: true },
+        readProperty: { type: Boolean, optional: true },
         showSearchInput: { type: Boolean, optional: true },
         isDebugMode: { type: Boolean, optional: true },
         update: { type: Function, optional: true },
         filter: { type: Function, optional: true },
+        sort: { type: Function, optional: true },
         followRelations: { type: Boolean, optional: true },
         showDebugInput: { type: Boolean, optional: true },
     };
@@ -31,13 +33,15 @@ export class ModelFieldSelector extends Component {
     };
 
     setup() {
-        this.loadPathDescription = useLoadPathDescription();
-        const loadFieldInfo = useLoadFieldInfo();
+        this.fieldService = useService("field");
         this.popover = usePopover(this.constructor.components.Popover, {
             popoverClass: "o_popover_field_selector",
             onClose: async () => {
                 if (this.newPath !== null) {
-                    const fieldInfo = await loadFieldInfo(this.props.resModel, this.newPath);
+                    const fieldInfo = await this.fieldService.loadFieldInfo(
+                        this.props.resModel,
+                        this.newPath
+                    );
                     this.props.update(this.newPath, fieldInfo);
                 }
             },
@@ -45,7 +49,12 @@ export class ModelFieldSelector extends Component {
         this.keepLast = new KeepLast();
         this.state = useState({ isInvalid: false, displayNames: [] });
         onWillStart(() => this.updateState(this.props));
-        onWillUpdateProps((nextProps) => this.updateState(nextProps));
+        onWillUpdateProps((nextProps) => {
+            const modelPathKeys = ["resModel", "path", "allowEmpty"];
+            if (modelPathKeys.some((key) => this.props[key] !== nextProps[key])) {
+                this.updateState(nextProps);
+            }
+        });
     }
 
     openPopover(currentTarget) {
@@ -56,6 +65,7 @@ export class ModelFieldSelector extends Component {
         this.popover.open(currentTarget, {
             resModel: this.props.resModel,
             path: this.props.path,
+            readProperty: this.props.readProperty,
             update: (path, _fieldInfo, debug = false) => {
                 this.newPath = path;
                 if (!debug) {
@@ -65,6 +75,7 @@ export class ModelFieldSelector extends Component {
             showSearchInput: this.props.showSearchInput,
             isDebugMode: this.props.isDebugMode,
             filter: this.props.filter,
+            sort: this.props.sort,
             followRelations: this.props.followRelations,
             showDebugInput: this.props.showDebugInput,
         });
@@ -72,7 +83,7 @@ export class ModelFieldSelector extends Component {
 
     async updateState(params, isConcurrent) {
         const { resModel, path, allowEmpty } = params;
-        let prom = this.loadPathDescription(resModel, path, allowEmpty);
+        let prom = this.fieldService.loadPathDescription(resModel, path, allowEmpty);
         if (isConcurrent) {
             prom = this.keepLast.add(prom);
         }

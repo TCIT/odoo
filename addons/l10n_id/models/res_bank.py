@@ -2,10 +2,10 @@
 import datetime
 import requests
 import pytz
-from urllib.parse import urljoin
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.tools.urls import urljoin
 
 QRIS_TIMEOUT = 35  # They say that the time to get a response vary between 6 to 30s
 
@@ -25,7 +25,7 @@ def _l10n_id_make_qris_request(endpoint, params):
     return response
 
 
-class ResBank(models.Model):
+class ResPartnerBank(models.Model):
     _inherit = "res.partner.bank"
 
     l10n_id_qris_api_key = fields.Char("QRIS API Key", groups="base.group_system")
@@ -63,8 +63,8 @@ class ResBank(models.Model):
         """ Getting content for the QR through calling QRIS API and storing the QRIS transaction as a record"""
         # EXTENDS account
         if qr_method == "id_qr":
-            model = self._context.get('qris_model')
-            model_id = self._context.get('qris_model_id')
+            model = self.env.context.get('qris_model')
+            model_id = self.env.context.get('qris_model_id')
 
             # qris_trx is to help us fetch the backend record associated to the model and model_id.
             # we are using model and model_id instead of model.browse(id) because while executing this method
@@ -85,9 +85,9 @@ class ResBank(models.Model):
 
             params = {
                 "do": "create-invoice",
-                "apikey": self.l10n_id_qris_api_key,
-                "mID": self.l10n_id_qris_mid,
-                "cliTrxNumber": structured_communication,
+                "apikey": self.sudo().l10n_id_qris_api_key,
+                "mID": self.sudo().l10n_id_qris_mid,
+                "cliTrxNumber": free_communication or structured_communication,
                 "cliTrxAmount": int(amount)
             }
             response = _l10n_id_make_qris_request('show_qris.php', params)
@@ -120,10 +120,11 @@ class ResBank(models.Model):
     def _get_qr_code_generation_params(self, qr_method, amount, currency, debtor_partner, free_communication, structured_communication):
         # EXTENDS account
         if qr_method == 'id_qr':
-            if not self._context.get('is_online_qr'):
+            if not self.env.context.get('is_online_qr'):
                 return {}
             return {
                 'barcode_type': 'QR',
+                'quiet': 0,
                 'width': 120,
                 'height': 120,
                 'value': self._get_qr_vals(qr_method, amount, currency, debtor_partner, free_communication, structured_communication),

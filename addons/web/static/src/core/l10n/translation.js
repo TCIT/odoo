@@ -1,15 +1,68 @@
-import { markup } from "@odoo/owl";
-
+import { formatList } from "@web/core/l10n/utils";
+import { isIterable } from "@web/core/utils/arrays";
 import { Deferred } from "@web/core/utils/concurrency";
-import { escape, sprintf } from "@web/core/utils/strings";
+import { htmlSprintf, isMarkup } from "@web/core/utils/html";
+import { mapSubstitutions, sprintf } from "@web/core/utils/strings";
 
-export const translationLoaded = Symbol("translationLoaded");
-export const translatedTerms = {
-    [translationLoaded]: false,
-};
-export const translationIsReady = new Deferred();
+/**
+ * @typedef {ReturnType<markup>} Markup
+ */
 
-const Markup = markup().constructor;
+/**
+ * Returns true if the given value is a non-empty string, i.e. it contains other
+ * characters than white spaces and zero-width spaces.
+ *
+ * @param {unknown} value
+ */
+function isNotBlank(value) {
+    return typeof value === "string" && !R_BLANK.test(value);
+}
+
+/**
+ * Same behavior as sprintf, but doing two additional things:
+ * - If any of the provided values is an iterable, it will format its items
+ *   as a language-specific formatted string representing the elements of the
+ *   list.
+ * - If any of the provided values is a markup, it will escape all non-markup
+ *   content before performing the interpolation, then wraps the result in a
+ *   markup.
+ *
+ * @param {string} str
+ * @param {Substitutions} substitutions
+ * @returns {string | Markup | TranslatedString}
+ */
+function translationSprintf(str, substitutions) {
+    let hasMarkup = false;
+
+    /**
+     * @param {string | Markup} value
+     * @returns {string | Markup}
+     */
+    function formatSubstitution(value) {
+        hasMarkup ||= isMarkup(value);
+        // The `!(value instanceof String)` check is to prevent interpreting `Markup` and `TranslatedString`
+        // objects as iterables, since they are both subclasses of `String`.
+        if (isIterable(value) && !(value instanceof String)) {
+            return formatList(value);
+        } else {
+            return value;
+        }
+    }
+    const formattedSubstitutions = mapSubstitutions(substitutions, formatSubstitution);
+    if (hasMarkup) {
+        return htmlSprintf(str, ...formattedSubstitutions);
+    } else {
+        return sprintf(str, ...formattedSubstitutions);
+    }
+}
+
+/**
+ * @template [T=unknown]
+ * @typedef {import("@web/core/utils/strings").Substitutions<T>} Substitutions
+ */
+
+const DEFAULT_MODULE = "base";
+const R_BLANK = /^[\s\u200B]*$/;
 
 /**
  * Translates a term, or returns the term as it is if no translation can be
@@ -21,6 +74,10 @@ const Markup = markup().constructor;
  * map its entries to keyworded placeholders (%(kw_placeholder)s) for
  * replacement.
  *
+ * If one or more of the extra arguments are iterables, they will be turned
+ * into language-specific formatted strings representing the elements of the
+ * list.
+ *
  * If at least one of the extra arguments is a markup, the translation and
  * non-markup content are escaped, and the result is wrapped in a markup.
  *
@@ -28,63 +85,35 @@ const Markup = markup().constructor;
  * _t("Good morning"); // "Bonjour"
  * _t("Good morning %s", user.name); // "Bonjour Marc"
  * _t("Good morning %(newcomer)s, goodbye %(departer)s", { newcomer: Marc, departer: Mitchel }); // Bonjour Marc, au revoir Mitchel
- * _t("I love %s", markup("<blink>Minecraft</blink>")); // Markup {"J'adore <blink>Minecraft</blink>"}
+ * _t("I love %s", markup`<blink>Minecraft</blink>`); // Markup {"J'adore <blink>Minecraft</blink>"}
+ * _t("Good morning %s!", ["Mitchell", "Marc", "Louis"]); // Bonjour Mitchell, Marc et Louis !
  *
- * @param {string} term
- * @returns {string|Markup|LazyTranslatedString}
+ * @param {string} source
+ * @param {Substitutions} substitutions
+ * @returns {string | Markup | TranslatedString}
  */
-export function _t(term, ...values) {
-    if (translatedTerms[translationLoaded]) {
-        const translation = translatedTerms[term] ?? term;
-        if (values.length === 0) {
-            return translation;
-        }
-        return _safeSprintf(translation, ...values);
-    } else {
-        return new LazyTranslatedString(term, values);
-    }
+export function _t(source, ...substitutions) {
+    return appTranslateFn(source, odoo.translationContext, ...substitutions);
 }
 
-class LazyTranslatedString extends String {
-    constructor(term, values) {
-        super(term);
-        this.values = values;
-    }
-    valueOf() {
-        const term = super.valueOf();
-        if (translatedTerms[translationLoaded]) {
-            const translation = translatedTerms[term] ?? term;
-            if (this.values.length === 0) {
-                return translation;
-            }
-            return _safeSprintf(translation, ...this.values);
-        } else {
-            throw new Error(`translation error`);
-        }
-    }
-    toString() {
-        return this.valueOf();
-    }
-}
-
-/*
- * Setup jQuery timeago:
- * Strings in timeago are "composed" with prefixes, words and suffixes. This
- * makes their detection by our translating system impossible. Use all literal
- * strings we're using with a translation mark here so the extractor can do its
- * job.
+/**
+ * This is a wrapper for _t that the transpiler injects in its place
+ * to provide the knowledge of the module from which it was called.
+ *
+ * Providing the context of the module is useful to avoid conflicting
+ * translations, e.g. "table" has a different meaning depending on the module:
+ * the table of a restaurant (POS module) vs. a spreadsheet table.
+ *
+ * @param {string} source The term to translate
+ * @param {string} moduleName The name of the module, used as a context key to
+ * retrieve the translation.
+ * @param  {Substitutions} substitutions The other arguments passed to _t.
+ * @returns {string | Markup | TranslatedString}
  */
-_t("less than a minute ago");
-_t("about a minute ago");
-_t("%d minutes ago");
-_t("about an hour ago");
-_t("%d hours ago");
-_t("a day ago");
-_t("%d days ago");
-_t("about a month ago");
-_t("%d months ago");
-_t("about a year ago");
-_t("%d years ago");
+export function appTranslateFn(source, moduleName, ...substitutions) {
+    const string = new TranslatedString(source, substitutions, moduleName);
+    return string.lazy ? string : string.valueOf();
+}
 
 /**
  * Load the installed languages long names and code
@@ -92,6 +121,8 @@ _t("%d years ago");
  * The result of the call is put in cache.
  * If any new language is installed, a full page refresh will happen,
  * so there is no need invalidate it.
+ *
+ * @param {import("services").ServiceFactories["orm"]} orm
  */
 export async function loadLanguages(orm) {
     if (!loadLanguages.installedLanguages) {
@@ -100,42 +131,61 @@ export async function loadLanguages(orm) {
     return loadLanguages.installedLanguages;
 }
 
-/**
- * Same behavior as sprintf, but if any of the provided values is a markup,
- * escapes all non-markup content before performing the interpolation, then
- * wraps the result in a markup.
- *
- * @param {string} str The string with placeholders (%s) to insert values into.
- * @param  {...any} values Primitive values to insert in place of placeholders.
- * @returns {string|Markup}
- */
-function _safeSprintf(str, ...values) {
-    let hasMarkup;
-    if (values.length === 1 && Object.prototype.toString.call(values[0]) === "[object Object]") {
-        hasMarkup = Object.values(values[0]).some((v) => v instanceof Markup);
-    } else {
-        hasMarkup = values.some((v) => v instanceof Markup);
+export class TranslatedString extends String {
+    /** @type {string} */
+    context;
+    lazy = false;
+    /** @type {Substitutions} */
+    substitutions;
+
+    /**
+     *
+     * @param {string} value
+     * @param {Substitutions} substitutions
+     * @param {string | null} [context]
+     */
+    constructor(value, substitutions, context) {
+        super(value);
+
+        if (!isNotBlank(value)) {
+            return new String(value);
+        }
+
+        this.lazy = !translatedTerms[translationLoaded];
+        this.substitutions = substitutions;
+        this.context = context || DEFAULT_MODULE;
     }
-    if (hasMarkup) {
-        return markup(sprintf(escape(str), ..._escapeNonMarkup(values)));
+
+    toString() {
+        return this.valueOf();
     }
-    return sprintf(str, ...values);
+
+    valueOf() {
+        const source = super.valueOf();
+        if (this.lazy && !translatedTerms[translationLoaded]) {
+            // Evaluate lazy translated string while translations are not loaded
+            // -> error
+            throw new Error(`Cannot translate string: translations have not been loaded`);
+        }
+        const translation =
+            translatedTerms[this.context]?.[source] ?? translatedTermsGlobal[source] ?? source;
+        if (this.substitutions.length) {
+            return translationSprintf(translation, this.substitutions);
+        } else {
+            return translation;
+        }
+    }
 }
 
+export const translationLoaded = Symbol("translationLoaded");
+/** @type {Record<string, string>} */
+export const translatedTerms = {
+    [translationLoaded]: false,
+};
 /**
- * Go through each value to be passed to sprintf and escape anything that isn't
- * a markup.
- *
- * @param {any[]|[Object]} values Values for use with sprintf.
- * @returns {any[]|[Object]}
+ * Contains all the translated terms. Unlike "translatedTerms", there is no
+ * "namespacing" by module. It is used as a fallback when no translation is
+ * found within the module's context, or when the context is not known.
  */
-function _escapeNonMarkup(values) {
-    if (Object.prototype.toString.call(values[0]) === "[object Object]") {
-        const sanitized = {};
-        for (const [key, value] of Object.entries(values[0])) {
-            sanitized[key] = value instanceof Markup ? value : escape(value);
-        }
-        return [sanitized];
-    }
-    return values.map((x) => (x instanceof Markup ? x : escape(x)));
-}
+export const translatedTermsGlobal = Object.create(null);
+export const translationIsReady = new Deferred();

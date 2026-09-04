@@ -40,7 +40,7 @@ class TestClocFields(test_cloc.TestClocCustomization):
         # Check for existing module in case the test run on an existing database
         if not self.env['ir.module.module'].search([('name', '=', 'studio_customization')]):
             self.env['ir.module.module'].create({
-                'author': 'Odoo',
+                'author': 'Odoo S.A.',
                 'imported': True,
                 'latest_version': '13.0.1.0.0',
                 'name': 'studio_customization',
@@ -101,7 +101,7 @@ class TestClocFields(test_cloc.TestClocCustomization):
 
     def test_count_qweb_imported_module(self):
         self.env['ir.module.module'].create({
-            'author': 'Odoo',
+            'author': 'Odoo S.A.',
             'imported': True,
             'latest_version': '15.0.1.0.0',
             'name': 'test_imported_module',
@@ -151,6 +151,7 @@ class TestClocFields(test_cloc.TestClocCustomization):
                 ]
             },
             'license': 'LGPL-3',
+            'author': 'Odoo S.A.',
         })
 
         stream = BytesIO()
@@ -168,7 +169,7 @@ class TestClocFields(test_cloc.TestClocCustomization):
 
     def test_exclude_qweb(self):
         self.env['ir.module.module'].create({
-            'author': 'Odoo',
+            'author': 'Odoo S.A.',
             'imported': True,
             'latest_version': '15.0.1.0.0',
             'name': 'test_imported_module',
@@ -200,6 +201,7 @@ class TestClocFields(test_cloc.TestClocCustomization):
                 ]
             },
             'license': 'LGPL-3',
+            'author': 'Odoo S.A.',
         })
 
         stream = BytesIO()
@@ -243,6 +245,7 @@ class TestClocFields(test_cloc.TestClocCustomization):
                     'data/test.xml',
             ],
             'license': 'LGPL-3',
+            'author': 'Odoo S.A.',
         })
 
         stream = BytesIO()
@@ -261,3 +264,25 @@ class TestClocFields(test_cloc.TestClocCustomization):
         cl = cloc.Cloc()
         cl.count_customization(self.env)
         self.assertEqual(cl.code.get('test_imported_module', 0), 0)
+
+        # Uninstall data module
+        self.env['ir.module.module'].search([('name', '=', 'test_imported_module')]).module_uninstall()
+
+        # Check that the database is cleaned after uninstallation
+        attachments = self.env['ir.attachment'].search([('url', 'ilike', 'test_imported_module/static/src/js/test_js')])
+        self.assertFalse(attachments, "No more attachment from assets should remain in the db")
+
+        assets_data = self.env['ir.model.data'].search([
+            ('model', '=', 'ir.asset'),
+            ('module', '=', 'test_imported_module'),
+        ])
+        self.assertFalse(
+            self.env['ir.asset'].search([('id', 'in', assets_data.mapped('res_id'))]),
+            "No more assets should remain in the db",
+        )
+
+        irmodeldata = self.env['ir.model.data'].search([('module', '=', '__cloc_exclude__')])
+        self.assertTrue(
+            len(irmodeldata) == 1 and irmodeldata.res_id == self.env.ref('base.view_company_form').id,
+            "Only base form view should remain excluded",
+        )

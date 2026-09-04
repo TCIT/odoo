@@ -1,6 +1,6 @@
 import { mockDate } from "@odoo/hoot-mock";
 import { session } from "@web/session";
-import { defineModels, fields, models, patchWithCleanup } from "@web/../tests/web_test_helpers";
+import { defineModels, fields, models, patchWithCleanup, serverState } from "@web/../tests/web_test_helpers";
 
 import { defineProjectModels, projectModels } from "@project/../tests/project_models";
 
@@ -11,7 +11,6 @@ export class HRTimesheet extends models.Model {
     project_id = fields.Many2one({ relation: "project.project", required: true });
     task_id = fields.Many2one({ relation: "project.task" });
     unit_amount = fields.Float();
-    is_timesheet = fields.Boolean();
 
     _records = [
         {
@@ -100,18 +99,15 @@ export function defineTimesheetModels() {
 
 export function patchSession() {
     mockDate("2017-01-25 00:00:00");
-    patchWithCleanup(session, {
-        user_companies: {
-            current_company: 1,
-            allowed_companies: {
-                1: {
-                    id: 1,
-                    name: "Company",
-                    timesheet_uom_id: 1,
-                    timesheet_uom_factor: 1,
-                },
-            },
+    serverState.companies = [
+        {
+            id: 1,
+            name: "Company",
+            timesheet_uom_id: 1,
+            timesheet_uom_factor: 1,
         },
+    ];
+    patchWithCleanup(session, {
         uom_ids: {
             1: {
                 id: 1,

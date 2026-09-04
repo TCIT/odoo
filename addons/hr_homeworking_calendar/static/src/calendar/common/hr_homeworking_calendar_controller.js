@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
@@ -11,8 +9,9 @@ patch(AttendeeCalendarController.prototype, {
     setup() {
         super.setup();
         this.action = useService("action");
+        this._baseRendererProps.openWorkLocationWizard = this.openWorkLocationWizard.bind(this);
     },
-    async editRecord(record, context = {}, shouldFetchFormViewId = true) {
+    async editRecord(record) {
         if (record.homeworking && 'start' in record) {
             return this.action.doAction('hr_homeworking_calendar.set_location_wizard_action', {
                 additionalContext: {
@@ -68,11 +67,5 @@ patch(AttendeeCalendarController.prototype, {
                 this.model.load()
             },
         })
-    },
-    get rendererProps() {
-        return {
-            ...super.rendererProps,
-            openWorkLocationWizard: (date) => this.openWorkLocationWizard(date),
-        }
     },
 })

@@ -3,51 +3,70 @@ import { ImStatus } from "@mail/core/common/im_status";
 import { NotificationItem } from "@mail/core/public_web/notification_item";
 import { useDiscussSystray } from "@mail/utils/common/hooks";
 
-import { Component, useExternalListener, useRef, useState } from "@odoo/owl";
+import { Component, useExternalListener, useRef, useState, useSubEnv } from "@odoo/owl";
 
-import { hasTouch } from "@web/core/browser/feature_detection";
+import { hasTouch, isDisplayStandalone, isIOS } from "@web/core/browser/feature_detection";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
+import { DiscussContent } from "./discuss_content";
 
 export class MessagingMenu extends Component {
-    static components = { CountryFlag, Dropdown, NotificationItem, ImStatus };
+    static components = { CountryFlag, DiscussContent, Dropdown, NotificationItem, ImStatus };
     static props = [];
     static template = "mail.MessagingMenu";
 
     setup() {
         super.setup();
-        this.discussSystray = useDiscussSystray();
-        this.store = useState(useService("mail.store"));
+        this.isIosPwa = isIOS() && isDisplayStandalone();
+        this.store = useService("mail.store");
         this.hasTouch = hasTouch;
-        this.ui = useState(useService("ui"));
+        this.ui = useService("ui");
         this.state = useState({
             activeIndex: null,
             adding: false,
         });
         this.dropdown = useDropdownState();
+        this.discussSystray = useDiscussSystray(this.dropdown);
         this.notificationList = useRef("notification-list");
+        useSubEnv({ inMessagingMenu: { dropdown: this.dropdown } });
 
         useExternalListener(window, "keydown", this.onKeydown, true);
     }
 
-    onClickThread(isMarkAsRead, thread) {
+    onClickThread(isMarkAsRead, thread, message) {
         if (!isMarkAsRead) {
-            this.openDiscussion(thread);
+            if (message?.needaction && message.message_type === "user_notification") {
+                this.store.inbox.highlightMessage = message;
+                this.store.inbox.open();
+                return;
+            }
+            thread.open({ focus: true, fromMessagingMenu: true, bypassCompact: true });
+            this.dropdown.close();
             return;
         }
         this.markAsRead(thread);
     }
 
+    onClickInboxMsg(isMarkAsRead, msg) {
+        if (!isMarkAsRead) {
+            this.store.inbox.highlightMessage = msg;
+            this.env.services.action.doAction({
+                tag: "mail.action_discuss",
+                type: "ir.actions.client",
+                context: { active_id: "mail.box_inbox" },
+            });
+            return;
+        }
+        msg.setDone();
+    }
+
     markAsRead(thread) {
         if (thread.needactionMessages.length > 0) {
             thread.markAllMessagesAsRead();
-        }
-        if (thread.model === "discuss.channel") {
-            thread.markAsRead();
         }
     }
 
@@ -121,27 +140,42 @@ export class MessagingMenu extends Component {
         return this.store.menuThreads;
     }
 
+    get visibleStandaloneMessages() {
+        const tab = this.store.discuss.activeTab;
+        if (tab !== "notification") {
+            return [];
+        }
+        if (this.store.discuss.searchTerm) {
+            return [];
+        }
+        return this.store.standaloneInboxMessages;
+    }
+
     /**
      * @type {{ id: string, icon: string, label: string }[]}
      */
-    get tabs() {
+    get _tabs() {
         return [
             {
-                icon: "fa fa-user",
+                counter: this.store.discuss.chats.threadsWithCounter.length,
+                icon: "oi oi-users",
                 id: "chat",
-                label: _t("Chat"),
+                label: _t("Chats"),
+                sequence: 20,
             },
             {
-                icon: "fa fa-users",
+                channelHasUnread: Boolean(this.store.discuss.unreadChannels.length),
+                counter: this.store.discuss.channels.threadsWithCounter.length,
+                icon: "fa fa-hashtag",
                 id: "channel",
-                label: _t("Channel"),
+                label: _t("Channels"),
+                sequence: 40,
             },
         ];
     }
 
-    openDiscussion(thread) {
-        thread.open({ fromMessagingMenu: true });
-        this.dropdown.close();
+    get tabs() {
+        return this._tabs.sort((t1, t2) => t1.sequence - t2.sequence);
     }
 
     onClickNavTab(tabId) {
@@ -150,15 +184,21 @@ export class MessagingMenu extends Component {
         }
         this.store.discuss.activeTab = tabId;
         if (
-            this.store.discuss.activeTab === "main" &&
-            this.env.inDiscussApp &&
+            this.store.discuss.activeTab === "inbox" &&
             (!this.store.discuss.thread || this.store.discuss.thread.model !== "mail.box")
         ) {
             this.store.inbox.setAsDiscussThread();
         }
-        if (this.store.discuss.activeTab !== "main") {
+        if (this.store.discuss.activeTab === "starred") {
+            this.store.starred.setAsDiscussThread();
+        }
+        if (!["inbox", "starred"].includes(this.store.discuss.activeTab)) {
             this.store.discuss.thread = undefined;
         }
+    }
+
+    canUnpinItem(thread) {
+        return thread.canUnpin && thread.self_member_id?.message_unread_counter === 0;
     }
 }
 

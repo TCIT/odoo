@@ -1,10 +1,9 @@
-import { after } from "@odoo/hoot";
-import { mockTimeZone } from "@odoo/hoot-mock";
+import { after, onTimeZoneChange } from "@odoo/hoot";
 import { patch } from "@web/core/utils/patch";
 
 const { FixedOffsetZone, IANAZone, Settings } = luxon;
 
-mockTimeZone.onCall = (tz) => {
+onTimeZoneChange((tz) => {
     let defaultZone;
     if (typeof tz === "string") {
         defaultZone = IANAZone.create(tz);
@@ -13,7 +12,7 @@ mockTimeZone.onCall = (tz) => {
         defaultZone = FixedOffsetZone.instance(-offset);
     }
     patchWithCleanup(Settings, { defaultZone });
-};
+});
 
 //-----------------------------------------------------------------------------
 // Exports
@@ -21,5 +20,7 @@ mockTimeZone.onCall = (tz) => {
 
 /** @type {typeof patch} */
 export function patchWithCleanup(obj, patchValue) {
-    after(patch(obj, patchValue));
+    const unpatch = patch(obj, patchValue);
+    after(unpatch);
+    return unpatch;
 }

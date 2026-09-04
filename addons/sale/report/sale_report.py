@@ -6,7 +6,7 @@ from odoo.addons.sale.models.sale_order import SALE_ORDER_STATE
 
 
 class SaleReport(models.Model):
-    _name = "sale.report"
+    _name = 'sale.report'
     _description = "Sales Analysis Report"
     _auto = False
     _rec_name = 'date'
@@ -60,7 +60,7 @@ class SaleReport(models.Model):
         comodel_name='product.product', string="Product Variant", readonly=True)
     product_tmpl_id = fields.Many2one(
         comodel_name='product.template', string="Product", readonly=True)
-    product_uom = fields.Many2one(comodel_name='uom.uom', string="Unit of Measure", readonly=True)
+    product_uom_id = fields.Many2one(comodel_name='uom.uom', string="Unit", readonly=True)
     product_uom_qty = fields.Float(string="Qty Ordered", readonly=True)
     qty_to_deliver = fields.Float(string="Qty To Deliver", readonly=True)
     qty_delivered = fields.Float(string="Qty Delivered", readonly=True)
@@ -86,11 +86,7 @@ class SaleReport(models.Model):
 
     # aggregates or computed fields
     nbr = fields.Integer(string="# of Lines", readonly=True)
-    currency_id = fields.Many2one(comodel_name='res.currency', compute='_compute_currency_id')
-
-    @api.depends_context('allowed_company_ids')
-    def _compute_currency_id(self):
-        self.currency_id = self.env.company.currency_id
+    currency_id = fields.Many2one(comodel_name='res.currency', readonly=True)
 
     def _with_sale(self):
         return ""
@@ -100,12 +96,12 @@ class SaleReport(models.Model):
             MIN(l.id) AS id,
             l.product_id AS product_id,
             l.invoice_status AS line_invoice_status,
-            t.uom_id AS product_uom,
-            CASE WHEN l.product_id IS NOT NULL THEN SUM(l.product_uom_qty / u.factor * u2.factor) ELSE 0 END AS product_uom_qty,
-            CASE WHEN l.product_id IS NOT NULL THEN SUM(l.qty_delivered / u.factor * u2.factor) ELSE 0 END AS qty_delivered,
-            CASE WHEN l.product_id IS NOT NULL THEN SUM((l.product_uom_qty - l.qty_delivered) / u.factor * u2.factor) ELSE 0 END AS qty_to_deliver,
-            CASE WHEN l.product_id IS NOT NULL THEN SUM(l.qty_invoiced / u.factor * u2.factor) ELSE 0 END AS qty_invoiced,
-            CASE WHEN l.product_id IS NOT NULL THEN SUM(l.qty_to_invoice / u.factor * u2.factor) ELSE 0 END AS qty_to_invoice,
+            t.uom_id AS product_uom_id,
+            CASE WHEN l.product_id IS NOT NULL THEN SUM(l.product_uom_qty * u.factor / u2.factor) ELSE 0 END AS product_uom_qty,
+            CASE WHEN l.product_id IS NOT NULL THEN SUM(l.qty_delivered * u.factor / u2.factor) ELSE 0 END AS qty_delivered,
+            CASE WHEN l.product_id IS NOT NULL THEN SUM((l.product_uom_qty - l.qty_delivered) * u.factor / u2.factor) ELSE 0 END AS qty_to_deliver,
+            CASE WHEN l.product_id IS NOT NULL THEN SUM(l.qty_invoiced * u.factor / u2.factor) ELSE 0 END AS qty_invoiced,
+            CASE WHEN l.product_id IS NOT NULL THEN SUM(l.qty_to_invoice * u.factor / u2.factor) ELSE 0 END AS qty_to_invoice,
             CASE WHEN l.product_id IS NOT NULL THEN AVG(l.price_unit
                 / {self._case_value_or_one('s.currency_rate')}
                 * {self._case_value_or_one('account_currency_table.rate')}
@@ -151,14 +147,15 @@ class SaleReport(models.Model):
             partner.industry_id AS industry_id,
             partner.state_id AS state_id,
             partner.zip AS partner_zip,
-            CASE WHEN l.product_id IS NOT NULL THEN SUM(p.weight * l.product_uom_qty / u.factor * u2.factor) ELSE 0 END AS weight,
-            CASE WHEN l.product_id IS NOT NULL THEN SUM(p.volume * l.product_uom_qty / u.factor * u2.factor) ELSE 0 END AS volume,
+            CASE WHEN l.product_id IS NOT NULL THEN SUM(p.weight * l.product_uom_qty * u.factor / u2.factor) ELSE 0 END AS weight,
+            CASE WHEN l.product_id IS NOT NULL THEN SUM(p.volume * l.product_uom_qty * u.factor / u2.factor) ELSE 0 END AS volume,
             l.discount AS discount,
             CASE WHEN l.product_id IS NOT NULL THEN SUM(l.price_unit * l.product_uom_qty * l.discount / 100.0
                 / {self._case_value_or_one('s.currency_rate')}
                 * {self._case_value_or_one('account_currency_table.rate')}
                 ) ELSE 0
             END AS discount_amount,
+            {self.env.company.currency_id.id} AS currency_id,
             concat('sale.order', ',', s.id) AS order_reference"""
 
         additional_fields_info = self._select_additional_fields()
@@ -189,7 +186,7 @@ class SaleReport(models.Model):
             JOIN res_partner partner ON s.partner_id = partner.id
             LEFT JOIN product_product p ON l.product_id=p.id
             LEFT JOIN product_template t ON p.product_tmpl_id=t.id
-            LEFT JOIN uom_uom u ON u.id=l.product_uom
+            LEFT JOIN uom_uom u ON u.id=l.product_uom_id
             LEFT JOIN uom_uom u2 ON u2.id=t.uom_id
             JOIN {currency_table} ON account_currency_table.company_id = s.company_id
             """
@@ -244,6 +241,7 @@ class SaleReport(models.Model):
     def _table_query(self):
         return self._query()
 
+    @api.readonly
     def action_open_order(self):
         self.ensure_one()
         return {

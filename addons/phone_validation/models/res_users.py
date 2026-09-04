@@ -4,7 +4,7 @@
 from odoo import _, models
 
 
-class Users(models.Model):
+class ResUsers(models.Model):
     _inherit = 'res.users'
 
     def _deactivate_portal_user(self, **post):
@@ -17,7 +17,7 @@ class Users(models.Model):
                     if number:
                         numbers_to_blacklist[number] = user
 
-        super(Users, self)._deactivate_portal_user(**post)
+        super()._deactivate_portal_user(**post)
 
         if numbers_to_blacklist:
             current_user = self.env.user

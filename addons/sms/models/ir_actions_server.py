@@ -2,13 +2,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
 
 
-class ServerActions(models.Model):
+class IrActionsServer(models.Model):
     """ Add SMS option in server actions. """
-    _name = 'ir.actions.server'
-    _inherit = ['ir.actions.server']
+    _inherit = 'ir.actions.server'
 
     state = fields.Selection(selection_add=[
         ('sms', 'Send SMS'), ('followers',),
@@ -26,6 +24,15 @@ class ServerActions(models.Model):
         compute='_compute_sms_method',
         readonly=False, store=True)
 
+    def _name_depends(self):
+        return [*super()._name_depends(), "sms_template_id"]
+
+    def _generate_action_name(self):
+        self.ensure_one()
+        if self.state == 'sms' and self.sms_template_id:
+            return _('Send %(template_name)s', template_name=self.sms_template_id.name)
+        return super()._generate_action_name()
+
     @api.depends('state')
     def _compute_available_model_ids(self):
         mail_thread_based = self.filtered(lambda action: action.state == 'sms')
@@ -33,7 +40,7 @@ class ServerActions(models.Model):
             mail_models = self.env['ir.model'].search([('is_mail_thread', '=', True), ('transient', '=', False)])
             for action in mail_thread_based:
                 action.available_model_ids = mail_models.ids
-        super(ServerActions, self - mail_thread_based)._compute_available_model_ids()
+        super(IrActionsServer, self - mail_thread_based)._compute_available_model_ids()
 
     @api.depends('model_id', 'state')
     def _compute_sms_template_id(self):
@@ -53,21 +60,30 @@ class ServerActions(models.Model):
         if other:
             other.sms_method = 'sms'
 
-    @api.constrains('state', 'model_id')
-    def _check_sms_model_coherency(self):
-        for action in self:
-            if action.state == 'sms' and (action.model_id.transient or not action.model_id.is_mail_thread):
-                raise ValidationError(_("Sending SMS can only be done on a mail.thread or a transient model"))
+    @api.model
+    def _warning_depends(self):
+        return super()._warning_depends() + [
+            'model_id',
+            'state',
+            'sms_template_id',
+        ]
 
-    @api.constrains('model_id', 'template_id')
-    def _check_sms_template_model(self):
-        for action in self.filtered(lambda action: action.state == 'sms'):
-            if action.sms_template_id and action.sms_template_id.model_id != action.model_id:
-                raise ValidationError(
+    def _get_warning_messages(self):
+        self.ensure_one()
+        warnings = super()._get_warning_messages()
+
+        if self.state == 'sms':
+            if self.model_id.transient or not self.model_id.is_mail_thread:
+                warnings.append(_("Sending SMS can only be done on a not transient mail.thread model"))
+
+            if self.sms_template_id and self.sms_template_id.model_id != self.model_id:
+                warnings.append(
                     _('SMS template model of %(action_name)s does not match action model.',
-                      action_name=action.name
+                      action_name=self.name
                      )
                 )
+
+        return warnings
 
     def _run_action_sms_multi(self, eval_context=None):
         # TDE CLEANME: when going to new api with server action, remove action

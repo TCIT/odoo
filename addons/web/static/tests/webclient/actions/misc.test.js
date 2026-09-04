@@ -1,5 +1,5 @@
 import { expect, getFixture, test } from "@odoo/hoot";
-import { queryOne, scroll } from "@odoo/hoot-dom";
+import { queryOne, scroll, waitFor } from "@odoo/hoot-dom";
 import { animationFrame, Deferred } from "@odoo/hoot-mock";
 import { Component, onWillStart, xml } from "@odoo/owl";
 import {
@@ -16,6 +16,7 @@ import {
     onRpc,
     patchWithCleanup,
     serverState,
+    stepAllNetworkCalls,
     switchView,
     webModels,
 } from "@web/../tests/web_test_helpers";
@@ -26,6 +27,7 @@ import { router } from "@web/core/browser/router";
 import { listView } from "@web/views/list/list_view";
 import { PivotModel } from "@web/views/pivot/pivot_model";
 import { WebClient } from "@web/webclient/webclient";
+import { redirect } from "@web/core/utils/urls";
 
 const { ResCompany, ResPartner, ResUsers } = webModels;
 
@@ -46,7 +48,7 @@ class Partner extends models.Model {
         { id: 5, display_name: "Fifth record", o2m: [] },
     ];
     _views = {
-        "form,false": `
+        form: `
             <form>
                 <header>
                     <button name="object" string="Call method" type="object"/>
@@ -64,9 +66,8 @@ class Partner extends models.Model {
                     </t>
                 </templates>
             </kanban>`,
-        "list,false": `<list><field name="display_name"/></list>`,
+        list: `<list><field name="display_name"/></list>`,
         "list,2": `<list limit="3"><field name="display_name"/></list>`,
-        "search,false": `<search/>`,
     };
 }
 
@@ -79,9 +80,8 @@ class Pony extends models.Model {
         { id: 9, name: "Fluttershy" },
     ];
     _views = {
-        "list,false": '<list><field name="name"/></list>',
-        "form,false": `<form><field name="name"/></form>`,
-        "search,false": `<search/>`,
+        list: '<list><field name="name"/></list>',
+        form: `<form><field name="name"/></form>`,
     };
 }
 
@@ -203,6 +203,78 @@ test("action doesn't exists", async () => {
     }
 });
 
+test("getCurrentAction", async () => {
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+    const currentAction = await getService("action").currentAction;
+    expect(currentAction).toEqual({
+        binding_type: "action",
+        binding_view_types: "list,form",
+        id: 1,
+        type: "ir.actions.act_window",
+        xml_id: "action_1",
+        name: "Partners Action 1",
+        res_model: "partner",
+        views: [[1, "kanban"]],
+        context: {},
+        embedded_action_ids: [],
+        group_ids: [],
+        limit: 80,
+        mobile_view_mode: "kanban",
+        target: "current",
+        view_ids: [],
+        view_mode: "list,form",
+        cache: true,
+    });
+});
+
+test("getCurrentAction (virtual controller)", async () => {
+    stepAllNetworkCalls();
+    class ClientAction extends Component {
+        static template = xml`<div class="o_client_action_test">Hello World</div>`;
+        static props = ["*"];
+        static path = "plop";
+        setup() {
+            onWillStart(async () => {
+                const currentAction = await getService("action").currentAction;
+                expect.step(currentAction);
+            });
+        }
+    }
+    actionRegistry.add("HelloWorldTest", ClientAction);
+
+    redirect("/odoo/action-1/plop");
+    await mountWithCleanup(WebClient);
+
+    await animationFrame();
+
+    expect.verifySteps([
+        "/web/webclient/translations",
+        "/web/webclient/load_menus",
+        "/web/action/load_breadcrumbs",
+        "/web/action/load",
+        {
+            binding_type: "action",
+            binding_view_types: "list,form",
+            id: 1,
+            type: "ir.actions.act_window",
+            xml_id: "action_1",
+            name: "Partners Action 1",
+            res_model: "partner",
+            views: [[1, "kanban"]],
+            context: {},
+            embedded_action_ids: [],
+            group_ids: [],
+            limit: 80,
+            mobile_view_mode: "kanban",
+            target: "current",
+            view_ids: [],
+            view_mode: "list,form",
+            cache: true,
+        },
+    ]);
+});
+
 test("action in handler registry", async () => {
     await makeMockEnv();
     actionHandlersRegistry.add("ir.action_in_handler_registry", ({ action }) =>
@@ -221,6 +293,7 @@ test("properly handle case when action id does not exist", async () => {
     await mountWithCleanup(WebClient);
     getService("action").doAction(4448);
     await animationFrame();
+    expect.verifyErrors(["RPC_ERROR"]);
     expect(`.modal .o_error_dialog`).toHaveCount(1);
     expect(".o_error_dialog .modal-body").toHaveText("The action 4448 does not exist");
 });
@@ -230,6 +303,7 @@ test("properly handle case when action path does not exist", async () => {
     await mountWithCleanup(WebClient);
     getService("action").doAction("plop");
     await animationFrame();
+    expect.verifyErrors(["RPC_ERROR"]);
     expect(`.modal .o_error_dialog`).toHaveCount(1);
     expect(".o_error_dialog .modal-body").toHaveText('The action "plop" does not exist');
 });
@@ -239,6 +313,7 @@ test("properly handle case when action xmlId does not exist", async () => {
     await mountWithCleanup(WebClient);
     getService("action").doAction("not.found.action");
     await animationFrame();
+    expect.verifyErrors(["RPC_ERROR"]);
     expect(`.modal .o_error_dialog`).toHaveCount(1);
     expect(".o_error_dialog .modal-body").toHaveText(
         'The action "not.found.action" does not exist'
@@ -248,7 +323,7 @@ test("properly handle case when action xmlId does not exist", async () => {
 test("actions can be cached", async () => {
     onRpc("/web/action/load", async (request) => {
         const { params } = await request.json();
-        expect.step(JSON.stringify(params));
+        expect.step(params.context);
     });
 
     await makeMockEnv();
@@ -283,16 +358,22 @@ test("actions can be cached", async () => {
     await getService("action").loadAction(3, { active_model: "b" });
 
     // should load from server once per active_id/active_ids/active_model change, nothing else
+    const baseCtx = {
+        lang: "en",
+        tz: "taht",
+        uid: 7,
+        allowed_company_ids: [1],
+    };
     expect.verifySteps([
-        '{"action_id":3,"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1]}}',
-        '{"action_id":3,"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"configuratorMode":"add"}}',
-        '{"action_id":3,"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"configuratorMode":"edit"}}',
-        '{"action_id":3,"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"active_id":1}}',
-        '{"action_id":3,"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"active_id":2}}',
-        '{"action_id":3,"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"active_ids":[1,2]}}',
-        '{"action_id":3,"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"active_ids":[1,2,3]}}',
-        '{"action_id":3,"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"active_model":"a"}}',
-        '{"action_id":3,"context":{"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1],"active_model":"b"}}',
+        { ...baseCtx },
+        { ...baseCtx, configuratorMode: "add" },
+        { ...baseCtx, configuratorMode: "edit" },
+        { ...baseCtx, active_id: 1 },
+        { ...baseCtx, active_id: 2 },
+        { ...baseCtx, active_ids: [1, 2] },
+        { ...baseCtx, active_ids: [1, 2, 3] },
+        { ...baseCtx, active_model: "a" },
+        { ...baseCtx, active_model: "b" },
     ]);
 });
 
@@ -322,12 +403,17 @@ test("action cache: additionalContext is used on the key", async () => {
     expect(action.context).toEqual(actionParams);
 });
 
+test.tags("desktop");
 test('action with "no_breadcrumbs" set to true', async () => {
     defineActions([
         {
             id: 42,
             res_model: "partner",
-            views: [[1, "kanban"]],
+            type: "ir.actions.act_window",
+            views: [
+                [1, "kanban"],
+                [false, "list"],
+            ],
             context: { no_breadcrumbs: true },
         },
     ]);
@@ -336,6 +422,10 @@ test('action with "no_breadcrumbs" set to true', async () => {
     expect(".o_breadcrumb").toHaveCount(1);
     // push another action flagged with 'no_breadcrumbs=true'
     await getService("action").doAction(42);
+    await waitFor(".o_kanban_view");
+    expect(".o_breadcrumb").toHaveCount(0);
+    await contains(".o_switch_view.o_list").click();
+    await waitFor(".o_list_view");
     expect(".o_breadcrumb").toHaveCount(0);
 });
 
@@ -491,7 +581,7 @@ test("stores and restores scroll position (in list)", async () => {
 
 test.tags("desktop");
 test('executing an action with target != "new" closes all dialogs', async () => {
-    Partner._views["form,false"] = `
+    Partner._views["form"] = `
         <form>
             <field name="o2m">
                 <list><field name="display_name"/></list>
@@ -512,7 +602,7 @@ test('executing an action with target != "new" closes all dialogs', async () => 
 
 test.tags("desktop");
 test('executing an action with target "new" does not close dialogs', async () => {
-    Partner._views["form,false"] = `
+    Partner._views["form"] = `
         <form>
             <field name="o2m">
                 <list><field name="display_name"/></list>
@@ -533,8 +623,6 @@ test('executing an action with target "new" does not close dialogs', async () =>
 test.tags("desktop");
 test("search defaults are removed from context when switching view", async () => {
     expect.assertions(1);
-    Partner._views["pivot,false"] = `<pivot/>`;
-    Partner._views["list,false"] = `<list/>`;
     const context = {
         search_default_x: true,
         searchpanel_default_y: true,
@@ -565,7 +653,7 @@ test("search defaults are removed from context when switching view", async () =>
     await switchView("pivot");
 });
 
-test("retrieving a stored action should remove 'allowed_company_ids' from its context", async () => {
+test("retrieving a stored action should remove 'allowed_company_ids' from its context (model)", async () => {
     // Prepare a multi company scenario
     serverState.companies = [
         { id: 3, name: "Hermit", sequence: 1 },
@@ -610,6 +698,51 @@ test("retrieving a stored action should remove 'allowed_company_ids' from its co
     });
 });
 
+test("retrieving a stored action should remove 'allowed_company_ids' from its context (action)", async () => {
+    // Prepare a multi company scenario
+    serverState.companies = [
+        { id: 3, name: "Hermit", sequence: 1 },
+        { id: 2, name: "Herman's", sequence: 2 },
+        { id: 1, name: "Heroes TM", sequence: 3 },
+    ];
+
+    // Prepare a stored action
+    browser.sessionStorage.setItem(
+        "current_action",
+        JSON.stringify({
+            id: 1,
+            name: "Partners Action 1",
+            res_model: "partner",
+            type: "ir.actions.act_window",
+            views: [[1, "kanban"]],
+            context: {
+                someKey: 44,
+                allowed_company_ids: [1, 2],
+                lang: "not_en",
+                tz: "not_taht",
+                uid: 42,
+            },
+        })
+    );
+
+    // Prepare the URL hash to make sure the stored action will get executed.
+    // Object.assign(browser.location, { search: "?model=partner&view_type=kanban" });
+    redirect("/odoo/action-1?view_type=kanban");
+
+    // Create the web client. It should execute the stored action.
+    await mountWithCleanup(WebClient);
+    await animationFrame(); // blank action
+
+    // Check the current action context
+    expect(getService("action").currentController.action.context).toEqual({
+        // action context
+        someKey: 44,
+        lang: "not_en",
+        tz: "not_taht",
+        uid: 42,
+        // note there is no 'allowed_company_ids' in the action context
+    });
+});
 test.tags("desktop");
 test("action is removed while waiting for another action with selectMenu", async () => {
     let def;
@@ -631,7 +764,14 @@ test("action is removed while waiting for another action with selectMenu", async
             params: { description: "Id 1" },
         },
     ]);
-    defineMenus([{ id: 1, children: [], name: "App1", appID: 1, actionID: 1001, xmlid: "menu_1" }]);
+    defineMenus([
+        {
+            id: 1,
+            name: "App1",
+            actionID: 1001,
+            xmlid: "menu_1",
+        },
+    ]);
 
     await mountWithCleanup(WebClient);
     // starting point: a kanban view

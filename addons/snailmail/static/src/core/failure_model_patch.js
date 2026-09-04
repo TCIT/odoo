@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { Failure } from "@mail/core/common/failure_model";
 import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
@@ -16,7 +14,7 @@ patch(Failure.prototype, {
             if (this.notifications.length === 1 && this.lastMessage?.thread) {
                 return _t(
                     "An error occurred when sending a letter with Snailmail on “%(record_name)s”",
-                    { record_name: this.lastMessage.thread.name }
+                    { record_name: this.lastMessage.thread.display_name }
                 );
             }
             return _t("An error occurred when sending a letter with Snailmail.");

@@ -4,20 +4,29 @@ import { Domain } from "@web/core/domain";
 import { DynamicList } from "./dynamic_list";
 import { getGroupServerValue } from "./utils";
 
+export const MOVABLE_RECORD_TYPES = ["char", "boolean", "integer", "selection", "many2one"];
+
+/**
+ * @typedef {import("./record").Record} RelationalRecord
+ */
+
 export class DynamicGroupList extends DynamicList {
     static type = "DynamicGroupList";
 
     /**
-     * @param {import("./relational_model").Config} config
-     * @param {Object} data
+     * @type {DynamicList["setup"]}
      */
-    setup(config, data) {
+    setup(_config, data) {
         super.setup(...arguments);
+
         this.isGrouped = true;
         this._nbRecordsMatchingDomain = null;
         this._setData(data);
     }
 
+    /**
+     * @param {Record<string, unknown>} data
+     */
     _setData(data) {
         /** @type {import("./group").Group[]} */
         this.groups = data.groups.map((g) => this._createGroupDatapoint(g));
@@ -47,7 +56,7 @@ export class DynamicGroupList extends DynamicList {
 
     /**
      * List of loaded records inside groups.
-     * @returns {import("./record").Record[]}
+     * @returns {RelationalRecord[]}
      */
     get records() {
         return this.groups
@@ -121,10 +130,11 @@ export class DynamicGroupList extends DynamicList {
         sourceGroup._removeRecords([record.id]);
         targetGroup._addRecord(record, refIndex + 1);
         // step 2: update record value
-        const value =
-            targetGroup.groupByField.type === "many2one"
-                ? [targetGroup.value, targetGroup.displayName]
-                : targetGroup.value;
+        let value = targetGroup.value;
+        if (targetGroup.groupByField.type === "many2one") {
+            value = value ? { id: value, display_name: targetGroup.displayName } : false;
+        }
+
         const revert = () => {
             targetGroup._removeRecords([record.id]);
             sourceGroup._addRecord(record, oldIndex);
@@ -221,6 +231,7 @@ export class DynamicGroupList extends DynamicList {
             resModel: this.config.resModel,
             fields: this.config.fields,
             activeFields: this.config.activeFields,
+            fieldsToAggregate: this.config.fieldsToAggregate,
         };
         const context = {
             ...this.context,
@@ -228,26 +239,31 @@ export class DynamicGroupList extends DynamicList {
         };
         const nextConfigGroups = { ...this.config.groups };
         const domain = Domain.and([this.domain, [[this.groupByField.name, "=", id]]]).toList();
+        const groupBy = this.groupBy.slice(1);
         nextConfigGroups[id] = {
             ...commonConfig,
             context,
             groupByFieldName: this.groupByField.name,
             isFolded: Boolean(foldField),
+            value: id,
+            extraDomain: false,
             initialDomain: domain,
             list: {
                 ...commonConfig,
                 context,
                 domain: domain,
-                groupBy: [],
+                groupBy,
                 orderBy: this.orderBy,
+                limit: this.model.initialLimit,
+                offset: 0,
             },
         };
         this.model._updateConfig(this.config, { groups: nextConfigGroups }, { reload: false });
 
         const data = {
+            aggregates: {},
             count: 0,
             length: 0,
-            records: [],
             __domain: domain,
             [this.groupByField.name]: [id, groupName],
             value: id,
@@ -255,6 +271,11 @@ export class DynamicGroupList extends DynamicList {
             displayName: groupName,
             rawValue: [id, groupName],
         };
+        if (groupBy.length) {
+            data.groups = [];
+        } else {
+            data.records = [];
+        }
 
         const group = this._createGroupDatapoint(data);
         if (lastGroup) {
@@ -272,7 +293,10 @@ export class DynamicGroupList extends DynamicList {
 
     async _deleteGroups(groups) {
         const shouldReload = groups.some((g) => g.count > 0);
-        await this._unlinkGroups(groups);
+        const succeeded = await this._unlinkGroups(groups);
+        if (succeeded === false) {
+            return;
+        }
         const configGroups = { ...this.config.groups };
         for (const group of groups) {
             delete configGroups[group.value];

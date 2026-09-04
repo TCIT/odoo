@@ -3,13 +3,13 @@
 
     <!-- this header can be used on any Argentinean report, to be useful some variables should be passed -->
     <template id="custom_header">
-        <div>
-            <div class="row">
+        <div class="mb-3">
+            <div class="row mb-2">
                 <div name="left-upper-side" class="col-5" t-if="not pre_printed_report">
-                    <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 45px;" alt="Logo"/>
+                    <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 65px;" alt="Logo"/>
                 </div>
                 <div name="center-upper" class="col-2 text-center" t-att-style="'color: %s;' % o.company_id.primary_color">
-                    <span style="display: inline-block; text-align: center; line-height: 8px;">
+                    <span id="withholding_legend" style="display: inline-block; text-align: center; line-height: 8px;">
                         <h1 style="line-height: 35px;">
                             <strong><span t-out="not pre_printed_report and document_letter or '&#160;'"/></strong>
                         </h1>
@@ -46,7 +46,7 @@
                         <span t-att-style="'color: %s;' % o.company_id.primary_color" t-out="' - '.join([item for item in [(header_address.website or '').replace('https://', '').replace('http://', ''), header_address.email] if item])"/>
                     </t>
                 </div>
-                <div class="col-6 text-end" style="padding-left: 0px;">
+                <div id="l10n_ar_header_right" class="col-6 text-end" style="padding-left: 0px;">
 
                     <t t-if="not pre_printed_report">
                         <!-- (7) Numero punto venta - (8) numero de documento -->
@@ -81,7 +81,8 @@
             <t t-set="report_number" t-value="o.l10n_latam_document_number"/>
             <t t-set="pre_printed_report" t-value="report_type == 'pdf' and o.journal_id.l10n_ar_afip_pos_system == 'II_IM'"/>
             <t t-set="document_letter" t-value="o.l10n_latam_document_type_id.l10n_ar_letter"/>
-            <t t-set="document_legend" t-value="o.l10n_latam_document_type_id.code and 'Cod. %02d' % int(o.l10n_latam_document_type_id.code) or ''"/>
+            <t t-set="document_type_code" t-value="o.l10n_latam_document_type_id.code"/>
+            <t t-set="document_legend" t-value="document_type_code and 'Cod. %02d' % int(document_type_code) or ''"/>
             <t t-set="report_name" t-value="o.l10n_latam_document_type_id.report_name"/>
             <t t-set="header_address" t-value="o.journal_id.l10n_ar_afip_pos_partner_id"/>
 
@@ -123,21 +124,25 @@
         </td>
 
         <!-- use latam prices (to include/exclude VAT) -->
-        <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" position="before">
+        <xpath expr="//t[@t-foreach='lines_to_report']/t" position="before">
             <t t-set="l10n_ar_values" t-value="line._l10n_ar_prices_and_taxes()"/>
-        </t>
+        </xpath>
         <xpath expr="//span[@t-field='line.price_unit']" position="attributes">
             <attribute name="t-field"></attribute>
             <attribute name="t-out">l10n_ar_values['price_unit']</attribute>
-            <attribute name="t-options">{"widget": "monetary", "display_currency": o.currency_id}</attribute>
+            <attribute name="t-options">{"widget": "float", "display_currency": o.currency_id, "decimal_precision": "Product Price"}</attribute>
         </xpath>
-        <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" position="attributes">
-            <attribute name="t-value">current_subtotal + l10n_ar_values['price_subtotal']</attribute>
-        </t>
         <!-- if b2c we still wants the latam subtotal -->
-        <t t-set="current_total" t-value="current_total + line.price_total" position="attributes">
-            <attribute name="t-value">current_subtotal + l10n_ar_values['price_subtotal']</attribute>
+        <t t-set="section_subtotal" t-value="line.get_section_subtotal()" position="attributes">
+            <attribute name="t-value">line.get_section_subtotal() + l10n_ar_values['price_subtotal']</attribute>
         </t>
+        <xpath expr="//t/tr/t[@t-set='line_colspan']" position="attributes">
+            <attribute name="t-value">3 + (1 if display_discount else 0) + (1 if not line.tax_ids and not o._l10n_ar_include_vat() else 0)</attribute>
+        </xpath>
+
+        <xpath expr="//t/t/t[@t-else='']/t[@t-set='line_colspan']" position="attributes">
+            <attribute name="t-value">3 + (1 if display_discount else 0) + (1 if display_taxes and not grouped_line.get('taxes') and o._l10n_ar_include_vat() else 0)</attribute>
+        </xpath>
         <!-- label amount for subtotal column on b2b and b2c -->
         <xpath expr="//th[@name='th_subtotal']/span" position="replace">
             <span>Amount</span>
@@ -163,10 +168,13 @@
         </xpath>
 
         <xpath expr="//span[@id='line_tax_ids']/.." position="attributes">
+            <attribute name="t-if">not hide_prices and not o._l10n_ar_include_vat()</attribute>
+        </xpath>
+        <xpath expr="//span[@id='grouped_line_tax_ids']/.." position="attributes">
             <attribute name="t-if">not o._l10n_ar_include_vat()</attribute>
         </xpath>
         <span id="line_tax_ids" position="attributes">
-            <attribute name="t-out">', '.join(map(lambda x: (x.invoice_label or x.name), line.tax_ids.filtered(lambda x: x.tax_group_id.l10n_ar_vat_afip_code)))</attribute>
+            <attribute name="t-out">', '.join(tax.tax_label for tax in line.tax_ids if tax.tax_label and tax.tax_group_id.l10n_ar_vat_afip_code)</attribute>
         </span>
 
         <!-- remove payment reference that is not used in Argentina -->
@@ -188,7 +196,7 @@
                     <br/>
                     <span t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['address'], 'no_marker': true, 'no_tag_br': True}"/>
 
-                    <!-- (16) Responsabilidad AFIP -->
+                    <!-- (16) Responsabilidad ARCA -->
                     <strong>VAT Cond: </strong><span t-field="o.partner_id.l10n_ar_afip_responsibility_type_id"/>
 
                     <!-- (17) CUIT -->
@@ -257,7 +265,7 @@
          http://biblioteca.afip.gob.ar/dcp/LEY_C_027440_2018_05_09 article 5.f -->
         <xpath expr="//div[@id='total']/div/table" position="after">
             <t t-if="o.l10n_latam_document_type_id.code in ['201', '202', '203', '206', '207', '208', '211', '212', '213']">
-                <strong>Son: </strong><span t-out="o.currency_id.with_context(lang='es_AR').amount_to_text(o.amount_total)"/>
+                <strong>Son: </strong><span t-out="o.currency_id.amount_to_text(o.amount_total)"/>
             </t>
         </xpath>
 
@@ -271,6 +279,29 @@
         <t t-call="account.document_tax_totals" position="attributes">
             <attribute name="t-call">l10n_ar.document_tax_totals</attribute>
         </t>
+
+        <div id="qrcode" position="after">
+            <!-- RG 5614/2024: Show ARCA VAT and Other National Internal Taxes -->
+            <t t-set="l10n_ar_custom_tax_summary" t-value="o._l10n_ar_get_invoice_custom_tax_summary_for_report()"/>
+            <div t-attf-class="l10n_ar_tax_details {{ 'col-6' if report_type == 'pdf' else '' }}" t-if="l10n_ar_custom_tax_summary">
+                <table class="table table-sm table-borderless" style="page-break-inside: avoid;">
+                    <th class="border-black" style="border-bottom: 1px solid" colspan="2">
+                           Fiscal Transparency Regime for the Final Consumer (Law 27.743)
+                    </th>
+                    <t t-foreach="l10n_ar_custom_tax_summary" t-as="detail">
+                        <tr>
+                            <td class="text-end"><strong t-esc="detail['name']"/></td>
+                            <td class="text-end">
+                                <span
+                                    class="oe_subtotal_footer_separator"
+                                    t-out="detail['formatted_tax_amount_currency']"
+                                />
+                            </td>
+                        </tr>
+                    </t>
+                </table>
+            </div>
+        </div>
 
     </template>
 

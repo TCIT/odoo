@@ -11,8 +11,6 @@ class AccountChartTemplate(models.AbstractModel):
         return {
             'property_account_receivable_id': 'chart20000100',
             'property_account_payable_id': 'chart21000100',
-            'property_account_expense_categ_id': 'chart70010100',
-            'property_account_income_categ_id': 'chart73000100',
             'code_digits': '8',
             'use_storno_accounting': True,
         }
@@ -32,5 +30,18 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_journal_early_pay_discount_gain_account_id': 'chart75000900',
                 'default_cash_difference_income_account_id': 'chart75000700',
                 'default_cash_difference_expense_account_id': 'chart75010500',
+                'expense_account_id': 'chart70010100',
+                'income_account_id': 'chart73000100',
+                'account_stock_journal_id': 'inventory_valuation',
+                'account_stock_valuation_id': 'chart33000400',
+            },
+        }
+
+    @template('pl', 'account.account')
+    def _get_pl_account_account(self):
+        return {
+            'chart33000400': {
+                'account_stock_expense_id': 'chart73010100',
+                'account_stock_variation_id': 'chart74010100',
             },
         }

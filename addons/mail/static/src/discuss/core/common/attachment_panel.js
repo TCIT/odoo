@@ -9,6 +9,7 @@ import { useSequential, useVisible } from "@mail/utils/common/hooks";
 /**
  * @typedef {Object} Props
  * @property {import("models").Thread} thread
+ * @extends {Component<Props, Env>}
  */
 export class AttachmentPanel extends Component {
     static components = { ActionPanel, AttachmentList, DateSection };
@@ -47,21 +48,5 @@ export class AttachmentPanel extends Component {
             attachmentsByDate[attachment.monthYear] = attachments;
         }
         return attachmentsByDate;
-    }
-
-    get hasToggleAllowPublicUpload() {
-        return (
-            this.props.thread.model !== "mail.box" &&
-            this.props.thread.channel_type !== "chat" &&
-            this.store.self.isInternalUser
-        );
-    }
-
-    toggleAllowPublicUpload() {
-        this.sequential(() =>
-            this.ormService.write("discuss.channel", [this.props.thread.id], {
-                allow_public_upload: !this.props.thread.allow_public_upload,
-            })
-        );
     }
 }

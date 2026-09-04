@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, tools
+from odoo import fields
 from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_common import ValuationReconciliationTestCommon
 from odoo.tests import tagged, common, Form
 
@@ -11,7 +10,7 @@ class TestLifoPrice(ValuationReconciliationTestCommon):
 
     def test_lifoprice(self):
         # Required for `uom_id` to be visible in the view
-        self.env.user.groups_id += self.env.ref('uom.group_uom')
+        self.env.user.group_ids += self.env.ref('uom.group_uom')
 
         # Set product category removal strategy as LIFO
         product_category_001 = self.env['product.category'].create({
@@ -41,14 +40,11 @@ class TestLifoPrice(ValuationReconciliationTestCommon):
         #         product.write({'list_price': value})
         product_form.lst_price = 100.0
         product_form.uom_id = self.env.ref('uom.product_uom_kgm')
-        product_form.uom_po_id = self.env.ref('uom.product_uom_kgm')
         # these are not available (visible) in either product or variant
         # for views, apparently from the UI you can only set the product
         # category (or hand-assign the property_* version which seems...)
         # product_form.categ_id.valuation = 'real_time'
         # product_form.categ_id.property_cost_method = 'fifo'
-        product_form.categ_id.property_stock_account_input_categ_id = self.company_data['default_account_stock_in']
-        product_form.categ_id.property_stock_account_output_categ_id = self.company_data['default_account_stock_out']
         product_lifo_icecream = product_form.save()
 
         product_lifo_icecream.standard_price = 70.0
@@ -93,7 +89,7 @@ class TestLifoPrice(ValuationReconciliationTestCommon):
         # Let us send some goods
         out_form = Form(self.env['stock.picking'])
         out_form.picking_type_id = self.company_data['default_warehouse'].out_type_id
-        with out_form.move_ids_without_package.new() as move:
+        with out_form.move_ids.new() as move:
             move.product_id = product_lifo_icecream
             move.quantity = 20.0
             move.picked = True
@@ -107,4 +103,4 @@ class TestLifoPrice(ValuationReconciliationTestCommon):
         outgoing_lifo_shipment.button_validate()
 
         # Check if the move value correctly reflects the fifo costing method
-        self.assertEqual(outgoing_lifo_shipment.move_ids.stock_valuation_layer_ids.value, -1400.0, 'Stock move value should have been 1400 euro')
+        self.assertEqual(outgoing_lifo_shipment.move_ids.value, 1400.0, 'Stock move value should have been 1400 euro')

@@ -6,6 +6,7 @@ from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError, UserError, AccessError
 
 
+
 class PosPaymentMethod(models.Model):
     _inherit = 'pos.payment.method'
 
@@ -16,8 +17,8 @@ class PosPaymentMethod(models.Model):
     stripe_serial_number = fields.Char(help='[Serial number of the stripe terminal], for example: WSC513105011295', copy=False)
 
     @api.model
-    def _load_pos_data_fields(self, config_id):
-        params = super()._load_pos_data_fields(config_id)
+    def _load_pos_data_fields(self, config):
+        params = super()._load_pos_data_fields(config)
         params += ['stripe_serial_number']
         return params
 
@@ -45,21 +46,11 @@ class PosPaymentMethod(models.Model):
         return stripe_payment_provider
 
     @api.model
-    def _get_stripe_secret_key(self):
-        # TODO: unused, remove in master
-        stripe_secret_key = self._get_stripe_payment_provider().stripe_secret_key
-
-        if not stripe_secret_key:
-            raise ValidationError(_('Complete the Stripe onboarding for company %s.', self.env.company.name))
-
-        return stripe_secret_key
-
-    @api.model
     def stripe_connection_token(self):
         if not self.env.user.has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Do not have access to fetch token from Stripe"))
         
-        return self.sudo()._get_stripe_payment_provider()._stripe_make_request('terminal/connection_tokens')
+        return self.sudo()._get_stripe_payment_provider()._send_api_request('POST', 'terminal/connection_tokens')
 
     def _stripe_calculate_amount(self, amount):
         currency = self.journal_id.currency_id or self.company_id.currency_id
@@ -87,7 +78,22 @@ class PosPaymentMethod(models.Model):
         elif currency.name == 'CAD' and self.company_id.country_code == 'CA':
             params.append(("payment_method_types[]", "interac_present"))
 
-        return self.sudo()._get_stripe_payment_provider()._stripe_make_request('payment_intents', params)
+        return self.sudo()._get_stripe_payment_provider()._send_api_request('POST', 'payment_intents', data=params)
+
+    def stripe_refund(self, payment_intent_id, amount):
+        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+            raise AccessError(_("Do not have access to refund Stripe payment"))
+
+        id_type = "payment_intent" if payment_intent_id.startswith("pi") else "charge"
+        params = [
+            (id_type, payment_intent_id),
+            ("amount", self._stripe_calculate_amount(abs(amount))),
+        ]
+
+        try:
+            return self.sudo()._get_stripe_payment_provider()._send_api_request("POST", "refunds", data=params)
+        except ValidationError as error:
+            return {"error": error}
 
     @api.model
     def stripe_capture_payment(self, paymentIntentId, amount=None):
@@ -105,11 +111,13 @@ class PosPaymentMethod(models.Model):
 
         data = None
         if amount is not None:
+            # No rounding values stored in a model method
+            rounding = self.env.context.get('stripe_currency_rounding', 0.01)
             data = {
-                "amount_to_capture": self._stripe_calculate_amount(amount),
+                "amount_to_capture": round(amount / rounding),
             }
 
-        return self.sudo()._get_stripe_payment_provider()._stripe_make_request(endpoint, data)
+        return self.sudo()._get_stripe_payment_provider()._send_api_request('POST', endpoint, data=data)
 
     def action_stripe_key(self):
         res_id = self._get_stripe_payment_provider().id

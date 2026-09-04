@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
@@ -31,6 +29,10 @@ export class SMLX2ManyField extends X2ManyField {
         });
     }
 
+    get quantListViewShowOnHandOnly(){
+        return true; // To override in mrp_subcontracting
+    }
+
     async onAdd({ context, editable } = {}) {
         if (!this.props.record.data.show_quant) {
             return super.onAdd(...arguments);
@@ -42,15 +44,17 @@ export class SMLX2ManyField extends X2ManyField {
             ...context,
             single_product: true,
             list_view_ref: "stock.view_stock_quant_tree_simple",
-            search_default_on_hand: true,
-            search_default_in_stock: true,
         };
-        const productName = this.props.record.data.product_id[1];
+        const productName = this.props.record.data.product_id.display_name;
         const title = _t("Add line: %s", productName);
         let domain = [
-            ["product_id", "=", this.props.record.data.product_id[0]],
+            ["product_id", "=", this.props.record.data.product_id.id],
             ["location_id", "child_of", this.props.context.default_location_id],
+            ["quantity", ">", 0.0],
         ];
+        if (this.quantListViewShowOnHandOnly) {
+            domain.push(["on_hand", "=", true]);
+        }
         if (this.dirtyQuantsData.size) {
             const notFullyUsed = [];
             const fullyUsed = [];
@@ -75,11 +79,11 @@ export class SMLX2ManyField extends X2ManyField {
         // Since changes of move line quantities will not affect the available quantity of the quant before
         // the record has been saved, it is necessary to determine the offset of the DB quant data.
         this.dirtyQuantsData.clear();
-        const dirtyQuantityMoveLines = this.props.record.data.move_line_ids.records.filter(
+        const dirtyQuantityMoveLines = this._move_line_ids.filter(
             (ml) => !ml.data.quant_id && ml._values.quantity - ml._changes.quantity
         );
-        const dirtyQuantMoveLines = this.props.record.data.move_line_ids.records.filter(
-            (ml) => ml.data.quant_id[0]
+        const dirtyQuantMoveLines = this._move_line_ids.filter(
+            (ml) => ml.data.quant_id.id
         );
         const dirtyMoveLines = [...dirtyQuantityMoveLines, ...dirtyQuantMoveLines];
         if (!dirtyMoveLines.length) {
@@ -89,12 +93,12 @@ export class SMLX2ManyField extends X2ManyField {
             "stock.move.line",
             "get_move_line_quant_match",
             [
-                this.props.record.data.move_line_ids.records
+                this._move_line_ids
                     .filter((rec) => rec.resId)
                     .map((rec) => rec.resId),
                 this.props.record.resId,
                 dirtyMoveLines.filter((rec) => rec.resId).map((rec) => rec.resId),
-                dirtyQuantMoveLines.map((ml) => ml.data.quant_id[0]),
+                dirtyQuantMoveLines.map((ml) => ml.data.quant_id.id),
             ],
             {}
         );
@@ -108,7 +112,7 @@ export class SMLX2ManyField extends X2ManyField {
         }
         const offsetByQuant = new Map();
         for (const ml of dirtyQuantMoveLines) {
-            const quantId = ml.data.quant_id[0];
+            const quantId = ml.data.quant_id.id;
             offsetByQuant.set(quantId, (offsetByQuant.get(quantId) || 0) - ml.data.quantity);
             const dbQuantId = dbMoveLinesData.get(ml.resId)?.quantId;
             if (dbQuantId && quantId != dbQuantId) {
@@ -136,7 +140,7 @@ export class SMLX2ManyField extends X2ManyField {
     async selectRecord(res_ids) {
         const demand =
             this.props.record.data.product_uom_qty -
-            this.props.record.data.move_line_ids.records
+            this._move_line_ids
                 .map((ml) => ml.data.quantity)
                 .reduce((val, sum) => val + sum, 0);
         const params = {
@@ -171,6 +175,10 @@ export class SMLX2ManyField extends X2ManyField {
                 }
             },
         });
+    }
+
+    get _move_line_ids() {
+        return this.props.record.data.move_line_ids.records;
     }
 }
 

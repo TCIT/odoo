@@ -2,12 +2,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models, _
-
-from werkzeug import urls
+from odoo.tools import urls
 
 
 class LinkTracker(models.Model):
-    _inherit = ['link.tracker']
+    _inherit = 'link.tracker'
 
     def action_visit_page_statistics(self):
         return {
@@ -18,6 +17,9 @@ class LinkTracker(models.Model):
         }
 
     def _compute_short_url_host(self):
+        current_website = self.env['website'].get_current_website(fallback=False)
+        if not current_website:
+            return super()._compute_short_url_host()
+        base_url = current_website.get_base_url() if current_website == self.env.company.website_id else self.env.company.get_base_url()
         for tracker in self:
-            base_url = self.env['website'].get_current_website().get_base_url()
-            tracker.short_url_host = urls.url_join(base_url, '/r/')
+            tracker.short_url_host = urls.urljoin(base_url, '/r/')

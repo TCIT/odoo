@@ -15,7 +15,7 @@
                         <t t-name="card" class="row g-0">
                             <widget name="web_ribbon" class="d-flex" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                             <aside class="col-2 my-auto">
-                                <field name="avatar_128" widget="image" options="{'size': [50, 50]}" alt="Channel"/>
+                                <field name="avatar_128" widget="image" options="{'size': [50, 50], 'img_class': 'bg-transparent'}" alt="Channel"/>
                             </aside>
                             <main class="col me-4 ms-2">
                                 <span class="fw-bold fs-5">#<field name="name"/></span>
@@ -30,12 +30,27 @@
             </field>
         </record>
 
+        <record id="mail.discuss_channel_view_list" model="ir.ui.view">
+            <field name="name">discuss.channel.list</field>
+            <field name="model">discuss.channel</field>
+            <field name="priority" eval="10"/>
+            <field name="arch" type="xml">
+                <list string="Channels" default_order="name">
+                    <field name="avatar_128" invisible="parent_channel_id" widget="image" options="{'size': [24, 24]}" width="30" string=""/>
+                    <field name="name"/>
+                    <field name="description"/>
+                    <button type="object" invisible="is_member or group_ids" class="btn btn-primary ms-auto mt-auto" name="channel_join" string="Join"/>
+                    <button type="object" invisible="not is_member or group_ids" class="btn btn-secondary ms-auto mt-auto" name="action_unfollow" string="Leave"/>
+                </list>
+            </field>
+        </record>
+
         <record id="mail.discuss_channel_view_form" model="ir.ui.view">
             <field name="name">discuss.channel.form</field>
             <field name="model">discuss.channel</field>
             <field name="priority" eval="10"/>
             <field name="arch" type="xml">
-                <form string="Mail Channel Form">
+                <form string="Mail Channel Form" duplicate="0">
                     <sheet>
                         <div class="oe_button_box" name="button_box"/>
                         <field name="avatar_128" invisible="1"/>
@@ -50,15 +65,7 @@
                         </div>
                         <group class="o_label_nowrap">
                             <field name="active" invisible="1"/>
-                            <field name="channel_type" groups="base.group_no_one"/>
                             <field name="description" placeholder="Topics discussed in this group..." readonly="not is_editable"/>
-                            <field name="parent_channel_id" groups="base.group_no_one"/>
-                            <field name="sub_channel_ids" groups="base.group_no_one"/>
-                            <field name="from_message_id" groups="base.group_no_one"/>
-                        </group>
-                        <group class="o_label_nowrap" groups="base.group_no_one">
-                            <field name="sfu_channel_uuid"/>
-                            <field name="sfu_server_url"/>
                         </group>
                         <notebook>
                             <page string="Privacy" name="privacy">
@@ -78,6 +85,16 @@
                                         <field name="guest_id" readonly="id or partner_id" required="not partner_id"/>
                                     </list>
                                 </field>
+                            </page>
+                            <page string="Extra info" name="extra_info" groups="base.group_no_one">
+                                <group class="o_label_nowrap">
+                                    <field name="channel_type"/>
+                                    <field name="parent_channel_id"/>
+                                    <field name="sub_channel_ids"/>
+                                    <field name="from_message_id"/>
+                                    <field name="sfu_channel_uuid"/>
+                                    <field name="sfu_server_url"/>
+                                </group>
                             </page>
                             <page string="Integrations" invisible="1" name="discuss_channel_integrations"></page>
                         </notebook>
@@ -114,6 +131,14 @@
             <field name="res_model">discuss.channel</field>
             <field name="view_mode">kanban,list,form</field>
             <field name="search_view_id" ref="discuss_channel_view_search"/>
+        </record>
+
+        <record id="mail.discuss_channel_action" model="ir.actions.act_window">
+            <field name="name">Channels</field>
+            <field name="res_model">discuss.channel</field>
+            <field name="view_mode">kanban,form</field>
+            <field name="domain" eval="[(('channel_type', '=', 'channel'))]" />
+            <field name="search_view_id" ref="discuss_channel_view_search" />
         </record>
 
     <record id="mail.action_discuss" model="ir.actions.client">

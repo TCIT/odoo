@@ -4,8 +4,24 @@ from stdnum.fr import siret
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
-from odoo.addons.account_edi_ubl_cii.models.account_edi_common import EAS_MAPPING
+from odoo.addons.account_edi_ubl_cii.models.account_edi_common import EAS_MAPPING, DEPRECATED_PEPPOL_EAS
 from odoo.addons.account.models.company import PEPPOL_DEFAULT_COUNTRIES
+from odoo.tools import single_email_re
+
+
+PEPPOL_ENDPOINT_INVALIDCHARS_RE = re.compile(r'[^a-zA-Z\d\-._~]')
+PEPPOL_ENDPOINT_INVALID_CHARS_RE_BY_EAS = {
+    '0208': re.compile(r'[^0-9]'),
+    '9925': re.compile(r'[^beBE0-9]'),
+    'EM': re.compile(r'[^a-zA-Z\d\-._@]'),
+}
+
+
+def sanitize_peppol_endpoint(peppol_endpoint, eas=None):
+    if not peppol_endpoint:
+        return peppol_endpoint
+    sanitizer = PEPPOL_ENDPOINT_INVALID_CHARS_RE_BY_EAS.get(eas, PEPPOL_ENDPOINT_INVALIDCHARS_RE)
+    return sanitizer.sub('', peppol_endpoint)
 
 
 class ResPartner(models.Model):
@@ -13,12 +29,13 @@ class ResPartner(models.Model):
 
     invoice_edi_format = fields.Selection(
         selection_add=[
-            ('facturx', "Factur-X (CII)"),
-            ('ubl_bis3', "BIS Billing 3.0"),
-            ('xrechnung', "XRechnung CIUS"),
-            ('nlcius', "NLCIUS"),
-            ('ubl_a_nz', "BIS Billing 3.0 A-NZ"),
-            ('ubl_sg', "BIS Billing 3.0 SG"),
+            ('facturx', "France (FacturX)"),
+            ('ubl_bis3', "EU Standard (Peppol Bis 3.0)"),
+            ('zugferd', "Germany (ZUGFeRD)"),
+            ('xrechnung', "Germany (XRechnung)"),
+            ('nlcius', "Netherlands (NLCIUS)"),
+            ('ubl_a_nz', "Australia (BIS Billing 3.0 A-NZ)"),
+            ('ubl_sg', "Singapore (BIS Billing 3.0 SG)"),
         ],
     )
     is_ubl_format = fields.Boolean(compute='_compute_is_ubl_format')
@@ -46,7 +63,7 @@ class ResPartner(models.Model):
             ('9914', "Austria UID"),
             ('9915', "Austria VOKZ"),
             ('0208', "Belgian Company Registry"),
-            ('9925', "Belgian VAT number"),
+            ('9925', "Belgian VAT"),
             ('9924', "Bosnia and Herzegovina VAT"),
             ('9926', "Bulgaria VAT"),
             ('9934', "Croatia VAT"),
@@ -63,6 +80,9 @@ class ResPartner(models.Model):
             ('0002', "France SIRENE"),
             ('0009', "France SIRET"),
             ('9957', "France VAT"),
+            ('0225', "France FRCTC Electronic Address"),
+            ('0240', "France Register of legal persons"),
+            ('0246', "German Electronic Business Address"),
             ('0204', "Germany Leitweg-ID"),
             ('9930', "Germany VAT"),
             ('9933', "Greece VAT"),
@@ -73,6 +93,7 @@ class ResPartner(models.Model):
             ('0097', "Italia FTI"),
             ('0188', "Japan SST"),
             ('0221', "Japan IIN"),
+            ('0218', "Latvia Unified registration number"),
             ('9939', "Latvia VAT"),
             ('9936', "Liechtenstein VAT"),
             ('0200', "Lithuania JAK"),
@@ -86,12 +107,14 @@ class ResPartner(models.Model):
             ('0106', "Netherlands KvK"),
             ('0190', "Netherlands OIN"),
             ('9944', "Netherlands VAT"),
+            ('0244', "Nigeria Tax Identification"),
             ('0192', "Norway Org.nr."),
             ('9945', "Poland VAT"),
             ('9946', "Portugal VAT"),
             ('9947', "Romania VAT"),
             ('9948', "Serbia VAT"),
             ('0195', "Singapore UEN"),
+            ('0245', "SK Tax identification number (DIČ)"),
             ('9949', "Slovenia VAT"),
             ('9950', "Slovakia VAT"),
             ('9920', "Spain VAT"),
@@ -100,6 +123,7 @@ class ResPartner(models.Model):
             ('9927', "Swiss VAT"),
             ('0183', "Swiss UIDB"),
             ('9952', "Turkey VAT"),
+            ('0235', "UAE Tax Identification Number (TIN)"),
             ('9932', "United Kingdom VAT"),
             ('9959', "USA EIN"),
             ('0060', "DUNS Number"),
@@ -118,8 +142,14 @@ class ResPartner(models.Model):
             ('9919', "Kennziffer des Unternehmensregisters"),
             ('9951', "San Marino VAT"),
             ('9953', "Vatican VAT"),
+            ('AN', "O.F.T.P. (ODETTE File Transfer Protocol)"),
+            ('AQ', "X.400 address for mail text"),
+            ('AS', "AS2 exchange"),
+            ('AU', "File Transfer Protocol"),
+            ('EM', "Electronic mail"),
         ]
     )
+    available_peppol_eas = fields.Json(compute='_compute_available_peppol_eas')
 
     @api.constrains('peppol_endpoint')
     def _check_peppol_fields(self):
@@ -136,12 +166,18 @@ class ResPartner(models.Model):
     @api.model
     def _get_ubl_cii_formats_info(self):
         return {
-            'ubl_bis3': {'countries': list(PEPPOL_DEFAULT_COUNTRIES), 'on_peppol': True, 'sequence': 200},
-            'xrechnung': {'countries': ['DE'], 'on_peppol': True},
+            'ubl_bis3': {
+                'countries': list(PEPPOL_DEFAULT_COUNTRIES),
+                'on_peppol': True,
+                'sequence': 200,
+                'embed_attachments': True,
+            },
+            'xrechnung': {'countries': ['DE'], 'sequence': 200, 'on_peppol': True},
             'ubl_a_nz': {'countries': ['NZ', 'AU'], 'on_peppol': False},  # Not yet available through Odoo's Access Point, although it's a Peppol valid format
             'nlcius': {'countries': ['NL'], 'on_peppol': True},
             'ubl_sg': {'countries': ['SG'], 'on_peppol': False},  # Same.
             'facturx': {'countries': ['FR'], 'on_peppol': False},
+            'zugferd': {'countries': ['DE'], 'on_peppol': False},
         }
 
     @api.model
@@ -166,9 +202,15 @@ class ResPartner(models.Model):
             if len(formats_by_country) == 1:
                 return formats_by_country[0]
             else:
+                if self.peppol_eas == '0204':
+                    return 'xrechnung'
                 formats_info = self._get_ubl_cii_formats_info()
                 return min(formats_by_country, key=lambda e: formats_info[e].get('sequence', 100))  # we use a sequence of 100 by default
         return False
+
+    def _get_ubl_cii_edi_format(self):
+        self.ensure_one()
+        return self.invoice_edi_format or self._get_suggested_ubl_cii_edi_format()
 
     def _get_suggested_peppol_edi_format(self):
         self.ensure_one()
@@ -189,11 +231,6 @@ class ResPartner(models.Model):
         # because we need to extend depends in l10n modules
         return ['country_code', 'vat', 'company_registry']
 
-    @api.depends(lambda self: self._peppol_eas_endpoint_depends())
-    def _compute_invoice_edi_format(self):
-        # EXTENDS 'account' - add depends
-        super()._compute_invoice_edi_format()
-
     @api.depends_context('company')
     @api.depends('invoice_edi_format')
     def _compute_is_ubl_format(self):
@@ -206,19 +243,37 @@ class ResPartner(models.Model):
         for partner in self:
             partner.is_peppol_edi_format = partner.invoice_edi_format in self._get_peppol_formats()
 
-    @api.depends(lambda self: self._peppol_eas_endpoint_depends() + ['peppol_eas'])
+    def _get_peppol_endpoint_value(self, country_code, field, eas):
+        self.ensure_one()
+        # Field `peppol_endpoint` can be used as placeholer for custom logic (by extending this function)
+        if field == 'peppol_endpoint':
+            return None
+
+        value = field in self._fields and self[field]
+
+        if (
+            country_code == 'BE'
+            and field == 'company_registry'
+            and not value
+            and self.vat
+        ):
+            value = self.vat
+            if value.isalnum():
+                value = value.removeprefix(country_code)
+
+        return sanitize_peppol_endpoint(value, eas)
+
+    @api.depends('peppol_eas')
     def _compute_peppol_endpoint(self):
         """ If the EAS changes and a valid endpoint is available, set it. Otherwise, keep the existing value."""
         for partner in self:
-            partner.peppol_endpoint = partner.peppol_endpoint
+            partner.peppol_endpoint = sanitize_peppol_endpoint(partner.peppol_endpoint, partner.peppol_eas)
             country_code = partner._deduce_country_code()
             if country_code in EAS_MAPPING:
                 field = EAS_MAPPING[country_code].get(partner.peppol_eas)
-                if field \
-                        and field in partner._fields \
-                        and partner[field] \
-                        and not partner._build_error_peppol_endpoint(partner.peppol_eas, partner[field]):
-                    partner.peppol_endpoint = partner[field]
+                value = partner._get_peppol_endpoint_value(country_code, field, partner.peppol_eas)
+                if field and value and not partner._build_error_peppol_endpoint(partner.peppol_eas, value):
+                    partner.peppol_endpoint = value
 
     @api.depends(lambda self: self._peppol_eas_endpoint_depends())
     def _compute_peppol_eas(self):
@@ -231,15 +286,31 @@ class ResPartner(models.Model):
             country_code = partner._deduce_country_code()
             if country_code in EAS_MAPPING:
                 eas_to_field = EAS_MAPPING[country_code]
-                if partner.peppol_eas not in eas_to_field.keys():
-                    new_eas = next(iter(EAS_MAPPING[country_code].keys()))
+                if partner.peppol_eas not in eas_to_field:
+                    candidates = {
+                        eas: field
+                        for eas, field in eas_to_field.items()
+                        if eas not in DEPRECATED_PEPPOL_EAS
+                    } or eas_to_field
+                    new_eas = next(iter(candidates))
                     # Iterate on the possible EAS until a valid one is found
-                    for eas, field in eas_to_field.items():
-                        if field and field in partner._fields and partner[field]:
-                            if not partner._build_error_peppol_endpoint(eas, partner[field]):
+                    for eas, field in candidates.items():
+                        if field and field in partner._fields:
+                            value = partner._get_peppol_endpoint_value(country_code, field, eas)
+                            if value and not partner._build_error_peppol_endpoint(eas, value):
                                 new_eas = eas
                                 break
                     partner.peppol_eas = new_eas
+
+    @api.depends_context('company')
+    @api.depends('company_id', 'peppol_eas')
+    def _compute_available_peppol_eas(self):
+        # TO OVERRIDE
+        for partner in self:
+            partner.available_peppol_eas = [
+                eas for eas in dict(partner._fields['peppol_eas'].selection)
+                if eas not in DEPRECATED_PEPPOL_EAS or eas == partner.peppol_eas
+            ]
 
     def _build_error_peppol_endpoint(self, eas, endpoint):
         """ This function contains all the rules regarding the peppol_endpoint."""
@@ -251,12 +322,18 @@ class ResPartner(models.Model):
             return _("The Peppol endpoint is not valid. "
                      "It should contain exactly 10 digits (Company Registry number)."
                      "The expected format is: 1234567890")
+        if eas == 'EM' and not single_email_re.match(endpoint):
+            return _("The Peppol endpoint is not valid. A valid email is required")
+        invalid_chars_re = PEPPOL_ENDPOINT_INVALID_CHARS_RE_BY_EAS.get(eas, PEPPOL_ENDPOINT_INVALIDCHARS_RE)
+        if invalid_chars_re.search(endpoint) or not 1 <= len(endpoint) <= 50:
+            return _("The Peppol endpoint (%s) is not valid. It should contain only letters and digit.", endpoint)
 
     @api.model
     def _get_edi_builder(self, invoice_edi_format):
         if invoice_edi_format == 'xrechnung':
             return self.env['account.edi.xml.ubl_de']
-        if invoice_edi_format == 'facturx':
+        # Same template for the two formats (France and Germany)
+        if invoice_edi_format in ('facturx', 'zugferd'):
             return self.env['account.edi.xml.cii']
         if invoice_edi_format == 'ubl_a_nz':
             return self.env['account.edi.xml.ubl_a_nz']
@@ -266,3 +343,16 @@ class ResPartner(models.Model):
             return self.env['account.edi.xml.ubl_bis3']
         if invoice_edi_format == 'ubl_sg':
             return self.env['account.edi.xml.ubl_sg']
+
+    @api.model
+    def _import_retrieve_customer_from_eas_endpoint(self, customer_values):
+        peppol_eas = customer_values.get('peppol_eas')
+        peppol_endpoint = customer_values.get('peppol_endpoint')
+        if not peppol_eas or not peppol_endpoint:
+            return
+
+        return {
+            'criteria': [{
+                'domain': [('peppol_eas', '=', peppol_eas), ('peppol_endpoint', '=', peppol_endpoint)],
+            }],
+        }

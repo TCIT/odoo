@@ -4,6 +4,7 @@ import { descendants } from "../utils/dom_traversal";
 
 export class CommentPlugin extends Plugin {
     static id = "comment";
+    /** @type {import("plugins").EditorResources} */
     resources = {
         normalize_handlers: this.removeComment.bind(this),
     };
@@ -12,7 +13,6 @@ export class CommentPlugin extends Plugin {
         for (const el of [node, ...descendants(node)]) {
             if (el.nodeType === Node.COMMENT_NODE && !isProtected(el)) {
                 el.remove();
-                return;
             }
         }
     }

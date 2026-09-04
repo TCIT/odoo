@@ -1,24 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* sale_pdf_quote_builder
-# 
-# Translators:
-# zakariya moradi, 2025
-# Tiffany Chang, 2025
-# 
+# * sale_pdf_quote_builder
+#
+# ebrahim khorami <ebrahim@farasat.co>, 2026.
+# Aliraza Habibitanha <alireza.habibitanha@gmail.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:40+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Tiffany Chang, 2025\n"
-"Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-05 21:52+0000\n"
+"Last-Translator: Aliraza Habibitanha <alireza.habibitanha@gmail.com>\n"
+"Language-Team: Persian <https://translate.odoo.com/projects/odoo-19/"
+"sale_pdf_quote_builder/fa/>\n"
+"Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fa\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: sale_pdf_quote_builder
 #: model:ir.actions.report,print_report_name:sale_pdf_quote_builder.action_report_saleorder_raw
@@ -26,8 +26,11 @@ msgid ""
 "(object.state in ('draft', 'sent') and 'Quotation - %s' % (object.name)) or "
 "'Order - %s' % (object.name)"
 msgstr ""
-"(object.state in ('draft', 'sent') and 'پیش‌فاکتور  - %s' % (object.name)) "
-"or 'سفارش - %s' % (object.name)"
+
+#. module: sale_pdf_quote_builder
+#: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.sale_order_template_form
+msgid "<i class=\"fa fa-arrow-right\"/> Link to the demo video"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
@@ -43,77 +46,92 @@ msgstr ""
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_pdf_form_field.py:0
 msgid ""
-"A form field set as used in product documents can't be linked to a quotation"
-" document."
+"A form field set as used in product documents can't be linked to a quotation "
+"document."
 msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_pdf_form_field.py:0
 msgid ""
-"A form field set as used in quotation documents can't be linked to a product"
-" document."
+"A form field set as used in quotation documents can't be linked to a product "
+"document."
 msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__access_token
 msgid "Access Token"
-msgstr "توکن دسترسی"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__active
 msgid "Active"
-msgstr "فعال"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__add_by_default
+#: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
+msgid "Add By Default"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
 msgid "All"
-msgstr "همه"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/controllers/quotation_document.py:0
 msgid "All files uploaded"
-msgstr "همه فایل ها آپلود شد"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,help:sale_pdf_quote_builder.field_product_document__attached_on_sale
 msgid ""
 "Allows you to share the document with your customers within a sale.\n"
-"Leave it empty if you don't want to share this document with sales customer.\n"
-"On quote: the document will be sent to and accessible by customers at any time.\n"
+"Leave it empty if you don't want to share this document with sales "
+"customer.\n"
+"On quote: the document will be sent to and accessible by customers at any "
+"time.\n"
 "e.g. this option can be useful to share Product description files.\n"
-"On order confirmation: the document will be sent to and accessible by customers.\n"
-"e.g. this option can be useful to share User Manual or digital content bought on ecommerce. \n"
-"Inside quote: The document will be included in the pdf of the quotation and sale order between the header pages and the quote table. "
+"On order confirmation: the document will be sent to and accessible by "
+"customers.\n"
+"e.g. this option can be useful to share User Manual or digital content "
+"bought on ecommerce. \n"
+"Inside quote: The document will be included in the pdf of the quotation and "
+"sale order between the header pages and the quote table. "
 msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
 msgid "Archived"
-msgstr "بایگانی شده"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
 msgid "Attached To"
-msgstr "پیوست به"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__local_url
 msgid "Attachment URL"
-msgstr "پیوست URL"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order__available_product_document_ids
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order_line__available_product_document_ids
 msgid "Available Product Documents"
 msgstr ""
 
 #. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order__available_quotation_document_ids
+msgid "Available Quotation Documents"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__checksum
 msgid "Checksum/SHA1"
-msgstr "کنترل مجموع/SHA1"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-javascript
@@ -124,7 +142,7 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__company_id
 msgid "Company"
-msgstr "شرکت"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.product_document_form
@@ -141,18 +159,18 @@ msgstr ""
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__create_uid
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__create_uid
 msgid "Created by"
-msgstr "ایجاد شده توسط"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__create_date
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__create_date
 msgid "Created on"
-msgstr "ایجاد شده در"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
 msgid "Creation"
-msgstr "ایجاد"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search
@@ -167,23 +185,28 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__db_datas
 msgid "Database Data"
-msgstr "داده پایگاه داده"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
 msgid "Delete"
-msgstr "حذف"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__description
 msgid "Description"
-msgstr "توضیحات"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_ir_actions_report__display_name
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__display_name
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__display_name
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order__display_name
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order_line__display_name
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order_template__display_name
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__display_name
 msgid "Display Name"
-msgstr "نام نمایشی"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__document_type
@@ -199,7 +222,7 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
 msgid "Download"
-msgstr "دانلود"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.sale_order_template_form
@@ -209,33 +232,29 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
 msgid "Edit"
-msgstr "ویرایش"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__datas
 msgid "File Content (base64)"
-msgstr "محتوای فایل (base64)"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__raw
 msgid "File Content (raw)"
 msgstr ""
-"I'm sorry, I need the actual content of the text that you want me to "
-"translate into Persian. Please provide the specific text from the file "
-"content related to Odoo modules, and I'll translate it for you while "
-"preserving HTML tags and formatting."
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__file_size
 msgid "File Size"
-msgstr "حجم فایل"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_order.py:0
 #: model:ir.model.fields.selection,name:sale_pdf_quote_builder.selection__quotation_document__document_type__footer
 msgid "Footer"
-msgstr "پاورقی"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__name
@@ -266,16 +285,16 @@ msgid "Form fields of inside quotation documents."
 msgstr ""
 
 #. module: sale_pdf_quote_builder
-#: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
-msgid "Group By"
-msgstr "گروه‌بندی برمبنای"
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__has_thumbnail
+msgid "Has Thumbnail"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_order.py:0
 #: model:ir.model.fields.selection,name:sale_pdf_quote_builder.selection__quotation_document__document_type__header
 msgid "Header"
-msgstr "سربرگ"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields.selection,name:sale_pdf_quote_builder.selection__sale_pdf_form_field__document_type__quotation_document
@@ -293,18 +312,29 @@ msgstr ""
 #: model:ir.ui.menu,name:sale_pdf_quote_builder.sale_menu_quotation_document_action
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.res_config_settings_view_form
 msgid "Headers/Footers"
-msgstr ""
+msgstr "سربرگ‌ها / پانویس‌ها"
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
 msgid "History"
-msgstr "تاریخچه"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_ir_actions_report__id
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__id
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__id
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order__id
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order_line__id
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order_template__id
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__id
 msgid "ID"
-msgstr "شناسه"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
+#: model:ir.model.fields,help:sale_pdf_quote_builder.field_quotation_document__add_by_default
+msgid ""
+"If checked, this header or footer will be added by default on new quotes."
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,help:sale_pdf_quote_builder.field_quotation_document__active
@@ -316,22 +346,22 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__image_height
 msgid "Image Height"
-msgstr "ارتفاع تصویر"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__image_src
 msgid "Image Src"
-msgstr "منبع تصویر"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__image_width
 msgid "Image Width"
-msgstr "عرض تصویر"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__index_content
 msgid "Indexed Content"
-msgstr "محتوای ایندکس شده"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields.selection,name:sale_pdf_quote_builder.selection__product_document__attached_on_sale__inside
@@ -370,7 +400,7 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__public
 msgid "Is public document"
-msgstr "یک سند عمومی است"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
@@ -379,25 +409,23 @@ msgid ""
 "It seems that we're not able to process this pdf inside a quotation. It is "
 "either encrypted, or encoded in a format we do not support."
 msgstr ""
-"به نظر می‌رسد که قادر به پردازش این فایل پی‌دی‌اف درون یک نقل‌قول نیستیم. یا"
-" رمزگذاری شده است، یا به فرمتی کدگذاری شده است که از آن پشتیبانی نمی‌کنیم."
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__key
 msgid "Key"
-msgstr "کلید"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__write_uid
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__write_uid
 msgid "Last Updated by"
-msgstr "آخرین بروز رسانی توسط"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__write_date
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__write_date
 msgid "Last Updated on"
-msgstr "آخرین بروز رسانی در"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
@@ -407,24 +435,24 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__mimetype
 msgid "Mime Type"
-msgstr "نوع MIME"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__name
 msgid "Name"
-msgstr "نام"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/ir_actions_report.py:0
 msgid "No"
-msgstr "خیر"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/product_document.py:0
 msgid "Only PDF documents can be attached inside a quote."
-msgstr "فقط می‌توان اسناد PDF را درون یک پیشنهاد پیوست کرد."
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
@@ -435,12 +463,12 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__original_id
 msgid "Original (unoptimized, unresized) attachment"
-msgstr "پیوست اصلی (بهینه‌نشده، تغییر اندازه نداده)"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_pdf_form_field__path
 msgid "Path"
-msgstr "مسیر"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.actions.act_window,help:sale_pdf_quote_builder.quotation_document_action
@@ -454,19 +482,19 @@ msgstr ""
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_pdf_form_field.py:0
 msgid "Please use only relational fields until the last value of your path."
-msgstr ""
+msgstr "لطفاً تا آخرین مقدار مسیر، فقط از فیلدهای رابطه‌ای استفاده کنید."
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_order.py:0
 msgid "Product"
-msgstr "محصول"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model,name:sale_pdf_quote_builder.model_product_document
 #: model:ir.model.fields.selection,name:sale_pdf_quote_builder.selection__sale_pdf_form_field__document_type__product_document
 msgid "Product Document"
-msgstr "سند محصول"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_sale_order_line__product_document_ids
@@ -477,17 +505,22 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.sale_order_template_form
 msgid ""
-"Provide header pages and footer pages to compose an attractive quotation with more information\n"
-"                        about your company, your products and you services. <br/>\n"
-"                        The pdf of your quotes will be built by putting together header pages, product descriptions,\n"
-"                        details of the quote and then the footer pages. <br/>\n"
-"                        If empty, it will use those define in the company settings. <br/>"
+"Provide header pages and footer pages to compose an attractive quotation "
+"with more information\n"
+"                        about your company, your products and you services. "
+"<br/>\n"
+"                        The pdf of your quotes will be built by putting "
+"together header pages, product descriptions,\n"
+"                        details of the quote and then the footer pages. <br/"
+">\n"
+"                        If empty, it will use those define in the company "
+"settings. <br/>"
 msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.actions.report,name:sale_pdf_quote_builder.action_report_saleorder_raw
 msgid "Quotation / Order"
-msgstr "پیش فاکتور / سفارش"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
@@ -503,12 +536,12 @@ msgstr ""
 #: model:ir.model,name:sale_pdf_quote_builder.model_sale_order_template
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
 msgid "Quotation Template"
-msgstr "قالب پیش‌فاکتور"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__quotation_template_ids
 msgid "Quotation Templates"
-msgstr "قالب‌های پیش‌فاکتور"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model,name:sale_pdf_quote_builder.model_quotation_document
@@ -522,34 +555,39 @@ msgid "Quote Builder"
 msgstr ""
 
 #. module: sale_pdf_quote_builder
+#: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.sale_order_template_form
+msgid "Quote Builder Demo Video"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__ir_attachment_id
 msgid "Related attachment"
-msgstr "پیوست مربوطه"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model,name:sale_pdf_quote_builder.model_ir_actions_report
 msgid "Report Action"
-msgstr "اکشن گزارش"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__res_field
 msgid "Resource Field"
-msgstr "فیلد منبع"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__res_id
 msgid "Resource ID"
-msgstr "شناسه منبع"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__res_model
 msgid "Resource Model"
-msgstr "مدل منبع"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__res_name
 msgid "Resource Name"
-msgstr "نام منبع"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__attached_on_sale
@@ -564,22 +602,22 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model,name:sale_pdf_quote_builder.model_sale_order
 msgid "Sales Order"
-msgstr "سفارش فروش"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model,name:sale_pdf_quote_builder.model_sale_order_line
 msgid "Sales Order Line"
-msgstr "سطر سفارش‌فروش"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__sequence
 msgid "Sequence"
-msgstr "دنباله"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__store_fname
 msgid "Stored Filename"
-msgstr "نام فایل ذخیره شده"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
@@ -609,7 +647,7 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__theme_template_id
 msgid "Theme Template"
-msgstr "قالبهای تم"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search
@@ -617,9 +655,14 @@ msgid "This document"
 msgstr ""
 
 #. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__thumbnail
+msgid "Thumbnail"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__type
 msgid "Type"
-msgstr "نوع"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.actions.act_window,help:sale_pdf_quote_builder.quotation_document_action
@@ -629,7 +672,7 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__url
 msgid "Url"
-msgstr "آدرس وب"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
@@ -639,26 +682,24 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__voice_ids
 msgid "Voice"
-msgstr "صوت"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__website_id
 msgid "Website"
-msgstr "تارنما"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/product_document.py:0
 msgid "When attached inside a quote, the document must be a file, not a URL."
 msgstr ""
-"هنگامی که در داخل یک نقل‌قول پیوست می‌شود، سند باید یک فایل باشد، نه یک آدرس"
-" اینترنتی."
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/ir_actions_report.py:0
 msgid "Yes"
-msgstr "بله"
+msgstr ""
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,help:sale_pdf_quote_builder.field_quotation_document__type
@@ -666,10 +707,8 @@ msgid ""
 "You can either upload a file from your computer or copy/paste an internet "
 "link to your file."
 msgstr ""
-"می توانید یک فایل را از رایانه خود آپلود کنید یا یک لینک اینترنتی را در فایل"
-" خود کپی/پیست کنید."
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
 msgid "on"
-msgstr "در"
+msgstr ""

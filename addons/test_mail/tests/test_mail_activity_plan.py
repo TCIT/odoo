@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
 
-from odoo import Command, fields
-from odoo.addons.mail.tests.test_mail_activity import ActivityScheduleCase
-from odoo.exceptions import ValidationError
+from odoo import fields
+from odoo.addons.mail.tests.common import mail_new_test_user
+from odoo.addons.mail.tests.common_activity import ActivityScheduleCase
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests import Form, tagged, users
 from odoo.tools.misc import format_date
 
@@ -25,12 +26,32 @@ class TestActivitySchedule(ActivityScheduleCase):
     def setUpClass(cls):
         super().setUpClass()
 
+        # add some triggered and suggested next activitities
+        cls.test_type_1, cls.test_type_2, cls.test_type_3 = cls.env['mail.activity.type'].create([
+            {'name': 'TestAct1', 'res_model': 'mail.test.activity',},
+            {'name': 'TestAct2', 'res_model': 'mail.test.activity',},
+            {'name': 'TestAct3', 'res_model': 'mail.test.activity',},
+        ])
+        cls.test_type_1.write({
+            'chaining_type': 'trigger',
+            'delay_count': 2,
+            'delay_from': 'current_date',
+            'delay_unit': 'days',
+            'triggered_next_type_id': cls.test_type_2.id,
+        })
+        cls.test_type_2.write({
+            'chaining_type': 'suggest',
+            'delay_count': 3,
+            'delay_unit': 'weeks',
+            'suggested_next_type_ids': [(4, cls.test_type_1.id), (4, cls.test_type_3.id)],
+        })
+
         # prepare plans
         cls.plan_party = cls.env['mail.activity.plan'].create({
             'name': 'Test Plan A Party',
             'res_model': 'mail.test.activity',
             'template_ids': [
-                Command.create({
+                (0, 0, {
                     'activity_type_id': cls.activity_type_todo.id,
                     'delay_count': 1,
                     'delay_from': 'before_plan_date',
@@ -38,7 +59,7 @@ class TestActivitySchedule(ActivityScheduleCase):
                     'responsible_type': 'on_demand',
                     'sequence': 10,
                     'summary': 'Book a place',
-                }), Command.create({
+                }), (0, 0, {
                     'activity_type_id': cls.activity_type_todo.id,
                     'delay_count': 1,
                     'delay_from': 'after_plan_date',
@@ -54,7 +75,7 @@ class TestActivitySchedule(ActivityScheduleCase):
             'name': 'Test Onboarding',
             'res_model': 'mail.test.activity',
             'template_ids': [
-                Command.create({
+                (0, 0, {
                     'activity_type_id': cls.activity_type_todo.id,
                     'delay_count': 3,
                     'delay_from': 'before_plan_date',
@@ -63,7 +84,7 @@ class TestActivitySchedule(ActivityScheduleCase):
                     'responsible_type': 'other',
                     'sequence': 10,
                     'summary': 'Plan training',
-                }), Command.create({
+                }), (0, 0, {
                     'activity_type_id': cls.activity_type_todo.id,
                     'delay_count': 2,
                     'delay_from': 'after_plan_date',
@@ -86,10 +107,16 @@ class TestActivitySchedule(ActivityScheduleCase):
             } for idx in range(5)
         ])
 
+        # some big dict comparisons
+        cls.maxDiff = None
+
     @users('employee')
     def test_activity_schedule(self):
         """ Test schedule of an activity on a single or multiple records. """
         test_records_all = [self.test_records[0], self.test_records[:3]]
+        # sanity check: new activity created without specifying activiy type
+        # will have default type of the available activity type with the lowest sequence, then lowest id
+        self.assertTrue(self.activity_type_todo.sequence < self.activity_type_call.sequence)
         for test_idx, test_case in enumerate(['mono', 'multi']):
             test_records = test_records_all[test_idx].with_env(self.env)
             with self.subTest(test_case=test_case, test_records=test_records):
@@ -116,6 +143,7 @@ class TestActivitySchedule(ActivityScheduleCase):
                 with freeze_time(self.reference_now):
                     form = self._instantiate_activity_schedule_wizard(test_records)
                     form.activity_type_id = self.activity_type_call
+                    form.activity_user_id = self.user_admin
                     with self._mock_activities(), freeze_time(self.reference_now):
                         form.save().with_context(
                             mail_activity_quick_update=True
@@ -124,40 +152,12 @@ class TestActivitySchedule(ActivityScheduleCase):
                 for record in test_records:
                     self.assertActivityDoneOnRecord(record, self.activity_type_call)
 
-                # 3. LOG DONE ACTIVITIES, PREPARE SCHEDULE NEXT
-                with freeze_time(self.reference_now):
-                    form = self._instantiate_activity_schedule_wizard(test_records)
-                    form.activity_type_id = self.activity_type_todo
-                    with self._mock_activities():
-                        wizard_res = form.save().with_context(
-                            mail_activity_quick_update=True
-                        ).action_schedule_activities_done_and_schedule()
-                self.assertDictEqual(wizard_res, {
-                    'name': "Schedule Activity On Selected Records" if len(test_records) > 1 else "Schedule Activity",
-                    'context': {
-                        'active_id': test_records[0].id,
-                        'active_ids': test_records.ids,
-                        'active_model': test_records._name,
-                        'mail_activity_quick_update': True,
-                        'default_previous_activity_type_id': 4,
-                        'activity_previous_deadline': self.reference_now.date() + timedelta(days=4),
-                        'default_res_ids': repr(test_records.ids),
-                        'default_res_model': test_records._name,
-                    },
-                    'view_mode': 'form',
-                    'res_model': 'mail.activity.schedule',
-                    'views': [(False, 'form')],
-                    'type': 'ir.actions.act_window',
-                    'target': 'new',
-                })
-                for record in test_records:
-                    self.assertActivityDoneOnRecord(record, self.activity_type_todo)
-
-                # 4. CONTINUE WITH SCHEDULE ACTIVITIES
+                # 3. CONTINUE WITH SCHEDULE ACTIVITIES
                 # implies deadline addition on top of previous activities
                 with freeze_time(self.reference_now):
-                    form = Form(self.env['mail.activity.schedule'].with_context(wizard_res['context']))
+                    form = self._instantiate_activity_schedule_wizard(test_records)
                     form.activity_type_id = self.activity_type_call
+                    form.activity_user_id = self.user_admin
                     with self._mock_activities():
                         form.save().with_context(
                             mail_activity_quick_update=True
@@ -167,10 +167,10 @@ class TestActivitySchedule(ActivityScheduleCase):
                     self.assertActivityCreatedOnRecord(record, {
                         'activity_type_id': self.activity_type_call,
                         'automated': False,
-                        'date_deadline': self.reference_now.date() + timedelta(days=5),  # both types delays
+                        'date_deadline': self.reference_now.date() + timedelta(days=1),  # activity call delay
                         'note': False,
-                        'summary': False,
-                        'user_id': self.env.user,
+                        'summary': 'TodoSumCallSummary',
+                        'user_id': self.user_admin,
                     })
 
         # global activity creation from tests
@@ -179,6 +179,50 @@ class TestActivitySchedule(ActivityScheduleCase):
         self.assertEqual(len(self.test_records[2].activity_ids), 2)
         self.assertEqual(len(self.test_records[3].activity_ids), 0)
         self.assertEqual(len(self.test_records[4].activity_ids), 0)
+
+    @users('admin')
+    def test_activity_schedule_rights_upload(self):
+        user = mail_new_test_user(
+            self.env,
+            groups='base.group_public',
+            login='bert',
+            name='Bert Tartignole',
+        )
+        demo_record, demo_record2 = self.env['mail.test.access'].create([
+            {'access': 'admin', 'name': 'Record'},
+            {'access': 'admin', 'name': 'Record'},
+            ])
+        form = self._instantiate_activity_schedule_wizard(demo_record + demo_record2)
+        form.activity_type_id = self.env.ref('test_mail.mail_act_test_upload_document')
+        with self.assertRaises(UserError):
+            form.activity_user_id = user
+        form.save()
+
+    @users('employee')
+    def test_activity_schedule_norecord(self):
+        """ Test scheduling free activities, supported if assigned user. """
+        scheduler = self._instantiate_activity_schedule_wizard(None)
+        self.assertEqual(scheduler.activity_type_id, self.activity_type_todo)
+        with self._mock_activities():
+            scheduler.save().action_schedule_activities()
+        self.assertActivityValues(self._new_activities, {
+            'res_id': False,
+            'res_model': False,
+            'summary': 'TodoSummary',
+            'user_id': self.user_employee,
+        })
+
+        # cannot scheduler unassigned personal activities
+        scheduler = self._instantiate_activity_schedule_wizard(None)
+        scheduler = scheduler.save()
+        with self.assertRaises(ValidationError):
+            scheduler.activity_user_id = False
+
+    def test_plan_copy(self):
+        """Test plan copy"""
+        copied_plan = self.plan_onboarding.copy()
+        self.assertEqual(copied_plan.name, f'{self.plan_onboarding.name} (copy)')
+        self.assertEqual(len(copied_plan.template_ids), len(self.plan_onboarding.template_ids))
 
     @users('employee')
     def test_plan_mode(self):
@@ -200,6 +244,40 @@ class TestActivitySchedule(ActivityScheduleCase):
         with Form(self.env['mail.activity.schedule'].with_context(plan_mode_context)) as form:
             self.assertEqual(form.plan_id, self.plan_onboarding)
 
+    @users('admin')
+    def test_plan_next_activities(self):
+        """ Test that next activities are displayed correctly. """
+        test_plan = self.env['mail.activity.plan'].create({
+            'name': 'Test Plan',
+            'res_model': 'mail.test.activity',
+            'template_ids': [
+                (0, 0, {'activity_type_id': self.test_type_1.id}),
+                (0, 0, {'activity_type_id': self.test_type_2.id}),
+                (0, 0, {'activity_type_id': self.test_type_3.id}),
+            ],
+        })
+        # Assert expected next activities
+        expected_next_activities = [['TestAct2'], ['TestAct1', 'TestAct3'], []]
+        for template, expected_names in zip(test_plan.template_ids, expected_next_activities, strict=True):
+            self.assertEqual(template.next_activity_ids.mapped('name'), expected_names)
+        # Test the plan summary
+        with self.subTest(test_case='Check plan summary'), \
+             freeze_time(self.reference_now):
+            form = self._instantiate_activity_schedule_wizard(self.test_records[0])
+            form.plan_id = test_plan
+            expected_values = [
+                {'description': 'TestAct1', 'deadline': datetime(2023, 9, 30).date()},
+                {'description': 'TestAct2', 'deadline': datetime(2023, 10, 21).date()},
+                {'description': 'TestAct2', 'deadline': datetime(2023, 9, 30).date()},
+                {'description': 'TestAct1', 'deadline': datetime(2023, 10, 2).date()},
+                {'description': 'TestAct3', 'deadline': datetime(2023, 9, 30).date()},
+                {'description': 'TestAct3', 'deadline': datetime(2023, 9, 30).date()},
+            ]
+            for line, expected in zip(form.plan_schedule_line_ids._records, expected_values):
+                with self.subTest(line=line, expected_values=expected):
+                    self.assertEqual(line['line_description'], expected['description'])
+                    self.assertEqual(line['line_date_deadline'], expected['deadline'])
+
     @users('employee')
     def test_plan_schedule(self):
         """ Test schedule of a plan on a single or multiple records. """
@@ -210,13 +288,24 @@ class TestActivitySchedule(ActivityScheduleCase):
                  freeze_time(self.reference_now):
                 # No plan_date specified (-> self.reference_now is used), No responsible specified
                 form = self._instantiate_activity_schedule_wizard(test_records)
-                self.assertFalse(form.plan_summary)
+                self.assertFalse(form.plan_schedule_line_ids)
                 form.plan_id = self.plan_onboarding
-                self.assertEqual("<ul><li>To-Do: Plan training</li><li>To-Do: Training</li></ul>", form.plan_summary)
+                expected_values = [
+                    {'description': 'Plan training', 'deadline': datetime(2023, 9, 27).date()},
+                    {'description': 'Training', 'deadline': datetime(2023, 10, 14).date()},
+                ]
+                for line, expected in zip(form.plan_schedule_line_ids._records, expected_values):
+                    self.assertEqual(line['line_description'], expected['description'])
+                    self.assertEqual(line['line_date_deadline'], expected['deadline'])
                 self.assertTrue(form._get_modifier('plan_on_demand_user_id', 'invisible'))
                 form.plan_id = self.plan_party
-                self.assertEqual("<ul><li>To-Do: Book a place</li><li>To-Do: Invite special guest</li></ul>",
-                                 form.plan_summary)
+                expected_values = [
+                    {'description': 'Book a place', 'deadline': datetime(2023, 9, 29).date()},
+                    {'description': 'Invite special guest', 'deadline': datetime(2023, 10, 7).date()},
+                ]
+                for line, expected in zip(form.plan_schedule_line_ids._records, expected_values):
+                    self.assertEqual(line['line_description'], expected['description'])
+                    self.assertEqual(line['line_date_deadline'], expected['deadline'])
                 self.assertFalse(form._get_modifier('plan_on_demand_user_id', 'invisible'))
                 with self._mock_activities():
                     form.save().action_schedule_plan()
@@ -238,12 +327,15 @@ class TestActivitySchedule(ActivityScheduleCase):
                               form.error)
                 form.plan_on_demand_user_id = responsible_id
                 self.assertFalse(form.has_error)
-                deadline_1 = format_date(self.env, plan_date + relativedelta(days=-1))
-                deadline_2 = format_date(self.env, plan_date + relativedelta(days=7))
-                self.assertEqual(
-                    form.plan_summary,
-                    f"<ul><li>To-Do: Book a place ({deadline_1})</li>"
-                    f"<li>To-Do: Invite special guest ({deadline_2})</li></ul>")
+                deadline_1 = plan_date + relativedelta(days=-1)
+                deadline_2 = plan_date + relativedelta(days=7)
+                expected_values = [
+                    {'description': 'Book a place', 'deadline': deadline_1},
+                    {'description': 'Invite special guest', 'deadline': deadline_2},
+                ]
+                for line, expected in zip(form.plan_schedule_line_ids._records, expected_values):
+                    self.assertEqual(line['line_description'], expected['description'])
+                    self.assertEqual(line['line_date_deadline'], expected['deadline'])
                 with self._mock_activities():
                     form.save().action_schedule_plan()
 
@@ -319,9 +411,3 @@ class TestActivitySchedule(ActivityScheduleCase):
                 ValidationError, msg='When selecting responsible "other", you must specify a responsible.'):
             template.responsible_type = 'other'
         template.write({'responsible_type': 'other', 'responsible_id': self.user_admin})
-
-    def test_plan_copy(self):
-        """Test plan copy"""
-        copied_plan = self.plan_onboarding.copy()
-        self.assertEqual(copied_plan.name, f'{self.plan_onboarding.name} (copy)')
-        self.assertEqual(len(copied_plan.template_ids), len(self.plan_onboarding.template_ids))

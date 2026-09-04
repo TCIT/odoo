@@ -1,24 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* pos_online_payment
-# 
-# Translators:
-# Wil Odoo, 2024
-# Marianna Ciofani, 2024
-# 
+# * pos_online_payment
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# "Marianna Ciofani (cima)" <cima@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Marianna Ciofani, 2024\n"
-"Language-Team: Italian (https://app.transifex.com/odoo/teams/41243/it/)\n"
+"POT-Creation-Date: 2026-03-06 18:37+0000\n"
+"PO-Revision-Date: 2026-08-08 02:13+0000\n"
+"Last-Translator: \"Marianna Ciofani (cima)\" <cima@odoo.com>\n"
+"Language-Team: Italian <https://translate.odoo.com/projects/odoo-19/"
+"pos_online_payment/it/>\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: it\n"
-"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pay
@@ -27,11 +27,10 @@ msgstr "<strong>Attenzione</strong> La valuta manca o non è valida."
 
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pay_confirmation
-msgid ""
-"<strong>Error:</strong> There was a problem during the payment process."
+msgid "<strong>Error:</strong> There was a problem during the payment process."
 msgstr ""
-"<strong>Errore:</strong> si è verificato un problema durante la procedura di"
-" pagamento."
+"<strong>Errore:</strong> si è verificato un problema durante la procedura di "
+"pagamento."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -50,8 +49,7 @@ msgstr "È necessario specificare un'opzione di pagamento."
 #. module: pos_online_payment
 #. odoo-python
 #: code:addons/pos_online_payment/controllers/payment_portal.py:0
-msgid ""
-"A validation payment cannot be used for a Point of Sale online payment."
+msgid "A validation payment cannot be used for a Point of Sale online payment."
 msgstr ""
 "Un pagamento di convalida non può essere utilizzato per un pagamento online "
 "del Punto Vendita."
@@ -69,10 +67,9 @@ msgid ""
 "same currency as the Sales Journal, or the company currency if that is not "
 "set, of the POS config."
 msgstr ""
-"Tutti i fornitori di pagamento configurati per un metodo di pagamento online"
-" devono utilizzare la stessa valuta come indicato nel registro vendite "
-"oppure la valuta dell'azienda se non è configurata, nella configurazione del"
-" POS."
+"Tutti i fornitori di pagamento configurati per un metodo di pagamento online "
+"devono utilizzare la stessa valuta come indicato nel registro vendite oppure "
+"la valuta dell'azienda se non è configurata, nella configurazione del POS."
 
 #. module: pos_online_payment
 #: model:ir.model.fields,field_description:pos_online_payment.field_pos_payment_method__online_payment_provider_ids
@@ -86,7 +83,7 @@ msgstr "Importo"
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/app/online_payment_popup/online_payment_popup.xml:0
+#: code:addons/pos_online_payment/static/src/app/components/popups/online_payment_popup/online_payment_popup.xml:0
 msgid "Amount:"
 msgstr "Importo:"
 
@@ -116,8 +113,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/pos_online_payment/models/pos_payment.py:0
 msgid "Cannot edit a POS online payment essential data."
-msgstr ""
-"Impossibile modificare i dati essenziali del pagamento online del POS."
+msgstr "Impossibile modificare i dati essenziali del pagamento online del POS."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -126,8 +122,19 @@ msgid ""
 "Could not create an online payment method (company_id=%(company_id)d, "
 "pos_config_id=%(pos_config_id)d)"
 msgstr ""
-"Impossibile creare un metodo di pagamento online "
-"(company_id=%(company_id)d+, pos_config_id=%(pos_config_id)d)"
+"Impossibile creare un metodo di pagamento online (company_id=%(company_id)"
+"d+, pos_config_id=%(pos_config_id)d)"
+
+#. module: pos_online_payment
+#: model:ir.model.fields,field_description:pos_online_payment.field_account_payment__display_name
+#: model:ir.model.fields,field_description:pos_online_payment.field_payment_transaction__display_name
+#: model:ir.model.fields,field_description:pos_online_payment.field_pos_config__display_name
+#: model:ir.model.fields,field_description:pos_online_payment.field_pos_order__display_name
+#: model:ir.model.fields,field_description:pos_online_payment.field_pos_payment__display_name
+#: model:ir.model.fields,field_description:pos_online_payment.field_pos_payment_method__display_name
+#: model:ir.model.fields,field_description:pos_online_payment.field_pos_session__display_name
+msgid "Display Name"
+msgstr "Nome visualizzato"
 
 #. module: pos_online_payment
 #: model:ir.model.fields,field_description:pos_online_payment.field_pos_payment_method__has_an_online_payment_provider
@@ -135,20 +142,31 @@ msgid "Has An Online Payment Provider"
 msgstr "Ha un fornitore di pagamento online"
 
 #. module: pos_online_payment
+#: model:ir.model.fields,field_description:pos_online_payment.field_account_payment__id
+#: model:ir.model.fields,field_description:pos_online_payment.field_payment_transaction__id
+#: model:ir.model.fields,field_description:pos_online_payment.field_pos_config__id
+#: model:ir.model.fields,field_description:pos_online_payment.field_pos_order__id
+#: model:ir.model.fields,field_description:pos_online_payment.field_pos_payment__id
+#: model:ir.model.fields,field_description:pos_online_payment.field_pos_payment_method__id
+#: model:ir.model.fields,field_description:pos_online_payment.field_pos_session__id
+msgid "ID"
+msgstr "ID"
+
+#. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/overrides/pos_overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid "Invalid online payment"
 msgstr "Pagamento online non valido"
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/overrides/pos_overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid "Invalid online payments"
 msgstr "Pagamenti online non validi"
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/overrides/pos_overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid "Invoice could not be generated"
 msgstr "Impossibile generare la fattura"
 
@@ -181,13 +199,13 @@ msgstr "Pagamento contabile online"
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/overrides/pos_overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid "Online payment unavailable"
 msgstr "Pagamento online non disponibile"
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/overrides/pos_overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid "Online payments cannot have a negative amount (%s: %s)."
 msgstr "I pagamenti online non possono avere un importo negativo (%s: %s)."
 
@@ -208,13 +226,13 @@ msgstr "Riferimento ordine"
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/app/online_payment_popup/online_payment_popup.xml:0
+#: code:addons/pos_online_payment/static/src/app/components/popups/online_payment_popup/online_payment_popup.xml:0
 msgid "Order reference:"
 msgstr "Riferimento ordine:"
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/overrides/pos_overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid "Order saving issue"
 msgstr "Problema registrazione ordine"
 
@@ -230,6 +248,16 @@ msgid "POS Order"
 msgstr "Ordine PoS"
 
 #. module: pos_online_payment
+#: model_terms:ir.ui.view,arch_db:pos_online_payment.pay
+msgid "Payment"
+msgstr "Pagamento"
+
+#. module: pos_online_payment
+#: model_terms:ir.ui.view,arch_db:pos_online_payment.pay_confirmation
+msgid "Payment Confirmation"
+msgstr "Conferma di pagamento"
+
+#. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_method_view_form_inherit_pos_online_payment
 msgid "Payment Providers"
 msgstr "Fornitori di pagamenti"
@@ -240,9 +268,21 @@ msgid "Payment Transaction"
 msgstr "Transazione di pagamento"
 
 #. module: pos_online_payment
+#. odoo-javascript
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
+msgid "Payment provider requirement"
+msgstr "Requisiti fornitore di servizi di pagamento"
+
+#. module: pos_online_payment
 #: model:ir.model,name:pos_online_payment.model_account_payment
 msgid "Payments"
 msgstr "Pagamenti"
+
+#. module: pos_online_payment
+#. odoo-javascript
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
+msgid "Please ensure you have a customer with an email address on this order."
+msgstr "Assicurati che il cliente abbia un indirizzo e-mail su questo ordine."
 
 #. module: pos_online_payment
 #: model:ir.model,name:pos_online_payment.model_pos_config
@@ -276,27 +316,33 @@ msgstr "Elaborato da"
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/app/online_payment_popup/online_payment_popup.xml:0
+#: code:addons/pos_online_payment/static/src/app/components/popups/online_payment_popup/online_payment_popup.xml:0
 msgid "QR Code to pay"
 msgstr "Codice QR per pagare"
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/app/online_payment_popup/online_payment_popup.xml:0
+#: code:addons/pos_online_payment/static/src/app/components/popups/online_payment_popup/online_payment_popup.xml:0
 msgid "Scan the QR code to pay"
 msgstr "Scansiona il codice QR per pagare"
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/app/online_payment_popup/online_payment_popup.xml:0
+#: code:addons/pos_online_payment/static/src/app/components/popups/online_payment_popup/online_payment_popup.xml:0
 msgid "Scan to pay"
 msgstr "Scansiona per pagare"
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/overrides/pos_overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid "Server error"
 msgstr "Errore del server"
+
+#. module: pos_online_payment
+#. odoo-python
+#: code:addons/pos_online_payment/models/pos_payment_method.py:0
+msgid "The %s already has one online payment."
+msgstr "%s ha già un pagamento online."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -313,7 +359,7 @@ msgid ""
 "online payment method could not be found"
 msgstr ""
 "Impossibile salvare il pagamento online del POS (tx.id=%d) correttamente "
-"perché non è stato possibile trovare il metodo di pagamento online "
+"perché non è stato possibile trovare il metodo di pagamento online"
 
 #. module: pos_online_payment
 #. odoo-python
@@ -333,7 +379,7 @@ msgstr "L'ordine del Punto Vendita collegato al pagamento"
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/overrides/pos_overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid "The QR Code for paying could not be generated."
 msgstr "Impossibile generare il codice QR per effettuare il pagamento."
 
@@ -351,7 +397,7 @@ msgstr "La valuta non è valida."
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/overrides/pos_overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid "The invoice could not be generated."
 msgstr "Impossibile generare la fattura."
 
@@ -363,7 +409,7 @@ msgstr "L'ordine è stato annullato."
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/overrides/pos_overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid "The order has not been saved correctly on the server."
 msgstr "L'ordine non è stato salvato correttamente nel server."
 
@@ -371,7 +417,7 @@ msgstr "L'ordine non è stato salvato correttamente nel server."
 #. odoo-python
 #: code:addons/pos_online_payment/models/pos_session.py:0
 msgid "The partner of the POS online payment (id=%d) could not be found"
-msgstr "Impossibile trovare il partner del pagamento online del POS (id=%d) "
+msgstr "Impossibile trovare il partner del pagamento online del POS (id=%d)"
 
 #. module: pos_online_payment
 #. odoo-python
@@ -414,13 +460,13 @@ msgstr "Il partner_id fornito è diverso da quanto atteso."
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/overrides/pos_overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid "The saved order could not be retrieved."
 msgstr "L'ordine salvato non può essere recuperato."
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/overrides/pos_overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid ""
 "The total amount of remaining online payments to execute (%s) doesn't "
 "correspond to the remaining unpaid amount of the order (%s)."
@@ -430,13 +476,13 @@ msgstr ""
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/overrides/pos_overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid "There are online payments that were missing in your view."
 msgstr "Sono presenti pagamenti online che mancavano nella vista."
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/overrides/pos_overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid ""
 "There is a problem with the server. The order online payment status cannot "
 "be retrieved."
@@ -446,7 +492,7 @@ msgstr ""
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/overrides/pos_overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid ""
 "There is a problem with the server. The order online payment status cannot "
 "be retrieved. Are you sure there is no online payment for this order ?"
@@ -514,7 +560,7 @@ msgstr "Tipologia"
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/overrides/pos_overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid "Updated online payments"
 msgstr "Pagamenti online aggiornati"
 
@@ -529,7 +575,7 @@ msgstr ""
 
 #. module: pos_online_payment
 #. odoo-javascript
-#: code:addons/pos_online_payment/static/src/overrides/pos_overrides/components/payment_screen/payment_screen.js:0
+#: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid "Yes"
 msgstr "Sì"
 

@@ -1,9 +1,8 @@
-/** @odoo-module */
-
 import { Component, useState } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
+import { _t } from "@web/core/l10n/translation";
 
 import { Field, getPropertyFieldInfo } from "@web/views/fields/field";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
@@ -26,9 +25,15 @@ export class SubtaskKanbanList extends Component {
     setup() {
         this.actionService = useService("action");
         this.orm = useService("orm");
+        this.notification = useService("notification");
         this.subtaskCreate = useState({
             open: false,
             name: "",
+        });
+        this.state = useState({
+            subtasks: [],
+            isLoad: true,
+            prevSubtaskCount: 0,
         });
     }
 
@@ -37,15 +42,24 @@ export class SubtaskKanbanList extends Component {
     }
 
     get closedList() {
-        return this.list.records.filter((child) => {
-            return !["1_done", "1_canceled"].includes(child.data.state);
-        });
+        const currentCount = this.list.records.length;
+        if (this.state.isLoad || currentCount !== this.state.prevSubtaskCount) {
+            this.state.prevSubtaskCount = currentCount;
+            this.state.isLoad = false;
+            this.state.subtasks = this.list.records
+                .filter((subtask) => !["1_done", "1_canceled"].includes(subtask.data.state));
+        }
+        return this.state.subtasks;
     }
 
     get fieldInfo() {
         return {
             state: {
-                ...getPropertyFieldInfo({ name: "state", type: "project_task_state_selection" }),
+                ...getPropertyFieldInfo({
+                    name: "state",
+                    type: "selection",
+                    widget: "project_task_state_selection",
+                }),
                 viewType: "kanban",
             },
         };
@@ -73,15 +87,25 @@ export class SubtaskKanbanList extends Component {
     }
 
     async _onSubtaskCreateNameChanged(name) {
-        await this.orm.create("project.task", [{
-            display_name: name,
-            parent_id: this.props.record.resId,
-            project_id: this.props.record.data.project_id[0],
-            user_ids: this.props.record.data.user_ids.resIds,
-        }]);
-        this.subtaskCreate.open = false;
-        this.subtaskCreate.name = "";
-        this.props.record.load();
+        if (name.trim() === "") {
+            this.notification.add(_t("Invalid Display Name"), {
+                type: "danger",
+            });
+        } else {
+            const sequences = this.list.records.map(r => r.data.sequence);
+            const nextSequence = (sequences.length ? Math.max(...sequences) : 0) + 1;
+
+            await this.orm.create("project.task", [{
+                display_name: name,
+                parent_id: this.props.record.resId,
+                project_id: this.props.record.data.project_id.id,
+                user_ids: this.props.record.data.user_ids.resIds,
+                sequence: nextSequence,
+            }]);
+            this.subtaskCreate.open = false;
+            this.subtaskCreate.name = "";
+            this.props.record.load();
+        }
     }
 }
 

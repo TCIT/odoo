@@ -3,7 +3,7 @@ from cryptography.fernet import Fernet
 from odoo import api, models
 
 
-class Key(models.Model):
+class CertificateKey(models.Model):
     _inherit = 'certificate.key'
 
     @api.model

@@ -32,6 +32,8 @@ class BaseCommon(TransactionCase):
         if independent_user:
             cls.env = cls.env(user=independent_user)
             cls.user = cls.env.user
+        else:
+            cls.env.user.group_ids += cls.get_default_groups()
 
         independent_company = cls.setup_independent_company()
         if independent_company:
@@ -50,9 +52,9 @@ class BaseCommon(TransactionCase):
             'name': 'Test Partner',
         })
 
-        cls.group_portal = cls.env.ref('base.group_portal')
-        cls.group_user = cls.env.ref('base.group_user')
-        cls.group_system = cls.env.ref('base.group_system')
+        cls.group_portal = cls.quick_ref('base.group_portal')
+        cls.group_user = cls.quick_ref('base.group_user')
+        cls.group_system = cls.quick_ref('base.group_system')
 
     @classmethod
     def default_env_context(cls):
@@ -62,7 +64,7 @@ class BaseCommon(TransactionCase):
     @classmethod
     def setup_other_currency(cls, code, **kwargs):
         rates = kwargs.pop('rates', [])
-        currency = cls.env['res.currency'].with_context(active_test=False).search([('name', '=', code)], limit=1)
+        currency = cls._enable_currency(code)
         currency.rate_ids.unlink()
         currency.write({
             'active': True,
@@ -87,7 +89,7 @@ class BaseCommon(TransactionCase):
 
     @classmethod
     def get_default_groups(cls):
-        return cls.env['res.users']._default_groups()
+        return cls.env.ref('base.group_user')
 
     @classmethod
     def setup_main_company(cls, currency_code='USD'):
@@ -96,7 +98,8 @@ class BaseCommon(TransactionCase):
     @classmethod
     def _enable_currency(cls, currency_code):
         currency = cls.env['res.currency'].with_context(active_test=False).search(
-            [('name', '=', currency_code.upper())]
+            [('name', '=', currency_code.upper())],
+            limit=1,
         )
         currency.action_unarchive()
         return currency
@@ -145,15 +148,11 @@ class BaseCommon(TransactionCase):
             **({'login': 'portal_user'} | kwargs),
         )
 
-
-class BaseUsersCommon(BaseCommon):
-
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
-        cls.user_portal = cls._create_new_portal_user()
-        cls.user_internal = cls._create_new_internal_user()
+    def quick_ref(cls, xmlid):
+        """Find the matching record, without an existence check."""
+        model, id = cls.env['ir.model.data']._xmlid_to_res_model_res_id(xmlid)
+        return cls.env[model].browse(id)
 
 
 class TransactionCaseWithUserDemo(TransactionCase):
@@ -176,7 +175,7 @@ class TransactionCaseWithUserDemo(TransactionCase):
                 'login': 'demo',
                 'password': 'demo',
                 'partner_id': cls.partner_demo.id,
-                'groups_id': [Command.set([cls.env.ref('base.group_user').id, cls.env.ref('base.group_partner_manager').id])],
+                'group_ids': [Command.set([cls.env.ref('base.group_user').id, cls.env.ref('base.group_partner_manager').id])],
             })
 
 
@@ -202,7 +201,7 @@ class HttpCaseWithUserDemo(HttpCase):
                 'login': 'demo',
                 'password': 'demo',
                 'partner_id': cls.partner_demo.id,
-                'groups_id': [Command.set([cls.env.ref('base.group_user').id, cls.env.ref('base.group_partner_manager').id])],
+                'group_ids': [Command.set([cls.env.ref('base.group_user').id, cls.env.ref('base.group_partner_manager').id])],
             })
 
 
@@ -225,7 +224,7 @@ class SavepointCaseWithUserDemo(TransactionCase):
                 'login': 'demo',
                 'password': 'demo',
                 'partner_id': cls.partner_demo.id,
-                'groups_id': [Command.set([cls.env.ref('base.group_user').id, cls.env.ref('base.group_partner_manager').id])],
+                'group_ids': [Command.set([cls.env.ref('base.group_user').id, cls.env.ref('base.group_partner_manager').id])],
             })
 
     @classmethod
@@ -257,7 +256,7 @@ class SavepointCaseWithUserDemo(TransactionCase):
                     'name': 'Austin Kennedy', # Tom Ruiz
                 })],
             }, {
-                'name': 'Pepper Street', # 'Deco Addict',
+                'name': 'Pepper Street',  # 'Acme Corporation',
                 'state_id': cls.env.ref('base.state_us_2').id,
                 'child_ids': [Command.create({
                     'name': 'Liam King', # 'Douglas Fletcher',
@@ -350,7 +349,7 @@ class TransactionCaseWithUserPortal(TransactionCase):
                 'login': 'portal',
                 'password': 'portal',
                 'partner_id': cls.partner_portal.id,
-                'groups_id': [Command.set([cls.env.ref('base.group_portal').id])],
+                'group_ids': [Command.set([cls.env.ref('base.group_portal').id])],
             })
 
 
@@ -372,7 +371,7 @@ class HttpCaseWithUserPortal(HttpCase):
                 'login': 'portal',
                 'password': 'portal',
                 'partner_id': cls.partner_portal.id,
-                'groups_id': [Command.set([cls.env.ref('base.group_portal').id])],
+                'group_ids': [Command.set([cls.env.ref('base.group_portal').id])],
             })
 
 
@@ -410,6 +409,7 @@ class MockSmtplibCase:
                     'smtp_from': smtp_from,
                     'smtp_to_list': smtp_to_list,
                     'from_filter': self.from_filter,
+
                 })
 
             def set_debuglevel(self, smtp_debug):
@@ -427,7 +427,7 @@ class MockSmtplibCase:
         self.testing_smtp_session = TestingSMTPSession()
 
         IrMailServer = self.env['ir.mail_server']
-        connect_origin = type(IrMailServer).connect
+        connect_origin = type(IrMailServer)._connect__
         find_mail_server_origin = type(IrMailServer)._find_mail_server
 
         # custom mock to avoid losing context
@@ -443,8 +443,8 @@ class MockSmtplibCase:
 
         with patch('smtplib.SMTP_SSL', side_effect=lambda *args, **kwargs: self.testing_smtp_session), \
              patch('smtplib.SMTP', side_effect=lambda *args, **kwargs: self.testing_smtp_session), \
-             patch.object(modules.module, 'current_test', False), \
-             patch.object(type(IrMailServer), 'connect', mock_function(connect_origin)) as connect_mocked, \
+             patch.object(type(IrMailServer), '_disable_send', lambda _: False), \
+             patch.object(type(IrMailServer), '_connect__', mock_function(connect_origin)) as connect_mocked, \
              patch.object(type(IrMailServer), '_find_mail_server', mock_function(find_mail_server_origin)) as find_mail_server_mocked:
             self.connect_mocked = connect_mocked.mock
             self.find_mail_server_mocked = find_mail_server_mocked.mock
@@ -453,7 +453,7 @@ class MockSmtplibCase:
     def _build_email(self, mail_from, return_path=None, **kwargs):
         headers = {'Return-Path': return_path} if return_path else {}
         headers.update(**kwargs.pop('headers', {}))
-        return self.env['ir.mail_server'].build_email(
+        return self.env['ir.mail_server']._build_email__(
             mail_from,
             kwargs.pop('email_to', 'dest@example-é.com'),
             kwargs.pop('subject', 'subject'),
@@ -463,8 +463,9 @@ class MockSmtplibCase:
         )
 
     def _send_email(self, msg, smtp_session):
-        with patch.object(modules.module, 'current_test', False):
-            self.env['ir.mail_server'].send_email(msg, smtp_session=smtp_session)
+        IrMailServer = self.env['ir.mail_server']
+        with patch.object(type(IrMailServer), '_disable_send', lambda _: False):
+            IrMailServer.send_email(msg, smtp_session=smtp_session)
         return smtp_session.messages.pop()
 
     def assertSMTPEmailsSent(self, smtp_from=None, smtp_to_list=None,
@@ -483,8 +484,8 @@ class MockSmtplibCase:
         :param from_filter: from_filter of the <ir.mail_server> used to send the
           email. False means 'match everything';'
         :param emails_count: the number of emails which should match the condition
-        :param msg_cc: optional check msg_cc value of email;
-        :param msg_to: optional check msg_to value of email;
+        :param msg_cc_lst: optional check msg_cc value of email;
+        :param msg_to_lst: optional check msg_to value of email;
 
         :return: True if at least one email has been found with those parameters
         """
@@ -509,7 +510,7 @@ class MockSmtplibCase:
         if matching_emails_count != emails_count:
             debug_info = '\n'.join(
                 f"SMTP-From: {email['smtp_from']}, SMTP-To: {email['smtp_to_list']}, "
-                f"Msg-From: {email['msg_from']}, From_filter: {email['from_filter']})"
+                f"Msg-From: {email['msg_from']}, Msg-To: {email['msg_to']}, From_filter: {email['from_filter']})"
                 for email in self.emails
             )
         self.assertEqual(

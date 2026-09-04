@@ -1,5 +1,5 @@
 .o_searchview {
-    --SearchBar-background-color: $input-focus-bg;
+    --SearchBar-background-color: #{$input-focus-bg};
 
     background-color: var(--SearchBar-background-color);
     border: $input-border-width solid $border-color;
@@ -17,32 +17,6 @@
 
     .o_searchview_input {
         appearance: none;
-    }
-
-    .o_searchview_autocomplete {
-        @include o-position-absolute(calc(100% + #{$border-width * 3}), 0);
-        width: 100%;
-
-        .o_menu_item {
-            align-items: center;
-            display: flex;
-            padding-left: 25px;
-
-            &.o_indent {
-                padding-left: 50px;
-            }
-
-            a {
-                color: inherit;
-
-                &.o_expand {
-                    display: flex;
-                    justify-content: center;
-                    width: 25px;
-                    @include o-position-absolute($left: 0);
-                }
-            }
-        }
     }
 }
 

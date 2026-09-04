@@ -146,7 +146,7 @@ class test_search(TransactionCase):
         states_us = country_us.state_ids[:2]
 
         # Create test users
-        u = Users.create({'name': '__search', 'login': '__search', 'groups_id': [Command.set([group_employee.id])]})
+        u = Users.create({'name': '__search', 'login': '__search', 'group_ids': [Command.set([group_employee.id])]})
         a = Users.create({'name': '__test_A', 'login': '__test_A', 'country_id': country_be.id, 'state_id': country_be.id})
         b = Users.create({'name': '__test_B', 'login': '__a_test_B', 'country_id': country_us.id, 'state_id': states_us[1].id})
         c = Users.create({'name': '__test_B', 'login': '__z_test_B', 'country_id': country_us.id, 'state_id': states_us[0].id})
@@ -215,7 +215,7 @@ class test_search(TransactionCase):
         self.patch_order('res.partner', 'create_uid, name')
         self.patch_order('res.users', 'partner_id, login desc')
 
-        kw = dict(groups_id=[Command.set([self.ref('base.group_system'),
+        kw = dict(group_ids=[Command.set([self.ref('base.group_system'),
                                      self.ref('base.group_partner_manager')])])
 
         # When creating with the superuser, the ordering by 'create_uid' will
@@ -291,16 +291,12 @@ class test_search(TransactionCase):
     def test_22_like_folding(self):
         Model = self.env['res.country']
 
+        # there is just one query for the first search as it matches all
+        # the second search does not run, because the domain is False
         with self.assertQueries(["""
             SELECT "res_country"."id"
             FROM "res_country"
-            WHERE TRUE
-            ORDER BY "res_country"."name"->>%s
-        """, """
-            SELECT "res_country"."id"
-            FROM "res_country"
-            WHERE FALSE
-            ORDER BY "res_country"."name"->>%s
+            ORDER BY "res_country"."name"->>%s, "res_country"."id"
         """]):
             Model.search([('code', 'ilike', '')])
             Model.search([('code', 'not ilike', '')])

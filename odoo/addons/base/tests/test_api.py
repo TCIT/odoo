@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models, Command
+from odoo import models, Command
 from odoo.addons.base.tests.common import SavepointCaseWithUserDemo
 from odoo.tools import mute_logger, unique, lazy
+from odoo.tools.constants import PREFETCH_MAX
 from odoo.exceptions import AccessError
 
 
@@ -100,7 +101,7 @@ class TestAPI(SavepointCaseWithUserDemo):
         user = self.env.user
         self.assertIsRecord(user, 'res.users')
         self.assertIsRecord(user.partner_id, 'res.partner')
-        self.assertIsRecordset(user.groups_id, 'res.groups')
+        self.assertIsRecordset(user.group_ids, 'res.groups')
 
         for name, field in self.partners._fields.items():
             if field.type == 'many2one':
@@ -134,8 +135,8 @@ class TestAPI(SavepointCaseWithUserDemo):
 
         self.assertIs(partner.parent_id.user_id.name, False)
 
-        self.assertFalse(partner.parent_id.user_id.groups_id)
-        self.assertIsRecordset(partner.parent_id.user_id.groups_id, 'res.groups')
+        self.assertFalse(partner.parent_id.user_id.group_ids)
+        self.assertIsRecordset(partner.parent_id.user_id.group_ids, 'res.groups')
 
     @mute_logger('odoo.models')
     def test_40_new_new(self):
@@ -208,20 +209,11 @@ class TestAPI(SavepointCaseWithUserDemo):
             demo_partner.company_id.write({'name': 'Pricks'})
 
         # remove demo user from all groups
-        demo.write({'groups_id': [Command.clear()]})
+        demo.write({'group_ids': [Command.clear()]})
 
         # demo user can no longer access partner data
         with self.assertRaises(AccessError):
             demo_partner.company_id.name
-
-    def test_56_environment_uid_origin(self):
-        """Check the expected behavior of `env.uid_origin`"""
-        user_demo = self.user_demo
-        user_admin = self.env.ref('base.user_admin')
-        self.assertEqual(self.env.uid_origin, None)
-        self.assertEqual(self.env['base'].with_user(user_demo).env.uid_origin, user_demo.id)
-        self.assertEqual(self.env['base'].with_user(user_demo).with_user(user_admin).env.uid_origin, user_demo.id)
-        self.assertEqual(self.env['base'].with_user(user_admin).with_user(user_demo).env.uid_origin, user_admin.id)
 
     @mute_logger('odoo.models')
     def test_60_cache(self):
@@ -287,7 +279,7 @@ class TestAPI(SavepointCaseWithUserDemo):
     @mute_logger('odoo.models')
     def test_60_prefetch(self):
         """ Check the record cache prefetching """
-        partners = self.env['res.partner'].search([('id', 'in', self.partners.ids)], limit=models.PREFETCH_MAX)
+        partners = self.env['res.partner'].search([('id', 'in', self.partners.ids)], limit=PREFETCH_MAX)
         self.assertTrue(len(partners) > 1)
 
         # all the records in partners are ready for prefetching
@@ -322,7 +314,7 @@ class TestAPI(SavepointCaseWithUserDemo):
     @mute_logger('odoo.models')
     def test_60_prefetch_model(self):
         """ Check the prefetching model. """
-        partners = self.env['res.partner'].search([('id', 'in', self.partners.ids)], limit=models.PREFETCH_MAX)
+        partners = self.env['res.partner'].search([('id', 'in', self.partners.ids)], limit=PREFETCH_MAX)
         self.assertTrue(partners)
 
         def same_prefetch(a, b):
@@ -467,9 +459,9 @@ class TestAPI(SavepointCaseWithUserDemo):
         self.assertTrue(p1 in ps)
 
         with self.assertRaisesRegex(TypeError, r"unsupported operand types in: 42 in res\.partner.*"):
-            42 in ps
+            _ = 42 in ps
         with self.assertRaisesRegex(TypeError, r"inconsistent models in: ir\.ui\.menu.* in res\.partner.*"):
-            self.env['ir.ui.menu'] in ps
+            _ = self.env['ir.ui.menu'] in ps
 
     @mute_logger('odoo.models')
     def test_80_lazy_contains(self):
@@ -479,9 +471,9 @@ class TestAPI(SavepointCaseWithUserDemo):
         self.assertTrue(p1 in ps)
 
         with self.assertRaisesRegex(TypeError, r"unsupported operand types in: 42 in res\.partner.*"):
-            lazy(lambda: 42) in ps
+            _ = lazy(lambda: 42) in ps
         with self.assertRaisesRegex(TypeError, r"inconsistent models in: ir\.ui\.menu.* in res\.partner.*"):
-            lazy(lambda: self.env['ir.ui.menu']) in ps
+            _ = lazy(lambda: self.env['ir.ui.menu']) in ps
 
     @mute_logger('odoo.models')
     def test_80_set_operations(self):
@@ -521,23 +513,23 @@ class TestAPI(SavepointCaseWithUserDemo):
         self.assertNotEqual(ps, ms)
 
         with self.assertRaisesRegex(TypeError, r"unsupported operand types in: res\.partner.* \+ 'string'"):
-            ps + 'string'
+            _ = ps + 'string'
         with self.assertRaisesRegex(TypeError, r"inconsistent models in: res\.partner.* \+ ir\.ui\.menu.*"):
-            ps + ms
+            _ = ps + ms
         with self.assertRaisesRegex(TypeError, r"inconsistent models in: res\.partner.* - ir\.ui\.menu.*"):
-            ps - ms
+            _ = ps - ms
         with self.assertRaisesRegex(TypeError, r"inconsistent models in: res\.partner.* & ir\.ui\.menu.*"):
-            ps & ms
+            _ = ps & ms
         with self.assertRaisesRegex(TypeError, r"inconsistent models in: res\.partner.* \| ir\.ui\.menu.*"):
-            ps | ms
+            _ = ps | ms
         with self.assertRaises(TypeError):
-            ps < ms
+            _ = ps < ms
         with self.assertRaises(TypeError):
-            ps <= ms
+            _ = ps <= ms
         with self.assertRaises(TypeError):
-            ps > ms
+            _ = ps > ms
         with self.assertRaises(TypeError):
-            ps >= ms
+            _ = ps >= ms
 
     @mute_logger('odoo.models')
     def test_80_lazy_set_operations(self):
@@ -577,23 +569,23 @@ class TestAPI(SavepointCaseWithUserDemo):
         self.assertNotEqual(ps, ms)
 
         with self.assertRaisesRegex(TypeError, r"unsupported operand types in: res\.partner.* \+ 'string'"):
-            ps + 'string'
+            _ = ps + 'string'
         with self.assertRaisesRegex(TypeError, r"inconsistent models in: res\.partner.* \+ ir\.ui\.menu.*"):
-            ps + ms
+            _ = ps + ms
         with self.assertRaisesRegex(TypeError, r"inconsistent models in: res\.partner.* - ir\.ui\.menu.*"):
-            ps - ms
+            _ = ps - ms
         with self.assertRaisesRegex(TypeError, r"inconsistent models in: res\.partner.* & ir\.ui\.menu.*"):
-            ps & ms
+            _ = ps & ms
         with self.assertRaisesRegex(TypeError, r"inconsistent models in: res\.partner.* \| ir\.ui\.menu.*"):
-            ps | ms
+            _ = ps | ms
         with self.assertRaises(TypeError):
-            ps < ms
+            _ = ps < ms
         with self.assertRaises(TypeError):
-            ps <= ms
+            _ = ps <= ms
         with self.assertRaises(TypeError):
-            ps > ms
+            _ = ps > ms
         with self.assertRaises(TypeError):
-            ps >= ms
+            _ = ps >= ms
 
     @mute_logger('odoo.models')
     def test_80_filter(self):
@@ -659,38 +651,6 @@ class TestAPI(SavepointCaseWithUserDemo):
         by_name_ids = [p.id for p in sorted(ps, key=lambda p: p.name, reverse=True)]
         self.assertEqual(ps.sorted('name', reverse=True).ids, by_name_ids)
 
-        # sorted doesn't filter out new records but don't sort them either (limitation)
-        new_p = self.env['res.partner'].new({
-            'child_ids': [
-                Command.create({'name': 'z'}),
-                Command.create({'name': 'a'}),
-            ],
-        })
-        self.assertEqual(len(new_p.child_ids.sorted()), 2)
-
-        # sorted keeps the _prefetch_ids
-        partners_with_children = self.env['res.partner'].create([
-            {
-                'name': 'required',
-                'child_ids': [
-                    Command.create({'name': 'z'}),
-                    Command.create({'name': 'a'}),
-                ],
-            },
-            {
-                'name': 'required',
-                'child_ids': [
-                    Command.create({'name': 'z'}),
-                    Command.create({'name': 'a'}),
-                ],
-            },
-        ])
-        partners_with_children.invalidate_model(['name'])
-        # Only one query to fetch name of children of each partner
-        with self.assertQueryCount(1):
-            for partner in partners_with_children:
-                partner.child_ids.sorted('id').mapped('name')
-
     def test_group_on(self):
         p0, p1, p2 = self.env['res.partner'].create([
             {'name': "bob", 'function': "guest"},
@@ -712,20 +672,9 @@ class TestAPI(SavepointCaseWithUserDemo):
         with self.subTest("Should allow cross-group prefetching"):
             byfn = (p0 | p1 | p2).grouped('function')
             self.env.invalidate_all(flush=False)
-            self.assertFalse(self.env.cache._data, "ensure the cache is empty")
+            self.assertFalse(self.env.transaction.field_data, "ensure the cache is empty")
             self.assertEqual(byfn['guest'].mapped('name'), ['bob', 'rhod'])
             # name should have been prefetched by previous statement (on guest
             # group), so should be nothing here
             with self.assertQueries([]):
                 _ = byfn['host'].name
-
-
-class TestExternalAPI(SavepointCaseWithUserDemo):
-
-    def test_call_kw(self):
-        """kwargs is not modified by the execution of the call"""
-        partner = self.env['res.partner'].create({'name': 'MyPartner1'})
-        args = (partner.ids, ['name'])
-        kwargs = {'context': {'test': True}}
-        api.call_kw(self.env['res.partner'], 'read', args, kwargs)
-        self.assertEqual(kwargs, {'context': {'test': True}})

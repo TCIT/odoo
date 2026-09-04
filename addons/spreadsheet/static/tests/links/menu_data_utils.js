@@ -4,31 +4,24 @@ import { serverState } from "@web/../tests/web_test_helpers";
 export function getMenuServerData() {
     const serverData = {};
     serverData.menus = {
-        root: {
-            id: "root",
-            name: "root",
-            appID: "root",
+        1: {
+            id: 1,
+            name: "App_1",
+            appID: 1,
+            xmlid: "app_1",
             children: [
                 {
-                    id: 1,
-                    name: "App_1",
+                    id: 11,
+                    name: "menu with xmlid",
                     appID: 1,
-                    xmlid: "app_1",
-                    children: [
-                        {
-                            id: 11,
-                            name: "menu with xmlid",
-                            appID: 1,
-                            xmlid: "test_menu",
-                            actionID: "spreadsheet.action1",
-                        },
-                        {
-                            id: 12,
-                            name: "menu without xmlid",
-                            actionID: "spreadsheet.action1",
-                            appID: 1,
-                        },
-                    ],
+                    xmlid: "test_menu",
+                    actionID: "spreadsheet.action1",
+                },
+                {
+                    id: 12,
+                    name: "menu without xmlid",
+                    actionID: "spreadsheet.action1",
+                    appID: 1,
                 },
             ],
         },
@@ -41,8 +34,8 @@ export function getMenuServerData() {
             res_model: "ir.ui.menu",
             type: "ir.actions.act_window",
             views: [
-                [1, "list"],
-                [2, "form"],
+                [false, "list"],
+                [false, "form"],
             ],
         },
         action2: {
@@ -63,17 +56,17 @@ export function getMenuServerData() {
             fields: {
                 name: { string: "Name", type: "char" },
                 action: { string: "Action", type: "char" },
-                groups_id: { string: "Groups", type: "many2many", relation: "res.group" },
+                group_ids: { string: "Groups", type: "many2many", relation: "res.group" },
             },
             records: [
-                { id: 11, name: "menu with xmlid", action: "action1", groups_id: [10] },
-                { id: 12, name: "menu without xmlid", action: "action1", groups_id: [10] },
+                { id: 11, name: "menu with xmlid", action: "action1", group_ids: [10] },
+                { id: 12, name: "menu without xmlid", action: "action1", group_ids: [10] },
             ],
         },
         "res.users": {
             fields: {
                 name: { string: "Name", type: "char" },
-                groups_id: { string: "Groups", type: "many2many", relation: "res.group" },
+                group_ids: { string: "Groups", type: "many2many", relation: "res.group" },
             },
             records: [
                 {
@@ -81,9 +74,9 @@ export function getMenuServerData() {
                     name: "Raoul",
                     active: true,
                     partner_id: serverState.partnerId,
-                    groups_id: [10],
+                    group_ids: [10],
                 },
-                { id: 2, name: "Joseph", groups_id: [] },
+                { id: 2, name: "Joseph", group_ids: [] },
             ],
         },
         "res.group": {

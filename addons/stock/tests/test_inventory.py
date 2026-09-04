@@ -19,13 +19,11 @@ class TestInventory(TransactionCase):
         cls.product1 = cls.env['product.product'].create({
             'name': 'Product A',
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
         })
         cls.product2 = cls.env['product.product'].create({
             'name': 'Product A',
             'is_storable': True,
             'tracking': 'serial',
-            'categ_id': cls.env.ref('product.product_category_all').id,
         })
 
     def test_inventory_1(self):
@@ -143,14 +141,7 @@ class TestInventory(TransactionCase):
         })
         inventory_quants = self.env['stock.quant'].search(quant_domain)
         self.assertEqual(len(inventory_quants), 2)
-        stock_confirmation_action = inventory_quants.action_apply_inventory()
-        stock_confirmation_wizard_form = Form(
-            self.env['stock.track.confirmation'].with_context(
-                **stock_confirmation_action['context'])
-        )
-
-        stock_confirmation_wizard = stock_confirmation_wizard_form.save()
-        stock_confirmation_wizard.action_confirm()
+        inventory_quants.action_apply_inventory()
 
         # check
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product2, self.stock_location, lot_id=lot1, strict=False), 11.0)
@@ -197,7 +188,6 @@ class TestInventory(TransactionCase):
         # Make a chain of two moves, validate the first and check that 10 products are reserved
         # in the second one.
         move_stock_pack = self.env['stock.move'].create({
-            'name': 'test_link_2_1',
             'location_id': self.stock_location.id,
             'location_dest_id': self.pack_location.id,
             'product_id': self.product1.id,
@@ -205,7 +195,6 @@ class TestInventory(TransactionCase):
             'product_uom_qty': 10.0,
         })
         move_pack_cust = self.env['stock.move'].create({
-            'name': 'test_link_2_2',
             'location_id': self.pack_location.id,
             'location_dest_id': self.customer_location.id,
             'product_id': self.product1.id,
@@ -326,7 +315,7 @@ class TestInventory(TransactionCase):
         """ Ensures when a request to count a quant for tracked product is done, other quants for
         the same product in the same location are also marked as to count."""
         # Config: enable tracking and multilocations.
-        self.env.user.groups_id = [
+        self.env.user.group_ids = [
             Command.link(self.env.ref('stock.group_production_lot').id),
             Command.link(self.env.ref('stock.group_stock_multi_locations').id)
         ]
@@ -374,7 +363,7 @@ class TestInventory(TransactionCase):
         # should also be updated, other quants shouldn't
         request_wizard = self.env['stock.request.count'].create({
             'quant_ids': quants[1].ids,
-            'set_count': 'empty',
+            'show_expected_quantity': False,
             'user_id': self.env.user.id,
         })
         request_wizard.action_request_count()
@@ -406,7 +395,6 @@ class TestInventory(TransactionCase):
 
         # Deliver 3 units
         move_out = self.env['stock.move'].create({
-            'name': 'Outgoing move of 3 units',
             'location_id': self.stock_location.id,
             'location_dest_id': self.customer_location.id,
             'product_id': self.product1.id,
@@ -449,7 +437,6 @@ class TestInventory(TransactionCase):
 
         # Decrease quant to 3 and inventory line is now outdated
         move_out = self.env['stock.move'].create({
-            'name': 'Outgoing move of 3 units',
             'location_id': self.stock_location.id,
             'location_dest_id': self.customer_location.id,
             'product_id': self.product1.id,
@@ -505,7 +492,6 @@ class TestInventory(TransactionCase):
         product3 = self.env['product.product'].create({
             'name': 'Product C',
             'is_storable': True,
-            'categ_id': self.env.ref('product.product_category_all').id,
         })
         self.env['stock.quant'].create({
             'product_id': product3.id,
@@ -523,7 +509,7 @@ class TestInventory(TransactionCase):
         dates auto-generate and apply relevant dates.
         """
         grp_multi_loc = self.env.ref('stock.group_stock_multi_locations')
-        self.env.user.write({'groups_id': [(4, grp_multi_loc.id)]})
+        self.env.user.write({'group_ids': [(4, grp_multi_loc.id)]})
         now = datetime.now()
         today = now.date()
 

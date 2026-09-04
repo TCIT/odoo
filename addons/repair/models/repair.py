@@ -3,11 +3,11 @@
 from collections import defaultdict
 from random import randint
 
-from odoo import api, Command, fields, models, _
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
-from odoo.osv import expression
-from odoo.tools import float_compare, float_is_zero, clean_context
-from odoo.tools.misc import format_date, groupby
+from odoo.fields import Command, Domain
+from odoo.tools import float_compare
+from odoo.tools.misc import format_date, unique
 
 MAP_REPAIR_TO_PICKING_LOCATIONS = {
     'location_id': 'default_location_src_id',
@@ -17,7 +17,7 @@ MAP_REPAIR_TO_PICKING_LOCATIONS = {
 }
 
 
-class Repair(models.Model):
+class RepairOrder(models.Model):
     """ Repair Orders """
     _name = 'repair.order'
     _description = 'Repair Order'
@@ -32,7 +32,7 @@ class Repair(models.Model):
     # Common Fields
     name = fields.Char(
         'Repair Reference',
-        default='New', index='trigram',
+        default=lambda self: _('New'), index='trigram',
         copy=False, required=True,
         readonly=True)
     company_id = fields.Many2one(
@@ -87,15 +87,13 @@ class Repair(models.Model):
         check_company=True)
     product_qty = fields.Float(
         'Product Quantity', compute='_compute_product_qty', readonly=False, store=True,
-        default=1.0, digits='Product Unit of Measure')
+        default=1.0, digits='Product Unit')
+    allowed_uom_ids = fields.Many2many('uom.uom', compute='_compute_allowed_uom_ids')
     product_uom = fields.Many2one(
-        'uom.uom', 'Product Unit of Measure',
-        compute='compute_product_uom', store=True, precompute=True,
-        domain="[('category_id', '=', product_uom_category_id)]")
-    product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id')
+        'uom.uom', 'Unit', domain="[('id', 'in', allowed_uom_ids)]",
+        compute='compute_product_uom', store=True, precompute=True, readonly=False)
     lot_id = fields.Many2one(
         'stock.lot', 'Lot/Serial',
-        default=False,
         compute="compute_lot_id", store=True,
         domain="[('id', 'in', allowed_lot_ids)]", check_company=True,
         help="Products repaired are all belonging to this lot")
@@ -108,9 +106,9 @@ class Repair(models.Model):
         default=_default_picking_type_id,
         domain="[('code', '=', 'repair_operation'), ('company_id', '=', company_id)]",
         required=True, precompute=True, check_company=True, index=True)
-    procurement_group_id = fields.Many2one(
-        'procurement.group', 'Procurement Group',
-        copy=False)
+    reference_ids = fields.Many2many(
+        'stock.reference', 'stock_reference_repair_rel',
+        'repair_id', 'reference_id', string='References', copy=False)
     location_id = fields.Many2one(
         'stock.location', 'Component Source Location',
         compute="_compute_location_id",
@@ -168,7 +166,7 @@ class Repair(models.Model):
 
     # Sale Order Binding
     sale_order_id = fields.Many2one(
-        'sale.order', 'Sale Order', check_company=True, readonly=True,
+        'sale.order', 'Sale Order', check_company=True, readonly=True, index='btree_not_null',
         copy=False, help="Sale Order from which the Repair Order comes from.")
     sale_order_line_id = fields.Many2one(
         'sale.order.line', check_company=True, readonly=True,
@@ -180,12 +178,9 @@ class Repair(models.Model):
 
     # Return Binding
     picking_id = fields.Many2one(
-        'stock.picking', 'Return', check_company=True,
+        'stock.picking', 'Transfer', check_company=True, index='btree_not_null',
         domain="[('return_id', '!=', False), ('product_id', '=?', product_id)]",
-        copy=False, help="Return Order from which the product to be repaired comes from.")
-    is_returned = fields.Boolean(
-        "Returned", compute='_compute_is_returned',
-        help="True if this repair is linked to a Return Order and the order is 'Done'. False otherwise.")
+        copy=False, help="Transfer from which the product to be repaired is picked")
     picking_product_ids = fields.One2many('product.product', compute='_compute_picking_product_ids')
     picking_product_id = fields.Many2one(related="picking_id.product_id")
     allowed_lot_ids = fields.One2many('stock.lot', compute='_compute_allowed_lot_ids')
@@ -197,6 +192,15 @@ class Repair(models.Model):
     reserve_visible = fields.Boolean(
         'Allowed to Reserve Production', compute='_compute_unreserve_visible',
         help='Technical field to check when we can reserve quantities')
+    picking_type_visible = fields.Boolean(compute='_compute_picking_type_visible')
+
+    def _compute_picking_type_visible(self):
+        repair_type_by_company = dict(self.env['stock.picking.type']._read_group([
+                ('code', '=', 'repair_operation'),
+                ('company_id', 'in', self.company_id.ids)
+            ], groupby=['company_id'], aggregates=['__count']))
+        for ro in self:
+            ro.picking_type_visible = repair_type_by_company.get(ro.company_id, 0) > 1
 
     @api.depends('product_id', 'picking_id', 'lot_id')
     def _compute_product_qty(self):
@@ -211,6 +215,11 @@ class Repair(models.Model):
             else:
                 repair.product_qty = 1.0
 
+    @api.depends('product_id', 'product_id.uom_id', 'product_id.uom_ids', 'product_id.seller_ids', 'product_id.seller_ids.product_uom_id')
+    def _compute_allowed_uom_ids(self):
+        for repair in self:
+            repair.allowed_uom_ids = repair.product_id.uom_id | repair.product_id.uom_ids | repair.product_id.seller_ids.product_uom_id
+
     @api.depends('picking_id')
     def _compute_partner_id(self):
         for repair in self:
@@ -224,17 +233,17 @@ class Repair(models.Model):
     @api.depends('product_id', 'company_id', 'picking_id', 'picking_id.move_ids', 'picking_id.move_ids.lot_ids')
     def _compute_allowed_lot_ids(self):
         for repair in self:
-            domain = [('product_id', '=', repair.product_id.id)]
+            domain = Domain('product_id', '=', repair.product_id.id)
             if repair.picking_id:
-                domain = expression.AND([domain, [('id', 'in', repair.picking_id.move_ids.lot_ids.ids)]])
+                domain &= Domain('id', 'in', repair.picking_id.move_ids.lot_ids.ids)
             repair.allowed_lot_ids = self.env['stock.lot'].search(domain)
 
-    @api.depends('product_id', 'product_id.uom_id.category_id', 'product_uom.category_id')
+    @api.depends('product_id', 'product_id.uom_id')
     def compute_product_uom(self):
         for repair in self:
             if not repair.product_id:
                 repair.product_uom = False
-            elif not repair.product_uom or repair.product_uom.category_id != repair.product_id.uom_id.category_id:
+            elif not repair.product_uom:
                 repair.product_uom = repair.product_id.uom_id
 
     @api.depends('product_id', 'lot_id', 'lot_id.product_id', 'picking_id')
@@ -245,7 +254,7 @@ class Repair(models.Model):
             elif len(repair.picking_id.move_ids.lot_ids) == 1:
                 repair.lot_id = repair.picking_id.move_ids.lot_ids
 
-    @api.depends('user_id', 'company_id')
+    @api.depends('company_id')
     def _compute_picking_type_id(self):
         picking_type_by_company = self._get_picking_type()
         for ro in self:
@@ -286,7 +295,13 @@ class Repair(models.Model):
         # Force to prefetch more than 1000 by 1000
         all_moves._fields['forecast_availability'].compute_value(all_moves)
         for repair in repairs:
-            if any(float_compare(move.forecast_availability, move.product_qty, precision_rounding=move.product_id.uom_id.rounding) < 0 for move in repair.move_ids):
+            if any(
+                move.product_id
+                and move.product_id.uom_id.compare(
+                    move.forecast_availability, move.product_qty
+                ) < 0
+                for move in repair.move_ids
+            ):
                 repair.parts_availability = _('Not Available')
                 repair.parts_availability_state = 'late'
                 continue
@@ -308,16 +323,10 @@ class Repair(models.Model):
             elif repair.parts_availability_state == 'late':
                 repair.is_parts_late = True
 
-    @api.depends('picking_id', 'picking_id.state')
-    def _compute_is_returned(self):
-        self.is_returned = False
-        returned = self.filtered(lambda r: r.picking_id and r.picking_id.state == 'done')
-        returned.is_returned = True
-
     @api.depends('move_ids.quantity', 'move_ids.product_uom_qty', 'move_ids.product_uom.rounding')
     def _compute_has_uncomplete_moves(self):
         for repair in self:
-            repair.has_uncomplete_moves = any(float_compare(move.quantity, move.product_uom_qty, precision_rounding=move.product_uom.rounding) < 0 for move in repair.move_ids)
+            repair.has_uncomplete_moves = any(move.product_uom and move.product_uom.compare(move.quantity, move.product_uom_qty) < 0 for move in repair.move_ids)
 
     @api.depends('move_ids', 'state', 'move_ids.product_uom_qty')
     def _compute_unreserve_visible(self):
@@ -332,20 +341,18 @@ class Repair(models.Model):
             )
 
     def _search_date_category(self, operator, value):
-        if operator != '=':
-            raise NotImplementedError(_('Operation not supported'))
-        search_domain = self.env['stock.picking'].date_category_to_domain(value)
-        return expression.AND([
-            [('schedule_date', operator, value)] for operator, value in search_domain
-        ])
+        if operator != 'in':
+            return NotImplemented
+        return Domain.OR(
+            self.env['stock.picking'].date_category_to_domain('schedule_date', item)
+            for item in value
+        )
 
     @api.onchange('product_uom')
     def onchange_product_uom(self):
         res = {}
         if not self.product_id or not self.product_uom:
             return res
-        if self.product_uom.category_id != self.product_id.uom_id.category_id:
-            res['warning'] = {'title': _('Warning'), 'message': _('The product unit of measure you chose has a different category than the product unit of measure.')}
         return res
 
     @api.onchange('location_id', 'picking_id')
@@ -358,11 +365,13 @@ class Repair(models.Model):
             }
 
     @api.model
-    def default_get(self, fields_list):
+    def default_get(self, fields):
         # Adds the picking_id if it comes from a return. Avoids having a default_picking_id pollute the context for further move creation.
-        res = super().default_get(fields_list)
-        if 'picking_id' not in res and 'picking_id' in fields_list and 'default_repair_picking_id' in self.env.context:
+        res = super().default_get(fields)
+        if 'picking_id' not in res and 'picking_id' in fields and 'default_repair_picking_id' in self.env.context:
             res['picking_id'] = self.env.context.get('default_repair_picking_id')
+        if 'lot_id' not in res and 'lot_id' in fields and 'default_repair_lot_id' in self.env.context:
+            res['lot_id'] = self.env.context.get('default_repair_lot_id')
         return res
 
     @api.model_create_multi
@@ -374,18 +383,22 @@ class Repair(models.Model):
             )
             if 'picking_type_id' not in vals:
                 vals['picking_type_id'] = picking_type.id
-            if not vals.get('name', False) or vals['name'] == 'New':
+            if not vals.get('name', False) or vals['name'] == _('New'):
                 vals['name'] = picking_type.sequence_id.next_by_id()
-            if not vals.get('procurement_group_id'):
-                vals['procurement_group_id'] = self.env["procurement.group"].create({'name': vals['name']}).id
+            if not vals.get('reference_ids'):
+                vals['reference_ids'] = [Command.link(self.env["stock.reference"].create({'name': vals['name']}).id)]
         return super().create(vals_list)
 
     def write(self, vals):
+        moves_to_reassign = self.env['stock.move']
         if vals.get('picking_type_id'):
             picking_type = self.env['stock.picking.type'].browse(vals.get('picking_type_id'))
             for repair in self:
+                if repair.state in ('cancel', 'done'):
+                    continue
                 if picking_type != repair.picking_type_id:
                     repair.name = picking_type.sequence_id.next_by_id()
+                    moves_to_reassign |= repair.move_ids
         res = super().write(vals)
         if 'product_id' in vals and self.tracking == 'serial':
             self.write({'product_qty': 1.0})
@@ -398,46 +411,40 @@ class Repair(models.Model):
                 (repair.move_id + repair.move_ids).filtered(lambda m: m.state not in ('done', 'cancel')).write({'date': repair.schedule_date})
             if 'under_warranty' in vals:
                 repair._update_sale_order_line_price()
+        if moves_to_reassign:
+            moves_to_reassign._do_unreserve()
+            moves_to_reassign = moves_to_reassign.filtered(
+                lambda move: move.state in ('confirmed', 'partially_available')
+                and (move._should_bypass_reservation()
+                    or move.picking_type_id.reservation_method == 'at_confirm'
+                    or (move.reservation_date and move.reservation_date <= fields.Date.today())))
+            moves_to_reassign._action_assign()
         return res
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_confirmed(self):
-        repairs_to_cancel = self.filtered(lambda ro: ro.state not in ('draft', 'cancel'))
+        repairs_to_cancel = self.filtered(lambda ro: ro.state != 'cancel')
         repairs_to_cancel.action_repair_cancel()
+
+    def action_generate_serial(self):
+        self.ensure_one()
+        name = self.product_id.lot_sequence_id.next_by_id()
+        exist_lot = not name or self.env['stock.lot'].search([
+            ('product_id', '=', self.product_id.id),
+            '|', ('company_id', '=', False), ('company_id', '=', self.company_id.id),
+            ('name', '=', name),
+        ], limit=1)
+        if exist_lot:
+            name = self.env['stock.lot']._get_next_serial(self.company_id, self.product_id)
+        if not name:
+            raise UserError(_("Please set the first Serial Number or a default sequence"))
+        self.lot_id = self.env['stock.lot'].create({'product_id': self.product_id.id, 'name': name})
 
     def action_assign(self):
         return self.move_ids._action_assign()
 
     def action_create_sale_order(self):
-        if any(repair.sale_order_id for repair in self):
-            concerned_ro = self.filtered('sale_order_id')
-            ref_str = "\n".join(ro.name for ro in concerned_ro)
-            raise UserError(
-                _(
-                    "You cannot create a quotation for a repair order that is already linked to an existing sale order.\nConcerned repair order(s):\n%(ref_str)s",
-                    ref_str=ref_str,
-                ),
-            )
-        if any(not repair.partner_id for repair in self):
-            concerned_ro = self.filtered(lambda ro: not ro.partner_id)
-            ref_str = "\n".join(ro.name for ro in concerned_ro)
-            raise UserError(
-                _(
-                    "You need to define a customer for a repair order in order to create an associated quotation.\nConcerned repair order(s):\n%(ref_str)s",
-                    ref_str=ref_str,
-                ),
-            )
-        sale_order_values_list = []
-        for repair in self:
-            sale_order_values_list.append({
-                "company_id": self.company_id.id,
-                "partner_id": self.partner_id.id,
-                "warehouse_id": self.picking_type_id.warehouse_id.id,
-                "repair_order_ids": [Command.link(repair.id)],
-            })
-        self.env['sale.order'].create(sale_order_values_list)
-        # Add Sale Order Lines for 'add' move_ids
-        self.move_ids._create_repair_sale_order_line()
+        self._create_sale_order()
         return self.action_view_sale_order()
 
     def action_repair_cancel(self):
@@ -452,7 +459,7 @@ class Repair(models.Model):
     def action_repair_cancel_draft(self):
         if self.filtered(lambda repair: repair.state != 'cancel'):
             self.action_repair_cancel()
-        sale_line_to_update = self.move_ids.sale_line_id.filtered(lambda l: l.order_id.state != 'cancel' and float_is_zero(l.product_uom_qty, precision_rounding=l.product_uom.rounding))
+        sale_line_to_update = self.move_ids.sale_line_id.filtered(lambda l: l.order_id.state != 'cancel' and l.product_uom_id.is_zero(l.product_uom_qty))
         sale_line_to_update.move_ids._update_repair_sale_order_line()
         self.move_ids.state = 'draft'
         self.state = 'draft'
@@ -465,11 +472,11 @@ class Repair(models.Model):
         @return: True
         """
 
-        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        precision = self.env['decimal.precision'].precision_get('Product Unit')
         product_move_vals = []
 
         # Cancel moves with 0 quantity
-        self.move_ids.filtered(lambda m: float_is_zero(m.quantity, precision_rounding=m.product_uom.rounding))._action_cancel()
+        self.move_ids.filtered(lambda m: m.product_uom.is_zero(m.quantity))._action_cancel()
 
         no_service_policy = 'service_policy' not in self.env['product.template']
         #SOL qty delivered = repair.move_ids.quantity
@@ -497,7 +504,6 @@ class Repair(models.Model):
                 owner_id = repair.partner_id.id
 
             product_move_vals.append({
-                'name': repair.name,
                 'product_id': repair.product_id.id,
                 'product_uom': repair.product_uom.id or repair.product_id.uom_id.id,
                 'product_uom_qty': repair.product_qty,
@@ -533,10 +539,6 @@ class Repair(models.Model):
         all_moves = self.move_ids + product_moves
         all_moves._action_done(cancel_backorder=True)
 
-        for sale_line in self.move_ids.sale_line_id:
-            price_unit = sale_line.price_unit
-            sale_line.write({'product_uom_qty': sale_line.qty_delivered, 'price_unit': price_unit})
-
         self.state = 'done'
         return True
 
@@ -549,7 +551,7 @@ class Repair(models.Model):
         partial_moves = set()
         picked_moves = set()
         for move in self.move_ids:
-            if float_compare(move.quantity, move.product_uom_qty, precision_rounding=move.product_uom.rounding) < 0:
+            if move.product_uom.compare(move.quantity, move.product_uom_qty) < 0:
                 partial_moves.add(move.id)
             if move.picked:
                 picked_moves.add(move.id)
@@ -571,7 +573,7 @@ class Repair(models.Model):
             raise UserError(_("You can not enter negative quantities."))
         if not self.product_id or not self.product_id.is_storable:
             return self._action_repair_confirm()
-        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        precision = self.env['decimal.precision'].precision_get('Product Unit')
         available_qty_owner = sum(self.env['stock.quant'].search([
             ('product_id', '=', self.product_id.id),
             ('location_id', '=', self.product_location_src_id.id),
@@ -643,7 +645,7 @@ class Repair(models.Model):
 
         picking_type_by_company_user = {}
         without_default_warehouse_companies = set()
-        for (company, user), dummy in groupby(self, lambda r: (r.company_id, r.user_id)):
+        for company, user in unique((r.company_id, r.user_id) for r in self):
             default_warehouse = user.with_company(company.id)._get_default_warehouse_id()
             if default_warehouse and default_warehouse.repair_type_id:
                 picking_type_by_company_user[(company, user)] = default_warehouse.repair_type_id
@@ -672,14 +674,48 @@ class Repair(models.Model):
             else:
                 add_moves.sale_line_id._compute_price_unit()
 
+    def _get_sale_order_values(self):
+        self.ensure_one()
+        return {
+            "company_id": self.company_id.id,
+            "partner_id": self.partner_id.id,
+            "warehouse_id": self.picking_type_id.warehouse_id.id,
+            "repair_order_ids": [Command.link(self.id)],
+            "origin": self.name,
+        }
+
+    def _create_sale_order(self):
+        if any(repair.sale_order_id for repair in self):
+            concerned_ro = self.filtered('sale_order_id')
+            ref_str = "\n".join(ro.name for ro in concerned_ro)
+            raise UserError(
+                _(
+                    "You cannot create a quotation for a repair order that is already linked to an existing sale order.\nConcerned repair order(s):\n%(ref_str)s",
+                    ref_str=ref_str,
+                ),
+            )
+        if any(not repair.partner_id for repair in self):
+            concerned_ro = self.filtered(lambda ro: not ro.partner_id)
+            ref_str = "\n".join(ro.name for ro in concerned_ro)
+            raise UserError(
+                _(
+                    "You need to define a customer for a repair order in order to create an associated quotation.\nConcerned repair order(s):\n%(ref_str)s",
+                    ref_str=ref_str,
+                ),
+            )
+        sale_order_values_list = [repair._get_sale_order_values() for repair in self]
+        sale_orders = self.env['sale.order'].create(sale_order_values_list)
+        # Add Sale Order Lines for 'add' move_ids
+        self.move_ids._create_repair_sale_order_line()
+        return sale_orders
+
     # -------------------------------------------------------------------------
     # CATALOG
     # -------------------------------------------------------------------------
 
     def action_add_from_catalog(self):
         res = super().action_add_from_catalog()
-        if res['context'].get('product_catalog_order_model') == 'repair.order':
-            res['search_view_id'] = [self.env.ref('repair.product_view_search_catalog').id, 'search']
+        res['search_view_id'] = [self.env.ref('repair.product_view_search_catalog').id, 'search']
         return res
 
     def _default_order_line_values(self, child_field=False):
@@ -687,6 +723,9 @@ class Repair(models.Model):
         new_default_data = self.env['stock.move']._get_product_catalog_lines_data(parent_record=self)
 
         return {**default_data, **new_default_data}
+
+    def _get_product_catalog_domain(self):
+        return super()._get_product_catalog_domain() & Domain('type', '=', 'consu')
 
     def _get_product_catalog_order_data(self, products, **kwargs):
         product_catalog = super()._get_product_catalog_order_data(products, **kwargs)
@@ -707,6 +746,9 @@ class Repair(models.Model):
 
         return grouped_lines
 
+    def _is_display_stock_in_catalog(self):
+        return True
+
     def _update_order_line_info(self, product_id, quantity, **kwargs):
         move = self.move_ids.filtered(lambda e: e.product_id.id == product_id)
         if move:
@@ -726,9 +768,18 @@ class Repair(models.Model):
 
         return self.env['product.product'].browse(product_id).list_price
 
+    # ------------------------------------------------------------
+    # MAIL.THREAD
+    # ------------------------------------------------------------
+
+    def message_post(self, **kwargs):
+        kwargs['notify_author_mention'] = kwargs.get('notify_author_mention', True)
+        return super().message_post(**kwargs)
+
+
 class RepairTags(models.Model):
     """ Tags of Repair's tasks """
-    _name = "repair.tags"
+    _name = 'repair.tags'
     _description = "Repair Tags"
 
     def _get_default_color(self):
@@ -737,6 +788,7 @@ class RepairTags(models.Model):
     name = fields.Char('Tag Name', required=True)
     color = fields.Integer(string='Color Index', default=_get_default_color)
 
-    _sql_constraints = [
-        ('name_uniq', 'unique (name)', "Tag name already exists!"),
-    ]
+    _name_uniq = models.Constraint(
+        'unique (name)',
+        'Tag name already exists!',
+    )

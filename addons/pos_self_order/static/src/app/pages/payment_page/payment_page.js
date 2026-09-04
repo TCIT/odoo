@@ -1,5 +1,5 @@
 import { Component, onMounted, onWillUnmount, useState } from "@odoo/owl";
-import { useSelfOrder } from "@pos_self_order/app/self_order_service";
+import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
 import { rpc } from "@web/core/network/rpc";
 import { useService } from "@web/core/utils/hooks";
 
@@ -28,8 +28,9 @@ export class PaymentPage extends Component {
         });
     }
 
-    get showFooterBtn() {
-        return this.selfOrder.paymentError || this.state.selection;
+    back() {
+        this.selfOrder.currentOrder.uiState.lineChanges = {};
+        this.router.back();
     }
 
     selectMethod(methodId) {
@@ -49,13 +50,11 @@ export class PaymentPage extends Component {
     async startPayment() {
         this.selfOrder.paymentError = false;
         try {
-            const result = await rpc(`/kiosk/payment/${this.selfOrder.config.id}/kiosk`, {
-                order: this.selfOrder.currentOrder.serialize({ orm: true }),
+            await rpc(`/kiosk/payment/${this.selfOrder.config.id}/kiosk`, {
+                order: this.selfOrder.currentOrder.serializeForORM(),
                 access_token: this.selfOrder.access_token,
                 payment_method_id: this.state.paymentMethodId,
             });
-            const order = result.order;
-            this.selfOrder.updateOrderFromServer(order);
         } catch (error) {
             this.selfOrder.handleErrorNotification(error);
             this.selfOrder.paymentError = true;

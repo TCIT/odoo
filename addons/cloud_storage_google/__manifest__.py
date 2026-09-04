@@ -9,11 +9,18 @@
     "data": [
         "views/settings.xml",
     ],
+    "external_dependencies": {
+        "python": ["google-auth"],
+        "apt": {
+            "google-auth": "python3-google-auth",
+        },
+    },
     'assets': {
         'web.assets_backend': [
             'cloud_storage_google/static/src/**/*',
         ],
     },
     "uninstall_hook": "uninstall_hook",
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

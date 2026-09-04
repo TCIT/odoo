@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from dateutil.relativedelta import relativedelta
 from lxml.builder import E
 
 from odoo import api, fields, models, _
+from odoo.tools import date_utils
 from odoo.exceptions import ValidationError
-from odoo.osv.expression import OR
+from odoo.fields import Domain
 
 
-class AnalyticPlanFields(models.AbstractModel):
+class AnalyticPlanFieldsMixin(models.AbstractModel):
     """ Add one field per analytic plan to the model """
     _name = 'analytic.plan.fields.mixin'
     _description = 'Analytic Plan Fields'
@@ -36,13 +37,19 @@ class AnalyticPlanFields(models.AbstractModel):
         for line in self:
             line.auto_account_id = bool(plan) and line[plan._column_name()]
 
+    def _compute_partner_id(self):
+        # TO OVERRIDE
+        pass
+
     def _inverse_auto_account(self):
         for line in self:
             line[line.auto_account_id.plan_id._column_name()] = line.auto_account_id
 
     def _search_auto_account(self, operator, value):
+        if operator in Domain.NEGATIVE_OPERATORS:
+            return NotImplemented
         project_plan, other_plans = self.env['account.analytic.plan']._get_all_plans()
-        return OR([
+        return Domain.OR([
             [(plan._column_name(), operator, value)]
             for plan in project_plan + other_plans
         ])
@@ -58,9 +65,12 @@ class AnalyticPlanFields(models.AbstractModel):
             if self[fname]
         ])
 
+    def _get_distribution_key(self):
+        return ",".join(str(account_id) for account_id in self._get_analytic_accounts().ids)
+
     def _get_analytic_distribution(self):
-        account_ids = self._get_analytic_accounts().ids
-        return {} if not account_ids else {",".join(str(account_id) for account_id in account_ids): 100}
+        accounts = self._get_distribution_key()
+        return {} if not accounts else {accounts: 100}
 
     def _get_mandatory_plans(self, company, business_domain):
         return [
@@ -88,9 +98,18 @@ class AnalyticPlanFields(models.AbstractModel):
                 raise ValidationError(_("At least one analytic account must be set"))
 
     @api.model
+    def default_get(self, fields):
+        defaults = super().default_get(fields)
+        account_id = self.env.context.get('default_auto_account_id')
+        account = self.env['account.analytic.account'].browse(account_id).exists()
+        if account:
+            defaults[account.plan_id._column_name()] = account.id
+        return defaults
+
+    @api.model
     def fields_get(self, allfields=None, attributes=None):
         fields = super().fields_get(allfields, attributes)
-        if not self._context.get("studio") and self.env['account.analytic.plan'].has_access('read'):
+        if not self.env.context.get("studio") and self.env['account.analytic.plan'].has_access('read'):
             project_plan, other_plans = self.env['account.analytic.plan']._get_all_plans()
             for plan in project_plan + other_plans:
                 fname = plan._column_name()
@@ -104,7 +123,7 @@ class AnalyticPlanFields(models.AbstractModel):
         return self._patch_view(arch, view, view_type)
 
     def _patch_view(self, arch, view, view_type):
-        if not self._context.get("studio") and self.env['account.analytic.plan'].has_access('read'):
+        if not self.env.context.get("studio") and self.env['account.analytic.plan'].has_access('read'):
             project_plan, other_plans = self.env['account.analytic.plan']._get_all_plans()
 
             # Find main account nodes
@@ -116,7 +135,7 @@ class AnalyticPlanFields(models.AbstractModel):
                 account_node.set('domain', repr(self._get_plan_domain(project_plan)))
 
             # If there is a main node, append the ones for other plans
-            if account_node is not None or account_filter_node is not None:
+            if account_node is not None:
                 account_node.set('context', repr(self._get_account_node_context(project_plan)))
                 for plan in other_plans[::-1]:
                     fname = plan._column_name()
@@ -128,14 +147,22 @@ class AnalyticPlanFields(models.AbstractModel):
                             'domain': repr(self._get_plan_domain(plan)),
                             'context': repr(self._get_account_node_context(plan)),
                         }))
-                    if account_filter_node is not None:
+            if account_filter_node is not None:
+                for plan in other_plans[::-1] + project_plan:
+                    fname = plan._column_name()
+                    if plan != project_plan:
                         account_filter_node.addnext(E.filter(name=fname, context=f"{{'group_by': '{fname}'}}"))
+                    current = plan
+                    while current := current.children_ids:
+                        _depth, subfname = current[0]._hierarchy_name()
+                        if subfname in self._fields:
+                            account_filter_node.addnext(E.filter(name=subfname, context=f"{{'group_by': '{subfname}'}}"))
         return arch, view
 
 
 class AccountAnalyticLine(models.Model):
     _name = 'account.analytic.line'
-    _inherit = 'analytic.plan.fields.mixin'
+    _inherit = ['analytic.plan.fields.mixin']
     _description = 'Analytic Line'
     _order = 'date desc, id desc'
     _check_company_auto = True
@@ -161,13 +188,7 @@ class AccountAnalyticLine(models.Model):
     )
     product_uom_id = fields.Many2one(
         'uom.uom',
-        string='Unit of Measure',
-        domain="[('category_id', '=', product_uom_category_id)]",
-    )
-    product_uom_category_id = fields.Many2one(
-        related='product_uom_id.category_id',
-        string='UoM Category',
-        readonly=True,
+        string='Unit',
     )
     partner_id = fields.Many2one(
         'res.partner',
@@ -198,3 +219,56 @@ class AccountAnalyticLine(models.Model):
         [('other', 'Other')],
         default='other',
     )
+    fiscal_year_search = fields.Boolean(
+        search='_search_fiscal_date',
+        store=False, exportable=False,
+        export_string_translation=False,
+    )
+    analytic_distribution = fields.Json(
+        'Analytic Distribution',
+        compute="_compute_analytic_distribution",
+        inverse='_inverse_analytic_distribution',
+    )
+    analytic_precision = fields.Integer(
+        store=False,
+        default=lambda self: self.env['decimal.precision'].precision_get("Percentage Analytic"),
+    )
+
+    def _compute_analytic_distribution(self):
+        for line in self:
+            line.analytic_distribution = {line._get_distribution_key(): 100}
+
+    def _inverse_analytic_distribution(self):
+        empty_account = dict.fromkeys(self._get_plan_fnames(), False)
+        to_create_vals = []
+        for line in self:
+            final_distribution = self.env['analytic.mixin']._merge_distribution(
+                {line._get_distribution_key(): 100},
+                line.analytic_distribution or {},
+            )
+            if not final_distribution:
+                continue
+            amount_fname = line._split_amount_fname()
+            vals_list = [
+                {amount_fname: line[amount_fname] * percent / 100} | empty_account | {
+                    account.plan_id._column_name(): account.id
+                    for account in self.env['account.analytic.account'].browse(int(aid) for aid in account_ids.split(','))
+                }
+                for account_ids, percent in final_distribution.items()
+            ]
+
+            line.write(vals_list[0])
+            to_create_vals += [line.copy_data(vals)[0] for vals in vals_list[1:]]
+        if to_create_vals:
+            self.create(to_create_vals)
+            self.env.user._bus_send('simple_notification', {
+                'type': 'success',
+                'message': self.env._("%s analytic lines created", len(to_create_vals)),
+            })
+
+    def _split_amount_fname(self):
+        return 'amount'
+
+    def _search_fiscal_date(self, operator, value):
+        fiscalyear_date_range = self.env.company.compute_fiscalyear_dates(fields.Date.today())
+        return [('date', '>=', fiscalyear_date_range['date_from'] - relativedelta(years=1))]

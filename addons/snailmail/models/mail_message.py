@@ -2,7 +2,7 @@
 from odoo import api, fields, models
 
 
-class Message(models.Model):
+class MailMessage(models.Model):
     _inherit = 'mail.message'
 
     snailmail_error = fields.Boolean(
@@ -20,9 +20,9 @@ class Message(models.Model):
             message.snailmail_error = message.letter_ids[0].state == 'error'
 
     def _search_snailmail_error(self, operator, operand):
-        if operator == '=' and operand:
-            return ['&', ('letter_ids.state', '=', 'error'), ('letter_ids.user_id', '=', self.env.user.id)]
-        return ['!', '&', ('letter_ids.state', '=', 'error'), ('letter_ids.user_id', '=', self.env.user.id)]
+        if operator != 'in':
+            return NotImplemented
+        return ['&', ('letter_ids.state', '=', 'error'), ('letter_ids.user_id', '=', self.env.user.id)]
 
     def cancel_letter(self):
         self.letter_ids.cancel()

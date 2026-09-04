@@ -1,10 +1,12 @@
-import { expect, test } from "@odoo/hoot";
+import { beforeEach, expect, test } from "@odoo/hoot";
 import { queryAllTexts, queryFirst } from "@odoo/hoot-dom";
-import { advanceFrame, animationFrame } from "@odoo/hoot-mock";
+import { advanceFrame, animationFrame, disableAnimations } from "@odoo/hoot-mock";
 import { contains, mountWithCleanup } from "@web/../tests/web_test_helpers";
 
 import { Component, reactive, useRef, useState, xml } from "@odoo/owl";
 import { useSortable } from "@web/core/utils/sortable_owl";
+
+beforeEach(disableAnimations);
 
 test("Parameters error handling", async () => {
     const mountListAndAssert = async (setupList) => {
@@ -240,7 +242,7 @@ test("Sorting in groups with distinct per-axis scrolling", async () => {
 
     // Negative horizontal scrolling
 
-    queryFirst(".spacer_horizontal").scrollIntoView({ behavior: "instant" });
+    queryFirst(".spacer_horizontal").scrollIntoView();
     queryFirst(".root").scrollLeft = 16;
     expect(".root").toHaveProperty("scrollLeft", 16, {
         message: "Negative horizontal scrolling: scrollLeft",
@@ -262,7 +264,7 @@ test("Sorting in groups with distinct per-axis scrolling", async () => {
 
     // Positive horizontal scrolling
 
-    queryFirst(".spacer_horizontal").scrollIntoView({ behavior: "instant" });
+    queryFirst(".spacer_horizontal").scrollIntoView();
     expect(".root").toHaveProperty("scrollLeft", 0, {
         message: "Positive horizontal scrolling - scrollLeft",
     });
@@ -283,7 +285,7 @@ test("Sorting in groups with distinct per-axis scrolling", async () => {
 
     // Negative vertical scrolling
 
-    queryFirst(".root").scrollIntoView({ behavior: "instant" });
+    queryFirst(".root").scrollIntoView();
     queryFirst(".root").scrollLeft = 16;
     expect(".root").toHaveProperty("scrollLeft", 16, {
         message: "Negative vertical scrolling - scrollLeft",
@@ -305,7 +307,7 @@ test("Sorting in groups with distinct per-axis scrolling", async () => {
 
     // Positive vertical scrolling
 
-    queryFirst(".spacer_before").scrollIntoView({ behavior: "instant" });
+    queryFirst(".spacer_before").scrollIntoView();
     queryFirst(".root").scrollLeft = 16;
     expect(".root").toHaveProperty("scrollLeft", 16, {
         message: "Positive vertical scrolling - scrollLeft",
@@ -625,4 +627,54 @@ test("clone option", async () => {
     // First item after 2nd item
     await contains(".item:first-child").dragAndDrop(".item:nth-child(2)");
     expect(".placeholder:not(.item)").toHaveCount(0);
+});
+
+test("dragged element is removed from the DOM while being dragged", async () => {
+    class List extends Component {
+        static props = ["*"];
+        static template = xml`
+            <div t-ref="root" class="root">
+                <ul class="list">
+                    <li t-foreach="state.items" t-as="i" t-key="i" t-esc="i" class="item" />
+                </ul>
+            </div>`;
+        setup() {
+            this.state = useState({
+                items: [1, 2, 3],
+            });
+            useSortable({
+                ref: useRef("root"),
+                elements: ".item",
+                onDragStart() {
+                    expect.step("start");
+                },
+                onDragEnd() {
+                    expect.step("end");
+                },
+                onDrop() {
+                    expect.step("drop"); // should not be called
+                },
+            });
+        }
+    }
+
+    const list = await mountWithCleanup(List);
+
+    expect(".item:visible").toHaveCount(3);
+    expect(".o_dragged").toHaveCount(0);
+    expect.verifySteps([]);
+
+    const { drop, moveTo } = await contains(".item:first-child").drag();
+    expect(".o_dragged").toHaveCount(1);
+    expect.verifySteps(["start"]);
+
+    await moveTo(".item:nth-child(2)");
+    expect(".o_dragged").toHaveCount(1);
+
+    list.state.items = [3, 4];
+    await animationFrame();
+    expect(".item:visible").toHaveCount(2);
+    expect(".o_dragged").toHaveCount(0);
+    await drop();
+    expect.verifySteps(["end"]);
 });

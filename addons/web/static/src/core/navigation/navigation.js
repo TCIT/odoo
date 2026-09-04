@@ -1,270 +1,413 @@
-import { useEffect, useRef } from "@odoo/owl";
+import { onWillDestroy, useEffect, useExternalListener, useRef } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+import { deepMerge } from "@web/core/utils/objects";
 import { scrollTo } from "@web/core/utils/scrolling";
-import { debounce, throttleForAnimation } from "@web/core/utils/timing";
+import { throttleForAnimation } from "@web/core/utils/timing";
+import { browser } from "@web/core/browser/browser";
 
-const ACTIVE_ELEMENT_CLASS = "focus";
-const throttledElementFocus = throttleForAnimation((el) => el?.focus());
-
-function focusElement(el) {
-    throttledElementFocus.cancel();
-    throttledElementFocus(el);
-}
+export const ACTIVE_ELEMENT_CLASS = "focus";
+const throttledFocus = throttleForAnimation((el) => el?.focus());
 
 class NavigationItem {
-    constructor({ index, el, setActiveItem, options }) {
+    /**@type {number} */
+    index = -1;
+
+    /**
+     * The container element
+     * @type {Element}
+     */
+    el = undefined;
+
+    /**
+     * The actual "clicked" element, it can be the same
+     * as @see el but will be the closest child input if
+     * options.shouldFocusChildInput is true
+     * @type {Element}
+     */
+    target = undefined;
+
+    constructor({ index, el, options, navigator }) {
         this.index = index;
-        this.options = options;
-        this.setActiveItem = setActiveItem;
+
+        /**@private */
+        this._options = options;
+
+        /**
+         * @private
+         * @type {Navigator}
+         */
+        this._navigator = navigator;
 
         this.el = el;
-        if (options.shouldFocusChildInput) {
+        if (this._options.shouldFocusChildInput) {
             const subInput = el.querySelector(":scope input, :scope button, :scope textarea");
             this.target = subInput || el;
         } else {
             this.target = el;
         }
 
-        const focus = () => this.focus(true);
-        const onMouseEnter = (ev) => this.onMouseEnter(ev);
+        if (this.el.ariaSelected !== true) {
+            this.el.ariaSelected = false;
+        }
 
-        this.target.addEventListener("focus", focus);
-        this.target.addEventListener("mouseenter", onMouseEnter);
-        this.removeListeners = () => {
-            this.target.removeEventListener("focus", focus);
-            this.target.removeEventListener("mouseenter", onMouseEnter);
+        const onFocus = () => this.setActive(false);
+        const onMouseMove = () => this._onMouseMove();
+
+        this.target.addEventListener("focus", onFocus);
+        this.target.addEventListener("mousemove", onMouseMove);
+
+        /**@private*/
+        this._removeListeners = () => {
+            this.target.removeEventListener("focus", onFocus);
+            this.target.removeEventListener("mousemove", onMouseMove);
         };
     }
 
     select() {
-        this.focus();
+        this.setActive();
         this.target.click();
     }
 
-    focus(skipRealFocus = false) {
+    setActive(focus = true) {
         scrollTo(this.target);
-        this.setActiveItem(this.index, this);
+        this._navigator._setActiveItem(this.index);
         this.target.classList.add(ACTIVE_ELEMENT_CLASS);
+        this.target.ariaSelected = true;
 
-        if (!skipRealFocus && !this.options.virtualFocus) {
-            focusElement(this.target);
+        if (focus && !this._options.virtualFocus) {
+            throttledFocus.cancel();
+            throttledFocus(this.target);
         }
     }
 
-    defocus() {
+    setInactive(blur = true) {
         this.target.classList.remove(ACTIVE_ELEMENT_CLASS);
+        this.target.ariaSelected = false;
+        if (blur && !this._options.virtualFocus) {
+            this.target.blur();
+        }
     }
 
-    onMouseEnter() {
-        this.focus(true);
-        this.options.onMouseEnter?.(this);
+    /**
+     * @private
+     */
+    _onMouseMove() {
+        if (
+            this._navigator.activeItem !== this &&
+            this._navigator._isNavigationAvailable(this.target)
+        ) {
+            this.setActive(false);
+            this._options.onMouseEnter?.(this);
+        }
     }
 }
 
-class Navigator {
+export class Navigator {
+    /**@type {NavigationItem|undefined}*/
+    activeItem = undefined;
+
+    /**@type {number}*/
+    activeItemIndex = -1;
+
+    /**@type {Array<NavigationItem>}*/
+    items = [];
+
+    /**@private*/ _hotkeyRemoves = [];
+    /**@private*/ _hotkeyService = undefined;
+
     /**
-     * @param {*} containerRef
      * @param {NavigationOptions} options
+     * @param {import("@web/core/hotkeys/hotkey_service").HotkeyService} hotkeyService
      */
-    constructor(containerRef, options, hotkeyService) {
-        this.enabled = false;
-        this.containerRef = containerRef;
+    constructor(options, hotkeyService) {
+        this._hotkeyService = hotkeyService;
 
-        const focusAt = (increment) => {
-            const isFocused = this.activeItem?.el.isConnected;
-            const index = this.currentActiveIndex + increment;
-            if (isFocused && index >= 0) {
-                return this.items[index % this.items.length]?.focus();
-            } else if (!isFocused && increment >= 0) {
-                return this.items[0]?.focus();
-            } else {
-                return this.items.at(-1)?.focus();
-            }
-        };
-
-        this.options = {
-            shouldFocusChildInput: true,
-            virtualFocus: false,
-            itemsSelector: ":scope .o-navigable",
-            focusInitialElementOnDisabled: () => true,
-            ...options,
-
-            hotkeys: {
-                home: (index, items) => items[0]?.focus(),
-                end: (index, items) => items.at(-1)?.focus(),
-                tab: () => focusAt(+1),
-                "shift+tab": () => focusAt(-1),
-                arrowdown: () => focusAt(+1),
-                arrowup: () => focusAt(-1),
-                enter: (index, items) => {
-                    const item = items[index] || items[0];
-                    item?.select();
+        /**@private*/
+        this._options = deepMerge(
+            {
+                isNavigationAvailable: ({ target }) =>
+                    this.contains(target) && (this.isFocused || this._options.virtualFocus),
+                shouldFocusChildInput: true,
+                shouldFocusFirstItem: false,
+                shouldRegisterHotkeys: true,
+                virtualFocus: false,
+                hotkeys: {
+                    home: () => this.items[0]?.setActive(),
+                    end: () => this.items.at(-1)?.setActive(),
+                    tab: {
+                        callback: () => this.next(),
+                        bypassEditableProtection: true,
+                    },
+                    "shift+tab": {
+                        callback: () => this.previous(),
+                        bypassEditableProtection: true,
+                    },
+                    arrowdown: {
+                        callback: () => this.next(),
+                        bypassEditableProtection: true,
+                    },
+                    arrowup: {
+                        callback: () => this.previous(),
+                        bypassEditableProtection: true,
+                    },
+                    enter: {
+                        isAvailable: ({ navigator }) => Boolean(navigator.activeItem),
+                        callback: () => {
+                            const item = this.activeItem || this.items[0];
+                            item?.select();
+                        },
+                        bypassEditableProtection: true,
+                    },
                 },
-                ...(options?.hotkeys || {}),
             },
-        };
+            options
+        );
 
-        /**@type {Array<NavigationItem>} */
-        this.items = [];
-
-        /**@type {NavigationItem|undefined}*/
-        this.activeItem = undefined;
-        this.currentActiveIndex = -1;
-
-        this.initialFocusElement = undefined;
-        this.debouncedUpdate = debounce(() => this.update(), 100);
-
-        this.hotkeyRemoves = [];
-        this.hotkeyService = hotkeyService;
-
-        this.allowedInEditableHotkeys = ["arrowup", "arrowdown", "enter", "tab", "shift+tab"];
+        if (this._options.shouldRegisterHotkeys) {
+            this.registerHotkeys();
+        }
     }
 
-    enable() {
-        if (!this.containerRef.el || this.targetObserver) {
+    /**
+     * Returns true if the current active item is not null and still inside the DOM
+     * @type {boolean}
+     */
+    get hasActiveItem() {
+        return Boolean(this.activeItem?.el.isConnected);
+    }
+
+    /**
+     * Returns true if the focus is on any of the navigable items
+     * @type {boolean}
+     */
+    get isFocused() {
+        return this.items.some((item) => item.target.contains(document.activeElement));
+    }
+
+    next() {
+        if (!this.hasActiveItem) {
+            this.items[0]?.setActive();
+        } else {
+            this.items[(this.activeItemIndex + 1) % this.items.length]?.setActive();
+        }
+    }
+
+    previous() {
+        const index = this.activeItemIndex - 1;
+        if (!this.hasActiveItem || index < 0) {
+            this.items.at(-1)?.setActive();
+        } else {
+            this.items[index % this.items.length]?.setActive();
+        }
+    }
+
+    update() {
+        const oldItems = new Map(this.items.map((item) => [item.el, item]));
+        const oldActiveItem = this.activeItem;
+        const elements = this._options.getItems();
+        this.items = [];
+
+        let didUpdate = elements.length !== oldItems.size;
+        for (let index = 0; index < elements.length; index++) {
+            const element = elements[index];
+
+            let item = oldItems.get(element);
+            if (item) {
+                if (item.index !== index) {
+                    item.index = index;
+                    didUpdate = true;
+                }
+                oldItems.delete(element);
+            } else {
+                didUpdate = true;
+                item = new NavigationItem({
+                    index,
+                    el: element,
+                    options: this._options,
+                    navigator: this,
+                });
+            }
+            this.items.push(item);
+        }
+
+        for (const item of oldItems.values()) {
+            item._removeListeners();
+        }
+
+        if (didUpdate) {
+            const activeItemIndex =
+                oldActiveItem && oldActiveItem.el.isConnected
+                    ? this.items.findIndex((item) => item.el === oldActiveItem.el)
+                    : -1;
+            const focusedElementIndex = this.items.findIndex(
+                (item) => item.el === document.activeElement
+            );
+            if (activeItemIndex > -1) {
+                this._updateActiveItemIndex(activeItemIndex);
+            } else if (this.activeItemIndex >= 0) {
+                const closest = Math.min(this.activeItemIndex, elements.length - 1);
+                this._updateActiveItemIndex(closest);
+            } else if (focusedElementIndex >= 0) {
+                this._updateActiveItemIndex(focusedElementIndex);
+            } else {
+                this._updateActiveItemIndex(-1);
+            }
+
+            this._options.onUpdated?.(this);
+
+            if (this._options.shouldFocusFirstItem) {
+                this.items[0]?.setActive();
+            }
+        }
+    }
+
+    /**
+     * @param {HTMLElement} target
+     * @returns {boolean}
+     */
+    contains(target) {
+        return this.items.some((item) => item.target.contains(target));
+    }
+
+    registerHotkeys() {
+        if (this._hotkeyRemoves.length > 0) {
             return;
         }
 
-        for (const [hotkey, callback] of Object.entries(this.options.hotkeys)) {
+        for (const [hotkey, hotkeyInfo] of Object.entries(this._options.hotkeys)) {
+            if (!hotkeyInfo) {
+                continue;
+            }
+
+            const callback = typeof hotkeyInfo == "function" ? hotkeyInfo : hotkeyInfo.callback;
             if (!callback) {
                 continue;
             }
 
-            this.hotkeyRemoves.push(
-                this.hotkeyService.add(
-                    hotkey,
-                    () => callback(this.currentActiveIndex, this.items),
-                    {
-                        allowRepeat: true,
-                        bypassEditableProtection: this.allowedInEditableHotkeys.includes(hotkey),
-                    }
-                )
+            const isAvailable = hotkeyInfo?.isAvailable ?? (() => true);
+            const bypassEditableProtection = hotkeyInfo?.bypassEditableProtection ?? false;
+            const allowRepeat = hotkeyInfo?.allowRepeat ?? true;
+
+            this._hotkeyRemoves.push(
+                this._hotkeyService.add(hotkey, async () => await callback(this), {
+                    global: true,
+                    allowRepeat,
+                    isAvailable: (target) =>
+                        this._isNavigationAvailable(target) &&
+                        isAvailable({ navigator: this, target }),
+                    bypassEditableProtection,
+                })
             );
         }
-
-        this.targetObserver = new MutationObserver(() => this.debouncedUpdate());
-        this.targetObserver.observe(this.containerRef.el, {
-            childList: true,
-            subtree: true,
-        });
-
-        this.initialFocusElement = document.activeElement;
-        this.currentActiveIndex = -1;
-        this.update();
-
-        if (this.options.onEnabled) {
-            this.options.onEnabled(this.items);
-        } else if (this.items.length > 0) {
-            this.items[0]?.focus();
-        }
-
-        this.enabled = true;
     }
 
-    disable() {
-        if (!this.enabled) {
-            return;
-        }
-
-        if (this.targetObserver) {
-            this.targetObserver.disconnect();
-            this.targetObserver = undefined;
-        }
-
-        this.clearItems();
-        for (const removeHotkey of this.hotkeyRemoves) {
+    unregisterHotkeys() {
+        for (const removeHotkey of this._hotkeyRemoves) {
             removeHotkey();
         }
-        this.hotkeyRemoves = [];
-
-        if (this.options.focusInitialElementOnDisabled()) {
-            focusElement(this.initialFocusElement);
-        }
-
-        this.enabled = false;
+        this._hotkeyRemoves = [];
     }
 
-    update() {
-        if (!this.containerRef.el) {
-            return;
-        }
-        const oldItemsLength = this.items.length;
-        this.clearItems();
-
-        const elements = [...this.containerRef.el.querySelectorAll(this.options.itemsSelector)];
-        this.items = elements.map((el, index) => {
-            return new NavigationItem({
-                index,
-                el,
-                options: this.options,
-                setActiveItem: (index, el) => this.setActiveItem(index, el),
-            });
-        });
-
-        if (oldItemsLength != this.items.length && this.currentActiveIndex >= this.items.length) {
-            this.items.at(-1)?.focus();
-        }
-    }
-
-    setActiveItem(index, item) {
-        if (this.activeItem) {
-            this.activeItem.el.classList.remove(ACTIVE_ELEMENT_CLASS);
-        }
-        this.activeItem = item;
-        this.currentActiveIndex = index;
-    }
-
-    clearItems() {
+    /**
+     * @private
+     */
+    _destroy() {
         for (const item of this.items) {
-            item.removeListeners();
+            item._removeListeners();
         }
         this.items = [];
+        this.unregisterHotkeys();
+    }
+
+    /**
+     * @private
+     */
+    _setActiveItem(index) {
+        this.activeItem?.setInactive(false);
+        this.activeItemIndex = index;
+        if (index >= 0) {
+            this.activeItem = this.items[index];
+            this._options.onItemActivated?.(this.activeItem.el);
+        } else {
+            this.activeItem = null;
+        }
+    }
+
+    /**
+     * @private
+     */
+    _updateActiveItemIndex(index) {
+        if (this.items[index]) {
+            const shouldFocus = !this.items.some((item) => item.target === document.activeElement);
+            this.items[index].setActive(shouldFocus);
+        } else {
+            this.activeItemIndex = -1;
+            this.activeItem = null;
+        }
+    }
+
+    /**
+     * @private
+     */
+    _isNavigationAvailable(target) {
+        return this._options.isNavigationAvailable({ navigator: this, target });
+    }
+
+    /**
+     * @private
+     */
+    _checkFocus(target) {
+        if (!(target instanceof HTMLElement) || !this._isNavigationAvailable(target)) {
+            this._setActiveItem(-1);
+        }
     }
 }
 
 /**
  * @typedef {Object} NavigationOptions
+ * @property {() => HTMLElement[]} getItems
+ * @property {({{ navigator: Navigator, target: HTMLElement }}) => bool} isNavigationAvailable
  * @property {NavigationHotkeys} hotkeys
- * @property {Function} onEnabled
- * @property {Function} onMouseEnter
+ * @property {Function} onUpdated
+ * @property {Function} onItemActivated
  * @property {Boolean} [virtualFocus=false] - If true, items are only visually
  * focused so the actual focus can be kept on another input.
- * @property {string} [itemsSelector=":scope .o-navigable"] - The selector used to get the list
- * of navigable elements.
- * @property {Function} focusInitialElementOnDisabled
  * @property {Boolean} [shouldFocusChildInput=false] - If true, elements like inputs or buttons
  * inside of the items are focused instead of the items themselves.
+ * @property {Boolean} [shouldRegisterHotkeys=true] - If true, registers all hotkeys directly when
+ * the hook is called.
  */
 
 /**
  * @typedef {{
- *  home: keyHandlerCallback|undefined,
- *  end: keyHandlerCallback|undefined,
- *  tab: keyHandlerCallback|undefined,
- *  "shift+tab": keyHandlerCallback|undefined,
- *  arrowup: keyHandlerCallback|undefined,
- *  arrowdown: keyHandlerCallback|undefined,
- *  enter: keyHandlerCallback|undefined,
- *  arrowleft: keyHandlerCallback|undefined,
- *  arrowright: keyHandlerCallback|undefined,
- *  escape: keyHandlerCallback|undefined,
- *  space: keyHandlerCallback|undefined,
+ *  home: hotkeyHandler|HotkeyOptions|undefined,
+ *  end: hotkeyHandler|HotkeyOptions|undefined,
+ *  tab: hotkeyHandler|HotkeyOptions|undefined,
+ *  "shift+tab": hotkeyHandler|HotkeyOptions|undefined,
+ *  arrowup: hotkeyHandler|HotkeyOptions|undefined,
+ *  arrowdown: hotkeyHandler|HotkeyOptions|undefined,
+ *  enter: hotkeyHandler|HotkeyOptions|undefined,
+ *  arrowleft: hotkeyHandler|HotkeyOptions|undefined,
+ *  arrowright: hotkeyHandler|HotkeyOptions|undefined,
+ *  escape: hotkeyHandler|HotkeyOptions|undefined,
+ *  space: hotkeyHandler|HotkeyOptions|undefined,
  * }} NavigationHotkeys
+ */
+
+/**
+ * @typedef HotkeyOptions
+ * @param {hotkeyHandler} callback
+ * @param {({{ navigator: Navigator, target: HTMLElement }}) => bool} isAvailable
+ * @param {boolean} bypassEditableProtection
+ * @param {boolean} [allowRepeat=true]
  */
 
 /**
  * Callback used to override the behaviour of a specific
  * key input.
  *
- * @callback keyHandlerCallback
- * @param {number} index                Current index.
- * @param {Array<NavigationItem>} items List of all navigation items.
- */
-
-/**
- * @typedef NavigationHook
- * @method enable
- * @method disable
+ * @callback hotkeyHandler
+ * @param {Navigator} navigator
  */
 
 /**
@@ -280,26 +423,36 @@ class Navigator {
  *
  * @param {string|Object} containerRef
  * @param {NavigationOptions} options
- * @returns {NavigationHook}
+ * @returns {Navigator}
  */
 export function useNavigation(containerRef, options = {}) {
-    const hotkeyService = useService("hotkey");
     containerRef = typeof containerRef === "string" ? useRef(containerRef) : containerRef;
-    const navigator = new Navigator(containerRef, options, hotkeyService);
+
+    const newOptions = { ...options };
+    if (!newOptions.getItems) {
+        newOptions.getItems = () => containerRef.el?.querySelectorAll(":scope .o-navigable") ?? [];
+    }
+
+    const hotkeyService = useService("hotkey");
+    const navigator = new Navigator(newOptions, hotkeyService);
+    const observer = new MutationObserver(() => navigator.update());
 
     useEffect(
-        (container) => {
-            if (container) {
-                navigator.enable();
-            } else if (navigator) {
-                navigator.disable();
+        (containerEl) => {
+            if (containerEl) {
+                navigator.update();
+                observer.observe(containerEl, {
+                    childList: true,
+                    subtree: true,
+                });
             }
+            return () => observer.disconnect();
         },
         () => [containerRef.el]
     );
 
-    return {
-        enable: () => navigator.enable(),
-        disable: () => navigator.disable(),
-    };
+    useExternalListener(browser, "focus", ({ target }) => navigator._checkFocus(target), true);
+    onWillDestroy(() => navigator._destroy());
+
+    return navigator;
 }

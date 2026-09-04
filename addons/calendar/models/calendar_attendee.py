@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import uuid
 import base64
@@ -14,7 +13,7 @@ from odoo.tools import split_every
 _logger = logging.getLogger(__name__)
 
 
-class Attendee(models.Model):
+class CalendarAttendee(models.Model):
     """ Calendar Attendee Information """
     _name = 'calendar.attendee'
     _rec_name = 'common_name'
@@ -25,14 +24,14 @@ class Attendee(models.Model):
         return uuid.uuid4().hex
 
     STATE_SELECTION = [
-        ('needsAction', 'Needs Action'),
-        ('tentative', 'Maybe'),
-        ('declined', 'No'),
         ('accepted', 'Yes'),
+        ('declined', 'No'),
+        ('tentative', 'Maybe'),
+        ('needsAction', 'Needs Action'),
     ]
 
     # event
-    event_id = fields.Many2one('calendar.event', 'Meeting linked', required=True, ondelete='cascade')
+    event_id = fields.Many2one('calendar.event', 'Meeting linked', required=True, index=True, ondelete='cascade')
     recurrence_id = fields.Many2one('calendar.recurrence', related='event_id.recurrence_id')
     # attendee
     partner_id = fields.Many2one('res.partner', 'Attendee', required=True, readonly=True, ondelete='cascade')
@@ -68,7 +67,12 @@ class Attendee(models.Model):
                 values['email'] = email[0] if email else ''
                 values['common_name'] = values.get("common_name")
         attendees = super().create(vals_list)
-        attendees._subscribe_partner()
+        attendees.event_id.check_access('write')
+        return attendees
+
+    def write(self, vals):
+        attendees = super().write(vals)
+        self.event_id.check_access('write')
         return attendees
 
     def unlink(self):
@@ -78,45 +82,63 @@ class Attendee(models.Model):
     def copy(self, default=None):
         raise UserError(_('You cannot duplicate a calendar attendee.'))
 
-    def _subscribe_partner(self):
-        mapped_followers = defaultdict(lambda: self.env['calendar.event'])
-        for event in self.event_id:
-            partners = (event.attendee_ids & self).partner_id - event.message_partner_ids
-            # current user is automatically added as followers, don't add it twice.
-            partners -= self.env.user.partner_id
-            mapped_followers[partners] |= event
-        for partners, events in mapped_followers.items():
-            if not partners:
-                continue
-            events.message_subscribe(partner_ids=partners.ids)
-
     def _unsubscribe_partner(self):
         for event in self.event_id:
             partners = (event.attendee_ids & self).partner_id & event.message_partner_ids
             event.message_unsubscribe(partner_ids=partners.ids)
 
+    # ------------------------------------------------------------
+    # MAILING
+    # ------------------------------------------------------------
+
+    @api.model
+    def _mail_template_default_values(self):
+        return {
+            "email_from": "{{ (object.event_id.user_id.email_formatted or user.email_formatted or '') }}",
+            "email_to": False,
+            "partner_to": False,
+            "lang": "{{ object.partner_id.lang }}",
+            "use_default_to": True,
+        }
+
+    def _message_add_default_recipients(self):
+        # override: partner_id being the only stored field, we can currently
+        # simplify computation, we have no other choice than relying on it
+        return {
+            attendee.id: {
+                'partners': attendee.partner_id,
+                'email_to_lst': [],
+                'email_cc_lst': [],
+            } for attendee in self
+        }
+
     def _send_invitation_emails(self):
         """ Hook to be able to override the invitation email sending process.
          Notably inside appointment to use a different mail template from the appointment type. """
-        self._send_mail_to_attendees(
+        now = fields.Datetime.now()
+        self.filtered(lambda attendee: attendee.event_id.start > now)._notify_attendees(
             self.env.ref('calendar.calendar_template_meeting_invitation', raise_if_not_found=False),
             force_send=True,
         )
 
-    def _send_mail_to_attendees(self, mail_template, force_send=False):
-        """ Send mail for event invitation to event attendees.
-            :param mail_template: a mail.template record
-            :param force_send: if set to True, the mail(s) will be sent immediately (instead of the next queue processing)
+    def _notify_attendees(self, mail_template, notify_author=False, force_send=False):
+        """ Notify attendees about event main changes (invite, cancel, ...) based
+        on template.
+
+        :param mail_template: a mail.template record
+        :param force_send: if set to True, the mail(s) will be sent immediately (instead of the next queue processing)
         """
+        # TDE FIXME: check this
         if force_send:
             force_send_limit = int(self.env['ir.config_parameter'].sudo().get_param('mail.mail_force_send_limit', 100))
-        notified_attendees = self
+        notified_attendees_ids = set(self.ids)
         for event, attendees in self.grouped('event_id').items():
             if event._skip_send_mail_status_update():
-                notified_attendees -= attendees
+                notified_attendees_ids -= set(attendees.ids)
+        notified_attendees = self.browse(notified_attendees_ids)
         if isinstance(mail_template, str):
             raise ValueError('Template should be a template record, not an XML ID anymore.')
-        if self.env['ir.config_parameter'].sudo().get_param('calendar.block_mail') or self._context.get("no_mail_to_attendees"):
+        if self.env['ir.config_parameter'].sudo().get_param('calendar.block_mail') or self.env.context.get("no_mail_to_attendees"):
             return False
         if not mail_template:
             _logger.warning("No template passed to %s notification process. Skipped.", self)
@@ -139,7 +161,7 @@ class Attendee(models.Model):
 
         mail_messages = self.env['mail.message']
         for attendee in notified_attendees:
-            if attendee.email and attendee._should_notify_attendee():
+            if attendee.email and attendee._should_notify_attendee(notify_author=notify_author):
                 event_id = attendee.event_id.id
                 ics_file = ics_files.get(event_id)
 
@@ -168,11 +190,15 @@ class Attendee(models.Model):
                     'subject',
                     attendee.ids,
                     compute_lang=True)[attendee.id]
+                email_from = mail_template._render_field(
+                    'email_from',
+                    attendee.ids)[attendee.id]
                 mail_messages += attendee.event_id.with_context(no_document=True).sudo().message_notify(
-                    email_from=attendee.event_id.user_id.email_formatted or self.env.user.email_formatted,
+                    email_from=email_from or None,  # use None to trigger fallback sender
                     author_id=attendee.event_id.user_id.partner_id.id or self.env.user.partner_id.id,
                     body=body,
                     subject=subject,
+                    notify_author=notify_author,
                     partner_ids=attendee.partner_id.ids,
                     email_layout_xmlid='mail.mail_notification_light',
                     attachment_ids=attachment_ids,
@@ -182,7 +208,7 @@ class Attendee(models.Model):
         if force_send and len(notified_attendees) < force_send_limit:
             mail_messages.sudo().mail_ids.send_after_commit()
 
-    def _should_notify_attendee(self):
+    def _should_notify_attendee(self, notify_author=False):
         """ Utility method that determines if the attendee should be notified.
             By default, we do not want to notify (aka no message and no mail) the current user
             if he is part of the attendees. But for reminders, mail_notify_author could be forced
@@ -190,8 +216,11 @@ class Attendee(models.Model):
         """
         self.ensure_one()
         partner_not_sender = self.partner_id != self.env.user.partner_id
-        mail_notify_author = self.env.context.get('mail_notify_author')
-        return partner_not_sender or mail_notify_author
+        return partner_not_sender or notify_author
+
+    # ------------------------------------------------------------
+    # STATE MANAGEMENT
+    # ------------------------------------------------------------
 
     def do_tentative(self):
         """ Makes event invitation as Tentative. """

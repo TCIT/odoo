@@ -15,6 +15,7 @@ class TestProjectProfitabilityCommon(Common):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.env.user.group_ids += cls.env.ref('sales_team.group_sale_manager')
         uom_unit_id = cls.env.ref('uom.product_uom_unit').id
 
         # Create material product
@@ -25,7 +26,6 @@ class TestProjectProfitabilityCommon(Common):
             'list_price': 10,
             'invoice_policy': 'order',
             'uom_id': uom_unit_id,
-            'uom_po_id': uom_unit_id,
         })
 
         # Create service products
@@ -38,7 +38,6 @@ class TestProjectProfitabilityCommon(Common):
             'invoice_policy': 'delivery',
             'service_type': 'manual',
             'uom_id': cls.uom_hour.id,
-            'uom_po_id': cls.uom_hour.id,
             'default_code': 'SERV-ORDERED2',
             'service_tracking': 'task_global_project',
             'project_id': cls.project.id,
@@ -150,7 +149,6 @@ class TestSaleProjectProfitability(TestProjectProfitabilityCommon, TestSaleCommo
             'invoice_policy': 'delivery',
             'service_type': 'manual',
             'uom_id': self.uom_hour.id,
-            'uom_po_id': self.uom_hour.id,
             'default_code': 'SERV-ORDERED2',
             'service_tracking': 'task_global_project',
             'project_id': self.project.id,
@@ -1159,4 +1157,59 @@ class TestSaleProjectProfitability(TestProjectProfitabilityCommon, TestSaleCommo
                     'billed': -2.4 * (self.product_a.standard_price + self.product_b.standard_price) - 150,
                 },
             },
+        )
+
+    def test_bills_without_purchase_order_and_negative_amls(self):
+        downpayment_invoice = self.env['account.move'].create({
+            "name": "Downpayment Bill",
+            "move_type": "in_invoice",
+            "state": "draft",
+            "partner_id": self.partner.id,
+            "invoice_date": datetime.today(),
+            "invoice_line_ids": [Command.create({
+                "analytic_distribution": {self.analytic_account.id: 100},
+                "name": "Downpayment 50%",
+                "quantity": 1,
+                "price_unit": 500,
+                "currency_id": self.env.company.currency_id.id,
+            })],
+        })
+
+        downpayment_invoice.action_post()
+
+        final_invoice = self.env['account.move'].create({
+            "name": "Final Bill",
+            "move_type": "in_invoice",
+            "state": "draft",
+            "partner_id": self.partner.id,
+            "invoice_date": datetime.today(),
+            "invoice_line_ids": [Command.create({
+                "analytic_distribution": {self.analytic_account.id: 100},
+                "name": "Downpayment 50%",
+                "quantity": 1,
+                "price_unit": -500,
+                "currency_id": self.env.company.currency_id.id,
+            }), Command.create({
+                "analytic_distribution": {self.analytic_account.id: 100},
+                "name": "Product",
+                "quantity": 1,
+                "price_unit": 1000,
+                "currency_id": self.env.company.currency_id.id,
+            })],
+        })
+
+        final_invoice.action_post()
+
+        self.assertDictEqual(
+            self.project._get_profitability_items(False)['costs'],
+            {
+                'data': [{
+                    'id': 'other_purchase_costs',
+                    'sequence': self.project._get_profitability_sequence_per_invoice_type()['other_purchase_costs'],
+                    'billed': -1000.0,
+                    'to_bill': 0.0,
+                }],
+                'total': {'billed': -1000.0, 'to_bill': 0.0},
+            },
+            'Bill lines with a negative subtotal should count toward purchase costs'
         )

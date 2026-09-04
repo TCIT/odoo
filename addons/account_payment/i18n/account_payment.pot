@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:48+0000\n"
-"PO-Revision-Date: 2024-10-25 07:48+0000\n"
+"POT-Creation-Date: 2026-05-29 17:36+0000\n"
+"PO-Revision-Date: 2026-05-29 17:36+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -25,7 +25,7 @@ msgstr ""
 
 #. module: account_payment
 #. odoo-javascript
-#: code:addons/account_payment/static/src/js/portal_my_invoices_payment.js:0
+#: code:addons/account_payment/static/src/interactions/portal_my_invoices_payment_list.js:0
 msgid "%s day(s) overdue"
 msgstr ""
 
@@ -126,11 +126,6 @@ msgid "A token is required to create a new payment transaction."
 msgstr ""
 
 #. module: account_payment
-#: model:onboarding.onboarding.step,button_text:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Activate Stripe"
-msgstr ""
-
-#. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_overdue_invoices_page
 msgid "Amount"
@@ -166,6 +161,11 @@ msgid "Authorized Transactions"
 msgstr ""
 
 #. module: account_payment
+#: model:ir.model,name:account_payment.model_account_bank_statement_line
+msgid "Bank Statement Line"
+msgstr ""
+
+#. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.account_invoice_view_form_inherit_payment
 msgid "Capture Transaction"
 msgstr ""
@@ -175,11 +175,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment_paid
 msgid "Close"
-msgstr ""
-
-#. module: account_payment
-#: model:ir.model.fields,field_description:account_payment.field_account_payment_register__payment_method_code
-msgid "Code"
 msgstr ""
 
 #. module: account_payment
@@ -208,7 +203,18 @@ msgid "Discount Date"
 msgstr ""
 
 #. module: account_payment
+#: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_journal__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_move__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method_line__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_register__display_name
+#: model:ir.model.fields,field_description:account_payment.field_payment_link_wizard__display_name
+#: model:ir.model.fields,field_description:account_payment.field_payment_provider__display_name
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__display_name
+#: model:ir.model.fields,field_description:account_payment.field_payment_transaction__display_name
+#: model:ir.model.fields,field_description:account_payment.field_res_config_settings__display_name
 msgid "Display Name"
 msgstr ""
 
@@ -232,11 +238,6 @@ msgstr ""
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
 msgid "Early Payment Discount of"
-msgstr ""
-
-#. module: account_payment
-#: model:onboarding.onboarding.step,description:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Enable credit & debit card payments supported by Stripe."
 msgstr ""
 
 #. module: account_payment
@@ -265,7 +266,18 @@ msgid "Has a pending refund"
 msgstr ""
 
 #. module: account_payment
+#: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__id
+#: model:ir.model.fields,field_description:account_payment.field_account_journal__id
+#: model:ir.model.fields,field_description:account_payment.field_account_move__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method_line__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_register__id
+#: model:ir.model.fields,field_description:account_payment.field_payment_link_wizard__id
+#: model:ir.model.fields,field_description:account_payment.field_payment_provider__id
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__id
+#: model:ir.model.fields,field_description:account_payment.field_payment_transaction__id
+#: model:ir.model.fields,field_description:account_payment.field_res_config_settings__id
 msgid "ID"
 msgstr ""
 
@@ -361,18 +373,9 @@ msgid ""
 msgstr ""
 
 #. module: account_payment
-#: model:onboarding.onboarding.step,step_image_alt:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Onboarding Online Payments"
-msgstr ""
-
-#. module: account_payment
-#: model:ir.model,name:account_payment.model_onboarding_onboarding_step
-msgid "Onboarding Step"
-msgstr ""
-
-#. module: account_payment
-#: model:onboarding.onboarding.step,title:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Online Payments"
+#. odoo-python
+#: code:addons/account_payment/wizards/payment_link_wizard.py:0
+msgid "Online payment option is not enabled in Configuration."
 msgstr ""
 
 #. module: account_payment
@@ -565,11 +568,6 @@ msgid "State"
 msgstr ""
 
 #. module: account_payment
-#: model:onboarding.onboarding.step,done_text:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Step Completed!"
-msgstr ""
-
-#. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_payment__suitable_payment_token_ids
 #: model:ir.model.fields,field_description:account_payment.field_account_payment_register__suitable_payment_token_ids
 msgid "Suitable Payment Token"
@@ -596,9 +594,7 @@ msgstr ""
 #. module: account_payment
 #. odoo-python
 #: code:addons/account_payment/models/payment_transaction.py:0
-msgid ""
-"The payment related to the transaction with reference %(ref)s has been "
-"posted: %(link)s"
+msgid "The payment related to transaction %(ref)s has been posted: %(link)s"
 msgstr ""
 
 #. module: account_payment
@@ -610,6 +606,18 @@ msgstr ""
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_account_payment__source_payment_id
 msgid "The source payment of related refund payments"
+msgstr ""
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "There are pending transactions for this invoice."
+msgstr ""
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "There is no amount to be paid."
 msgstr ""
 
 #. module: account_payment
@@ -635,8 +643,27 @@ msgid "There was en error processing your payment: invalid credit card ID."
 msgstr ""
 
 #. module: account_payment
-#: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment_paid
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This invoice cannot be paid online."
+msgstr ""
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
 msgid "This invoice has already been paid."
+msgstr ""
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This invoice isn't posted."
+msgstr ""
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This is not an outgoing invoice."
 msgstr ""
 
 #. module: account_payment
@@ -693,13 +720,13 @@ msgstr ""
 
 #. module: account_payment
 #. odoo-javascript
-#: code:addons/account_payment/static/src/js/portal_my_invoices_payment.js:0
+#: code:addons/account_payment/static/src/interactions/portal_my_invoices_payment_list.js:0
 msgid "due in %s day(s)"
 msgstr ""
 
 #. module: account_payment
 #. odoo-javascript
-#: code:addons/account_payment/static/src/js/portal_my_invoices_payment.js:0
+#: code:addons/account_payment/static/src/interactions/portal_my_invoices_payment_list.js:0
 msgid "due today"
 msgstr ""
 

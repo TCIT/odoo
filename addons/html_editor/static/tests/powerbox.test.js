@@ -26,6 +26,8 @@ import { PowerboxPlugin } from "@html_editor/main/powerbox/powerbox_plugin";
 import { SearchPowerboxPlugin } from "@html_editor/main/powerbox/search_powerbox_plugin";
 import { withSequence } from "@html_editor/utils/resource";
 import { execCommand } from "./_helpers/userCommands";
+import { expectElementCount } from "./_helpers/ui_expectations";
+import { VideoPlugin } from "@html_editor/main/media/video_plugin";
 
 function commandNames() {
     return queryAllTexts(".o-we-command-name");
@@ -33,41 +35,60 @@ function commandNames() {
 
 test("should open the Powerbox on type `/`", async () => {
     const { el, editor } = await setupEditor("<p>ab[]</p>");
-    expect(".o-we-powerbox").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
     expect(getContent(el)).toBe("<p>ab[]</p>");
     await insertText(editor, "/");
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(1);
+    await expectElementCount(".o-we-powerbox", 1);
 });
 
-test.tags("iframe");
-test("in iframe: should open the Powerbox on type `/`", async () => {
+test("should not open powerbox inside code block", async () => {
+    const { editor } = await setupEditor(`<pre>abc[]</pre>`);
+    await insertText(editor, "/");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(0);
+});
+
+test.tags("iframe", "desktop");
+test("in iframe, desktop: should open the Powerbox on type `/`", async () => {
     const { el, editor } = await setupEditor("<p>ab[]</p>", { props: { iframe: true } });
     expect("iframe").toHaveCount(1);
-    expect(".o-we-powerbox").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
     expect(getContent(el)).toBe("<p>ab[]</p>");
     await insertText(editor, "/");
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(1);
+    await expectElementCount(".o-we-powerbox", 1);
+});
+
+test.tags("iframe", "mobile");
+test("in iframe, mobile: should open the Powerbox on type `/`", async () => {
+    const { el, editor } = await setupEditor("<p>ab[]</p>", { props: { iframe: true } });
+    await waitFor(".o-we-toolbar");
+    expect("iframe").toHaveCount(2);
+    await expectElementCount(".o-we-powerbox", 0);
+    expect(getContent(el)).toBe("<p>ab[]</p>");
+    await insertText(editor, "/");
+    await animationFrame();
+    await expectElementCount(".o-we-powerbox", 1);
 });
 
 test("should correctly hint in iframes", async () => {
     const { el } = await setupEditor("<p>[]<br></p>", { props: { iframe: true } });
     expect(getContent(el)).toBe(
-        `<p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p>`
+        `<p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]<br></p>`
     );
 });
 
 test("should open the Powerbox on type `/`, but in an empty paragraph", async () => {
     const { el, editor } = await setupEditor("<p>[]<br></p>");
-    expect(".o-we-powerbox").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
     expect(getContent(el)).toBe(
-        `<p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p>`
+        `<p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]<br></p>`
     );
     await press("/");
     await insertText(editor, "/");
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(1);
+    await expectElementCount(".o-we-powerbox", 1);
 });
 
 describe("search", () => {
@@ -75,32 +96,60 @@ describe("search", () => {
         const { el, editor } = await setupEditor("<p>ab[]</p>");
         await insertText(editor, "/");
         await animationFrame();
-        expect(commandNames(el).length).toBe(28);
+        expect(commandNames(el).length).toBe(27);
         await insertText(editor, "head");
         await animationFrame();
         expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
+    });
+
+    test("should filter heading commands with term 'title'", async () => {
+        const { el, editor } = await setupEditor("<p>ab[]</p>");
+        await insertText(editor, "/");
+        await animationFrame();
+        expect(commandNames(el).length).toBe(27);
+        await insertText(editor, "title");
+        await animationFrame();
+        const commands = commandNames(el);
+        expect(["Heading 1", "Heading 2", "Heading 3"].every((h) => commands.includes(h))).toBe(
+            true
+        );
+    });
+
+    test("should filter Separator commands with term 'divider' and 'line'", async () => {
+        const { el, editor } = await setupEditor("<p>ab[]</p>");
+        await insertText(editor, "/");
+        await animationFrame();
+        expect(commandNames(el).length).toBe(27);
+        await insertText(editor, "line");
+        await animationFrame();
+        expect(commandNames(el).includes("Separator")).toBe(true);
+        // Replace "line" by "divider"
+        for (let i = 0; i < 4; i++) {
+            press("backspace");
+        }
+        await insertText(editor, "/divider");
+        await animationFrame();
+        expect(commandNames(el).includes("Separator")).toBe(true);
     });
 
     test("should hide categories when you have a search term", async () => {
         const { el, editor } = await setupEditor("<p>ab[]</p>");
         await insertText(editor, "/");
         await animationFrame();
-        expect(commandNames(el).length).toBe(28);
-        expect(".o-we-category").toHaveCount(8);
+        expect(commandNames(el).length).toBe(27);
+        expect(".o-we-category").toHaveCount(6);
         expect(queryAllTexts(".o-we-category")).toEqual([
+            "FORMAT",
             "STRUCTURE",
             "BANNER",
-            "FORMAT",
             "MEDIA",
             "NAVIGATION",
             "WIDGET",
-            "AI TOOLS",
-            "BASIC BLOC",
         ]);
 
         await insertText(editor, "h");
         await animationFrame();
-        expect(commandNames(el).length).toBe(9);
+        expect(commandNames(el).length).toBe(8);
         expect(".o-we-category").toHaveCount(0);
     });
 
@@ -109,7 +158,7 @@ describe("search", () => {
         const { el, editor } = await setupEditor("<p>ab[]</p>", { props: { iframe: true } });
         await insertText(editor, "/");
         await animationFrame();
-        expect(commandNames(el).length).toBe(28);
+        expect(commandNames(el).length).toBe(27);
         await insertText(editor, "head");
         await animationFrame();
         expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
@@ -140,18 +189,18 @@ describe("search", () => {
         const { editor, el } = await setupEditor(`<p>[]</p>`, {
             config: { Plugins: [...MAIN_PLUGINS, TestPlugin] },
         });
-        expect(".o-we-powerbox").toHaveCount(0);
+        await expectElementCount(".o-we-powerbox", 0);
         await insertText(editor, "/test12");
         await animationFrame();
         expect(getContent(el)).toBe("<p>/test12[]</p>");
-        expect(".o-we-powerbox").toHaveCount(1);
+        await expectElementCount(".o-we-powerbox", 1);
         expect(commandNames(el)).toEqual(["Test12"]);
         expect(".active .o-we-command-name").toHaveText("Test12");
 
         await press("backspace");
         await animationFrame();
         expect(getContent(el)).toBe("<p>/test1[]</p>");
-        expect(".o-we-powerbox").toHaveCount(1);
+        await expectElementCount(".o-we-powerbox", 1);
         expect(commandNames(el)).toEqual(["Test1", "Test12"]);
         expect(".active .o-we-command-name").toHaveText("Test1");
     });
@@ -160,16 +209,16 @@ describe("search", () => {
         const { el, editor } = await setupEditor("<p>ab[]</p>");
         await insertText(editor, "/");
         await animationFrame();
-        expect(".o-we-powerbox").toHaveCount(1);
-        expect(commandNames(el).length).toBe(28);
+        await expectElementCount(".o-we-powerbox", 1);
+        expect(commandNames(el).length).toBe(27);
 
         await insertText(editor, "headx");
         await animationFrame();
-        expect(".o-we-powerbox").toHaveCount(0);
+        await expectElementCount(".o-we-powerbox", 0);
 
         await press("Backspace");
         await animationFrame();
-        expect(".o-we-powerbox").toHaveCount(1);
+        await expectElementCount(".o-we-powerbox", 1);
         expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
     });
 
@@ -192,17 +241,17 @@ describe("search", () => {
         const { el, editor } = await setupEditor("<p>ab[]</p>");
         await insertText(editor, "/head");
         await animationFrame();
-        expect(".o-we-powerbox").toHaveCount(1);
+        await expectElementCount(".o-we-powerbox", 1);
         expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
         expect(".active .o-we-command-name").toHaveText("Heading 1");
 
         await insertText(editor, "/headx");
         await animationFrame();
-        expect(".o-we-powerbox").toHaveCount(0);
+        await expectElementCount(".o-we-powerbox", 0);
 
         await press("backspace");
         await animationFrame();
-        expect(".o-we-powerbox").toHaveCount(1);
+        await expectElementCount(".o-we-powerbox", 1);
         expect(".active .o-we-command-name").toHaveText("Heading 1");
         expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
     });
@@ -220,7 +269,7 @@ describe("search", () => {
         });
         await animationFrame();
         mergePeersSteps(peerInfos);
-        expect(".o-we-powerbox").toHaveCount(1);
+        await expectElementCount(".o-we-powerbox", 1);
         expect(commandNames()).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
 
         applyConcurrentActions(peerInfos, {
@@ -230,7 +279,7 @@ describe("search", () => {
         });
         await animationFrame();
         mergePeersSteps(peerInfos);
-        expect(".o-we-powerbox").toHaveCount(1);
+        await expectElementCount(".o-we-powerbox", 1);
         expect(commandNames()).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
 
         applyConcurrentActions(peerInfos, {
@@ -240,7 +289,7 @@ describe("search", () => {
         });
         await animationFrame();
         mergePeersSteps(peerInfos);
-        expect(".o-we-powerbox").toHaveCount(1);
+        await expectElementCount(".o-we-powerbox", 1);
         expect(commandNames()).toEqual(["Heading 1"]);
 
         renderTextualSelection(peerInfos);
@@ -250,10 +299,10 @@ describe("search", () => {
     test("powerbox doesn't need to be displayed to apply a command (fast search)", async () => {
         const { el, editor } = await setupEditor("<p>ab[]</p>");
         await insertText(editor, "/head");
-        expect(".o-we-powerbox").toHaveCount(0);
+        await expectElementCount(".o-we-powerbox", 0);
 
         await press("enter");
-        expect(".o-we-powerbox").toHaveCount(0);
+        await expectElementCount(".o-we-powerbox", 0);
         expect(getContent(el)).toBe("<h1>ab[]</h1>");
     });
 
@@ -284,10 +333,10 @@ describe("search", () => {
             const { editor, el } = await setupEditor(`<p>[]</p>`, {
                 config: { Plugins: [...MAIN_PLUGINS, TestPlugin] },
             });
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             insertText(editor, "/apple");
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // Both commands should be found with the keyword "apple", being the first
             // one with a higher score
             expect(commandNames(el)).toEqual(["Test1", "Test2"]);
@@ -342,10 +391,10 @@ describe("search", () => {
                     Plugins: [...CORE_PLUGINS, PowerboxPlugin, SearchPowerboxPlugin, TestPlugin],
                 },
             });
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             insertText(editor, "/icon");
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
 
             const matchedCommands = commandNames(el);
             // All three commands are found, as they all match "icon" in some way.
@@ -363,62 +412,84 @@ describe("search", () => {
             const { el, editor } = await setupEditor("<p>a[]</p>");
             await insertText(editor, "/");
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             await insertText(editor, "zxzxzxz");
             await animationFrame();
             expect(getContent(el)).toBe("<p>a/zxzxzxz[]</p>");
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
         });
         test("should close powerbox typing a space", async () => {
             const { el, editor } = await setupEditor("<p>a[]</p>");
             await insertText(editor, "/");
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             // We need to add another character (b) otherwise the space will be
             // considered invisible in the getContent(el). This is a limitation
             // of the test suite that does not transform the space into a nbsp.
             await insertText(editor, " b");
             await animationFrame();
             expect(getContent(el)).toBe("<p>a/ b[]</p>");
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
         });
 
         test("delete '/' should close the powerbox", async () => {
             const { editor, el } = await setupEditor("<p>[]</p>");
             await insertText(editor, "/");
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             expect(getContent(el)).toBe("<p>/[]</p>");
 
             await press("backspace");
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             expect(getContent(el)).toBe(
-                `<p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p>`
+                `<p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]<br></p>`
             );
 
             await insertText(editor, "a");
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(0);
-            expect(getContent(el)).toBe("<p>a[]<br></p>");
+            await expectElementCount(".o-we-powerbox", 0);
+            expect(getContent(el)).toBe("<p>a[]</p>");
         });
 
         test("press escape should close the powerbox", async () => {
             const { editor, el } = await setupEditor("<p>[]</p>");
             await insertText(editor, "/");
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(1);
+            await expectElementCount(".o-we-powerbox", 1);
             expect(getContent(el)).toBe("<p>/[]</p>");
 
             await press("escape");
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             expect(getContent(el)).toBe(`<p>/[]</p>`);
 
             await insertText(editor, "h");
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             expect(getContent(el)).toBe(`<p>/h[]</p>`);
+        });
+    });
+    describe("media dialog tabs", () => {
+        test("/icon + enter should open the media dialog directly on the Icons tab", async () => {
+            const { el, editor } = await setupEditor("<p>[]<br></p>");
+            await insertText(editor, "/icon");
+            await waitFor(".o-we-powerbox");
+            expect(commandNames(el)[0]).toBe("Media");
+            await press("Enter");
+            await waitFor(".o_select_media_dialog");
+            expect(".o_select_media_dialog .nav-link:contains('Icons')").toHaveClass("active");
+        });
+        test("/video + enter should open the media dialog directly on the Videos tab", async () => {
+            const { el, editor } = await setupEditor("<p>[]<br></p>", {
+                config: { Plugins: [...MAIN_PLUGINS, VideoPlugin] },
+            });
+            await insertText(editor, "/video");
+            await waitFor(".o-we-powerbox");
+            expect(commandNames(el)[0]).toBe("Media");
+            await press("Enter");
+            await waitFor(".o_select_media_dialog");
+            expect(".o_select_media_dialog .nav-link:contains('Videos')").toHaveClass("active");
         });
     });
 });
@@ -428,13 +499,13 @@ test("should execute command and remove term and hot character on Enter", async 
     await insertText(editor, "/head");
     await animationFrame();
     expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
-    expect(".o-we-powerbox").toHaveCount(1);
+    await expectElementCount(".o-we-powerbox", 1);
     await press("Enter");
     expect(getContent(el)).toBe("<h1>ab[]</h1>");
-    expect(".o-we-powerbox").toHaveCount(1);
+    await expectElementCount(".o-we-powerbox", 1);
     // need 1 animation frame to close
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
 });
 
 test("should execute command and remove term and hot character on Tab", async () => {
@@ -450,17 +521,19 @@ test.todo("should close the powerbox if keyup event is called on other block", a
     const { editor } = await setupEditor("<p>ab</p><p>c[]d</p>");
     await insertText(editor, "/");
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(1);
+    await expectElementCount(".o-we-powerbox", 1);
     // await dispatch(editor.editable, "keyup");
-    expect(".o-we-powerbox").toHaveCount(1);
+    await expectElementCount(".o-we-powerbox", 1);
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
 });
 
 test.tags("desktop");
 test("should insert a 3x3 table on type `/table`", async () => {
     const { el, editor } = await setupEditor("<p>[]</p>");
-    expect(getContent(el)).toBe(`<p placeholder='Type "/" for commands' class="o-we-hint">[]</p>`);
+    expect(getContent(el)).toBe(
+        `<p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]</p>`
+    );
 
     await insertText(editor, "/table");
     await waitFor(".o-we-powerbox ");
@@ -471,7 +544,7 @@ test("should insert a 3x3 table on type `/table`", async () => {
     await press("Enter");
     await tick();
     expect(getContent(el)).toBe(
-        `<table class="table table-bordered o_table"><tbody><tr><td><p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p></td><td><p><br></p></td><td><p><br></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr></tbody></table><p><br></p>`
+        `<p data-selection-placeholder=""><br></p><table class="table table-bordered o_table"><tbody><tr><td><p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]<br></p></td><td><p><br></p></td><td><p><br></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr></tbody></table><p data-selection-placeholder="" style="margin: -9px 0px 8px;"><br></p>`
     );
 });
 
@@ -483,7 +556,7 @@ test("should insert a 3x3 table on type `/table` in mobile view", async () => {
     await press("Enter");
     await tick();
     expect(getContent(el)).toBe(
-        `<table class="table table-bordered o_table"><tbody><tr><td><p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p></td><td><p><br></p></td><td><p><br></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr></tbody></table><p><br></p>`
+        `<p data-selection-placeholder=""><br></p><table class="table table-bordered o_table"><tbody><tr><td><p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]<br></p></td><td><p><br></p></td><td><p><br></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr></tbody></table><p data-selection-placeholder="" style="margin: -9px 0px 8px;"><br></p>`
     );
 });
 
@@ -493,22 +566,18 @@ test("should toggle list on empty paragraph", async () => {
     /** @todo fix warnings */
     patchWithCleanup(console, { warn: () => {} });
 
-    await insertText(editor, "/");
-    // @todo @phoenix: remove this once we manage inputs.
-    // Simulate <br> removal by contenteditable when something is inserted
-    el.querySelector("p > br").remove();
-    await insertText(editor, "checklist");
+    await insertText(editor, "/checklist");
     expect(getContent(el)).toBe("<p>/checklist[]</p>");
     await animationFrame();
     expect(commandNames(el)).toEqual(["Checklist"]);
-    expect(".o-we-powerbox").toHaveCount(1);
+    await expectElementCount(".o-we-powerbox", 1);
     await press("Enter");
     expect(getContent(el)).toBe(
-        `<ul class="o_checklist"><li placeholder="List" class="o-we-hint">[]<br></li></ul>`
+        `<ul class="o_checklist"><li o-we-hint-text="List" class="o-we-hint">[]<br></li></ul>`
     );
     // need 1 animation frame to close
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
 });
 
 class NoOpPlugin extends Plugin {
@@ -540,7 +609,7 @@ test("should restore state before /command insertion when command is executed (1
     await insertText(editor, "/no-op");
     expect(getContent(el)).toBe("<p>abc/no-op[]</p>");
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(1);
+    await expectElementCount(".o-we-powerbox", 1);
     expect(commandNames(el)).toEqual(["No-op"]);
     await press("Enter");
     expect(getContent(el)).toBe("<p>abc[]</p>");
@@ -555,20 +624,16 @@ test("should restore state before /command insertion when command is executed (2
     patchWithCleanup(console, { warn: () => {} });
 
     expect(getContent(el)).toBe(
-        `<p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p>`
+        `<p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]<br></p>`
     );
-    await insertText(editor, "/");
-    // @todo @phoenix: remove this once we manage inputs.
-    // Simulate <br> removal by contenteditable when something is inserted
-    el.querySelector("p > br").remove();
-    await insertText(editor, "no-op");
+    await insertText(editor, "/no-op");
     expect(getContent(el)).toBe("<p>/no-op[]</p>");
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(1);
+    await expectElementCount(".o-we-powerbox", 1);
     expect(commandNames(el)).toEqual(["No-op"]);
     await press("Enter");
     expect(getContent(el, { sortAttrs: true })).toBe(
-        `<p class="o-we-hint" placeholder='Type "/" for commands'>[]<br></p>`
+        `<p class="o-we-hint" o-we-hint-text='Type "/" for commands'>[]<br></p>`
     );
 });
 
@@ -579,7 +644,7 @@ test("should discard /command insertion from history when command is executed", 
     patchWithCleanup(console, { warn: () => {} });
 
     expect(getContent(el)).toBe(
-        `<p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p>`
+        `<p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]<br></p>`
     );
     // @todo @phoenix: remove this once we manage inputs.
     // Simulate <br> removal by contenteditable when something is inserted
@@ -587,7 +652,7 @@ test("should discard /command insertion from history when command is executed", 
     await insertText(editor, "abc/heading1");
     expect(getContent(el)).toBe("<p>abc/heading1[]</p>");
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(1);
+    await expectElementCount(".o-we-powerbox", 1);
     expect(commandNames(el)).toEqual(["Heading 1"]);
     await press("Enter");
     expect(getContent(el)).toBe("<h1>abc[]</h1>");
@@ -603,7 +668,7 @@ test("should discard /command insertion from history when command is executed", 
     expect(getContent(el)).toBe("<p>a[]</p>");
     execCommand(editor, "historyUndo");
     expect(getContent(el, { sortAttrs: true })).toBe(
-        `<p class="o-we-hint" placeholder='Type "/" for commands'>[]<br></p>`
+        `<p class="o-we-hint" o-we-hint-text='Type "/" for commands'>[]<br></p>`
     );
 });
 
@@ -624,11 +689,11 @@ test("should adapt the search of the powerbox when undo/redo", async () => {
 
 test("should open the Powerbox on type `/` in DIV", async () => {
     const { editor } = await setupEditor(`<div>ab<br><br>[]</div>`);
-    expect(".o-we-powerbox").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
     await insertText(editor, "/");
     await animationFrame();
 
-    expect(".o-we-powerbox").toHaveCount(1);
+    await expectElementCount(".o-we-powerbox", 1);
 });
 
 test("press 'arrowdown' to navigate", async () => {
@@ -675,22 +740,22 @@ test("press 'arrowleft' should close PowerBox", async () => {
     const { editor } = await setupEditor("<p>ab[]c</p>");
     await insertText(editor, "/head");
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(1);
+    await expectElementCount(".o-we-powerbox", 1);
 
     await press("arrowleft");
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
 });
 
 test("press 'arrowright' should close PowerBox", async () => {
     const { editor } = await setupEditor("<p>ab[]c</p>");
     await insertText(editor, "/head");
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(1);
+    await expectElementCount(".o-we-powerbox", 1);
 
     await press("arrowright");
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(0);
+    await expectElementCount(".o-we-powerbox", 0);
 });
 
 test.tags("desktop");
@@ -720,7 +785,7 @@ test("select command with 'mouseenter' after scroll -- doc in iframe", async () 
 
     // Hoot don't trigger a mousemove event at the start of an hover, if we don't hover
     // another element before. So we need to do a first hover to set a previous element.
-    await hover("body"); // Hover on main document's body
+    await hover(document.body); // Hover on main document's body
 
     await insertText(editor, "/");
     await animationFrame();
@@ -732,7 +797,7 @@ test("select command with 'mouseenter' after scroll -- doc in iframe", async () 
 
     await hover(".o-we-command-name:eq(3)");
     await animationFrame();
-    expect(".active .o-we-command-name").toHaveText("4 columns");
+    expect(".active .o-we-command-name").toHaveText("Text");
 });
 
 test("click on a command", async () => {
@@ -779,10 +844,10 @@ test.todo("add plugins with the same powerboxCategory should crash", async () =>
             config: { Plugins: [...MAIN_PLUGINS, Plugin1, Plugin2] },
         })
     ).rejects.toThrow();
-    expect(["Duplicate category id: test"]).toVerifyErrors();
-    expect([
+    expect.verifyErrors(["Duplicate category id: test"]);
+    expect.verifySteps([
         "[Owl] Unhandled error. Destroying the root component",
         "[Owl] Unhandled error. Destroying the root component",
         "[Owl] Unhandled error. Destroying the root component",
-    ]).toVerifySteps();
+    ]);
 });

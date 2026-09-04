@@ -36,7 +36,7 @@
                                                 Fill "Callback URL 1" with the following URL:
                                                 <br/><field name="l10n_ro_edi_callback_url" widget="text" class="w-100 text-success"/>
                                             </li>
-                                            <li>In "Serviciu", select the option "E-Factura"</li>
+                                            <li id="serviciu">In "Serviciu", select the option "E-Factura"</li>
                                             <li>Submit the form by clicking on "Generare Client ID"</li>
                                         </ul>
                                     </li>
@@ -44,12 +44,8 @@
                                     <li>With the digital signature USB token inserted, generate the token using the button below</li>
                                 </ul>
                             </div>
-                            <div class="row text-warning" invisible="not l10n_ro_edi_oauth_error">
-                                Error when generating token:
-                                <field name="l10n_ro_edi_oauth_error" widget="text" class="w-100"/>
-                            </div>
                             <div class="row">
-                                <label for="l10n_ro_edi_client_id" class="col-lg-3 o_light_label"/>
+                                <label for="l10n_ro_edi_client_id" string="Client ID" class="col-lg-3 o_light_label"/>
                                 <field name="l10n_ro_edi_client_id"/>
                             </div>
                             <div class="row">
@@ -77,6 +73,10 @@
                                         type="object"
                                         string="Generate Token"
                                         class="btn btn-primary"/>
+                            </div>
+                            <div class="row">
+                                <label for="l10n_ro_edi_anaf_imported_inv_journal_id" class="col-lg-3 o_light_label" string="Import Vendor Bills in : "/>
+                                <field name="l10n_ro_edi_anaf_imported_inv_journal_id" domain="[('type', '=', 'purchase'), ('active', '=', True)]"/>
                             </div>
                             <setting id="l10n_ro_edi_test_env_setting" class="mt-3"
                                      help="Activate test environment for sending E-Factura to SPV">

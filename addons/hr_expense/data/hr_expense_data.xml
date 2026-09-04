@@ -8,11 +8,11 @@
             <field name="standard_price">0.0</field>
             <field name="type">service</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
-            <field name="uom_po_id" ref="uom.product_uom_unit"/>
             <field name="default_code">FOOD</field>
             <field name="can_be_expensed" eval="True"/>
             <field name="sale_ok" eval="False"/>
-            <field name="purchase_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="categ_id" eval="ref('product.product_category_expenses', raise_if_not_found=False)"/>
             <field name="image_1920" type="base64" file="hr_expense/static/img/food.svg"/>
         </record>
         <record id="expense_product_travel_accommodation" model="product.product">
@@ -21,23 +21,27 @@
             <field name="standard_price">0.0</field>
             <field name="type">service</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
-            <field name="uom_po_id" ref="uom.product_uom_unit"/>
             <field name="default_code">TRANS &amp; ACC</field>
             <field name="can_be_expensed" eval="True"/>
+            <field name="purchase_ok" eval="True"/>
             <field name="sale_ok" eval="False"/>
-            <field name="purchase_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="categ_id" eval="ref('product.product_category_expenses', raise_if_not_found=False)"/>
             <field name="image_1920" type="base64" file="hr_expense/static/img/transport.svg"/>
+        </record>
+        <record id="uom.product_uom_km" model="uom.uom">
+            <field name="active" eval="True"/>
         </record>
         <record id="expense_product_mileage" model="product.product">
             <field name="name">Mileage</field>
             <field name="standard_price">1.0</field>
             <field name="type">service</field>
             <field name="uom_id" ref="uom.product_uom_km"/>
-            <field name="uom_po_id" ref="uom.product_uom_km"/>
             <field name="default_code">MIL</field>
             <field name="can_be_expensed" eval="True"/>
             <field name="sale_ok" eval="False"/>
-            <field name="purchase_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="categ_id" eval="ref('product.product_category_expenses', raise_if_not_found=False)"/>
             <field name="image_1920" type="base64" file="hr_expense/static/img/mileage.svg"/>
         </record>
         <record id="expense_product_gift" model="product.product">
@@ -45,12 +49,12 @@
             <field name="description">Gifts to customers or vendors</field>
             <field name="standard_price">0.0</field>
             <field name="type">service</field>
-            <field name="uom_id" ref="uom.product_uom_km"/>
-            <field name="uom_po_id" ref="uom.product_uom_km"/>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
             <field name="default_code">GIFT</field>
             <field name="can_be_expensed" eval="True"/>
             <field name="sale_ok" eval="False"/>
-            <field name="purchase_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="categ_id" eval="ref('product.product_category_expenses', raise_if_not_found=False)"/>
             <field name="image_1920" type="base64" file="hr_expense/static/img/gift.svg"/>
         </record>
         <record id="expense_product_communication" model="product.product">
@@ -58,12 +62,12 @@
             <field name="description">Phone bills, postage, etc.</field>
             <field name="standard_price">0.0</field>
             <field name="type">service</field>
-            <field name="uom_id" ref="uom.product_uom_km"/>
-            <field name="uom_po_id" ref="uom.product_uom_km"/>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
             <field name="default_code">COMM</field>
             <field name="can_be_expensed" eval="True"/>
             <field name="sale_ok" eval="False"/>
-            <field name="purchase_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="categ_id" eval="ref('product.product_category_expenses', raise_if_not_found=False)"/>
             <field name="image_1920" type="base64" file="hr_expense/static/img/communication.svg"/>
         </record>
         <record id="product_product_no_cost" model="product.product">
@@ -71,8 +75,9 @@
             <field name="standard_price">0.0</field>
             <field name="type">service</field>
             <field name="default_code">EXP_GEN</field>
-            <field name="categ_id" ref="product.cat_expense"/>
+            <field name="categ_id" eval="ref('product.product_category_expenses', raise_if_not_found=False)"/>
             <field name="can_be_expensed" eval="True"/>
+            <field name="purchase_ok" eval="True"/>
             <field name="image_1920" type="base64" file="hr_expense/static/img/other.svg"/>
         </record>
     </data>

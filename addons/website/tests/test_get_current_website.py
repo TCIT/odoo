@@ -2,9 +2,11 @@
 import json
 
 from odoo import Command
-from odoo.addons.website.tools import MockRequest
 from odoo.tests import tagged
+from odoo.tools import mute_logger
+
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo
+from odoo.addons.http_routing.tests.common import MockRequest
 
 
 @tagged('post_install', '-at_install')
@@ -73,6 +75,16 @@ class TestGetCurrentWebsite(HttpCaseWithUserDemo):
         self.assertEqual(Website._get_current_website_id('site-1.com:82'), website1.id)
         self.assertEqual(Website._get_current_website_id('site-1.com'), website1.id)
 
+        # CASE: Unicode domain (IDNA) support
+        website2.domain = 'düsseldorf.com'
+        self.assertEqual(Website._get_current_website_id('xn--dsseldorf-q9a.com'), website2.id)
+        self.assertEqual(Website._get_current_website_id('düsseldorf.com'), website2.id)
+
+        # CASE: domain stored as punycode
+        website2.domain = 'xn--dsseldorf-q9a.com'
+        self.assertEqual(Website._get_current_website_id('xn--dsseldorf-q9a.com'), website2.id)
+        self.assertEqual(Website._get_current_website_id('düsseldorf.com'), website2.id)
+
     def test_02_signup_user_website_id(self):
         website = self.website
         website.specific_user_account = True
@@ -81,13 +93,14 @@ class TestGetCurrentWebsite(HttpCaseWithUserDemo):
             'website_id': website.id,
             'login': 'sad@mail.com',
             'name': 'Hope Fully',
-            'groups_id': [
+            'group_ids': [
                 Command.link(self.env.ref('base.group_portal').id),
                 Command.unlink(self.env.ref('base.group_user').id),
             ],
         })
         self.assertTrue(user.website_id == user.partner_id.website_id == website)
 
+    @mute_logger('odoo.addons.rpc.controllers.jsonrpc')
     def test_03_rpc_signin_user_website_id(self):
         def rpc_login_user_demo():
             """

@@ -1,8 +1,6 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 
 registry.category("web_tour.tours").add('order_lunch_tour', {
     url: "/odoo",
@@ -28,7 +26,7 @@ registry.category("web_tour.tours").add('order_lunch_tour', {
     trigger: '.lunch_location input:value("Farm 1")',
 },
 {
-    trigger: ".o_kanban_record",
+    trigger: `.o_kanban_record:contains("Aaron's Pizza")`,
     content: _t("Click on a product you want to order and is available."),
     run: 'click'
 },
@@ -50,7 +48,6 @@ registry.category("web_tour.tours").add('order_lunch_tour', {
     tooltipPosition: 'left',
     run: 'click',
 }, {
-    trigger: '.o_lunch_widget_lines .badge:contains("Ordered")',
+    trigger: ".o_lunch_widget_line li[name='o_lunch_order_line'] .badge:contains('Ordered')",
     content: 'Check that order is ordered',
-    run: () => {}
 }]});

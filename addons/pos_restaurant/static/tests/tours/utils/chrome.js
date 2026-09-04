@@ -1,14 +1,19 @@
+import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
+
 export function isTabActive(tabText) {
     return [
         {
             content: "Check if the active tab contains the text" + tabText,
-            trigger: `.navbar-menu .btn-primary:contains(${tabText})`,
+            trigger: `.pos-leftheader span.text-bg-info:contains(${tabText})`,
         },
     ];
 }
 
-export function activeTableOrOrderIs(label) {
-    return {
-        trigger: `.table-free-order-label:contains("${label}")`,
-    };
+export function closePrintingWarning() {
+    return [
+        {
+            ...Dialog.confirm(),
+            content: "acknowledge printing error ( because we don't have printer in the test. )",
+        },
+    ];
 }

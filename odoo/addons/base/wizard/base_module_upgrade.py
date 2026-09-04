@@ -1,17 +1,15 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import odoo
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
 class BaseModuleUpgrade(models.TransientModel):
-    _name = "base.module.upgrade"
+    _name = 'base.module.upgrade'
     _description = "Upgrade Module"
 
     @api.model
-    @api.returns('ir.module.module')
     def get_module_list(self):
         states = ['to upgrade', 'to remove', 'to install']
         return self.env['ir.module.module'].search([('state', 'in', states)])
@@ -58,15 +56,15 @@ class BaseModuleUpgrade(models.TransientModel):
                         JOIN ir_module_module_dependency d ON (m.id = d.module_id)
                         LEFT JOIN ir_module_module m2 ON (d.name = m2.name)
                         WHERE m.id = any(%s) and (m2.state IS NULL or m2.state = %s) """
-            self._cr.execute(query, (mods.ids, 'uninstalled'))
-            unmet_packages = [row[0] for row in self._cr.fetchall()]
+            self.env.cr.execute(query, (mods.ids, 'uninstalled'))
+            unmet_packages = [row[0] for row in self.env.cr.fetchall()]
             if unmet_packages:
-                raise UserError(_('The following modules are not installed or unknown: %s', '\n\n' + '\n'.join(unmet_packages)))
+                raise UserError(self.env._('The following modules are not installed or unknown: %s', '\n\n' + '\n'.join(unmet_packages)))
 
         # terminate transaction before re-creating cursor below
-        self._cr.commit()
-        odoo.modules.registry.Registry.new(self._cr.dbname, update_module=True)
-        self._cr.reset()
+        self.env.cr.commit()
+        odoo.modules.registry.Registry.new(self.env.cr.dbname, update_module=True)
+        self.env.cr.reset()
 
         return {'type': 'ir.actions.act_window_close'}
 

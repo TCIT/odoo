@@ -1,11 +1,17 @@
 import { after, describe, expect, test } from "@odoo/hoot";
 import { Deferred, mockFetch } from "@odoo/hoot-mock";
-import { patchTranslations } from "@web/../tests/web_test_helpers";
+import { allowTranslations } from "@web/../tests/web_test_helpers";
 
-import { download } from "@web/core/network/download";
+import { download, parse } from "@web/core/network/download";
 import { ConnectionLostError, RPCError } from "@web/core/network/rpc";
 
 describe.current.tags("headless");
+
+test("parse: tab character in quoted-string filename is valid per RFC 2616", () => {
+    // HT (\x09) is valid qdtext: TEXT includes LWS which includes HT
+    const result = parse('attachment; filename="\ttabFilename.gif"');
+    expect(result.parameters.filename).toBe("\ttabFilename.gif");
+});
 
 test("handles connection error when behind a server", async () => {
     mockFetch(() => new Response("", { status: 502 }));
@@ -23,7 +29,7 @@ test("handles connection error when network unavailable", async () => {
 
 test("handles business error from server", async () => {
     const serverError = {
-        code: 200,
+        code: 0,
         data: {
             name: "odoo.exceptions.RedirectWarning",
             arguments: ["Business Error Message", "someArg"],
@@ -68,7 +74,7 @@ test("handles arbitrary error", async () => {
 });
 
 test("handles success download", async () => {
-    patchTranslations();
+    allowTranslations();
     // This test relies on a implementation detail of the lowest layer of download
     // That is, a link will be created with the download attribute
 

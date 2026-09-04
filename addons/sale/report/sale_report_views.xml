@@ -84,7 +84,7 @@
                 <filter string="Sales Orders" name="Sales" domain="[('state','not in',('draft', 'cancel', 'sent'))]"/>
                 <separator/>
                 <filter name="filter_date" date="date" default_period="month"/>
-                <filter name="filter_order_date" invisible="1" string="Order Date: Last 365 Days" domain="[('date', '&gt;=', (datetime.datetime.combine(context_today() + relativedelta(days=-365), datetime.time(0,0,0))).strftime('%Y-%m-%d %H:%M:%S'))]"/>
+                <filter name="filter_order_date" invisible="1" string="Order Date: Last 365 Days" domain="[('date', '&gt;=', '-365d')]"/>
                 <separator/>
                 <field name="user_id"/>
                 <field name="team_id"/>
@@ -96,11 +96,11 @@
                 <field name="partner_id"/>
                 <field name="country_id"/>
                 <field name="industry_id"/>
-                <group expand="0" string="Extended Filters">
+                <group>
                     <field name="categ_id" filter_domain="[('categ_id', 'child_of', self)]"/>
                     <field name="company_id" groups="base.group_multi_company"/>
                 </group>
-                <group expand="1" string="Group By">
+                <group>
                     <filter string="Salesperson" name="User" context="{'group_by':'user_id'}"/>
                     <filter string="Sales Team" name="sales_channel" context="{'group_by':'team_id'}"/>
                     <filter string="Customer" name="Customer" context="{'group_by':'partner_id'}"/>

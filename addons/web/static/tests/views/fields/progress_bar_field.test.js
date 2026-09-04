@@ -33,7 +33,13 @@ class Partner extends models.Model {
         },
     ];
 }
-defineModels([Partner]);
+class User extends models.Model {
+    _name = "res.users";
+    has_group() {
+        return true;
+    }
+}
+defineModels([Partner, User]);
 
 test("ProgressBarField: max_value should update", async () => {
     expect.assertions(3);
@@ -72,7 +78,9 @@ test("ProgressBarField: max_value should update", async () => {
 test("ProgressBarField: value should update in edit mode when typing in input", async () => {
     expect.assertions(4);
     Partner._records[0].int_field = 99;
-    onRpc("web_save", ({ args }) => expect(args[1].int_field).toBe(69));
+    onRpc("web_save", ({ args }) => {
+        expect(args[1].int_field).toBe(69);
+    });
     await mountView({
         type: "form",
         resModel: "partner",
@@ -107,7 +115,9 @@ test("ProgressBarField: value should update in edit mode when typing in input wi
     expect.assertions(4);
     Partner._records[0].int_field = 99;
 
-    onRpc("web_save", ({ args }) => expect(args[1].int_field).toBe(69));
+    onRpc("web_save", ({ args }) => {
+        expect(args[1].int_field).toBe(69);
+    });
 
     await mountView({
         type: "form",
@@ -141,7 +151,9 @@ test("ProgressBarField: max value should update in edit mode when typing in inpu
     expect.assertions(5);
     Partner._records[0].int_field = 99;
 
-    onRpc("web_save", ({ args }) => expect(args[1].float_field).toBe(69));
+    onRpc("web_save", ({ args }) => {
+        expect(args[1].float_field).toBe(69);
+    });
     await mountView({
         type: "form",
         resModel: "partner",
@@ -208,7 +220,9 @@ test("ProgressBarField: field is editable in kanban", async () => {
     expect.assertions(7);
     Partner._records[0].int_field = 99;
 
-    onRpc("web_save", ({ args }) => expect(args[1].int_field).toBe(69));
+    onRpc("web_save", ({ args }) => {
+        expect(args[1].int_field).toBe(69);
+    });
     await mountView({
         type: "kanban",
         resModel: "partner",
@@ -315,7 +329,9 @@ test("ProgressBarField: write float instead of int works, in locale", async () =
             thousands_sep: "#",
         },
     });
-    onRpc("web_save", ({ args }) => expect(args[1].int_field).toBe(1037));
+    onRpc("web_save", ({ args }) => {
+        expect(args[1].int_field).toBe(1037);
+    });
     await mountView({
         type: "form",
         resModel: "partner",

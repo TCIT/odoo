@@ -70,23 +70,23 @@ class TestWebsiteSession(HttpCaseWithUserDemo):
             el = html.fromstring(html_text)
             return el.xpath('//*[@data-oe-model="test.model"]')
 
-        self.user_demo.groups_id += self.env.ref('website.group_website_restricted_editor')
-        self.user_demo.groups_id += self.env.ref('test_website.group_test_website_admin')
-        self.user_demo.groups_id -= self.env.ref('website.group_website_designer')
+        self.user_demo.group_ids += self.env.ref('website.group_website_restricted_editor')
+        self.user_demo.group_ids += self.env.ref('test_website.group_test_website_admin')
+        self.user_demo.group_ids -= self.env.ref('website.group_website_designer')
 
         # Create session for demo user.
         public_session = self.authenticate(None, None)
         demo_session = self.authenticate('demo', 'demo')
-        record = self.env['test.model'].search([])
+        record = self.env['test.model'].search([], limit=1)
         result = self.url_open(f'/test_website/model_item_sudo/{record.id}')
         self.assertTrue(has_branding(result.text), "Should have branding for user demo")
 
         # Public user.
-        self.opener.cookies['session_id'] = public_session.sid
+        self.opener.cookies.set("session_id", public_session.sid, domain=odoo.tests.common.HOST)
         result = self.url_open(f'/test_website/model_item_sudo/{record.id}')
         self.assertFalse(has_branding(result.text), "Should have no branding for public user")
 
         # Back to demo user.
-        self.opener.cookies['session_id'] = demo_session.sid
+        self.opener.cookies.set("session_id", demo_session.sid, domain=odoo.tests.common.HOST)
         result = self.url_open(f'/test_website/model_item_sudo/{record.id}')
         self.assertTrue(has_branding(result.text), "Should have branding for user demo")

@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import configuratorTourUtils from '@sale/js/tours/product_configurator_tour_utils';
 
 function assertProductStrikethroughPrice(productName, price) {
@@ -7,7 +5,6 @@ function assertProductStrikethroughPrice(productName, price) {
         content: `Assert that ${productName} was reduced from ${price}`,
         trigger: `
             ${configuratorTourUtils.productSelector(productName)}
-            td.o_sale_product_configurator_price
             .oe_striked_price:contains("${price}")
         `,
     };
@@ -18,7 +15,6 @@ function assertOptionalProductStrikethroughPrice(productName, price) {
         content: `Assert that ${productName} was reduced from ${price}`,
         trigger: `
             ${configuratorTourUtils.optionalProductSelector(productName)}
-            td.o_sale_product_configurator_qty
             .oe_striked_price:contains("${price}")
         `,
     };

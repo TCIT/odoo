@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add('project_task_activities_split', {
@@ -15,10 +13,18 @@ registry.category("web_tour.tours").add('project_task_activities_split', {
             run: "click",
         }, {
             content: 'Task "New Task!" is listed in the activity view',
-            trigger: '.o_activity_record .d-block:contains("New Task!")',
+            trigger: 'td.o_data_cell:contains("New Task!")',
+        }, {
+            trigger: ".o_control_panel_navigation button i.fa-sliders",
+            content: "Open embedded actions dropdown",
+            run: "click",
+        }, {
+            content: 'Click on `Show Sub-Tasks` button to see sub-tasks in the main view',
+            trigger: "span.o-dropdown-item:contains('Show Sub-Tasks')",
+            run: 'click',
         }, {
             content: 'Task "New Sub-Task!" is listed in the activity view',
-            trigger: '.o_activity_record .d-block:contains("New Sub-Task!")',
+            trigger: 'td.o_data_cell:contains("New Sub-Task!")',
             run: () => {
                 const nodes = document.querySelectorAll(".o_activity_record .d-block");
                 for (const node of nodes) {
@@ -37,7 +43,7 @@ registry.category("web_tour.tours").add('project_task_activities_split', {
             run: "click",
         }, {
             content: 'Record "New To-Do!" is listed in the activity view',
-            trigger: '.o_activity_record .d-block:contains("New To-Do!")',
+            trigger: 'td.o_data_cell:contains("New To-Do!")',
             run: () => {
                 const nodes = document.querySelectorAll(".o_activity_record .d-block");
                 for (const node of nodes) {

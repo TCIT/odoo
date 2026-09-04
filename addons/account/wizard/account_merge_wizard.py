@@ -41,7 +41,7 @@ class AccountMergeWizard(models.TransientModel):
     def _get_grouping_key(self, account):
         """ Return a grouping key for the given account. """
         self.ensure_one()
-        grouping_fields = ['account_type', 'non_trade', 'currency_id', 'reconcile', 'deprecated']
+        grouping_fields = ['account_type', 'non_trade', 'currency_id', 'reconcile', 'active']
         if self.is_group_by_name:
             grouping_fields.append('name')
         return tuple(account[field] for field in grouping_fields)
@@ -141,14 +141,15 @@ class AccountMergeWizard(models.TransientModel):
         # Step 1: Keep track of the company_ids and codes we should write on the account.
         # We will do so only at the end, to avoid triggering the constraint that prevents duplicate codes.
         company_ids_to_write = accounts.sudo().company_ids
-        code_by_company = {}
-        all_root_companies = self.env['res.company'].sudo().search([('parent_id', '=', False)])
-        for account in accounts:
-            for company in account.company_ids & all_root_companies:
-                code_by_company[company] = account.with_company(company).sudo().code
-            for company in all_root_companies - account.company_ids:
-                if code := account.with_company(company).sudo().code:
-                    code_by_company[company] = code
+        code_by_company = self.env.execute_query(SQL(
+            """
+            SELECT jsonb_object_agg(key, value)
+              FROM account_account, jsonb_each_text(account_account.code_store)
+             WHERE account_account.id IN %(account_ids)s
+            """,
+            account_ids=tuple(accounts.ids),
+            to_flush=accounts._fields['code_store'],
+        ))[0][0]
 
         account_to_merge_into = accounts[0]
         accounts_to_remove = accounts[1:]
@@ -205,10 +206,18 @@ class AccountMergeWizard(models.TransientModel):
         self.env.registry.clear_cache()
 
         # Step 5: Write company_ids and codes on the account
-        for company, code in code_by_company.items():
-            account_to_merge_into.with_company(company).sudo().code = code
+        self.env.cr.execute(SQL(
+            """
+            UPDATE account_account
+               SET code_store = %(code_by_company_json)s
+             WHERE id = %(account_to_merge_into_id)s
+            """,
+            code_by_company_json=json.dumps(code_by_company),
+            account_to_merge_into_id=account_to_merge_into.id,
+        ))
 
         account_to_merge_into.sudo().company_ids = company_ids_to_write
+        self.env.add_to_compute(self.env['account.account']._fields['tag_ids'], account_to_merge_into)
 
 
 class AccountMergeWizardLine(models.TransientModel):
@@ -226,6 +235,7 @@ class AccountMergeWizardLine(models.TransientModel):
     display_type = fields.Selection(
         selection=[
             ('line_section', "Section"),
+            ('line_subsection', "Subsection"),
             ('account', "Account"),
         ],
         required=True,
@@ -251,10 +261,10 @@ class AccountMergeWizardLine(models.TransientModel):
     @api.depends('account_id')
     def _compute_account_has_hashed_entries(self):
         # optimization to avoid having to re-check which accounts have hashed entries
-        query = self.env['account.move.line']._where_calc([
+        query = self.env['account.move.line']._search([
             ('account_id', 'in', self.account_id.ids),
             ('move_id.inalterable_hash', '!=', False),
-        ])
+        ], bypass_access=True)
         query_result = self.env.execute_query(query.select(SQL('DISTINCT account_move_line.account_id')))
         accounts_with_hashed_entries_ids = {r[0] for r in query_result}
         wizard_lines_with_hashed_entries = self.filtered(lambda l: l.account_id.id in accounts_with_hashed_entries_ids)
@@ -295,7 +305,7 @@ class AccountMergeWizardLine(models.TransientModel):
         if self.account_id.reconcile:
             other_name_elements.append(_("Reconcilable"))
 
-        if self.account_id.deprecated:
+        if not self.account_id.active:
             other_name_elements.append(_("Deprecated"))
 
         if not self.wizard_id.is_group_by_name:

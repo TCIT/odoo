@@ -7,6 +7,11 @@ class ResCompany(models.Model):
     _inherit = "res.company"
 
     trade_registry = fields.Char()
+    l10n_cz_tax_office_id = fields.Many2one(
+        string="Tax Office (CZ)",
+        comodel_name='l10n_cz.tax_office',
+    )
+
 
 class BaseDocumentLayout(models.TransientModel):
     _inherit = 'base.document.layout'

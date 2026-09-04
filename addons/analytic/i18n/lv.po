@@ -1,34 +1,44 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* analytic
-# 
+# * analytic
+#
 # Translators:
-# Anzelika Adejanova, 2024
-# Arnis Putniņš <arnis@allegro.lv>, 2024
-# Martin Trigaux, 2024
-# Will Sensors, 2024
-# ievaputnina <ievai.putninai@gmail.com>, 2024
-# Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2025
-# 
+# InfernalLV <karlisdreizis@gmail.com>, 2022
+# Konstantins Zabogonskis <inculin4ik@gmail.com>, 2022
+# Anzelika Adejanova, 2022
+# JanisJanis <jbojars@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Arnis Putniņš <arnis@allegro.lv>, 2023
+# Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2023
+# ievaputnina <ievai.putninai@gmail.com>, 2023
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 13:03+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2025\n"
-"Language-Team: Latvian (https://app.transifex.com/odoo/teams/41243/lv/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 18:23+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Latvian <https://translate.odoo.com/projects/odoo-19/analytic/"
+"lv/>\n"
+"Language: lv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: lv\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: analytic
 #. odoo-python
 #: code:addons/analytic/models/analytic_account.py:0
 msgid "%s (copy)"
 msgstr "%s (kopija)"
+
+#. module: analytic
+#. odoo-python
+#: code:addons/analytic/models/analytic_line.py:0
+msgid "%s analytic lines created"
+msgstr ""
 
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_plan_form_view
@@ -60,6 +70,11 @@ msgid "Accounts"
 msgstr "Konti"
 
 #. module: analytic
+#: model:account.analytic.account,name:analytic.analytic_agrolait
+msgid "Acme Corporation"
+msgstr ""
+
+#. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_needaction
 msgid "Action Needed"
 msgstr "Nepieciešama darbība"
@@ -78,7 +93,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
 msgid "Add a Line"
-msgstr "Pievienot rindu"
+msgstr ""
 
 #. module: analytic
 #: model_terms:ir.actions.act_window,help:analytic.action_account_analytic_account_form
@@ -128,13 +143,13 @@ msgstr "Analītiskais Konts"
 #: model:ir.model.fields,field_description:analytic.field_res_config_settings__group_analytic_accounting
 #: model:res.groups,name:analytic.group_analytic_accounting
 msgid "Analytic Accounting"
-msgstr "Analītiskā grāmatvedība"
+msgstr "Analītiskā Uzskaite"
 
 #. module: analytic
 #: model:ir.actions.act_window,name:analytic.action_account_analytic_account_form
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_list
 msgid "Analytic Accounts"
-msgstr "Analītiskie konti"
+msgstr "Analītiskie Konti"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__account_count
@@ -143,9 +158,10 @@ msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__analytic_distribution
+#: model:ir.model.fields,field_description:analytic.field_account_analytic_line__analytic_distribution
 #: model:ir.model.fields,field_description:analytic.field_analytic_mixin__analytic_distribution
 msgid "Analytic Distribution"
-msgstr "Analītiskais sadalījums"
+msgstr "Analītiskais Sadalījums"
 
 #. module: analytic
 #. odoo-javascript
@@ -154,12 +170,12 @@ msgstr "Analītiskais sadalījums"
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_distribution_model_form_view
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_distribution_model_tree_view
 msgid "Analytic Distribution Model"
-msgstr "Analītiskais izplatīšanas modelis"
+msgstr ""
 
 #. module: analytic
 #: model:ir.actions.act_window,name:analytic.action_analytic_distribution_model
 msgid "Analytic Distribution Models"
-msgstr "Analītiskie izplatīšanas modeļi"
+msgstr ""
 
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_form
@@ -177,7 +193,7 @@ msgstr "Analītiskie Ieraksti"
 #. module: analytic
 #: model:ir.model,name:analytic.model_account_analytic_line
 msgid "Analytic Line"
-msgstr "Analītiskā rinda"
+msgstr "Analytic Line"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__line_ids
@@ -202,7 +218,7 @@ msgstr ""
 #. module: analytic
 #: model:ir.model,name:analytic.model_account_analytic_applicability
 msgid "Analytic Plan's Applicabilities"
-msgstr "Analītiskā plāna piemērojamība"
+msgstr ""
 
 #. module: analytic
 #: model:ir.actions.act_window,name:analytic.account_analytic_plan_action
@@ -210,10 +226,11 @@ msgstr "Analītiskā plāna piemērojamība"
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_plan_form_view
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_plan_tree_view
 msgid "Analytic Plans"
-msgstr "Analītiskie plāni"
+msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__analytic_precision
+#: model:ir.model.fields,field_description:analytic.field_account_analytic_line__analytic_precision
 #: model:ir.model.fields,field_description:analytic.field_analytic_mixin__analytic_precision
 msgid "Analytic Precision"
 msgstr "Analītiskā precizitāte"
@@ -235,7 +252,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__applicability_ids
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_plan_form_view
 msgid "Applicability"
-msgstr "Pielietošana"
+msgstr "Pielietojums"
 
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_form
@@ -320,7 +337,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
 msgid "Close"
-msgstr "Aizvērt"
+msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__color
@@ -330,7 +347,7 @@ msgstr "Krāsa"
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__color
 msgid "Color Index"
-msgstr "Krāsas Indekss"
+msgstr "Krāsas indekss"
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_commercial_marketing
@@ -359,16 +376,6 @@ msgstr ""
 #: model:ir.model,name:analytic.model_res_config_settings
 msgid "Config Settings"
 msgstr "Konfigurācijas uzstādījumi"
-
-#. module: analytic
-#: model:ir.model.fields,help:analytic.field_account_analytic_line__product_uom_category_id
-msgid ""
-"Conversion between Units of Measure can only occur if they belong to the "
-"same category. The conversion will be made based on the ratios."
-msgstr ""
-"Mērvienību konvertēšana starp mērvienībām var notikt tikai tad, ja tās "
-"pieder vienai un tai pašai kategorijai. Pārrēķins tiks veikts, pamatojoties "
-"uz attiecībām."
 
 #. module: analytic
 #: model_terms:ir.actions.act_window,help:analytic.account_analytic_line_action
@@ -428,17 +435,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__debit
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_list
 msgid "Debit"
-msgstr "Debits"
-
-#. module: analytic
-#: model:account.analytic.account,name:analytic.analytic_agrolait
-msgid "Deco Addict"
-msgstr ""
+msgstr "Debets"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__default_applicability
 msgid "Default Applicability"
-msgstr "Noklusējuma pielietojums"
+msgstr ""
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_deltapc
@@ -448,7 +450,7 @@ msgstr ""
 #. module: analytic
 #: model:account.analytic.plan,name:analytic.analytic_plan_departments
 msgid "Departments"
-msgstr "Struktūrvienības"
+msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__name
@@ -473,14 +475,18 @@ msgstr ""
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__display_name
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__display_name
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__display_name
+#: model:ir.model.fields,field_description:analytic.field_analytic_mixin__display_name
+#: model:ir.model.fields,field_description:analytic.field_analytic_plan_fields_mixin__display_name
+#: model:ir.model.fields,field_description:analytic.field_ir_config_parameter__display_name
+#: model:ir.model.fields,field_description:analytic.field_res_config_settings__display_name
 msgid "Display Name"
-msgstr "Nosaukums"
+msgstr "Parādīt vārdu"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__distribution_analytic_account_ids
 #: model:ir.model.fields,field_description:analytic.field_analytic_mixin__distribution_analytic_account_ids
 msgid "Distribution Analytic Account"
-msgstr "Izplatīšanas analītiskais konts"
+msgstr ""
 
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_distribution_model_form_view
@@ -490,7 +496,19 @@ msgstr ""
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_applicability__business_domain
 msgid "Domain"
-msgstr "Domēns"
+msgstr "Filtrs"
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
+msgid "Don't update"
+msgstr ""
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
+msgid "Dynamic Placeholder"
+msgstr ""
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_rd_finance
@@ -519,20 +537,14 @@ msgid "Gross Margin"
 msgstr ""
 
 #. module: analytic
-#: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_search
-#: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_filter
-msgid "Group By..."
-msgstr "Grupēt pēc..."
-
-#. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__has_message
 msgid "Has Message"
-msgstr "Ir ziņojums"
+msgstr "ir ziņojums"
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_rd_hr
 msgid "Human Resources"
-msgstr "Personāla vadība"
+msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__id
@@ -540,6 +552,10 @@ msgstr "Personāla vadība"
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__id
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__id
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__id
+#: model:ir.model.fields,field_description:analytic.field_analytic_mixin__id
+#: model:ir.model.fields,field_description:analytic.field_analytic_plan_fields_mixin__id
+#: model:ir.model.fields,field_description:analytic.field_ir_config_parameter__id
+#: model:ir.model.fields,field_description:analytic.field_res_config_settings__id
 msgid "ID"
 msgstr "ID"
 
@@ -551,14 +567,15 @@ msgstr "Ja atzīmēts, jums jāpievērš uzmanība jauniem ziņojumiem."
 #. module: analytic
 #: model:ir.model.fields,help:analytic.field_account_analytic_account__message_has_error
 msgid "If checked, some messages have a delivery error."
-msgstr "Ja atzīmēts, daži ziņojumi satur piegādes kļūdu."
+msgstr "Ja atzīmēts, dažiem ziņojumiem ir piegādes kļūda."
 
 #. module: analytic
 #: model_terms:ir.actions.act_window,help:analytic.account_analytic_line_action
 #: model_terms:ir.actions.act_window,help:analytic.account_analytic_line_action_entries
 msgid ""
 "In Odoo, sales orders and projects are implemented using\n"
-"                analytic accounts. You can track costs and revenues to analyse\n"
+"                analytic accounts. You can track costs and revenues to "
+"analyse\n"
 "                your margins easily."
 msgstr ""
 
@@ -579,7 +596,7 @@ msgstr "Ir sekotājs"
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__write_uid
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__write_uid
 msgid "Last Updated by"
-msgstr "Pēdējo reizi atjaunoja"
+msgstr "Pēdējoreiz atjaunoja"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__write_date
@@ -588,7 +605,7 @@ msgstr "Pēdējo reizi atjaunoja"
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__write_date
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__write_date
 msgid "Last Updated on"
-msgstr "Pēdējās izmaiņas"
+msgstr "Pēdējoreiz atjaunots"
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_rd_legal
@@ -629,7 +646,13 @@ msgstr ""
 #. module: analytic
 #: model:ir.model.fields.selection,name:analytic.selection__account_analytic_applicability__business_domain__general
 msgid "Miscellaneous"
-msgstr "Dažādi"
+msgstr "Miscellaneous"
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
+msgid "Multi edit"
+msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__name
@@ -677,7 +700,7 @@ msgstr "Kļūdu skaits"
 #. module: analytic
 #: model:ir.model.fields,help:analytic.field_account_analytic_account__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr "Ziņojumu, kuriem nepieciešama darbība, skaits"
+msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields,help:analytic.field_account_analytic_account__message_has_error_counter
@@ -710,7 +733,7 @@ msgstr "Pēc izvēles"
 #. module: analytic
 #: model:ir.model.fields.selection,name:analytic.selection__account_analytic_line__category__other
 msgid "Other"
-msgstr "Cits"
+msgstr "Other"
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_our_super_product
@@ -725,7 +748,7 @@ msgstr "Virs"
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__parent_path
 msgid "Parent Path"
-msgstr "Virskategorijas ceļš"
+msgstr "Virskategoriju ceļš"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__partner_id
@@ -741,13 +764,14 @@ msgstr ""
 #. module: analytic
 #. odoo-javascript
 #: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
 msgid "Percentage"
-msgstr "Procentuālā attiecība"
+msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__plan_id
 msgid "Plan"
-msgstr "Plāns"
+msgstr "Plan"
 
 #. module: analytic
 #. odoo-javascript
@@ -758,12 +782,12 @@ msgstr ""
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_rd_production
 msgid "Production"
-msgstr "Ražošana"
+msgstr ""
 
 #. module: analytic
 #: model:account.analytic.plan,name:analytic.analytic_plan_projects
 msgid "Project"
-msgstr "Projekti"
+msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__account_id
@@ -780,7 +804,7 @@ msgstr "Daudzums"
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__code
 msgid "Reference"
-msgstr "Reference"
+msgstr "Atsauksme"
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_rd_department
@@ -792,15 +816,17 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:analytic.account_analytic_line_action_entries
 msgid ""
 "Revenues will be created automatically when you create customer\n"
-"                invoices. Customer invoices can be created based on sales orders\n"
-"                (fixed price invoices), on timesheets (based on the work done) or\n"
+"                invoices. Customer invoices can be created based on sales "
+"orders\n"
+"                (fixed price invoices), on timesheets (based on the work "
+"done) or\n"
 "                on expenses (e.g. reinvoicing of travel costs)."
 msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__root_id
 msgid "Root"
-msgstr "Pamata"
+msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__root_plan_id
@@ -822,6 +848,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_filter
 msgid "Search Analytic Lines"
 msgstr "Meklēt Analītiskajos Ierakstos"
+
+#. module: analytic
+#. odoo-python
+#: code:addons/analytic/models/analytic_account.py:0
+msgid "See them"
+msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields,help:analytic.field_account_analytic_distribution_model__company_id
@@ -851,7 +883,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__sequence
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__sequence
 msgid "Sequence"
-msgstr "Sekvence"
+msgstr ""
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_spark
@@ -864,14 +896,27 @@ msgid "Subplans"
 msgstr ""
 
 #. module: analytic
+#: model:ir.model,name:analytic.model_ir_config_parameter
+msgid "System Parameter"
+msgstr ""
+
+#. module: analytic
+#. odoo-python
+#: code:addons/analytic/models/ir_config_parameter.py:0
+msgid ""
+"The value for %s must be the ID to a valid analytic plan that is not a "
+"subplan"
+msgstr ""
+
+#. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_absences
 msgid "Time Off"
-msgstr "Prombūtnes"
+msgstr "Atvaļinājumi"
 
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_tree
 msgid "Total"
-msgstr "Kopā"
+msgstr "Summa"
 
 #. module: analytic
 #: model:ir.model.fields.selection,name:analytic.selection__account_analytic_applicability__applicability__unavailable
@@ -881,12 +926,13 @@ msgstr ""
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__product_uom_id
-msgid "Unit of Measure"
-msgstr "Mērvienība"
+msgid "Unit"
+msgstr ""
 
 #. module: analytic
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_line__product_uom_category_id
-msgid "UoM Category"
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
+msgid "Update"
 msgstr ""
 
 #. module: analytic
@@ -895,11 +941,27 @@ msgid "User"
 msgstr "Lietotājs"
 
 #. module: analytic
+#: model_terms:ir.ui.view,arch_db:analytic.account_analytic_distribution_model_form_view
+#: model_terms:ir.ui.view,arch_db:analytic.account_analytic_distribution_model_tree_view
+#: model_terms:ir.ui.view,arch_db:analytic.account_analytic_plan_form_view
+#: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_form
+msgid "Visible to all"
+msgstr ""
+
+#. module: analytic
 #. odoo-python
 #: code:addons/analytic/models/analytic_account.py:0
 msgid ""
-"You can't set a different company on your analytic account since there are "
-"some analytic items linked to it."
+"Whoa there! Making this change would wipe out your current data. Let's avoid "
+"that, shall we?"
+msgstr ""
+
+#. module: analytic
+#. odoo-python
+#: code:addons/analytic/models/analytic_account.py:0
+msgid ""
+"You can't change the company of an analytic account that already has "
+"analytic items! It's a recipe for an analytical disaster!"
 msgstr ""
 
 #. module: analytic
@@ -920,3 +982,41 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_form
 msgid "e.g. Project XYZ"
 msgstr ""
+
+#~ msgid "Add a line"
+#~ msgstr "Pievienot rindu"
+
+#~ msgid "Analytic Distribution Search"
+#~ msgstr "Analītiskā izplatīšanas meklēšana"
+
+#~ msgid ""
+#~ "Conversion between Units of Measure can only occur if they belong to the "
+#~ "same category. The conversion will be made based on the ratios."
+#~ msgstr ""
+#~ "Mērvienību konvertēšana starp mērvienībām var notikt tikai tad, ja tās "
+#~ "pieder vienai un tai pašai kategorijai. Pārrēķins tiks veikts, "
+#~ "pamatojoties uz attiecībām."
+
+#~ msgid "Group By..."
+#~ msgstr "Grupēt pēc..."
+
+#~ msgid "Invalid"
+#~ msgstr "Nederīgs"
+
+#~ msgid "Loading..."
+#~ msgstr "Notiek ielāde..."
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Ziņojumu, kuriem nepieciešama darbība, skaits"
+
+#~ msgid "OK"
+#~ msgstr "Labi"
+
+#~ msgid "Projects"
+#~ msgstr "Projekti"
+
+#~ msgid "Unit of Measure"
+#~ msgstr "Mērvienība"
+
+#~ msgid "View"
+#~ msgstr "Skatīt"

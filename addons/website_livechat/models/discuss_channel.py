@@ -1,13 +1,17 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _
+from odoo import fields, models, _
+from odoo.addons.im_livechat.models.discuss_channel import is_livechat_channel
 from odoo.addons.mail.tools.discuss import Store
-from odoo.exceptions import AccessError
+from datetime import datetime, timedelta
 
 
 class DiscussChannel(models.Model):
     _inherit = 'discuss.channel'
 
+    is_pending_chat_request = fields.Boolean(
+        "When created from an operator, whether the channel is yet to be opened on the visitor side.",
+    )
     livechat_visitor_id = fields.Many2one('website.visitor', string='Visitor', index='btree_not_null')
 
     def channel_pin(self, pinned=False):
@@ -19,46 +23,36 @@ class DiscussChannel(models.Model):
          delete discuss_channel as not useful to keep empty chat
          """
         super().channel_pin(pinned=pinned)
-        if self.livechat_active and not self.message_ids:
+        if self.channel_type == "livechat" and not pinned and not self.message_ids:
             self.sudo().unlink()
 
-    def _to_store(self, store: Store):
-        """
-        Override to add visitor information on the mail channel infos.
-        This will be used to display a banner with visitor informations
-        at the top of the livechat channel discussion view in discuss module.
-        """
-        super()._to_store(store)
-        for channel in self.filtered('livechat_visitor_id'):
-            channel_info = {
-                "requested_by_operator": channel.create_uid in channel.livechat_operator_id.user_ids
-            }
-            visitor = channel.livechat_visitor_id
-            try:
-                country_id = visitor.partner_id.country_id or visitor.country_id
-                channel_info['visitor'] = {
-                    'name': visitor.partner_id.name or visitor.partner_id.display_name or visitor.display_name or _("Visitor #%(id)d.", id=visitor.id),
-                    'country': {'id': country_id.id, 'code': country_id.code.lower()} if country_id else False,
-                    'id': visitor.id,
-                    'is_connected': visitor.is_connected,
-                    'history': self.sudo()._get_visitor_history(visitor),
-                    'website_name': visitor.website_id.name,
-                    'lang_name': visitor.lang_id.name,
-                    'partner_id': visitor.partner_id.id,
-                    'type': "visitor",
-                }
-            except AccessError:
-                pass
-            store.add(channel, channel_info)
+    def _to_store_defaults(self, target):
+        return super()._to_store_defaults(target) + [
+            Store.One(
+                "livechat_visitor_id",
+                [
+                    Store.One("country_id", ["code"]),
+                    "display_name",
+                    "page_visit_history",
+                    Store.One("lang_id", ["name"]),
+                    Store.One("partner_id", [Store.One("country_id", ["code"])]),
+                    Store.One("website_id", ["name"]),
+                ],
+                predicate=lambda channel: channel.channel_type == "livechat"
+                and self.livechat_visitor_id.has_access("read"),
+            ),
+            # sudo: discuss.channel - visitor can access to the channel member history of
+            # an accessible channel when computing requested_by_operator
+            Store.Attr(
+                "requested_by_operator",
+                lambda channel: channel.create_uid
+                in channel.sudo().livechat_agent_history_ids.partner_id.user_ids,
+                predicate=is_livechat_channel,
+            ),
+        ]
 
     def _get_visitor_history(self, visitor):
-        """
-        Prepare history string to render it in the visitor info div on discuss livechat channel view.
-        :param visitor: website.visitor of the channel
-        :return: arrow separated string containing navigation history information
-        """
-        recent_history = self.env['website.track'].search([('page_id', '!=', False), ('visitor_id', '=', visitor.id)], limit=3)
-        return ' → '.join(visit.page_id.name + ' (' + visit.visit_datetime.strftime('%H:%M') + ')' for visit in reversed(recent_history))
+        return visitor._get_visitor_history()
 
     def _get_visitor_leave_message(self, operator=False, cancel=False):
         if not cancel:
@@ -71,7 +65,31 @@ class DiscussChannel(models.Model):
             operator=operator or _("an operator"),
         )
 
-    @api.returns('mail.message', lambda value: value.id)
+    def _get_livechat_session_fields_to_store(self):
+        fields_to_store = super()._get_livechat_session_fields_to_store()
+        domain = [
+            ("channel_type", "=", "livechat"),
+            ("livechat_visitor_id", "=", self.livechat_visitor_id.id),
+            (
+                "create_date",
+                ">=",
+                fields.Datetime.to_string(datetime.now() - timedelta(days=7)),
+            ),
+        ]
+        channels = self.env["discuss.channel"].search(domain, limit=5)
+        fields_to_store.append(
+            Store.One(
+                "livechat_visitor_id", [
+                    Store.Many(
+                        "discuss_channel_ids",
+                        value=channels,
+                    ),
+                ],
+                predicate=is_livechat_channel,
+            ),
+        )
+        return fields_to_store
+
     def message_post(self, **kwargs):
         """Override to mark the visitor as still connected.
         If the message sent is not from the operator (so if it's the visitor or

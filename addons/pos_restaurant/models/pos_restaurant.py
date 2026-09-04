@@ -6,8 +6,8 @@ from odoo.exceptions import UserError
 
 
 class RestaurantFloor(models.Model):
-
     _name = 'restaurant.floor'
+
     _description = 'Restaurant Floor'
     _order = "sequence, name"
     _inherit = ['pos.load.mixin']
@@ -15,19 +15,19 @@ class RestaurantFloor(models.Model):
     name = fields.Char('Floor Name', required=True)
     pos_config_ids = fields.Many2many('pos.config', string='Point of Sales', domain="[('module_pos_restaurant', '=', True)]")
     background_image = fields.Binary('Background Image')
-    background_color = fields.Char('Background Color', help='The background color of the floor in a html-compatible format', default='rgb(249,250,251)')
+    background_color = fields.Char('Background Color', help='The background color of the floor in a html-compatible format')
     table_ids = fields.One2many('restaurant.table', 'floor_id', string='Tables')
     sequence = fields.Integer('Sequence', default=1)
     active = fields.Boolean(default=True)
     floor_background_image = fields.Image(string='Floor Background Image')
 
     @api.model
-    def _load_pos_data_domain(self, data):
-        return [('pos_config_ids', '=', data['pos.config']['data'][0]['id'])]
+    def _load_pos_data_domain(self, data, config):
+        return [('pos_config_ids', '=', config.id)]
 
     @api.model
-    def _load_pos_data_fields(self, config_id):
-        return ['name', 'background_color', 'table_ids', 'sequence', 'pos_config_ids', 'floor_background_image']
+    def _load_pos_data_fields(self, config):
+        return ['name', 'background_color', 'table_ids', 'sequence', 'pos_config_ids', 'floor_background_image', 'active']
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_active_pos_session(self):
@@ -46,9 +46,14 @@ class RestaurantFloor(models.Model):
             for config in floor.pos_config_ids:
                 if config.has_active_session and (vals.get('pos_config_ids') or vals.get('active')):
                     raise UserError(
-                        'Please close and validate the following open PoS Session before modifying this floor.\n'
-                        'Open session: %s' % (' '.join(config.mapped('name')),))
-        return super(RestaurantFloor, self).write(vals)
+                        self.env._(
+                            "Please close and validate the following open PoS Session before modifying this floor.\n"
+                            "Open session: %(session_names)s",
+                            session_names=" ".join(config.mapped("name")),
+                        )
+                    )
+
+        return super().write(vals)
 
     def rename_floor(self, new_name):
         for floor in self:
@@ -81,13 +86,14 @@ class RestaurantFloor(models.Model):
 
         return True
 
-class RestaurantTable(models.Model):
 
+class RestaurantTable(models.Model):
     _name = 'restaurant.table'
+
     _description = 'Restaurant Table'
     _inherit = ['pos.load.mixin']
 
-    floor_id = fields.Many2one('restaurant.floor', string='Floor')
+    floor_id = fields.Many2one('restaurant.floor', string='Floor', index='btree_not_null')
     table_number = fields.Integer('Table Number', required=True, help='The number of the table as displayed on the floor plan', default=0)
     shape = fields.Selection([('square', 'Square'), ('round', 'Round')], string='Shape', required=True, default='square')
     position_h = fields.Float('Horizontal Position', default=10,
@@ -97,7 +103,7 @@ class RestaurantTable(models.Model):
     width = fields.Float('Width', default=50, help="The table's width in pixels")
     height = fields.Float('Height', default=50, help="The table's height in pixels")
     seats = fields.Integer('Seats', default=1, help="The default number of customer served at this table.")
-    color = fields.Char('Color', help="The table's color, expressed as a valid 'background' CSS property value", default="#35D374")
+    color = fields.Char('Color', help="The table's color, expressed as a valid 'background' CSS property value")
     parent_id = fields.Many2one('restaurant.table', string='Parent Table', help="The parent table if this table is part of a group of tables")
     active = fields.Boolean('Active', default=True, help='If false, the table is deactivated and will not be available in the point of sale')
 
@@ -107,11 +113,11 @@ class RestaurantTable(models.Model):
             table.display_name = f"{table.floor_id.name}, {table.table_number}"
 
     @api.model
-    def _load_pos_data_domain(self, data):
-        return [('active', '=', True), ('floor_id', 'in', [floor['id'] for floor in data['restaurant.floor']['data']])]
+    def _load_pos_data_domain(self, data, config):
+        return [('active', '=', True), ('floor_id', 'in', config.floor_ids.ids)]
 
     @api.model
-    def _load_pos_data_fields(self, config_id):
+    def _load_pos_data_fields(self, config):
         return ['table_number', 'width', 'height', 'position_h', 'position_v', 'parent_id', 'shape', 'floor_id', 'color', 'seats', 'active']
 
     def are_orders_still_in_draft(self):
@@ -130,3 +136,15 @@ class RestaurantTable(models.Model):
             error_msg = _("You cannot remove a table that is used in a PoS session, close the session(s) first.")
             if confs:
                 raise UserError(error_msg)
+
+    def set_parent_id(self, parent_id, config_id):
+        parent_id = self.env['restaurant.table'].browse(parent_id).exists()
+        config_id = self.env['pos.config'].browse(config_id).exists()
+        if parent_id:
+            old_parent = self.parent_id
+            self.parent_id = parent_id
+            if self._has_cycle('parent_id'):
+                self.parent_id = old_parent
+        return {
+            'restaurant.table': self._load_pos_data_read(self, config_id) if config_id else [],
+        }

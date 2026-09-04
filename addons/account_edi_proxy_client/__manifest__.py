@@ -12,15 +12,13 @@ Odoo database.
     'version': '1.0',
     'category': 'Accounting/Accounting',
     'depends': ['account', 'certificate'],
-    'external_dependencies': {
-        'python': ['cryptography']
-    },
     'data': [
         'security/ir.model.access.csv',
         'security/account_edi_proxy_client_security.xml',
         'views/account_edi_proxy_user_views.xml',
     ],
     'installable': True,
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
     'post_init_hook': '_create_demo_config_param',
 }

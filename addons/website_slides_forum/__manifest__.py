@@ -21,11 +21,16 @@
         'views/website_slides_menu_views.xml',
         'views/forum_forum_templates.xml',
         'views/website_slides_templates.xml',
-        'views/snippets.xml',
     ],
     'demo': [
         'data/slide_channel_demo.xml',
     ],
     'auto_install': True,
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
+    'assets': {
+        'website.website_builder_assets': [
+            'website_slides_forum/static/src/website_builder/**/*',
+        ],
+    },
 }

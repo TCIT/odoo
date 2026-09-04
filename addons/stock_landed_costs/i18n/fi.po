@@ -1,56 +1,64 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* stock_landed_costs
-# 
+# * stock_landed_costs
+#
 # Translators:
-# Tiffany Chang, 2024
-# Mikko Virtanen <mikko.virtanen2013@gmail.com>, 2024
-# Jukka Paulin <jukka.paulin@gmail.com>, 2024
-# Sari Mäyrä <sari.mayra@sv-oy.fi>, 2024
-# Eino Mäkitalo <eino.makitalo@netitbe.fi>, 2024
-# Mikko Salmela <salmemik@gmail.com>, 2024
-# Kari Lindgren <kari.lindgren@emsystems.fi>, 2024
-# Johanna Valkonen <miujohanna@gmail.com>, 2024
-# Jenni Heikkilä <jenni.heikkila@sv-oy.fi>, 2024
-# Jussi Lehto <jussi@gulfeo.com>, 2024
-# Marko Happonen <marko.happonen@sprintit.fi>, 2024
-# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2024
-# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2024
-# Svante Suominen <svante.suominen@web-veistamo.fi>, 2024
-# Pekko Tuomisto <pekko.tuomisto@web-veistamo.fi>, 2024
-# Martin Trigaux, 2024
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2025
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025
-# 
+# Mikko Virtanen <mikko.virtanen2013@gmail.com>, 2022
+# Jukka Paulin <jukka.paulin@gmail.com>, 2022
+# Eino Mäkitalo <eino.makitalo@netitbe.fi>, 2022
+# Sari Mäyrä <sari.mayra@sv-oy.fi>, 2022
+# Kari Lindgren <kari.lindgren@emsystems.fi>, 2022
+# Johanna Valkonen <miujohanna@gmail.com>, 2022
+# Jenni Heikkilä <jenni.heikkila@sv-oy.fi>, 2022
+# Simo Suurla <simo@suurla.fi>, 2022
+# Mikko Salmela <salmemik@gmail.com>, 2022
+# Marko Happonen <marko.happonen@sprintit.fi>, 2022
+# Jussi Lehto <jussi@gulfeo.com>, 2022
+# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2022
+# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2022
+# Svante Suominen <svante.suominen@web-veistamo.fi>, 2022
+# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2022
+# Pekko Tuomisto <pekko.tuomisto@web-veistamo.fi>, 2022
+# Martin Trigaux, 2022
+# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2023
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Saara Hakanen <sahak@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025\n"
-"Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-05 04:03+0000\n"
+"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-19/"
+"stock_landed_costs/fi/>\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fi\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: stock_landed_costs
 #. odoo-python
-#: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
-msgid "%(product)s: %(quantity)s already out"
-msgstr "%(product)s: %(quantity)s on jo ulkona"
+#: code:addons/stock_landed_costs/models/stock_move.py:0
+msgid "+ %(value)s (Landed Cost: %(landed_cost)s)"
+msgstr "+ %(value)s (Maahantuontikustannukset: %(landed_cost)s)"
+
+#. module: stock_landed_costs
+#. odoo-python
+#: code:addons/stock_landed_costs/models/stock_move.py:0
+msgid "+ %(value)s from %(vendor_bill)s (Landed Cost: %(landed_cost)s)"
+msgstr ""
+"+ %(value)s osoitteesta %(vendor_bill)s (Maahantuontikustannukset: %"
+"(landed_cost)s)"
 
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.stock_landed_cost_view_kanban
-msgid "<i class=\"fa fa-clock-o\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
-msgstr "<i class=\"fa fa-clock-o\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
-
-#. module: stock_landed_costs
-#: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_form
-msgid "<span class=\"o_stat_text\">Valuation</span>"
-msgstr "<span class=\"o_stat_text\">Arvostus</span>"
+msgid ""
+"<i class=\"fa fa-clock-o\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
+msgstr ""
+"<i class=\"fa fa-clock-o\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__account_id
@@ -96,6 +104,16 @@ msgstr "Lisäkulut"
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__additional_landed_cost
 msgid "Additional Landed Cost"
 msgstr "Lisäkulut"
+
+#. module: stock_landed_costs
+#. odoo-python
+#: code:addons/stock_landed_costs/models/stock_move.py:0
+msgid ""
+"Additional landed costs:\n"
+"%(landed_cost)s"
+msgstr ""
+"Lisämaahatuontikustannukset:\n"
+"%(landed_cost)s"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__target_model
@@ -251,8 +269,15 @@ msgid "Description"
 msgstr "Kuvaus"
 
 #. module: stock_landed_costs
+#: model:ir.model.fields,field_description:stock_landed_costs.field_account_move__display_name
+#: model:ir.model.fields,field_description:stock_landed_costs.field_account_move_line__display_name
+#: model:ir.model.fields,field_description:stock_landed_costs.field_product_template__display_name
+#: model:ir.model.fields,field_description:stock_landed_costs.field_purchase_order_line__display_name
+#: model:ir.model.fields,field_description:stock_landed_costs.field_res_company__display_name
+#: model:ir.model.fields,field_description:stock_landed_costs.field_res_config_settings__display_name
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__display_name
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__display_name
+#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_move__display_name
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__display_name
 msgid "Display Name"
 msgstr "Näyttönimi"
@@ -286,7 +311,8 @@ msgid ""
 msgstr ""
 "Yhtäläinen: Kustannukset jaetaan tasan.\n"
 "Määrän mukaan: Kustannukset jaetaan tuotteen määrän mukaan.\n"
-"Nykyisten kustannusten mukaan: Kustannukset jaetaan tuotteen nykyisten kustannusten mukaan.\n"
+"Nykyisten kustannusten mukaan: Kustannukset jaetaan tuotteen nykyisten "
+"kustannusten mukaan.\n"
 "Painon mukaan: Kustannukset jaetaan tuotteen painon mukaan.\n"
 "Määrän mukaan: Kustannukset jaetaan tuotteen tilavuuden mukaan."
 
@@ -316,13 +342,8 @@ msgid ""
 "Goods are tangible materials and merchandise you provide.\n"
 "A service is a non-material product you provide."
 msgstr ""
-"Tavarat ovat toimittamiasi aineellisia materiaaleja ja kauppatavaroita.\n"
+"Tavarat ovat tarjoamiasi aineellisia materiaaleja ja kauppatavaroita.\n"
 "Palvelu on tarjoamasi aineeton tuote."
-
-#. module: stock_landed_costs
-#: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
-msgid "Group By"
-msgstr "Ryhmittely"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__has_message
@@ -330,8 +351,15 @@ msgid "Has Message"
 msgstr "Sisältää viestin"
 
 #. module: stock_landed_costs
+#: model:ir.model.fields,field_description:stock_landed_costs.field_account_move__id
+#: model:ir.model.fields,field_description:stock_landed_costs.field_account_move_line__id
+#: model:ir.model.fields,field_description:stock_landed_costs.field_product_template__id
+#: model:ir.model.fields,field_description:stock_landed_costs.field_purchase_order_line__id
+#: model:ir.model.fields,field_description:stock_landed_costs.field_res_company__id
+#: model:ir.model.fields,field_description:stock_landed_costs.field_res_config_settings__id
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__id
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__id
+#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_move__id
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__id
 msgid "ID"
 msgstr "ID"
@@ -402,17 +430,18 @@ msgstr "Päiväkirjan kirjaus"
 #. module: stock_landed_costs
 #: model:ir.model,name:stock_landed_costs.model_account_move_line
 msgid "Journal Item"
-msgstr "Päiväkirjatapahtuma"
+msgstr "Kirjausrivi"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__cost_id
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__cost_id
-#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_layer__stock_landed_cost_id
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_form
 msgid "Landed Cost"
 msgstr "Lähetyksen kokonaiskulut"
 
 #. module: stock_landed_costs
+#. odoo-python
+#: code:addons/stock_landed_costs/models/account_move.py:0
 #: model:ir.actions.act_window,name:stock_landed_costs.action_stock_landed_cost
 #: model:ir.model.fields,field_description:stock_landed_costs.field_account_bank_statement_line__landed_costs_ids
 #: model:ir.model.fields,field_description:stock_landed_costs.field_account_move__landed_costs_ids
@@ -472,12 +501,17 @@ msgstr "Kokonaiskulujen päiväkirja"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_has_error
 msgid "Message Delivery error"
-msgstr "Ongelma viestin toimituksessa"
+msgstr "Viestin toimitusvirhe"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_ids
 msgid "Messages"
 msgstr "Viestit"
+
+#. module: stock_landed_costs
+#: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
+msgid "My Activities"
+msgstr "Toimenpiteeni"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__my_activity_date_deadline
@@ -561,7 +595,7 @@ msgstr "Keräily"
 #. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 msgid "Please configure Stock Expense Account for product: %s."
-msgstr "Konfiguroi varastokulutili tuotteelle: %s."
+msgstr "Määritä varastokulutili tuotteelle: %s."
 
 #. module: stock_landed_costs
 #. odoo-python
@@ -599,7 +633,7 @@ msgstr "Määrä"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__rating_ids
 msgid "Ratings"
-msgstr "Arviointi"
+msgstr "Arvostelut"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__activity_user_id
@@ -613,8 +647,10 @@ msgstr "Tekstiviestin toimitusvirhe"
 
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
-msgid "Show all records which has next action date is before today"
-msgstr "Näytä kaikki tietueet joissa on toimenpide myöhässä"
+msgid "Show all records whose next activity date is past"
+msgstr ""
+"Näytä kaikki tietueet, joiden seuraavan toimenpiteen päivämäärä on "
+"menneisyydessä"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__split_method
@@ -661,12 +697,6 @@ msgid "Stock Move"
 msgstr "Varastosiirto"
 
 #. module: stock_landed_costs
-#: model:ir.model,name:stock_landed_costs.model_stock_valuation_layer
-#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__stock_valuation_layer_ids
-msgid "Stock Valuation Layer"
-msgstr "Varaston arvostuskerros"
-
-#. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
 msgid "Today Activities"
 msgstr "Tämän päivän toimenpiteet"
@@ -685,7 +715,7 @@ msgstr "Siirrot"
 #. module: stock_landed_costs
 #: model:ir.model.fields,help:stock_landed_costs.field_stock_landed_cost__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr "Poikkeusaktiviteetin tyyppi tietueella."
+msgstr "Tietueen poikkeustoiminnon tyyppi."
 
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_form
@@ -699,8 +729,8 @@ msgid ""
 "Validated landed costs cannot be cancelled, but you could create negative "
 "landed costs to reverse them"
 msgstr ""
-"Vahvistettuja laskettuja kustannuksia ei voi peruuttaa, mutta voit luoda "
-"negatiivisia laskettuja kustannuksia niiden peruuttamiseksi"
+"Vahvistettuja ja laskettuja kustannuksia ei voi peruuttaa, mutta voit luoda "
+"negatiivisia laskettuja kustannuksia niiden kumoamiseksi"
 
 #. module: stock_landed_costs
 #: model:ir.model,name:stock_landed_costs.model_stock_valuation_adjustment_lines
@@ -716,7 +746,7 @@ msgstr "Arvostuksen muutokset"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__vendor_bill_id
 msgid "Vendor Bill"
-msgstr "Ostolasku"
+msgstr "Toimittajan lasku"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__volume
@@ -731,7 +761,7 @@ msgstr "Verkkosivun ilmoitukset"
 #. module: stock_landed_costs
 #: model:ir.model.fields,help:stock_landed_costs.field_stock_landed_cost__website_message_ids
 msgid "Website communication history"
-msgstr "Verkkosivun viestihistoria"
+msgstr "Verkkosivun viestintähistoria"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__weight
@@ -753,8 +783,37 @@ msgstr ""
 #. odoo-python
 #: code:addons/stock_landed_costs/models/product.py:0
 msgid ""
-"You cannot change the product type or disable landed cost option because the"
-" product is used in an account move line."
+"You cannot change the product type or disable landed cost option because the "
+"product is used in an account move line."
 msgstr ""
-"Et voi muuttaa tuotetyyppiä tai poistaa tuotekustannusvaihtoehtoa käytöstä, "
-"koska tuotetta käytetään tilisiirtorivillä."
+"Et voi muuttaa tuotetyyppiä tai poistaa maahantuontikustannusvaihtoehtoa "
+"käytöstä, koska tuotetta käytetään tilikirjauksen rivillä."
+
+#~ msgid " already out"
+#~ msgstr "jo ulkona"
+
+#~ msgid ""
+#~ "A storable product is a product for which you manage stock. The Inventory "
+#~ "app has to be installed.\n"
+#~ "A consumable product is a product for which stock is not managed.\n"
+#~ "A service is a non-material product you provide."
+#~ msgstr ""
+#~ "Varastoitava tuote on tuote, jonka varastosaldoja hallitset. Tätä varten "
+#~ "on asennettava Varasto-sovellus.\n"
+#~ "Kulutustuote on fyysinen tuote, jonka varastoa ei hallita.\n"
+#~ "Palvelu on tarjonnassa oleva aineeton tuote."
+
+#~ msgid "Company related to this journal"
+#~ msgstr "Päiväkirjaan liittyvä yritys"
+
+#~ msgid "Group By"
+#~ msgstr "Ryhmittely"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Toimenpiteitä vaativien viestien määrä"
+
+#~ msgid "Show all records which has next action date is before today"
+#~ msgstr "Näytä kaikki tietueet joissa on toimenpide myöhässä."
+
+#~ msgid "Stock Valuation Layer"
+#~ msgstr "Varaston arvostuskerros"

@@ -6,24 +6,23 @@
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="priority" eval="50"/>
         <field name="arch" type="xml">
-            <div name="button_box" position="inside">
+            <button name="action_open_versions" position="before">
                 <button name="%(maintenance.hr_equipment_action)d"
                     context="{'search_default_employee_id': id, 'default_employee_id': id}"
                     groups="maintenance.group_equipment_manager"
                     class="o_stat_button"
                     icon="fa-cubes"
                     type="action">
-                    <field name="equipment_count" widget="statinfo"/>
+                    <field name="equipment_count" string="Equipment" widget="statinfo"/>
                 </button>
-            </div>
+            </button>
         </field>
     </record>
 
-    <!-- user preferences -->
-    <record id="res_users_view_form_preference" model="ir.ui.view">
-        <field name="name">res.users.view.form.inherit.maintenance</field>
-        <field name="model">res.users</field>
-        <field name="inherit_id" ref="hr.res_users_view_form_profile"/>
+    <record id="hr_employee_public_view_form" model="ir.ui.view">
+        <field name="name">hr.employee.public.form.inherit.maintenance</field>
+        <field name="model">hr.employee.public</field>
+        <field name="inherit_id" ref="hr.hr_employee_public_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//div[@name='button_box']" position="inside">
                 <field name="employee_id" invisible="1"/>
@@ -31,8 +30,9 @@
                     context="{'search_default_employee_id': employee_id, 'default_employee_id': employee_id}"
                     class="o_stat_button"
                     icon="fa-cubes"
-                    type="action">
-                    <field name="equipment_count" widget="statinfo"/>
+                    type="action"
+                    invisible="not is_user">
+                    <field name="equipment_count" string="Equipment" widget="statinfo"/>
                 </button>
             </xpath>
         </field>

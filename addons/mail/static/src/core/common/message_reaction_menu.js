@@ -1,15 +1,7 @@
-import { loadEmoji, loader } from "@web/core/emoji_picker/emoji_picker";
+import { loadEmoji } from "@web/core/emoji_picker/emoji_picker";
 import { onExternalClick } from "@mail/utils/common/hooks";
 
-import {
-    Component,
-    onMounted,
-    onPatched,
-    useEffect,
-    useExternalListener,
-    useRef,
-    useState,
-} from "@odoo/owl";
+import { Component, onMounted, useEffect, useExternalListener, useRef, useState } from "@odoo/owl";
 
 import { Dialog } from "@web/core/dialog/dialog";
 import { useService } from "@web/core/utils/hooks";
@@ -22,10 +14,9 @@ export class MessageReactionMenu extends Component {
     setup() {
         super.setup();
         this.root = useRef("root");
-        this.store = useState(useService("mail.store"));
-        this.ui = useState(useService("ui"));
+        this.store = useService("mail.store");
+        this.ui = useService("ui");
         this.state = useState({
-            emojiLoaded: Boolean(loader.loaded),
             reaction: this.props.initialReaction
                 ? this.props.initialReaction
                 : this.props.message.reactions[0],
@@ -45,16 +36,11 @@ export class MessageReactionMenu extends Component {
             },
             () => [this.props.message.reactions.length]
         );
-        onMounted(async () => {
-            if (!loader.loaded) {
+        onMounted(() => {
+            if (!this.store.emojiLoader.loaded) {
                 loadEmoji();
             }
         });
-        if (!loader.loaded) {
-            loader.onEmojiLoaded(() => (this.state.emojiLoaded = true));
-        }
-        onMounted(() => void this.state.emojiLoaded);
-        onPatched(() => void this.state.emojiLoaded);
     }
 
     onKeydown(ev) {
@@ -71,6 +57,17 @@ export class MessageReactionMenu extends Component {
     }
 
     getEmojiShortcode(reaction) {
-        return loader.loaded?.emojiValueToShortcode?.[reaction.content] ?? "?";
+        return this.store.emojiLoader.loaded?.emojiValueToShortcodes?.[reaction.content]?.[0] ?? "?";
+    }
+
+    get contentClass() {
+        const attClass = {
+            "o-mail-MessageReactionMenu h-50 d-flex": true,
+            "position-absolute bottom-0": this.store.useMobileView,
+        };
+        return Object.entries(attClass)
+            .filter(([classNames, value]) => value)
+            .map(([classNames]) => classNames)
+            .join(" ");
     }
 }

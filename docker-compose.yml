@@ -1,0 +1,53 @@
+# Local mirror of the Heroku setup: same image, same entrypoint, same
+# DATABASE_URL contract. Bring it up with:
+#
+#   docker compose up --build
+#
+# then open http://localhost:8069 (login admin / admin).
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+      POSTGRES_DB: odoo
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  odoo:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://odoo:odoo@db:5432/odoo
+      PORT: "8069"
+      ODOO_ADMIN_PASSWD: admin
+      ODOO_DB_SSLMODE: disable
+      ODOO_DB_MAXCONN: "16"
+      ODOO_BASE_URL: http://localhost:8069
+      ODOO_INIT_MODULES: base
+      # Demo data is useful locally and off by default in production.
+      ODOO_WITHOUT_DEMO: "False"
+    ports:
+      - "8069:8069"
+    volumes:
+      # Drop your own modules here; the config picks the directory up
+      # automatically when it exists.
+      - ./custom-addons:/app/custom-addons
+    # The release phase is what installs Odoo into an empty database; run it
+    # here too so that a fresh volume comes up ready to use.
+    command:
+      - bash
+      - -c
+      - deploy/heroku/release.sh && exec deploy/heroku/entrypoint.sh
+
+volumes:
+  pgdata:

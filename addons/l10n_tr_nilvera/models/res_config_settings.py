@@ -10,9 +10,9 @@ class ResConfigSettings(models.TransientModel):
         string="Nilvera API key",
         readonly=False,
     )
-    l10n_tr_nilvera_environment = fields.Selection(
-        related='company_id.l10n_tr_nilvera_environment',
-        string="Nilvera Environment",
+    l10n_tr_nilvera_use_test_env = fields.Boolean(
+        related='company_id.l10n_tr_nilvera_use_test_env',
+        string="Use testing environment",
         required=True,
         readonly=False,
     )
@@ -20,10 +20,11 @@ class ResConfigSettings(models.TransientModel):
         related='company_id.l10n_tr_nilvera_purchase_journal_id',
         readonly=False,
     )
+    l10n_tr_nilvera_vat = fields.Char(related="company_id.vat", string="Nilvera VAT")
 
     def nilvera_ping(self):
         """ Test the connection and the API key. """
-        self.check_access_rule('read')  # To make sure not everyone can call this method as it's public.
+        self.check_access('read')  # To make sure not everyone can call this method as it's public.
         with _get_nilvera_client(self.env.company) as client:
             # As there is no endpoint to ping Nilvera to make sure the connection works, try an endpoint to get the
             # company's data and this way we can verify the connection and the tax ID in the same step.

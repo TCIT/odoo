@@ -5,7 +5,7 @@ from odoo import fields, models, _
 from odoo.exceptions import UserError
 
 
-class Applicant(models.Model):
+class HrApplicant(models.Model):
     _inherit = "hr.applicant"
 
     survey_id = fields.Many2one('survey.survey', related='job_id.survey_id', string="Survey", readonly=True)
@@ -43,7 +43,6 @@ class Applicant(models.Model):
                 'name': self.partner_name,
                 'email': self.email_from,
                 'phone': self.partner_phone,
-                'mobile': self.partner_phone
             })
 
         self.survey_id.check_validity()

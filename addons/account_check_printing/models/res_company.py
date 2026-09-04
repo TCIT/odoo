@@ -3,7 +3,7 @@
 from odoo import models, fields
 
 
-class res_company(models.Model):
+class ResCompany(models.Model):
     _inherit = "res.company"
 
     # This field needs to be overridden with `selection_add` in the modules which intends to add report layouts.

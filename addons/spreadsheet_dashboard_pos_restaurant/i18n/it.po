@@ -1,25 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* spreadsheet_dashboard_pos_restaurant
-# 
-# Translators:
-# Tiffany Chang, 2024
-# Wil Odoo, 2024
-# Marianna Ciofani, 2024
-# 
+# * spreadsheet_dashboard_pos_restaurant
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# "Marianna Ciofani (cima)" <cima@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:49+0000\n"
-"PO-Revision-Date: 2024-09-29 00:00+0000\n"
-"Last-Translator: Marianna Ciofani, 2024\n"
-"Language-Team: Italian (https://app.transifex.com/odoo/teams/41243/it/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-06 05:26+0000\n"
+"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"Language-Team: Italian <https://translate.odoo.com/projects/odoo-19/"
+"spreadsheet_dashboard_pos_restaurant/it/>\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: it\n"
-"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
@@ -57,7 +56,7 @@ msgstr "Sconto medio"
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Average net revenue / sitting "
-msgstr "Ricavo netto medio/turno"
+msgstr "Ricavo netto medio/turno "
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
@@ -95,8 +94,21 @@ msgstr "Ricavo medio lordo per ordine"
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
+msgid "Avg revenue per guest"
+msgstr "Ricavo medio per ospite"
+
+#. module: spreadsheet_dashboard_pos_restaurant
+#. odoo-javascript
+#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
+#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
+msgid "Avg revenue per order"
+msgstr "Ricavo medio per ordine"
+
+#. module: spreadsheet_dashboard_pos_restaurant
+#. odoo-javascript
+#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Category "
-msgstr "Categoria"
+msgstr "Categoria "
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
@@ -134,7 +146,6 @@ msgstr "Ricavo orario totale"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Margin"
 msgstr "Margine"
@@ -153,7 +164,6 @@ msgstr "Ricavo netto"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Orders"
 msgstr "Ordini"
@@ -171,10 +181,9 @@ msgstr "Prodotto"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Product "
-msgstr "Prodotto"
+msgstr "Prodotto "
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
@@ -184,21 +193,18 @@ msgstr "Categoria prodotto"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Quantity"
 msgstr "Quantità"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Quantity Sold"
 msgstr "Quantità venduta"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Responsible"
 msgstr "Responsabile"
@@ -212,10 +218,9 @@ msgstr "Ricavi"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Revenue "
-msgstr "Ricavi"
+msgstr "Ricavi "
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
@@ -233,7 +238,6 @@ msgstr "Ricavi per ora"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Table"
 msgstr "Tavolo"
@@ -247,14 +251,12 @@ msgstr "Periodo"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Tip"
 msgstr "Consiglio"
 
 #. module: spreadsheet_dashboard_pos_restaurant
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Top 15 Products per Category"
 msgstr "Migliori 15 prodotti per categoria"
@@ -291,20 +293,6 @@ msgstr "Ricavo totale"
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
-msgid "Total revenue per guest"
-msgstr "Ricavo totale per ospite"
-
-#. module: spreadsheet_dashboard_pos_restaurant
-#. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
-msgid "Total revenue per order"
-msgstr "Ricavo totale per ordine"
-
-#. module: spreadsheet_dashboard_pos_restaurant
-#. odoo-javascript
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
-#: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_sample_dashboard.json:0
 msgid "Untaxed revenue"
 msgstr "Ricavo lordo"
 
@@ -327,3 +315,9 @@ msgstr "Ricavo lordo per ordine"
 #: code:addons/spreadsheet_dashboard_pos_restaurant/data/files/pos_restaurant_dashboard.json:0
 msgid "Waiter"
 msgstr "Cameriere"
+
+#~ msgid "Total revenue per guest"
+#~ msgstr "Ricavo totale per ospite"
+
+#~ msgid "Total revenue per order"
+#~ msgstr "Ricavo totale per ordine"

@@ -9,17 +9,21 @@ import selectors
 import threading
 import time
 from psycopg2 import InterfaceError
+from psycopg2.pool import PoolError
 
 import odoo
+from ..tools import orjson
 from odoo import api, fields, models
 from odoo.service.server import CommonServer
 from odoo.tools import json_default, SQL
+from odoo.tools.constants import GC_UNLINK_LIMIT
 from odoo.tools.misc import OrderedSet
 
 _logger = logging.getLogger(__name__)
 
 # longpolling timeout connection
 TIMEOUT = 50
+DEFAULT_GC_RETENTION_SECONDS = 60 * 60 * 24  # 24 hours
 
 # custom function to call instead of default PostgreSQL's `pg_notify`
 ODOO_NOTIFY_FUNCTION = os.getenv('ODOO_NOTIFY_FUNCTION', 'pg_notify')
@@ -81,22 +85,27 @@ def get_notify_payloads(channels):
                 get_notify_payloads(channels[pivot:]))
 
 
-class ImBus(models.Model):
-
+class BusBus(models.Model):
     _name = 'bus.bus'
+
     _description = 'Communication Bus'
 
     channel = fields.Char('Channel')
     message = fields.Char('Message')
+    create_date = fields.Datetime(index=True)
 
     @api.autovacuum
     def _gc_messages(self):
-        timeout_ago = fields.Datetime.now() - datetime.timedelta(seconds=TIMEOUT*2)
-        domain = [('create_date', '<', timeout_ago)]
-        records = self.search(domain, limit=models.GC_UNLINK_LIMIT)
-        if len(records) >= models.GC_UNLINK_LIMIT:
-            self.env.ref('base.autovacuum_job')._trigger()
-        return records.unlink()
+        gc_retention_seconds = int(
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("bus.gc_retention_seconds", DEFAULT_GC_RETENTION_SECONDS)
+        )
+        timeout_ago = fields.Datetime.now() - datetime.timedelta(seconds=gc_retention_seconds)
+        # Direct SQL to avoid ORM overhead; this way we can delete millions of rows quickly.
+        # This is a low-level table with no expected references, and doing this avoids
+        # the need to split or reschedule this GC job.
+        self.env.cr.execute("DELETE FROM bus_bus WHERE create_date < %s", (timeout_ago,))
 
     @api.model
     def _sendone(self, target, notification_type, message):
@@ -176,7 +185,7 @@ class ImBus(models.Model):
         for notif in notifications:
             result.append({
                 'id': notif['id'],
-                'message': json.loads(notif['message']),
+                'message': orjson.loads(notif['message']),
             })
         return result
 
@@ -240,7 +249,7 @@ class ImDispatch(threading.Thread):
                     conn.poll()
                     channels = []
                     while conn.notifies:
-                        channels.extend(json.loads(conn.notifies.pop().payload))
+                        channels.extend(orjson.loads(conn.notifies.pop().payload))
                     # relay notifications to websockets that have
                     # subscribed to the corresponding channels.
                     websockets = set()
@@ -254,7 +263,7 @@ class ImDispatch(threading.Thread):
             try:
                 self.loop()
             except Exception as exc:
-                if isinstance(exc, InterfaceError) and stop_event.is_set():
+                if isinstance(exc, (InterfaceError, PoolError)) and stop_event.is_set():
                     continue
                 _logger.exception("Bus.loop error, sleep and retry")
                 time.sleep(TIMEOUT)

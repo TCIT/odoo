@@ -5,7 +5,7 @@ from odoo import models
 from odoo.tools import format_date
 
 
-class ReceptionReport(models.AbstractModel):
+class ReportStockReport_Reception(models.AbstractModel):
     _inherit = 'report.stock.report_reception'
 
     def _get_docs(self, docids):
@@ -37,11 +37,19 @@ class ReceptionReport(models.AbstractModel):
         return super()._get_formatted_scheduled_date(source)
 
     def _action_assign(self, in_move, out_move):
-        if in_move.production_id:
-            in_move.production_id.move_dest_ids |= out_move
-            if not out_move.group_id and out_move._get_source_document() not in [False, out_move.picking_id]:
-                out_move.group_id = out_move._get_source_document()
+        super()._action_assign(in_move, out_move)
+        parent_doc = out_move._get_source_document()
+        child_doc = in_move._get_source_document()
+        if parent_doc and child_doc and parent_doc._name == 'mrp.production' and child_doc._name == 'mrp.production':
+            parent_doc.production_group_id.child_ids += child_doc.production_group_id
+            child_doc.production_group_id.parent_ids += parent_doc.production_group_id
 
     def _action_unassign(self, in_move, out_move):
+        super()._action_unassign(in_move, out_move)
         if in_move.production_id:
             in_move.production_id.move_dest_ids -= out_move
+        parent_doc = out_move._get_source_document()
+        child_doc = in_move._get_source_document()
+        if parent_doc and child_doc and parent_doc._name == 'mrp.production' and child_doc._name == 'mrp.production':
+            parent_doc.production_group_id.child_ids -= child_doc.production_group_id
+            child_doc.production_group_id.parent_ids -= parent_doc.production_group_id

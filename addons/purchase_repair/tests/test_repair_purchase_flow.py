@@ -2,11 +2,11 @@
 
 from odoo.fields import Command
 from odoo.tests import tagged
-from odoo.addons.stock.tests.common import TestStockCommon
+from odoo.addons.purchase_stock.tests.common import PurchaseTestCommon
 
 
 @tagged('post_install', '-at_install')
-class TestRepairPurchaseFlow(TestStockCommon):
+class TestRepairPurchaseFlow(PurchaseTestCommon):
 
     @classmethod
     def setUpClass(cls):
@@ -20,19 +20,17 @@ class TestRepairPurchaseFlow(TestStockCommon):
         Validates that a repair order triggers a purchase order with correct product
         and quantity, and ensures proper linking via the procurement group.
         """
-        self.env.ref('stock.route_warehouse0_mto').active = True
-        mto_route = self.env['stock.route'].search([('name', '=', 'Replenish on Order (MTO)')])
-        buy_route = self.env['stock.route'].search([('name', '=', 'Buy')])
-        rule = mto_route.rule_ids.filtered(lambda r: r.picking_type_id.code == 'repair_operation')
+        self.route_mto.active = True
+        rule = self.route_mto.rule_ids.filtered(lambda r: r.picking_type_id.code == 'repair_operation')
         rule.update({'procure_method': 'make_to_order'})
 
         seller = self.env['res.partner'].create({
             'name': 'Vendor',
         })
 
-        product = self.productA
+        product = self.product
         product.write({
-            'route_ids': [(4, mto_route.id), (4, buy_route.id)],
+            'route_ids': [Command.set([self.route_mto.id, self.route_buy.id])],
             'seller_ids': [
                 Command.create({
                     'partner_id': seller.id,
@@ -60,5 +58,8 @@ class TestRepairPurchaseFlow(TestStockCommon):
         self.assertEqual(purchase.order_line.product_id, product)
         self.assertEqual(purchase.order_line.product_qty, 1.0)
         self.assertEqual(purchase.order_line.move_dest_ids.repair_id, repair)
+        self.assertEqual(repair.purchase_count, 1)
+        self.assertEqual(purchase.repair_count, 1)
+        purchase.button_confirm()
         self.assertEqual(repair.purchase_count, 1)
         self.assertEqual(purchase.repair_count, 1)

@@ -1,0 +1,16 @@
+# Heroku container stack manifest.
+#
+# Odoo needs wkhtmltopdf and compiled Python extensions, neither of which
+# fits the classic buildpack slug, so the app is deployed as an image.
+setup:
+  addons:
+    - plan: heroku-postgresql:essential-0
+build:
+  docker:
+    web: deploy/Dockerfile
+release:
+  image: web
+  command:
+    - deploy/heroku/release.sh
+run:
+  web: deploy/heroku/entrypoint.sh

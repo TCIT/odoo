@@ -1,42 +1,40 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_customer
-# 
+# * website_customer
+#
 # Translators:
-# Stevin Lilla, 2024
-# Patrick-Jordan Kiudorv, 2024
-# Siim Raasuke, 2024
-# Piia Paurson <piia@avalah.ee>, 2024
-# JanaAvalah, 2024
-# Algo Kärp <algokarp@gmail.com>, 2024
-# Eneli Õigus <enelioigus@gmail.com>, 2024
-# Triine Aavik <triine@avalah.ee>, 2024
-# Anna, 2024
-# 
+# Piia Paurson <piia@avalah.ee>, 2022
+# Andre Roomet <andreroomet@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Rivo Zängov <eraser@eraser.ee>, 2022
+# Algo Kärp <algokarp@gmail.com>, 2022
+# Eneli Õigus <enelioigus@gmail.com>, 2022
+# Arma Gedonsky <armagedonsky@hot.ee>, 2022
+# Triine Aavik <triine@avalah.ee>, 2022
+# Anna, 2023
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Anna, 2024\n"
-"Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-02 13:42+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Estonian <https://translate.odoo.com/projects/odoo-19/"
+"website_customer/et/>\n"
+"Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: et\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.details
-msgid "<i class=\"fa fa-chevron-left me-2\"/>Back to references"
-msgstr "<i class=\"fa fa-chevron-left me-2\"/>Tagasi viidete juurde"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
 msgid ""
 "<i class=\"fa fa-info-circle me-2\"/>\n"
-"                        There are no matching customers found for the selected country. Displaying results across all countries instead."
+"                        There are no matching customers found for the "
+"selected country. Displaying results across all countries instead."
 msgstr ""
 
 #. module: website_customer
@@ -47,6 +45,11 @@ msgid ""
 msgstr ""
 "<i class=\"fa fa-map-marker\" role=\"img\" aria-label=\"Open map\" "
 "title=\"Open map\"/>"
+
+#. module: website_customer
+#: model_terms:ir.ui.view,arch_db:website_customer.details
+msgid "<i class=\"oi oi-chevron-left me-2\"/>Back to references"
+msgstr ""
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
@@ -62,7 +65,7 @@ msgstr "<span class=\"small text-muted\">Juurutaja</span>"
 #. module: website_customer
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__active
 msgid "Active"
-msgstr "Aktiivne"
+msgstr "Tegev"
 
 #. module: website_customer
 #. odoo-python
@@ -94,7 +97,7 @@ msgstr "Bootstrap class to customize the color"
 #. module: website_customer
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__can_publish
 msgid "Can Publish"
-msgstr "Võib avaldada"
+msgstr "Võib avalikustada"
 
 #. module: website_customer
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__name
@@ -118,9 +121,15 @@ msgid "Contact"
 msgstr "Kontakt"
 
 #. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.snippet_options
+#. odoo-javascript
+#: code:addons/website_customer/static/src/website_builder/customer_filter_option.xml:0
 msgid "Countries Filter"
 msgstr "Riikide filter"
+
+#. module: website_customer
+#: model:ir.model,website_form_label:website_customer.model_res_partner
+msgid "Create a Customer"
+msgstr "Lisa klient"
 
 #. module: website_customer
 #: model_terms:ir.actions.act_window,help:website_customer.action_partner_tag_form
@@ -135,7 +144,19 @@ msgstr "Loonud"
 #. module: website_customer
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__create_date
 msgid "Created on"
-msgstr "Loodud"
+msgstr "Loomise kuupäev"
+
+#. module: website_customer
+#. odoo-python
+#: code:addons/website_customer/controllers/main.py:0
+msgid "Customers"
+msgstr "Kliendid"
+
+#. module: website_customer
+#. odoo-javascript
+#: code:addons/website_customer/static/src/website_builder/customer_filter_option.js:0
+msgid "Customers Page"
+msgstr ""
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.details
@@ -143,9 +164,11 @@ msgid "DROP BUILDING BLOCKS HERE TO MAKE THEM AVAILABLE ACROSS ALL CUSTOMERS"
 msgstr ""
 
 #. module: website_customer
+#: model:ir.model.fields,field_description:website_customer.field_res_partner__display_name
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__display_name
+#: model:ir.model.fields,field_description:website_customer.field_website__display_name
 msgid "Display Name"
-msgstr "Kuvatav nimi"
+msgstr "Näidatav nimi"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
@@ -168,6 +191,16 @@ msgid "Filter by Tags"
 msgstr "Filtreeritud siltide järgi"
 
 #. module: website_customer
+#: model_terms:ir.ui.view,arch_db:website_customer.opt_country_list
+msgid "Filter by country"
+msgstr "Filtreeri riigi järgi"
+
+#. module: website_customer
+#: model_terms:ir.ui.view,arch_db:website_customer.opt_industry_list
+msgid "Filter by industry"
+msgstr ""
+
+#. module: website_customer
 #: model:ir.model.fields,help:website_customer.field_res_partner__website_tag_ids
 #: model:ir.model.fields,help:website_customer.field_res_users__website_tag_ids
 msgid "Filter published customers on the .../customers website page"
@@ -184,24 +217,27 @@ msgid "Go to customer"
 msgstr "Vaata klienti"
 
 #. module: website_customer
+#: model:ir.model.fields,field_description:website_customer.field_res_partner__id
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__id
+#: model:ir.model.fields,field_description:website_customer.field_website__id
 msgid "ID"
 msgstr "ID"
 
 #. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.snippet_options
+#. odoo-javascript
+#: code:addons/website_customer/static/src/website_builder/customer_filter_option.xml:0
 msgid "Industry Filter"
 msgstr "Valdkonna filter"
 
 #. module: website_customer
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__is_published
 msgid "Is Published"
-msgstr "On avaldatud"
+msgstr "On avalikustatud"
 
 #. module: website_customer
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__write_uid
 msgid "Last Updated by"
-msgstr "Viimati uuendatud"
+msgstr "Viimati uuendas"
 
 #. module: website_customer
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__write_date
@@ -221,16 +257,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_customer.index
 msgid "No results found for \""
 msgstr "Päringule tulemusi ei leitud"
-
-#. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.opt_country_list
-msgid "Open countries dropdown"
-msgstr "Ava riikide rippmenüü"
-
-#. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.opt_industry_list
-msgid "Open industries dropdown"
-msgstr "Ava valdkonnade rippmenüü"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
@@ -264,11 +290,6 @@ msgid "References"
 msgstr "Viited"
 
 #. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.snippet_options
-msgid "References Page"
-msgstr "Viidete leht"
-
-#. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
 msgid "Search"
 msgstr "Otsi"
@@ -294,19 +315,26 @@ msgid "See industries filters"
 msgstr "Vaata valdkonna filtreid"
 
 #. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.snippet_options
+#. odoo-javascript
+#: code:addons/website_customer/static/src/website_builder/customer_filter_option.xml:0
 msgid "Show Map"
 msgstr "Kuva kaart"
 
 #. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.snippet_options
+#. odoo-javascript
+#: code:addons/website_customer/static/src/website_builder/customer_filter_option.xml:0
 msgid "Tags Filter"
 msgstr "Siltide filter"
 
 #. module: website_customer
+#: model:ir.model.fields,help:website_customer.field_res_partner_tag__website_absolute_url
+msgid "The full absolute URL to access the document through the website."
+msgstr ""
+
+#. module: website_customer
 #: model:ir.model.fields,help:website_customer.field_res_partner_tag__website_url
-msgid "The full URL to access the document through the website."
-msgstr "Dokumendile veebisaidi kaudu juurdepääsuks täielik URL."
+msgid "The full relative URL to access the document through the website."
+msgstr ""
 
 #. module: website_customer
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__website_published
@@ -317,6 +345,11 @@ msgstr "Nähtav praegusel veebilehel"
 #: model:ir.model,name:website_customer.model_website
 msgid "Website"
 msgstr "Veebileht"
+
+#. module: website_customer
+#: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__website_absolute_url
+msgid "Website Absolute URL"
+msgstr ""
 
 #. module: website_customer
 #: model:ir.actions.act_window,name:website_customer.action_partner_tag_form
@@ -341,3 +374,43 @@ msgstr "Veebilehe sildid"
 #: model_terms:ir.ui.view,arch_db:website_customer.opt_country
 msgid "World Map"
 msgstr "Maailma kaart"
+
+#~ msgid ""
+#~ "<span class=\"fa fa-external-link\" role=\"img\" aria-label=\"External "
+#~ "link\" title=\"External link\"/>"
+#~ msgstr ""
+#~ "<span class=\"fa fa-external-link\" role=\"img\" aria-label=\"External "
+#~ "link\" title=\"External link\"/>"
+
+#~ msgid "Implemented By"
+#~ msgstr "Implementeerija"
+
+#~ msgid "Last Modified on"
+#~ msgstr "Viimati muudetud"
+
+#~ msgid "No result found"
+#~ msgstr "Tulemusi ei leitud"
+
+#~ msgid "Our References"
+#~ msgstr "Meie viited"
+
+#~ msgid "References Page"
+#~ msgstr "Viidete leht"
+
+#~ msgid "References by Country"
+#~ msgstr "Viited riigiti"
+
+#~ msgid "References by Industries"
+#~ msgstr "Viited valdkonniti"
+
+#~ msgid "References by Tag"
+#~ msgstr "Viited siltide kaup"
+
+#~ msgid "The full URL to access the document through the website."
+#~ msgstr "Dokumendile veebisaidi kaudu juurdepääsuks täielik URL."
+
+#~ msgid "Trusted by millions worldwide"
+#~ msgstr "Üleilmselt miljonite poolt usaldatud"
+
+#~ msgid "reference(s))"
+#~ msgstr "viitedq"

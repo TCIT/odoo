@@ -1,17 +1,14 @@
 /** @typedef {import("./record").Record} Record */
 /** @typedef {import("./record_list").RecordList} RecordList */
 
-import { markup, toRaw } from "@odoo/owl";
+import { htmlEscape, markup, toRaw } from "@odoo/owl";
 import { RecordInternal } from "./record_internal";
 import { deserializeDate, deserializeDateTime } from "@web/core/l10n/dates";
-import { IS_DELETING_SYM, Markup, isCommand, isMany } from "./misc";
+import { isCommand, isMany } from "./misc";
+
+const Markup = markup().constructor;
 
 export class StoreInternal extends RecordInternal {
-    /**
-     * Determines whether the inserts are considered trusted or not.
-     * Useful to auto-markup html fields when this is set
-     */
-    trusted = false;
     /** @type {Map<import("./record").Record, Map<string, true>>} */
     FC_QUEUE = new Map(); // field-computes
     /** @type {Map<import("./record").Record, Map<string, true>>} */
@@ -26,12 +23,11 @@ export class StoreInternal extends RecordInternal {
     RO_QUEUE = new Map(); // record-onchanges
     /** @type {Map<Record, true>} */
     RD_QUEUE = new Map(); // record-deletes
-    /** @type {Map<Record, true>} */
-    RHD_QUEUE = new Map(); // record-hard-deletes
+    ERRORS = [];
     UPDATE = 0;
 
     /**
-     * @param {"compute"|"sort"|"onAdd"|"onDelete"|"onUpdate"|"hard_delete"} type
+     * @param {"compute"|"sort"|"onAdd"|"onDelete"|"onUpdate"} type
      * @param {...any} params
      */
     ADD_QUEUE(type, ...params) {
@@ -120,15 +116,6 @@ export class StoreInternal extends RecordInternal {
                 recMap.set(fieldName, true);
                 break;
             }
-            case "hard_delete": {
-                /** @type {import("./record").Record} */
-                const [record] = params;
-                record._[IS_DELETING_SYM] = true;
-                if (!this.RHD_QUEUE.has(record)) {
-                    this.RHD_QUEUE.set(record, true);
-                }
-                break;
-            }
         }
     }
     /** @param {RecordList<Record>} recordListFullProxy */
@@ -170,11 +157,18 @@ export class StoreInternal extends RecordInternal {
             shouldChange = !record[fieldName] || !value.equals(record[fieldName]);
         }
         let newValue = value;
-        if (fieldHtml && this.trusted) {
+        if (fieldHtml) {
+            newValue =
+                Array.isArray(value) && value[0] === "markup"
+                    ? value[1]
+                        ? markup(value[1])
+                        : ""
+                    : value
+                    ? htmlEscape(value)
+                    : "";
             shouldChange =
-                record[fieldName]?.toString() !== value?.toString() ||
-                !(record[fieldName] instanceof Markup);
-            newValue = typeof value === "string" ? markup(value) : value;
+                record[fieldName]?.toString() !== newValue?.toString() ||
+                record[fieldName] instanceof Markup != newValue instanceof Markup;
         }
         if (shouldChange) {
             record._.updatingAttrs.set(fieldName, true);
@@ -187,7 +181,10 @@ export class StoreInternal extends RecordInternal {
      * @param {Object} vals
      */
     updateFields(record, vals) {
-        for (const [fieldName, value] of Object.entries(vals)) {
+        const fieldEntries = Object.entries(vals).concat(
+            Object.getOwnPropertySymbols(vals).map((sym) => [sym, vals[sym]])
+        );
+        for (const [fieldName, value] of fieldEntries) {
             if (!record.Model._.fields.get(fieldName) || record.Model._.fieldsAttr.get(fieldName)) {
                 this.updateAttr(record, fieldName, value);
             } else {

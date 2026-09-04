@@ -4,8 +4,8 @@
 from odoo import api, fields, models, _
 
 
-class RecruitmentStage(models.Model):
-    _name = "hr.recruitment.stage"
+class HrRecruitmentStage(models.Model):
+    _name = 'hr.recruitment.stage'
     _description = "Recruitment Stages"
     _order = 'sequence'
 
@@ -24,8 +24,12 @@ class RecruitmentStage(models.Model):
         help="This stage is folded in the kanban view when there are no records in that stage to display.")
     hired_stage = fields.Boolean('Hired Stage',
         help="If checked, this stage is used to determine the hire date of an applicant")
+    rotting_threshold_days = fields.Integer('Days to rot', default=0, help='Day count before applicants in this stage become stale. \
+        Set to 0 to disable.  Changing this parameter will not affect the rotting status/date of resources last updated before this change.')
     legend_blocked = fields.Char(
         'Red Kanban Label', default=lambda self: _('Blocked'), translate=True, required=True)
+    legend_waiting = fields.Char(
+        'Orange Kanban Label', default=lambda self: _('Waiting'), translate=True, required=True)
     legend_done = fields.Char(
         'Green Kanban Label', default=lambda self: _('Ready for Next Stage'), translate=True, required=True)
     legend_normal = fields.Char(
@@ -34,11 +38,11 @@ class RecruitmentStage(models.Model):
 
     @api.model
     def default_get(self, fields):
-        if self._context and self._context.get('default_job_id') and not self._context.get('hr_recruitment_stage_mono', False):
-            context = dict(self._context)
+        if self.env.context and self.env.context.get('default_job_id') and not self.env.context.get('hr_recruitment_stage_mono', False):
+            context = dict(self.env.context)
             context.pop('default_job_id')
             self = self.with_context(context)
-        return super(RecruitmentStage, self).default_get(fields)
+        return super().default_get(fields)
 
     @api.depends('hired_stage')
     def _compute_is_warning_visible(self):

@@ -32,7 +32,7 @@
                         <tbody>
                             <tr>
                                 <td t-if="has_button_access" t-att-style="'border-radius: 3px; text-align: center; background: ' + (company.email_secondary_color or '#875A7B') + ';'">
-                                    <a t-att-href="button_access['url']" style="font-size: 12px; color: #FFFFFF; display: block; padding: 8px 12px 11px; text-decoration: none !important; font-weight: bold;">
+                                    <a t-att-href="button_access['url']" t-att-style="'font-size: 12px; color: ' + (company.email_primary_color or '#FFFFFF') + '; display: block; padding: 8px 12px 11px; text-decoration: none !important; font-weight: bold;'">
                                         <t t-out="button_access['title']"/>
                                     </a>
                                 </td>
@@ -44,7 +44,7 @@
                                         <br t-if="not subtitle_last"/>
                                     </t>
                                 </td>
-                                <td t-else=""><span style="font-weight:bold;" t-out="record_name"/><br/></td>
+                                <td t-else=""><span style="font-weight:bold;" t-out="record_name or (message.record_name and message.record_name.replace('/','-')) or ''"/><br/></td>
 
                             </tr>
                         </tbody>
@@ -68,7 +68,7 @@
     </t>
 </ul>
 <t class="o_signature">
-    <div t-if="email_add_signature and not is_html_empty(signature)" t-out="signature" style="font-size: 13px;"/>
+    <div t-if="email_add_signature and not is_html_empty(signature)" t-out="signature" class="o_signature" style="font-size: 13px;"/>
 </t>
 <!-- FOOTER -->
 <div t-if="show_footer" style="margin-top:16px;">
@@ -85,7 +85,7 @@
 <div t-if="show_footer" style="color: #555555; font-size:11px;">
     Powered by <a target="_blank" href="https://www.odoo.com?utm_source=db&amp;utm_medium=email"
                   t-att-style="'color: ' + (company.email_secondary_color or '#875A7B') + ';'">Odoo</a>
-    <span id="mail_unfollow">
+    <span t-if="show_unfollow" id="mail_unfollow">
         | <a href="/mail/unfollow" style="text-decoration:none; color:#555555;">Unfollow</a>
     </span>
 </div>
@@ -114,13 +114,13 @@
                     <t t-if="has_button_access">
                         <a t-att-href="button_access['url']">
                             <span style="font-size: 20px; font-weight: bold;">
-                                <t t-out="message.record_name and message.record_name.replace('/','-') or ''"/>
+                                <t t-out="(record_name or message.record_name or '').replace('/','-')"/>
                             </span>
                         </a>
                     </t>
                     <t t-else="">
                         <span style="font-size: 20px; font-weight: bold;">
-                            <t t-out="message.record_name and message.record_name.replace('/','-') or ''"/>
+                            <t t-out="(record_name or message.record_name or '').replace('/','-')"/>
                         </span>
                     </t>
                 </td><td valign="middle" align="right" t-if="company and not company.uses_default_logo">
@@ -159,7 +159,7 @@
 <tr><td align="center" style="min-width: 590px;">
         Powered by <a target="_blank" href="https://www.odoo.com?utm_source=db&amp;utm_medium=email"
                       t-att-style="'color: ' + (company.email_secondary_color or '#875A7B') + ';'">Odoo</a>
-    <span id="mail_unfollow">
+    <span t-if="show_unfollow" id="mail_unfollow">
         | <a href="/mail/unfollow" style="text-decoration:none; color:#555555;">Unfollow</a>
     </span>
 </td></tr>
@@ -186,8 +186,8 @@
                   inherit_id="mail.mail_notification_layout" primary="True">
             <xpath expr="//t[hasclass('o_signature')]" position="replace">
                 <t class="o_signature">
-                    <div t-if="email_add_signature and 'user_id' in record and record.user_id and not record.env.user._is_superuser() and not is_html_empty(record.user_id.sudo().signature)"
-                         t-out="record.user_id.sudo().signature" style="font-size: 13px;"/>
+                    <div t-if="email_add_signature and record and 'user_id' in record and record.user_id and not record.env.user._is_superuser() and not is_html_empty(record.user_id.sudo().signature)"
+                         t-out="record.user_id.sudo().signature" class="o_signature" style="font-size: 13px;"/>
                 </t>
             </xpath>
         </template>

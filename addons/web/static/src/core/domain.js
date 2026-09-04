@@ -42,7 +42,7 @@ export class Domain {
 
     /**
      * Combine various domains together with `AND` operator
-     * @param {DomainRepr} domains
+     * @param {DomainRepr[]} domains
      * @returns {Domain}
      */
     static and(domains) {
@@ -51,7 +51,7 @@ export class Domain {
 
     /**
      * Combine various domains together with `OR` operator
-     * @param {DomainRepr} domains
+     * @param {DomainRepr[]} domains
      * @returns {Domain}
      */
     static or(domains) {
@@ -148,6 +148,7 @@ export class Domain {
 
     /**
      * Check if the set of records represented by a domain contains a record
+     * Warning: smart dates (see parseSmartDateInput) are not handled here.
      *
      * @param {Object} record
      * @returns {boolean}
@@ -195,18 +196,6 @@ export class Domain {
             return this.toString();
         }
     }
-}
-
-/**
- * @param {Array[] | boolean} modifier
- * @param {Object} evalContext
- * @returns {boolean}
- */
-export function evalDomain(modifier, evalContext) {
-    if (modifier && typeof modifier !== "boolean") {
-        modifier = new Domain(modifier).contains(evalContext);
-    }
-    return Boolean(modifier);
 }
 
 /** @type {Condition} */
@@ -327,6 +316,7 @@ function matchCondition(record, condition) {
         ilikeRegexp = new RegExp(`(.*)${escapeRegExp(value).replaceAll("%", "(.*)")}(.*)`, "gi");
     }
     const fieldValue = typeof field === "number" ? field : record[field];
+    const isNot = operator.startsWith("not ");
     switch (operator) {
         case "=?":
             if ([false, null].includes(value)) {
@@ -341,7 +331,7 @@ function matchCondition(record, condition) {
             return fieldValue === value;
         case "!=":
         case "<>":
-            return !matchCondition(record, [field, "==", value]);
+            return !matchCondition(record, [field, "=", value]);
         case "<":
             return fieldValue < value;
         case "<=":
@@ -350,48 +340,48 @@ function matchCondition(record, condition) {
             return fieldValue > value;
         case ">=":
             return fieldValue >= value;
-        case "in": {
-            const val = Array.isArray(value) ? value : [value];
-            const fieldVal = Array.isArray(fieldValue) ? fieldValue : [fieldValue];
-            return fieldVal.some((fv) => val.includes(fv));
-        }
+        case "in":
         case "not in": {
             const val = Array.isArray(value) ? value : [value];
             const fieldVal = Array.isArray(fieldValue) ? fieldValue : [fieldValue];
-            return !fieldVal.some((fv) => val.includes(fv));
+            return Boolean(fieldVal.some((fv) => val.includes(fv))) != isNot;
         }
         case "like":
-            if (fieldValue === false) {
-                return false;
-            }
-            return Boolean(fieldValue.match(likeRegexp));
         case "not like":
             if (fieldValue === false) {
-                return false;
+                return isNot;
             }
-            return Boolean(!fieldValue.match(likeRegexp));
+            return Boolean(fieldValue.match(likeRegexp)) != isNot;
         case "=like":
+        case "not =like":
             if (fieldValue === false) {
-                return false;
+                return isNot;
             }
-            return new RegExp(escapeRegExp(value).replace(/%/g, ".*")).test(fieldValue);
+            return (
+                Boolean(new RegExp(escapeRegExp(value).replace(/%/g, ".*")).test(fieldValue)) !=
+                isNot
+            );
         case "ilike":
-            if (fieldValue === false) {
-                return false;
-            }
-            return Boolean(fieldValue.match(ilikeRegexp));
         case "not ilike":
             if (fieldValue === false) {
-                return false;
+                return isNot;
             }
-            return Boolean(!fieldValue.match(ilikeRegexp));
+            return Boolean(fieldValue.match(ilikeRegexp)) != isNot;
         case "=ilike":
+        case "not =ilike":
             if (fieldValue === false) {
-                return false;
+                return isNot;
             }
-            return new RegExp(escapeRegExp(value).replace(/%/g, ".*"), "i").test(fieldValue);
+            return (
+                Boolean(
+                    new RegExp(escapeRegExp(value).replace(/%/g, ".*"), "i").test(fieldValue)
+                ) != isNot
+            );
         case "any":
-        case "not_any":
+        case "not any":
+            return true;
+        case "child_of":
+        case "parent_of":
             return true;
     }
     throw new InvalidDomainError("could not match domain");

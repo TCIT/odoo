@@ -4,6 +4,11 @@
 DEFAULT_PAYMENT_METHOD_CODES = {
     # Primary payment methods.
     'card',
+    # Brand payment methods.
+    'amex',
+    'discover',
+    'mastercard',
+    'visa',
 }
 
 # Mapping of payment method codes to Worldline codes.
@@ -14,7 +19,7 @@ PAYMENT_METHODS_MAPPING = {
     'bancontact': 3012,
     'bizum': 5001,
     'cartes_bancaires': 130,
-    'cofidis': 3012,
+    'cofidis': 5129,
     'diners': 132,
     'discover': 128,
     'eps': 5406,
@@ -39,6 +44,7 @@ PAYMENT_METHODS_MAPPING = {
 REDIRECT_PAYMENT_METHODS = {
     'alipay_plus',
     'bizum',
+    'cofidis',
     'eps',
     'floa_bank',
     'ideal',
@@ -61,4 +67,12 @@ PAYMENT_STATUS_MAPPING = {
     'done': ('CAPTURED',),
     'cancel': ('CANCELLED',),
     'declined': ('REJECTED', 'REJECTED_CAPTURE'),
+}
+
+# Mapping of response codes indicating Worldline handled the request
+# See https://apireference.connect.worldline-solutions.com/s2sapi/v1/en_US/json/response-codes.html.
+VALID_RESPONSE_CODES = {
+    200: 'Successful',
+    201: 'Created',
+    402: 'Payment Rejected',
 }

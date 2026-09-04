@@ -8,9 +8,7 @@ class PosPaymentMethod(models.Model):
     def _payment_request_from_kiosk(self, order):
         pass
 
+    # will be overridden.
     @api.model
-    def _load_pos_self_data_domain(self, data):
-        if data['pos.config']['data'][0]['self_ordering_mode'] == 'kiosk':
-            return [('use_payment_terminal', 'in', ['adyen', 'stripe']), ('id', 'in', data['pos.config']['data'][0]['payment_method_ids'])]
-        else:
-            [('id', '=', False)]
+    def _load_pos_self_data_domain(self, data, config):
+        return [('id', '=', False)]

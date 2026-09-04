@@ -1,6 +1,6 @@
 from odoo import Command
 from odoo.tests import tagged
-from odoo.tools.float_utils import float_compare
+from odoo.tools import float_compare, float_round
 from odoo.addons.l10n_jo_edi.tests.jo_edi_common import JoEdiCommon
 from odoo.addons.l10n_jo_edi.models.account_edi_xml_ubl_21_jo import JO_MAX_DP
 
@@ -44,10 +44,13 @@ class TestJoEdiPrecision(JoEdiCommon):
 
         return defaults
 
-    def _sum_max_dp(self, iterable):
-        return self.env['account.edi.xml.ubl_21.jo']._sum_max_dp(iterable)
+    def _round_max_dp(self, value):
+        return float_round(value, JO_MAX_DP)
 
-    def _validate_jo_edi_numbers(self, xml_string):
+    def _sum_max_dp(self, iterable):
+        return sum(self._round_max_dp(element) for element in iterable)
+
+    def _validate_jo_edi_numbers(self, xml_string, amount_total):
         """
         TLDR: This method checks that units sum up to total values.
         ===================================================================================================
@@ -75,12 +78,13 @@ class TestJoEdiPrecision(JoEdiCommon):
         root = self.get_xml_tree_from_string(xml_string)
         error_message = ""
 
-        total_discount = float(root.findtext('./{*}AllowanceCharge/{*}Amount'))
+        total_discount = float(root.findtext('./{*}AllowanceCharge/{*}Amount') or 0.0)
         total_tax = float(root.findtext('./{*}TaxTotal/{*}TaxAmount', default=0))
 
         tax_exclusive_amount = float(root.findtext('./{*}LegalMonetaryTotal/{*}TaxExclusiveAmount'))
         tax_inclusive_amount = float(root.findtext('./{*}LegalMonetaryTotal/{*}TaxInclusiveAmount'))
-        monetary_values_discount = float(root.findtext('./{*}LegalMonetaryTotal/{*}AllowanceTotalAmount'))
+        self.assertEqual(float_compare(tax_inclusive_amount, amount_total, 2), 0, f'{tax_inclusive_amount} != {amount_total}')
+        monetary_values_discount = float(root.findtext('./{*}LegalMonetaryTotal/{*}AllowanceTotalAmount') or 0.0)
         payable_amount = float(root.findtext('./{*}LegalMonetaryTotal/{*}PayableAmount'))
 
         error_message += self._equality_check({  # They have to be exactly the same, no decimal difference is tolerated
@@ -112,7 +116,7 @@ class TestJoEdiPrecision(JoEdiCommon):
                         'total_tax_amount': 0,
                     }),
                 'price_unit': float(xml_line.findtext('{*}Price/{*}PriceAmount')),
-                'discount': float(xml_line.findtext('{*}Price/{*}AllowanceCharge/{*}Amount')),
+                'discount': float(xml_line.findtext('{*}Price/{*}AllowanceCharge/{*}Amount') or 0.0),
             }
             lines.append(line)
             line_errors = self._equality_check({
@@ -161,7 +165,7 @@ class TestJoEdiPrecision(JoEdiCommon):
         with self.subTest(sub_test_name=invoice_vals['name']):
             invoice = self._l10n_jo_create_invoice(invoice_vals)
             generated_file = self.env['account.edi.xml.ubl_21.jo']._export_invoice(invoice)[0]
-            errors = self._validate_jo_edi_numbers(generated_file)
+            errors = self._validate_jo_edi_numbers(generated_file, invoice.amount_total)
             self.assertFalse(errors, errors)
 
     def test_jo_sales_invoice_precision(self):
@@ -342,5 +346,90 @@ class TestJoEdiPrecision(JoEdiCommon):
                     'quantity': 1,
                     'tax_ids': [Command.set((self.jo_general_tax_16 | self.jo_special_tax_10).ids)],
                 }),
+            ],
+        })
+
+    def test_jo_credit_notes_price_unit(self):
+        def get_price_units(xml_string):
+            root = self.get_xml_tree_from_string(xml_string)
+            for xml_line in root.findall('./{*}InvoiceLine'):
+                yield float(xml_line.findtext('{*}Price/{*}PriceAmount'))
+        self.company.l10n_jo_edi_taxpayer_type = 'sales'
+        self.company.l10n_jo_edi_sequence_income_source = '16683693'
+        invoice = self._l10n_jo_create_invoice({
+            'name': 'TestEIN014',
+            'invoice_date': '2023-11-10',
+            'invoice_line_ids': [
+                Command.create({
+                    'product_id': self.product_b.id,
+                    'price_unit': 11.11,
+                    'quantity': 9833,
+                    'discount': 3.12,
+                    'tax_ids': [Command.set((self.jo_general_tax_16_included).ids)],
+                }),
+                Command.create({
+                    'product_id': self.product_a.id,
+                    'price_unit': 10000.01,
+                    'quantity': 93333,
+                    'discount': 99.71,
+                    'tax_ids': [Command.set((self.jo_general_tax_16_included).ids)],
+                }),
+                Command.create({
+                    'product_id': self.product_a.id,
+                    'price_unit': 0.01,
+                    'quantity': 0.11,
+                    'discount': 2,
+                    'tax_ids': [Command.set((self.jo_general_tax_16_included).ids)],
+                }),
+            ],
+        })
+        refund = self._l10n_jo_create_refund(invoice, 'return reason', {
+            'invoice_line_ids': [
+                Command.create({
+                    'product_id': self.product_b.id,
+                    'price_unit': 11.11,
+                    'quantity': 3.11,
+                    'discount': 3.12,
+                    'tax_ids': [Command.set((self.jo_general_tax_16_included).ids)],
+                }),
+                Command.create({
+                    'product_id': self.product_a.id,
+                    'price_unit': 10000.01,
+                    'quantity': 2.02,
+                    'discount': 99.71,
+                    'tax_ids': [Command.set((self.jo_general_tax_16_included).ids)],
+                }),
+                Command.create({
+                    'product_id': self.product_a.id,
+                    'price_unit': 0.01,
+                    'quantity': 0.1,
+                    'discount': 2,
+                    'tax_ids': [Command.set((self.jo_general_tax_16_included).ids)],
+                }),
+            ],
+        })
+        invoice_file = self.env['account.edi.xml.ubl_21.jo']._export_invoice(invoice)[0]
+        refund_file = self.env['account.edi.xml.ubl_21.jo']._export_invoice(refund)[0]
+        for invoice_price_unit, refund_price_unit in zip(get_price_units(invoice_file), get_price_units(refund_file)):
+            self.assertEqual(invoice_price_unit, refund_price_unit)
+
+    def test_jo_total_tax_and_lines_taxes_rounding_error(self):
+        """
+        The aim of this test is to ensure that the taxes amounts on lines are calculated using rounded base amounts
+        this would get broken if _add_tax_details_in_base_line uses round_globally
+        """
+        self.company.l10n_jo_edi_taxpayer_type = 'sales'
+        self.company.l10n_jo_edi_sequence_income_source = '16683693'
+
+        self._validate_invoice_vals_jo_edi_numbers({
+            'name': 'TestEIN022',
+            'date': '2023-11-12',
+            'invoice_line_ids': [
+                Command.create({
+                    'product_id': self.product_a.id,
+                    'quantity': 1,
+                    'price_unit': 109,
+                    'tax_ids': [Command.set(self.jo_general_tax_16_included.ids)],
+                }) for _ in range(20)
             ],
         })

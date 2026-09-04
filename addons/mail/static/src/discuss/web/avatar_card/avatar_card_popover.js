@@ -1,60 +1,88 @@
 import { useService } from "@web/core/utils/hooks";
-import { Component, onWillStart } from "@odoo/owl";
+import { Component } from "@odoo/owl";
 import { useOpenChat } from "@mail/core/web/open_chat_hook";
+import { ImStatus } from "@mail/core/common/im_status";
 
 export class AvatarCardPopover extends Component {
     static template = "mail.AvatarCardPopover";
-
+    static components = { ImStatus };
     static props = {
         id: { type: Number, required: true },
         close: { type: Function, required: true },
+        model: {
+            type: String,
+            validate: (m) => ["res.users", "res.partner"].includes(m),
+            optional: true,
+        },
+    };
+    static defaultProps = {
+        model: "res.users",
     };
 
     setup() {
         this.actionService = useService("action");
-        this.orm = useService("orm");
-        this.openChat = useOpenChat("res.users");
-        onWillStart(async () => {
-            [this.user] = await this.orm.read("res.users", [this.props.id], this.fieldNames);
+        this.store = useService("mail.store");
+        this.openChat = useOpenChat(this.props.model);
+        this.store.fetchStoreData("avatar_card", {
+            id: this.props.id,
+            model: this.props.model,
         });
     }
 
-    get fieldNames() {
-        return ["name", "email", "phone", "im_status", "share", "partner_id"];
+    get user() {
+        if (this.props.model === "res.users") {
+            return this.store["res.users"].get(this.props.id);
+        }
+        return undefined;
+    }
+
+    get partner() {
+        if (this.props.model === "res.partner") {
+            return this.store["res.partner"].get(this.props.id);
+        }
+        return this.user?.partner_id;
+    }
+
+    get name() {
+        return this.partner?.name;
     }
 
     get email() {
-        return this.user.email;
+        return this.partner?.email;
     }
 
     get phone() {
-        return this.user.phone;
+        return this.partner?.phone;
     }
 
     get showViewProfileBtn() {
-        return true;
+        return this.partner;
+    }
+
+    get hasFooter() {
+        return false;
     }
 
     async getProfileAction() {
         return {
-            res_id: this.user.partner_id[0],
+            res_id: this.partner.id,
             res_model: "res.partner",
             type: "ir.actions.act_window",
             views: [[false, "form"]],
         };
     }
 
-    get userId() {
-        return this.user.id;
-    }
-
     onSendClick() {
-        this.openChat(this.userId);
+        this.openChat(this.props.id);
         this.props.close();
     }
 
-    async onClickViewProfile() {
+    async onClickViewProfile(newWindow) {
         const action = await this.getProfileAction();
-        this.actionService.doAction(action);
+        this.props.close();
+        if (!action) {
+            return;
+        }
+        this.actionService.doAction(action, { newWindow });
     }
 }

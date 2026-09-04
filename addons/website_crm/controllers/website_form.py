@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import tools
@@ -56,8 +55,8 @@ class WebsiteForm(form.WebsiteForm):
                     request.params['state_id'] = state.id
         return super(WebsiteForm, self)._handle_website_form(model_name, **kwargs)
 
-    def insert_record(self, request, model, values, custom, meta=None):
-        is_lead_model = model.sudo().model == 'crm.lead'
+    def insert_record(self, request, model_sudo, values, custom, meta=None):
+        is_lead_model = model_sudo.model == 'crm.lead'
         if is_lead_model:
             values_email_normalized = tools.email_normalize(values.get('email_from'))
             visitor_sudo = request.env['website.visitor']._get_visitor_from_request(force_create=True)
@@ -77,10 +76,10 @@ class WebsiteForm(form.WebsiteForm):
                     values['partner_id'] = visitor_partner.id
             if 'company_id' not in values:
                 values['company_id'] = request.website.company_id.id
-            lang = request.context.get('lang', False)
+            lang = request.env.context.get('lang', False)
             values['lang_id'] = values.get('lang_id') or request.env['res.lang']._get_data(code=lang).id
 
-        result = super(WebsiteForm, self).insert_record(request, model, values, custom, meta=meta)
+        result = super().insert_record(request, model_sudo, values, custom, meta=meta)
 
         if is_lead_model and visitor_sudo and result:
             lead_sudo = request.env['crm.lead'].browse(result).sudo()

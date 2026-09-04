@@ -1,5 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo.addons.payment.const import SENSITIVE_KEYS as PAYMENT_SENSITIVE_KEYS
+
+SENSITIVE_KEYS = {'client_secret'}
+PAYMENT_SENSITIVE_KEYS.update(SENSITIVE_KEYS)  # Add Stripe-specific keys to the global set.
+
 API_VERSION = '2019-05-16'  # The API version of Stripe implemented in this module
 
 # Stripe proxy URL
@@ -11,7 +16,6 @@ DEFAULT_PAYMENT_METHOD_CODES = {
     'card',
     'bancontact',
     'eps',
-    'giropay',
     'ideal',
     'p24',
     # Brand payment methods.
@@ -135,4 +139,14 @@ COUNTRY_MAPPING = {
     'RE': 'FR',  # Réunion
     'YT': 'FR',  # Mayotte
     'MF': 'FR',  # Saint-Martin
+}
+
+# Stripe-specific mapping of currency codes in ISO 4217 format to the number of decimals.
+# Only currencies for which Stripe does not follow the ISO 4217 norm are listed here.
+CURRENCY_DECIMALS = {
+    # https://docs.stripe.com/currencies#special-cases
+    'ISK': 2,
+    'UGX': 2,
+    # https://docs.stripe.com/currencies#zero-decimal
+    'MGA': 0,
 }

@@ -1,14 +1,12 @@
 import { Plugin } from "@html_editor/plugin";
-import {
-    getAdjacentNextSiblings,
-    getAdjacentPreviousSiblings,
-} from "@html_editor/utils/dom_traversal";
 import { parseHTML } from "@html_editor/utils/html";
 import { _t } from "@web/core/l10n/translation";
+import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
 
 export class StarPlugin extends Plugin {
     static id = "star";
     static dependencies = ["dom", "history"];
+    /** @type {import("plugins").EditorResources} */
     resources = {
         user_commands: [
             {
@@ -17,6 +15,7 @@ export class StarPlugin extends Plugin {
                 description: _t("Insert a rating"),
                 icon: "fa-star",
                 run: this.addStars.bind(this),
+                isAvailable: isHtmlContentSupported,
             },
         ],
         powerbox_items: [
@@ -36,6 +35,7 @@ export class StarPlugin extends Plugin {
                 commandParams: { length: 5 },
             },
         ],
+        selectors_for_feff_providers: () => ".o_stars",
     };
 
     setup() {
@@ -52,8 +52,10 @@ export class StarPlugin extends Plugin {
             node.parentElement &&
             node.parentElement.className.includes("o_stars")
         ) {
-            const previousStars = getAdjacentPreviousSiblings(node, isStar);
-            const nextStars = getAdjacentNextSiblings(node, isStar);
+            const allStars = Array.from(node.parentElement.childNodes).filter(isStar);
+            const currentStarIndex = allStars.indexOf(node);
+            const previousStars = allStars.slice(0, currentStarIndex);
+            const nextStars = allStars.slice(currentStarIndex + 1);
             if (nextStars.length || previousStars.length) {
                 const shouldToggleOff =
                     node.classList.contains("fa-star") &&
@@ -75,7 +77,7 @@ export class StarPlugin extends Plugin {
 
     addStars({ length }) {
         const stars = Array.from({ length }, () => '<i class="fa fa-star-o"></i>').join("");
-        const html = `\u200B<span contenteditable="false" class="o_stars">${stars}</span>\u200B`;
+        const html = `<span contenteditable="false" class="o_stars">${stars}</span>`;
         this.dependencies.dom.insert(parseHTML(this.document, html));
         this.dependencies.history.addStep();
     }

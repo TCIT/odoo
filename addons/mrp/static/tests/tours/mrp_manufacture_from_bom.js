@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("test_manufacture_from_bom", {
@@ -10,6 +8,10 @@ registry.category("web_tour.tours").add("test_manufacture_from_bom", {
         },
         {
             trigger: '.o_stat_text:contains("BoM Overview")',
+            run: "click",
+        },
+        {
+            trigger: '.fa-toggle-off',
             run: "click",
         },
         {

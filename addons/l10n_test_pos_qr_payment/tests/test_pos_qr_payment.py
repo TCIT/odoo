@@ -21,7 +21,7 @@ class TestUiSEPA(TestPosQrCommon):
         cls.company_data['default_journal_bank'].write({'bank_account_id': cls.bank_account.id})
 
         # Setup QR Payment method for SEPA
-        qr_payment = cls.env['pos.payment.method'].create({
+        qr_payment = cls.env['pos.payment.method'].sudo().create({
             'name': 'QR Code',
             'journal_id': cls.company_data['default_journal_bank'].id,
             'payment_method_type': "qr_code",
@@ -38,12 +38,14 @@ class TestUiSEPA(TestPosQrCommon):
         """
 
         # Set non sepa bank account to make the test failed
+        self.bank_account.allow_out_payment = False
         self.bank_account.write({
             'acc_number': 'SA4420000001234567891234',
+            'allow_out_payment': True,
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()
 
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PaymentScreenWithQRPaymentFailure', login="pos_user")
+        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PaymentScreenWithQRPaymentFailure', login="pos_user")
 
     def test_02_pos_order_with_sepa_qr_payment(self):
         """ Test Point of Sale QR Payment flow with SEPA
@@ -55,7 +57,7 @@ class TestUiSEPA(TestPosQrCommon):
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()
 
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PaymentScreenWithQRPayment', login="pos_user")
+        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PaymentScreenWithQRPayment', login="pos_user")
 
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
@@ -81,7 +83,7 @@ class TestUiCH(TestPosQrCommon):
         cls.company_data['default_journal_bank'].write({'bank_account_id': cls.bank_account.id})
 
         # Setup QR Payment method for Swiss QR
-        qr_payment = cls.env['pos.payment.method'].create({
+        qr_payment = cls.env['pos.payment.method'].sudo().create({
             'name': 'QR Code',
             'journal_id': cls.company_data['default_journal_bank'].id,
             'payment_method_type': "qr_code",
@@ -106,7 +108,7 @@ class TestUiCH(TestPosQrCommon):
         """
         self.main_pos_config.with_user(self.pos_user).open_ui()
 
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PaymentScreenWithQRPaymentFailure', login="pos_user")
+        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PaymentScreenWithQRPaymentFailure', login="pos_user")
 
     def test_02_pos_order_with_swiss_qr_payment(self):
         """ Test Point of Sale QR Payment flow with Swiss QR
@@ -114,7 +116,7 @@ class TestUiCH(TestPosQrCommon):
         """
         self.main_pos_config.with_user(self.pos_user).open_ui()
 
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PaymentScreenWithQRPaymentSwiss', login="pos_user")
+        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PaymentScreenWithQRPaymentSwiss', login="pos_user")
 
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
@@ -141,7 +143,7 @@ class TestUiHK(TestPosQrCommon):
         cls.company_data['default_journal_bank'].write({'bank_account_id': cls.bank_account.id})
 
         # Setup QR Payment method for EMV(FPS)
-        qr_payment = cls.env['pos.payment.method'].create({
+        qr_payment = cls.env['pos.payment.method'].sudo().create({
             'name': 'QR Code',
             'journal_id': cls.company_data['default_journal_bank'].id,
             'payment_method_type': "qr_code",
@@ -158,7 +160,7 @@ class TestUiHK(TestPosQrCommon):
         """
         self.main_pos_config.with_user(self.pos_user).open_ui()
 
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PaymentScreenWithQRPaymentFailure', login="pos_user")
+        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PaymentScreenWithQRPaymentFailure', login="pos_user")
 
     def test_02_pos_order_with_emv_qr_payment(self):
         """ Test Point of Sale QR Payment flow with FPS.
@@ -173,7 +175,7 @@ class TestUiHK(TestPosQrCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
 
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PaymentScreenWithQRPayment', login="pos_user")
+        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PaymentScreenWithQRPayment', login="pos_user")
 
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
@@ -196,7 +198,7 @@ class TestUIBR(TestPosQrCommon):
         cls.company_data['default_journal_bank'].write({'bank_account_id': cls.bank_account.id})
 
         # Setup QR Payment method for PIX
-        qr_payment = cls.env['pos.payment.method'].create({
+        qr_payment = cls.env['pos.payment.method'].sudo().create({
             'name': 'QR Code',
             'journal_id': cls.company_data['default_journal_bank'].id,
             'payment_method_type': "qr_code",
@@ -213,7 +215,7 @@ class TestUIBR(TestPosQrCommon):
         """
         self.main_pos_config.with_user(self.pos_user).open_ui()
 
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PaymentScreenWithQRPaymentFailure', login="pos_user")
+        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PaymentScreenWithQRPaymentFailure', login="pos_user")
 
     def test_02_pos_order_with_pix_qr_payment(self):
         """ Test Point of Sale QR Payment flow with PIX
@@ -228,4 +230,4 @@ class TestUIBR(TestPosQrCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
 
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PaymentScreenWithQRPayment', login="pos_user")
+        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PaymentScreenWithQRPayment', login="pos_user")

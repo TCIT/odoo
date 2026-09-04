@@ -11,7 +11,6 @@ class TestL10nRoEdiStockCommon(ValuationReconciliationTestCommon):
         cls.warehouse = cls.company_data['default_warehouse']
         cls.customer_location = cls.env.ref('stock.stock_location_customers').id
         cls.stock_location = cls.warehouse.lot_stock_id.id
-
         # Disable auto-batching
         cls.warehouse.out_type_id.auto_batch = False
         cls.warehouse.in_type_id.auto_batch = False
@@ -29,7 +28,6 @@ class TestL10nRoEdiStockCommon(ValuationReconciliationTestCommon):
         for data in product_data or []:
             product = data['product_id']
             cls.env['stock.move'].create({
-                'name': product.name,
                 'product_id': product.id,
                 'product_uom': product.uom_id.id,
                 'product_uom_qty': data['product_uom_qty'],

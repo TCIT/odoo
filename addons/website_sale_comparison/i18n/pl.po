@@ -1,86 +1,63 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_sale_comparison
-# 
+# * website_sale_comparison
+#
 # Translators:
-# Wil Odoo, 2024
-# Tiffany Chang, 2024
-# 
+# Piotr Strębski <strebski@gmail.com>, 2022
+# Marcin Młynarczyk <mlynarczyk@gmail.com>, 2022
+# Andrzej Wiśniewski <a.wisniewski@hadron.eu.com>, 2022
+# Dariusz Żbikowski <darek@krokus.com.pl>, 2022
+# Judyta Kaźmierczak <judyta.kazmierczak@openglobe.pl>, 2022
+# Piotr Cierkosz <piotr.w.cierkosz@gmail.com>, 2022
+# Wojciech Warczakowski <w.warczakowski@gmail.com>, 2022
+# Grzegorz Krukar <grzegorzgk1@gmail.com>, 2022
+# Piotr Szlązak <szlazakpiotr@gmail.com>, 2022
+# Paweł Wodyński <pw@myodoo.pl>, 2022
+# Tomasz Leppich <t.leppich@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Tadeusz Karpiński <tadeuszkarpinski@gmail.com>, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Marta (wacm)" <wacm@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Tiffany Chang, 2024\n"
-"Language-Team: Polish (https://app.transifex.com/odoo/teams/41243/pl/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-02 17:42+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Polish <https://translate.odoo.com/projects/odoo-19/"
+"website_sale_comparison/pl/>\n"
+"Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: pl\n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
-
-#. module: website_sale_comparison
-#: model:product.attribute.value,name:website_sale_comparison.product_attribute_value_8
-msgid "134.7 x 200 x 7.2 mm"
-msgstr "134.7 x 200 x 7.2 mm"
-
-#. module: website_sale_comparison
-#: model:product.attribute.value,name:website_sale_comparison.product_attribute_value_7
-msgid "308 g"
-msgstr "308 g"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
+"(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
+"n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_sale_comparison
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
-msgid ""
-"<i class=\"fa fa-chevron-circle-down o_product_comparison_collpase\" "
-"role=\"img\" aria-label=\"Collapse\" title=\"Collapse\"/>"
+msgid "<i class=\"fa fa-shopping-cart me-2\" aria-hidden=\"true\"/>Add to Cart"
 msgstr ""
-"<i class=\"fa fa-chevron-circle-down o_product_comparison_collpase\" "
-"role=\"img\" aria-label=\"Collapse\" title=\"Collapse\"/>"
+"<i class=\"fa fa-shopping-cart me-2\" aria-hidden=\"true\"/>Dodaj do koszyka"
 
 #. module: website_sale_comparison
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
-msgid ""
-"<i class=\"fa fa-chevron-circle-down o_product_comparison_collpase\" "
-"role=\"img\" aria-label=\"Collapse\" title=\"Collapse\"/><span>Tags</span>"
+msgid "<i class=\"oi oi-chevron-left me-1\"/> Back to shop"
 msgstr ""
 
 #. module: website_sale_comparison
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
-msgid "<i class=\"fa fa-shopping-cart me-2\"/>Add to Cart"
-msgstr "<i class=\"fa fa-shopping-cart me-2\"/>Dodaj do koszyka"
-
-#. module: website_sale_comparison
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_product
-msgid "<i class=\"fa fa-trash\" role=\"img\" aria-label=\"Remove\"/>"
-msgstr "<i class=\"fa fa-trash\" role=\"img\" aria-label=\"Usuń\"/>"
+#: model_terms:ir.ui.view,arch_db:website_sale_comparison.add_to_compare
+msgid ""
+"<span class=\"fa fa-exchange fa-fw o_not-animable\"/>\n"
+"                    <span class=\"o_label small ms-2\">Compare</span>"
+msgstr ""
 
 #. module: website_sale_comparison
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_add_to_compare
-msgid "<span class=\"fa fa-exchange me-2\"/>Compare"
-msgstr "<span class=\"fa fa-exchange me-2\"/>Porównaj"
-
-#. module: website_sale_comparison
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_attributes_body
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
-msgid "<span>Tags</span>"
-msgstr ""
-
-#. module: website_sale_comparison
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
-msgid "<strong>Price:</strong>"
-msgstr "<strong>Cena:</strong>"
-
-#. module: website_sale_comparison
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
-msgid "<strong>x</strong>"
-msgstr "<strong>x</strong>"
-
-#. module: website_sale_comparison
-#: model:product.attribute.value,name:website_sale_comparison.product_attribute_value_1
-msgid "Apple"
-msgstr "Apple"
+msgid "Add to compare"
+msgstr "Dodaj aby porównać"
 
 #. module: website_sale_comparison
 #: model:ir.actions.act_window,name:website_sale_comparison.product_attribute_category_action
@@ -89,7 +66,8 @@ msgid "Attribute Categories"
 msgstr "Kategorie atrybutów"
 
 #. module: website_sale_comparison
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.snippet_options
+#. odoo-javascript
+#: code:addons/website_sale_comparison/static/src/website_builder/product_page_option.xml:0
 msgid "Bottom of Page"
 msgstr "Dół strony"
 
@@ -100,24 +78,33 @@ msgstr "Nazwa kategorii"
 
 #. module: website_sale_comparison
 #. odoo-javascript
-#: code:addons/website_sale_comparison/static/src/xml/comparison.xml:0
+#: code:addons/website_sale_comparison/static/src/js/product_comparison_bottom_bar/product_comparison_bottom_bar.xml:0
+#: code:addons/website_sale_comparison/static/src/website_builder/product_page_option.xml:0
+#: code:addons/website_sale_comparison/static/src/website_builder/products_design_panel.xml:0
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.add_to_compare
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_add_to_compare
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.snippet_options
 msgid "Compare"
 msgstr "Porównaj"
 
 #. module: website_sale_comparison
-#. odoo-javascript
-#: code:addons/website_sale_comparison/static/src/js/website_sale_comparison.js:0
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
 msgid "Compare Products"
 msgstr "Porównaj Produkty"
 
 #. module: website_sale_comparison
+#. odoo-javascript
+#: code:addons/website_sale_comparison/static/src/js/product_comparison_bottom_bar/product_comparison_bottom_bar.xml:0
+msgid "Compare products"
+msgstr ""
+
+#. module: website_sale_comparison
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
 msgid "Contact Us"
 msgstr "Skontaktuj się z nami"
+
+#. module: website_sale_comparison
+#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
+msgid "Continue shopping"
+msgstr ""
 
 #. module: website_sale_comparison
 #: model_terms:ir.actions.act_window,help:website_sale_comparison.product_attribute_category_action
@@ -135,13 +122,20 @@ msgid "Created on"
 msgstr "Data utworzenia"
 
 #. module: website_sale_comparison
-#: model:product.attribute,name:website_sale_comparison.product_attribute_8
-#: model:product.attribute.category,name:website_sale_comparison.product_attribute_category_2
+#: model:product.attribute.category,name:website_sale_comparison.product_attribute_category_design
+msgid "Design"
+msgstr ""
+
+#. module: website_sale_comparison
+#: model:product.attribute.category,name:website_sale_comparison.product_attribute_category_dimensions
 msgid "Dimensions"
 msgstr "Wymiary"
 
 #. module: website_sale_comparison
+#: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute__display_name
 #: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute_category__display_name
+#: model:ir.model.fields,field_description:website_sale_comparison.field_product_product__display_name
+#: model:ir.model.fields,field_description:website_sale_comparison.field_product_template_attribute_line__display_name
 msgid "Display Name"
 msgstr "Nazwa wyświetlana"
 
@@ -165,12 +159,16 @@ msgstr ""
 "strony produktu."
 
 #. module: website_sale_comparison
+#: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute__id
 #: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute_category__id
+#: model:ir.model.fields,field_description:website_sale_comparison.field_product_product__id
+#: model:ir.model.fields,field_description:website_sale_comparison.field_product_template_attribute_line__id
 msgid "ID"
 msgstr "ID"
 
 #. module: website_sale_comparison
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.snippet_options
+#. odoo-javascript
+#: code:addons/website_sale_comparison/static/src/website_builder/product_page_option.xml:0
 msgid "In accordion"
 msgstr ""
 
@@ -185,21 +183,21 @@ msgid "Last Updated on"
 msgstr "Data ostatniej aktualizacji"
 
 #. module: website_sale_comparison
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.snippet_options
+#. odoo-javascript
+#: code:addons/website_sale_comparison/static/src/website_builder/product_page_option.xml:0
 msgid "None"
 msgstr "Brak"
+
+#. module: website_sale_comparison
+#: model:product.attribute.category,name:website_sale_comparison.product_attribute_category_options
+msgid "Options"
+msgstr ""
 
 #. module: website_sale_comparison
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.accordion_specs_item
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.specifications_table
 msgid "Others"
 msgstr "Inne"
-
-#. module: website_sale_comparison
-#. odoo-javascript
-#: code:addons/website_sale_comparison/static/src/xml/comparison.xml:0
-msgid "Product"
-msgstr "Produkt"
 
 #. module: website_sale_comparison
 #: model:ir.model,name:website_sale_comparison.model_product_attribute
@@ -213,6 +211,12 @@ msgid "Product Attribute Category"
 msgstr "Kategoria atrybutu produktu"
 
 #. module: website_sale_comparison
+#. odoo-javascript
+#: code:addons/website_sale_comparison/static/src/js/product_row/product_row.xml:0
+msgid "Product Image"
+msgstr ""
+
+#. module: website_sale_comparison
 #: model:ir.model,name:website_sale_comparison.model_product_template_attribute_line
 msgid "Product Template Attribute Line"
 msgstr "Linia atrybutów szablonu produktu"
@@ -224,7 +228,6 @@ msgstr "Wariant produktu"
 
 #. module: website_sale_comparison
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_product
 msgid "Product image"
 msgstr "Zdjęcie produktu"
 
@@ -234,9 +237,29 @@ msgid "Related Attributes"
 msgstr "Powiązane atrybuty"
 
 #. module: website_sale_comparison
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_product
-msgid "Remove"
-msgstr "Usuń"
+#. odoo-javascript
+#: code:addons/website_sale_comparison/static/src/js/product_comparison_bottom_bar/product_comparison_bottom_bar.xml:0
+msgid "Remove All"
+msgstr ""
+
+#. module: website_sale_comparison
+#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
+msgid "Remove all"
+msgstr ""
+
+#. module: website_sale_comparison
+#. odoo-javascript
+#: code:addons/website_sale_comparison/static/src/js/product_comparison_bottom_bar/product_comparison_bottom_bar.xml:0
+#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
+msgid "Remove all products from comparison"
+msgstr ""
+
+#. module: website_sale_comparison
+#. odoo-javascript
+#: code:addons/website_sale_comparison/static/src/js/product_row/product_row.xml:0
+#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
+msgid "Remove product from comparison"
+msgstr ""
 
 #. module: website_sale_comparison
 #: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute_category__sequence
@@ -256,7 +279,14 @@ msgid "Shop Comparator"
 msgstr "Porównywarka"
 
 #. module: website_sale_comparison
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.snippet_options
+#. odoo-javascript
+#: code:addons/website_sale_comparison/static/src/js/product_comparison_bottom_bar/product_comparison_bottom_bar.xml:0
+msgid "Show products added to comparison"
+msgstr ""
+
+#. module: website_sale_comparison
+#. odoo-javascript
+#: code:addons/website_sale_comparison/static/src/website_builder/product_page_option.xml:0
 msgid "Specification"
 msgstr "Specyfikacja"
 
@@ -268,27 +298,82 @@ msgstr "Specyfikacja"
 
 #. module: website_sale_comparison
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
+msgid "Tags"
+msgstr ""
+
+#. module: website_sale_comparison
+#. odoo-javascript
+#: code:addons/website_sale_comparison/static/src/interactions/product_comparison.js:0
+msgid "This product has already been added to the comparison."
+msgstr ""
+
+#. module: website_sale_comparison
+#. odoo-javascript
+#: code:addons/website_sale_comparison/static/src/interactions/product_comparison.js:0
+msgid "Too many products to compare"
+msgstr ""
+
+#. module: website_sale_comparison
+#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
 msgid "Uncategorized"
 msgstr "Bez kategorii"
 
 #. module: website_sale_comparison
 #. odoo-javascript
-#: code:addons/website_sale_comparison/static/src/xml/comparison.xml:0
-msgid "Warning"
-msgstr "Ostrzeżenie"
-
-#. module: website_sale_comparison
-#: model:product.attribute,name:website_sale_comparison.product_attribute_7
-msgid "Weight"
-msgstr "Waga"
-
-#. module: website_sale_comparison
-#. odoo-javascript
-#: code:addons/website_sale_comparison/static/src/xml/comparison.xml:0
-msgid "You can compare max 4 products."
-msgstr "Możesz porównać maksymalnie 4 produkty na raz."
+#: code:addons/website_sale_comparison/static/src/interactions/product_comparison.js:0
+msgid "You can compare up to 4 products at a time."
+msgstr ""
 
 #. module: website_sale_comparison
 #: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute__category_id
 msgid "eCommerce Category"
-msgstr ""
+msgstr "Kategoria eCommerce"
+
+#~ msgid "134.7 x 200 x 7.2 mm"
+#~ msgstr "134.7 x 200 x 7.2 mm"
+
+#~ msgid "308 g"
+#~ msgstr "308 g"
+
+#~ msgid ""
+#~ "<i class=\"fa fa-chevron-circle-down o_product_comparison_collpase\" "
+#~ "role=\"img\" aria-label=\"Collapse\" title=\"Collapse\"/>"
+#~ msgstr ""
+#~ "<i class=\"fa fa-chevron-circle-down o_product_comparison_collpase\" "
+#~ "role=\"img\" aria-label=\"Collapse\" title=\"Collapse\"/>"
+
+#~ msgid "<i class=\"fa fa-shopping-cart me-2\"/>Add to Cart"
+#~ msgstr "<i class=\"fa fa-shopping-cart me-2\"/>Dodaj do koszyka"
+
+#~ msgid "<i class=\"fa fa-trash\" role=\"img\" aria-label=\"Remove\"/>"
+#~ msgstr "<i class=\"fa fa-trash\" role=\"img\" aria-label=\"Usuń\"/>"
+
+#~ msgid "<span class=\"fa fa-exchange me-2\"/>Compare"
+#~ msgstr "<span class=\"fa fa-exchange me-2\"/>Porównaj"
+
+#~ msgid "<strong>Price:</strong>"
+#~ msgstr "<strong>Cena:</strong>"
+
+#~ msgid "<strong>x</strong>"
+#~ msgstr "<strong>x</strong>"
+
+#~ msgid "Apple"
+#~ msgstr "Apple"
+
+#~ msgid "Product"
+#~ msgstr "Produkt"
+
+#~ msgid "Remove"
+#~ msgstr "Usuń"
+
+#~ msgid "Warning"
+#~ msgstr "Ostrzeżenie"
+
+#~ msgid "Weight"
+#~ msgstr "Waga"
+
+#~ msgid "You can compare max 4 products."
+#~ msgstr "Możesz porównać maksymalnie 4 produkty na raz."
+
+#~ msgid "or"
+#~ msgstr "lub"

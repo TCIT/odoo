@@ -1,8 +1,8 @@
 import { _t } from '@web/core/l10n/translation';
-import { patch } from '@web/core/utils/patch';
 import {
     ProductTemplateAttributeLine
 } from '@sale/js/product_template_attribute_line/product_template_attribute_line';
+import { patch } from '@web/core/utils/patch';
 
 patch(ProductTemplateAttributeLine.prototype, {
     /**

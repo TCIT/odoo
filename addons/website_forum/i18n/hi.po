@@ -1,38 +1,33 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_forum
-# 
-# Translators:
-# Gautam Hingrajiya, 2024
-# Martin Trigaux, 2024
-# Wil Odoo, 2024
-# Hideki Akiyoshi, 2025
-# Ronald Kung, 2025
-# Manav Shah, 2025
-# 
+# * website_forum
+#
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Manav Shah, 2025\n"
-"Language-Team: Hindi (https://app.transifex.com/odoo/teams/41243/hi/)\n"
+"POT-Creation-Date: 2026-02-20 18:37+0000\n"
+"PO-Revision-Date: 2026-08-07 19:31+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Hindi <https://translate.odoo.com/projects/odoo-19/"
+"website_forum/hi/>\n"
+"Language: hi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: hi\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid " Flag"
 msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid " Flagged"
 msgstr ""
 
@@ -56,6 +51,19 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__total_views
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_tree
 msgid "# Views"
+msgstr ""
+
+#. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
+msgid ""
+"%(link_start)sRead the guidelines to know how to gain karma.%(link_end)s"
+msgstr ""
+
+#. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
+msgid "%(score)s karma is required to perform this action."
 msgstr ""
 
 #. module: website_forum
@@ -188,19 +196,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_index_tags
 msgid "&amp;nbsp;"
-msgstr ""
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
-msgid "'Please enter 2 or more characters'"
-msgstr ""
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
-msgid "'Tags'"
-msgstr ""
+msgstr "&amp;nbsp;"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -233,17 +229,26 @@ msgid ""
 msgstr ""
 
 #. module: website_forum
+#: model_terms:forum.forum,welcome_message:website_forum.forum_help
+msgid ""
+"<a class=\"btn btn-primary forum_register_url o_translate_inline\" href=\"/"
+"web/login\">Sign up</a>"
+msgstr ""
+
+#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
 "<b class=\"d-block \">This answer has been flagged</b>\n"
-"                            As a moderator, you can either validate or reject this answer."
+"                            As a moderator, you can either validate or "
+"reject this answer."
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "<b class=\"d-block\">You have a pending post</b>\n"
-"                        Please wait for a moderator to validate your previous post to be allowed replying questions."
+"                        Please wait for a moderator to validate your "
+"previous post to be allowed replying questions."
 msgstr ""
 
 #. module: website_forum
@@ -276,8 +281,8 @@ msgstr ""
 msgid ""
 "<b>Answers should not start debates</b> This community Q&amp;A is not a "
 "discussion group. Please avoid holding debates in your answers as they tend "
-"to dilute the essence of questions and answers. For brief discussions please"
-" use commenting facility."
+"to dilute the essence of questions and answers. For brief discussions please "
+"use commenting facility."
 msgstr ""
 
 #. module: website_forum
@@ -286,16 +291,16 @@ msgstr ""
 msgid ""
 "<b>Answers shouldn't just point to other Questions</b>. Instead add a "
 "question comment indication \"Possible duplicate of...\". However, it's ok "
-"to include links to other questions or answers providing relevant additional"
-" information."
+"to include links to other questions or answers providing relevant additional "
+"information."
 msgstr ""
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just point to other questions</b>.Instead add a comment"
-" indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
+"<b>Answers shouldn't just point to other questions</b>.Instead add a comment "
+"indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
 "include links to other questions or answers providing relevant additional "
 "information."
 msgstr ""
@@ -304,8 +309,8 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the"
-" solution description text in your answer, even if it's just a copy/paste. "
+"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the "
+"solution description text in your answer, even if it's just a copy/paste. "
 "Links are welcome, but should be complementary to answer, referring sources "
 "or additional reading."
 msgstr ""
@@ -315,24 +320,27 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "<b>Before you ask - please make sure to search for a similar question.</b> "
-"You can search questions by their title or tags. It’s also OK to answer your"
-" own question."
+"You can search questions by their title or tags. It’s also OK to answer your "
+"own question."
 msgstr ""
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Please avoid asking questions that are too subjective and "
-"argumentative</b> or not relevant to this community."
+"<b>Please avoid asking questions that are too subjective and argumentative</"
+"b> or not relevant to this community."
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answer
 msgid ""
-"<b>Please try to give a substantial answer.</b> If you wanted to comment on the question or answer, just\n"
-"            <b>use the commenting tool.</b> Please remember that you can always <b>revise your answers</b>\n"
-"            - no need to answer the same question twice. Also, please <b>don't forget to vote</b>\n"
+"<b>Please try to give a substantial answer.</b> If you wanted to comment on "
+"the question or answer, just\n"
+"            <b>use the commenting tool.</b> Please remember that you can "
+"always <b>revise your answers</b>\n"
+"            - no need to answer the same question twice. Also, please "
+"<b>don't forget to vote</b>\n"
 "            - it really helps to select the best questions and answers!"
 msgstr ""
 
@@ -350,7 +358,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.contact
 msgid ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-trophy o-text-gold ms-2\" role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
+"                    <span class=\"fa fa-trophy o-text-gold ms-2\" "
+"role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
 msgstr ""
 
 #. module: website_forum
@@ -406,7 +415,8 @@ msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
-msgid "<i class=\"fa fa-check fa-fw me-1\"/>Try searching for one or two words."
+msgid ""
+"<i class=\"fa fa-check fa-fw me-1\"/>Try searching for one or two words."
 msgstr ""
 
 #. module: website_forum
@@ -422,7 +432,8 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
-msgid "<i class=\"fa fa-check\"/> How to configure TPS and TVQ's canadian taxes?"
+msgid ""
+"<i class=\"fa fa-check\"/> How to configure TPS and TVQ's canadian taxes?"
 msgstr ""
 
 #. module: website_forum
@@ -433,13 +444,6 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
 msgid "<i class=\"fa fa-comments-o me-1\" title=\"Forum\"/>"
-msgstr ""
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
-msgid ""
-"<i class=\"fa fa-ellipsis-h\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"More\"/>"
 msgstr ""
 
 #. module: website_forum
@@ -477,7 +481,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
 "<i class=\"fa fa-pencil\"/>\n"
-"                                Edit<span class=\"d-none d-lg-inline\"> your answer</span>"
+"                                Edit<span class=\"d-none d-lg-inline\"> your "
+"answer</span>"
 msgstr ""
 
 #. module: website_forum
@@ -515,8 +520,8 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid ""
-"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive"
-" votes\" title=\"Positive votes\"/>"
+"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive "
+"votes\" title=\"Positive votes\"/>"
 msgstr ""
 
 #. module: website_forum
@@ -570,8 +575,10 @@ msgid ""
 msgstr ""
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_sub_nav
-msgid "<i class=\"oi oi-chevron-left small\"/> Back"
+#: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
+msgid ""
+"<i class=\"oi oi-ellipsis-h\" data-bs-toggle=\"tooltip\" data-bs-"
+"placement=\"top\" title=\"More\"/>"
 msgstr ""
 
 #. module: website_forum
@@ -606,7 +613,8 @@ msgstr ""
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
-msgid "<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
+msgid ""
+"<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
 msgstr ""
 
 #. module: website_forum
@@ -625,8 +633,8 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<span class=\"flex-grow-1\">Why can other people edit my "
-"questions/answers?</span>"
+"<span class=\"flex-grow-1\">Why can other people edit my questions/answers?</"
+"span>"
 msgstr ""
 
 #. module: website_forum
@@ -641,24 +649,24 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">select text to format "
-"it.</span>"
+"<span class=\"form-text small text-muted d-block\">select text to format it."
+"</span>"
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">use '/' to insert "
-"images.</span>"
+"<span class=\"form-text small text-muted d-block\">use '/' to insert images."
+"</span>"
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-"
-"lightbulb-o\"/> Tip:</span>"
+"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-lightbulb-"
+"o\"/> Tip:</span>"
 msgstr ""
 
 #. module: website_forum
@@ -686,6 +694,8 @@ msgstr ""
 #: model_terms:web_tour.tour,rainbow_man_message:website_forum.question
 msgid "<span><b>Good job!</b> You went through all steps of this tour.</span>"
 msgstr ""
+"<span><b>शाबाश!</b> आपने इस पूरे गाइड या प्रक्रिया के सारे कदम सफलतापूर्वक पूरे कर लिए "
+"हैं.</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -748,23 +758,23 @@ msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Access Denied"
-msgstr ""
+msgstr "ऐक्सेस के लिए मना किया गया"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__message_needaction
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__message_needaction
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__message_needaction
 msgid "Action Needed"
-msgstr ""
+msgstr "कार्रवाई की ज़रूरत है"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__active
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__active
 #: model:ir.model.fields.selection,name:website_forum.selection__forum_post__state__active
 msgid "Active"
-msgstr "सक्रिय"
+msgstr "ऐक्टिव"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
@@ -776,7 +786,7 @@ msgstr "गतिविधियाँ"
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_related_posts
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid "Activity"
-msgstr ""
+msgstr "ऐक्टिविटी"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_comment
@@ -795,7 +805,7 @@ msgstr ""
 #: code:addons/website_forum/controllers/website_forum.py:0
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
 msgid "All"
-msgstr ""
+msgstr "सभी"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_body
@@ -918,12 +928,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_search
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid "Answers"
-msgstr ""
+msgstr "जवाब"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_gamification_challenge__challenge_category
 msgid "Appears in"
-msgstr ""
+msgstr "इसमें दिखता है"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_forum_view_form
@@ -931,11 +941,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_form
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_search
 msgid "Archived"
-msgstr ""
+msgstr "संग्रहीत किया गया"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Are you sure you want to delete this comment?"
 msgstr ""
 
@@ -1009,26 +1019,26 @@ msgstr ""
 #. module: website_forum
 #: model:ir.model,name:website_forum.model_ir_attachment
 msgid "Attachment"
-msgstr ""
+msgstr "अटैचमेंट"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__message_attachment_count
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__message_attachment_count
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__message_attachment_count
 msgid "Attachment Count"
-msgstr ""
+msgstr "अटैचमेंट की संख्या"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_search
 #: model_terms:ir.ui.view,arch_db:website_forum.post_comment
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid "Author"
-msgstr ""
+msgstr "लेखक"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__authorized_group_id
 msgid "Authorized Group"
-msgstr ""
+msgstr "ऐसे ग्रुप जिनको अनुमति मिली है"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_p_1
@@ -1042,7 +1052,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.post_comment
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_header
 msgid "Avatar"
-msgstr ""
+msgstr "अवतार"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
@@ -1071,12 +1081,12 @@ msgstr ""
 #. module: website_forum
 #: model:ir.ui.menu,name:website_forum.menu_forum_badges
 msgid "Badges"
-msgstr ""
+msgstr "बैज"
 
 #. module: website_forum
 #: model:ir.model.fields.selection,name:website_forum.selection__forum_post_reason__reason_type__basic
 msgid "Basic"
-msgstr ""
+msgstr "बेसिक"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
@@ -1137,7 +1147,7 @@ msgstr ""
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__can_edit
 msgid "Can Edit"
-msgstr ""
+msgstr "बदलाव कर सकते हैं"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__can_flag
@@ -1208,7 +1218,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_mobile
 msgid "Close"
-msgstr "बंद"
+msgstr "बंद करें"
 
 #. module: website_forum
 #: model:ir.ui.menu,name:website_forum.menu_forum_post_reasons
@@ -1255,7 +1265,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.mark_as_offensive
 msgid "Closing"
-msgstr ""
+msgstr "क्लोजिंग"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_reason__name
@@ -1265,12 +1275,12 @@ msgstr ""
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__color
 msgid "Color"
-msgstr ""
+msgstr "कलर"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid "Comment"
-msgstr ""
+msgstr "टिप्पणी"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_comment_all
@@ -1319,7 +1329,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__content
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_search
 msgid "Content"
-msgstr ""
+msgstr "कॉन्टेंट"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_comment_convert_all
@@ -1360,7 +1370,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__create_date
 #: model:ir.model.fields,field_description:website_forum.field_res_users__create_date
 msgid "Create Date"
-msgstr ""
+msgstr "तारीख बनाएं"
 
 #. module: website_forum
 #: model_terms:ir.actions.act_window,help:website_forum.forum_post_action
@@ -1408,7 +1418,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__create_uid
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__create_uid
 msgid "Created by"
-msgstr "द्वारा निर्मित"
+msgstr "इन्होंने बनाया"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__create_date
@@ -1416,7 +1426,7 @@ msgstr "द्वारा निर्मित"
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__create_date
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post
 msgid "Created on"
-msgstr ""
+msgstr "इस तारीख को बनाया गया"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_q_4
@@ -1432,24 +1442,27 @@ msgid "Critic"
 msgstr ""
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option_plugin.js:0
 msgid "Date"
-msgstr "तिथि"
+msgstr "तारीख"
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
-msgid "Date (high to low)"
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option_plugin.js:0
+msgid "Date (new to old)"
 msgstr ""
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
-msgid "Date (low to high)"
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option_plugin.js:0
+msgid "Date (old to new)"
 msgstr ""
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__default_order
 msgid "Default"
-msgstr ""
+msgstr "डिफ़ॉल्ट"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_forum_view_form
@@ -1460,10 +1473,11 @@ msgstr ""
 #: model:ir.model.fields,help:website_forum.field_gamification_challenge__challenge_category
 msgid "Define the visibility of the challenge through menus"
 msgstr ""
+"यह तय करें कि यह चुनौती (चैलेंज) सिस्टम के मेन्यू में कहां और किसे दिखाई देगी"
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 #: model_terms:ir.ui.view,arch_db:website_forum.post_comment
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
@@ -1512,9 +1526,10 @@ msgid "Deleted own post with 3 or more upvotes"
 msgstr ""
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option_plugin.js:0
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__description
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid "Description"
 msgstr "विवरण"
@@ -1531,7 +1546,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answer
 #: model_terms:ir.ui.view,arch_db:website_forum.post_comment
 msgid "Discard"
-msgstr ""
+msgstr "खारिज करें"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_6
@@ -1563,8 +1578,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_reason__display_name
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__display_name
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__display_name
+#: model:ir.model.fields,field_description:website_forum.field_gamification_challenge__display_name
+#: model:ir.model.fields,field_description:website_forum.field_gamification_karma_tracking__display_name
+#: model:ir.model.fields,field_description:website_forum.field_ir_attachment__display_name
+#: model:ir.model.fields,field_description:website_forum.field_res_users__display_name
+#: model:ir.model.fields,field_description:website_forum.field_website__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "डिस्प्ले का नाम"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_user_bio
@@ -1633,7 +1653,7 @@ msgstr ""
 #: model:gamification.challenge,name:website_forum.challenge_editor
 #: model:gamification.goal.definition,name:website_forum.definition_editor
 msgid "Editor"
-msgstr "संपादक "
+msgstr "एडिटर"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_editor
@@ -1682,7 +1702,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__favourite_count
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
 msgid "Favorite"
-msgstr ""
+msgstr "पसंदीदा"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_q_5
@@ -1778,7 +1798,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.follow
 msgid "Follow"
-msgstr ""
+msgstr "फ़ॉलो"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
@@ -1795,14 +1815,14 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__message_follower_ids
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__message_follower_ids
 msgid "Followers"
-msgstr ""
+msgstr "फ़ॉलोवर"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__message_partner_ids
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__message_partner_ids
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__message_partner_ids
 msgid "Followers (Partners)"
-msgstr ""
+msgstr "फ़ॉलोवर (पार्टनर)"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -1818,6 +1838,7 @@ msgstr ""
 
 #. module: website_forum
 #. odoo-python
+#: code:addons/website_forum/controllers/website_forum.py:0
 #: code:addons/website_forum/models/website.py:0
 #: model:ir.actions.act_url,name:website_forum.action_open_forum
 #: model:ir.model,name:website_forum.model_forum_forum
@@ -1831,7 +1852,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_search
 #: model_terms:ir.ui.view,arch_db:website_forum.gamification_karma_tracking_view_search
 msgid "Forum"
-msgstr ""
+msgstr "फ़ोरम"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_website__forum_count
@@ -1850,7 +1871,8 @@ msgid "Forum Name"
 msgstr ""
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option_plugin.js:0
 msgid "Forum Page"
 msgstr ""
 
@@ -1881,17 +1903,18 @@ msgid "Forum Tags"
 msgstr ""
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_searchbar_option.xml:0
 #: model:ir.actions.act_window,name:website_forum.forum_forum_action
 #: model:ir.ui.menu,name:website_forum.menu_forum_global
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_forum_view_tree
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_searchbar_input_snippet_options
 msgid "Forums"
-msgstr ""
+msgstr "फ़ोरम"
 
 #. module: website_forum
 #: model:ir.model,name:website_forum.model_gamification_challenge
 msgid "Gamification Challenge"
-msgstr ""
+msgstr "गेमिफ़िकेशन चैलेंज"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.follow
@@ -1959,20 +1982,16 @@ msgid "Great Question"
 msgstr ""
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 msgid "Grid"
-msgstr ""
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_search
-msgid "Group By"
-msgstr ""
+msgstr "ग्रिड"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__faq
 #: model_terms:ir.ui.view,arch_db:website_forum.faq
 msgid "Guidelines"
-msgstr ""
+msgstr "गाइडलाइन"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_a_6
@@ -1995,7 +2014,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__has_message
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__has_message
 msgid "Has Message"
-msgstr ""
+msgstr "मैसेज है"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__has_pending_post
@@ -2005,7 +2024,7 @@ msgstr ""
 #. module: website_forum
 #: model:forum.forum,name:website_forum.forum_help
 msgid "Help"
-msgstr ""
+msgstr "सहायता"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_votes
@@ -2024,15 +2043,20 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_reason__id
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__id
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__id
+#: model:ir.model.fields,field_description:website_forum.field_gamification_challenge__id
+#: model:ir.model.fields,field_description:website_forum.field_gamification_karma_tracking__id
+#: model:ir.model.fields,field_description:website_forum.field_ir_attachment__id
+#: model:ir.model.fields,field_description:website_forum.field_res_users__id
+#: model:ir.model.fields,field_description:website_forum.field_website__id
 msgid "ID"
-msgstr ""
+msgstr "आईडी"
 
 #. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_forum_forum__message_needaction
 #: model:ir.model.fields,help:website_forum.field_forum_post__message_needaction
 #: model:ir.model.fields,help:website_forum.field_forum_tag__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr ""
+msgstr "अगर यह बॉक्स चेक है, तो नए मैसेज देखने ज़रूरी हैं।"
 
 #. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_forum_forum__message_has_error
@@ -2042,7 +2066,7 @@ msgstr ""
 #: model:ir.model.fields,help:website_forum.field_forum_tag__message_has_error
 #: model:ir.model.fields,help:website_forum.field_forum_tag__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr ""
+msgstr "अगर बॉक्स पर टिक है, तो कुछ मैसेज भेजने में गलती हुई है।"
 
 #. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_forum_forum__karma_dofollow
@@ -2070,8 +2094,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "If you fit in one of these example or if your motivation for asking the "
-"question is “I would like to participate in a discussion about ______”, then"
-" you should not be asking here but on our mailing lists. However, if your "
+"question is “I would like to participate in a discussion about ______”, then "
+"you should not be asking here but on our mailing lists. However, if your "
 "motivation is “I would like others to explain ______ to me”, then you are "
 "probably OK."
 msgstr ""
@@ -2087,27 +2111,27 @@ msgstr ""
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__image_1920
 msgid "Image"
-msgstr ""
+msgstr "इमेज"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__image_1024
 msgid "Image 1024"
-msgstr ""
+msgstr "इमेज 1024"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__image_128
 msgid "Image 128"
-msgstr ""
+msgstr "इमेज 128"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__image_256
 msgid "Image 256"
-msgstr ""
+msgstr "इमेज 256"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__image_512
 msgid "Image 512"
-msgstr ""
+msgstr "इमेज 512"
 
 #. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_13
@@ -2135,7 +2159,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__message_is_follower
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__message_is_follower
 msgid "Is Follower"
-msgstr ""
+msgstr "फ़ॉलोवर है"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__can_moderate
@@ -2166,7 +2190,7 @@ msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Karma Error"
 msgstr ""
 
@@ -2208,11 +2232,12 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post
 msgid "Last Activity"
-msgstr ""
+msgstr "आखिरी गतिविधि"
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__last_post_id
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
 msgid "Last Post"
 msgstr ""
 
@@ -2227,7 +2252,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__write_uid
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "इन्होंने आखिरी बार अपडेट किया"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__write_date
@@ -2235,7 +2260,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__write_date
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "आखिरी बार अपडेट हुआ"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__last_activity_date
@@ -2243,7 +2268,8 @@ msgid "Last activity on"
 msgstr ""
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 msgid "Layout"
 msgstr ""
 
@@ -2265,7 +2291,8 @@ msgid "LinkedIn"
 msgstr ""
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 msgid "List"
 msgstr "सूची"
 
@@ -2300,7 +2327,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__message_has_error
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__message_has_error
 msgid "Message Delivery error"
-msgstr ""
+msgstr "मैसेज डिलीवरी में गड़बड़ी"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__message_ids
@@ -2312,7 +2339,7 @@ msgstr "संदेश"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__mode
 msgid "Mode"
-msgstr ""
+msgstr "मोड"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_moderate
@@ -2413,7 +2440,7 @@ msgstr ""
 #. module: website_forum
 #: model:ir.model.fields.selection,name:website_forum.selection__forum_forum__default_order__create_date_desc
 msgid "Newest"
-msgstr ""
+msgstr "सबसे नया"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_a_2
@@ -2443,6 +2470,11 @@ msgid "No posts yet"
 msgstr ""
 
 #. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "No results."
+msgstr ""
+
+#. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_dofollow
 msgid "Nofollow links"
 msgstr ""
@@ -2468,7 +2500,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__message_needaction_counter
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__message_needaction_counter
 msgid "Number of Actions"
-msgstr ""
+msgstr "ऐक्शन की संख्या"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__posts_count
@@ -2480,7 +2512,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__message_has_error_counter
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__message_has_error_counter
 msgid "Number of errors"
-msgstr ""
+msgstr "गड़बड़ी की संख्या"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__count_flagged_posts
@@ -2492,14 +2524,14 @@ msgstr ""
 #: model:ir.model.fields,help:website_forum.field_forum_post__message_needaction_counter
 #: model:ir.model.fields,help:website_forum.field_forum_tag__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr ""
+msgstr "ऐसे मैसेज की संख्या जिनपर कार्रवाई की ज़रूरत है"
 
 #. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_forum_forum__message_has_error_counter
 #: model:ir.model.fields,help:website_forum.field_forum_post__message_has_error_counter
 #: model:ir.model.fields,help:website_forum.field_forum_tag__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr ""
+msgstr "डिलीवरी में गड़बड़ी वाले मैसेज की संख्या"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__count_posts_waiting_validation
@@ -2522,19 +2554,13 @@ msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Offensive Post"
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 msgid "Offensive Posts"
-msgstr ""
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
-msgid "Oh no! Please <a href=\"%s\">sign in</a> to perform this action"
 msgstr ""
 
 #. module: website_forum
@@ -2546,12 +2572,12 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
 msgid "Oops!"
-msgstr ""
+msgstr "कोई गलती हुई!"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_forum_view_form
 msgid "Options"
-msgstr ""
+msgstr "विकल्प"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_forum_view_form
@@ -2571,11 +2597,16 @@ msgid "Plain Content"
 msgstr ""
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
+msgid "Please enter 2 or more characters"
+msgstr ""
+
+#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"Please wait for a moderator to validate your previous post before "
-"continuing."
+"Please wait for a moderator to validate your previous post before continuing."
 msgstr ""
 
 #. module: website_forum
@@ -2608,7 +2639,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__post_id
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_search
 msgid "Post"
-msgstr ""
+msgstr "पोस्ट करें"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answer
@@ -2631,7 +2662,8 @@ msgid "Post Closing Reason"
 msgstr ""
 
 #. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.snippet_options
+#. odoo-javascript
+#: code:addons/website_forum/static/src/website_builder/forum_page_option.xml:0
 msgid "Post Count"
 msgstr ""
 
@@ -2689,19 +2721,20 @@ msgstr ""
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__privacy
 msgid "Privacy"
-msgstr ""
+msgstr "गोपनीयता"
 
 #. module: website_forum
 #: model:ir.model.fields.selection,name:website_forum.selection__forum_forum__privacy__public
 msgid "Public"
-msgstr ""
+msgstr "पब्लिक"
 
 #. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_forum_forum__privacy
 msgid ""
 "Public: Forum is public\n"
 "Signed In: Forum is visible for signed in users\n"
-"Some users: Forum and their content are hidden for non members of selected group"
+"Some users: Forum and their content are hidden for non members of selected "
+"group"
 msgstr ""
 
 #. module: website_forum
@@ -2727,7 +2760,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__parent_id
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 msgid "Question"
-msgstr ""
+msgstr "सवाल"
 
 #. module: website_forum
 #. odoo-python
@@ -2802,7 +2835,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid "Questions"
-msgstr ""
+msgstr "सवाल"
 
 #. module: website_forum
 #: model:ir.model.fields.selection,name:website_forum.selection__forum_forum__mode__questions
@@ -2824,14 +2857,14 @@ msgstr ""
 #. module: website_forum
 #: model:ir.ui.menu,name:website_forum.menu_forum_rank_global
 msgid "Ranks"
-msgstr ""
+msgstr "रैंक्स"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__rating_ids
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__rating_ids
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__rating_ids
 msgid "Ratings"
-msgstr ""
+msgstr "रेटिंग"
 
 #. module: website_forum
 #. odoo-python
@@ -2842,7 +2875,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "Read: #{question.name}"
+msgid "Read: {{0}}"
 msgstr ""
 
 #. module: website_forum
@@ -2961,7 +2994,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__message_has_sms_error
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr ""
+msgstr "एसएमएस डिलीवरी में गड़बड़ी"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
@@ -2976,6 +3009,21 @@ msgid "Scholar"
 msgstr ""
 
 #. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "Search"
+msgstr "सर्च"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "Search Answers..."
+msgstr ""
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
+msgid "Search Questions..."
+msgstr ""
+
+#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_search
 msgid "Search in Post"
 msgstr ""
@@ -2983,7 +3031,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 msgid "Search..."
-msgstr ""
+msgstr "खोजें..।"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__relevancy_time_decay
@@ -3028,7 +3076,7 @@ msgstr ""
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__sequence
 msgid "Sequence"
-msgstr "अनुक्रम"
+msgstr "सीक्वेंस"
 
 #. module: website_forum
 #. odoo-python
@@ -3043,8 +3091,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid ""
-"Share this content to increase your chances to be featured on the front page"
-" and attract more visitors."
+"Share this content to increase your chances to be featured on the front page "
+"and attract more visitors."
 msgstr ""
 
 #. module: website_forum
@@ -3065,11 +3113,10 @@ msgstr ""
 #. module: website_forum
 #. odoo-python
 #: code:addons/website_forum/models/forum_forum.py:0
-#: model_terms:forum.forum,welcome_message:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_sign_up_cta
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_header
 msgid "Sign up"
-msgstr ""
+msgstr "साइन अप करें"
 
 #. module: website_forum
 #: model:ir.model.fields.selection,name:website_forum.selection__forum_forum__privacy__connected
@@ -3080,7 +3127,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
 msgid "Solved"
-msgstr ""
+msgstr "सॉल्व किया गया"
 
 #. module: website_forum
 #: model:ir.model.fields.selection,name:website_forum.selection__forum_forum__privacy__private
@@ -3114,13 +3161,13 @@ msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Sorry, you cannot select your own posts as best answer"
 msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "Sorry, you cannot vote for your own posts"
 msgstr ""
 
@@ -3142,7 +3189,7 @@ msgstr ""
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__state
 msgid "Status"
-msgstr "स्थिति"
+msgstr "स्टेटस"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_q_6
@@ -3154,7 +3201,7 @@ msgstr ""
 #: model:gamification.badge,name:website_forum.badge_q_7
 #: model:gamification.challenge,name:website_forum.challenge_student
 msgid "Student"
-msgstr ""
+msgstr "छात्र"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.follow
@@ -3172,14 +3219,16 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_search
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_tag_view_form
 msgid "Tag"
-msgstr ""
+msgstr "टैग"
 
 #. module: website_forum
 #: model:ir.model.constraint,message:website_forum.constraint_forum_tag_name_uniq
 msgid "Tag name already exists!"
-msgstr ""
+msgstr "टैग नाम पहले से ही मौजूद है!"
 
 #. module: website_forum
+#. odoo-javascript
+#: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__tag_ids
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__tag_ids
 #: model:ir.ui.menu,name:website_forum.menu_forum_tag_global
@@ -3210,11 +3259,6 @@ msgstr ""
 #: model:gamification.challenge,name:website_forum.challenge_teacher
 #: model:gamification.goal.definition,name:website_forum.definition_teacher
 msgid "Teacher"
-msgstr ""
-
-#. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_forum_forum__teaser
-msgid "Teaser"
 msgstr ""
 
 #. module: website_forum
@@ -3268,9 +3312,9 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 #: model_terms:ir.ui.view,arch_db:website_forum.faq_karma
 msgid ""
-"Therefore questions and answers can be edited like wiki pages by experienced"
-" users of this site in order to improve the overall quality of the knowledge"
-" base content. Such privileges are granted based on user karma level: you "
+"Therefore questions and answers can be edited like wiki pages by experienced "
+"users of this site in order to improve the overall quality of the knowledge "
+"base content. Such privileges are granted based on user karma level: you "
 "will be able to do the same once your karma gets high enough."
 msgstr ""
 
@@ -3281,6 +3325,8 @@ msgid ""
 "This community is for professional and enthusiast users, partners and "
 "programmers. You can ask questions about:"
 msgstr ""
+"यह कम्यूनिटी प्रोफेशनल लोगों, शौकीन यूजर्स, पार्टनर और प्रोग्रामर्स के लिए है. आप यहां इनसे "
+"जुड़े सवाल पूछ सकते हैं."
 
 #. module: website_forum
 #: model:forum.forum,description:website_forum.forum_help
@@ -3305,13 +3351,13 @@ msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "This post can not be flagged"
 msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
+#: code:addons/website_forum/static/src/interactions/website_forum.js:0
 msgid "This post is already flagged"
 msgstr ""
 
@@ -3324,7 +3370,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "This post is currently awaiting moderation and is not published yet.<br/>\n"
-"                    As a moderator you can either <b>Accept</b> or <b>Reject</b> this post."
+"                    As a moderator you can either <b>Accept</b> or "
+"<b>Reject</b> this post."
 msgstr ""
 
 #. module: website_forum
@@ -3334,12 +3381,12 @@ msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "This user hasn't answered any questions yet. <br/>"
+msgid "This user hasn't answered any questions yet."
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "This user hasn't posted any questions yet.<br/>"
+msgid "This user hasn't posted any questions yet."
 msgstr ""
 
 #. module: website_forum
@@ -3352,7 +3399,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid "Title"
-msgstr ""
+msgstr "टाइटल"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
@@ -3369,13 +3416,13 @@ msgstr ""
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_vote__recipient_id
 msgid "To"
-msgstr ""
+msgstr "से"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_body
 msgid "To Validate"
-msgstr ""
+msgstr "पुष्टि करने के लिए"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -3424,14 +3471,14 @@ msgstr ""
 #. module: website_forum
 #: model:ir.model,name:website_forum.model_gamification_karma_tracking
 msgid "Track Karma Changes"
-msgstr ""
+msgstr "कर्मा बदलावों को ट्रैक करें"
 
 #. module: website_forum
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid "Twitter"
-msgstr ""
+msgstr "Twitter"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
@@ -3531,7 +3578,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
 #: model_terms:ir.ui.view,arch_db:website_forum.show_flag_validator
 msgid "Validate"
-msgstr ""
+msgstr "पुष्टि करें"
 
 #. module: website_forum
 #. odoo-python
@@ -3547,7 +3594,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_stats
 msgid "View"
-msgstr ""
+msgstr "देखें"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
@@ -3560,7 +3607,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_related_posts
 #: model_terms:ir.ui.view,arch_db:website_forum.post_stats
 msgid "Views"
-msgstr ""
+msgstr "डेटा देखने का तरीका"
 
 #. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_12
@@ -3593,7 +3640,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__website_id
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__website_id
 msgid "Website"
-msgstr ""
+msgstr "वेबसाइट"
 
 #. module: website_forum
 #: model:ir.model.fields.selection,name:website_forum.selection__gamification_challenge__challenge_category__forum
@@ -3605,40 +3652,40 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__website_message_ids
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__website_message_ids
 msgid "Website Messages"
-msgstr ""
+msgstr "वेबसाइट मैसेज"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__website_url
 msgid "Website URL"
-msgstr ""
+msgstr "वेबसाइट यूआरएल"
 
 #. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_forum_forum__website_message_ids
 #: model:ir.model.fields,help:website_forum.field_forum_post__website_message_ids
 #: model:ir.model.fields,help:website_forum.field_forum_tag__website_message_ids
 msgid "Website communication history"
-msgstr ""
+msgstr "वेबसाइट कम्यूनिकेशन हिस्ट्री"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__website_meta_description
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__website_meta_description
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__website_meta_description
 msgid "Website meta description"
-msgstr ""
+msgstr "वेबसाइट पर मेटा की जानकारी"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__website_meta_keywords
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__website_meta_keywords
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__website_meta_keywords
 msgid "Website meta keywords"
-msgstr ""
+msgstr "वेबसाइट पर मेटा कीवर्ड"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__website_meta_title
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__website_meta_title
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__website_meta_title
 msgid "Website meta title"
-msgstr ""
+msgstr "वेबसाइट पर मेटा टाइटल"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__website_meta_og_img
@@ -3718,12 +3765,12 @@ msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "You have not answered any questions yet. <br/>"
+msgid "You have not answered any questions yet."
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "You have not posted any questions yet. <br/>"
+msgid "You have not posted any questions yet."
 msgstr ""
 
 #. module: website_forum
@@ -3745,9 +3792,9 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"You should only ask practical, answerable questions based on actual problems"
-" that you face. Chatty, open-ended questions diminish the usefulness of this"
-" site and push other questions off the front page."
+"You should only ask practical, answerable questions based on actual problems "
+"that you face. Chatty, open-ended questions diminish the usefulness of this "
+"site and push other questions off the front page."
 msgstr ""
 
 #. module: website_forum
@@ -3789,7 +3836,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.author_box
 msgid "at"
-msgstr ""
+msgstr "पर"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
@@ -3889,7 +3936,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid "here"
-msgstr ""
+msgstr "क्लिक करें"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -3945,12 +3992,6 @@ msgstr ""
 
 #. module: website_forum
 #. odoo-javascript
-#: code:addons/website_forum/static/src/js/website_forum.js:0
-msgid "karma is required to perform this action. "
-msgstr ""
-
-#. module: website_forum
-#. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid "karma points"
 msgstr ""
@@ -3983,7 +4024,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_template_validation
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid "on"
-msgstr ""
+msgstr " "
 
 #. module: website_forum
 #. odoo-javascript

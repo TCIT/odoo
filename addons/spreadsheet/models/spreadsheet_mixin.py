@@ -13,8 +13,9 @@ from odoo.exceptions import ValidationError, MissingError
 
 from odoo.addons.spreadsheet.utils.validate_data import fields_in_spreadsheet, menus_xml_ids_in_spreadsheet
 
+
 class SpreadsheetMixin(models.AbstractModel):
-    _name = "spreadsheet.mixin"
+    _name = 'spreadsheet.mixin'
     _description = "Spreadsheet mixin"
     _auto = False
 
@@ -28,13 +29,13 @@ class SpreadsheetMixin(models.AbstractModel):
 
     @api.constrains("spreadsheet_binary_data")
     def _check_spreadsheet_data(self):
-        if not(tools.config['test_enable'] or tools.config['test_file']):
-            return None
         for spreadsheet in self.filtered("spreadsheet_binary_data"):
             try:
                 data = json.loads(base64.b64decode(spreadsheet.spreadsheet_binary_data).decode())
             except (json.JSONDecodeError, UnicodeDecodeError):
                 raise ValidationError(_("Uh-oh! Looks like the spreadsheet file contains invalid data."))
+            if not (tools.config['test_enable'] or tools.config['test_file']):
+                continue
             if data.get("[Content_Types].xml"):
                 # this is a xlsx file
                 continue
@@ -101,6 +102,7 @@ class SpreadsheetMixin(models.AbstractModel):
     def _onchange_data_(self):
         self._check_spreadsheet_data()
 
+    @api.readonly
     @api.model
     def get_display_names_for_spreadsheet(self, args):
         ids_per_model = defaultdict(list)
@@ -133,7 +135,6 @@ class SpreadsheetMixin(models.AbstractModel):
         lang = self.env["res.lang"]._lang_get(self.env.user.lang)
         locale = lang._odoo_lang_to_spreadsheet_locale()
         return {
-            "version": 1,
             "sheets": [
                 {
                     "id": "sheet1",

@@ -2,18 +2,20 @@
 
 import hashlib
 import hmac
-import logging
-import pprint
+import uuid
+from datetime import timedelta
+from urllib.parse import urlencode
 
-import requests
+from odoo import _, api, fields, models, tools
+from odoo.exceptions import RedirectWarning, ValidationError
+from odoo.http import request
 
-from odoo import _, fields, models
-from odoo.exceptions import ValidationError
-
+from odoo.addons.payment.logging import get_payment_logger
 from odoo.addons.payment_razorpay import const
+from odoo.addons.payment_razorpay.controllers.onboarding import RazorpayController
 
 
-_logger = logging.getLogger(__name__)
+_logger = get_payment_logger(__name__)
 
 
 class PaymentProvider(models.Model):
@@ -25,20 +27,47 @@ class PaymentProvider(models.Model):
     razorpay_key_id = fields.Char(
         string="Razorpay Key Id",
         help="The key solely used to identify the account with Razorpay.",
-        required_if_provider='razorpay',
+        copy=False,
     )
     razorpay_key_secret = fields.Char(
         string="Razorpay Key Secret",
-        required_if_provider='razorpay',
+        copy=False,
         groups='base.group_system',
     )
     razorpay_webhook_secret = fields.Char(
         string="Razorpay Webhook Secret",
-        required_if_provider='razorpay',
+        copy=False,
         groups='base.group_system',
     )
 
-    #=== COMPUTE METHODS ===#
+    # OAuth fields
+    razorpay_account_id = fields.Char(
+        string="Razorpay Account ID",
+        copy=False,
+        groups='base.group_system',
+    )
+    razorpay_refresh_token = fields.Char(
+        string="Razorpay Refresh Token",
+        copy=False,
+        groups='base.group_system',
+    )
+    razorpay_public_token = fields.Char(
+        string="Razorpay Public Token",
+        copy=False,
+        groups='base.group_system',
+    )
+    razorpay_access_token = fields.Char(
+        string="Razorpay Access Token",
+        copy=False,
+        groups='base.group_system',
+    )
+    razorpay_access_token_expiry = fields.Datetime(
+        string="Razorpay Access Token Expiry",
+        copy=False,
+        groups='base.group_system',
+    )
+
+    # === COMPUTE METHODS === #
 
     def _compute_feature_support_fields(self):
         """ Override of `payment` to enable additional features. """
@@ -49,8 +78,6 @@ class PaymentProvider(models.Model):
             'support_tokenization': True,
         })
 
-    # === BUSINESS METHODS - PAYMENT FLOW === #
-
     def _get_supported_currencies(self):
         """ Override of `payment` to return the supported currencies. """
         supported_currencies = super()._get_supported_currencies()
@@ -60,82 +87,119 @@ class PaymentProvider(models.Model):
             )
         return supported_currencies
 
-    def _razorpay_make_request(self, endpoint, payload=None, method='POST'):
-        """ Make a request to Razorpay API at the specified endpoint.
+    # === CONSTRAINT METHODS === #
 
-        Note: self.ensure_one()
+    @api.constrains('state')
+    def _check_razorpay_credentials_are_set_before_enabling(self):
+        """ Check that the Razorpay credentials are valid when the provider is enabled.
 
-        :param str endpoint: The endpoint to be reached by the request.
-        :param dict payload: The payload of the request.
-        :param str method: The HTTP method of the request.
-        :return The JSON-formatted content of the response.
-        :rtype: dict
-        :raise ValidationError: If an HTTP error occurs.
+        :raise ValidationError: If the Razorpay credentials are not valid.
         """
-        self.ensure_one()
+        for provider in self.filtered(lambda p: p.code == 'razorpay' and p.state != 'disabled'):
+            if not provider.razorpay_account_id:
+                if not provider.razorpay_key_id or not provider.razorpay_key_secret:
+                    raise ValidationError(_(
+                        "Razorpay credentials are missing. Click the \"Connect\" button to set up"
+                        " your account."
+                    ))
 
-        # TODO: Make api_version a kwarg in master.
-        api_version = self.env.context.get('razorpay_api_version', 'v1')
-        url = f'https://api.razorpay.com/{api_version}/{endpoint}'
-        headers = None
-        if access_token := self._razorpay_get_access_token():
-            headers = {'Authorization': f'Bearer {access_token}'}
-        auth = (self.razorpay_key_id, self.razorpay_key_secret) if self.razorpay_key_id else None
-        try:
-            if method == 'GET':
-                response = requests.get(
-                    url,
-                    params=payload,
-                    headers=headers,
-                    auth=auth,
-                    timeout=10,
-                )
-            else:
-                response = requests.post(
-                    url,
-                    json=payload,
-                    headers=headers,
-                    auth=auth,
-                    timeout=10,
-                )
-            try:
-                response.raise_for_status()
-            except requests.exceptions.HTTPError:
-                _logger.exception(
-                    "Invalid API request at %s with data:\n%s", url, pprint.pformat(payload),
-                )
-                raise ValidationError("Razorpay: " + _(
-                    "Razorpay gave us the following information: '%s'",
-                    response.json().get('error', {}).get('description')
-                ))
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            _logger.exception("Unable to reach endpoint at %s", url)
-            raise ValidationError(
-                "Razorpay: " + _("Could not establish the connection to the API.")
-            )
-        return response.json()
-
-    def _razorpay_calculate_signature(self, data):
-        """ Compute the signature for the request's data according to the Razorpay documentation.
-
-        See https://razorpay.com/docs/webhooks/validate-test#validate-webhooks.
-
-        :param bytes data: The data to sign.
-        :return: The calculated signature.
-        :rtype: str
-        """
-        secret = self.razorpay_webhook_secret
-        if not secret:
-            _logger.warning("Missing webhook secret; aborting signature calculation.")
-            return None
-        return hmac.new(secret.encode(), msg=data, digestmod=hashlib.sha256).hexdigest()
+    # === CRUD METHODS === #
 
     def _get_default_payment_method_codes(self):
         """ Override of `payment` to return the default payment method codes. """
-        default_codes = super()._get_default_payment_method_codes()
+        self.ensure_one()
         if self.code != 'razorpay':
-            return default_codes
+            return super()._get_default_payment_method_codes()
         return const.DEFAULT_PAYMENT_METHOD_CODES
+
+    # === ACTIONS METHODS === #
+
+    def action_start_onboarding(self, menu_id=None):
+        """ Override of `payment` to redirect to the Razorpay OAuth URL.
+
+        Note: `self.ensure_one()`
+
+        :param int menu_id: The menu from which the onboarding is started, as an `ir.ui.menu` id.
+        :return: An URL action to redirect to the Razorpay OAuth URL.
+        :rtype: dict
+        :raise RedirectWarning: If the company's currency is not supported.
+        """
+        self.ensure_one()
+
+        if self.code != 'razorpay':
+            return super().action_start_onboarding(menu_id=menu_id)
+
+        if self.company_id.currency_id.name not in const.SUPPORTED_CURRENCIES:
+            raise RedirectWarning(
+                _(
+                    "Razorpay is not available in your country; please use another payment"
+                    " provider."
+                ),
+                self.env.ref('payment.action_payment_provider').id,
+                _("Other Payment Providers"),
+            )
+
+        params = {
+            'return_url': tools.urls.urljoin(self.get_base_url(), RazorpayController.OAUTH_RETURN_URL),
+            'provider_id': self.id,
+            'csrf_token': request.csrf_token(),
+        }
+        authorization_url = f'{const.OAUTH_URL}/authorize?{urlencode(params)}'
+        return {
+            'type': 'ir.actions.act_url',
+            'url': authorization_url,
+            'target': 'self',
+        }
+
+    def _get_reset_values(self):
+        """Override of `payment` to supply the provider-specific credential values to reset."""
+        if self.code != 'razorpay':
+            return super()._get_reset_values()
+
+        return {
+            'razorpay_account_id': None,
+            'razorpay_public_token': None,
+            'razorpay_refresh_token': None,
+            'razorpay_access_token': None,
+            'razorpay_access_token_expiry': None,
+        }
+
+    def action_razorpay_create_webhook(self):
+        """ Create a webhook and display a toast notification.
+
+        Note: `self.ensure_one()`
+
+        :return: The feedback notification.
+        :rtype: dict
+        """
+        self.ensure_one()
+
+        webhook_secret = uuid.uuid4().hex  # Generate a random webhook secret.
+        payload = {
+            'url': tools.urls.urljoin(self.get_base_url(), '/payment/razorpay/webhook'),
+            'alert_email': self.env.user.partner_id.email,
+            'secret': webhook_secret,
+            'events': const.HANDLED_WEBHOOK_EVENTS,
+        }
+        self._send_api_request(
+            'POST',
+            f'accounts/{self.razorpay_account_id}/webhooks',
+            json=payload,
+            api_version='v2',
+        )
+        self.razorpay_webhook_secret = webhook_secret
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'type': 'success',
+                'message': _("Your Razorpay webhook was successfully set up!"),
+                'next': {'type': 'ir.actions.client', 'tag': 'soft_reload'},
+            },
+        }
+
+    # === BUSINESS METHODS - PAYMENT FLOW === #
 
     def _get_validation_amount(self):
         """ Override of `payment` to return the amount for Razorpay validation operations.
@@ -149,12 +213,101 @@ class PaymentProvider(models.Model):
 
         return 1.0
 
-    # === BUSINESS METHODS - OAUTH === #
+    def _razorpay_calculate_signature(self, data, is_redirect=True):
+        """ Compute the signature for the request's data according to the Razorpay documentation.
 
-    def _razorpay_get_public_token(self):  # TODO: remove in master
-        self.ensure_one()
-        return None
+        See https://razorpay.com/docs/webhooks/validate-test#validate-webhooks.
 
-    def _razorpay_get_access_token(self):  # TODO: remove in master
+        :param bytes data: The data to sign.
+        :param bool is_redirect: Whether the data should be treated as redirect data or as coming
+                                 from a webhook notification.
+        :return: The calculated signature.
+        :rtype: str
+        """
+        if is_redirect:
+            secret = self.razorpay_key_secret
+            signing_string = f'{data["razorpay_order_id"]}|{data["razorpay_payment_id"]}'
+            return hmac.new(
+                secret.encode(), msg=signing_string.encode(), digestmod=hashlib.sha256
+            ).hexdigest()
+        else:  # payment data
+            secret = self.razorpay_webhook_secret
+            if not secret:
+                _logger.warning("Missing webhook secret; aborting signature calculation.")
+                return None
+            return hmac.new(secret.encode(), msg=data, digestmod=hashlib.sha256).hexdigest()
+
+    # === BUSINESS METHODS - OAUTH FLOW === #
+
+    def _razorpay_refresh_access_token(self):
+        """ Refresh the access token.
+
+        Note: `self.ensure_one()`
+
+        :return: dict
+        """
         self.ensure_one()
-        return None
+        proxy_payload = self._prepare_json_rpc_payload(
+            {'refresh_token': self.razorpay_refresh_token}
+        )
+
+        response_content = self._send_api_request(
+            'POST',
+            '/refresh_access_token',
+            json=proxy_payload,
+            is_proxy_request=True,
+        )
+        if response_content.get('access_token'):
+            expiry = fields.Datetime.now() + timedelta(seconds=int(response_content['expires_in']))
+            self.write({
+                'razorpay_public_token': response_content['public_token'],
+                'razorpay_refresh_token': response_content['refresh_token'],
+                'razorpay_access_token': response_content['access_token'],
+                'razorpay_access_token_expiry': expiry,
+            })
+
+    # === REQUEST HELPERS === #
+
+    def _build_request_url(self, endpoint, *, api_version='v1', is_proxy_request=False, **kwargs):
+        if self.code != 'razorpay':
+            return super()._build_request_url(
+                endpoint, api_version=api_version, is_proxy_request=is_proxy_request, **kwargs
+            )
+        if is_proxy_request:
+            return f'{const.OAUTH_URL}{endpoint}'
+        return f'https://api.razorpay.com/{api_version}/{endpoint}'
+
+    def _build_request_headers(self, *args, is_proxy_request=False, **kwargs):
+        if self.code != 'razorpay':
+            return super()._build_request_headers(
+                *args, is_proxy_request=is_proxy_request, **kwargs
+            )
+
+        headers = None
+        if not is_proxy_request and self.razorpay_access_token and not self.razorpay_key_id:
+            if self.razorpay_access_token_expiry < fields.Datetime.now():
+                self._razorpay_refresh_access_token()
+            headers = {'Authorization': f'Bearer {self.razorpay_access_token}'}
+        return headers
+
+    def _build_request_auth(self, *, is_proxy_request=False, **kwargs):
+        """Override of `payment` to build the request Auth."""
+        if self.code != 'razorpay':
+            return super()._build_request_auth(is_proxy_request=is_proxy_request, **kwargs)
+
+        auth = tuple()
+        if not is_proxy_request and self.razorpay_key_id:
+            auth = (self.razorpay_key_id, self.razorpay_key_secret)
+        return auth
+
+    def _parse_response_error(self, response):
+        if self.code != 'razorpay':
+            return super()._parse_response_error(response)
+        return response.json().get('error', {}).get('description', '')
+
+    def _parse_response_content(self, response, *, is_proxy_request=False, **kwargs):
+        if self.code != 'razorpay' or not is_proxy_request:
+            return super()._parse_response_content(
+                response, is_proxy_request=is_proxy_request, **kwargs
+            )
+        return self._parse_proxy_response(response)

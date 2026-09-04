@@ -1,8 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import Command, _, api, fields, models
-from odoo.exceptions import UserError
-from odoo.osv import expression
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError, ValidationError
+from odoo.fields import Command, Domain
 
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment.const import REPORT_REASONS_MAPPING
@@ -23,6 +23,7 @@ class PaymentMethod(models.Model):
         help="The primary payment method of the current payment method, if the latter is a brand."
              "\nFor example, \"Card\" is the primary payment method of the card brand \"VISA\".",
         comodel_name='payment.method',
+        index='btree_not_null',
     )
     brand_ids = fields.One2many(
         string="Brands",
@@ -68,6 +69,17 @@ class PaymentMethod(models.Model):
              " provides all required billing and shipping information, thus allowing to skip the"
              " checkout process.",
     )
+    support_manual_capture = fields.Selection(
+        string="Manual Capture",
+        help="The payment is authorized and captured in two steps instead of one.",
+        selection=[
+            ('none', "Unsupported"),
+            ('full_only', "Full Only"),
+            ('partial', "Full & Partial"),
+        ],
+        required=True,
+        default='none'
+    )
     support_refund = fields.Selection(
         string="Refund",
         help="Refund is a feature allowing to refund customers directly from the payment in Odoo.",
@@ -94,21 +106,18 @@ class PaymentMethod(models.Model):
         context={'active_test': False},
     )
 
-    #=== COMPUTE METHODS ===#
+    # === COMPUTE METHODS === #
 
     def _compute_is_primary(self):
         for payment_method in self:
             payment_method.is_primary = not payment_method.primary_payment_method_id
 
     def _search_is_primary(self, operator, value):
-        if operator == '=' and value is True:
-            return [('primary_payment_method_id', '=', False)]
-        elif operator == '=' and value is False:
-            return [('primary_payment_method_id', '!=', False)]
-        else:
-            raise NotImplementedError(_("Operation not supported."))
+        if operator not in ('in', 'not in'):
+            return NotImplemented
+        return [('primary_payment_method_id', operator, [False])]
 
-    #=== ONCHANGE METHODS ===#
+    # === ONCHANGE METHODS === #
 
     @api.onchange('active', 'provider_ids', 'support_tokenization')
     def _onchange_warn_before_disabling_tokens(self):
@@ -127,10 +136,8 @@ class PaymentMethod(models.Model):
         blocking_tokenization = self._origin.support_tokenization and not self.support_tokenization
         if disabling or detached_providers or blocking_tokenization:
             related_tokens = self.env['payment.token'].with_context(active_test=True).search(
-                expression.AND([
-                    [('payment_method_id', 'in', (self._origin + self._origin.brand_ids).ids)],
-                    [('provider_id', 'in', detached_providers.ids)] if detached_providers else [],
-                ])
+                Domain('payment_method_id', 'in', (self._origin + self._origin.brand_ids).ids)
+                & (Domain('provider_id', 'in', detached_providers.ids) if detached_providers else Domain.TRUE),
             )  # Fix `active_test` in the context forwarded by the view.
             if related_tokens:
                 return {
@@ -165,26 +172,40 @@ class PaymentMethod(models.Model):
                 }
             }
 
-    #=== CRUD METHODS ===#
+    # === CONSTRAINT METHODS === #
 
-    def write(self, values):
+    @api.constrains('active', 'support_manual_capture')
+    def _check_manual_capture_supported_by_providers(self):
+        incompatible_pms = self.filtered(
+            lambda pm:
+                pm.active
+                and (pm.primary_payment_method_id or pm).support_manual_capture == 'none'
+                and any(provider.capture_manually for provider in pm.provider_ids),
+        )
+        if incompatible_pms:
+            raise ValidationError(_(
+                "The following payment methods cannot be enabled because their payment provider has"
+                " manual capture activated: %s", ", ".join(incompatible_pms.mapped('name'))
+            ))
+
+    # === CRUD METHODS === #
+
+    def write(self, vals):
         # Handle payment methods being archived, detached from providers, or blocking tokenization.
-        archiving = values.get('active') is False
+        archiving = vals.get('active') is False
         detached_provider_ids = [
-            vals[0] for command, *vals in values['provider_ids'] if command == Command.UNLINK
-        ] if 'provider_ids' in values else []
-        blocking_tokenization = values.get('support_tokenization') is False
+            v[0] for command, *v in vals['provider_ids'] if command == Command.UNLINK
+        ] if 'provider_ids' in vals else []
+        blocking_tokenization = vals.get('support_tokenization') is False
         if archiving or detached_provider_ids or blocking_tokenization:
             linked_tokens = self.env['payment.token'].with_context(active_test=True).search(
-                expression.AND([
-                    [('payment_method_id', 'in', (self + self.brand_ids).ids)],
-                    [('provider_id', 'in', detached_provider_ids)] if detached_provider_ids else [],
-                ])
+                Domain('payment_method_id', 'in', (self + self.brand_ids).ids)
+                & (Domain('provider_id', 'in', detached_provider_ids) if detached_provider_ids else Domain.TRUE),
             )  # Fix `active_test` in the context forwarded by the view.
             linked_tokens.active = False
 
         # Prevent enabling a payment method if it is not linked to an enabled provider.
-        if values.get('active'):
+        if vals.get('active'):
             for pm in self:
                 primary_pm = pm if pm.is_primary else pm.primary_payment_method_id
                 if (
@@ -196,7 +217,13 @@ class PaymentMethod(models.Model):
                         " provider supporting this method first."
                     ))
 
-        return super().write(values)
+        return super().write(vals)
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_not_default_payment_method(self):
+        payment_method_unknown = self.env.ref('payment.payment_method_unknown')
+        if payment_method_unknown in self:
+            raise UserError(_("You cannot delete the default payment method."))
 
     # === BUSINESS METHODS === #
 
@@ -307,7 +334,7 @@ class PaymentMethod(models.Model):
         :param dict mapping: A non-exhaustive mapping of generic payment method codes to
                              provider-specific codes.
         :return: The corresponding payment method, if any.
-        :type: payment.method
+        :rtype: payment.method
         """
         generic_to_specific_mapping = mapping or {}
         specific_to_generic_mapping = {v: k for k, v in generic_to_specific_mapping.items()}

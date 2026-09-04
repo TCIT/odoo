@@ -50,7 +50,6 @@ export class SelectCreateDialog extends Component {
         this.busy = false; // flag used to ensure we only call once the onSelected/onUnselect props
         this.baseViewProps = {
             display: { searchPanel: false },
-            editable: false, // readonly
             noBreadcrumbs: true,
             noContentHelp,
             showButtons: false,
@@ -69,12 +68,14 @@ export class SelectCreateDialog extends Component {
             context: this.props.context,
             domain: this.props.domain,
             dynamicFilters: this.props.dynamicFilters,
+            readonly: true,
             resModel: this.props.resModel,
             searchViewId: this.props.searchViewId,
             type,
         };
         if (type === "list") {
             props.allowSelectors = this.props.multiSelect;
+            props.allowOpenAction = false;
         } else if (type === "kanban") {
             props.forceGlobalClick = true;
         }

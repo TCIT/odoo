@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 import { CharField, charField } from "@web/views/fields/char/char_field";
 
@@ -12,7 +10,7 @@ export class CharWithPlaceholderField extends CharField {
 
     /** Override **/
     get formattedValue() {
-        return super.formattedValue || this.placeholder;
+        return super.formattedValue || this.props.placeholder;
     }
 }
 

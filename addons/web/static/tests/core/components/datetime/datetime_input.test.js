@@ -1,6 +1,10 @@
 import { test, expect, describe } from "@odoo/hoot";
 import { Component, xml } from "@odoo/owl";
-import { assertDateTimePicker, getPickerCell } from "../../datetime/datetime_test_helpers";
+import {
+    assertDateTimePicker,
+    editTime,
+    getPickerCell,
+} from "../../datetime/datetime_test_helpers";
 import { animationFrame } from "@odoo/hoot-mock";
 import { DateTimeInput } from "@web/core/datetime/datetime_input";
 import {
@@ -10,7 +14,7 @@ import {
     mountWithCleanup,
     serverState,
 } from "@web/../tests/web_test_helpers";
-import { click, edit, queryAll, queryFirst, select } from "@odoo/hoot-dom";
+import { click, edit, queryFirst } from "@odoo/hoot-dom";
 
 const { DateTime } = luxon;
 
@@ -38,6 +42,7 @@ describe("DateTimeInput (date)", () => {
             props: {
                 value: DateTime.fromFormat("09/01/1997", "dd/MM/yyyy"),
                 type: "date",
+                class: "custom_class",
             },
         });
 
@@ -45,6 +50,7 @@ describe("DateTimeInput (date)", () => {
         assertDateTimePicker(false);
 
         expect(".o_datetime_input").toHaveValue("09/01/1997");
+        expect(".o_datetime_input").toHaveClass("custom_class");
 
         await click(".o_datetime_input");
         await animationFrame();
@@ -54,14 +60,15 @@ describe("DateTimeInput (date)", () => {
             date: [
                 {
                     cells: [
-                        [0, 0, 0, 1, 2, 3, 4],
+                        [29, 30, 31, 1, 2, 3, 4],
                         [5, 6, 7, 8, [9], 10, 11],
                         [12, 13, 14, 15, 16, 17, 18],
                         [19, 20, 21, 22, 23, 24, 25],
-                        [26, 27, 28, 29, 30, 31, 0],
+                        [26, 27, 28, 29, 30, 31, 1],
+                        [2, 3, 4, 5, 6, 7, 8],
                     ],
-                    daysOfWeek: ["#", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-                    weekNumbers: [1, 2, 3, 4, 5],
+                    daysOfWeek: ["", "S", "M", "T", "W", "T", "F", "S"],
+                    weekNumbers: [1, 2, 3, 4, 5, 6],
                 },
             ],
         });
@@ -92,7 +99,6 @@ describe("DateTimeInput (date)", () => {
         await contains(getPickerCell("8")).click();
 
         expect(".o_datetime_input").toHaveValue("08/02/1997");
-        // the onchange is called twice (when clicking and whe the popover is closing)
         expect.verifySteps(["datetime-changed"]);
     });
 
@@ -190,7 +196,7 @@ describe("DateTimeInput (date)", () => {
         await click(".o_datetime_input");
         await animationFrame();
 
-        expect(getPickerCell("8")).toHaveClass("o_selected");
+        expect(getPickerCell("8", true)).toHaveClass("o_selected");
     });
 
     test("Date format is correctly set", async () => {
@@ -267,17 +273,18 @@ describe("DateTimeInput (datetime)", () => {
             date: [
                 {
                     cells: [
-                        [0, 0, 0, 1, 2, 3, 4],
+                        [29, 30, 31, 1, 2, 3, 4],
                         [5, 6, 7, 8, [9], 10, 11],
                         [12, 13, 14, 15, 16, 17, 18],
                         [19, 20, 21, 22, 23, 24, 25],
-                        [26, 27, 28, 29, 30, 31, 0],
+                        [26, 27, 28, 29, 30, 31, 1],
+                        [2, 3, 4, 5, 6, 7, 8],
                     ],
-                    daysOfWeek: ["#", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-                    weekNumbers: [1, 2, 3, 4, 5],
+                    daysOfWeek: ["", "S", "M", "T", "W", "T", "F", "S"],
+                    weekNumbers: [1, 2, 3, 4, 5, 6],
                 },
             ],
-            time: [[12, 30]],
+            time: ["12:30"],
         });
     });
 
@@ -301,14 +308,10 @@ describe("DateTimeInput (datetime)", () => {
         await contains(getPickerCell("8")).click();
 
         // Select 15:45
-        const [hourSelect, minuteSelect] = queryAll(".o_time_picker_select");
-        await select("15", { target: hourSelect });
-        await animationFrame();
-        await select("45", { target: minuteSelect });
-        await animationFrame();
+        await editTime("15:45");
 
         expect(".o_datetime_input").toHaveValue("08/02/1997 15:45:01");
-        expect.verifySteps(["1997-02-08 12:30:01", "1997-02-08 15:30:01", "1997-02-08 15:45:01"]);
+        expect.verifySteps(["1997-02-08 12:30:01", "1997-02-08 15:45:01"]);
     });
 
     test("pick a date and time with locale", async () => {
@@ -318,12 +321,12 @@ describe("DateTimeInput (datetime)", () => {
             props: {
                 value: DateTime.fromFormat("09/01/1997 12:30:01", "dd/MM/yyyy HH:mm:ss"),
                 type: "datetime",
-                format: "dd MMM, yyyy HH:mm:ss",
+                format: "dd MMM, yyyy HH:mm",
                 onChange: (date) => expect.step(date.toSQL().split(".")[0]),
             },
         });
 
-        expect(".o_datetime_input").toHaveValue("09 janv., 1997 12:30:01");
+        expect(".o_datetime_input").toHaveValue("09 janv., 1997 12:30");
 
         await contains(".o_datetime_input").click();
 
@@ -332,14 +335,10 @@ describe("DateTimeInput (datetime)", () => {
         await contains(getPickerCell("1")).click();
 
         // Select 15:45
-        const [hourSelect, minuteSelect] = queryAll(".o_time_picker_select");
-        await select("15", { target: hourSelect });
-        await animationFrame();
-        await select("45", { target: minuteSelect });
-        await animationFrame();
+        await editTime("15:45");
 
-        expect(".o_datetime_input").toHaveValue("01 sept., 1997 15:45:01");
-        expect.verifySteps(["1997-09-01 12:30:01", "1997-09-01 15:30:01", "1997-09-01 15:45:01"]);
+        expect(".o_datetime_input").toHaveValue("01 sept., 1997 15:45");
+        expect.verifySteps(["1997-09-01 12:30:01", "1997-09-01 15:45:01"]);
     });
 
     test("pick a time with 12 hour format without meridiem", async () => {
@@ -353,31 +352,31 @@ describe("DateTimeInput (datetime)", () => {
         await makeMockEnv();
         await mountWithCleanup(DateTimeInputComp, {
             props: {
-                value: DateTime.fromFormat("09/01/1997 08:30:01", "dd/MM/yyyy HH:mm:ss"),
+                value: DateTime.fromFormat("09/01/1997 08:30", "dd/MM/yyyy HH:mm"),
                 type: "datetime",
                 onChange: (date) => expect.step(date.toSQL().split(".")[0]),
             },
         });
 
-        expect(".o_datetime_input").toHaveValue("09/01/1997 08:30:01");
+        expect(".o_datetime_input").toHaveValue("09/01/1997 08:30:00");
 
         await contains(".o_datetime_input").click();
 
-        const [, minuteSelect] = queryAll(".o_time_picker_select");
-        await select("15", { target: minuteSelect });
+        await editTime("8:15");
 
         await click(document.body);
         await animationFrame();
 
-        expect.verifySteps(["1997-01-09 08:15:01"]);
+        expect.verifySteps(["1997-01-09 08:15:00"]);
     });
 
     test("enter a datetime value", async () => {
-        expect.assertions(7);
+        expect.assertions(6);
 
         await mountWithCleanup(DateTimeInputComp, {
             props: {
                 value: DateTime.fromFormat("09/01/1997 12:30:01", "dd/MM/yyyy HH:mm:ss"),
+                format: "dd/MM/yyyy HH:mm:ss",
                 type: "datetime",
                 onChange: (date) => {
                     expect.step("datetime-changed");
@@ -401,11 +400,9 @@ describe("DateTimeInput (datetime)", () => {
         await contains(".o_datetime_input").click();
 
         expect(".o_datetime_input").toHaveValue("08/02/1997 15:45:05");
-        expect(getPickerCell("8")).toHaveClass("o_selected");
+        expect(getPickerCell("8", true)).toHaveClass("o_selected");
 
-        const [hourSelect, minuteSelect] = queryAll(".o_time_picker_select");
-        expect(hourSelect).toHaveValue("15");
-        expect(minuteSelect).toHaveValue("45");
+        expect(".o_time_picker_input").toHaveValue("15:45");
     });
 
     test("Date time format is correctly set", async () => {
@@ -426,7 +423,7 @@ describe("DateTimeInput (datetime)", () => {
     });
 
     test("Datepicker works with norwegian locale", async () => {
-        expect.assertions(7);
+        expect.assertions(5);
 
         await changeLang("nb");
 
@@ -453,10 +450,6 @@ describe("DateTimeInput (datetime)", () => {
 
         await contains(getPickerCell("1")).click();
         expect(".o_datetime_input").toHaveValue("01 apr., 1997");
-        expect.verifySteps(["datetime-changed"]);
-
-        await click(".o_apply");
-        await animationFrame();
         expect.verifySteps(["datetime-changed"]);
     });
 
@@ -486,7 +479,7 @@ describe("DateTimeInput (datetime)", () => {
                 type: "datetime",
                 onChange(date) {
                     expect.step("datetime-changed");
-                    expect(date.toFormat("dd/MM/yyyy HH:mm:ss")).toBe("08/02/1997 15:45:05", {
+                    expect(date.toFormat("dd/MM/yyyy HH:mm")).toBe("08/02/1997 15:45", {
                         message: "Event should transmit the correct date",
                     });
                 },
@@ -497,16 +490,16 @@ describe("DateTimeInput (datetime)", () => {
         expect.verifySteps([]);
 
         await contains(".o_datetime_input").click();
-        await edit("08/02/1997 15:45:05");
+        await edit("08/02/1997 15:45");
         await animationFrame();
         await click(document.body);
         await animationFrame();
 
         expect.verifySteps(["datetime-changed"]);
-        expect(".o_datetime_input").toHaveValue("08/02/1997 15:45:05");
+        expect(".o_datetime_input").toHaveValue("08/02/1997 15:45:00");
     });
 
-    test("Clicking close button closes datetime picker", async () => {
+    test("Clicking clear button closes datetime picker", async () => {
         await mountWithCleanup(DateTimeInputComp, {
             props: {
                 value: DateTime.fromFormat("09/01/1997 12:30:01", "dd/MM/yyyy HH:mm:ss"),
@@ -516,6 +509,20 @@ describe("DateTimeInput (datetime)", () => {
         });
         await contains(".o_datetime_input").click();
         await contains(".o_datetime_picker .o_datetime_buttons .btn-secondary").click();
+
+        expect(".o_datetime_picker").toHaveCount(0);
+    });
+
+    test("Clicking apply button closes datetime picker", async () => {
+        await mountWithCleanup(DateTimeInputComp, {
+            props: {
+                value: DateTime.fromFormat("09/01/1997 12:30:01", "dd/MM/yyyy HH:mm:ss"),
+                type: "datetime",
+                format: "dd MMM, yyyy HH:mm:ss",
+            },
+        });
+        await contains(".o_datetime_input").click();
+        await contains(".o_datetime_picker .o_datetime_buttons .btn-primary").click();
 
         expect(".o_datetime_picker").toHaveCount(0);
     });
@@ -557,7 +564,9 @@ describe("DateTimeInput (datetime)", () => {
 
         await changeLang("ar-001");
 
-        await mountWithCleanup(DateTimeInputComp);
+        await mountWithCleanup(DateTimeInputComp, {
+            props: { rounding: 0 },
+        });
 
         await contains(".o_datetime_input").click();
         await edit("٠٤ يونيو, ٢٠٢٣ ١١:٣٣:٠٠");

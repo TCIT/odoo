@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 /* global YT, Vimeo */
 
     import publicWidget from '@web/legacy/js/public/public_widget';
@@ -544,10 +542,6 @@
                 const slide = this._slideValue;
                 var $content = this.$('.o_wslides_fs_content');
                 $content.empty();
-                if (this.websiteAnimateWidget) {
-                    this.websiteAnimateWidget.destroy()
-                    this.websiteAnimateWidget = null;
-                }
 
                 // display quiz slide, or quiz attached to a slide
                 if (slide.category === 'quiz' || slide.isQuiz) {
@@ -568,14 +562,12 @@
                 } else if (slide.category === 'video' && slide.videoSourceType === 'google_drive') {
                     $content.empty().append(renderToElement('website.slides.fullscreen.video.google_drive', {widget: this}));
                 } else if (slide.category === 'article'){
-                    this.websiteAnimateWidget = new publicWidget.registry.WebsiteAnimate();
                     var $wpContainer = $('<div>').addClass('o_wslide_fs_article_content bg-white block w-100 overflow-auto p-3');
                     $wpContainer.html(slide.htmlContent);
                     $content.append($wpContainer);
                     this.trigger_up('widgets_start_request', {
                         $target: $content,
                     });
-                    this.websiteAnimateWidget.attachTo($wpContainer);
                 }
                 unhideConditionalElements();
             } finally {
@@ -611,7 +603,7 @@
             const slide = this._slideValue;
             self._pushUrlState();
             return this._fetchSlideContent().then(function() { // render content
-                var websiteName = document.title.split(" | ")[1]; // get the website name from title
+                var websiteName = document.title.split(" | ").at(-1); // get the website name from title
                 document.title =  (websiteName) ? slide.name + ' | ' + websiteName : slide.name;
                 if  (uiUtils.getSize() < SIZES.MD) {
                     self._toggleSidebar(); // hide sidebar when small device screen
@@ -695,7 +687,10 @@
             const slide = this._slideValue;
             this.call("dialog", "add", SlideShareDialog, {
                 category: slide.category,
-                documentMaxPage: slide.category == 'document' && this.getDocumentMaxPage(),
+                documentMaxPage:
+                    slide.category == "document" &&
+                    new URL(slide.embedUrl, window.location.href).origin === window.location.origin &&
+                    this.getDocumentMaxPage(),
                 emailSharing: slide.emailSharing === 'True',
                 embedCode: slide.embedCode || '',
                 id: slide.id,

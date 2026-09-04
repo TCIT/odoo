@@ -1,37 +1,40 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* mass_mailing_sms
-# 
+# * mass_mailing_sms
+#
 # Translators:
-# Arunas Vaitekunas <vaitekunas@gmail.com>, 2024
-# Gailius Kazlauskas <gailius@vialaurea.lt>, 2024
-# Monika Raciunaite <monika.raciunaite@gmail.com>, 2024
-# Arunas V. <arunas@devoro.com>, 2024
-# Audrius Palenskis <audrius.palenskis@gmail.com>, 2024
-# Donatas <donatasvaliulis16@gmail.com>, 2024
-# Rolandas <info@paninfo.lt>, 2024
-# digitouch UAB <digitouchagencyeur@gmail.com>, 2024
-# Jonas Zinkevicius <jozi@odoo.com>, 2024
-# UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2024
-# grupoda2 <dmitrijus.ivanovas@gmail.com>, 2024
-# Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2024
-# Linas Versada <linaskrisiukenas@gmail.com>, 2024
-# Martin Trigaux, 2024
-# Aleksandr Jadov <a.jadov@tata.lt>, 2024
-# 
+# Arunas V. <arunas@devoro.com>, 2022
+# UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2022
+# Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2022
+# Rolandas <info@paninfo.lt>, 2022
+# Arunas Vaitekunas <vaitekunas@gmail.com>, 2022
+# Jonas Zinkevicius <jozi@odoo.com>, 2022
+# grupoda2 <dmitrijus.ivanovas@gmail.com>, 2022
+# digitouch UAB <digitouchagencyeur@gmail.com>, 2022
+# Aleksandr Jadov <a.jadov@tata.lt>, 2022
+# Audrius Palenskis <audrius.palenskis@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Monika Raciunaite <monika.raciunaite@gmail.com>, 2022
+# Linas Versada <linaskrisiukenas@gmail.com>, 2022
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Aleksandr Jadov <a.jadov@tata.lt>, 2024\n"
-"Language-Team: Lithuanian (https://app.transifex.com/odoo/teams/41243/lt/)\n"
+"POT-Creation-Date: 2026-04-10 18:37+0000\n"
+"PO-Revision-Date: 2026-08-02 19:23+0000\n"
+"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"Language-Team: Lithuanian <https://translate.odoo.com/projects/odoo-19/"
+"mass_mailing_sms/lt/>\n"
+"Language: lt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: lt\n"
-"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);\n"
+"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < "
+"11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 "
+": n % 1 != 0 ? 2: 3);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: mass_mailing_sms
 #. odoo-javascript
@@ -49,13 +52,6 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/mass_mailing_sms/static/src/components/sms_widget/fields_sms_widget.js:0
 msgid " (including opt-out link)"
-msgstr ""
-
-#. module: mass_mailing_sms
-#: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_sms_test_view_form
-msgid ""
-"+32 495 85 85 77\n"
-"+33 545 55 55 55"
 msgstr ""
 
 #. module: mass_mailing_sms
@@ -97,8 +93,8 @@ msgstr ""
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_form_sms
 msgid ""
-"<span name=\"process_text_sms\" invisible=\"mailing_type != 'sms'\">SMS Text"
-" Messages are being processed.</span>"
+"<span name=\"process_text_sms\" invisible=\"mailing_type != 'sms'\">SMS Text "
+"Messages are being processed.</span>"
 msgstr ""
 
 #. module: mass_mailing_sms
@@ -121,15 +117,11 @@ msgid "<span widget=\"statinfo\">Open Recipient</span>"
 msgstr ""
 
 #. module: mass_mailing_sms
-#: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_list_view_kanban
-msgid "<span>Valid SMS Recipients</span>"
-msgstr ""
-
-#. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_form_sms
 msgid ""
 "<strong>\n"
-"                            It appears you don't have enough IAP credits. Click here to buy credits.\n"
+"                            It appears you don't have enough IAP credits. "
+"Click here to buy credits.\n"
 "                        </strong>"
 msgstr ""
 
@@ -137,8 +129,14 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_form_sms
 msgid ""
 "<strong>\n"
-"                            It appears your SMS account is not registered. Click here to set up your account.\n"
+"                            It appears your SMS account is not registered. "
+"Click here to set up your account.\n"
 "                        </strong>"
+msgstr ""
+
+#. module: mass_mailing_sms
+#: model_terms:ir.ui.view,arch_db:mass_mailing_sms.blacklist_number
+msgid "<strong>Mailing List</strong>"
 msgstr ""
 
 #. module: mass_mailing_sms
@@ -160,7 +158,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_tree_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.utm_campaign_view_form
 msgid "A/B Test"
-msgstr ""
+msgstr "A/B Testas"
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_mailing__ab_testing_mailings_sms_count
@@ -180,9 +178,20 @@ msgid "Action Needed"
 msgstr "Reikalingas veiksmas"
 
 #. module: mass_mailing_sms
+#. odoo-python
+#: code:addons/mass_mailing_sms/wizard/mailing_sms_test.py:0
+msgid "An error occurred."
+msgstr ""
+
+#. module: mass_mailing_sms
 #: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_contact__message_attachment_count
 msgid "Attachment Count"
 msgstr "Prisegtukų skaičius"
+
+#. module: mass_mailing_sms
+#: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__twilio_authentication
+msgid "Authentication Error\""
+msgstr ""
 
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_tree_sms
@@ -213,11 +222,6 @@ msgstr ""
 #. module: mass_mailing_sms
 #: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__sms_blacklist
 msgid "Blacklisted"
-msgstr ""
-
-#. module: mass_mailing_sms
-#: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_contact__mobile_blacklisted
-msgid "Blacklisted Phone Is Mobile"
 msgstr ""
 
 #. module: mass_mailing_sms
@@ -328,7 +332,17 @@ msgid "Discard"
 msgstr "Atmesti"
 
 #. module: mass_mailing_sms
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_contact__display_name
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_list__display_name
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_mailing__display_name
 #: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_sms_test__display_name
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_trace__display_name
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_res_users__display_name
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_sms_composer__display_name
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_sms_sms__display_name
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_sms_tracker__display_name
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_utm_campaign__display_name
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_utm_medium__display_name
 msgid "Display Name"
 msgstr "Rodomas pavadinimas"
 
@@ -391,6 +405,11 @@ msgid ""
 msgstr ""
 
 #. module: mass_mailing_sms
+#: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__twilio_from_to
+msgid "From / To identic"
+msgstr ""
+
+#. module: mass_mailing_sms
 #: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_contact__has_message
 msgid "Has Message"
 msgstr "Turi žinutę"
@@ -401,7 +420,17 @@ msgid "Highest Click Rate"
 msgstr ""
 
 #. module: mass_mailing_sms
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_contact__id
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_list__id
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_mailing__id
 #: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_sms_test__id
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_trace__id
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_res_users__id
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_sms_composer__id
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_sms_sms__id
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_sms_tracker__id
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_utm_campaign__id
+#: model:ir.model.fields,field_description:mass_mailing_sms.field_utm_medium__id
 msgid "ID"
 msgstr "ID"
 
@@ -419,15 +448,14 @@ msgstr "Jei pažymėta, yra žinučių, turinčių pristatymo klaidų."
 #. module: mass_mailing_sms
 #: model:ir.model.fields,help:mass_mailing_sms.field_mailing_contact__phone_sanitized_blacklisted
 msgid ""
-"If the sanitized phone number is on the blacklist, the contact won't receive"
-" mass mailing sms anymore, from any list"
+"If the sanitized phone number is on the blacklist, the contact won't receive "
+"mass mailing sms anymore, from any list"
 msgstr ""
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields,help:mass_mailing_sms.field_mailing_mailing__sms_force_send
 msgid ""
-"Immediately send the SMS Mailing instead of queuing up. Use at your own "
-"risk."
+"Immediately send the SMS Mailing instead of queuing up. Use at your own risk."
 msgstr ""
 
 #. module: mass_mailing_sms
@@ -437,11 +465,8 @@ msgid "Include opt-out link"
 msgstr ""
 
 #. module: mass_mailing_sms
-#: model:ir.model.fields,help:mass_mailing_sms.field_mailing_contact__mobile_blacklisted
-msgid ""
-"Indicates if a blacklisted sanitized phone number is a mobile number. Helps "
-"distinguish which number is blacklisted             when there is both a "
-"mobile and phone field in a model."
+#: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__twilio_callback
+msgid "Incorrect callback URL"
 msgstr ""
 
 #. module: mass_mailing_sms
@@ -470,12 +495,6 @@ msgstr ""
 #. module: mass_mailing_sms
 #: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__sms_invalid_destination
 msgid "Invalid Destination"
-msgstr ""
-
-#. module: mass_mailing_sms
-#. odoo-python
-#: code:addons/mass_mailing_sms/controllers/main.py:0
-msgid "Invalid number %s"
 msgstr ""
 
 #. module: mass_mailing_sms
@@ -513,7 +532,7 @@ msgstr "Laiškų siuntimas"
 #. module: mass_mailing_sms
 #: model:ir.model,name:mass_mailing_sms.model_mailing_contact
 msgid "Mailing Contact"
-msgstr ""
+msgstr "Pašto kontaktas"
 
 #. module: mass_mailing_sms
 #: model:ir.model,name:mass_mailing_sms.model_mailing_list
@@ -587,6 +606,11 @@ msgid "Messages"
 msgstr "Žinutės"
 
 #. module: mass_mailing_sms
+#: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__twilio_from_missing
+msgid "Missing From Number"
+msgstr ""
+
+#. module: mass_mailing_sms
 #: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__sms_number_missing
 msgid "Missing Number"
 msgstr ""
@@ -609,8 +633,8 @@ msgstr "Jokių duomenų!"
 #. module: mass_mailing_sms
 #: model_terms:ir.actions.act_window,help:mass_mailing_sms.mailing_list_action_sms
 msgid ""
-"No need to import mailing lists, you can send SMS to contacts saved in other"
-" Odoo apps."
+"No need to import mailing lists, you can send SMS to contacts saved in other "
+"Odoo apps."
 msgstr ""
 
 #. module: mass_mailing_sms
@@ -625,15 +649,8 @@ msgstr "Nepristatyta"
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_trace__sms_number
-#: model_terms:ir.ui.view,arch_db:mass_mailing_sms.blacklist_main
 msgid "Number"
 msgstr "Įrašo numeris"
-
-#. module: mass_mailing_sms
-#. odoo-python
-#: code:addons/mass_mailing_sms/controllers/main.py:0
-msgid "Number %s not found"
-msgstr ""
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_contact__message_needaction_counter
@@ -668,8 +685,22 @@ msgstr ""
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_form_sms
 msgid ""
-"Once you send these text messages, they'll be making a grand entrance in all"
-" pockets, creating quite the bzzzzz!"
+"Once you send these text messages, they'll be making a grand entrance in all "
+"pockets, creating quite the bzzzzz!"
+msgstr ""
+
+#. module: mass_mailing_sms
+#. odoo-python
+#: code:addons/mass_mailing_sms/controllers/main.py:0
+msgid "Oops! Number not found"
+msgstr ""
+
+#. module: mass_mailing_sms
+#. odoo-python
+#: code:addons/mass_mailing_sms/controllers/main.py:0
+msgid ""
+"Oops! The phone number seems to be incorrect. Please make sure to include "
+"the country code."
 msgstr ""
 
 #. module: mass_mailing_sms
@@ -699,13 +730,13 @@ msgstr ""
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_contact__phone_mobile_search
-msgid "Phone/Mobile"
-msgstr ""
+msgid "Phone Number"
+msgstr "Telefono numeris"
 
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.blacklist_main
-msgid "Please enter your phone number"
-msgstr "Prašome įvesti Jūsų tel. nr."
+msgid "Please confirm your phone number to unsubscribe :"
+msgstr ""
 
 #. module: mass_mailing_sms
 #. odoo-python
@@ -717,6 +748,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_contact__rating_ids
 msgid "Ratings"
 msgstr "Įvertinimai"
+
+#. module: mass_mailing_sms
+#: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_form_sms
+msgid "Ready to unleash your text messages?"
+msgstr ""
 
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_tree_sms
@@ -792,7 +828,6 @@ msgid "SMS Marketing Analysis"
 msgstr ""
 
 #. module: mass_mailing_sms
-#: model_terms:ir.ui.view,arch_db:mass_mailing_sms.blacklist_main
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.blacklist_number
 msgid "SMS Subscription"
 msgstr ""
@@ -882,6 +917,11 @@ msgid "Send a sample SMS for testing purpose to the numbers below."
 msgstr ""
 
 #. module: mass_mailing_sms
+#: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_form_sms
+msgid "Send to all"
+msgstr ""
+
+#. module: mass_mailing_sms
 #: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__sms_server
 msgid "Server Error"
 msgstr "Serverio klaida"
@@ -895,6 +935,16 @@ msgstr "Statistika"
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_trace_view_form_sms
 msgid "Status"
 msgstr "Būsena"
+
+#. module: mass_mailing_sms
+#: model:ir.model,website_form_label:mass_mailing_sms.model_mailing_contact
+msgid "Subscribe to Newsletter"
+msgstr ""
+
+#. module: mass_mailing_sms
+#: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_trace_view_form_sms
+msgid "Test"
+msgstr "Testas"
 
 #. module: mass_mailing_sms
 #. odoo-python
@@ -917,6 +967,12 @@ msgstr ""
 #. module: mass_mailing_sms
 #. odoo-python
 #: code:addons/mass_mailing_sms/wizard/mailing_sms_test.py:0
+msgid "Test SMS skipped those numbers as they appear invalid: %(numbers)s"
+msgstr ""
+
+#. module: mass_mailing_sms
+#. odoo-python
+#: code:addons/mass_mailing_sms/wizard/mailing_sms_test.py:0
 msgid "Test SMS successfully sent to %s"
 msgstr ""
 
@@ -929,13 +985,7 @@ msgid ""
 msgstr ""
 
 #. module: mass_mailing_sms
-#. odoo-python
-#: code:addons/mass_mailing_sms/wizard/mailing_sms_test.py:0
-msgid "The following numbers are not correctly encoded: %s"
-msgstr ""
-
-#. module: mass_mailing_sms
-#: model_terms:ir.ui.view,arch_db:mass_mailing_sms.blacklist_number
+#: model_terms:ir.ui.view,arch_db:mass_mailing_sms.blacklist_main
 msgid "There was an error when trying to unsubscribe"
 msgstr ""
 
@@ -991,8 +1041,8 @@ msgstr ""
 
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.blacklist_main
-msgid "Unsubscribe me"
-msgstr ""
+msgid "Unsubscribe"
+msgstr "Atsisakyti"
 
 #. module: mass_mailing_sms
 #. odoo-python
@@ -1028,13 +1078,17 @@ msgstr ""
 #. module: mass_mailing_sms
 #: model_terms:ir.actions.act_window,help:mass_mailing_sms.mailing_mailing_action_sms
 msgid ""
-"Write an appealing SMS Text Message, define recipients and track its "
-"results."
+"Write an appealing SMS Text Message, define recipients and track its results."
 msgstr ""
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__sms_number_format
 msgid "Wrong Number Format"
+msgstr ""
+
+#. module: mass_mailing_sms
+#: model_terms:ir.ui.view,arch_db:mass_mailing_sms.blacklist_main
+msgid "e.g. \"+1 (555) 123-4567\""
 msgstr ""
 
 #. module: mass_mailing_sms
@@ -1051,3 +1105,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.blacklist_number
 msgid "has been successfully removed from"
 msgstr ""
+
+#~ msgid "Cancel"
+#~ msgstr "Atšaukti"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Žinučių, kurioms reikia jūsų veiksmo, skaičius"
+
+#~ msgid "Please enter your phone number"
+#~ msgstr "Prašome įvesti Jūsų tel. nr."

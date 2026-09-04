@@ -1,7 +1,8 @@
 from odoo import models, fields
 
-class ModelMultiCompany(models.Model):
-    _name = "test.model_multicompany"
+
+class TestModel_Multicompany(models.Model):
+    _name = 'test.model_multicompany'
     _description = "test multicompany model"
 
     name = fields.Char()

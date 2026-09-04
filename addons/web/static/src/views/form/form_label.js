@@ -1,8 +1,8 @@
 import { fieldVisualFeedback } from "@web/views/fields/field";
-import { session } from "@web/session";
 import { getTooltipInfo } from "@web/views/fields/field_tooltip";
 import { _t } from "@web/core/l10n/translation";
 import { Component } from "@odoo/owl";
+import { user } from "@web/core/user";
 
 export class FormLabel extends Component {
     static template = "web.FormLabel";
@@ -43,7 +43,7 @@ export class FormLabel extends Component {
     get tooltipHelp() {
         const field = this.props.record.fields[this.props.fieldName];
         let help = this.props.fieldInfo.help || field.help || "";
-        if (field.company_dependent && session.display_switch_company_menu) {
+        if (field.company_dependent && user.allowedCompanies.length > 1) {
             help += (help ? "\n\n" : "") + _t("Values set here are company-specific.");
         }
         return help;

@@ -1,5 +1,6 @@
 import { expect, getFixture, test } from "@odoo/hoot";
-import { queryAllAttributes, queryAllTexts, queryFirst } from "@odoo/hoot-dom";
+import { queryAllAttributes, queryAllTexts, queryFirst, click, middleClick } from "@odoo/hoot-dom";
+import { animationFrame } from "@odoo/hoot-mock";
 import {
     contains,
     defineModels,
@@ -169,6 +170,21 @@ test("with placeholder", async () => {
     expect(`.o_field_widget input`).toHaveAttribute("placeholder", "Placeholder");
 });
 
+test("placeholder_field shows as placeholder", async () => {
+    Product._fields.url1 = fields.Char({
+        default: "http://www.url1.com",
+    });
+    await mountView({
+        type: "form",
+        resModel: "product",
+        arch: `<form>
+            <field name="url" widget="url" options="{'placeholder_field' : 'url1'}"/>
+            <field name="url1"/>
+        </form>`,
+    });
+    expect(`.o_field_url input`).toHaveAttribute("placeholder", "http://www.url1.com");
+});
+
 test("with non falsy, but non url value", async () => {
     Product._fields.url.default = "odoo://hello";
     await mountView({
@@ -177,4 +193,30 @@ test("with non falsy, but non url value", async () => {
         arch: `<form><field name="url" widget="url"/></form>`,
     });
     expect(".o_field_widget[name=url] a").toHaveAttribute("href", "http://odoo://hello");
+});
+
+test.tags("desktop");
+test("in form x2many field, click/middleclick on the link should not open the record in modal", async () => {
+    Product._fields.p = fields.One2many({
+        string: "one2many_field",
+        relation: "product",
+    });
+    Product._records = [
+        { id: 1, url: "https://www.example.com/1", p: [2] },
+        { id: 2, url: "http://www.example.com/2", p: [] },
+    ];
+    Product._views.list = `<list><field name="url" widget="url"/></list>`;
+    await mountView({
+        type: "form",
+        resModel: "product",
+        resId: 1,
+        arch: `<form><field name="p" widget="one2many"/></form>`,
+    });
+    await click(".o_field_widget[name=url] a");
+    await animationFrame();
+    expect(".modal.o_technical_modal").toHaveCount(0);
+
+    await middleClick(".o_field_widget[name=url] a");
+    await animationFrame();
+    expect(".modal.o_technical_modal").toHaveCount(0);
 });

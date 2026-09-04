@@ -1,16 +1,13 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-import argparse
 import glob
 import itertools
 import os
 import sys
-from pathlib import Path
 
-import odoo
 from . import Command
 from .server import main
-from odoo.modules.module import get_module_root, MANIFEST_NAMES
+from odoo.modules.module import Manifest, MANIFEST_NAMES
 from odoo.service.db import _create_empty_database, DatabaseExists
+from odoo.tools import config
 
 
 class Start(Command):
@@ -24,26 +21,20 @@ class Start(Command):
         return [mod.split(os.path.sep)[-2] for mod in mods]
 
     def run(self, cmdargs):
-        odoo.tools.config.parser.prog = f'{Path(sys.argv[0]).name} {self.name}'
-        parser = argparse.ArgumentParser(
-            prog=f'{Path(sys.argv[0]).name} {self.name}',
-            description=self.__doc__.strip(),
-        )
-        parser.add_argument('--path', default=".",
+        config.parser.prog = self.prog
+        self.parser.add_argument('--path', default=".",
             help="Directory where your project's modules are stored (will autodetect from current dir)")
-        parser.add_argument("-d", "--database", dest="db_name", default=None,
-                         help="Specify the database name (default to project's directory name")
+        self.parser.add_argument("-d", "--database", dest="db_name", default=None,
+            help="Specify the database name (default to project's directory name")
 
-
-        args, unknown = parser.parse_known_args(args=cmdargs)
+        args, _unknown = self.parser.parse_known_args(args=cmdargs)
 
         # When in a virtualenv, by default use it's path rather than the cwd
         if args.path == '.' and os.environ.get('VIRTUAL_ENV'):
             args.path = os.environ.get('VIRTUAL_ENV')
         project_path = os.path.abspath(os.path.expanduser(os.path.expandvars(args.path)))
-        module_root = get_module_root(project_path)
         db_name = None
-        if module_root:
+        if is_path_in_module(project_path):
             # started in a module so we choose this module name for database
             db_name = project_path.split(os.path.sep)[-1]
             # go to the parent's directory of the module root
@@ -61,11 +52,11 @@ class Start(Command):
         # TODO: forbid some database names ? eg template1, ...
         try:
             _create_empty_database(args.db_name)
-            odoo.tools.config['init']['base'] = True
+            config['init']['base'] = True
         except DatabaseExists as e:
             pass
         except Exception as e:
-            die("Could not create database `%s`. (%s)" % (args.db_name, e))
+            sys.exit("Could not create database `%s`. (%s)" % (args.db_name, e))
 
         if '--db-filter' not in cmdargs:
             cmdargs.append('--db-filter=^%s$' % args.db_name)
@@ -79,6 +70,12 @@ class Start(Command):
 
         main(cmdargs)
 
-def die(message, code=1):
-    print(message, file=sys.stderr)
-    sys.exit(code)
+
+def is_path_in_module(path):
+    old_path = None
+    while path != old_path:
+        if Manifest._from_path(path):
+            return True
+        old_path = path
+        path, _ = os.path.split(path)
+    return False

@@ -1,37 +1,42 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* web
-# 
+# * web
+#
 # Translators:
-# f1b3a33e3b33fcf18004a5292e501f50_3500ca8 <373b677b151624c4521d9efc77b996fd_750224>, 2024
-# 5768b353f27900ae76ad88cc42dfd5b8_3bb349f, 2024
-# Csaba Tóth <i3rendszerhaz@gmail.com>, 2024
-# Kovács Tibor <kovika@gmail.com>, 2024
-# Istvan <leki69@gmail.com>, 2024
-# Zsolt Godó <zsolttokio@gmail.com>, 2024
-# Gergő Kertész <gergo.kertesz@maxflow.hu>, 2024
-# Ákos Nagy <akos.nagy@oregional.hu>, 2024
-# Tamás Dombos, 2024
-# krnkris, 2024
-# Martin Trigaux, 2024
-# gezza <geza.nagy@oregional.hu>, 2024
-# Tamás Németh <ntomasz81@gmail.com>, 2025
-# Krisztián Juhász <juhasz.krisztian@josafar.hu>, 2025
-# Pammer József, 2025
-# 
+# Zsolt Godó <zsolttokio@gmail.com>, 2022
+# Tibor Kőnig <konig.tibor@evitalit.hu>, 2022
+# Kovács Tibor <kovika@gmail.com>, 2022
+# Tamás Dombos, 2022
+# Krisztián Juhász <juhasz.krisztian@josafar.hu>, 2022
+# Gergő Kertész <gergo.kertesz@maxflow.hu>, 2022
+# Istvan <leki69@gmail.com>, 2022
+# Ákos Nagy <akos.nagy@oregional.hu>, 2022
+# Martin Trigaux, 2022
+# krnkris, 2022
+# Tamás Németh <ntomasz81@gmail.com>, 2022
+# gezza <geza.nagy@oregional.hu>, 2023
+# Szabolcs Rádi, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Krisztián Juhász <juhasz.krisztian@uzletimegoldasok.hu>, 2025, 2026.
+# Tommy Gombar <tommy.gombar@kilafornia.net>, 2026.
+# Sarbó Gergely <sarbo.gergely@gmail.com>, 2026.
+# Odoo Translation Bot <c3p@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:24+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Pammer József, 2025\n"
-"Language-Team: Hungarian (https://app.transifex.com/odoo/teams/41243/hu/)\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
+"PO-Revision-Date: 2026-08-08 02:22+0000\n"
+"Last-Translator: Krisztián Juhász <juhasz.krisztian@uzletimegoldasok.hu>\n"
+"Language-Team: Hungarian <https://translate.odoo.com/projects/odoo-19/web/"
+"hu/>\n"
+"Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: hu\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: web
 #. odoo-javascript
@@ -48,45 +53,9 @@ msgstr "%(property_string)s (%(parent_name)s)"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "%d days ago"
-msgstr "%d napja"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "%d hours ago"
-msgstr "%d órája"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "%d minutes ago"
-msgstr "%d perce"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "%d months ago"
-msgstr "%d hónapja"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "%d years ago"
-msgstr "%d éve"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/file_upload/file_upload_service.js:0
 msgid "%s Files"
 msgstr "%s fájl"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
-msgid "%s days ago"
-msgstr "%s napja"
 
 #. module: web
 #. odoo-javascript
@@ -160,7 +129,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.js:0
+#: code:addons/web/static/src/views/calendar/calendar_filter_section/calendar_filter_section.js:0
 msgid "+ Add %s"
 msgstr ""
 
@@ -172,133 +141,9 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "00"
-msgstr "00"
-
-#. module: web
-#: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "07/08/2020"
-msgstr ""
-
-#. module: web
-#: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "08/07/2020"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/fields/formatters.js:0
 msgid "1 record"
 msgstr "1 bejegyzés"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "1.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "10"
-msgstr "10"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "10.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "100"
-msgstr "100"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "10:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "10:30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "11"
-msgstr "11"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "11.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "11:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "11:30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "12"
-msgstr "12"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "12.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "1234"
-msgstr "1234"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "12:00"
-msgstr "12:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "12:30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "18"
-msgstr "18"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "1:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "1:30"
-msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -309,43 +154,13 @@ msgstr "Aranyérem"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "2.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "2:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "2:30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "2nd place medal"
 msgstr "Ezüstérem"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "3.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "3:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "3:30"
+#: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
+msgid "31/01/%s"
 msgstr ""
 
 #. module: web
@@ -353,24 +168,6 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "3rd place medal"
 msgstr "Bronzérem"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "4.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "4:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "4:30"
-msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -386,97 +183,44 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "5.30"
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
+msgid ": not"
 msgstr ""
 
 #. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "5:00"
+#: model_terms:ir.ui.view,arch_db:web.login_oauth
+msgid "<em class=\"d-block my-3 small text-center text-muted\">- or -</em>"
 msgstr ""
 
 #. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "5:30"
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "<i class=\"fa fa-download\"/> (html)"
 msgstr ""
 
 #. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "6.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "6:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "6:30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "7.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "7:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "7:30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "8.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "8:00"
-msgstr "8:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "8:30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "9.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "9:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "9:30"
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "<i class=\"fa fa-download\"/> (json)"
 msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "<i class=\"fa fa-repeat\"/> Reset"
+msgstr ""
+
+#. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid ""
+"<select class=\"form-select\" name=\"profile_aggregation_mode\" "
+"id=\"profile_aggregation_mode\">\n"
+"                                        <option value=\"tabs\">Separated "
+"(one per tab)</option>\n"
+"                                        <option value=\"temporal\">Temporal "
+"(experimental)</option>\n"
+"                                    </select>\n"
+"                                    <span id=\"temporal_warning\" "
+"class=\"alert alert-warning\" style=\"display:none\"><b>Warning:</b> "
+"Temporal mode will merge all samples.<br/>It can lead to partially invalid "
+"result in case of concurrent profiles.<br/>Use with caution </span>"
 msgstr ""
 
 #. module: web
@@ -487,20 +231,20 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span "
-"class=\"oe_currency_value\">11,750.00</span></span>"
+"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">11,750.00</"
+"span></span>"
 msgstr ""
-"<span class=\"text-nowrap\">$ <span "
-"class=\"oe_currency_value\">11,750.00</span></span>"
+"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">11,750.00</"
+"span></span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span "
-"class=\"oe_currency_value\">7,500.00</span></span>"
+"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">7,500.00</"
+"span></span>"
 msgstr ""
-"<span class=\"text-nowrap\">$ <span "
-"class=\"oe_currency_value\">7,500.00</span></span>"
+"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">7,500.00</"
+"span></span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -520,8 +264,10 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa Barbara\n"
-"                                       Rd<br/>Pleasant Hill CA 94523<br/>United States</span>"
+"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa "
+"Barbara\n"
+"                                       Rd<br/>Pleasant Hill CA 94523<br/"
+">United States</span>"
 msgstr ""
 
 #. module: web
@@ -531,7 +277,7 @@ msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "<span itemprop=\"name\">Deco Addict</span>"
+msgid "<span itemprop=\"name\">Acme Corporation</span>"
 msgstr ""
 
 #. module: web
@@ -585,21 +331,24 @@ msgstr "<span>Egységár</span>"
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<span>[FURN_8220] Four Person Desk<br/>\n"
-"                                       Four person modern office workstation</span>"
+"                                       Four person modern office "
+"workstation</span>"
 msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<span>[FURN_8999] Three-Seat Sofa<br/>\n"
-"                                       Three Seater Sofa with Lounger in Steel Grey Colour</span>"
+"                                       Three Seater Sofa with Lounger in "
+"Steel Grey Colour</span>"
 msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<strong class=\"text-nowrap\">$ <span class=\"oe_currency_value\">\n"
-"                                                       22,137.50</span></strong>"
+"                                                       22,137.50</span></"
+"strong>"
 msgstr ""
 
 #. module: web
@@ -678,13 +427,13 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "A button (blood type)"
+msgid "A"
 msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/custom_favorite_item/custom_favorite_item.js:0
-msgid "A filter with same name already exists."
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "A button (blood type)"
 msgstr ""
 
 #. module: web
@@ -802,8 +551,20 @@ msgstr "Akciók"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/search/cog_menu/cog_menu.xml:0
+msgid "Actions menu"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/debug/debug_menu_items.js:0
 msgid "Activate Test Mode"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/debug/debug_providers.js:0
+msgid "Activate debug mode"
 msgstr ""
 
 #. module: web
@@ -838,43 +599,36 @@ msgstr "Tevékenységek"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/search_model.js:0
-#: code:addons/web/static/src/views/fields/x2many/x2many_field.js:0
 #: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
 #: code:addons/web/static/src/views/kanban/kanban_record_quick_create.xml:0
+#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
+#: code:addons/web/static/src/views/view_components/multi_create_popover.xml:0
+#: code:addons/web/static/src/views/view_components/multi_selection_buttons.xml:0
 msgid "Add"
 msgstr "Hozzáadás"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/search_bar/search_bar.xml:0
-#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
-#: code:addons/web/static/src/search/search_model.js:0
-msgid "Add Custom Filter"
-msgstr "Egyéni szűrő hozzáadása"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/search/custom_group_by_item/custom_group_by_item.xml:0
-msgid "Add Custom Group"
-msgstr "Új egyéni csoport"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
-msgid "Add New Rule"
+#: code:addons/web/static/src/views/fields/x2many/x2many_field.js:0
+msgid "Add %s"
 msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/form/form_controller.js:0
-msgid "Add Properties"
+#: code:addons/web/static/src/views/fields/contact_image/contact_image_field.xml:0
+msgid "Add Photo"
 msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/properties_field.xml:0
-msgid "Add a Property"
+msgid "Add Property"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/list/list_renderer.xml:0
+msgid "Add a"
 msgstr ""
 
 #. module: web
@@ -898,12 +652,6 @@ msgstr "Új sor"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
-msgid "Add branch"
-msgstr "Új ágazat"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
 msgid "Add column"
 msgstr "Új oszlop"
@@ -916,8 +664,8 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/datetime/datetime_field.xml:0
-msgid "Add end date"
+#: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
+msgid "Add nested rule"
 msgstr ""
 
 #. module: web
@@ -928,8 +676,8 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/datetime/datetime_field.xml:0
-msgid "Add start date"
+#: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
+msgid "Add rule"
 msgstr ""
 
 #. module: web
@@ -974,6 +722,16 @@ msgid "Africa"
 msgstr "Afrika"
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Aggregate SQL"
+msgstr ""
+
+#. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Aggregation mode"
+msgstr ""
+
+#. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/confirmation_dialog/confirmation_dialog.js:0
 msgid "Alert"
@@ -983,7 +741,7 @@ msgstr "Figyelmeztetés"
 #. odoo-javascript
 #: code:addons/web/static/src/search/search_arch_parser.js:0
 #: code:addons/web/static/src/search/search_panel/search_panel.xml:0
-#: code:addons/web/static/src/views/list/list_controller.xml:0
+#: code:addons/web/static/src/views/view_components/selection_box.xml:0
 msgid "All"
 msgstr "Összes"
 
@@ -1004,6 +762,18 @@ msgstr "Egész nap"
 #: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 msgid "All users"
 msgstr "Minden felhasználó"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+msgid "Allow expressions"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/binary/binary_field.js:0
+msgid "Allowed file mimetype"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -1031,8 +801,10 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
-msgid "Among the"
+#: code:addons/web/static/src/views/list/list_confirmation_dialog.js:0
+msgid ""
+"Among the %(total)s selected records, %(valid_count)s are valid for this "
+"update."
 msgstr ""
 
 #. module: web
@@ -1079,7 +851,9 @@ msgstr "Vízöntő"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/model/relational_model/dynamic_list.js:0
 #: code:addons/web/static/src/views/form/form_controller.js:0
+#: code:addons/web/static/src/views/kanban/kanban_controller.js:0
 #: code:addons/web/static/src/views/kanban/kanban_renderer.js:0
 #: code:addons/web/static/src/views/list/list_controller.js:0
 msgid "Archive"
@@ -1087,20 +861,7 @@ msgstr "Archiválás"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
-msgid "Archive All"
-msgstr "Mindent archivál"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
-msgid ""
-"Are you sure that you want to archive all the records from this column?"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/list/list_controller.js:0
+#: code:addons/web/static/src/model/relational_model/dynamic_list.js:0
 msgid "Are you sure that you want to archive all the selected records?"
 msgstr ""
 
@@ -1113,40 +874,50 @@ msgstr "Biztos archiválja ezt a rekordot?"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/model/relational_model/dynamic_list.js:0
+msgid "Are you sure that you want to duplicate all the selected records?"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/search/control_panel/control_panel.js:0
 msgid "Are you sure that you want to remove this embedded action?"
 msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.js:0
-msgid "Are you sure that you want to remove this filter?"
-msgstr "Szűrő eltávolítása?"
+#: code:addons/web/static/src/views/view_components/multi_selection_buttons.js:0
+msgid "Are you sure you want to delete the %(nbSelected)s selected records?"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_controller.js:0
+#: code:addons/web/static/src/views/view_components/multi_selection_buttons.js:0
+msgid "Are you sure you want to delete the selected record?"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/view_hook.js:0
 msgid "Are you sure you want to delete these records?"
 msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
+#: code:addons/web/static/src/views/view_components/group_config_menu.js:0
 msgid "Are you sure you want to delete this column?"
 msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
-msgid ""
-"Are you sure you want to delete this property field? It will be removed for "
-"everyone using the \"%(parentName)s\" %(parentFieldLabel)s."
+msgid "Are you sure you want to delete this property field?"
 msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
-msgid "Are you sure you want to perform the following update on those"
+#: code:addons/web/static/src/views/list/list_confirmation_dialog.js:0
+msgid "Are you sure you want to update %(count)s records?"
 msgstr ""
 
 #. module: web
@@ -1184,7 +955,7 @@ msgstr "Ázsia"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/many2many_tags_avatar/many2many_tags_avatar_field.xml:0
-#: code:addons/web/static/src/views/fields/many2one_avatar/many2one_avatar_field.xml:0
+#: code:addons/web/static/src/views/fields/many2one/many2one.xml:0
 msgid "Assign"
 msgstr "Hozzárendelés"
 
@@ -1241,10 +1012,15 @@ msgstr "Elérhető mezők"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.xml:0
-#: code:addons/web/static/src/views/kanban/kanban_renderer.xml:0
+#: code:addons/web/static/src/views/calendar/calendar_filter_section/calendar_filter_section.xml:0
 msgid "Avatar"
 msgstr "Avatár"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "B"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -1318,6 +1094,12 @@ msgstr "Jelvények"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/badge_selection_with_filter/badge_selection_field_with_filter.js:0
+msgid "Badges for Selection With Filter"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/graph/graph_controller.xml:0
 msgid "Bar Chart"
 msgstr "Oszlopdiagram"
@@ -1349,8 +1131,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/web/controllers/export.py:0
 msgid ""
-"Binary fields can not be exported to Excel unless their content is "
-"base64-encoded. That does not seem to be the case for %s."
+"Binary fields can not be exported to Excel unless their content is base64-"
+"encoded. That does not seem to be the case for %s."
 msgstr ""
 
 #. module: web
@@ -1422,20 +1204,18 @@ msgstr "Gomb típus:"
 #. odoo-javascript
 #: code:addons/web/static/src/core/signature/signature_dialog.xml:0
 msgid ""
-"By clicking Adopt & Sign, I agree that the chosen signature/initials will be"
-" a valid electronic representation of my hand-written signature/initials for"
-" all purposes when it is used on documents, including legally binding "
+"By clicking Adopt & Sign, I agree that the chosen signature/initials will be "
+"a valid electronic representation of my hand-written signature/initials for "
+"all purposes when it is used on documents, including legally binding "
 "contracts."
 msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/calendar/calendar_controller.js:0
-#: code:addons/web/static/src/views/form/form_controller.js:0
-#: code:addons/web/static/src/views/kanban/kanban_controller.js:0
-#: code:addons/web/static/src/views/list/list_controller.js:0
+#: code:addons/web/static/src/views/view_hook.js:0
 msgid "Bye-bye, record!"
-msgstr ""
+msgstr "Viszlát, rekord!"
 
 #. module: web
 #. odoo-javascript
@@ -1448,6 +1228,12 @@ msgstr ""
 #: code:addons/web/static/src/core/utils/binary.js:0
 msgid "Bytes|Kb|Mb|Gb|Tb|Pb|Eb|Zb|Yb"
 msgstr "Bájt|kB|MB|GB|TB|PB|EB|ZB|YB"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "C"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -1525,7 +1311,6 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/confirmation_dialog/confirmation_dialog.js:0
 #: code:addons/web/static/src/core/signature/signature_dialog.xml:0
-#: code:addons/web/static/src/search/search_model.js:0
 #: code:addons/web/static/src/views/calendar/quick_create/calendar_quick_create.xml:0
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
 #: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
@@ -1550,6 +1335,12 @@ msgstr "Rák"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Capricorn"
 msgstr "Bak"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/public/caps_lock_warning.xml:0
+msgid "Caps Lock is on!"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -1610,7 +1401,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/user_switch/user_switch.xml:0
 msgid "Choose a user"
-msgstr ""
+msgstr "Felhasználó választás"
 
 #. module: web
 #. odoo-javascript
@@ -1660,7 +1451,9 @@ msgstr "Télapó"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/datetime/datetime_picker_popover.xml:0
 #: code:addons/web/static/src/core/model_field_selector/model_field_selector.xml:0
+#: code:addons/web/static/src/core/select_menu/select_menu.xml:0
 #: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
 #: code:addons/web/static/src/views/fields/binary/binary_field.xml:0
 #: code:addons/web/static/src/views/fields/image/image_field.xml:0
@@ -1677,13 +1470,18 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/kanban/kanban_record.xml:0
+msgid "Click to select"
+msgstr "Kattintson a kiválasztáshoz"
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/statusbar/statusbar_field.js:0
 msgid "Clickable"
 msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/datetime/datetime_picker_popover.xml:0
 #: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 #: code:addons/web/static/src/core/dialog/dialog.xml:0
 #: code:addons/web/static/src/core/domain_selector_dialog/domain_selector_dialog.xml:0
@@ -1723,6 +1521,8 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/badge/badge_field.js:0
+#: code:addons/web/static/src/views/fields/badge_selection/list_badge_selection_field.js:0
 #: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
 msgid "Color field"
 msgstr ""
@@ -1731,12 +1531,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "Colors"
 msgstr "Színek"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_renderer.js:0
-msgid "Column %s"
-msgstr "%s oszlop"
 
 #. module: web
 #. odoo-javascript
@@ -1807,20 +1601,9 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
-msgid "Comparison"
-msgstr "Összehasonlítás"
-
-#. module: web
-#. odoo-javascript
+#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 #: code:addons/web/static/src/views/debug_items.js:0
 msgid "Computed Arch"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
-msgid "Condensed display"
 msgstr ""
 
 #. module: web
@@ -1843,7 +1626,7 @@ msgstr "Konfigurálja a dokumentumai elrendezését"
 #. odoo-javascript
 #: code:addons/web/static/src/core/domain_selector_dialog/domain_selector_dialog.js:0
 #: code:addons/web/static/src/core/expression_editor_dialog/expression_editor_dialog.xml:0
-#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
+#: code:addons/web/static/src/model/relational_model/dynamic_list.js:0
 #: code:addons/web/static/src/webclient/switch_company_menu/switch_company_menu.xml:0
 msgid "Confirm"
 msgstr "Megerősítés"
@@ -1869,9 +1652,20 @@ msgid "Connection restored. You are back online."
 msgstr ""
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Constant Time"
+msgstr ""
+
+#. module: web
 #: model:ir.model,name:web.model_res_partner
 msgid "Contact"
 msgstr "Kapcsolat"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/contact_statistics/contact_statistics.js:0
+msgid "Contact Statistics"
+msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.external_layout_bold
@@ -2009,6 +1803,12 @@ msgid "Count"
 msgstr "Darab"
 
 #. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+msgid "Count Limit"
+msgstr ""
+
+#. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__country_id
 msgid "Country"
 msgstr "Ország"
@@ -2017,7 +1817,6 @@ msgstr "Ország"
 #. odoo-javascript
 #: code:addons/web/static/src/views/calendar/calendar_year/calendar_year_popover.xml:0
 #: code:addons/web/static/src/views/calendar/quick_create/calendar_quick_create.xml:0
-#: code:addons/web/static/src/views/fields/many2one/many2one_field.xml:0
 #: code:addons/web/static/src/views/kanban/kanban_record_quick_create.js:0
 msgid "Create"
 msgstr "Létrehozás"
@@ -2027,13 +1826,7 @@ msgstr "Létrehozás"
 #: code:addons/web/static/src/views/fields/properties/property_tags.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 msgid "Create \"%s\""
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
-msgid "Create %(value)s as a new %(field)s?"
-msgstr ""
+msgstr "Létrehozás: \"%s\""
 
 #. module: web
 #. odoo-javascript
@@ -2042,18 +1835,31 @@ msgid "Create %s"
 msgstr "Létrehoz %s"
 
 #. module: web
+#: model:ir.model,website_form_label:web.model_res_partner
+msgid "Create a Customer"
+msgstr ""
+
+#. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 msgid "Create and edit..."
 msgstr ""
 
 #. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/relational_utils.js:0
+msgid "Create..."
+msgstr ""
+
+#. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__create_uid
+#: model:ir.model.fields,field_description:web.field_res_users_settings_embedded_action__create_uid
 msgid "Created by"
 msgstr "Létrehozta"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__create_date
+#: model:ir.model.fields,field_description:web.field_res_users_settings_embedded_action__create_date
 msgid "Created on"
 msgstr "Létrehozva"
 
@@ -2083,8 +1889,8 @@ msgstr "Pénznem"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/statusbar/statusbar_field.js:0
-msgid "Current state"
+#: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
+msgid "Currency field"
 msgstr ""
 
 #. module: web
@@ -2092,6 +1898,12 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/progress_bar/progress_bar_field.js:0
 msgid "Current value field"
 msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/color_picker/tabs/color_picker_custom_tab.js:0
+msgid "Custom"
+msgstr "Egyéni"
 
 #. module: web
 #. odoo-javascript
@@ -2108,6 +1920,32 @@ msgstr "Egyéni színek"
 #. odoo-javascript
 #: code:addons/web/static/src/search/control_panel/control_panel.js:0
 msgid "Custom Embedded Action"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/search/search_bar/search_bar.js:0
+#: code:addons/web/static/src/search/search_model.js:0
+msgid "Custom Filter"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/search/search_bar/search_bar.xml:0
+#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
+msgid "Custom Filter..."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/search/custom_group_by_item/custom_group_by_item.xml:0
+msgid "Custom Group"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
+msgid "Custom range"
 msgstr ""
 
 #. module: web
@@ -2169,6 +2007,12 @@ msgstr "Dátum"
 #: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 msgid "Date & Time"
 msgstr "Dátum és idő"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
+msgid "Date Format"
+msgstr "Dátum Formátum"
 
 #. module: web
 #. odoo-javascript
@@ -2271,6 +2115,15 @@ msgstr "Alapértelmezés:"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
+#: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
+msgid ""
+"Defines the minimum number of characters to perform the search. If not set, "
+"the search is performed on focus."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/image/image_field.js:0
 msgid "Delay the apparition of the zoomed image with a value in milliseconds"
 msgstr ""
@@ -2279,24 +2132,24 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/tags_list/tags_list.xml:0
 #: code:addons/web/static/src/search/control_panel/control_panel.js:0
-#: code:addons/web/static/src/views/calendar/calendar_common/calendar_common_popover.xml:0
 #: code:addons/web/static/src/views/calendar/calendar_controller.js:0
 #: code:addons/web/static/src/views/fields/many2many_binary/many2many_binary_field.xml:0
-#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 #: code:addons/web/static/src/views/form/form_controller.js:0
 #: code:addons/web/static/src/views/kanban/kanban_controller.js:0
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
 #: code:addons/web/static/src/views/list/list_controller.js:0
+#: code:addons/web/static/src/views/view_components/group_config_menu.js:0
+#: code:addons/web/static/src/views/view_components/multi_selection_buttons.xml:0
 #: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
+#: code:addons/web/static/src/views/view_hook.js:0
 msgid "Delete"
 msgstr "Törlés"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.js:0
-msgid "Delete Filter"
+#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
+msgid "Delete Field"
 msgstr ""
 
 #. module: web
@@ -2308,20 +2161,19 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/search/control_panel/control_panel.xml:0
-#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
 msgid "Delete item"
 msgstr "Elem törlése"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
-msgid "Delete node"
-msgstr "Csomópont törlése"
+#: code:addons/web/static/src/views/list/list_renderer.xml:0
+msgid "Delete row"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_renderer.xml:0
-msgid "Delete row"
+#: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
+msgid "Delete rule"
 msgstr ""
 
 #. module: web
@@ -2335,12 +2187,6 @@ msgstr "Csökkenő"
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_dev_tool.xml:0
 msgid "Developer Tools"
 msgstr "Fejlesztési eszközök"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/list/list_renderer.js:0
-msgid "Different currencies cannot be aggregated"
-msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -2384,15 +2230,24 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
+msgid "Disabled due to invalid configuration"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/domain_selector_dialog/domain_selector_dialog.js:0
 #: code:addons/web/static/src/core/expression_editor_dialog/expression_editor_dialog.xml:0
+#: code:addons/web/static/src/search/search_bar/search_bar.js:0
+#: code:addons/web/static/src/search/search_model.js:0
 #: code:addons/web/static/src/views/fields/dynamic_placeholder_popover.xml:0
-#: code:addons/web/static/src/views/fields/many2one/many2one_field.xml:0
+#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.xml:0
 #: code:addons/web/static/src/views/fields/translation_dialog.xml:0
 #: code:addons/web/static/src/views/form/form_controller.xml:0
 #: code:addons/web/static/src/views/kanban/kanban_cover_image_dialog.xml:0
 #: code:addons/web/static/src/views/list/list_controller.xml:0
+#: code:addons/web/static/src/views/view_components/multi_create_popover.xml:0
 #: code:addons/web/static/src/webclient/settings_form_view/settings_confirmation_dialog.xml:0
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "Discard"
@@ -2411,9 +2266,20 @@ msgid "Discard changes"
 msgstr ""
 
 #. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_record_quick_create.js:0
 #: model:ir.model.fields,field_description:web.field_base_document_layout__display_name
+#: model:ir.model.fields,field_description:web.field_ir_http__display_name
+#: model:ir.model.fields,field_description:web.field_ir_model__display_name
+#: model:ir.model.fields,field_description:web.field_ir_qweb_field_image__display_name
+#: model:ir.model.fields,field_description:web.field_ir_qweb_field_image_url__display_name
+#: model:ir.model.fields,field_description:web.field_ir_ui_menu__display_name
+#: model:ir.model.fields,field_description:web.field_ir_ui_view__display_name
+#: model:ir.model.fields,field_description:web.field_properties_base_definition__display_name
+#: model:ir.model.fields,field_description:web.field_res_company__display_name
+#: model:ir.model.fields,field_description:web.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:web.field_res_partner__display_name
+#: model:ir.model.fields,field_description:web.field_res_users__display_name
+#: model:ir.model.fields,field_description:web.field_res_users_settings__display_name
+#: model:ir.model.fields,field_description:web.field_res_users_settings_embedded_action__display_name
 msgid "Display Name"
 msgstr "Megjelenített név"
 
@@ -2427,6 +2293,11 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 msgid "Display in Cards"
+msgstr ""
+
+#. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Display presets"
 msgstr ""
 
 #. module: web
@@ -2450,13 +2321,21 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
-msgid "Displays or hides the seconds in the datetime value."
+msgid ""
+"Displays or hides the seconds in the datetime value. Affect only the "
+"readable datetime format."
 msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 msgid "Displays or hides the time in the datetime value."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
+msgid "Displays the date either in 31/01/%(year)s or in Jan 31, %(year)s"
 msgstr ""
 
 #. module: web
@@ -2487,7 +2366,6 @@ msgstr "Dokumentum sablon"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/widgets/documentation_link/documentation_link.xml:0
-#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
 msgid "Documentation"
 msgstr "Dokumentáció"
 
@@ -2529,6 +2407,7 @@ msgstr ""
 #: code:addons/web/static/src/core/file_viewer/file_viewer.xml:0
 #: code:addons/web/static/src/views/fields/binary/binary_field.xml:0
 #: code:addons/web/static/src/views/fields/many2many_binary/many2many_binary_field.xml:0
+#: code:addons/web/static/src/views/fields/pdf_viewer/pdf_viewer_field.xml:0
 msgid "Download"
 msgstr "Letöltés"
 
@@ -2570,6 +2449,7 @@ msgstr "Legördülő menü"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/form/form_controller.js:0
+#: code:addons/web/static/src/views/kanban/kanban_controller.js:0
 #: code:addons/web/static/src/views/list/list_controller.js:0
 msgid "Duplicate"
 msgstr "Duplikálás"
@@ -2577,7 +2457,20 @@ msgstr "Duplikálás"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/char/char_field.js:0
+#: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
+#: code:addons/web/static/src/views/fields/email/email_field.js:0
+#: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
+#: code:addons/web/static/src/views/fields/phone/phone_field.js:0
+#: code:addons/web/static/src/views/fields/selection/selection_field.js:0
+#: code:addons/web/static/src/views/fields/text/text_field.js:0
+#: code:addons/web/static/src/views/fields/url/url_field.js:0
 msgid "Dynamic Placeholder"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
+msgid "Dynamic placeholder"
 msgstr ""
 
 #. module: web
@@ -2600,13 +2493,14 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/search/custom_favorite_item/custom_favorite_item.xml:0
 #: code:addons/web/static/src/views/calendar/calendar_common/calendar_common_popover.xml:0
 #: code:addons/web/static/src/views/calendar/quick_create/calendar_quick_create.xml:0
 #: code:addons/web/static/src/views/fields/binary/binary_field.xml:0
 #: code:addons/web/static/src/views/fields/image/image_field.xml:0
 #: code:addons/web/static/src/views/fields/pdf_viewer/pdf_viewer_field.xml:0
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
 #: code:addons/web/static/src/views/kanban/kanban_record_quick_create.xml:0
+#: code:addons/web/static/src/views/view_components/group_config_menu.js:0
 msgid "Edit"
 msgstr "Szerkesztés"
 
@@ -2624,8 +2518,20 @@ msgstr "Tartomány szerkesztése"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/form/form_controller.js:0
+msgid "Edit Properties"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
 msgid "Edit Tags"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
+msgid "Edit favorite"
 msgstr ""
 
 #. module: web
@@ -2637,7 +2543,7 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
+#: code:addons/web/static/src/views/view_components/group_config_menu.js:0
 msgid "Edit: %s"
 msgstr "Szerkesztés: %s"
 
@@ -2648,6 +2554,11 @@ msgstr "Szerkesztés: %s"
 #: model_terms:ir.ui.view,arch_db:web.login
 msgid "Email"
 msgstr "Email"
+
+#. module: web
+#: model:ir.model.fields,field_description:web.field_res_users_settings__embedded_actions_config_ids
+msgid "Embedded Actions Config"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -2692,6 +2603,16 @@ msgid "Enter an email"
 msgstr ""
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.login
+msgid "Enter your email"
+msgstr ""
+
+#. module: web
+#: model_terms:ir.ui.view,arch_db:web.login
+msgid "Enter your password"
+msgstr ""
+
+#. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/highlight_text/form_label_highlight_text.xml:0
 msgid "Enterprise"
@@ -2699,14 +2620,8 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/file_upload/file_upload_service.js:0
-msgid "Error"
-msgstr "Hiba"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
-msgid "Esc"
+#: code:addons/web/static/src/webclient/debug/profiling/profiling_item.xml:0
+msgid "Entry Count"
 msgstr ""
 
 #. module: web
@@ -2723,15 +2638,9 @@ msgstr "Európai"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/calendar/calendar_model.js:0
-msgid "Everybody's calendars"
-msgstr "Mindenki naptára"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/calendar/calendar_model.js:0
-msgid "Everything"
-msgstr "Mindegyik"
+#: code:addons/web/static/src/webclient/res_user_group_ids_field/res_user_group_ids_popover.xml:0
+msgid "Exclusively implies"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -2747,6 +2656,7 @@ msgstr "Összes kibontása"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/kanban/kanban_controller.js:0
 #: code:addons/web/static/src/views/list/list_controller.js:0
 #: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
 msgid "Export"
@@ -2786,9 +2696,15 @@ msgstr ""
 #. odoo-javascript
 #. odoo-python
 #: code:addons/web/controllers/export.py:0
-#: code:addons/web/static/src/views/list/list_controller.js:0
+#: code:addons/web/static/src/views/view_hook.js:0
 msgid "External ID"
 msgstr "Külső azonosító"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/res_user_group_ids_field/res_user_group_ids_field.js:0
+msgid "Extra Rights"
+msgstr "Extra jogok"
 
 #. module: web
 #. odoo-javascript
@@ -2818,17 +2734,7 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/search/search_model.js:0
-msgid ""
-"Failed to evaluate the context: %(context)s.\n"
-"%(error)s"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/search/search_model.js:0
-msgid ""
-"Failed to evaluate the domain: %(domain)s.\n"
-"%(error)s"
+msgid "Failed to evaluate the context: %(context)s."
 msgstr ""
 
 #. module: web
@@ -2871,6 +2777,12 @@ msgstr "Kedvencek"
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Ferris"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/field_selector/field_selector_field.js:0
+msgid "Field Selector"
 msgstr ""
 
 #. module: web
@@ -2939,6 +2851,7 @@ msgstr "Lebegőpontos"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 #: code:addons/web/static/src/views/kanban/kanban_header.js:0
 msgid "Fold"
 msgstr "Behajtás"
@@ -2957,7 +2870,7 @@ msgstr "Behajtható"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/dynamic_widget/dynamic_model_field_selector_char.js:0
+#: code:addons/web/static/src/views/fields/field_selector/field_selector_field.js:0
 msgid "Follow relations"
 msgstr ""
 
@@ -2992,9 +2905,18 @@ msgstr "Lábjegyzet szövege megjelenítve minden kimutatás alján."
 #. odoo-javascript
 #: code:addons/web/static/src/views/pivot/pivot_renderer.js:0
 msgid ""
-"For Excel compatibility, data cannot be exported if there are more than 16384 columns.\n"
+"For Excel compatibility, data cannot be exported if there are more than "
+"16384 columns.\n"
 "\n"
 "Tip: try to flip axis, filter further or reduce the number of measures."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
+msgid ""
+"For example, if the value is \"1\" and you enter \"+=2\", it will be updated "
+"to \"3\"."
 msgstr ""
 
 #. module: web
@@ -3021,6 +2943,16 @@ msgid ""
 msgstr ""
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Frames"
+msgstr ""
+
+#. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Frames + sql (Combined)"
+msgstr ""
+
+#. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "French"
@@ -3036,7 +2968,7 @@ msgstr "Francia bagett"
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_picker.js:0
 msgid "Frequently used"
-msgstr ""
+msgstr "Gyakran használt"
 
 #. module: web
 #. odoo-javascript
@@ -3082,12 +3014,6 @@ msgstr "Ikrek"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
-msgid "Get View"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/fields/upgrade_dialog.xml:0
 msgid "Get this feature and much more with Odoo Enterprise!"
 msgstr ""
@@ -3115,6 +3041,12 @@ msgstr "Zöld"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/webclient/res_user_group_ids_field/res_user_group_ids_popover.xml:0
+msgid "Group"
+msgstr "Csoport"
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 msgid "Group %s"
 msgstr ""
@@ -3124,6 +3056,12 @@ msgstr ""
 #: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
 msgid "Group By"
 msgstr "Csoportosítás"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/property_definition.js:0
+msgid "HTML"
+msgstr "HTML"
 
 #. module: web
 #: model:ir.model,name:web.model_ir_http
@@ -3152,14 +3090,20 @@ msgstr ""
 #: code:addons/web/static/src/model/relational_model/record.js:0
 msgid ""
 "Heads up! Your recent changes are too large to save automatically. Please "
-"click the <i class=\"fa fa-cloud-upload fa-fw\"></i> button now to ensure "
-"your work is saved before you exit this tab."
+"click the %(upload_icon)s button now to ensure your work is saved before you "
+"exit this tab."
 msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
+msgid "Help"
+msgstr "Súgó"
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.xml:0
-msgid "Hide in kanban"
+msgid "Hide in Kanban"
 msgstr ""
 
 #. module: web
@@ -3188,6 +3132,27 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/float/float_field.js:0
+#: code:addons/web/static/src/views/fields/monetary/monetary_field.js:0
+msgid "Hide trailing zeros"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/password/password_field.js:0
+msgid "Hide value"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/float/float_field.js:0
+#: code:addons/web/static/src/views/fields/monetary/monetary_field.js:0
+msgid ""
+"Hide zeros to the right of the last non-zero digit, e.g. 1.20 becomes 1.2"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Hindu"
 msgstr "Hindu"
@@ -3197,6 +3162,12 @@ msgstr "Hindu"
 #: code:addons/web/static/src/webclient/navbar/navbar.xml:0
 msgid "Home Menu"
 msgstr "Kezdő menü"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/search/utils/dates.js:0
+msgid "Hour"
+msgstr "Óra"
 
 #. module: web
 #. odoo-python
@@ -3215,6 +3186,12 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/color_picker/custom_color_picker/custom_color_picker.xml:0
+msgid "Hue"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
 msgid "I want to update data (import-compatible export)"
 msgstr ""
@@ -3223,6 +3200,19 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #: model:ir.model.fields,field_description:web.field_base_document_layout__id
+#: model:ir.model.fields,field_description:web.field_ir_http__id
+#: model:ir.model.fields,field_description:web.field_ir_model__id
+#: model:ir.model.fields,field_description:web.field_ir_qweb_field_image__id
+#: model:ir.model.fields,field_description:web.field_ir_qweb_field_image_url__id
+#: model:ir.model.fields,field_description:web.field_ir_ui_menu__id
+#: model:ir.model.fields,field_description:web.field_ir_ui_view__id
+#: model:ir.model.fields,field_description:web.field_properties_base_definition__id
+#: model:ir.model.fields,field_description:web.field_res_company__id
+#: model:ir.model.fields,field_description:web.field_res_config_settings__id
+#: model:ir.model.fields,field_description:web.field_res_partner__id
+#: model:ir.model.fields,field_description:web.field_res_users__id
+#: model:ir.model.fields,field_description:web.field_res_users_settings__id
+#: model:ir.model.fields,field_description:web.field_res_users_settings_embedded_action__id
 msgid "ID"
 msgstr "ID"
 
@@ -3259,8 +3249,7 @@ msgstr "Ikon"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/url/url_field.js:0
-msgid ""
-"If True, the url will be used as it is, without any prefix added to it."
+msgid "If True, the url will be used as it is, without any prefix added to it."
 msgstr ""
 
 #. module: web
@@ -3270,6 +3259,14 @@ msgid ""
 "If checked, clicking on the tag will open the form that allows to directly "
 "edit it. Note that if a color field is also set, the tag edition will "
 "prevail. So, the color picker will not be displayed on click on the tag."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/json_checkboxes/json_checkboxes_field.js:0
+msgid ""
+"If checked, the checkboxes will be displayed in a column. Otherwise, they "
+"will be inlined."
 msgstr ""
 
 #. module: web
@@ -3311,6 +3308,12 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+msgid "If true, non-literals are accepted"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/file_viewer/file_viewer.xml:0
 #: code:addons/web/static/src/views/fields/attachment_image/attachment_image_field.xml:0
 #: code:addons/web/static/src/views/fields/image/image_field.js:0
@@ -3321,8 +3324,8 @@ msgstr "Kép"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
-msgid "In %s days"
+#: code:addons/web/static/src/webclient/res_user_group_ids_field/res_user_group_ids_popover.xml:0
+msgid "Implied by"
 msgstr ""
 
 #. module: web
@@ -3330,7 +3333,7 @@ msgstr ""
 #: code:addons/web/static/src/core/record_selectors/multi_record_selector.js:0
 #: code:addons/web/static/src/core/record_selectors/record_selector.js:0
 #: code:addons/web/static/src/core/tree_editor/tree_editor_autocomplete.js:0
-#: code:addons/web/static/src/core/tree_editor/utils.js:0
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
 msgid "Inaccessible/missing record ID: %s"
 msgstr ""
 
@@ -3342,9 +3345,15 @@ msgstr "Archiváltakkal együtt"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/webclient/res_user_group_ids_field/res_user_group_ids_popover.xml:0
+msgid "Incompatibility"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/dynamic_placeholder_popover.xml:0
 msgid "Insert"
-msgstr ""
+msgstr "Beszúrás"
 
 #. module: web
 #. odoo-javascript
@@ -3370,7 +3379,7 @@ msgstr "%s telepítése"
 #: code:addons/web/static/src/webclient/actions/action_install_kiosk_pwa.xml:0
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
 msgid "Install App"
-msgstr ""
+msgstr "App telepítése"
 
 #. module: web
 #. odoo-javascript
@@ -3389,10 +3398,10 @@ msgstr "Egész szám"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/many2one/many2one_field.xml:0
+#: code:addons/web/static/src/views/fields/many2one/many2one.xml:0
 #: code:addons/web/static/src/views/fields/properties/property_value.xml:0
 msgid "Internal link"
-msgstr ""
+msgstr "Belső hivatkozás"
 
 #. module: web
 #. odoo-javascript
@@ -3402,9 +3411,15 @@ msgstr "Intervallum"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/kanban/kanban_record_quick_create.js:0
+msgid "Invalid Display Name"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/errors/error_dialogs.js:0
 msgid "Invalid Operation"
-msgstr ""
+msgstr "Érvénytelen művelet"
 
 #. module: web
 #. odoo-javascript
@@ -3433,13 +3448,13 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_invite_users.js:0
-msgid "Invalid email addresses: %(2 addresses)s"
+msgid "Invalid email addresses: %(addresses)s"
 msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_invite_users.js:0
-msgid "Invalid email addresses: %(addresses)s"
+msgid "Invalid email addresses: %(two_addresses)s"
 msgstr ""
 
 #. module: web
@@ -3456,13 +3471,6 @@ msgid "Invalid fields"
 msgstr ""
 
 #. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/model/relational_model/record.js:0
-#: code:addons/web/static/src/views/kanban/kanban_record_quick_create.js:0
-msgid "Invalid fields: "
-msgstr ""
-
-#. module: web
 #. odoo-python
 #: code:addons/web/controllers/domain.py:0
 msgid "Invalid model: %s"
@@ -3472,6 +3480,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/tree_editor/tree_editor_autocomplete.js:0
 msgid "Invalid record ID: %s"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/view_components/multi_create_popover.js:0
+msgid "Invalid time range"
 msgstr ""
 
 #. module: web
@@ -3526,11 +3540,16 @@ msgstr "Iszlám"
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/debug/profiling/profiling_qweb.xml:0
 msgid ""
-"It is possible that the \"t-call\" time does not correspond to the overall time of the\n"
-"            template. Because the global time (in the drop down) does not take into account the\n"
-"            duration which is not in the rendering (look for the template, read, inheritance,\n"
-"            compilation...). During rendering, the global time also takes part of the time to make\n"
-"            the profile as well as some part not logged in the function generated by the qweb."
+"It is possible that the \"t-call\" time does not correspond to the overall "
+"time of the\n"
+"            template. Because the global time (in the drop down) does not "
+"take into account the\n"
+"            duration which is not in the rendering (look for the template, "
+"read, inheritance,\n"
+"            compilation...). During rendering, the global time also takes "
+"part of the time to make\n"
+"            the profile as well as some part not logged in the function "
+"generated by the qweb."
 msgstr ""
 
 #. module: web
@@ -3539,6 +3558,26 @@ msgstr ""
 msgid ""
 "It seems the records with IDs %s cannot be found. They might have been "
 "deleted."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
+msgid ""
+"It will be removed for everyone using the \"%(parentName)s\" %"
+"(parentFieldLabel)s."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
+msgid "It will be removed for everyone!"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
+msgid "Jan 31, %s"
 msgstr ""
 
 #. module: web
@@ -3699,13 +3738,19 @@ msgstr "Zsidó"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/webclient/res_user_group_ids_field/res_user_group_ids_popover.xml:0
+msgid "Jointly implies"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Jolly Roger"
 msgstr "Jolly Roger"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/jsonb/jsonb.js:0
+#: code:addons/web/static/src/views/fields/json/json_field.js:0
 msgid "Json"
 msgstr ""
 
@@ -3759,6 +3804,12 @@ msgid "Label:"
 msgstr ""
 
 #. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/kanban/kanban_renderer.xml:0
+msgid "Lack of inspiration?"
+msgstr ""
+
+#. module: web
 #. odoo-python
 #: code:addons/web/controllers/session.py:0
 msgid "Languages"
@@ -3773,14 +3824,40 @@ msgid "Large"
 msgstr "Nagy"
 
 #. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
+msgid "Last 12 months"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
+msgid "Last 30 days"
+msgstr "Elmúlt 30 nap"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
+msgid "Last 7 days"
+msgstr "Elmúlt 7 nap"
+
+#. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__write_uid
+#: model:ir.model.fields,field_description:web.field_res_users_settings_embedded_action__write_uid
 msgid "Last Updated by"
 msgstr "Frissítette"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__write_date
+#: model:ir.model.fields,field_description:web.field_res_users_settings_embedded_action__write_date
 msgid "Last Updated on"
 msgstr "Frissítve"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
+msgid "Last month"
+msgstr "Múlt hónap"
 
 #. module: web
 #. odoo-javascript
@@ -3866,7 +3943,7 @@ msgstr "Demó adatok betöltése"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/graph/graph_controller.xml:0
+#: code:addons/web/static/src/views/graph/graph_renderer.xml:0
 msgid "Load everything anyway."
 msgstr ""
 
@@ -3896,7 +3973,8 @@ msgstr "Betöltés"
 #: code:addons/web/static/src/core/model_selector/model_selector.js:0
 #: code:addons/web/static/src/core/record_selectors/record_autocomplete.js:0
 #: code:addons/web/static/src/core/ui/block_ui.js:0
-#: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.js:0
+#: code:addons/web/static/src/core/ui/block_ui.xml:0
+#: code:addons/web/static/src/views/calendar/calendar_filter_section/calendar_filter_section.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 msgid "Loading..."
 msgstr "Betöltés…"
@@ -3917,6 +3995,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.login_successful
 msgid "Log out"
 msgstr "Kijelentkezés"
+
+#. module: web
+#. odoo-python
+#: code:addons/web/controllers/home.py:0
+msgid "Login"
+msgstr "Bejelentkezés"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.external_layout_bold
@@ -3945,6 +4029,12 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "M"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Mahjong"
 msgstr "Mahjong"
 
@@ -3963,8 +4053,6 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/graph/graph_controller.xml:0
-#: code:addons/web/static/src/views/kanban/kanban_controller.xml:0
-#: code:addons/web/static/src/views/list/list_controller.xml:0
 #: code:addons/web/static/src/views/pivot/pivot_controller.xml:0
 msgid "Main actions"
 msgstr ""
@@ -3973,12 +4061,6 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/search/control_panel/control_panel.xml:0
 msgid "Make this embedded action available to other users"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/search/custom_favorite_item/custom_favorite_item.xml:0
-msgid "Make this filter available to other users"
 msgstr ""
 
 #. module: web
@@ -4076,6 +4158,11 @@ msgid "Meeting Subject"
 msgstr "Találkozó tárgya"
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Memory (heuristic)"
+msgstr ""
+
+#. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/burger_menu/burger_menu.xml:0
 #: model:ir.model,name:web.model_ir_ui_menu
@@ -4121,6 +4208,12 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/float/float_field.js:0
+msgid "Minimum Digits"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/timezone_mismatch/timezone_mismatch_field.js:0
 msgid "Mismatch title"
 msgstr ""
@@ -4145,6 +4238,12 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/model/relational_model/record.js:0
+msgid "Missing required fields"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/fields/upgrade_dialog.xml:0
 msgid "Mobile support"
 msgstr "Mobiltámogatás"
@@ -4158,7 +4257,7 @@ msgstr "Mód"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/domain/domain_field.js:0
-#: code:addons/web/static/src/views/fields/dynamic_widget/dynamic_model_field_selector_char.js:0
+#: code:addons/web/static/src/views/fields/field_selector/field_selector_field.js:0
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 msgid "Model"
 msgstr "Modell"
@@ -4200,12 +4299,6 @@ msgstr "Modellek"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/search_bar/search_bar.js:0
-msgid "Modify Condition"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/fields/domain/domain_field.xml:0
 msgid "Modify filter"
 msgstr ""
@@ -4219,6 +4312,7 @@ msgstr "H"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/monetary/monetary_field.js:0
+#: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 msgid "Monetary"
 msgstr "Pénzügyi"
 
@@ -4231,14 +4325,22 @@ msgstr "Hónap"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
+msgid "Month to date"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 msgid "Months"
 msgstr "Hónap"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/search/control_panel/control_panel.xml:0
 #: code:addons/web/static/src/views/fields/statusbar/statusbar_field.js:0
 #: code:addons/web/static/src/views/form/button_box/button_box.xml:0
+#: code:addons/web/static/src/views/form/status_bar_buttons/status_bar_buttons.xml:0
 msgid "More"
 msgstr "Továbbiak"
 
@@ -4250,6 +4352,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
 #: code:addons/web/static/src/views/fields/statusbar/statusbar_field.xml:0
 msgid "More..."
 msgstr ""
@@ -4316,9 +4419,15 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 #: code:addons/web/static/src/views/fields/text/text_field.js:0
 msgid "Multiline Text"
 msgstr "Többsoros szöveg"
+
+#. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Multiple profile"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -4335,8 +4444,14 @@ msgstr "Muszlim"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
-msgid "My Odoo.com account"
-msgstr "Odoo.com fiókom"
+msgid "My Odoo.com Account"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
+msgid "My Preferences"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -4420,12 +4535,6 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
-msgid "New: %s"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/file_viewer/file_viewer.xml:0
 #: code:addons/web/static/src/core/pager/pager.xml:0
 #: code:addons/web/static/src/views/calendar/calendar_controller.xml:0
@@ -4464,9 +4573,8 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/model/relational_model/utils.js:0
 #: code:addons/web/static/src/search/search_bar/search_bar.js:0
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
-#: code:addons/web/static/src/views/list/list_renderer.js:0
 #: code:addons/web/static/src/views/pivot/pivot_model.js:0
 msgid "No"
 msgstr "Nem"
@@ -4505,21 +4613,22 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_renderer.js:0
-msgid "No currency provided"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/graph/graph_renderer.js:0
 msgid "No data"
 msgstr "Nincs adat"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/action_helper.xml:0
 #: code:addons/web/static/src/views/no_content_helpers.xml:0
 msgid "No data to display"
 msgstr "Nincs megjeleníthető adat."
+
+#. module: web
+#. odoo-python
+#: code:addons/web/controllers/pivot.py:0
+msgid "No data to export"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -4536,7 +4645,7 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_picker.xml:0
-msgid "No emoji matches your search"
+msgid "No emojis match your search"
 msgstr ""
 
 #. module: web
@@ -4560,7 +4669,7 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/model_selector/model_selector.js:0
-#: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.js:0
+#: code:addons/web/static/src/views/calendar/calendar_filter_section/calendar_filter_section.js:0
 #: code:addons/web/static/src/views/fields/formatters.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 msgid "No records"
@@ -4581,15 +4690,25 @@ msgstr "Nincs eredmény"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/commands/command_palette.js:0
-#: code:addons/web/static/src/core/select_menu/select_menu.xml:0
 msgid "No result found"
 msgstr "Nem talál eredményt"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/model/relational_model/dynamic_list.js:0
-#: code:addons/web/static/src/model/relational_model/record.js:0
-msgid "No valid record to save"
+#: code:addons/web/static/src/core/select_menu/select_menu.xml:0
+msgid "No results"
+msgstr "Nincs eredmény"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/settings_form_view/settings_form_view.xml:0
+msgid "No settings found"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/kanban/kanban_renderer.xml:0
+msgid "No stages yet, let's create some!"
 msgstr ""
 
 #. module: web
@@ -4601,18 +4720,17 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/calendar/calendar_controller.js:0
-#: code:addons/web/static/src/views/form/form_controller.js:0
-#: code:addons/web/static/src/views/kanban/kanban_controller.js:0
-#: code:addons/web/static/src/views/list/list_controller.js:0
+#: code:addons/web/static/src/views/view_hook.js:0
 msgid "No, keep it"
-msgstr ""
+msgstr "Nem, maradjon"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/model/relational_model/utils.js:0
 #: code:addons/web/static/src/views/graph/graph_model.js:0
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
-#: code:addons/web/static/src/views/list/list_renderer.js:0
+#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
 #: code:addons/web/static/src/views/pivot/pivot_model.js:0
+#: code:addons/web/static/src/webclient/debug/profiling/profiling_item.xml:0
 msgid "None"
 msgstr "Nincs"
 
@@ -4630,20 +4748,22 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/statusbar/statusbar_field.js:0
-msgid "Not active state"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/statusbar/statusbar_field.js:0
-msgid "Not active state, click to change it"
+#: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
+msgid ""
+"Not possible to create monetary field because there is no currency on "
+"current model."
 msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/many2many_binary/many2many_binary_field.js:0
 msgid "Number of files"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "O"
 msgstr ""
 
 #. module: web
@@ -4704,7 +4824,7 @@ msgstr "Objektum:"
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Objects"
-msgstr ""
+msgstr "Tárgyak"
 
 #. module: web
 #. odoo-javascript
@@ -4805,24 +4925,11 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/confirmation_dialog/confirmation_dialog.js:0
-#: code:addons/web/static/src/core/dialog/dialog.xml:0
 #: code:addons/web/static/src/public/error_notifications.js:0
 #: code:addons/web/static/src/views/calendar/calendar_year/calendar_year_popover.xml:0
 #: code:addons/web/static/src/views/view_dialogs/form_view_dialog.xml:0
 msgid "Ok"
 msgstr "Ok"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/webclient/settings_form_view/widgets/mobile_apps_funnel.xml:0
-msgid "On Apple Store"
-msgstr "Az App Store-ban"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/webclient/settings_form_view/widgets/mobile_apps_funnel.xml:0
-msgid "On Google Play"
-msgstr "A Google Play-en"
 
 #. module: web
 #. odoo-python
@@ -4833,7 +4940,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/dynamic_widget/dynamic_model_field_selector_char.js:0
+#: code:addons/web/static/src/views/fields/field_selector/field_selector_field.js:0
 msgid "Only searchable"
 msgstr ""
 
@@ -4849,16 +4956,16 @@ msgstr ""
 #. odoo-python
 #: code:addons/web/models/models.py:0
 msgid ""
-"Only types %(supported_types)s are supported for category (found type "
-"%(field_type)s)"
+"Only types %(supported_types)s are supported for category (found type %"
+"(field_type)s)"
 msgstr ""
 
 #. module: web
 #. odoo-python
 #: code:addons/web/models/models.py:0
 msgid ""
-"Only types %(supported_types)s are supported for filter (found type "
-"%(field_type)s)"
+"Only types %(supported_types)s are supported for filter (found type %"
+"(field_type)s)"
 msgstr ""
 
 #. module: web
@@ -4872,6 +4979,37 @@ msgstr "Csak saját"
 #: code:addons/web/static/src/core/errors/error_dialogs.xml:0
 msgid "Oops!"
 msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/file_handler.js:0
+msgid "Oops! '%(fileName)s' didn’t upload since its format isn’t allowed."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
+msgid "Oops! A %(parentFieldLabel)s is needed to add property fields."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
+msgid "Oops! You cannot edit the %(parentFieldLabel)s \"%(parentName)s\"."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/color_picker/custom_color_picker/custom_color_picker.xml:0
+msgid "Opacity"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Open"
+msgstr "Megnyitás"
 
 #. module: web
 #. odoo-javascript
@@ -4943,6 +5081,7 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/kanban/progress_bar_hook.js:0
+#: code:addons/web/static/src/webclient/res_user_group_ids_field/res_user_group_ids_field.js:0
 msgid "Other"
 msgstr "Egyéb"
 
@@ -4950,6 +5089,12 @@ msgstr "Egyéb"
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/progress_bar/progress_bar_field.js:0
 msgid "Overflow style"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "P"
 msgstr ""
 
 #. module: web
@@ -4986,7 +5131,7 @@ msgstr "PDF fájl"
 #: model_terms:ir.ui.view,arch_db:web.external_layout_striped
 #: model_terms:ir.ui.view,arch_db:web.external_layout_wave
 msgid "Page <span class=\"page\"/> / <span class=\"topage\"/>"
-msgstr ""
+msgstr "Oldal <span class=\"page\"/> / <span class=\"topage\"/>"
 
 #. module: web
 #. odoo-javascript
@@ -5005,6 +5150,8 @@ msgid "Partner"
 msgstr "Partner"
 
 #. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/password/password_field.js:0
 #: model_terms:ir.ui.view,arch_db:web.login
 msgid "Password"
 msgstr "Jelszó"
@@ -5012,7 +5159,7 @@ msgstr "Jelszó"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid "Payment Communication: <b><span>INV/2023/00003</span></b>"
-msgstr ""
+msgstr "Fizetési közlemény:<b><span>INV/2023/00003</span></b>"
 
 #. module: web
 #. odoo-javascript
@@ -5024,7 +5171,7 @@ msgstr "Függő meghívások:"
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "People & Body"
-msgstr ""
+msgstr "Emberek & test"
 
 #. module: web
 #. odoo-javascript
@@ -5098,7 +5245,20 @@ msgid "Please enter save field list name"
 msgstr "Adja meg a mentett mező lista nevét"
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.view_view_form_inherit_view
+msgid ""
+"Please note that your view includes invalid locators.<br/>\n"
+"                    These nodes could not be anchored to the parent view and "
+"have no effect.<br/>\n"
+"                    This issue may have arisen as a result of manual "
+"modifications or during the upgrade process.<br/>\n"
+"                    For your reference, invalid xpath nodes are highlighted "
+"in red."
+msgstr ""
+
+#. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/x2many/x2many_field.js:0
 #: code:addons/web/static/src/views/list/list_renderer.js:0
 msgid "Please save your changes first"
 msgstr ""
@@ -5111,7 +5271,7 @@ msgstr "Válassza ki a mezőket az export lista mentéséhez..."
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
+#: code:addons/web/static/src/views/fields/many2one/many2one.js:0
 msgid "Please, scan again!"
 msgstr ""
 
@@ -5127,20 +5287,14 @@ msgstr "Támogatja az <span>Odoo</span>"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
-msgid "Preferences"
-msgstr "Preferenciák"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/fields/signature/signature_field.js:0
 msgid "Prefill with"
 msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
-msgid "Press"
+#: code:addons/web/static/src/core/tree_editor/tree_editor_value_editors.js:0
+msgid "Press \"Enter\" to add criterion"
 msgstr ""
 
 #. module: web
@@ -5199,18 +5353,6 @@ msgstr "Előző (balra nyíl)"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/utils/dates.js:0
-msgid "Previous Period"
-msgstr "Előző időszak"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/search/utils/dates.js:0
-msgid "Previous Year"
-msgstr "Előző év"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/datetime/datetime_picker.js:0
 msgid "Previous century"
 msgstr ""
@@ -5248,6 +5390,12 @@ msgstr "Nyomtatás"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/search/cog_menu/cog_menu.js:0
+msgid "Print report: %s"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/priority/priority_field.js:0
 #: code:addons/web/static/src/views/fields/priority/priority_field.xml:0
 msgid "Priority"
@@ -5276,6 +5424,11 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 msgid "Properties"
 msgstr "Tulajdonságok"
+
+#. module: web
+#: model:ir.model,name:web.model_properties_base_definition
+msgid "Properties Base Definition"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -5340,7 +5493,7 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/record_selectors/record_autocomplete.js:0
-#: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.js:0
+#: code:addons/web/static/src/views/calendar/calendar_filter_section/calendar_filter_section.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 msgid "Quick search: %s"
 msgstr ""
@@ -5353,15 +5506,9 @@ msgstr "Qweb mező kép"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/colorpicker/colorpicker.xml:0
-msgid "RGB"
-msgstr "RGB"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/colorpicker/colorpicker.xml:0
-msgid "RGBA"
-msgstr "RGBA"
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "R"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -5409,6 +5556,12 @@ msgstr "Bejegyzés"
 #: code:addons/web/static/src/webclient/actions/debug_items.js:0
 msgid "Record Rules"
 msgstr "Rekord szabályok"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/debug/profiling/profiling_item.xml:0
+msgid "Record memory"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -5500,6 +5653,7 @@ msgstr "Hátralévő napok"
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.xml:0
 #: code:addons/web/static/src/views/form/form_controller.xml:0
+#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
 msgid "Remove"
 msgstr "Eltávolítás"
 
@@ -5530,7 +5684,7 @@ msgstr "Eltávolít a Kedvencek közül"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.xml:0
+#: code:addons/web/static/src/views/calendar/calendar_filter_section/calendar_filter_section.xml:0
 msgid "Remove this favorite from the list"
 msgstr "Távolítsa el ezt a kedvencet a listából"
 
@@ -5577,6 +5731,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/color_picker/color_picker.xml:0
 #: code:addons/web/static/src/webclient/switch_company_menu/switch_company_menu.xml:0
 msgid "Reset"
 msgstr "Visszaállítás"
@@ -5602,6 +5757,12 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "Reset to logo colors"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/password/password_field.js:0
+msgid "Reveal value"
 msgstr ""
 
 #. module: web
@@ -5654,6 +5815,16 @@ msgid "SOS button"
 msgstr ""
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "SQL density"
+msgstr ""
+
+#. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "SQL no gap"
+msgstr ""
+
+#. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "SUV"
@@ -5685,12 +5856,25 @@ msgstr "Szo"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/color_picker/custom_color_picker/custom_color_picker.xml:0
+msgid "Saturation and brightness color picker."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/color_picker/custom_color_picker/custom_color_picker.js:0
+msgid "Saturation: %(saturationLvl)s %. Brightness: %(brightnessLvl)s %"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/search/control_panel/control_panel.xml:0
 #: code:addons/web/static/src/search/custom_favorite_item/custom_favorite_item.xml:0
 #: code:addons/web/static/src/views/fields/relational_utils.xml:0
 #: code:addons/web/static/src/views/fields/translation_dialog.xml:0
 #: code:addons/web/static/src/views/form/form_controller.xml:0
 #: code:addons/web/static/src/views/list/list_controller.xml:0
+#: code:addons/web/static/src/views/view_dialogs/form_view_dialog.xml:0
 #: code:addons/web/static/src/webclient/settings_form_view/settings_confirmation_dialog.xml:0
 msgid "Save"
 msgstr "Mentés"
@@ -5698,7 +5882,6 @@ msgstr "Mentés"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/relational_utils.xml:0
-#: code:addons/web/static/src/views/view_dialogs/form_view_dialog.xml:0
 msgid "Save & Close"
 msgstr "Mentés és bezárás"
 
@@ -5741,7 +5924,13 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/many2one/many2one_field.xml:0
+#: code:addons/web/static/src/views/fields/translation_button.js:0
+msgid "Save this record and its parent to translate"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/many2one/many2one.xml:0
 msgid "Scan barcode"
 msgstr "Vonalkód beolvasás"
 
@@ -5759,7 +5948,11 @@ msgstr "Skorpió"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/record_selectors/record_autocomplete.js:0
+#: code:addons/web/static/src/search/search_bar/search_bar.js:0
 #: code:addons/web/static/src/search/search_bar/search_bar.xml:0
+#: code:addons/web/static/src/search/search_model.js:0
+#: code:addons/web/static/src/views/fields/relational_utils.js:0
 #: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
 #: code:addons/web/static/src/webclient/settings_form_view/settings/settings_app.xml:0
 msgid "Search"
@@ -5768,14 +5961,13 @@ msgstr "Keresés"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/record_selectors/record_autocomplete.js:0
-#: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.js:0
-#: code:addons/web/static/src/views/fields/relational_utils.js:0
+#: code:addons/web/static/src/views/calendar/calendar_filter_section/calendar_filter_section.js:0
 msgid "Search More..."
 msgstr "Továbbiak keresése..."
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_picker.xml:0
+#: code:addons/web/static/src/core/emoji_picker/emoji_picker.js:0
 msgid "Search emoji"
 msgstr ""
 
@@ -5793,7 +5985,13 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/many2one_avatar/many2one_avatar_field.js:0
+#: code:addons/web/static/src/views/fields/relational_utils.js:0
+msgid "Search more..."
+msgstr "További keresés..."
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/many2one/many2one.js:0
 msgid "Search user..."
 msgstr "Felhasználó keresése..."
 
@@ -5808,7 +6006,6 @@ msgstr ""
 #: code:addons/web/static/src/core/commands/command_palette.js:0
 #: code:addons/web/static/src/core/emoji_picker/emoji_picker.xml:0
 #: code:addons/web/static/src/core/model_field_selector/model_field_selector_popover.xml:0
-#: code:addons/web/static/src/core/select_menu/select_menu.js:0
 #: code:addons/web/static/src/search/search_bar/search_bar.xml:0
 #: code:addons/web/static/src/webclient/settings_form_view/settings_form_view.xml:0
 #: code:addons/web/static/src/webclient/switch_company_menu/switch_company_menu.xml:0
@@ -5818,7 +6015,7 @@ msgstr "Keresés..."
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/record_selectors/record_autocomplete.js:0
-#: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.js:0
+#: code:addons/web/static/src/views/calendar/calendar_filter_section/calendar_filter_section.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 msgid "Search: %s"
 msgstr "Keresés: %s"
@@ -5842,7 +6039,7 @@ msgstr "Biztonság"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
+#: code:addons/web/static/src/views/kanban/kanban_renderer.xml:0
 msgid "See examples"
 msgstr ""
 
@@ -5904,13 +6101,13 @@ msgstr "Nézet kiválasztása"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_controller.xml:0
+#: code:addons/web/static/src/views/view_components/selection_box.xml:0
 msgid "Select all"
 msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_controller.xml:0
+#: code:addons/web/static/src/views/view_components/selection_box.xml:0
 msgid "Select all records matching the search"
 msgstr ""
 
@@ -5936,6 +6133,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/datetime/datetime_picker.js:0
 msgid "Select month"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_value_editors.js:0
+msgid "Select one or several criteria"
 msgstr ""
 
 #. module: web
@@ -6003,6 +6206,13 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/badge/badge_field.js:0
+#: code:addons/web/static/src/views/fields/badge_selection/list_badge_selection_field.js:0
+msgid "Set an integer field to use colors with the badge."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
 msgid "Set an integer field to use colors with the tags."
 msgstr ""
@@ -6023,19 +6233,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 msgid ""
-"Set to true the full range input has to be display by default, even if "
-"empty."
+"Set to true the full range input has to be display by default, even if empty."
 msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
-msgid "Set to true to display days, months (and hours) with unpadded numbers"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_header.xml:0
+#: code:addons/web/static/src/views/view_components/group_config_menu.xml:0
 #: code:addons/web/static/src/webclient/settings_form_view/settings_form_controller.js:0
 msgid "Settings"
 msgstr "Beállítások"
@@ -6049,15 +6252,8 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/search/control_panel/control_panel.xml:0
-#: code:addons/web/static/src/search/custom_favorite_item/custom_favorite_item.xml:0
 msgid "Shared"
 msgstr "Megosztott"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
-msgid "Shared filters"
-msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -6073,12 +6269,6 @@ msgstr "Sintó"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
-msgid "Shortcuts"
-msgstr "Gyorsbillentyűk"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/search/control_panel/control_panel.js:0
 msgid "Show %s view"
 msgstr ""
@@ -6087,6 +6277,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/domain/domain_field.xml:0
 msgid "Show matching records"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/model_field_selector/model_field_selector_popover.xml:0
+msgid "Show options"
 msgstr ""
 
 #. module: web
@@ -6111,7 +6307,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/view_components/view_scale_selector.xml:0
 msgid "Show weekends"
-msgstr ""
+msgstr "Hétvégék mutatása"
 
 #. module: web
 #. odoo-javascript
@@ -6133,7 +6329,13 @@ msgstr "Kicsi"
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Smileys & Emotion"
-msgstr ""
+msgstr "Hangulatjelek és érzelmek"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/color_picker/tabs/color_picker_solid_tab.js:0
+msgid "Solid"
+msgstr "Szolíd"
 
 #. module: web
 #. odoo-javascript
@@ -6168,7 +6370,13 @@ msgid "Special:"
 msgstr "Speciális:"
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Speedscope"
+msgstr ""
+
+#. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/json_checkboxes/json_checkboxes_field.js:0
 #: code:addons/web/static/src/views/graph/graph_controller.xml:0
 msgid "Stacked"
 msgstr ""
@@ -6183,6 +6391,18 @@ msgstr "Dávid csillag"
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 msgid "Start date field"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/view_components/multi_create_popover.js:0
+msgid "Start time should be before end time"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/relational_utils.js:0
+msgid "Start typing %s characters"
 msgstr ""
 
 #. module: web
@@ -6256,27 +6476,21 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
+msgid "Suffix"
+msgstr "Utótag"
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/graph/graph_model.js:0
 msgid "Sum"
 msgstr "Összeg"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/graph/graph_model.js:0
-msgid "Sum (%s)"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/widgets/week_days/week_days.js:0
 msgid "Sun"
 msgstr "V"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
-msgid "Support"
-msgstr "Támogatás"
 
 #. module: web
 #. odoo-javascript
@@ -6334,12 +6548,6 @@ msgid "TV"
 msgstr "TV"
 
 #. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
-msgid "Tag"
-msgstr "Címke"
-
-#. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "Tagline"
 msgstr ""
@@ -6348,6 +6556,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
 #: code:addons/web/static/src/views/fields/properties/property_definition.js:0
+#: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 msgid "Tags"
 msgstr "Címkék"
 
@@ -6413,12 +6622,6 @@ msgstr "Sablon:"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/debug/debug_menu_basic.js:0
-msgid "Testing"
-msgstr "Tesztelés"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/fields/char/char_field.js:0
 #: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
@@ -6430,14 +6633,6 @@ msgstr "Szöveg"
 #: code:addons/web/static/src/core/file_viewer/file_viewer.xml:0
 msgid "Text file"
 msgstr "Szövegfájl"
-
-#. module: web
-#: model:ir.model.fields,help:web.field_base_document_layout__vat
-msgid ""
-"The Tax Identification Number. Values here will be validated based on the "
-"country format. You can use '/' to indicate that the partner is not subject "
-"to tax."
-msgstr ""
 
 #. module: web
 #. odoo-python
@@ -6473,11 +6668,55 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+msgid "The domain involves non-literals. Their evaluation might fail."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+msgid "The domain should not involve non-literals"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/utils/files.js:0
+msgid "The file is not an image, resizing is not possible"
+msgstr ""
+
+#. module: web
+#. odoo-python
+#: code:addons/web/models/res_users_settings_embedded_action.py:0
+msgid "The ids in %(field_name)s must not be duplicated: “%(action_ids)s”"
+msgstr ""
+
+#. module: web
+#. odoo-python
+#: code:addons/web/models/res_users_settings_embedded_action.py:0
+msgid ""
+"The ids in %(field_name)s must only be integers or \"false\": “%"
+"(action_ids)s”"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/errors/error_dialogs.xml:0
 #: code:addons/web/static/src/public/error_notifications.js:0
 msgid ""
-"The operation was interrupted. This usually means that the current operation"
-" is taking too much time."
+"The operation was interrupted. This usually means that the current operation "
+"is taking too much time."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/errors/error_dialogs.js:0
+msgid "The request sent to the server was too large"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/utils/files.js:0
+msgid "The resizing of the image failed"
 msgstr ""
 
 #. module: web
@@ -6490,8 +6729,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/utils/files.js:0
 msgid ""
-"The selected file (%(size)sB) is larger than the maximum allowed file size "
-"(%(maxSize)sB)."
+"The selected file (%(size)sB) is larger than the maximum allowed file size (%"
+"(maxSize)sB)."
 msgstr ""
 
 #. module: web
@@ -6504,8 +6743,15 @@ msgid ""
 msgstr ""
 
 #. module: web
+#: model:ir.model.constraint,message:web.constraint_res_users_settings_embedded_action_res_user_settings_e_91890fa3
+msgid ""
+"The user should have one unique embedded action setting per user setting, "
+"action and record id."
+msgstr ""
+
+#. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/graph/graph_controller.xml:0
+#: code:addons/web/static/src/views/graph/graph_renderer.xml:0
 msgid ""
 "There are too many data. The graph only shows a sample. Use the filters to "
 "refine the scope."
@@ -6538,8 +6784,8 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/datetime/datetime_field.xml:0
-msgid "This date is on the future. Make sure it is what you expected."
+#: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
+msgid "This date is in the future"
 msgstr ""
 
 #. module: web
@@ -6577,12 +6823,6 @@ msgstr ""
 #: code:addons/web/static/src/core/signature/name_and_signature.xml:0
 msgid "This file is invalid. Please select an image."
 msgstr "Ez a fájl érvénytelen. Kérem, válasszon egy képet!"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.js:0
-msgid "This filter is global and will be removed for everyone."
-msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.preview_externalreport
@@ -6628,6 +6868,12 @@ msgstr "Idő"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/webclient/debug/profiling/profiling_item.xml:0
+msgid "Time Limit (seconds)"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 msgid "Time interval"
 msgstr ""
@@ -6637,7 +6883,8 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/timezone_mismatch/timezone_mismatch_field.js:0
 msgid ""
 "Timezone Mismatch : This timezone is different from that of your browser.\n"
-"Please, set the same timezone as your browser's to avoid time discrepancies in your system."
+"Please, set the same timezone as your browser's to avoid time discrepancies "
+"in your system."
 msgstr ""
 
 #. module: web
@@ -6673,8 +6920,8 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
 #: code:addons/web/static/src/views/calendar/calendar_controller.xml:0
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
 msgid "Today"
 msgstr "Ma"
 
@@ -6686,14 +6933,14 @@ msgstr "Lenyitható Doboz"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/control_panel/control_panel.xml:0
-msgid "Toggle Dropdown"
+#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
+msgid "Toggle Search Panel"
 msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
-msgid "Toggle Search Panel"
+#: code:addons/web/static/src/core/datetime/datetime_picker.xml:0
+msgid "Toggle date range mode"
 msgstr ""
 
 #. module: web
@@ -6713,12 +6960,6 @@ msgstr "Tokió"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Tokyo tower"
 msgstr "Tókió torony"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
-msgid "Tomorrow"
-msgstr "Holnap"
 
 #. module: web
 #. odoo-python
@@ -6747,6 +6988,12 @@ msgstr "Összesen"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/debug/debug_menu_basic.js:0
+msgid "Tours & Testing"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Tower"
 msgstr "Torony"
@@ -6761,7 +7008,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Travel & Places"
-msgstr ""
+msgstr "Utazás és helyszínek"
 
 #. module: web
 #. odoo-javascript
@@ -6771,9 +7018,17 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_value_editors.js:0
-msgid "True"
-msgstr "Igaz"
+#: code:addons/web/static/src/webclient/settings_form_view/settings_form_view.xml:0
+msgid "Try searching for another keyword"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/action_helper.xml:0
+msgid ""
+"Try to add some records, or make sure that there is no\n"
+"                        active filter in the search bar."
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -6800,7 +7055,7 @@ msgstr "Típus"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/model_selector/model_selector.xml:0
+#: code:addons/web/static/src/core/model_selector/model_selector.js:0
 msgid "Type a model here..."
 msgstr ""
 
@@ -6815,6 +7070,13 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/field_tooltip.xml:0
 msgid "Type:"
 msgstr "Típus:"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
+#: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
+msgid "Typeahead search"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -6873,8 +7135,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/actions/reports/utils.js:0
 msgid ""
-"Unable to find Wkhtmltopdf on this system. The report will be shown in "
-"html.%(link)s"
+"Unable to find Wkhtmltopdf on this system. The report will be shown in html.%"
+"(link)s"
 msgstr ""
 
 #. module: web
@@ -6886,15 +7148,10 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/form/form_controller.js:0
+#: code:addons/web/static/src/views/kanban/kanban_controller.js:0
 #: code:addons/web/static/src/views/list/list_controller.js:0
 msgid "Unarchive"
 msgstr "Visszatöltés"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
-msgid "Unarchive All"
-msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -6915,7 +7172,7 @@ msgstr "Kihajtás"
 #: code:addons/web/static/src/core/record_selectors/record_autocomplete.js:0
 #: code:addons/web/static/src/search/breadcrumbs/breadcrumbs.xml:0
 #: code:addons/web/static/src/views/fields/formatters.js:0
-#: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
+#: code:addons/web/static/src/views/fields/many2one/many2one.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 msgid "Unnamed"
 msgstr "Névtelen"
@@ -6929,7 +7186,8 @@ msgstr "Nem mentett módosítások"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_controller.xml:0
+#: code:addons/web/static/src/views/view_components/multi_selection_buttons.xml:0
+#: code:addons/web/static/src/views/view_components/selection_box.xml:0
 msgid "Unselect All"
 msgstr ""
 
@@ -6949,6 +7207,12 @@ msgstr "Névtelen"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
+msgid "Update"
+msgstr "Frissítés"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
 msgid "Update to:"
 msgstr ""
 
@@ -6957,12 +7221,6 @@ msgstr ""
 #: code:addons/web/static/src/webclient/settings_form_view/fields/upgrade_dialog.xml:0
 msgid "Upgrade now"
 msgstr "Frissítés most"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/webclient/settings_form_view/fields/upgrade_dialog.xml:0
-msgid "Upgrade to enterprise"
-msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -7016,7 +7274,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_column_quick_create.js:0
+#: code:addons/web/static/src/views/kanban/kanban_renderer.js:0
 msgid "Use This For My Kanban"
 msgstr ""
 
@@ -7034,11 +7292,24 @@ msgid "Use another user"
 msgstr ""
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Use execution context"
+msgstr ""
+
+#. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/float/float_field.js:0
 #: code:addons/web/static/src/views/fields/integer/integer_field.js:0
 msgid ""
 "Use it with the 'User-friendly format' option to customize the formatting."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
+msgid ""
+"Use the operators \"+=\", \"-=\", \"*=\" and \"/=\" to update the current "
+"value."
 msgstr ""
 
 #. module: web
@@ -7057,6 +7328,15 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/color_picker/custom_color_picker/custom_color_picker.xml:0
+msgid ""
+"Use up and down arrow keys to adapt the brightness. Use left and right arrow "
+"keys to adapt the saturation. Press the Control or Command key at the same "
+"time to have finer control."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/webclient/user_menu/user_menu.xml:0
 #: model:ir.model,name:web.model_res_users
 msgid "User"
@@ -7067,6 +7347,16 @@ msgstr "Felhasználó"
 #: code:addons/web/static/src/core/debug/debug_menu_basic.js:0
 msgid "User Interface"
 msgstr "Felhasználói felület"
+
+#. module: web
+#: model:ir.model,name:web.model_res_users_settings
+msgid "User Settings"
+msgstr "Felhasználói beállítások"
+
+#. module: web
+#: model:ir.model,name:web.model_res_users_settings_embedded_action
+msgid "User Settings for Embedded Actions"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -7142,18 +7432,13 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/pivot/pivot_model.js:0
-msgid "Variation"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/file_viewer/file_viewer.xml:0
 msgid "Video"
 msgstr "Videó"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/calendar/calendar_common/calendar_common_popover.xml:0
 #: code:addons/web/static/src/views/list/list_renderer.xml:0
 #: model:ir.model,name:web.model_ir_ui_view
 msgid "View"
@@ -7176,6 +7461,18 @@ msgstr ""
 #: code:addons/web/static/src/views/debug_items.js:0
 msgid "View Metadata"
 msgstr "Metadata megtekintése"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/res_user_group_ids_field/res_user_group_ids_popover.xml:0
+msgid "View extra groups"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/search/control_panel/control_panel.xml:0
+msgid "View related documents"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -7216,10 +7513,9 @@ msgstr "WC"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/errors/error_dialogs.js:0
-#: code:addons/web/static/src/model/relational_model/dynamic_list.js:0
 #: code:addons/web/static/src/search/control_panel/control_panel.js:0
-#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.js:0
 #: code:addons/web/static/src/views/fields/domain/domain_field.xml:0
+#: code:addons/web/static/src/views/fields/json_checkboxes/json_checkboxes_field.xml:0
 msgid "Warning"
 msgstr "Figyelmeztetés"
 
@@ -7244,11 +7540,6 @@ msgstr ""
 #. module: web
 #: model:ir.model.fields,field_description:web.field_res_config_settings__web_app_name
 msgid "Web App Name"
-msgstr ""
-
-#. module: web
-#: model_terms:ir.ui.view,arch_db:web.qunit_mobile_suite
-msgid "Web Mobile Tests"
 msgstr ""
 
 #. module: web
@@ -7356,6 +7647,12 @@ msgstr "Év"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
+msgid "Year to date"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 msgid "Years"
 msgstr "Év"
@@ -7368,19 +7665,12 @@ msgstr "Sárga"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/model/relational_model/utils.js:0
 #: code:addons/web/static/src/search/search_bar/search_bar.js:0
 #: code:addons/web/static/src/views/fields/field_tooltip.xml:0
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
-#: code:addons/web/static/src/views/list/list_renderer.js:0
 #: code:addons/web/static/src/views/pivot/pivot_model.js:0
 msgid "Yes"
 msgstr "Igen"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
-msgid "Yesterday"
-msgstr "Tegnap"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login_successful
@@ -7405,6 +7695,17 @@ msgid "You can install the app from the browser menu"
 msgstr ""
 
 #. module: web
+#. odoo-python
+#: code:addons/web/models/properties_base_definition.py:0
+msgid "You can not read that field definition."
+msgstr ""
+
+#. module: web
+#: model:ir.model.fields,help:web.field_base_document_layout__vat
+msgid "You can use '/' to indicate that the customer has no Tax ID."
+msgstr ""
+
+#. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 msgid "You do not have access to the model \"%s\"."
@@ -7423,22 +7724,9 @@ msgid "You may not believe it,"
 msgstr ""
 
 #. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
-msgid ""
-"You need edit access on the parent document to update these property fields"
-msgstr ""
-
-#. module: web
 #. odoo-python
 #: code:addons/web/controllers/json.py:0
 msgid "You need export permissions to use the /json route"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/properties/property_tags.js:0
-msgid "You need to be able to edit parent first to add property tags"
 msgstr ""
 
 #. module: web
@@ -7461,8 +7749,8 @@ msgstr ""
 #: code:addons/web/static/src/webclient/actions/reports/utils.js:0
 msgid ""
 "You should upgrade your version of Wkhtmltopdf to at least 0.12.0 in order "
-"to get a correct display of headers and footers as well as support for "
-"table-breaking between pages.%(link)s"
+"to get a correct display of headers and footers as well as support for table-"
+"breaking between pages.%(link)s"
 msgstr ""
 
 #. module: web
@@ -7506,12 +7794,6 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "a day ago"
-msgstr "egy napja"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "abacus"
 msgstr "abakusz"
@@ -7527,30 +7809,6 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "abcd"
 msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "about a minute ago"
-msgstr "kb. egy perce"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "about a month ago"
-msgstr "kb. egy hónapja"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "about a year ago"
-msgstr "kb. egy éve"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "about an hour ago"
-msgstr "kb. egy órája"
 
 #. module: web
 #. odoo-javascript
@@ -7656,6 +7914,12 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
+msgid "after"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "age restriction"
 msgstr ""
@@ -7722,8 +7986,8 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 #: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
 msgid "all"
 msgstr "összes"
 
@@ -7803,7 +8067,7 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/commands/command_items.xml:0
-#: code:addons/web/static/src/core/tree_editor/utils.js:0
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
 msgid "and"
 msgstr "és"
 
@@ -7894,6 +8158,7 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
 msgid "any"
 msgstr ""
 
@@ -7931,12 +8196,6 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "architect"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
-msgid "are valid for this update."
 msgstr ""
 
 #. module: web
@@ -8044,8 +8303,9 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/search/search_bar/search_bar.js:0
+#: code:addons/web/static/src/views/view_components/multi_currency_popover.xml:0
 msgid "at"
-msgstr "itt: "
+msgstr "itt:"
 
 #. module: web
 #. odoo-javascript
@@ -8631,6 +8891,12 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
+msgid "before"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "begging"
 msgstr ""
@@ -8687,6 +8953,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "berry"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
+msgid "between"
 msgstr ""
 
 #. module: web
@@ -11313,12 +11585,6 @@ msgstr "dátum"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
-msgid "days"
-msgstr "nap"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "dazed"
 msgstr ""
@@ -12248,8 +12514,8 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
-msgid "ends with"
+#: code:addons/web/static/src/webclient/actions/blank_component.xml:0
+msgid "empty"
 msgstr ""
 
 #. module: web
@@ -13197,24 +13463,6 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "flag: England"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "flag: Scotland"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "flag: Wales"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "flamboyant"
 msgstr ""
 
@@ -14096,6 +14344,18 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
+msgid "greater or equal to"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
+msgid "greater than"
+msgstr "nagyobb, mint"
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "green"
 msgstr ""
@@ -14696,7 +14956,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/colorpicker/colorpicker.xml:0
+#: code:addons/web/static/src/core/color_picker/custom_color_picker/custom_color_picker.xml:0
 msgid "hex"
 msgstr ""
 
@@ -15123,6 +15383,12 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "i"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "ice"
 msgstr ""
 
@@ -15453,14 +15719,8 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
-msgid "is"
+msgid "is equal to"
 msgstr "egyenlő"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
-msgid "is between"
-msgstr "között van"
 
 #. module: web
 #. odoo-javascript
@@ -15471,7 +15731,7 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
-msgid "is not"
+msgid "is not equal to"
 msgstr "nem egyenlő"
 
 #. module: web
@@ -15491,12 +15751,6 @@ msgstr "nincs beállítva"
 #: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
 msgid "is set"
 msgstr "beállítva"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
-msgid "is within"
-msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -16244,12 +16498,6 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "less than a minute ago"
-msgstr "kevesebb, mint egy perce"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "letter"
 msgstr ""
@@ -16564,6 +16812,18 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "low"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
+msgid "lower or equal to"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
+msgid "lower than"
 msgstr ""
 
 #. module: web
@@ -17756,12 +18016,6 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
-msgid "months"
-msgstr "hónap"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "moon"
 msgstr ""
@@ -17968,7 +18222,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "multiply"
-msgstr "szendvicspozitív "
+msgstr "szendvicspozitív"
 
 #. module: web
 #. odoo-javascript
@@ -18194,12 +18448,6 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
-msgid "new_template"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "news"
 msgstr ""
@@ -18314,6 +18562,12 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
+msgid "no records"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "no smoking"
 msgstr ""
@@ -18345,6 +18599,7 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
 msgid "none"
 msgstr ""
 
@@ -18386,7 +18641,20 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
+msgid "not %(operator_label)s"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
+msgid "not ="
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
 msgid "not all"
 msgstr ""
 
@@ -18394,13 +18662,6 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
 msgid "not like"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_value_editors.js:0
-#: code:addons/web/static/src/core/tree_editor/utils.js:0
-msgid "not set"
 msgstr ""
 
 #. module: web
@@ -18461,6 +18722,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "nuts"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "o"
 msgstr ""
 
 #. module: web
@@ -18759,7 +19026,20 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/utils.js:0
+#: code:addons/web/static/src/core/autocomplete/autocomplete.xml:0
+msgid "option.label"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/record_selectors/record_autocomplete.xml:0
+#: code:addons/web/static/src/views/fields/relational_utils.xml:0
+msgid "optionScope.label"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
 #: code:addons/web/static/src/search/search_model.js:0
 #: code:addons/web/static/src/views/fields/dynamic_placeholder_popover.xml:0
 msgid "or"
@@ -19975,7 +20255,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "point"
-msgstr ""
+msgstr "pont"
 
 #. module: web
 #. odoo-javascript
@@ -20538,6 +20818,12 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "r"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "rabbit"
 msgstr ""
 
@@ -20750,12 +21036,6 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/domain/domain_field.xml:0
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 msgid "record(s)"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
-msgid "records?"
 msgstr ""
 
 #. module: web
@@ -21651,7 +21931,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #: code:addons/web/static/src/search/search_bar/search_bar.xml:0
 msgid "search"
-msgstr ""
+msgstr "keresés"
 
 #. module: web
 #. odoo-javascript
@@ -21697,21 +21977,10 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_controller.xml:0
+#: code:addons/web/static/src/views/view_components/multi_selection_buttons.xml:0
+#: code:addons/web/static/src/views/view_components/selection_box.xml:0
 msgid "selected"
 msgstr "kiválasztva"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
-msgid "selected records,"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
-msgid "self"
-msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -21752,8 +22021,6 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/tree_editor/tree_editor_value_editors.js:0
-#: code:addons/web/static/src/core/tree_editor/utils.js:0
 msgid "set"
 msgstr ""
 
@@ -24033,12 +24300,6 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
-msgid "to discard"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 msgid "to trigger a shortcut."
 msgstr ""
@@ -24754,6 +25015,12 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "v"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "vague"
 msgstr ""
 
@@ -24911,6 +25178,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "virus"
+msgstr ""
+
+#. module: web
+#. odoo-python
+#: code:addons/web/controllers/vcard.py:0
+msgid "vobject library is not installed"
 msgstr ""
 
 #. module: web
@@ -25182,12 +25455,6 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "wedding"
 msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
-msgid "weeks"
-msgstr "hét"
 
 #. module: web
 #. odoo-javascript
@@ -26134,6 +26401,12 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "x"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "yacht"
 msgstr ""
 
@@ -26165,12 +26438,6 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "yay"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
-msgid "years"
 msgstr ""
 
 #. module: web
@@ -26301,18 +26568,6 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/view_components/column_progress.xml:0
-msgid "{{ bar.count }} {{ bar.string }}"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
-msgid "{{ relatedFieldName }}..."
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 msgid "— press"
 msgstr ""
@@ -26430,3 +26685,500 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "ココ"
 msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "サ"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "割"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "可"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "合"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "営"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "得"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "指"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "月"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "有"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "満"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "無"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "申"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "祝"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "禁"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "秘"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "空"
+msgstr ""
+
+#~ msgid ""
+#~ "The Tax Identification Number. Values here will be validated based on the "
+#~ "country format. You can use '/' to indicate that the partner is not "
+#~ "subject to tax."
+#~ msgstr ""
+#~ "A adóazonosító szám. Az itt megadott értékeket az ország formátuma "
+#~ "alapján érvényesítik. Azt is jelezheti, hogy a partner nem adóköteles, ha "
+#~ "'/'-t használ"
+
+#~ msgid "00"
+#~ msgstr "00"
+
+#~ msgid "10"
+#~ msgstr "10"
+
+#~ msgid "100"
+#~ msgstr "100"
+
+#~ msgid "11"
+#~ msgstr "11"
+
+#~ msgid "12"
+#~ msgstr "12"
+
+#~ msgid "1234"
+#~ msgstr "1234"
+
+#~ msgid "12:00"
+#~ msgstr "12:00"
+
+#~ msgid "18"
+#~ msgstr "18"
+
+#~ msgid "8:00"
+#~ msgstr "8:00"
+
+#~ msgid "Error"
+#~ msgstr "Hiba"
+
+#~ msgid " records"
+#~ msgstr " rekord"
+
+#~ msgid "%d days ago"
+#~ msgstr "%d napja"
+
+#~ msgid "%d hours ago"
+#~ msgstr "%d órája"
+
+#~ msgid "%d minutes ago"
+#~ msgstr "%d perce"
+
+#~ msgid "%d months ago"
+#~ msgstr "%d hónapja"
+
+#~ msgid "%d years ago"
+#~ msgstr "%d éve"
+
+#~ msgid "'%s' is not a correct date"
+#~ msgstr "'%s' nem érvényes dátum"
+
+#~ msgid "'%s' is not a correct date, datetime nor time"
+#~ msgstr "'%s' nem érvényes dátum, dátum idő és nem idő"
+
+#~ msgid "'%s' is not a correct datetime"
+#~ msgstr "'%s' em érvényes dátum időpont"
+
+#~ msgid "'%s' is not a correct float"
+#~ msgstr "'%s' nem megfelelő decimális szám"
+
+#~ msgid "'%s' is not a correct integer"
+#~ msgstr "'%s' nem megfelelő egész szám"
+
+#~ msgid "'%s' is not convertible to date, datetime nor time"
+#~ msgstr "'%s' nem átalakítható dátummá, dátum idővé vagy idővé"
+
+#~ msgid "(nolabel)"
+#~ msgstr "(nincs felirat)"
+
+#~ msgid "<strong>Due Date:</strong>"
+#~ msgstr "<strong>Fizetési határidő:</strong>"
+
+#~ msgid "<strong>Invoice Date:</strong>"
+#~ msgstr "<strong>Számla dátuma:</strong>"
+
+#~ msgid "<strong>Subtotal</strong>"
+#~ msgstr "<strong>Részösszeg</strong>"
+
+#~ msgid "Activate Assets Debugging"
+#~ msgstr "Eszköz hibakeresés aktiválása"
+
+#~ msgid "Add Custom Filter"
+#~ msgstr "Egyéni szűrő hozzáadása"
+
+#~ msgid "Add Custom Group"
+#~ msgstr "Új egyéni csoport"
+
+#~ msgid "Add a condition"
+#~ msgstr "Új feltétel"
+
+#~ msgid "Add branch"
+#~ msgstr "Új ágazat"
+
+#~ msgid "Add filter"
+#~ msgstr "Új szűrő"
+
+#~ msgid "Add new value"
+#~ msgstr "Új érték"
+
+#~ msgid "Add node"
+#~ msgstr "Új csomópont"
+
+#~ msgid "Add tag"
+#~ msgstr "Új címke"
+
+#~ msgid "An error occurred"
+#~ msgstr "Hiba történt"
+
+#~ msgid "Any"
+#~ msgstr "Bármely"
+
+#~ msgid ""
+#~ "Appears by default on the top right corner of your printed documents "
+#~ "(report header)."
+#~ msgstr ""
+#~ "Alap értelmezetten a jobb felső sarokban látható a nyomtatott "
+#~ "dokumentumon (kimutatás fejléc)."
+
+#~ msgid "Archive All"
+#~ msgstr "Mindent archivál"
+
+#~ msgid "Are you sure that you want to remove this filter?"
+#~ msgstr "Szűrő eltávolítása?"
+
+#~ msgid "Choose"
+#~ msgstr "Válasszon"
+
+#~ msgid "Column %s"
+#~ msgstr "%s oszlop"
+
+#~ msgid "Comparison"
+#~ msgstr "Összehasonlítás"
+
+#~ msgid "Could not connect to the server"
+#~ msgstr "Nem lehet kapcsolódni a szerverhez"
+
+#~ msgid "Could not serialize XML"
+#~ msgstr "Nem lehet szerializálni az XML-t"
+
+#~ msgid "Create \"<strong>%s</strong>\""
+#~ msgstr "Létrehozás: \"<strong>%s</strong>\""
+
+#~ msgid "Create and Edit..."
+#~ msgstr "Létrehozás és szerkesztés..."
+
+#~ msgid "Create: "
+#~ msgstr "Létrehozás: "
+
+#~ msgid "Create: %s"
+#~ msgstr "Létrehozás: %s"
+
+#~ msgid "Dark blue"
+#~ msgstr "Sötétkék"
+
+#~ msgid "Dark purple"
+#~ msgstr "Sötétlila"
+
+#~ msgid "Delete node"
+#~ msgstr "Csomópont törlése"
+
+#~ msgid "Domain not supported"
+#~ msgstr "A tartomány nem támogatott"
+
+#~ msgid "Don't leave yet,<br />it's still loading..."
+#~ msgstr "Várjon, <br />még tölt..."
+
+#~ msgid "Edit Action"
+#~ msgstr "Művelet szerkesztése"
+
+#~ msgid "Edit SearchView"
+#~ msgstr "Keresési nézet szerkesztése"
+
+#~ msgid "Enter e-mail address"
+#~ msgstr "Adja meg az e-mail címet"
+
+#~ msgid "Everybody's calendars"
+#~ msgstr "Mindenki naptára"
+
+#~ msgid "Everything"
+#~ msgstr "Mindegyik"
+
+#~ msgid "External link"
+#~ msgstr "Külső hivatkozás"
+
+#~ msgid "File upload"
+#~ msgstr "Fájl feltöltése"
+
+#~ msgid "Filter with same name already exists."
+#~ msgstr "Már létező nevekkel szűr."
+
+#~ msgid "Graph"
+#~ msgstr "Grafikon"
+
+#~ msgid "I am sure about this."
+#~ msgstr "Biztos vagyok benne."
+
+#~ msgid "In"
+#~ msgstr "Ebben"
+
+#~ msgid ""
+#~ "Invalid database name. Only alphanumerical characters, underscore, hyphen "
+#~ "and dot are allowed."
+#~ msgstr ""
+#~ "Érvénytelen adabázis név. Csak alfanumerikus karakterek, alulvonás, "
+#~ "kötőjel és pont megengedett."
+
+#~ msgid "Leave the Developer Tools"
+#~ msgstr "Fejlesztői eszközök kikapcsolása"
+
+#~ msgid "Light blue"
+#~ msgstr "Világoskék"
+
+#~ msgid "Loading, please wait..."
+#~ msgstr "Betöltés, kérem várjon..."
+
+#~ msgid "Manage Filters"
+#~ msgstr "Szűrők kezelése"
+
+#~ msgid "Medium blue"
+#~ msgstr "Középkék"
+
+#~ msgid "Modifiers:"
+#~ msgstr "Módosítók:"
+
+#~ msgid "My Odoo.com account"
+#~ msgstr "Odoo.com fiókom"
+
+#~ msgid "New %s"
+#~ msgstr "Új %s"
+
+#~ msgid "No records found!"
+#~ msgstr "Nem található bejegyzés!"
+
+#~ msgid "On change:"
+#~ msgstr "Változtatáskor:"
+
+#~ msgid "Open: "
+#~ msgstr "Megnyitás: "
+
+#~ msgid "Page: <span class=\"page\"/> / <span class=\"topage\"/>"
+#~ msgstr "Oldal: <span class=\"page\"/> / <span class=\"topage\"/>"
+
+#~ msgid "Pick a color"
+#~ msgstr "Válasszon egy színt"
+
+#~ msgid "Pivot"
+#~ msgstr "Pivot"
+
+#~ msgid "Preferences"
+#~ msgstr "Preferenciák"
+
+#~ msgid "Previous Period"
+#~ msgstr "Előző időszak"
+
+#~ msgid "Previous Year"
+#~ msgstr "Előző év"
+
+#~ msgid "RGB"
+#~ msgstr "RGB"
+
+#~ msgid "RGBA"
+#~ msgstr "RGBA"
+
+#~ msgid "Remove tag"
+#~ msgstr "Címke eltávolítása"
+
+#~ msgid "Run JS Tests"
+#~ msgstr "JS tesztek futtatása"
+
+#~ msgid "Salmon pink"
+#~ msgstr "Lazacrózsaszín"
+
+#~ msgid "Set Defaults"
+#~ msgstr "Alapértelmezések beállítása"
+
+#~ msgid "Share with all users"
+#~ msgstr "Megosztás minden felhasználóval"
+
+#~ msgid "Shortcuts"
+#~ msgstr "Gyorsbillentyűk"
+
+#~ msgid "Size:"
+#~ msgstr "Méret:"
+
+#~ msgid "Still loading...<br />Please be patient."
+#~ msgstr "Még tölt...<br />Várjon türelemmel."
+
+#~ msgid "Style"
+#~ msgstr "Stílus"
+
+#~ msgid "Styles"
+#~ msgstr "Stílusok"
+
+#~ msgid "Support"
+#~ msgstr "Támogatás"
+
+#~ msgid "Syntax error"
+#~ msgstr "Szintaktikai hiba"
+
+#~ msgid "Take a minute to get a coffee,<br />because it's loading..."
+#~ msgstr "Tartson szünetet és igyon egy kávét,<br />még mindig töltődik..."
+
+#~ msgid "The selected file exceed the maximum file size of %s."
+#~ msgstr "A kiválasztott fájl meghaladja a maximális %s fájlméretet."
+
+#~ msgid "There was a problem while uploading your file"
+#~ msgstr "Probléma merült fel a fájl feltöltése közben"
+
+#~ msgid ""
+#~ "This filter is global and will be removed for everybody if you continue."
+#~ msgstr ""
+#~ "Ez egy globális szűrő és mindenkitől el lesz távolítva, ha folytatja."
+
+#~ msgid "Tomorrow"
+#~ msgstr "Holnap"
+
+#~ msgid "True"
+#~ msgstr "Igaz"
+
+#~ msgid "Unknown nonliteral type "
+#~ msgstr "Ismeretlen nem szó szerinti típus "
+
+#~ msgid "Use by default"
+#~ msgstr "Alapértelmezésben használt"
+
+#~ msgid "User Error"
+#~ msgstr "Felhasználói hiba"
+
+#~ msgid "View %s"
+#~ msgstr "%s nézet"
+
+#~ msgid "View Fields"
+#~ msgstr "Mezők megtekintése"
+
+#~ msgid "Yesterday"
+#~ msgstr "Tegnap"
+
+#~ msgid ""
+#~ "You may not believe it,<br />but the application is actually loading..."
+#~ msgstr "Nem fogja elhinni,<br />de az alkalmazás tényleg töltődik..."
+
+#~ msgid "a day ago"
+#~ msgstr "egy napja"
+
+#~ msgid "about a minute ago"
+#~ msgstr "kb. egy perce"
+
+#~ msgid "about a month ago"
+#~ msgstr "kb. egy hónapja"
+
+#~ msgid "about a year ago"
+#~ msgstr "kb. egy éve"
+
+#~ msgid "about an hour ago"
+#~ msgstr "kb. egy órája"
+
+#~ msgid "as a new"
+#~ msgstr "mint új"
+
+#~ msgid "days"
+#~ msgstr "nap"
+
+#~ msgid "doesn't contain"
+#~ msgstr "nem tartalmazza"
+
+#~ msgid "greater than or equal to"
+#~ msgstr "nagyobb vagy egyenlő, mint"
+
+#~ msgid "is"
+#~ msgstr "egyenlő"
+
+#~ msgid "is after"
+#~ msgstr "későbbi"
+
+#~ msgid "is before"
+#~ msgstr "korábbi"
+
+#~ msgid "is between"
+#~ msgstr "között van"
+
+#~ msgid "is not"
+#~ msgstr "nem egyenlő"
+
+#~ msgid "less than"
+#~ msgstr "kisebb, mint"
+
+#~ msgid "less than a minute ago"
+#~ msgstr "kevesebb, mint egy perce"
+
+#~ msgid "less than or equal to"
+#~ msgstr "kisebb vagy egyenlő, mint"

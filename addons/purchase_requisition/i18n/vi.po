@@ -1,55 +1,32 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* purchase_requisition
-# 
+# * purchase_requisition
+#
 # Translators:
-# Tiffany Chang, 2024
-# Wil Odoo, 2024
-# Thi Huong Nguyen, 2025
-# 
+# Martin Trigaux, 2022
+# Thi Huong Nguyen, 2023
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Thi Huong Nguyen, 2025\n"
-"Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
+"POT-Creation-Date: 2026-04-10 18:39+0000\n"
+"PO-Revision-Date: 2026-08-07 07:25+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-19/"
+"purchase_requisition/vi/>\n"
+"Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: vi\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "$50"
-msgstr "50$"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "$500"
-msgstr "$500"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: purchase_requisition
 #: model:ir.actions.report,print_report_name:purchase_requisition.action_report_purchase_requisitions
 msgid "'Purchase Agreement - %s' % (object.name)"
 msgstr "'Hợp đồng mua hàng - %s' % (object.name)"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "02/16/2024"
-msgstr "02/16/2024"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "12/25/2024"
-msgstr "12/25/2024"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "2023-09-15"
-msgstr "2023-09-15"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
@@ -105,6 +82,7 @@ msgstr "Biểu tượng loại hoạt động"
 #: model:ir.model.fields,field_description:purchase_requisition.field_product_supplierinfo__purchase_requisition_id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__requisition_id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__name
+#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_search_inherit
 msgid "Agreement"
 msgstr "Hợp đồng"
 
@@ -134,6 +112,12 @@ msgstr "Đơn mua hàng dự trù"
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_form_inherit
 msgid "Alternative Purchase Order"
 msgstr "Đơn mua hàng dự trù"
+
+#. module: purchase_requisition
+#. odoo-python
+#: code:addons/purchase_requisition/wizard/purchase_requisition_create_alternative.py:0
+msgid "Alternative Purchase Orders"
+msgstr ""
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_requisition_alternative_warning_form
@@ -215,17 +199,12 @@ msgid "Cancelled by the agreement associated to this quotation."
 msgstr "Bị huỷ bởi hợp đồng liên quan đến báo giá này."
 
 #. module: purchase_requisition
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__product_uom_category_id
-msgid "Category"
-msgstr "Danh mục"
-
-#. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_line_compare_tree
 msgid "Choose"
 msgstr "Chọn"
 
 #. module: purchase_requisition
-#: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__partner_id
+#: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__partner_ids
 msgid "Choose a vendor for alternative PO"
 msgstr "Chọn nhà cung cấp cho đơn mua hàng dự trù"
 
@@ -302,15 +281,6 @@ msgid "Confirmed"
 msgstr "Đã xác nhận"
 
 #. module: purchase_requisition
-#: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_line__product_uom_category_id
-msgid ""
-"Conversion between Units of Measure can only occur if they belong to the "
-"same category. The conversion will be made based on the ratios."
-msgstr ""
-"Việc chuyển đổi qua lại giữa các Đơn vị tính chỉ có thể khả dụng nếu chúng "
-"cùng loại. Việc chuyển đổi sẽ được thực hiện dựa trên tỉ lệ."
-
-#. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__copy_products
 msgid "Copy Products"
 msgstr "Sao chép sản phẩm"
@@ -324,13 +294,19 @@ msgstr "Tạo đơn dự trù"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_form_inherit
 msgid ""
-"Create a call for tender by adding alternative requests for quotation to different vendors.\n"
-"                            Make your choice by selecting the best combination of lead time, OTD and/or total amount.\n"
-"                            By comparing product lines you can also decide to order some products from one vendor and others from another vendor."
+"Create a call for tender by adding alternative requests for quotation to "
+"different vendors.                                 Make your choice by "
+"selecting the best combination of lead time, OTD and/or total "
+"amount.                                 By comparing product lines you can "
+"also decide to order some products from one vendor and others from another "
+"vendor."
 msgstr ""
-"Tạo một thông báo mời thầu bằng cách thêm yêu cầu báo giá dự trù cho các nhà cung cấp khác nhau.\n"
-"                            Sau đó chọn nhà cung cấp có sự kết hợp hoàn hảo nhất giữa thời gian hoàn thành, tỷ lệ giao hàng đúng hạn và/hoặc tổng tiền.\n"
-"                            Bằng cách so sánh chi tiết sản phẩm, bạn cũng có thể quyết định đặt mua một số sản phẩm từ nhà cung cấp này và những sản phẩm khác từ nhà cung cấp khác."
+"Lập hồ sơ mời thầu bằng cách gửi các yêu cầu báo giá thay thế đến nhiều nhà "
+"cung cấp khác nhau. Sau đó, hãy lựa chọn phương án tối ưu dựa trên sự kết "
+"hợp tốt nhất giữa thời gian giao hàng, tỷ lệ giao hàng đúng hạn (OTD) và/"
+"hoặc tổng chi phí. Bằng cách so sánh từng dòng sản phẩm, bạn cũng có thể "
+"quyết định đặt một số mặt hàng từ nhà cung cấp này và những mặt hàng khác từ "
+"nhà cung cấp khác."
 
 #. module: purchase_requisition
 #. odoo-python
@@ -355,11 +331,6 @@ msgstr "Được tạo bởi"
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__create_date
 msgid "Created on"
 msgstr "Được tạo vào"
-
-#. module: purchase_requisition
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__creation_blocked
-msgid "Creation Blocked"
-msgstr "Thao tác tạo bị chặn"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__currency_id
@@ -388,11 +359,16 @@ msgid "Discard"
 msgstr "Huỷ bỏ"
 
 #. module: purchase_requisition
+#: model:ir.model.fields,field_description:purchase_requisition.field_product_product__display_name
+#: model:ir.model.fields,field_description:purchase_requisition.field_product_supplierinfo__display_name
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_group__display_name
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_line__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_alternative_warning__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__display_name
+#: model:ir.model.fields,field_description:purchase_requisition.field_res_config_settings__display_name
 msgid "Display Name"
 msgstr "Tên hiển thị"
 
@@ -424,8 +400,8 @@ msgid ""
 "End date cannot be earlier than start date. Please check dates for "
 "agreements: %s"
 msgstr ""
-"Ngày kết thúc không thể sớm hơn ngày bắt đầu. Vui lòng kiểm tra ngày của hợp"
-" đồng: %s"
+"Ngày kết thúc không thể sớm hơn ngày bắt đầu. Vui lòng kiểm tra ngày của hợp "
+"đồng: %s"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
@@ -451,7 +427,8 @@ msgstr "Font biểu tượng, ví dụ: fa-tasks"
 #: model_terms:ir.actions.act_window,help:purchase_requisition.action_purchase_requisition
 msgid ""
 "For a blanket order, you can record an agreement for a specific period\n"
-"            (e.g. a year) and you order products within this agreement to benefit\n"
+"            (e.g. a year) and you order products within this agreement to "
+"benefit\n"
 "            from the negotiated prices."
 msgstr ""
 "Đối với một hợp đồng khung, bạn có thể ghi nhận hợp đồng cho một kỳ cụ thể\n"
@@ -464,28 +441,21 @@ msgid "Future Activities"
 msgstr "Hoạt động trong tương lai"
 
 #. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
-msgid "Group By"
-msgstr "Nhóm theo"
-
-#. module: purchase_requisition
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__has_alternatives
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_kpis_tree_inherit_purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_tree_inherit_purchase_requisition
-msgid "Has Alternatives"
-msgstr "Có đơn dự trù"
-
-#. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__has_message
 msgid "Has Message"
 msgstr "Có tin nhắn"
 
 #. module: purchase_requisition
+#: model:ir.model.fields,field_description:purchase_requisition.field_product_product__id
+#: model:ir.model.fields,field_description:purchase_requisition.field_product_supplierinfo__id
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_group__id
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_line__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_alternative_warning__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__id
+#: model:ir.model.fields,field_description:purchase_requisition.field_res_config_settings__id
 msgid "ID"
 msgstr "ID"
 
@@ -511,25 +481,10 @@ msgid "If checked, some messages have a delivery error."
 msgstr "Nếu chọn, một số tin nhắn sẽ có lỗi gửi."
 
 #. module: purchase_requisition
-#: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__creation_blocked
-msgid ""
-"If the chosen vendor or if any of the products in the original PO have a "
-"blocking warning then we prevent creation of alternative PO. This is because"
-" normally these fields are cleared w/warning message within form view, but "
-"we cannot recreate that in this case."
-msgstr ""
-"Nếu nhà cung cấp được chọn hoặc nếu bất kỳ sản phẩm nào trong đơn mua hàng "
-"gốc có cảnh báo chặn thì chúng tôi sẽ chặn việc tạo đơn mua hàng dự trù. "
-"Điều này là do thông thường các trường này bị xóa với thông báo cảnh báo "
-"trong chế độ xem biểu mẫu, nhưng chúng tôi không thể tạo lại trường đó trong"
-" trường hợp này."
-
-#. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__copy_products
 msgid ""
 "If this is checked, the product quantities of the original PO will be copied"
-msgstr ""
-"Nếu được chọn, số lượng sản phẩm của đơn mua hàng gốc sẽ được sao chép"
+msgstr "Nếu được chọn, số lượng sản phẩm của đơn mua hàng gốc sẽ được sao chép"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__message_is_follower
@@ -567,12 +522,12 @@ msgstr "Hoạt động chậm trễ"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.res_config_settings_view_form_purchase_requisition
 msgid "Link RFQs together and compare them"
-msgstr "Liên kết các YCBG với nhau và so sánh chúng"
+msgstr "Liên kết các RFQ với nhau và so sánh chúng"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_form_inherit
 msgid "Link to Existing RfQ"
-msgstr "Liên kết với YCBG hiện có"
+msgstr "Liên kết với RFQ hiện có"
 
 #. module: purchase_requisition
 #: model:res.groups,name:purchase_requisition.group_purchase_alternatives
@@ -595,9 +550,14 @@ msgid "Mitchell Admin"
 msgstr "Mitchell Admin"
 
 #. module: purchase_requisition
+#: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
+msgid "My Activities"
+msgstr "Hoạt động của tôi"
+
+#. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__my_activity_date_deadline
 msgid "My Activity Deadline"
-msgstr "Hạn chót hoạt động của tôi"
+msgstr "Thời hạn hoạt động của tôi"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
@@ -633,7 +593,7 @@ msgstr "Sự kiện trên lịch cho hoạt động tiếp theo"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Hạn chót cho hoạt động tiếp theo"
+msgstr "Thời hạn cho hoạt động tiếp theo"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__activity_summary
@@ -720,11 +680,6 @@ msgid "Product"
 msgstr "Sản phẩm"
 
 #. module: purchase_requisition
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__product_uom_id
-msgid "Product Unit of Measure"
-msgstr "Đơn vị tính sản phẩm"
-
-#. module: purchase_requisition
 #: model:ir.model,name:purchase_requisition.model_product_product
 msgid "Product Variant"
 msgstr "Biến thể sản phẩm"
@@ -790,11 +745,6 @@ msgid "Purchase Orders"
 msgstr "Đơn mua hàng"
 
 #. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_search_inherit
-msgid "Purchase Orders with requisition"
-msgstr "Đơn mua hàng có yêu cầu"
-
-#. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "Purchase Reference"
 msgstr "Tham chiếu mua hàng"
@@ -835,12 +785,12 @@ msgstr "Số lượng"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "RFQ"
-msgstr "YCBG"
+msgstr "RFQ"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "RFQs/Orders"
-msgstr "YCBG/Đơn hàng"
+msgstr "RFQ/Đơn hàng"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__rating_ids
@@ -868,11 +818,6 @@ msgid "Request for Quotations"
 msgstr "Yêu cầu báo giá"
 
 #. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_search_inherit
-msgid "Requisition"
-msgstr "Yêu cầu"
-
-#. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "Reset to Draft"
 msgstr "Đặt lại thành nháp"
@@ -894,8 +839,8 @@ msgstr "Tìm kiếm hợp đồng mua hàng"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
-msgid "Show all records which has next action date is before today"
-msgstr "Hiển thị tất cả bản ghi có ngày xử lý tiếp theo trước ngày hôm nay"
+msgid "Show all records whose next activity date is past"
+msgstr "Hiển thị tất cả các bản ghi có ngày hoạt động tiếp theo đã quá hạn"
 
 #. module: purchase_requisition
 #. odoo-python
@@ -909,8 +854,8 @@ msgstr "Một số thông tin chưa được xoá"
 msgid ""
 "Some quantities were not cleared because their status is not a RFQ status."
 msgstr ""
-"Một số số lượng chưa bị xoá vì trạng thái của chúng không phải là trạng thái"
-" YCBG."
+"Một số số lượng chưa bị xoá vì trạng thái của chúng không phải là trạng thái "
+"RFQ."
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__date_start
@@ -969,18 +914,6 @@ msgstr "Đơn mua hàng gốc mà đơn mua hàng dự trù này đang được 
 
 #. module: purchase_requisition
 #. odoo-python
-#: code:addons/purchase_requisition/wizard/purchase_requisition_create_alternative.py:0
-msgid ""
-"The vendor you have selected or at least one of the products you are copying"
-" from the original order has a blocking warning on it and cannot be selected"
-" to create an alternative."
-msgstr ""
-"Nhà cung cấp bạn đã chọn hoặc ít nhất một trong các sản phẩm bạn đang sao "
-"chép từ đơn đặt hàng ban đầu có chứa cảnh báo chặn, nên bạn không thể chọn "
-"để tạo đơn dự trù."
-
-#. module: purchase_requisition
-#. odoo-python
 #: code:addons/purchase_requisition/models/purchase.py:0
 msgid "There are no quantities to clear."
 msgstr "Không có số lượng nào để xoá."
@@ -997,21 +930,17 @@ msgstr ""
 
 #. module: purchase_requisition
 #. odoo-python
-#: code:addons/purchase_requisition/wizard/purchase_requisition_create_alternative.py:0
-msgid "This is a blocking warning!\n"
-msgstr "Đây là một cảnh báo chặn!\n"
-
-#. module: purchase_requisition
-#. odoo-python
 #: code:addons/purchase_requisition/models/purchase_requisition.py:0
 msgid ""
 "To close this purchase requisition, cancel related Requests for Quotation.\n"
 "\n"
-"Imagine the mess if someone confirms these duplicates: double the order, double the trouble :)"
+"Imagine the mess if someone confirms these duplicates: double the order, "
+"double the trouble :)"
 msgstr ""
 "Để đóng yêu cầu mua hàng này, hãy hủy Yêu cầu báo giá liên quan.\n"
 "\n"
-"Thử tưởng tượng sự lộn xộn nếu ai đó xác nhận đơn hàng trùng lặp này: nhân đôi đơn hàng, nhân đôi rắc rối :)"
+"Thử tưởng tượng sự lộn xộn nếu ai đó xác nhận đơn hàng trùng lặp này: nhân "
+"đôi đơn hàng, nhân đôi rắc rối :)"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
@@ -1030,6 +959,7 @@ msgid "Type of the exception activity on record."
 msgstr "Loại hoạt động ngoại lệ trong bản ghi."
 
 #. module: purchase_requisition
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__product_uom_id
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "Unit"
 msgstr "Đơn vị"
@@ -1041,13 +971,8 @@ msgid "Unit Price"
 msgstr "Đơn giá"
 
 #. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
-msgid "UoM"
-msgstr "ĐVT"
-
-#. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__vendor_id
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__partner_id
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__partner_ids
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_line_compare_tree
 msgid "Vendor"
 msgstr "Nhà cung cấp"
@@ -1100,15 +1025,6 @@ msgid "What about the alternative Requests for Quotations?"
 msgstr "Còn các Yêu cầu báo giá thay thế thì sao?"
 
 #. module: purchase_requisition
-#: model:ir.model.fields,help:purchase_requisition.field_purchase_order__has_alternatives
-msgid ""
-"Whether or not this purchase order is linked to another purchase order as an"
-" alternative."
-msgstr ""
-"Đơn mua hàng này có được liên kết với một đơn mua hàng khác để làm đơn dự "
-"trù hay không."
-
-#. module: purchase_requisition
 #: model:ir.model,name:purchase_requisition.model_purchase_requisition_alternative_warning
 msgid "Wizard in case PO still has open alternative requests for quotation"
 msgstr "Công cụ nếu đơn mua hàng có yêu cầu báo giá dự trù chưa hoàn tất"
@@ -1150,8 +1066,8 @@ msgstr "Bạn không thể xác nhận hợp đồng khung chứa dòng không c
 #. odoo-python
 #: code:addons/purchase_requisition/models/purchase_requisition.py:0
 msgid ""
-"You cannot confirm agreement '%(agreement)s' because it does not contain any"
-" product lines."
+"You cannot confirm agreement '%(agreement)s' because it does not contain any "
+"product lines."
 msgstr ""
 "Bạn không thể xác nhận hợp đồng '%(agreement)s' vì hiện không có dòng nào "
 "chứa sản phẩm."
@@ -1170,3 +1086,268 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "e.g. PO0025"
 msgstr "vd: PO0025"
+
+#~ msgid "$50"
+#~ msgstr "50$"
+
+#~ msgid "$500"
+#~ msgstr "$500"
+
+#~ msgid "02/16/2024"
+#~ msgstr "02/16/2024"
+
+#~ msgid "12/25/2024"
+#~ msgstr "12/25/2024"
+
+#~ msgid "2023-09-15"
+#~ msgstr "2023-09-15"
+
+#~ msgid "<strong>Agreement Deadline:</strong><br/>"
+#~ msgstr "<strong>Hạn chót hợp đồng:</strong><br/>"
+
+#~ msgid "<strong>Date</strong>"
+#~ msgstr "<strong>Ngày</strong>"
+
+#~ msgid "<strong>Description</strong>"
+#~ msgstr "<strong>Mô tả</strong>"
+
+#~ msgid "<strong>Product UoM</strong>"
+#~ msgstr "<strong>Đơn vị tính sản phẩm</strong>"
+
+#~ msgid "<strong>Qty</strong>"
+#~ msgstr "<strong>SL</strong>"
+
+#~ msgid "<strong>Reference </strong>"
+#~ msgstr "<strong>Mã </strong>"
+
+#~ msgid "<strong>Scheduled Date</strong>"
+#~ msgstr "<strong>Ngày theo kế hoạch</strong>"
+
+#~ msgid "<strong>Scheduled Ordering Date:</strong><br/>"
+#~ msgstr "<strong>Ngày đặt hàng theo kế hoạch:</strong><br/>"
+
+#~ msgid "<strong>Source:</strong><br/>"
+#~ msgstr "<strong>Nguồn:</strong><br/>"
+
+#~ msgid "<strong>Vendor </strong>"
+#~ msgstr "<strong>Nhà cung cấp </strong>"
+
+#~ msgid "Agreement Deadline"
+#~ msgstr "Hạn chót hợp đồng"
+
+#~ msgid "Agreement Selection Type"
+#~ msgstr "Loại lựa chọn hợp đồng"
+
+#~ msgid "Alternative Po Count"
+#~ msgstr "Số lượng đơn mua hàng dự trù"
+
+#~ msgid "Bid Selection"
+#~ msgstr "Lựa chọn giá thầu"
+
+#~ msgid "Category"
+#~ msgstr "Danh mục"
+
+#~ msgid ""
+#~ "Conversion between Units of Measure can only occur if they belong to the "
+#~ "same category. The conversion will be made based on the ratios."
+#~ msgstr ""
+#~ "Việc chuyển đổi qua lại giữa các Đơn vị tính chỉ có thể khả dụng nếu "
+#~ "chúng cùng loại. Việc chuyển đổi sẽ được thực hiện dựa trên tỉ lệ."
+
+#~ msgid ""
+#~ "Create a call for tender by adding alternative request for quotations to "
+#~ "different vendors.\n"
+#~ "                            Make your choice by selecting the best "
+#~ "combination of lead time, OTD and/or total amount.\n"
+#~ "                            By comparing product lines you can also "
+#~ "decide to order some products from one vendor and others from another "
+#~ "vendor."
+#~ msgstr ""
+#~ "Tạo một thông báo mời thầu bằng cách thêm yêu cầu báo giá dự trù cho các "
+#~ "nhà cung cấp khác nhau.\n"
+#~ "                            Sau đó chọn nhà cung cấp có sự kết hợp hoàn "
+#~ "hảo nhất giữa thời gian giao hàng, tỷ lệ giao hàng đúng hạn và/hoặc tổng "
+#~ "tiền.\n"
+#~ "                            Bằng cách so sánh chi tiết sản phẩm, bạn cũng "
+#~ "có thể quyết định đặt mua một số sản phẩm từ nhà cung cấp này và những "
+#~ "sản phẩm khác từ nhà cung cấp khác."
+
+#~ msgid "Creation Blocked"
+#~ msgstr "Thao tác tạo bị chặn"
+
+#~ msgid "Custom Description"
+#~ msgstr "Mô tả tùy chỉnh"
+
+#~ msgid "Data for new quotations"
+#~ msgstr "Dữ liệu cho báo giá mới"
+
+#~ msgid "Delivery Date"
+#~ msgstr "Ngày giao hàng"
+
+#~ msgid "Do not create RfQ lines automatically"
+#~ msgstr "Không tự động tạo chi tiết YCBG"
+
+#~ msgid "Group By"
+#~ msgstr "Nhóm theo"
+
+#~ msgid "Has Alternatives"
+#~ msgstr "Có đơn dự trù"
+
+#~ msgid ""
+#~ "If the chosen vendor or if any of the products in the original PO have a "
+#~ "blocking warning then we prevent creation of alternative PO. This is "
+#~ "because normally these fields are cleared w/warning message within form "
+#~ "view, but we cannot recreate that in this case."
+#~ msgstr ""
+#~ "Nếu nhà cung cấp được chọn hoặc nếu bất kỳ sản phẩm nào trong đơn mua "
+#~ "hàng gốc có cảnh báo chặn thì chúng tôi sẽ chặn việc tạo đơn mua hàng dự "
+#~ "trù. Điều này là do thông thường các trường này bị xóa với thông báo cảnh "
+#~ "báo trong chế độ xem biểu mẫu, nhưng chúng tôi không thể tạo lại trường "
+#~ "đó trong trường hợp này."
+
+#~ msgid "In negotiation"
+#~ msgstr "Đang đàm phán"
+
+#~ msgid "Lines"
+#~ msgstr "Chi tiết"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Số tin nhắn cần xử lý"
+
+#~ msgid "Ongoing"
+#~ msgstr "Đang tiến hành"
+
+#~ msgid "Ordered Quantities"
+#~ msgstr "Số lượng đặt hàng"
+
+#~ msgid "Price Unit"
+#~ msgstr "Đơn giá"
+
+#~ msgid "Product Unit of Measure"
+#~ msgstr "Đơn vị tính sản phẩm"
+
+#~ msgid "Purchase Agreement Types"
+#~ msgstr "Loại hợp đồng mua hàng"
+
+#~ msgid "Purchase Orders with requisition"
+#~ msgstr "Đơn mua hàng có yêu cầu"
+
+#~ msgid "Purchase Requisition Type"
+#~ msgstr "Loại yêu cầu mua hàng"
+
+#~ msgid "Quantities"
+#~ msgstr "Số lượng"
+
+#~ msgid "Reference:"
+#~ msgstr "Mã tham chiếu:"
+
+#~ msgid "Requests for Quotation Details"
+#~ msgstr "Chi tiết Yêu cầu báo giá"
+
+#~ msgid "Requisition"
+#~ msgstr "Yêu cầu"
+
+#~ msgid "Scheduled Date"
+#~ msgstr "Ngày theo kế hoạch"
+
+#~ msgid "Select multiple RFQ (non-exclusive)"
+#~ msgstr "Chọn nhiều YCBG (không phải duy nhất)"
+
+#~ msgid "Select only one RFQ (exclusive)"
+#~ msgstr "Chỉ chọn một RFQ (duy nhất)"
+
+#~ msgid ""
+#~ "Select only one RFQ (exclusive):  when a purchase order is confirmed, "
+#~ "cancel the remaining purchase order.\n"
+#~ "\n"
+#~ "                    Select multiple RFQ (non-exclusive): allows multiple "
+#~ "purchase orders. On confirmation of a purchase order it does not cancel "
+#~ "the remaining orders"
+#~ msgstr ""
+#~ "Chỉ chọn một YCBG (duy nhất): khi một đơn mua hàng được xác nhận, hủy đơn "
+#~ "mua hàng còn lại.\n"
+#~ "\n"
+#~ "                    Chọn nhiều YCBG (không phải duy nhất): cho phép nhiều "
+#~ "đơn mua hàng. Khi xác nhận một đơn mua hàng, các đơn mua hàng còn lại sẽ "
+#~ "không bị huỷ"
+
+#~ msgid "Sequence"
+#~ msgstr "Trình tự"
+
+#~ msgid ""
+#~ "Set active to false to hide the Purchase Agreement Types without removing "
+#~ "it."
+#~ msgstr ""
+#~ "Đặt đang hoạt động thành sai để ẩn Loại Hợp đồng Mua hàng mà không cần "
+#~ "xóa. "
+
+#~ msgid "Set quantities manually"
+#~ msgstr "Đặt số lượng theo cách thủ công"
+
+#~ msgid "Show all records which has next action date is before today"
+#~ msgstr "Hiển thị tất cả dữ liệu có ngày xử lý tiếp theo trước ngày hôm nay"
+
+#~ msgid "Source Document"
+#~ msgstr "Chứng từ gốc"
+
+#~ msgid "State Blanket Order"
+#~ msgstr "Hợp đồng khung"
+
+#~ msgid ""
+#~ "The expected and scheduled delivery date where all the products are "
+#~ "received"
+#~ msgstr ""
+#~ "Ngày giao hàng dự kiến và theo kế hoạch khi toàn bộ hàng hoá được nhận"
+
+#~ msgid ""
+#~ "The vendor you have selected or at least one of the products you are "
+#~ "copying from the original order has a blocking warning on it and cannot "
+#~ "be selected to create an alternative."
+#~ msgstr ""
+#~ "Nhà cung cấp bạn đã chọn hoặc ít nhất một trong các sản phẩm bạn đang sao "
+#~ "chép từ đơn đặt hàng ban đầu có chứa cảnh báo chặn, nên bạn không thể "
+#~ "chọn để tạo đơn dự trù."
+
+#~ msgid "This is a blocking warning!\n"
+#~ msgstr "Đây là một cảnh báo chặn!\n"
+
+#~ msgid "UoM"
+#~ msgstr "Đơn vị tính"
+
+#~ msgid "Use lines of agreement"
+#~ msgstr "Dùng chi tiết hợp đồng"
+
+#~ msgid "Use quantities of agreement"
+#~ msgstr "Dùng số lượng hợp đồng"
+
+#~ msgid "Validate"
+#~ msgstr "Xác nhận"
+
+#~ msgid ""
+#~ "Whether or not this purchase order is linked to another purchase order as "
+#~ "an alternative."
+#~ msgstr ""
+#~ "Đơn mua hàng này có được liên kết với một đơn mua hàng khác để làm đơn dự "
+#~ "trù hay không."
+
+#~ msgid "You cannot confirm agreement '%s' because there is no product line."
+#~ msgstr "Bạn không thể xác nhận hợp đồng '%s' vì hiện không có sản phẩm nào."
+
+#~ msgid "You cannot confirm the blanket order without price."
+#~ msgstr "Bạn không thể xác nhận hợp đồng khung không có giá."
+
+#~ msgid "You cannot confirm the blanket order without quantity."
+#~ msgstr "Bạn không thể xác nhận hợp đồng khung không có số lượng."
+
+#~ msgid ""
+#~ "You have to cancel or validate every RfQ before closing the purchase "
+#~ "requisition."
+#~ msgstr ""
+#~ "Bạn phải huỷ hoặc xác nhận mọi YCBG liên quan trước khi đóng một yêu cầu "
+#~ "mua hàng."
+
+#~ msgid ""
+#~ "alternative request for quotations are still open, do you want to cancel "
+#~ "them?"
+#~ msgstr ""
+#~ "yêu cầu báo giá dự trù vẫn chưa hoàn tất, bạn có muốn huỷ chúng không?"

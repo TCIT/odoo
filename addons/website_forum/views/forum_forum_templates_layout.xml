@@ -42,7 +42,7 @@
                     </div>
                 </div>
                 <div class="d-flex gap-2 align-items-baseline">
-                    <h3 t-attf-class="col-lg-10 my-0" t-out="question.name"/>
+                    <h1 t-attf-class="col-lg-10 my-0 h3" t-out="question.name"/>
                     <div class="col d-flex justify-content-end align-items-center">
                         <i t-if="question.state == 'close'" class="fa fa-lock ms-2 fs-4" title="Closed" data-bs-toggle="tooltip" data-bs-placement="top"/>
                         <span t-elif="not question.active" class="badge text-bg-danger">
@@ -72,16 +72,18 @@
         <t t-elif="_page_name == 'list_questions' or is_edit">
             <t t-set="target" t-value="post.parent_id if is_answer else post"/>
             <div class="o_wforum_breadcrumb_root_list_or_edit d-flex">
-                <div t-if="breadcrumb_kind=='base'" class="col-10 col-lg flex-grow-1 fs-5">
+                <h1 t-if="breadcrumb_kind=='base'" class="col-10 col-lg flex-grow-1 fs-5">
                     <span t-if="not is_edit" class="fw-bold mb-0" t-out="_forum_name"/>
                     <span t-elif="not is_answer" class="fw-bold mb-0">Edit Question</span>
                     <span t-else="is_answer" class="fw-bold mb-0">Edit Answer</span>
-                </div>
+                </h1>
             </div>
         </t>
         <ol t-else="" class="breadcrumb col-10 col-lg flex-grow-1 flex-nowrap my-0 p-0 fs-5">
             <li class="o_wforum_breadcrumb_root breadcrumb-item text-nowrap text-truncatet">
-                <a t-attf-href="/forum/#{ _forum_slug }" t-out="_forum_name"/>
+                <h1 class="m-0 fw-normal d-inline h4-fs">
+                    <a t-attf-href="/forum/#{ _forum_slug }" t-out="_forum_name"/>
+                </h1>
             </li>
             <li t-if="queue_type" class="breadcrumb-item text-nowrap d-none d-lg-flex">
                 <span>Moderation</span>
@@ -169,7 +171,7 @@
                         <t t-set="search_type" t-value="'forums'"/>
                         <t t-set="action" t-value="'/forum/%s' % (_forum_slug)"/>
                     </t>
-                    <t t-set="display_description" t-valuef="true"/>
+                    <t t-set="display_description" t-valuef="false"/>
                     <t t-set="display_detail" t-valuef="true"/>
                     <t t-set="_form_classes" t-valuef="flex-grow-1"/>
                     <t t-set="_input_classes" t-valuef="border-0 bg-light"/>
@@ -206,7 +208,7 @@
                 <meta name="robots" content="noindex, nofollow" />
             </t>
             <div class="text-center text-muted">
-                <p class="css_editable_hidden"><h2>This forum has been archived.</h2></p>
+                <p class="css_editable_hidden"><h1 class="h2-fs">This forum has been archived.</h1></p>
             </div>
         </t>
         <t t-else="">
@@ -251,7 +253,7 @@
 <template id="user_sidebar_mobile">
     <div id="o_wforum_offcanvas" class="o_website_offcanvas offcanvas offcanvas-end d-lg-none mw-75 p-0 overflow-visible">
         <button type="button" class="btn-close mt-3 ms-auto me-3" data-bs-dismiss="offcanvas" aria-label="Close"/>
-        <div class="offcanvas-header align-items-start px-0" t-call="website_forum.user_sidebar_header"/>
+        <div class="offcanvas-header align-items-start px-0"><t t-call="website_forum.user_sidebar_header"/></div>
         <div class="offcanvas-body d-flex flex-column py-0 nav">
             <t t-call="website_forum.user_sidebar_body"/>
             <div t-if="forum" class="mb-2 d-flex justify-content-center align-items-end flex-grow-1">
@@ -273,12 +275,12 @@
         </div>
     </div>
     <div t-if="uid" class="o_wforum_sidebar_section mt-4 mb-2">
-        <a t-attf-href="/forum/user/#{ uid }?forum_id=#{ forum.id if forum else '' }&amp;forum_origin=#{ request.httprequest.path }"
+        <a t-attf-href="/profile/user/#{ uid }?forum_id=#{ forum.id if forum else '' }"
             class="btn w-100 py-1 text-start d-flex align-items-center" data-bs-toggle="tooltip" data-trigger="hover"
             title="My profile">
-            <img class="o_wforum_avatar rounded-circle o_object_fit_cover" t-att-src="request.website.image_url(user, 'avatar_128', '60x60')" alt="Avatar"/>
+            <img class="o_wforum_avatar rounded-circle object-fit-cover" t-att-src="request.website.image_url(user, 'avatar_128', '60x60')" alt="Avatar"/>
             <div class="d-flex flex-column justify-content-center ms-2">
-                <h6 class="mt-0 mb-1" t-out="user_id.name"/>
+                <span class="mt-0 mb-1 h6-fs fw-bold" t-out="user_id.name"/>
                 <span class="fs-6 text-reset opacity-50"><t t-out="user_id.karma"/> XP</span>
             </div>
         </a>
@@ -304,12 +306,12 @@
             </a>
         </t>
         <!-- People -->
-        <a t-attf-class="nav-link my-1 py-1 text-reset" t-attf-href="/profile/users?forum_origin=#{request.httprequest.path}">
+        <a t-attf-class="nav-link my-1 py-1 text-reset" t-attf-href="/profile/users">
             <i class="fa fa-users fa-fw opacity-50"/> People
         </a>
 
         <!-- Badges -->
-        <a t-attf-class="nav-link my-1 py-1 text-reset" t-attf-href="/profile/ranks_badges?forum_origin=#{request.httprequest.path}">
+        <a t-attf-class="nav-link my-1 py-1 text-reset" t-attf-href="/profile/ranks_badges">
             <i class="fa fa-shield fa-fw opacity-50"/> Badges
         </a>
     </div>
@@ -429,7 +431,7 @@
         <h1 class="mt-4">Question not found!</h1>
         <p>Sorry, this question is not available anymore.</p>
         <p>
-            <a class="btn-link" t-attf-href="/forum"><i class="oi oi-arrow-right display-inline-block"/> Return to questions list</a>
+            <a class="btn-link o_translate_inline" t-attf-href="/forum"><i class="oi oi-arrow-right display-inline-block"/> Return to questions list</a>
         </p>
     </t>
 </template>

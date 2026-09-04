@@ -2,7 +2,7 @@
 {
     'name': "Spreadsheet dashboard for time sheets",
     'version': '1.0',
-    'category': 'Hidden',
+    'category': 'Productivity/Dashboard',
     'summary': 'Spreadsheet',
     'description': 'Spreadsheet',
     'depends': ['spreadsheet_dashboard', 'sale_timesheet'],
@@ -11,5 +11,6 @@
     ],
     'installable': True,
     'auto_install': ['sale_timesheet'],
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

@@ -1,4 +1,9 @@
-import { formatDate as _formatDate, formatDateTime as _formatDateTime } from "@web/core/l10n/dates";
+import {
+    formatDate as _formatDate,
+    formatDateTime as _formatDateTime,
+    toLocaleDateString,
+    toLocaleDateTimeString,
+} from "@web/core/l10n/dates";
 import { localization as l10n } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
@@ -8,7 +13,7 @@ import {
     humanNumber,
     insertThousandsSep,
 } from "@web/core/utils/numbers";
-import { escape, exprToBoolean } from "@web/core/utils/strings";
+import { exprToBoolean } from "@web/core/utils/strings";
 
 import { markup } from "@odoo/owl";
 import { formatCurrency } from "@web/core/currency";
@@ -52,19 +57,18 @@ export function formatBinary(value) {
  * @returns {string}
  */
 export function formatBoolean(value) {
-    return markup(`
+    return markup`
         <div class="o-checkbox d-inline-block me-2">
             <input id="boolean_checkbox" type="checkbox" class="form-check-input" disabled ${
                 value ? "checked" : ""
             }/>
             <label for="boolean_checkbox" class="form-check-label"/>
-        </div>`);
+        </div>`;
 }
 
 /**
  * @param {string} value
  * @param {Object} [options] additional options
- * @param {boolean} [options.escape=false] if true, escapes the formatted value
  * @param {boolean} [options.isPassword=false] if true, returns '********'
  *   instead of the formatted value
  * @returns {string}
@@ -73,37 +77,39 @@ export function formatChar(value, options) {
     if (options && options.isPassword) {
         return "*".repeat(value ? value.length : 0);
     }
-    if (options && options.escape) {
-        value = escape(value);
-    }
-    return value;
+    return value || "";
 }
-formatChar.extractOptions = ({ attrs }) => {
-    return {
-        isPassword: exprToBoolean(attrs.password),
-    };
-};
+formatChar.extractOptions = ({ attrs }) => ({
+    isPassword: exprToBoolean(attrs.password),
+});
 
-export function formatDate(value, options) {
-    return _formatDate(value, options);
+export function formatDate(value, options = {}) {
+    if (options.numeric) {
+        return _formatDate(value, options);
+    } else {
+        return toLocaleDateString(value);
+    }
 }
-formatDate.extractOptions = ({ options }) => {
-    return { condensed: options.condensed };
-};
+formatDate.extractOptions = ({ options }) => ({
+    numeric: exprToBoolean(options.numeric ?? false),
+});
 
 export function formatDateTime(value, options = {}) {
-    if (options.showTime === false) {
-        return _formatDate(value, options);
+    if (options.numeric) {
+        if (options.showTime === false) {
+            return _formatDate(value, options);
+        }
+        return _formatDateTime(value, options);
+    } else {
+        return toLocaleDateTimeString(value, options);
     }
-    return _formatDateTime(value, options);
 }
-formatDateTime.extractOptions = ({ attrs, options }) => {
-    return {
-        ...formatDate.extractOptions({ attrs, options }),
-        showSeconds: exprToBoolean(options.show_seconds ?? true),
-        showTime: exprToBoolean(options.show_time ?? true),
-    };
-};
+formatDateTime.extractOptions = ({ attrs, options }) => ({
+    ...formatDate.extractOptions({ attrs, options }),
+    showSeconds: exprToBoolean(options.show_seconds ?? false),
+    showTime: exprToBoolean(options.show_time ?? true),
+    showDate: exprToBoolean(options.show_date ?? true),
+});
 
 /**
  * Returns a string representing a float.  The result takes into account the
@@ -113,6 +119,8 @@ formatDateTime.extractOptions = ({ attrs, options }) => {
  * @param {Object} [options]
  * @param {number[]} [options.digits] the number of digits that should be used,
  *   instead of the default digits precision in the field.
+ * @param {number} [options.minDigits] the minimum number of decimal digits to display.
+ *   Displays maximum 6 decimal places if no precision is provided.
  * @param {boolean} [options.humanReadable] if true, large numbers are formatted
  *   to a human readable format.
  * @param {string} [options.decimalPoint] decimal separating character
@@ -131,6 +139,9 @@ export function formatFloat(value, options = {}) {
     if (!options.digits && options.field) {
         options.digits = options.field.digits;
     }
+    if (!options.minDigits && options.field) {
+        options.minDigits = options.field.min_display_digits;
+    }
     return formatFloatNumber(value, options);
 }
 formatFloat.extractOptions = ({ attrs, options }) => {
@@ -142,9 +153,11 @@ formatFloat.extractOptions = ({ attrs, options }) => {
     } else if (options.digits) {
         digits = options.digits;
     }
+    const minDigits = options.minDigits;
     const humanReadable = !!options.human_readable;
     const decimals = options.decimals || 0;
-    return { decimals, digits, humanReadable };
+    const trailingZeros = !options.hide_trailing_zeros;
+    return { decimals, digits, minDigits, humanReadable, trailingZeros };
 };
 
 /**
@@ -166,12 +179,10 @@ export function formatFloatFactor(value, options = {}) {
     }
     return formatFloatNumber(value * factor, options);
 }
-formatFloatFactor.extractOptions = ({ attrs, options }) => {
-    return {
-        ...formatFloat.extractOptions({ attrs, options }),
-        factor: options.factor,
-    };
-};
+formatFloatFactor.extractOptions = ({ attrs, options }) => ({
+    ...formatFloat.extractOptions({ attrs, options }),
+    factor: options.factor,
+});
 
 /**
  * Returns a string representing a time value, from a float.  The idea is that
@@ -215,11 +226,9 @@ export function formatFloatTime(value, options = {}) {
     }
     return `${isNegative ? "-" : ""}${hour}:${min}${sec}`;
 }
-formatFloatTime.extractOptions = ({ options }) => {
-    return {
-        displaySeconds: options.displaySeconds,
-    };
-};
+formatFloatTime.extractOptions = ({ options }) => ({
+    displaySeconds: options.displaySeconds,
+});
 
 /**
  * Returns a string representing an integer.  If the value is false, then we
@@ -250,21 +259,19 @@ export function formatInteger(value, options = {}) {
     const thousandsSep = "thousandsSep" in options ? options.thousandsSep : l10n.thousandsSep;
     return insertThousandsSep(value.toFixed(0), thousandsSep, grouping);
 }
-formatInteger.extractOptions = ({ attrs, options }) => {
-    return {
-        decimals: options.decimals || 0,
-        humanReadable: !!options.human_readable,
-        isPassword: exprToBoolean(attrs.password),
-    };
-};
+formatInteger.extractOptions = ({ attrs, options }) => ({
+    decimals: options.decimals || 0,
+    humanReadable: !!options.human_readable,
+    isPassword: exprToBoolean(attrs.password),
+});
 
 /**
  * Returns a string representing a many2one value. The value is expected to be
- * either `false` or an array in the form [id, display_name]. The returned
- * value will then be the display name of the given value, or an empty string
- * if the value is false.
+ * either `false` or an array in the form [id, display_name] or an object
+ * containing at least the key "display_name". The returned value will then be
+ * the display name of the given value, or an empty string if the value is false.
  *
- * @param {[number, string] | false} value
+ * @param {[number, string] | { display_name: string } | false} value
  * @param {Object} [options] additional options
  * @param {boolean} [options.escape=false] if true, escapes the formatted value
  * @returns {string}
@@ -272,8 +279,8 @@ formatInteger.extractOptions = ({ attrs, options }) => {
 export function formatMany2one(value, options) {
     if (!value) {
         value = "";
-    } else if (value[1]) {
-        value = value[1];
+    } else if ("display_name" in value ? value.display_name : value[1]) {
+        value = "display_name" in value ? value.display_name : value[1];
     } else {
         value = _t("Unnamed");
     }
@@ -339,16 +346,15 @@ export function formatMonetary(value, options = {}) {
             (options.field && options.field.currency_field) ||
             "currency_id";
         const dataValue = options.data[currencyField];
-        currencyId = Array.isArray(dataValue) ? dataValue[0] : dataValue;
+        currencyId = dataValue?.id ?? dataValue;
     }
     return formatCurrency(value, currencyId, options);
 }
-formatMonetary.extractOptions = ({ options }) => {
-    return {
-        noSymbol: options.no_symbol,
-        currencyField: options.currency_field,
-    };
-};
+formatMonetary.extractOptions = ({ options }) => ({
+    noSymbol: options.no_symbol,
+    currencyField: options.currency_field,
+    trailingZeros: !options.hide_trailing_zeros,
+});
 
 /**
  * Returns a string representing the given value (multiplied by 100)
@@ -393,7 +399,10 @@ function formatProperties(value, field) {
  * @returns {string}
  */
 export function formatReference(value, options) {
-    return formatMany2one(value ? [value.resId, value.displayName] : false, options);
+    return formatMany2one(
+        value ? { id: value.resId, display_name: value.displayName } : false,
+        options
+    );
 }
 
 /**
@@ -403,7 +412,7 @@ export function formatReference(value, options) {
  * @returns {string}
  */
 export function formatMany2oneReference(value) {
-    return value ? formatMany2one([value.resId, value.displayName]) : "";
+    return value ? formatMany2one({ id: value.resId, display_name: value.displayName }) : "";
 }
 
 /**
@@ -438,7 +447,7 @@ export function formatText(value) {
  * @returns {html}
  */
 export function formatHtml(value) {
-    return value;
+    return value || "";
 }
 
 export function formatJson(value) {

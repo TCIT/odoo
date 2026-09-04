@@ -1,5 +1,6 @@
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { unique } from "@web/core/utils/arrays";
 import { exprToBoolean } from "@web/core/utils/strings";
 import { combineModifiers } from "@web/model/relational_model/utils";
 
@@ -285,13 +286,27 @@ export function toStringExpression(str) {
 }
 
 /**
- * Generate a unique identifier (64 bits) in hexadecimal.
+ * Given an array of values and an aggregator function, returns the aggregated
+ * value.
  *
- * @returns {string}
+ * @param {number[]} values
+ * @param {'sum'|'avg'|'min'|'max'|'count'|'count_distinct'} aggregator
+ * @returns number
+ * @throws {Error} if the aggregator function given isn't supported
  */
-export function uuid() {
-    const array = new Uint8Array(8);
-    window.crypto.getRandomValues(array);
-    // Uint8Array to hex
-    return [...array].map((b) => b.toString(16).padStart(2, "0")).join("");
+export function computeAggregatedValue(values, aggregator) {
+    if (aggregator === "sum") {
+        return values.reduce((acc, v) => v + acc, 0);
+    } else if (aggregator === "avg") {
+        return values.reduce((acc, v) => v + acc, 0) / values.length;
+    } else if (aggregator === "min") {
+        return Math.min(Infinity, ...values);
+    } else if (aggregator === "max") {
+        return Math.max(-Infinity, ...values);
+    } else if (aggregator === "count") {
+        return values.length;
+    } else if (aggregator === "count_distinct") {
+        return unique(values).length;
+    }
+    throw new Error(`Invalid aggregator '${aggregator}'`);
 }

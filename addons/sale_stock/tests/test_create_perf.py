@@ -1,10 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import functools
 import logging
 import random
 import time
-
-from decorator import decorator
 
 from odoo.fields import Command
 from odoo.tests import tagged
@@ -14,15 +13,18 @@ from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
 
 _logger = logging.getLogger(__name__)
 
-@decorator
-def prepare(func, self):
-    """Prepare data to remove common querries from the count.
+
+def prepare(func, /):
+    """Prepare data to remove common queries from the count.
 
     Must be run after `warmup` because of the invalidations"""
     # prefetch the data linked to the company and its country code to avoid changing
     # the query count during l10n tests
-    self.env.company.country_id.code
-    func(self)
+    @functools.wraps(func)
+    def test_func(self):
+        self.env.company.country_id.code
+        return func(self)
+    return test_func
 
 
 @tagged('so_batch_perf')
@@ -51,7 +53,7 @@ class TestPERF(TransactionCaseWithUserDemo):
     @warmup
     @prepare
     def test_empty_sale_order_creation_perf(self):
-        with self.assertQueryCount(admin=33):
+        with self.assertQueryCount(admin=34):
             self.env['sale.order'].create({
                 'partner_id': self.partners[0].id,
                 'user_id': self.salesmans[0].id,
@@ -66,7 +68,7 @@ class TestPERF(TransactionCaseWithUserDemo):
         # + 1 warehouse fetch
         # + 1 query to get analytic default account
         # + 1 followers queries ?
-        with self.assertQueryCount(admin=37):
+        with self.assertQueryCount(admin=39):
             self.env['sale.order'].create([{
                 'partner_id': self.partners[0].id,
                 'user_id': self.salesmans[0].id,
@@ -78,7 +80,7 @@ class TestPERF(TransactionCaseWithUserDemo):
     def test_dummy_sales_orders_batch_creation_perf(self):
         """ Dummy SOlines (notes/sections) should not add any custom queries other than their insert"""
         # + 2 SOL (batched) insert
-        with self.assertQueryCount(admin=40):
+        with self.assertQueryCount(admin=44):
             self.env['sale.order'].create([{
                 'partner_id': self.partners[0].id,
                 'user_id': self.salesmans[0].id,
@@ -97,7 +99,7 @@ class TestPERF(TransactionCaseWithUserDemo):
         # + 2 SQL insert
         # + 2 queries to get analytic default tags
         # + 9 follower queries ?
-        with self.assertQueryCount(admin=50):  # com 46
+        with self.assertQueryCount(admin=53):  # com 46
             self.env['sale.order'].create([{
                 'partner_id': self.partners[0].id,
                 'user_id': self.salesmans[0].id,

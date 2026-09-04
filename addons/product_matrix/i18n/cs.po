@@ -1,23 +1,29 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* product_matrix
-# 
+# * product_matrix
+#
 # Translators:
-# Wil Odoo, 2024
-# 
+# Martin Trigaux, 2022
+# Jiří Podhorecký, 2022
+# Aleš Fiala <f.ales1@seznam.cz>, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+# "Marta (wacm)" <wacm@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-04 15:14+0000\n"
+"Last-Translator: \"Marta (wacm)\" <wacm@odoo.com>\n"
+"Language-Team: Czech <https://translate.odoo.com/projects/odoo-19/"
+"product_matrix/cs/>\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
-"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
+"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n "
+"<= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: product_matrix
 #: model_terms:ir.ui.view,arch_db:product_matrix.matrix
@@ -25,21 +31,18 @@ msgid ""
 "<small>Switch to the \"else\" condition of this block to view or edit the "
 "table.</small>"
 msgstr ""
+"<small>Přepněte na podmínku „else“ tohoto bloku, abyste mohli tabulku "
+"zobrazit nebo upravit.</small>"
 
 #. module: product_matrix
 #: model_terms:ir.ui.view,arch_db:product_matrix.matrix
 msgid "<strong>Product matrix block</strong>"
-msgstr ""
-
-#. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_color_1
-msgid "Blue"
-msgstr "Modrá"
+msgstr "<strong>Blok produktové matice</strong>"
 
 #. module: product_matrix
 #: model_terms:ir.ui.view,arch_db:product_matrix.matrix
 msgid "Cell name"
-msgstr ""
+msgstr "Název buňky"
 
 #. module: product_matrix
 #. odoo-javascript
@@ -50,7 +53,7 @@ msgstr "Vyberte varianty produktu"
 #. module: product_matrix
 #: model_terms:ir.ui.view,arch_db:product_matrix.matrix
 msgid "Column name"
-msgstr ""
+msgstr "Název sloupce"
 
 #. module: product_matrix
 #. odoo-javascript
@@ -65,30 +68,27 @@ msgid "Discard"
 msgstr "Zrušit"
 
 #. module: product_matrix
-#: model:product.attribute,name:product_matrix.product_attribute_gender
-msgid "Gender"
-msgstr "Pohlaví"
+#: model:ir.model.fields,field_description:product_matrix.field_product_template__display_name
+#: model:ir.model.fields,field_description:product_matrix.field_product_template_attribute_value__display_name
+msgid "Display Name"
+msgstr "Zobrazovaný název"
 
 #. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_m
-msgid "Men"
-msgstr "Muži"
+#: model:ir.model.fields,field_description:product_matrix.field_product_template__id
+#: model:ir.model.fields,field_description:product_matrix.field_product_template_attribute_value__id
+msgid "ID"
+msgstr "ID"
 
 #. module: product_matrix
 #: model:product.template,name:product_matrix.matrix_product_template_shirt
 msgid "My Company Tshirt (GRID)"
-msgstr ""
+msgstr "Tričko mé společnosti (GRID)"
 
 #. module: product_matrix
 #. odoo-javascript
 #: code:addons/product_matrix/static/src/xml/product_matrix.xml:0
 msgid "Not available"
 msgstr "Není k dispozici"
-
-#. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_color_2
-msgid "Pink"
-msgstr ""
 
 #. module: product_matrix
 #: model:ir.model,name:product_matrix.model_product_template
@@ -101,19 +101,9 @@ msgid "Product Template Attribute Value"
 msgstr "Hodnota atributu šablony produktu"
 
 #. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_color_4
-msgid "Rainbow"
-msgstr ""
-
-#. module: product_matrix
 #: model:product.template,description_sale:product_matrix.matrix_product_template_shirt
 msgid "Show your company love around you =)."
-msgstr ""
-
-#. module: product_matrix
-#: model:product.attribute,name:product_matrix.product_attribute_size
-msgid "Size"
-msgstr "Velikost"
+msgstr "Ukažte svou lásku k firmě kolem sebe =)."
 
 #. module: product_matrix
 #: model_terms:ir.ui.view,arch_db:product_matrix.matrix
@@ -121,28 +111,34 @@ msgid ""
 "The matrix of product variants of this order will be displayed here, if "
 "there are any."
 msgstr ""
+"Zde se zobrazí matice variant produktů této objednávky, pokud nějaké "
+"existují."
 
 #. module: product_matrix
 #: model_terms:ir.ui.view,arch_db:product_matrix.extra_price
 msgid "Variant price"
-msgstr ""
+msgstr "Cena varianty"
 
-#. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_w
-msgid "Women"
-msgstr "Ženy"
+#~ msgid "Blue"
+#~ msgstr "Modrá"
 
-#. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_size_xl
-msgid "XL"
-msgstr "XL"
+#~ msgid "Gender"
+#~ msgstr "Pohlaví"
 
-#. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_size_xs
-msgid "XS"
-msgstr "XS"
+#~ msgid "Men"
+#~ msgstr "Muži"
 
-#. module: product_matrix
-#: model:product.attribute.value,name:product_matrix.product_attribute_value_color_3
-msgid "Yellow"
-msgstr "Žlutý"
+#~ msgid "Size"
+#~ msgstr "Velikost"
+
+#~ msgid "Women"
+#~ msgstr "Ženy"
+
+#~ msgid "XL"
+#~ msgstr "XL"
+
+#~ msgid "XS"
+#~ msgstr "XS"
+
+#~ msgid "Yellow"
+#~ msgstr "Žlutý"

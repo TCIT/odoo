@@ -1,6 +1,8 @@
-import { parseDateTime } from "@web/core/l10n/dates";
-import { roundDecimals, floatIsZero } from "@web/core/utils/numbers";
+/* global QRCode */
 
+import { session } from "@web/session";
+import { getDataURLFromFile } from "@web/core/utils/urls";
+import { deserializeDateTime } from "@web/core/l10n/dates";
 /*
  * comes from o_spreadsheet.js
  * https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
@@ -21,7 +23,7 @@ export function uuidv4() {
  * @returns {string}
  */
 export function deduceUrl(url) {
-    const { protocol } = window.location;
+    const protocol = odoo.use_lna ? "http:" : window.location.protocol;
     if (!url.includes("//")) {
         url = `${protocol}//${url}`;
     }
@@ -31,7 +33,7 @@ export function deduceUrl(url) {
     return url;
 }
 
-export function constructFullProductName(line) {
+export function constructAttributeString(line) {
     let attributeString = "";
 
     if (line.attribute_value_ids && line.attribute_value_ids.length > 0) {
@@ -50,10 +52,23 @@ export function constructFullProductName(line) {
         }
 
         attributeString = attributeString.slice(0, -2);
-        attributeString = ` (${attributeString})`;
+    } else if (
+        attributeString === "" &&
+        line?.product_id?.product_template_variant_value_ids?.length > 0
+    ) {
+        attributeString = line.product_id.product_template_variant_value_ids
+            ?.map((attr) => attr.name)
+            .join(", ");
     }
 
-    return `${line?.product_id?.display_name}${attributeString}`;
+    return attributeString;
+}
+
+export function constructFullProductName(line) {
+    const attributeString = constructAttributeString(line);
+    return attributeString
+        ? `${line?.product_id?.name} (${attributeString})`
+        : `${line?.product_id?.name}`;
 }
 /**
  * Returns a random 5 digits alphanumeric code
@@ -88,10 +103,6 @@ export function getMin(entries, options) {
     return getMax(entries, { ...options, inverted: true });
 }
 export function getOnNotified(bus, channel) {
-    if (!channel || typeof channel !== "string") {
-        return () => false;
-    }
-
     bus.addChannel(channel);
     return (notif, callback) => bus.subscribe(`${channel}-${notif}`, callback);
 }
@@ -121,43 +132,139 @@ export function loadImage(url, options = {}) {
  * Load all images in the given element.
  * @param {HTMLElement} el
  */
-export function loadAllImages(el) {
-    if (!el) {
-        return Promise.resolve();
+
+export function waitImages(containerElement, timeoutMs = 3000) {
+    return new Promise((resolve) => {
+        const images = containerElement.querySelectorAll("img");
+        const total = images.length;
+        let loadedCount = 0;
+        let timedOut = false;
+
+        if (total === 0) {
+            resolve({ timedOut: false });
+            return;
+        }
+
+        const timeoutId = setTimeout(() => {
+            timedOut = true;
+            resolve({ timedOut: true });
+        }, timeoutMs);
+
+        const onLoadOrError = () => {
+            loadedCount++;
+            if (loadedCount === total && !timedOut) {
+                clearTimeout(timeoutId);
+                resolve({ timedOut: false });
+            }
+        };
+
+        images.forEach((img) => {
+            if (img.complete) {
+                onLoadOrError();
+            } else {
+                img.addEventListener("load", onLoadOrError);
+                img.addEventListener("error", onLoadOrError);
+            }
+        });
+    });
+}
+
+export class Counter {
+    constructor(start = 0) {
+        this.value = start;
+    }
+    next() {
+        this.value++;
+        return this.value;
+    }
+}
+
+export function isValidPhone(string) {
+    const phone = string.replace(/[\s.\-()]/g, "");
+    const pattern = /^\+\d{8,18}$/;
+    return pattern.test(phone);
+}
+
+export function isValidEmail(email) {
+    return email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// Checks whether an ip address is on the local network. So one of the ranges:
+// 10.0.0.0 - 10.255.255.255
+// 127.0.0.0 - 127.255.255.255
+// 172.16.0.0 - 172.31.255.255
+// 169.254.0.0 - 169.254.255.255
+// 192.168.0.0 - 192.168.255.255
+export function isPrivateIp(ip) {
+    if (!ip || typeof ip !== "string") {
+        return false;
+    }
+    const blocks = ip.split(".");
+    if (blocks.length !== 4) {
+        return false;
     }
 
-    const images = el.querySelectorAll("img");
-    return Promise.all(Array.from(images).map((img) => loadImage(img.src)));
-}
-export function parseUTCString(utcStr) {
-    return parseDateTime(utcStr, { format: "yyyy-MM-dd HH:mm:ss", tz: "utc" });
-}
+    const [a, b, c, d] = blocks.map(Number);
+    const invalidBlock = blocks.some(
+        (b, i) => isNaN([a, b, c, d][i]) || [a, b, c, d][i] < 0 || [a, b, c, d][i] > 255
+    );
 
-export function floatCompare(a, b, { decimals } = {}) {
-    if (decimals === undefined) {
-        throw new Error("decimals must be provided");
+    if (invalidBlock) {
+        return false;
     }
-    a = roundDecimals(a, decimals);
-    b = roundDecimals(b, decimals);
-    const delta = a - b;
-    if (floatIsZero(delta, decimals)) {
-        return 0;
+
+    return (
+        a === 10 ||
+        a === 127 ||
+        (a === 172 && b >= 16 && b <= 31) ||
+        (a === 192 && b === 168) ||
+        (a === 169 && b === 254)
+    );
+}
+
+export const LONG_PRESS_DURATION = session.test_mode ? 100 : 500;
+
+export async function getImageDataUrl(imageUrl) {
+    const res = await fetch(imageUrl);
+    const blob = await res.blob();
+    return await getDataURLFromFile(blob);
+}
+
+export function orderUsageUTCtoLocalUtil(data) {
+    const result = {};
+    for (const [datetime, usage] of Object.entries(data)) {
+        const dt = deserializeDateTime(datetime);
+        const formattedDt = dt.toFormat("yyyy-MM-dd HH:mm:ss");
+        result[formattedDt] = usage;
     }
-    return delta < 0 ? -1 : 1;
+    return result;
 }
 
-export function gte(a, b, { decimals } = {}) {
-    return floatCompare(a, b, { decimals }) >= 0;
-}
+/**
+ * Generates a QR code as a data URL in SVG format for a given URL.
+ *
+ * @param {string} url - The URL or text to encode in the QR code.
+ * @param {Object} [options={}] - Optional configuration for the QR code.
+ * @param {number} [options.width=150] - The width of the QR code.
+ * @param {number} [options.height=150] - The height of the QR code.
+ * @param {number} [options.correctLevel=QRCode.CorrectLevel.L] - The error correction level for the QR code.
+ * @param {boolean} [options.useSVG=true] - Whether to generate the QR code as SVG.
+ * @param {Object} [options.rest] - Additional options to pass to the QRCode constructor.
+ * @returns {string} The QR code as a data URL in SVG format.
+ */
+export function generateQRCodeDataUrl(
+    url,
+    { width = 150, height = 150, correctLevel = QRCode.CorrectLevel.L, ...rest } = {}
+) {
+    const tempDiv = document.createElement("div");
+    const options = { width, height, correctLevel, ...rest };
 
-export function gt(a, b, { decimals } = {}) {
-    return floatCompare(a, b, { decimals }) > 0;
-}
+    new QRCode(tempDiv, { text: url, useSVG: true, ...options });
 
-export function lte(a, b, { decimals } = {}) {
-    return floatCompare(a, b, { decimals }) <= 0;
-}
+    const svg = tempDiv.querySelector("svg");
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
 
-export function lt(a, b, { decimals } = {}) {
-    return floatCompare(a, b, { decimals }) < 0;
+    const qr_code_svg = new XMLSerializer().serializeToString(svg);
+    return "data:image/svg+xml;base64," + window.btoa(qr_code_svg);
 }

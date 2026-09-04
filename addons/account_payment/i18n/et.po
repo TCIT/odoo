@@ -1,36 +1,37 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_payment
-# 
+# * account_payment
+#
 # Translators:
-# Siim Raasuke, 2024
-# Triine Aavik <triine@avalah.ee>, 2024
-# Martin Trigaux, 2024
-# Stevin Lilla, 2024
-# Katrin Kampura, 2024
-# Egon Raamat <egon@avalah.ee>, 2024
-# Marek Pontus, 2024
-# Martin Aavastik <martin@avalah.ee>, 2024
-# Eneli Õigus <enelioigus@gmail.com>, 2024
-# Algo Kärp <algokarp@gmail.com>, 2024
-# Kärt Villako, 2024
-# Leaanika Randmets, 2024
-# Anna, 2024
-# Birgit Vijar, 2024
-# 
+# Hedi Hunt <Hedi.Hunt@gmail.com>, 2022
+# Martin Aavastik <martin@avalah.ee>, 2022
+# Egon Raamat <egon@avalah.ee>, 2022
+# Arma Gedonsky <armagedonsky@hot.ee>, 2022
+# Piia Paurson <piia@avalah.ee>, 2022
+# Marek Pontus, 2022
+# Martin Trigaux, 2022
+# Algo Kärp <algokarp@gmail.com>, 2022
+# Andre Roomet <andreroomet@gmail.com>, 2022
+# Eneli Õigus <enelioigus@gmail.com>, 2022
+# Triine Aavik <triine@avalah.ee>, 2022
+# Anna, 2023
+# Leaanika Randmets, 2023
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:48+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Birgit Vijar, 2024\n"
-"Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
+"POT-Creation-Date: 2026-05-29 17:36+0000\n"
+"PO-Revision-Date: 2026-08-02 23:37+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Estonian <https://translate.odoo.com/projects/odoo-19/"
+"account_payment/et/>\n"
+"Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: et\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: account_payment
 #. odoo-python
@@ -44,7 +45,7 @@ msgstr ""
 
 #. module: account_payment
 #. odoo-javascript
-#: code:addons/account_payment/static/src/js/portal_my_invoices_payment.js:0
+#: code:addons/account_payment/static/src/interactions/portal_my_invoices_payment_list.js:0
 msgid "%s day(s) overdue"
 msgstr "%s päev(i) ületähtaja"
 
@@ -123,11 +124,14 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_payment.payment_refund_wizard_view_form
 msgid ""
 "<strong>Warning!</strong> There is a refund pending for this payment.\n"
-"                        Wait a moment for it to be processed. If the refund is still pending in a\n"
-"                        few minutes, please check your payment provider configuration."
+"                        Wait a moment for it to be processed. If the refund "
+"is still pending in a\n"
+"                        few minutes, please check your payment provider "
+"configuration."
 msgstr ""
 "<strong>Hoiatus!</strong> See makse on tagasimakse ootel.\n"
-"                        Oodake, kuni see töödeldakse. Kui makse on mõne minuti möödudes ikka veel ootel\n"
+"                        Oodake, kuni see töödeldakse. Kui makse on mõne "
+"minuti möödudes ikka veel ootel\n"
 "                        kontrollige oma makseteenusepakkuja seadistust."
 
 #. module: account_payment
@@ -139,8 +143,8 @@ msgstr "Soodustus rakendatakse kui klient maksab enne %s sealhulgas."
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
 msgid ""
-"A payment has already been made on this invoice, please make sure to not pay"
-" twice."
+"A payment has already been made on this invoice, please make sure to not pay "
+"twice."
 msgstr ""
 
 #. module: account_payment
@@ -154,11 +158,6 @@ msgstr "Maksetehing viitega %s on juba olemas."
 #: code:addons/account_payment/models/account_payment.py:0
 msgid "A token is required to create a new payment transaction."
 msgstr "Uue maksetehingu loomiseks on vaja tokenit."
-
-#. module: account_payment
-#: model:onboarding.onboarding.step,button_text:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Activate Stripe"
-msgstr "Aktiveeri Stripe"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
@@ -198,9 +197,14 @@ msgid "Authorized Transactions"
 msgstr "Volitatud tehingud"
 
 #. module: account_payment
+#: model:ir.model,name:account_payment.model_account_bank_statement_line
+msgid "Bank Statement Line"
+msgstr ""
+
+#. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.account_invoice_view_form_inherit_payment
 msgid "Capture Transaction"
-msgstr "Registreeri makse"
+msgstr "Capture Transaction"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.payment_refund_wizard_view_form
@@ -208,11 +212,6 @@ msgstr "Registreeri makse"
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment_paid
 msgid "Close"
 msgstr "Sulge"
-
-#. module: account_payment
-#: model:ir.model.fields,field_description:account_payment.field_account_payment_register__payment_method_code
-msgid "Code"
-msgstr "Kood"
 
 #. module: account_payment
 #: model:ir.model,name:account_payment.model_res_config_settings
@@ -227,7 +226,7 @@ msgstr "Loonud"
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__create_date
 msgid "Created on"
-msgstr "Loodud"
+msgstr "Loomise kuupäev"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__currency_id
@@ -240,9 +239,20 @@ msgid "Discount Date"
 msgstr "Allahindluse kuupäev"
 
 #. module: account_payment
+#: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_journal__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_move__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method_line__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_register__display_name
+#: model:ir.model.fields,field_description:account_payment.field_payment_link_wizard__display_name
+#: model:ir.model.fields,field_description:account_payment.field_payment_provider__display_name
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__display_name
+#: model:ir.model.fields,field_description:account_payment.field_payment_transaction__display_name
+#: model:ir.model.fields,field_description:account_payment.field_res_config_settings__display_name
 msgid "Display Name"
-msgstr "Kuvatav nimi"
+msgstr "Näidatav nimi"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_link_wizard__display_open_installments
@@ -267,11 +277,6 @@ msgid "Early Payment Discount of"
 msgstr "Varajase makse allahindlus"
 
 #. module: account_payment
-#: model:onboarding.onboarding.step,description:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Enable credit & debit card payments supported by Stripe."
-msgstr "Luba Stripe'i toetatud krediit- ja deebetkaardimaksed."
-
-#. module: account_payment
 #: model:ir.model.fields.selection,name:account_payment.selection__payment_refund_wizard__support_refund__full_only
 msgid "Full Only"
 msgstr "Ainult täielik"
@@ -279,12 +284,12 @@ msgstr "Ainult täielik"
 #. module: account_payment
 #: model:ir.model,name:account_payment.model_payment_link_wizard
 msgid "Generate Sales Payment Link"
-msgstr "Loo müügi makse link"
+msgstr "Genereerige müügi makse link"
 
 #. module: account_payment
 #: model:ir.actions.act_window,name:account_payment.action_invoice_order_generate_link
 msgid "Generate a Payment Link"
-msgstr "Loo makse link"
+msgstr "Genereerige makse link"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_link_wizard__has_eligible_epd
@@ -297,7 +302,18 @@ msgid "Has a pending refund"
 msgstr "Tagasimakse on ootel"
 
 #. module: account_payment
+#: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__id
+#: model:ir.model.fields,field_description:account_payment.field_account_journal__id
+#: model:ir.model.fields,field_description:account_payment.field_account_move__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method_line__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_register__id
+#: model:ir.model.fields,field_description:account_payment.field_payment_link_wizard__id
+#: model:ir.model.fields,field_description:account_payment.field_payment_provider__id
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__id
+#: model:ir.model.fields,field_description:account_payment.field_payment_transaction__id
+#: model:ir.model.fields,field_description:account_payment.field_res_config_settings__id
 msgid "ID"
 msgstr "ID"
 
@@ -365,7 +381,7 @@ msgstr "Andmiku kanne"
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__write_uid
 msgid "Last Updated by"
-msgstr "Viimati uuendatud"
+msgstr "Viimati uuendas"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__write_date
@@ -401,31 +417,22 @@ msgstr ""
 "tehingute autoriseerimiseks (mitte summa kinnitamiseks), pole saadaval."
 
 #. module: account_payment
-#: model:onboarding.onboarding.step,step_image_alt:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Onboarding Online Payments"
-msgstr "Internetimaksete juurutamine"
-
-#. module: account_payment
-#: model:ir.model,name:account_payment.model_onboarding_onboarding_step
-msgid "Onboarding Step"
-msgstr "Onboarding Samm"
-
-#. module: account_payment
-#: model:onboarding.onboarding.step,title:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Online Payments"
-msgstr "Internetipõhised maksed"
+#. odoo-python
+#: code:addons/account_payment/wizards/payment_link_wizard.py:0
+msgid "Online payment option is not enabled in Configuration."
+msgstr ""
 
 #. module: account_payment
 #. odoo-python
 #: code:addons/account_payment/controllers/portal.py:0
 msgid "Overdue invoices should share the same company."
-msgstr "Ületähtaja arvetel peaks olema sama ettevõte. "
+msgstr "Ületähtaja arvetel peaks olema sama ettevõte."
 
 #. module: account_payment
 #. odoo-python
 #: code:addons/account_payment/controllers/portal.py:0
 msgid "Overdue invoices should share the same currency."
-msgstr "Ületähtaja arvetel peaks olema sama valuuta. "
+msgstr "Ületähtaja arvetel peaks olema sama valuuta."
 
 #. module: account_payment
 #. odoo-python
@@ -572,7 +579,7 @@ msgstr "Tagastatud summa"
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.view_account_payment_form_inherit_payment
 msgid "Refunds"
-msgstr "Tagasimaksed"
+msgstr "Kreeditarved"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_payment__refunds_count
@@ -602,12 +609,7 @@ msgstr "Makse allikas"
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_payment_method_line__payment_provider_state
 msgid "State"
-msgstr "Staatus"
-
-#. module: account_payment
-#: model:onboarding.onboarding.step,done_text:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Step Completed!"
-msgstr "Tehtud!"
+msgstr "Maakond"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_payment__suitable_payment_token_ids
@@ -636,11 +638,8 @@ msgstr "Andmik, kuhu edukad tehingud on postitatud."
 #. module: account_payment
 #. odoo-python
 #: code:addons/account_payment/models/payment_transaction.py:0
-msgid ""
-"The payment related to the transaction with reference %(ref)s has been "
-"posted: %(link)s"
+msgid "The payment related to transaction %(ref)s has been posted: %(link)s"
 msgstr ""
-"Makse koos viitega, mis on tehinguga seotud %(ref)s on postitatud: %(link)s"
 
 #. module: account_payment
 #. odoo-python
@@ -652,6 +651,18 @@ msgstr "Sisestatud parameetrid on kehtetud."
 #: model:ir.model.fields,help:account_payment.field_account_payment__source_payment_id
 msgid "The source payment of related refund payments"
 msgstr "Seotud tagasimaksete algne makse"
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "There are pending transactions for this invoice."
+msgstr ""
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "There is no amount to be paid."
+msgstr ""
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_error
@@ -677,9 +688,28 @@ msgid "There was en error processing your payment: invalid credit card ID."
 msgstr "Teie makse töötlemisel tekkis viga: kehtetu krediitkaardi ID."
 
 #. module: account_payment
-#: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment_paid
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This invoice cannot be paid online."
+msgstr ""
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
 msgid "This invoice has already been paid."
 msgstr "See arve on juba tasutud."
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This invoice isn't posted."
+msgstr ""
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This is not an outgoing invoice."
+msgstr ""
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__transaction_count
@@ -713,10 +743,12 @@ msgstr "Kehtetu tehing"
 #. odoo-python
 #: code:addons/account_payment/models/account_payment_method_line.py:0
 msgid ""
-"You can't delete a payment method that is linked to a provider in the enabled or test state.\n"
+"You can't delete a payment method that is linked to a provider in the "
+"enabled or test state.\n"
 "Linked providers(s): %s"
 msgstr ""
-"Te ei saa kustutada makseviisi, mis on lubatud või test staatusega seotud teenusepakkujal.\n"
+"Te ei saa kustutada makseviisi, mis on lubatud või test staatusega seotud "
+"teenusepakkujal.\n"
 "Seotud teenusepakkuja(d): %s"
 
 #. module: account_payment
@@ -736,18 +768,19 @@ msgid ""
 "You must first deactivate a payment provider before deleting its journal.\n"
 "Linked providers: %s"
 msgstr ""
-"Te peate esmalt deaktiveerima makseteenuse pakkuja enne selle andmiku kustutamist.\n"
+"Te peate esmalt deaktiveerima makseteenuse pakkuja enne selle andmiku "
+"kustutamist.\n"
 "Seotud teenusepakkujad: %s"
 
 #. module: account_payment
 #. odoo-javascript
-#: code:addons/account_payment/static/src/js/portal_my_invoices_payment.js:0
+#: code:addons/account_payment/static/src/interactions/portal_my_invoices_payment_list.js:0
 msgid "due in %s day(s)"
 msgstr "tähtajani %s päev(a)"
 
 #. module: account_payment
 #. odoo-javascript
-#: code:addons/account_payment/static/src/js/portal_my_invoices_payment.js:0
+#: code:addons/account_payment/static/src/interactions/portal_my_invoices_payment_list.js:0
 msgid "due today"
 msgstr "tähtaeg täna"
 
@@ -760,3 +793,40 @@ msgstr "on rakendatud."
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid "overdue"
 msgstr "üle tähtaja"
+
+#~ msgid "Code"
+#~ msgstr "Kood"
+
+#~ msgid ""
+#~ "<strong>No suitable payment option could be found.</strong><br/>\n"
+#~ "                                If you believe that it is an error, "
+#~ "please contact the website administrator."
+#~ msgstr ""
+#~ "<strong>Sobivat makseviisi ei leitud.</strong><br/>\n"
+#~ "                                Kui arvate, et tegemist on veaga, võtke "
+#~ "ühendust veebilehe administraatoriga."
+
+#~ msgid "Pay with"
+#~ msgstr "Makseviis"
+
+#~ msgid "Register Payment"
+#~ msgstr "Lisa makse"
+
+#~ msgid ""
+#~ "The payment related to the transaction with reference %(ref)s has been "
+#~ "posted: %(link)s"
+#~ msgstr ""
+#~ "Makse koos viitega, mis on tehinguga seotud %(ref)s on postitatud: %"
+#~ "(link)s"
+
+#~ msgid "Type of Refund Supported"
+#~ msgstr "Toetatud tagasimakse tüüp"
+
+#~ msgid ""
+#~ "You can't delete a payment method that is linked to a provider in the "
+#~ "enabled or test state.\n"
+#~ "Linked provider(s): %s"
+#~ msgstr ""
+#~ "Te ei saa kustutada makseviisi, mis on lubatud või test staatusega seotud "
+#~ "teenusepakkujal.\n"
+#~ "Seotud teenuspakkuja(d): %s"

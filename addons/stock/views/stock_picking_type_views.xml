@@ -47,7 +47,7 @@
                 <field name="warehouse_id"/>
                 <filter name="favorites" string="Favorites" domain="[('is_favorite', '=', True)]"/>
                 <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
-                <group expand="0" string="Group By">
+                <group>
                     <filter string="Type of Operation" name="groupby_code" domain="[]" context="{'group_by': 'code'}"/>
                     <filter string="Warehouse" name="groupby_warehouse_id" domain="[]" context="{'group_by': 'warehouse_id'}"/>
                 </group>
@@ -113,7 +113,7 @@
                                     <field name="use_existing_lots" string="Use Existing ones"/>
                                 </group>
                                 <group invisible="code not in ['incoming', 'outgoing', 'internal']" string="Packages" groups="stock.group_tracking_lot">
-                                    <field name="show_entire_packs"/>
+                                    <field name="set_package_type"/>
                                 </group>
                                 <!-- As this group will be hidden without multi_loccation, you will not be able to create a
                                     picking type with the code 'Internal', which make sense, but as the field 'code' on picking

@@ -9,6 +9,8 @@ class TestPurchaseRequisitionCommon(common.TransactionCase):
     def setUpClass(cls):
         super(TestPurchaseRequisitionCommon, cls).setUpClass()
 
+        cls.env.user.group_ids += cls.env.ref('uom.group_uom')
+
         # Fetch purchase related user groups
         user_group_purchase_manager = cls.env.ref('purchase.group_purchase_manager')
         user_group_purchase_user = cls.env.ref('purchase.group_purchase_user')
@@ -21,37 +23,33 @@ class TestPurchaseRequisitionCommon(common.TransactionCase):
             'login': 'prm',
             'email': 'requisition_manager@yourcompany.com',
             'notification_type': 'inbox',
-            'groups_id': [(6, 0, [user_group_purchase_manager.id])]})
+            'group_ids': [(6, 0, [user_group_purchase_manager.id])]})
 
         cls.user_purchase_requisition_user = Users.create({
             'name': 'Purchase requisition User',
             'login': 'pru',
             'email': 'requisition_user@yourcompany.com',
             'notification_type': 'inbox',
-            'groups_id': [(6, 0, [user_group_purchase_user.id])]})
+            'group_ids': [(6, 0, [user_group_purchase_user.id])]})
 
         # Create Product
         cls.product_uom_id = cls.env.ref('uom.product_uom_unit')
 
         cls.product_09 = cls.env['product.product'].create({
             'name': 'Pedal Bin',
-            'categ_id': cls.env.ref('product.product_category_all').id,
             'standard_price': 10.0,
             'list_price': 47.0,
             'type': 'consu',
             'uom_id': cls.product_uom_id.id,
-            'uom_po_id': cls.product_uom_id.id,
             'default_code': 'E-COM10',
         })
 
         cls.product_13 = cls.env['product.product'].create({
             'name': 'Corner Desk Black',
-            'categ_id': cls.env.ref('product.product_category_all').id,
             'standard_price': 78.0,
             'list_price': 85.0,
             'type': 'consu',
             'uom_id': cls.product_uom_id.id,
-            'uom_po_id': cls.product_uom_id.id,
             'default_code': 'FURN_1118',
         })
 

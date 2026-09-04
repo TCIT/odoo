@@ -1,18 +1,16 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import logging
-
 from datetime import datetime, timedelta
-from freezegun import freeze_time
 from unittest.mock import patch
+
+from freezegun import freeze_time
 
 from odoo.fields import Command
 from odoo.tests import tagged
 from odoo.tools import SQL
 
 from odoo.addons.base.tests.common import HttpCaseWithUserPortal, TransactionCaseWithUserDemo
-from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
-
+from odoo.addons.website_sale.tests.common import MockRequest, WebsiteSaleCommon
 
 r''' /!\/!\
 Calling `get_pricelist_available` after setting `property_product_pricelist` on
@@ -40,7 +38,6 @@ class TestWebsitePriceList(WebsiteSaleCommon):
     def setUpClass(cls):
         super().setUpClass()
         cls.env.user.partner_id.country_id = False  # Remove country to avoid property pricelist computed.
-        cls.website.user_id = cls.env.user
 
         cls.pricelist.name = "Public Pricelist" # reduce diff in existing tests
         cls.country_be = cls.env.ref('base.be')
@@ -204,14 +201,14 @@ class TestWebsitePriceList(WebsiteSaleCommon):
 
     def test_pricelist_combination(self):
         # Enable discounts to view discount in sale_order
-        self.env.user.groups_id += self.env.ref('sale.group_discount_per_so_line')
+        self.env.user.group_ids += self.env.ref('sale.group_discount_per_so_line')
 
         product = self.env['product.product'].create({
             'name': 'Super Product',
             'list_price': 100,
             'taxes_id': False,
         })
-        self.website.pricelist_id.write({
+        self.pricelist.write({
             'item_ids': [Command.clear(), Command.create({
                 'applied_on': '1_product',
                 'product_tmpl_id': product.product_tmpl_id.id,
@@ -226,7 +223,7 @@ class TestWebsitePriceList(WebsiteSaleCommon):
                 'applied_on': '1_product',
                 'product_tmpl_id': product.product_tmpl_id.id,
                 'base': 'pricelist',
-                'base_pricelist_id': self.website.pricelist_id.id,
+                'base_pricelist_id': self.pricelist.id,
                 'compute_price': 'percentage',
                 'percent_price': 25,
             })]
@@ -234,19 +231,19 @@ class TestWebsitePriceList(WebsiteSaleCommon):
         so = self.env['sale.order'].create({
             'partner_id': self.env.user.partner_id.id,
             'website_id': self.website.id,
+            'pricelist_id': self.pricelist.id,
             'order_line': [Command.create({
                 'name': product.name,
                 'product_id': product.id,
                 'product_uom_qty': 1,
-                'product_uom': product.uom_id.id,
                 'price_unit': product.list_price,
-                'tax_id': False,
+                'tax_ids': False,
             })],
         })
         sol = so.order_line
         self.assertEqual(sol.price_total, 100.0)
         so.pricelist_id = promo_pricelist
-        so._cart_update(product_id=product.id, line_id=sol.id, set_qty=500)
+        so._cart_update_line_quantity(line_id=sol.id, quantity=500)
         self.assertEqual(sol.price_unit, 100.0, 'Both reductions should be applied')
         self.assertEqual(sol.discount, 72.25, 'Both reductions should be applied')
         self.assertEqual(sol.price_total, 13875)
@@ -257,7 +254,7 @@ class TestWebsitePriceList(WebsiteSaleCommon):
             'list_price': 0,
             'taxes_id': False,
         })
-        self.website.pricelist_id.write({
+        self.pricelist.write({
             'item_ids': [
                 Command.clear(),
                 Command.create({
@@ -272,19 +269,18 @@ class TestWebsitePriceList(WebsiteSaleCommon):
         so = self.env['sale.order'].create({
             'partner_id': self.env.user.partner_id.id,
             'website_id': self.website.id,
-            'pricelist_id': self.website.pricelist_id.id,
+            'pricelist_id': self.pricelist.id,
             'order_line': [Command.create({
                 'name': product.name,
                 'product_id': product.id,
                 'product_uom_qty': 5,
-                'product_uom': product.uom_id.id,
                 'price_unit': product.list_price,
-                'tax_id': False,
+                'tax_ids': False,
             })]
         })
         sol = so.order_line
         self.assertEqual(sol.price_total, 0)
-        so._cart_update(product_id=product.id, line_id=sol.id, set_qty=6)
+        so._cart_update_line_quantity(line_id=sol.id, quantity=6)
         self.assertEqual(sol.price_unit, 10.0, 'Pricelist price should be applied')
         self.assertEqual(sol.discount, 0, 'Pricelist price should be applied')
         self.assertEqual(sol.price_total, 60.0)
@@ -312,28 +308,29 @@ class TestWebsitePriceList(WebsiteSaleCommon):
             'name': 'Product Template', 'list_price': 10.0, 'standard_price': 5.0
         })
         self.assertEqual(product_template.standard_price, 5)
-        # Hack to enforce the use of this pricelist in the call to `_get_sales_price`
-        self.website.pricelist_id = pricelist
-        price = product_template._get_sales_prices(self.website)[product_template.id]['price_reduce']
-        msg = "Template has no variants, the price should be computed based on the template's cost."
-        self.assertEqual(price, 4.5, msg)
+        with MockRequest(
+            self.env, website=self.website, website_sale_current_pl=pricelist.id
+        ) as request:
+            self.assertEqual(request.pricelist, pricelist)
+            price = product_template._get_sales_prices(self.website)[product_template.id]['price_reduce']
+            msg = "Template has no variants, the price should be computed based on the template's cost."
+            self.assertEqual(price, 4.5, msg)
 
-        product_template.attribute_line_ids = [Command.create({
-            'attribute_id': pa.id, 'value_ids': [Command.set([pav1.id, pav2.id])]
-        })]
-        msg = "Product template with variants should have no cost."
-        self.assertEqual(product_template.standard_price, 0, msg)
-        self.assertEqual(product_template.product_variant_ids[0].standard_price, 0)
+            product_template.attribute_line_ids = [Command.create({
+                'attribute_id': pa.id, 'value_ids': [Command.set([pav1.id, pav2.id])]
+            })]
+            msg = "Product template with variants should have no cost."
+            self.assertEqual(product_template.standard_price, 0, msg)
+            self.assertEqual(product_template.product_variant_ids[0].standard_price, 0)
 
-        self.website.pricelist_id = pricelist
-        price = product_template._get_sales_prices(self.website)[product_template.id]['price_reduce']
-        msg = "Template has variants, the price should be computed based on the 1st variant's cost."
-        self.assertEqual(price, 0, msg)
+            price = product_template._get_sales_prices(self.website)[product_template.id]['price_reduce']
+            msg = "Template has variants, the price should be computed based on the 1st variant's cost."
+            self.assertEqual(price, 0, msg)
 
-        product_template.product_variant_ids[0].standard_price = 20
-        self.website.pricelist_id = pricelist
-        price = product_template._get_sales_prices(self.website)[product_template.id]['price_reduce']
-        self.assertEqual(price, 18, msg)
+            product_template.product_variant_ids[0].standard_price = 20
+
+            price = product_template._get_sales_prices(self.website)[product_template.id]['price_reduce']
+            self.assertEqual(price, 18, msg)
 
     def test_base_price_with_discount_on_pricelist_tax_included(self):
         """
@@ -368,10 +365,12 @@ class TestWebsitePriceList(WebsiteSaleCommon):
                 'product_tmpl_id': product_tmpl.id,
             })],
         })
-        # Hack to enforce the use of this pricelist in the call to `_get_sales_price`
-        self.website.pricelist_id = self.pricelist
-        res = product_tmpl._get_sales_prices(self.website)
-        self.assertEqual(res[product_tmpl.id]['base_price'], 75)
+        with MockRequest(
+            self.website.env, website=self.website, website_sale_current_pl=self.pricelist.id
+        ) as request:
+            self.assertEqual(request.pricelist, self.pricelist)
+            res = product_tmpl._get_sales_prices(self.website)
+            self.assertEqual(res[product_tmpl.id]['base_price'], 75)
 
     def test_pricelist_item_validity_period(self):
         """ Test that if a cart was created before a validity period,
@@ -393,8 +392,6 @@ class TestWebsitePriceList(WebsiteSaleCommon):
             'list_price': 100,
             'taxes_id': False,
         })
-        current_website = self.env['website'].get_current_website()
-        current_website.pricelist_id = pricelist
         with freeze_time(today) as frozen_time:
             so = self.env['sale.order'].create({
                 'partner_id': self.env.user.partner_id.id,
@@ -403,19 +400,52 @@ class TestWebsitePriceList(WebsiteSaleCommon):
                     'name': product.name,
                     'product_id': product.id,
                     'product_uom_qty': 1,
-                    'product_uom': product.uom_id.id,
+                    'product_uom_id': product.uom_id.id,
                     'price_unit': product.list_price,
-                    'tax_id': False,
                 })],
-                'website_id': current_website.id,
+                'website_id': self.website.id,
             })
             sol = so.order_line
             self.assertEqual(sol.price_total, 100.0)
 
             frozen_time.move_to(tomorrow + timedelta(seconds=10))
-            so._cart_update(product_id=product.id, line_id=sol.id, set_qty=2)
+            so._cart_update_line_quantity(line_id=sol.id, quantity=2)
             self.assertEqual(sol.price_unit, 80.0, 'Reduction should be applied')
             self.assertEqual(sol.price_total, 160)
+
+    def test_pricelist_anonymous_user(self):
+        list_benelux_2 = self.list_benelux.sudo().copy({
+            'name': 'Benelux 2',
+            'item_ids': [
+                Command.create({
+                    'compute_price': 'percentage',
+                    'base': 'list_price',
+                    'percent_price': 20,
+                }),
+            ]
+        })
+        order_sudo = self.env['sale.order'].sudo().create({
+            'partner_id': self.public_partner.id,
+            'pricelist_id': list_benelux_2.id,
+            'order_line': [Command.create({
+                'name': self.product.name,
+                'product_id': self.product.id,
+            })],
+        })
+        # Creating partner with address of belgium
+        partner = self.env['res.partner'].create({
+            'name': 'Test Partner',
+            'company_id': False,
+            'country_id': self.env.ref('base.be').id,
+        })
+        website = self.website.with_user(self.public_user)
+        with MockRequest(
+            website.env, website=website,
+            website_sale_current_pl=list_benelux_2.id,
+            website_sale_selected_pl_id=list_benelux_2.id
+        ) as request:
+            order_sudo._update_address({'partner_id': partner.id})
+        self.assertEqual(order_sudo.pricelist_id, list_benelux_2)
 
 def simulate_frontend_context(self, website_id=1):
     # Mock this method will be enough to simulate frontend context in most methods
@@ -431,6 +461,7 @@ class TestWebsitePriceListAvailable(WebsiteSaleCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls._enable_pricelists()
         Pricelist = cls.env['product.pricelist']
         Website = cls.env['website']
 
@@ -613,8 +644,10 @@ class TestWebsitePriceListAvailableGeoIP(TestWebsitePriceListAvailable):
         pls_to_return += self.env.user.partner_id.property_product_pricelist
 
         current_pl = self.w1_pl_code
-        with patch('odoo.addons.website_sale.models.website.Website._get_geoip_country_code', return_value=self.BE.code), \
-            patch('odoo.addons.website_sale.models.website.Website._get_cached_pricelist_id', return_value=current_pl.id):
+        with (
+            patch('odoo.addons.website_sale.models.website.Website._get_geoip_country_code', return_value=self.BE.code),
+            MockRequest(self.env, website=self.website, website_sale_current_pl=current_pl.id),
+        ):
             pls = self.website.get_pricelist_available(show_visible=True)
         self.assertEqual(pls, pls_to_return + current_pl, "Only pricelists for BE, accessible en website and selectable should be returned. It should also return the applied promo pl")
 
@@ -772,10 +805,11 @@ class TestWebsitePriceListMultiCompany(TransactionCaseWithUserDemo):
         # self.c2_pl | self.website  | self.company2 |
         # c2_pl2     | self.website  | self.company2 |
 
-        self.demo_user.groups_id += self.env.ref('sales_team.group_sale_manager')
+        self.demo_user.group_ids += self.env.ref('sales_team.group_sale_manager')
 
         # The test is here: while having access only to self.company2 records,
         # archive should not raise an error
+        self.demo_user.group_ids += self.env.ref('product.group_product_manager')
         self.c2_pl.with_user(self.demo_user).with_context(allowed_company_ids=self.company2.ids).write({'active': False})
 
 
@@ -787,6 +821,9 @@ class TestWebsiteSaleSession(HttpCaseWithUserPortal):
             The objective is to verify that the pricelist
             changes correctly according to the user.
         """
+        self.env.user.write(
+            {'group_ids': [Command.link(self.env.ref('product.group_product_pricelist').id)]}
+        )
         website = self.env.ref('website.default_website')
         test_user = self.env['res.users'].create({
             'name': 'Toto',

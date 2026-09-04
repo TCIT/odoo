@@ -1,45 +1,75 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* sales_team
-# 
+# * sales_team
+#
 # Translators:
-# Kim Asplund <kim.asplund@gmail.com>, 2024
-# Kristoffer Grundström <lovaren@gmail.com>, 2024
-# Christelle Wehbe <libanon_cristelle@hotmail.com>, 2024
-# Björn Hayer, 2024
-# Zou Haojun <haojunzou84@gmail.com>, 2024
-# Martin Wilderoth <martin.wilderoth@linserv.se>, 2024
-# Martin Trigaux, 2024
-# Robin Calvin, 2024
-# Mikael Åkerberg <mikael.akerberg@mariaakerberg.com>, 2024
-# Levi Siuzdak (sile), 2024
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2024
-# Anders Wallenquist <anders.wallenquist@vertel.se>, 2024
-# Simon S, 2024
-# Lasse L, 2024
-# Jakob Krabbe <jakob.krabbe@vertel.se>, 2024
-# 
+# Kim Asplund <kim.asplund@gmail.com>, 2022
+# Christelle Wehbe <libanon_cristelle@hotmail.com>, 2022
+# Martin Wilderoth <martin.wilderoth@linserv.se>, 2022
+# Robin Calvin, 2022
+# Zou Haojun <haojunzou84@gmail.com>, 2022
+# Kristoffer Grundström <lovaren@gmail.com>, 2022
+# Simon S, 2022
+# Chrille Hedberg <hedberg.chrille@gmail.com>, 2022
+# Anders Wallenquist <anders.wallenquist@vertel.se>, 2022
+# Martin Trigaux, 2022
+# Mikael Åkerberg <mikael.akerberg@mariaakerberg.com>, 2023
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Jacob Ljungström <jacob.ljungstrom03@gmail.com>, 2025.
+# Hanna Kharraziha <hakha@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:40+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Jakob Krabbe <jakob.krabbe@vertel.se>, 2024\n"
-"Language-Team: Swedish (https://app.transifex.com/odoo/teams/41243/sv/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-07 03:44+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Swedish <https://translate.odoo.com/projects/odoo-19/"
+"sales_team/sv/>\n"
+"Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: sv\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
+
+#. module: sales_team
+#. odoo-python
+#: code:addons/sales_team/models/crm_team_member.py:0
+msgid "%(user_name)s already in other teams (%(team_names)s)."
+msgstr "%(user_name)s finns redan i andra team (%(team_names)s)."
+
+#. module: sales_team
+#. odoo-python
+#: code:addons/sales_team/models/crm_team.py:0
+msgid "%(user_names)s already in other teams (%(team_names)s)."
+msgstr ""
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_kanban
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
-msgid "<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Email\" title=\"Email\"/>"
+msgid ""
+"<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Email\" "
+"title=\"Email\"/>"
 msgstr ""
 "<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"E-post\" "
 "title=\"E-post\"/>"
+
+#. module: sales_team
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
+msgid "<i class=\"fa fa-fw me-1 fa-building text-primary\" title=\"Company\"/>"
+msgstr "<i class=\"fa fa-fw me-1 fa-building text-primary\" title=\"Företag\"/>"
+
+#. module: sales_team
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
+msgid "<i class=\"fa fa-fw me-1 fa-envelope text-primary\" title=\"Email\"/>"
+msgstr "<i class=\"fa fa-fw me-1 fa-envelope text-primary\" title=\"E-post\"/>"
+
+#. module: sales_team
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
+msgid "<i class=\"fa fa-fw me-1 fa-phone text-primary\" title=\"Phone\"/>"
+msgstr "<i class=\"fa fa-fw me-1 fa-phone text-primary\" title=\"Telefon\"/>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_kanban_dashboard
@@ -49,7 +79,7 @@ msgstr "<span>Ny</span>"
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_kanban_dashboard
 msgid "<span>Reporting</span>"
-msgstr "<span>Rapportering</span>"
+msgstr "<span>Rapporter</span>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_kanban_dashboard
@@ -61,6 +91,12 @@ msgstr "<span>Visa</span>"
 #: model:ir.model.fields,field_description:sales_team.field_crm_team_member__message_needaction
 msgid "Action Needed"
 msgstr "Åtgärd krävs"
+
+#. module: sales_team
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
+msgid "Activate \"Multi-team\""
+msgstr ""
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team__active
@@ -80,36 +116,21 @@ msgstr "Lägg till en teammedlem"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__crm_team_member_ids
-msgid ""
-"Add members to automatically assign their documents to this sales team."
+msgid "Add members to automatically assign their documents to this sales team."
 msgstr ""
 "Lägg till medlemmar för att automatiskt tilldela deras dokument till detta "
 "säljteam."
 
 #. module: sales_team
-#. odoo-python
-#: code:addons/sales_team/models/crm_team_member.py:0
-msgid ""
-"Adding %(user_name)s in this team will remove them from %(team_names)s. "
-"Working in multiple teams? Activate the option under Configuration>Settings."
-msgstr ""
-"Lägga till %(user_name)s till detta laget kommer att ta bort dom från "
-"%(team_names)s. Arbeta i flera lag? Aktivera valet under Konfiguration > "
-"Inställningar."
-
-#. module: sales_team
-#. odoo-python
-#: code:addons/sales_team/models/crm_team.py:0
-msgid ""
-"Adding %(user_names)s in this team will remove them from %(team_names)s."
-msgstr ""
-"Lägga till %(user_names)s till detta laget kommer att t bort dom från  "
-"%(team_names)s."
-
-#. module: sales_team
 #: model:res.groups,name:sales_team.group_sale_manager
 msgid "Administrator"
 msgstr "Administratör"
+
+#. module: sales_team
+#. odoo-javascript
+#: code:addons/sales_team/static/src/js/crm_team_form.js:0
+msgid "An error occurred while activating the Multi-Team option."
+msgstr ""
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
@@ -216,11 +237,6 @@ msgid "Dashboard Button"
 msgstr "Knapp för anslagstavla"
 
 #. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team__dashboard_graph_data
-msgid "Dashboard Graph Data"
-msgstr "Anslagstavla datagraf"
-
-#. module: sales_team
 #: model_terms:ir.actions.act_window,help:sales_team.crm_team_action_pipeline
 #: model_terms:ir.actions.act_window,help:sales_team.crm_team_action_sales
 msgid "Define a new sales team"
@@ -235,6 +251,7 @@ msgstr "Konstruktion"
 #: model:ir.model.fields,field_description:sales_team.field_crm_tag__display_name
 #: model:ir.model.fields,field_description:sales_team.field_crm_team__display_name
 #: model:ir.model.fields,field_description:sales_team.field_crm_team_member__display_name
+#: model:ir.model.fields,field_description:sales_team.field_res_users__display_name
 msgid "Display Name"
 msgstr "Visningsnamn"
 
@@ -250,8 +267,7 @@ msgstr "Favoritmedlemmar"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__is_favorite
-msgid ""
-"Favorite teams to display them in the dashboard and access them easily."
+msgid "Favorite teams to display them in the dashboard and access them easily."
 msgstr "Favoritteam för att visa dem i anslagstavlan och enkelt komma åt dem."
 
 #. module: sales_team
@@ -264,17 +280,7 @@ msgstr "Följare"
 #: model:ir.model.fields,field_description:sales_team.field_crm_team__message_partner_ids
 #: model:ir.model.fields,field_description:sales_team.field_crm_team_member__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "Följare (kontakter)"
-
-#. module: sales_team
-#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_search
-msgid "Group By"
-msgstr "Grupp Av"
-
-#. module: sales_team
-#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_search
-msgid "Group By..."
-msgstr "Gruppera efter..."
+msgstr "Följare (Partners)"
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team__has_message
@@ -286,6 +292,7 @@ msgstr "Har meddelande"
 #: model:ir.model.fields,field_description:sales_team.field_crm_tag__id
 #: model:ir.model.fields,field_description:sales_team.field_crm_team__id
 #: model:ir.model.fields,field_description:sales_team.field_crm_team_member__id
+#: model:ir.model.fields,field_description:sales_team.field_res_users__id
 msgid "ID"
 msgstr "ID"
 
@@ -303,13 +310,13 @@ msgstr ""
 #: model:ir.model.fields,help:sales_team.field_crm_team__message_needaction
 #: model:ir.model.fields,help:sales_team.field_crm_team_member__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "Om markerat, nya meddelanden kräver din uppmärksamhet."
+msgstr "Om ikryssad, så finns det nya meddelanden som kräver din uppmärksamhet."
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__message_has_error
 #: model:ir.model.fields,help:sales_team.field_crm_team_member__message_has_error
 msgid "If checked, some messages have a delivery error."
-msgstr "Om markerad, några meddelanden har leveransfel."
+msgstr "Om ikryssad, så finns det meddelanden med leveransfel."
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__active
@@ -361,8 +368,8 @@ msgid ""
 "Main user sales team. Used notably for pipeline, or to set sales team in "
 "invoicing or subscription."
 msgstr ""
-"Huvudsaklig användare säljteam. Används särskilt för pipeline, eller för att"
-" ställa in säljteam i fakturering eller prenumeration."
+"Huvudsaklig användare säljteam. Används särskilt för pipeline, eller för att "
+"ställa in säljteam i fakturering eller prenumeration."
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team__member_company_ids
@@ -388,18 +395,13 @@ msgstr "Varning för problem med medlemskap"
 #: model:ir.model.fields,field_description:sales_team.field_crm_team__message_has_error
 #: model:ir.model.fields,field_description:sales_team.field_crm_team_member__message_has_error
 msgid "Message Delivery error"
-msgstr "Meddelande leveransfel"
+msgstr "Leveransfel för meddelanden"
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team__message_ids
 #: model:ir.model.fields,field_description:sales_team.field_crm_team_member__message_ids
 msgid "Messages"
 msgstr "Meddelanden"
-
-#. module: sales_team
-#: model:ir.model.fields,field_description:sales_team.field_crm_team_member__mobile
-msgid "Mobile"
-msgstr "Mobil"
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team__is_membership_multi
@@ -428,7 +430,7 @@ msgstr "Antal fel"
 #: model:ir.model.fields,help:sales_team.field_crm_team__message_needaction_counter
 #: model:ir.model.fields,help:sales_team.field_crm_team_member__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr "Antal meddelanden som kräver åtgärd"
+msgstr "Antal meddelanden som kräver åtgärder"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__message_has_error_counter
@@ -465,10 +467,11 @@ msgstr "Produkt"
 #: model:ir.model.fields,field_description:sales_team.field_crm_team__rating_ids
 #: model:ir.model.fields,field_description:sales_team.field_crm_team_member__rating_ids
 msgid "Ratings"
-msgstr "Betyg"
+msgstr "Omdömen"
 
 #. module: sales_team
 #: model:crm.team,name:sales_team.team_sales_department
+#: model:res.groups.privilege,name:sales_team.res_groups_privilege_sales
 msgid "Sales"
 msgstr "Försäljning"
 
@@ -532,12 +535,6 @@ msgid "Salesteams Search"
 msgstr "Sök säljteam"
 
 #. module: sales_team
-#. odoo-python
-#: code:addons/sales_team/models/crm_team.py:0
-msgid "Sample data"
-msgstr "Provuppgifter"
-
-#. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team__sequence
 msgid "Sequence"
 msgstr "Sekvens"
@@ -555,7 +552,7 @@ msgstr "Visa på anslagstavla"
 #. module: sales_team
 #: model:crm.tag,name:sales_team.categ_oppor2
 msgid "Software"
-msgstr "Programvara"
+msgstr "Mjukvara"
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_tag__name
@@ -611,6 +608,14 @@ msgid "The default company for this user."
 msgstr "Standardföretaget för den här användaren."
 
 #. module: sales_team
+#. odoo-python
+#: code:addons/sales_team/models/crm_team.py:0
+msgid ""
+"The following team members are not allowed in company '%(company)s' of the "
+"Sales Team '%(team)s': %(users)s"
+msgstr ""
+
+#. module: sales_team
 #: model_terms:ir.actions.act_window,help:sales_team.mail_activity_type_action_config_sales
 msgid ""
 "Those represent the different categories of things you have to do (e.g. "
@@ -639,15 +644,8 @@ msgid "UX: Limit to team company or all if no company"
 msgstr "UX: Begränsa till teamföretag eller alla om inget företag"
 
 #. module: sales_team
-#. odoo-python
-#: code:addons/sales_team/models/crm_team.py:0
-msgid "Undefined graph model for Sales Team: %s"
-msgstr "Odefinierad grafmodell för säljteam: %s"
-
-#. module: sales_team
 #: model_terms:ir.actions.act_window,help:sales_team.crm_team_action_config
-msgid ""
-"Use Sales Teams to organize your sales departments and draw up reports."
+msgid "Use Sales Teams to organize your sales departments and draw up reports."
 msgstr ""
 "Använd säljteamen för att organisera dina försäljningsavdelningar och ta "
 "fram rapporter."
@@ -675,6 +673,14 @@ msgstr ""
 #: model:ir.model,name:sales_team.model_res_users
 msgid "User"
 msgstr "Användare"
+
+#. module: sales_team
+#. odoo-python
+#: code:addons/sales_team/models/crm_team_member.py:0
+msgid ""
+"User '%(user)s' is not allowed in the company '%(company)s' of the Sales "
+"Team '%(team)s'."
+msgstr ""
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team_member__user_company_ids
@@ -707,27 +713,35 @@ msgid "Users assigned to this team."
 msgstr "Användare som tilldelats detta team."
 
 #. module: sales_team
-#: model:crm.team,name:sales_team.salesteam_website_sales
-msgid "Website"
-msgstr "Webbplats"
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
+msgid "Visible to all"
+msgstr "Synlig för alla"
 
 #. module: sales_team
-#. odoo-python
-#: code:addons/sales_team/models/crm_team.py:0
-msgid ""
-"Working in multiple teams? Activate the option under Configuration>Settings."
+#: model:crm.team,name:sales_team.salesteam_website_sales
+msgid "Website"
+msgstr "Hemsida"
+
+#. module: sales_team
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
+msgid "Working in multiple teams?"
 msgstr ""
-"Arbeta i flera lag? Aktivera valet under Konfiguration > Inställningar."
 
 #. module: sales_team
 #. odoo-python
 #: code:addons/sales_team/models/crm_team_member.py:0
 msgid ""
-"You are trying to create duplicate membership(s). We found that "
-"%(duplicates)s already exist(s)."
+"You are trying to create duplicate membership(s). We found that %"
+"(duplicates)s already exist(s)."
 msgstr ""
 "Du försöker skapa dubbla medlemskap. Vi fann att %(duplicates)s redan "
 "existerar."
+
+#. module: sales_team
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
+msgid "e.g. John Doe"
+msgstr "e.g. John Doe"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
@@ -758,8 +772,40 @@ msgstr ""
 #. module: sales_team
 #: model:res.groups,comment:sales_team.group_sale_manager
 msgid ""
-"the user will have an access to the sales configuration as well as statistic"
-" reports."
+"the user will have an access to the sales configuration as well as statistic "
+"reports."
 msgstr ""
 "användaren kommer att ha tillgång till försäljningsinställningar samt "
 "statistiska rapporter."
+
+#~ msgid "Contact"
+#~ msgstr "Kontakt"
+
+#~ msgid "Dashboard Graph Data"
+#~ msgstr "Anslagstavla datagraf"
+
+#~ msgid ""
+#~ "Follow this salesteam to automatically track the events associated to "
+#~ "users of this team."
+#~ msgstr ""
+#~ "Följ detta säljlag för att automatiskt spåra händelser knutna till "
+#~ "användare i detta lag."
+
+#~ msgid "Group By"
+#~ msgstr "Gruppera efter"
+
+#~ msgid "Group By..."
+#~ msgstr "Gruppera efter..."
+
+#~ msgid ""
+#~ "If set, this Sales Team will be used for sales and assignments related to "
+#~ "this partner"
+#~ msgstr ""
+#~ "Om angiven kommer säljteamet användas för försäljning och uppgifter "
+#~ "relaterade till denna partner"
+
+#~ msgid "Mobile"
+#~ msgstr "Mobil"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Antal meddelanden som kräver en åtgärd"

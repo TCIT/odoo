@@ -4,6 +4,7 @@ from odoo.addons.account_check_printing.models.account_payment import INV_LINES_
 from odoo.tests import tagged
 from odoo.tools.misc import NON_BREAKING_SPACE
 from odoo import Command
+from odoo.exceptions import ValidationError
 
 import math
 
@@ -212,3 +213,164 @@ class TestPrintCheck(AccountTestInvoicingCommon):
         payment_2.action_post()
         action_window = payment_2.print_checks()
         self.assertEqual(action_window['context']['default_next_check_number'], '2147483649', "Check number should have been incremented without error.")
+
+    def test_print_check_with_branch(self):
+        """
+        Test that we don't get access error when printing a check with a branch
+        """
+        company = self.env.company
+        branch = self.env['res.company'].create({
+            'name': 'Branch',
+            'parent_id': company.id,
+        })
+        self.cr.precommit.run()  # load the CoA
+        self.env.user.write({'company_id': company.id, 'company_ids': [Command.set(company.ids)]})
+
+        vals = {
+            'payment_type': 'outbound',
+            'partner_type': 'supplier',
+            'amount': 100.0,
+            'journal_id': self.company_data['default_journal_bank'].id,
+            'payment_method_line_id': self.payment_method_line_check.id,
+        }
+        payment = self.env['account.payment'].create(vals)
+        payment.action_post()
+        self.assertTrue(payment.write({'check_number': '00001'}))
+        payment.invalidate_recordset(['check_number'])
+
+        self.env.user.write({'company_id': branch.id, 'company_ids': [Command.set(branch.ids)]})
+
+        payment_2 = self.env['account.payment'].create(vals)
+        payment_2.action_post()
+
+        action_window = payment_2.print_checks()
+        self.assertTrue(action_window)
+
+    def test_draft_invoice_payment_check_printing(self):
+        nb_invoices_to_test = INV_LINES_PER_STUB + 1
+
+        accounting_installed = self.env['account.move']._get_invoice_in_payment_state() == 'in_payment'
+        if not accounting_installed:
+            self.skipTest('Accounting not installed')  # There is an implicit outstanding account in this case, which makes it avoid the error
+
+        self.company_data['default_journal_bank'].write({
+            'check_manual_sequencing': True,
+            'check_next_number': '00042',
+        })
+        self.payment_method_line_check.payment_account_id = None  # Needed to trigger the error
+
+        in_invoices = self.env['account.move'].create([{
+            'move_type': 'in_invoice',
+            'partner_id': self.partner_a.id,
+            'date': '2017-01-01',
+            'invoice_date': '2017-01-01',
+            'invoice_line_ids': [Command.create({
+                'product_id': self.product_a.id,
+                'price_unit': 100.0,
+                'tax_ids': []
+            })]
+        } for _ in range(nb_invoices_to_test)])
+        payment = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=in_invoices.ids).create({
+            'group_payment': True,
+            'payment_method_line_id': self.payment_method_line_check.id,
+        })._create_payments()
+        self.assertRecordValues(payment, [{
+            'payment_method_line_id': self.payment_method_line_check.id,
+            'check_amount_in_words': payment.currency_id.amount_to_text(100.0 * nb_invoices_to_test),
+            'check_number': '00042',
+        }])
+
+        report_pages = payment._check_get_pages()
+        self.assertEqual(len(report_pages), 1)
+
+    def test_multiple_payments_check_number_uniqueness(self):
+        """Test that when multiple payments are created at once with check printing,
+        each payment gets a unique check number when posted.
+        """
+        # Configure the bank journal with manual check sequencing
+        self.company_data['default_journal_bank'].write({
+            'check_manual_sequencing': True,
+            'check_next_number': '10001',
+        })
+
+        # Create three vendor bills
+        in_invoices = self.env['account.move'].create([
+            {
+                'move_type': 'in_invoice',
+                'partner_id': self.partner_a.id,
+                'date': '2023-01-01',
+                'invoice_date': '2023-01-01',
+                'invoice_line_ids': [Command.create({
+                    'product_id': self.product_a.id,
+                    'price_unit': 100.0,
+                    'tax_ids': []
+                })]
+            },
+            {
+                'move_type': 'in_invoice',
+                'partner_id': self.partner_a.id,
+                'date': '2023-01-01',
+                'invoice_date': '2023-01-01',
+                'invoice_line_ids': [Command.create({
+                    'product_id': self.product_a.id,
+                    'price_unit': 200.0,
+                    'tax_ids': []
+                })]
+            },
+            {
+                'move_type': 'in_invoice',
+                'partner_id': self.partner_b.id,
+                'date': '2023-01-01',
+                'invoice_date': '2023-01-01',
+                'invoice_line_ids': [Command.create({
+                    'product_id': self.product_a.id,
+                    'price_unit': 200.0,
+                    'tax_ids': []
+                })]
+            }
+        ])
+        in_invoices.action_post()
+
+        # Create grouped payments , using the check payment method
+        payments = self.env['account.payment.register'].with_context(
+            active_model='account.move',
+            active_ids=in_invoices.ids
+        ).create({
+            'group_payment': True,
+            'payment_method_line_id': self.payment_method_line_check.id,
+        })._create_payments()
+
+        # Check that the payments have different check numbers
+        check_numbers = payments.mapped('check_number')
+        self.assertEqual(len(check_numbers), 2, "Both payments should have a check number")
+        self.assertEqual(set(check_numbers), {'10001', '10002'}, "Check numbers should be sequential")
+
+        move_names = payments.move_id.line_ids.mapped('name')
+        self.assertIn(f"Checks - 10001: {payments[0].memo}", move_names)
+        self.assertIn(f"Checks - 10002: {payments[1].memo}", move_names)
+
+    def test_number_exceeds_int32_limit(self):
+        """Numbers greater than 2,147,483,647 should raise a ValidationError."""
+        self.journal = self.env['account.journal'].create({
+            'name': 'Test Bank Journal',
+            'type': 'bank',
+            'code': 'TBJ',
+            'bank_statements_source': 'manual',
+            'check_manual_sequencing': True,
+        })
+
+        check_number_too_big = str(2_147_483_648)
+        check_number_normal = str(2_147_483_647)
+        with self.assertRaisesRegex(ValidationError, "The check number you entered .* exceeds the maximum allowed value"):
+            self.journal.check_next_number = check_number_too_big
+        self.journal.check_next_number = check_number_normal
+        self.assertEqual(self.journal.check_sequence_id.number_next_actual, int(check_number_normal), "The check sequence should be updated correctly")
+
+    def test_set_non_numeric_check_next_number_on_journal(self):
+        """
+        Test that setting a non-numeric value as the journal's
+        Next Check Number raises a ValidationError.
+        """
+        bank_journal = self.company_data['default_journal_bank']
+        with self.assertRaisesRegex(ValidationError, "Next Check Number should only contains numbers."):
+            bank_journal.check_next_number = "F1234"

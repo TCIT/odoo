@@ -1,22 +1,24 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
+import werkzeug
 from collections import defaultdict, OrderedDict
 
 from odoo import api, fields, models
 from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
 from odoo.exceptions import MissingError
 from odoo.http import request
-from odoo.modules.module import get_manifest
+from odoo.modules import Manifest
 from odoo.tools import escape_psql, split_every, SQL
+from odoo.tools.constants import PREFETCH_MAX
 
 _logger = logging.getLogger(__name__)
 
 
 class IrModuleModule(models.Model):
-    _name = "ir.module.module"
+    _name = 'ir.module.module'
     _description = 'Module'
-    _inherit = _name
+    _inherit = ['ir.module.module']
 
     # The order is important because of dependencies (page need view, menu need page)
     _theme_model_names = OrderedDict([
@@ -32,7 +34,7 @@ class IrModuleModule(models.Model):
     }
 
     image_ids = fields.One2many('ir.attachment', 'res_id',
-                                domain=[('res_model', '=', _name), ('mimetype', '=like', 'image/%')],
+                                domain=[('res_model', '=', 'ir.module.module'), ('mimetype', '=like', 'image/%')],
                                 string='Screenshots', readonly=True)
     # for kanban view
     is_installed_on_current_website = fields.Boolean(compute='_compute_is_installed_on_current_website')
@@ -47,6 +49,13 @@ class IrModuleModule(models.Model):
         """
         for module in self:
             module.is_installed_on_current_website = module == self.env['website'].get_current_website().theme_id
+
+    def _button_immediate_function(self, func):
+        website = request.env['website'].get_current_website() if request else self.env['website']
+        self.env['ir.config_parameter'].sudo().set_param('website.apply_new_theme', website.id if request else False)
+        res = super()._button_immediate_function(func)
+        self.env['ir.config_parameter'].sudo().set_param('website.apply_new_theme', False)
+        return res
 
     def write(self, vals):
         """
@@ -75,20 +84,17 @@ class IrModuleModule(models.Model):
 
                     -> We want to upgrade every website using this theme.
         """
-        if request and request.db and request.env and request.context.get('apply_new_theme'):
-            self = self.with_context(apply_new_theme=True)
-
         for module in self:
             if module.name.startswith('theme_') and vals.get('state') == 'installed':
                 _logger.info('Module %s has been loaded as theme template (%s)' % (module.name, module.state))
 
                 if module.state in ['to install', 'to upgrade']:
                     websites_to_update = module._theme_get_stream_website_ids()
-
-                    if module.state == 'to upgrade' and request:
-                        Website = self.env['website']
-                        current_website = Website.get_current_website()
-                        websites_to_update = current_website if current_website in websites_to_update else Website
+                    if module.state == 'to upgrade' and (website_restriction := int(self.env['ir.config_parameter'].sudo().get_param('website.apply_new_theme', 0))):
+                        if website_restriction in websites_to_update.ids:
+                            websites_to_update = websites_to_update.browse(website_restriction)
+                        else:
+                            websites_to_update = websites_to_update.browse()
 
                     for website in websites_to_update:
                         module._theme_load(website)
@@ -103,13 +109,18 @@ class IrModuleModule(models.Model):
                 (the name must be one of the keys present in ``_theme_model_names``)
             :return: recordset of theme template models (of type defined by ``model_name``)
         """
-        theme_model_name = self._theme_model_names[model_name]
-        IrModelData = self.env['ir.model.data']
-        records = self.env[theme_model_name]
+        if not self.env.user.has_group('website.group_website_restricted_editor'):
+            raise werkzeug.exceptions.Forbidden()
 
-        for module in self:
+        self_sudo = self.sudo()
+
+        theme_model_name = self_sudo._theme_model_names[model_name]
+        IrModelData = self_sudo.env['ir.model.data']
+        records = self_sudo.env[theme_model_name]
+
+        for module in self_sudo:
             imd_ids = IrModelData.search([('module', '=', module.name), ('model', '=', theme_model_name)]).mapped('res_id')
-            records |= self.env[theme_model_name].with_context(active_test=False).browse(imd_ids)
+            records |= self_sudo.env[theme_model_name].with_context(active_test=False).browse(imd_ids)
         return records
 
     def _update_records(self, model_name, website):
@@ -237,14 +248,9 @@ class IrModuleModule(models.Model):
             for model_name in self._theme_model_names:
                 module._update_records(model_name, website)
 
-            if self._context.get('apply_new_theme'):
-                # Both the theme install and upgrade flow ends up here.
-                # The _post_copy() is supposed to be called only when the theme
-                # is installed for the first time on a website.
-                # It will basically select some header and footer template.
-                # We don't want the system to select again the theme footer or
-                # header template when that theme is updated later. It could
-                # erase the change the user made after the theme install.
+            if self.env.context.get('apply_new_theme'):
+                # TODO Kept for backward compatibility with design-themes tests
+                # and web_studio. This could become a parameter in master.
                 self.env['theme.utils'].with_context(website_id=website.id)._post_copy(module)
 
     def _theme_unload(self, website):
@@ -258,11 +264,11 @@ class IrModuleModule(models.Model):
         for module in self:
             _logger.info('Unload theme %s for website %s from template.' % (self.mapped('name'), website.id))
 
-            for model_name in self._theme_model_names:
-                template = self._get_module_data(model_name)
+            for model_name in module._theme_model_names:
+                template = module._get_module_data(model_name)
                 models = template.with_context(**{'active_test': False, MODULE_UNINSTALL_FLAG: True}).mapped('copy_ids').filtered(lambda m: m.website_id == website)
                 models.unlink()
-                self._theme_cleanup(model_name, website)
+                module._theme_cleanup(model_name, website)
 
     def _theme_cleanup(self, model_name, website):
         """
@@ -283,14 +289,17 @@ class IrModuleModule(models.Model):
             :param website: ``website`` model for which the models have to be cleaned
 
         """
+        if not self.env.user.has_group('website.group_website_restricted_editor'):
+            raise werkzeug.exceptions.Forbidden()
+
         self.ensure_one()
-        model = self.env[model_name]
+        model_sudo = self.env[model_name].sudo()
 
         if model_name in ('website.page', 'website.menu'):
-            return model
+            return model_sudo
         # use active_test to also unlink archived models
         # and use MODULE_UNINSTALL_FLAG to also unlink inherited models
-        orphans = model.with_context(**{'active_test': False, MODULE_UNINSTALL_FLAG: True}).search([
+        orphans = model_sudo.with_context(**{'active_test': False, MODULE_UNINSTALL_FLAG: True}).search([
             ('key', '=like', self.name + '.%'),
             ('website_id', '=', website.id),
             ('theme_template_id', '=', False),
@@ -349,13 +358,16 @@ class IrModuleModule(models.Model):
 
     def _theme_upgrade_upstream(self):
         """ Upgrade the upstream dependencies of a theme, and install it if necessary. """
+        if not self.env.user.has_group('website.group_website_restricted_editor'):
+            raise werkzeug.exceptions.Forbidden()
+
         def install_or_upgrade(theme):
             if theme.state != 'installed':
                 theme.button_install()
             themes = theme + theme._theme_get_upstream()
             themes.filtered(lambda m: m.state == 'installed').button_upgrade()
 
-        self._button_immediate_function(install_or_upgrade)
+        self.sudo()._button_immediate_function(install_or_upgrade)
 
     @api.model
     def _theme_remove(self, website):
@@ -399,12 +411,10 @@ class IrModuleModule(models.Model):
         website.theme_id = self
 
         # this will install 'self' if it is not installed yet
-        if request:
-            request.update_context(apply_new_theme=True)
         self._theme_upgrade_upstream()
+        self.env['theme.utils'].with_context(website_id=website.id)._post_copy(self)
 
         result = website.button_go_website()
-        result['context']['params']['with_loader'] = True
         return result
 
     def button_remove_theme(self):
@@ -481,9 +491,9 @@ class IrModuleModule(models.Model):
             self.pool.website_views_to_adapt.clear()
 
     @api.model
-    def _load_module_terms(self, modules, langs, overwrite=False, imported_module=False):
+    def _load_module_terms(self, modules, langs, overwrite=False):
         """ Add missing website specific translation """
-        res = super()._load_module_terms(modules, langs, overwrite=overwrite, imported_module=imported_module)
+        res = super()._load_module_terms(modules, langs, overwrite=overwrite)
 
         if not langs or langs == ['en_US'] or not modules:
             return res
@@ -492,42 +502,43 @@ class IrModuleModule(models.Model):
 
         # use the translation dic of the generic to translate the specific
         self.env.cr.flush()
-        cache = self.env.cache
         View = self.env['ir.ui.view']
         field = self.env['ir.ui.view']._fields['arch_db']
-        # assume there are not too many records
+        batch_size = PREFETCH_MAX // 10
         self.env.cr.execute(""" SELECT generic.arch_db, specific.arch_db, specific.id
-                          FROM ir_ui_view generic
-                         INNER JOIN ir_ui_view specific
-                            ON generic.key = specific.key
-                         WHERE generic.website_id IS NULL AND generic.type = 'qweb'
-                         AND specific.website_id IS NOT NULL
-            """)
-        for generic_arch_db, specific_arch_db, specific_id in self.env.cr.fetchall():
-            if not generic_arch_db:
-                continue
-            langs_update = (langs & generic_arch_db.keys()) - {'en_US'}
-            if not langs_update:
-                continue
-            # get dictionaries limited to the requested languages
-            generic_arch_db_en = generic_arch_db.get('en_US')
-            specific_arch_db_en = specific_arch_db.get('en_US')
-            generic_arch_db_update = {k: generic_arch_db[k] for k in langs_update}
-            specific_arch_db_update = {k: specific_arch_db.get(k, specific_arch_db_en) for k in langs_update}
-            generic_translation_dictionary = field.get_translation_dictionary(generic_arch_db_en, generic_arch_db_update)
-            specific_translation_dictionary = field.get_translation_dictionary(specific_arch_db_en, specific_arch_db_update)
-            # update specific_translation_dictionary
-            for term_en, specific_term_langs in specific_translation_dictionary.items():
-                if term_en not in generic_translation_dictionary:
+                                          FROM ir_ui_view generic
+                                         INNER JOIN ir_ui_view specific
+                                            ON generic.key = specific.key
+                                         WHERE generic.website_id IS NULL AND generic.type = 'qweb'
+                                         AND specific.website_id IS NOT NULL
+                                         AND generic.arch_db IS NOT NULL
+                                         AND specific.arch_db IS NOT NULL
+                            """)
+        while batch := self.env.cr.fetchmany(batch_size):
+            for generic_arch_db, specific_arch_db, specific_id in batch:
+                langs_update = (langs & generic_arch_db.keys()) - {'en_US'}
+                if not langs_update:
                     continue
-                for lang, generic_term_lang in generic_translation_dictionary[term_en].items():
-                    if overwrite or term_en == specific_term_langs[lang]:
-                        specific_term_langs[lang] = generic_term_lang
-            for lang in langs_update:
-                specific_arch_db[lang] = field.translate(
-                    lambda term: specific_translation_dictionary.get(term, {lang: None})[lang], specific_arch_db_en)
-            cache.update_raw(View.browse(specific_id), field, [specific_arch_db], dirty=True)
-
+                # get dictionaries limited to the requested languages
+                generic_arch_db_en = generic_arch_db.get('_en_US', generic_arch_db.get('en_US'))
+                specific_arch_db_en = specific_arch_db.get('_en_US', specific_arch_db.get('en_US'))
+                generic_arch_db_update = {k: generic_arch_db.get('_' + k, generic_arch_db[k]) for k in langs_update}
+                specific_arch_db_update = {k: specific_arch_db.get('_' + k, specific_arch_db.get(k, specific_arch_db_en)) for k in langs_update}
+                generic_translation_dictionary = field.get_translation_dictionary(generic_arch_db_en, generic_arch_db_update)
+                specific_translation_dictionary = field.get_translation_dictionary(specific_arch_db_en, specific_arch_db_update)
+                # update specific_translation_dictionary
+                for term_en, specific_term_langs in specific_translation_dictionary.items():
+                    if term_en not in generic_translation_dictionary:
+                        continue
+                    for lang, generic_term_lang in generic_translation_dictionary[term_en].items():
+                        if overwrite or term_en == specific_term_langs[lang]:
+                            specific_term_langs[lang] = generic_term_lang
+                for lang in langs_update:
+                    if specific_arch_db.get('_' + lang) == specific_arch_db.get(lang):
+                        specific_arch_db.pop('_' + lang, None)
+                    specific_arch_db[('_' + lang) if ('_' + lang) in specific_arch_db else lang] = field.translate(
+                        lambda term: specific_translation_dictionary.get(term, {lang: None})[lang], specific_arch_db_en)
+                field._update_cache(View.with_context(prefetch_langs=True).browse(specific_id), specific_arch_db, dirty=True)
         default_menu = self.env.ref('website.main_menu', raise_if_not_found=False)
         if not default_menu:
             return res
@@ -602,7 +613,7 @@ class IrModuleModule(models.Model):
             create_values = [values for values in create_values if values]
 
             keys = [values['key'] for values in create_values]
-            existing_primary_template_keys = self.env['ir.ui.view'].search_fetch([
+            existing_primary_template_keys = self.env['ir.ui.view'].with_context(active_test=False).search_fetch([
                 ('mode', '=', 'primary'), ('key', 'in', keys),
             ], ['key']).mapped('key')
             missing_create_values = [values for values in create_values if values['key'] not in existing_primary_template_keys]
@@ -657,13 +668,41 @@ class IrModuleModule(models.Model):
             return set(items)
 
         create_count = 0
-        manifest = get_manifest(self.name)
+        manifest = Manifest.for_addon(self.name)
 
         # ------------------------------------------------------------
         # Configurator
         # ------------------------------------------------------------
 
-        configurator_snippets = manifest.get('configurator_snippets', {})
+        configurator_snippets = dict(manifest.get('configurator_snippets', {}))
+        installed_modules = self.env['ir.module.module']._installed()
+
+        def add_addons_snippets(addons):
+            """ Add installable addon snippets to the configurator snippets. """
+            for module_name, pages in addons.items():
+                # A snippet such as `website_sale.x` can only be generated
+                # once `website_sale` exists, or while installing it.
+                if module_name not in installed_modules and module_name != self.name:
+                    continue
+                for page, snippets_to_insert in pages.items():
+                    snippets = configurator_snippets.setdefault(page, [])
+                    dynamic_snippets = [snippet for snippet, *_ in snippets_to_insert]
+                    configurator_snippets[page] = list(dict.fromkeys(snippets + dynamic_snippets))
+
+        theme = self.env['website'].get_current_website().theme_id
+        if theme and theme.name == self.name:
+            # The theme itself is being installed. Its manifest may add
+            # snippets for already installed modules such as `website_sale`.
+            addons = manifest.get('configurator_snippets_addons', {})
+            add_addons_snippets(addons)
+        elif theme:
+            # Another module is being installed after the theme was selected.
+            # Only include the theme addon snippets targeting this module.
+            theme_manifest = Manifest.for_addon(theme.name)
+            if theme_manifest:
+                theme_addons = theme_manifest.get('configurator_snippets_addons', {})
+                addons = {self.name: theme_addons.get(self.name, {})}
+                add_addons_snippets(addons)
 
         # Generate general configurator snippet templates
         create_values = []
@@ -729,7 +768,7 @@ class IrModuleModule(models.Model):
     def _generate_primary_page_templates(self):
         """ Generates page templates based on manifest entries. """
         View = self.env['ir.ui.view']
-        manifest = get_manifest(self.name)
+        manifest = Manifest.for_addon(self.name)
         templates = manifest['new_page_templates']
 
         # TODO Find a way to create theme and other module's template patches

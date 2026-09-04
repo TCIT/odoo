@@ -1,24 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* bus
-# 
+# * bus
+#
 # Translators:
-# Wil Odoo, 2024
-# Tony Ng, 2024
-# 
+# Wil Odoo, 2025
+# Tony Ng, 2025
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~18.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 13:03+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Tony Ng, 2024\n"
-"Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
+"POT-Creation-Date: 2026-07-31 17:37+0000\n"
+"PO-Revision-Date: 2026-08-07 05:23+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
+"projects/odoo-19/bus/zh_Hant/>\n"
+"Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: bus
 #: model:ir.model,name:bus.model_res_groups
@@ -29,11 +32,6 @@ msgstr "存取組"
 #: model:ir.model,name:bus.model_ir_attachment
 msgid "Attachment"
 msgstr "附件"
-
-#. module: bus
-#: model:ir.model.fields.selection,name:bus.selection__bus_presence__status__away
-msgid "Away"
-msgstr "離開"
 
 #. module: bus
 #: model:ir.model,name:bus.model_bus_listener_mixin
@@ -56,20 +54,46 @@ msgid "Contact"
 msgstr "聯絡人"
 
 #. module: bus
+#: model:ir.model.fields,field_description:bus.field_bus_bus__create_date
+msgid "Create Date"
+msgstr ""
+
+#. module: bus
+#: model:ir.model,website_form_label:bus.model_res_partner
+msgid "Create a Customer"
+msgstr "建立客戶"
+
+#. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__create_uid
 msgid "Created by"
 msgstr "建立人員"
 
 #. module: bus
-#: model:ir.model.fields,field_description:bus.field_bus_bus__create_date
-msgid "Created on"
-msgstr "建立於"
-
-#. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__display_name
-#: model:ir.model.fields,field_description:bus.field_bus_presence__display_name
+#: model:ir.model.fields,field_description:bus.field_bus_listener_mixin__display_name
+#: model:ir.model.fields,field_description:bus.field_ir_attachment__display_name
+#: model:ir.model.fields,field_description:bus.field_ir_http__display_name
+#: model:ir.model.fields,field_description:bus.field_ir_model__display_name
+#: model:ir.model.fields,field_description:bus.field_ir_qweb__display_name
+#: model:ir.model.fields,field_description:bus.field_ir_websocket__display_name
+#: model:ir.model.fields,field_description:bus.field_res_groups__display_name
+#: model:ir.model.fields,field_description:bus.field_res_partner__display_name
+#: model:ir.model.fields,field_description:bus.field_res_users__display_name
+#: model:ir.model.fields,field_description:bus.field_res_users_settings__display_name
 msgid "Display Name"
 msgstr "顯示名稱"
+
+#. module: bus
+#. odoo-javascript
+#: code:addons/bus/static/src/debug/bus_logs_menu_item.xml:0
+msgid "Download logs"
+msgstr "下載日誌"
+
+#. module: bus
+#. odoo-javascript
+#: code:addons/bus/static/src/debug/bus_logs_menu_item.xml:0
+msgid "Enable Bus Logging"
+msgstr "啟用匯流排記錄"
 
 #. module: bus
 #: model:ir.model,name:bus.model_ir_http
@@ -78,26 +102,18 @@ msgstr "http路由"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__id
-#: model:ir.model.fields,field_description:bus.field_bus_presence__id
+#: model:ir.model.fields,field_description:bus.field_bus_listener_mixin__id
+#: model:ir.model.fields,field_description:bus.field_ir_attachment__id
+#: model:ir.model.fields,field_description:bus.field_ir_http__id
+#: model:ir.model.fields,field_description:bus.field_ir_model__id
+#: model:ir.model.fields,field_description:bus.field_ir_qweb__id
+#: model:ir.model.fields,field_description:bus.field_ir_websocket__id
+#: model:ir.model.fields,field_description:bus.field_res_groups__id
+#: model:ir.model.fields,field_description:bus.field_res_partner__id
+#: model:ir.model.fields,field_description:bus.field_res_users__id
+#: model:ir.model.fields,field_description:bus.field_res_users_settings__id
 msgid "ID"
 msgstr "識別號"
-
-#. module: bus
-#: model:ir.model.fields,field_description:bus.field_bus_presence__status
-#: model:ir.model.fields,field_description:bus.field_res_partner__im_status
-#: model:ir.model.fields,field_description:bus.field_res_users__im_status
-msgid "IM Status"
-msgstr "IM的狀態"
-
-#. module: bus
-#: model:ir.model.fields,field_description:bus.field_bus_presence__last_poll
-msgid "Last Poll"
-msgstr "最後線上"
-
-#. module: bus
-#: model:ir.model.fields,field_description:bus.field_bus_presence__last_presence
-msgid "Last Presence"
-msgstr "最後出席"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__write_uid
@@ -120,14 +136,9 @@ msgid "Models"
 msgstr "型號"
 
 #. module: bus
-#: model:ir.model.fields.selection,name:bus.selection__bus_presence__status__offline
-msgid "Offline"
-msgstr "離線"
-
-#. module: bus
-#: model:ir.model.fields.selection,name:bus.selection__bus_presence__status__online
-msgid "Online"
-msgstr "網上進行"
+#: model:ir.model,name:bus.model_ir_qweb
+msgid "Qweb"
+msgstr ""
 
 #. module: bus
 #. odoo-javascript
@@ -157,7 +168,7 @@ msgstr "該頁面似乎已逾時"
 #: code:addons/bus/static/src/outdated_page_watcher_service.js:0
 #: code:addons/bus/static/src/services/bus_service.js:0
 msgid "The page is out of date"
-msgstr "該頁面已過期"
+msgstr "此頁面已過期"
 
 #. module: bus
 #: model:ir.model,name:bus.model_res_users
@@ -165,30 +176,25 @@ msgid "User"
 msgstr "使用者"
 
 #. module: bus
-#: model:ir.model,name:bus.model_bus_presence
-msgid "User Presence"
-msgstr "使用者出現"
-
-#. module: bus
 #: model:ir.model,name:bus.model_res_users_settings
 msgid "User Settings"
 msgstr "使用者設定"
 
 #. module: bus
-#: model:ir.model.fields,field_description:bus.field_bus_presence__user_id
-msgid "Users"
-msgstr "使用者"
-
-#. module: bus
 #. odoo-python
 #: code:addons/bus/controllers/home.py:0
 msgid ""
-"Your password is the default (admin)! If this system is exposed to untrusted"
-" users it is important to change it immediately for security reasons. I will"
-" keep nagging you about it!"
-msgstr "您的密碼是預設(admin)！如果此系統向不受信任的使用者公開，出於安全原因，非常重要請立即更改！ (將一直提醒!)"
+"Your password is the default (admin)! If this system is exposed to untrusted "
+"users it is important to change it immediately for security reasons. I will "
+"keep nagging you about it!"
+msgstr ""
+"您的密碼是預設(admin)！如果此系統向不受信任的使用者公開，出於安全原因，非常重"
+"要請立即更改！ (將一直提醒!)"
 
 #. module: bus
 #: model:ir.model,name:bus.model_ir_websocket
 msgid "websocket message handling"
 msgstr "WebSocket 訊息處理"
+
+#~ msgid "Created on"
+#~ msgstr "建立於"

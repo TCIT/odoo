@@ -1,27 +1,34 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* web
-# 
+# * web
+#
 # Translators:
-# Wichanon Jamwutthipreecha, 2024
-# Khwunchai Jaengsawang <khwunchai.j@ku.th>, 2024
-# Rasareeyar Lappiam, 2025
-# Ped, 2025
-# Wil Odoo, 2025
-# 
+# Krisa C, 2022
+# gsong <gsong2014@foxmail.com>, 2022
+# Pornvibool Tippayawat <pornvibool.t@gmail.com>, 2022
+# Khwunchai Jaengsawang <khwunchai.j@ku.th>, 2022
+# Wichanon Jamwutthipreecha, 2022
+# Martin Trigaux, 2022
+# Amin Cheloh <amincheloh@gmail.com>, 2022
+# Odoo Thaidev <odoothaidev@gmail.com>, 2023
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Odoo Translation Bot <c3p@odoo.com>, 2026.
+# Nusara Boonma <nuboo@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:24+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
-"Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
+"PO-Revision-Date: 2026-08-13 03:55+0000\n"
+"Last-Translator: Nusara Boonma <nuboo@odoo.com>\n"
+"Language-Team: Thai <https://translate.odoo.com/projects/odoo-19/web/th/>\n"
+"Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: th\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: web
 #. odoo-javascript
@@ -38,45 +45,9 @@ msgstr "%(property_string)s (%(parent_name)s)"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "%d days ago"
-msgstr "%d วันที่แล้ว"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "%d hours ago"
-msgstr "%d ชั่วโมงที่แล้ว"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "%d minutes ago"
-msgstr "%d นาทีก่อน"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "%d months ago"
-msgstr "%d เดือนที่แล้ว"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "%d years ago"
-msgstr "%d ปีที่ผ่านมา"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/file_upload/file_upload_service.js:0
 msgid "%s Files"
 msgstr "%s ไฟล์"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
-msgid "%s days ago"
-msgstr "%s วันที่แล้ว"
 
 #. module: web
 #. odoo-javascript
@@ -154,7 +125,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.js:0
+#: code:addons/web/static/src/views/calendar/calendar_filter_section/calendar_filter_section.js:0
 msgid "+ Add %s"
 msgstr "+ เพิ่ม %s"
 
@@ -166,133 +137,9 @@ msgstr "+ คีย์"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "00"
-msgstr "00"
-
-#. module: web
-#: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "07/08/2020"
-msgstr "07/08/2020"
-
-#. module: web
-#: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "08/07/2020"
-msgstr "08/07/2020"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/fields/formatters.js:0
 msgid "1 record"
 msgstr "1 บันทึก"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "1.30"
-msgstr "1.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "10"
-msgstr "10"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "10.30"
-msgstr "10.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "100"
-msgstr "100"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "10:00"
-msgstr "10:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "10:30"
-msgstr "10:30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "11"
-msgstr "11"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "11.30"
-msgstr "11.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "11:00"
-msgstr "11:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "11:30"
-msgstr "11:30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "12"
-msgstr "12"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "12.30"
-msgstr "12.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "1234"
-msgstr "1234"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "12:00"
-msgstr "12:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "12:30"
-msgstr "12:30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "18"
-msgstr "18"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "1:00"
-msgstr "1:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "1:30"
-msgstr "1:30"
 
 #. module: web
 #. odoo-javascript
@@ -303,68 +150,20 @@ msgstr "เหรียญอันดับที่ 1"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "2.30"
-msgstr "2.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "2:00"
-msgstr "2:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "2:30"
-msgstr "2:30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "2nd place medal"
 msgstr "เหรียญอันดับที่ 2"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "3.30"
-msgstr "3.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "3:00"
-msgstr "3:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "3:30"
-msgstr "3:30"
+#: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
+msgid "31/01/%s"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "3rd place medal"
 msgstr "เหรียญอันดับที่ 3"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "4.30"
-msgstr "4.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "4:00"
-msgstr "4:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "4:30"
-msgstr "4:30"
 
 #. module: web
 #. odoo-javascript
@@ -380,98 +179,45 @@ msgstr "4x4"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "5.30"
-msgstr "5.30"
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
+msgid ": not"
+msgstr ""
 
 #. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "5:00"
-msgstr "5:00"
+#: model_terms:ir.ui.view,arch_db:web.login_oauth
+msgid "<em class=\"d-block my-3 small text-center text-muted\">- or -</em>"
+msgstr ""
 
 #. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "5:30"
-msgstr "5:30"
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "<i class=\"fa fa-download\"/> (html)"
+msgstr ""
 
 #. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "6.30"
-msgstr "6.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "6:00"
-msgstr "6:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "6:30"
-msgstr "6:30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "7.30"
-msgstr "7.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "7:00"
-msgstr "7:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "7:30"
-msgstr "7:30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "8.30"
-msgstr "8.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "8:00"
-msgstr "8:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "8:30"
-msgstr "8:30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "9.30"
-msgstr "9.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "9:00"
-msgstr "9:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "9:30"
-msgstr "9:30"
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "<i class=\"fa fa-download\"/> (json)"
+msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "<i class=\"fa fa-repeat\"/> Reset"
 msgstr "<i class=\"fa fa-repeat\"/> รีเซ็ต"
+
+#. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid ""
+"<select class=\"form-select\" name=\"profile_aggregation_mode\" "
+"id=\"profile_aggregation_mode\">\n"
+"                                        <option value=\"tabs\">Separated "
+"(one per tab)</option>\n"
+"                                        <option value=\"temporal\">Temporal "
+"(experimental)</option>\n"
+"                                    </select>\n"
+"                                    <span id=\"temporal_warning\" "
+"class=\"alert alert-warning\" style=\"display:none\"><b>Warning:</b> "
+"Temporal mode will merge all samples.<br/>It can lead to partially invalid "
+"result in case of concurrent profiles.<br/>Use with caution </span>"
+msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -481,20 +227,20 @@ msgstr "<span class=\"text-nowrap\">$ 2,887.50</span>"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span "
-"class=\"oe_currency_value\">11,750.00</span></span>"
+"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">11,750.00</"
+"span></span>"
 msgstr ""
-"<span class=\"text-nowrap\">$ <span "
-"class=\"oe_currency_value\">11,750.00</span></span>"
+"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">11,750.00</"
+"span></span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span "
-"class=\"oe_currency_value\">7,500.00</span></span>"
+"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">7,500.00</"
+"span></span>"
 msgstr ""
-"<span class=\"text-nowrap\">$ <span "
-"class=\"oe_currency_value\">7,500.00</span></span>"
+"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">7,500.00</"
+"span></span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -514,11 +260,15 @@ msgstr "<span class=\"text-nowrap\">ภาษี 15%</span>"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa Barbara\n"
-"                                       Rd<br/>Pleasant Hill CA 94523<br/>United States</span>"
+"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa "
+"Barbara\n"
+"                                       Rd<br/>Pleasant Hill CA 94523<br/"
+">United States</span>"
 msgstr ""
-"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa Barbara\n"
-"                                       Rd<br/>Pleasant Hill CA 94523<br/>สหรัฐอเมริกา</span>"
+"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa "
+"Barbara\n"
+"                                       Rd<br/>Pleasant Hill CA 94523<br/>สหรัฐ"
+"อเมริกา</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -527,8 +277,8 @@ msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "<span itemprop=\"name\">Deco Addict</span>"
-msgstr "<span itemprop=\"name\">Deco Addict</span>"
+msgid "<span itemprop=\"name\">Acme Corporation</span>"
+msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -583,7 +333,8 @@ msgstr "<span>ราคาต่อหน่วย</span>"
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<span>[FURN_8220] Four Person Desk<br/>\n"
-"                                       Four person modern office workstation</span>"
+"                                       Four person modern office "
+"workstation</span>"
 msgstr ""
 "<span>[FURN_8220] โต๊ะสำหรับสี่คน<br/>\n"
 "                                      สถานีทำงานสมัยใหม่สำหรับสี่คน</span>"
@@ -592,7 +343,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<span>[FURN_8999] Three-Seat Sofa<br/>\n"
-"                                       Three Seater Sofa with Lounger in Steel Grey Colour</span>"
+"                                       Three Seater Sofa with Lounger in "
+"Steel Grey Colour</span>"
 msgstr ""
 "<span>[FURN_8999] โซฟาสำหรับ 3 ที่นั่ง<br/>\n"
 "                                       โซฟา 3 ที่นั่งพร้อมเก้าอี้นวมสีเทาเหล็ก</span>"
@@ -601,10 +353,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<strong class=\"text-nowrap\">$ <span class=\"oe_currency_value\">\n"
-"                                                       22,137.50</span></strong>"
+"                                                       22,137.50</span></"
+"strong>"
 msgstr ""
 "<strong class=\"text-nowrap\">$ <span class=\"oe_currency_value\">\n"
-"                                                       22,137.50</span></strong>"
+"                                                       22,137.50</span></"
+"strong>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.address_layout
@@ -685,14 +439,14 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "A button (blood type)"
-msgstr "ปุ่ม A (กรุ๊ปเลือด)"
+msgid "A"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/custom_favorite_item/custom_favorite_item.js:0
-msgid "A filter with same name already exists."
-msgstr "มีตัวกรองที่มีชื่อเดียวกันนี้แล้ว"
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "A button (blood type)"
+msgstr "ปุ่ม A (กรุ๊ปเลือด)"
 
 #. module: web
 #. odoo-javascript
@@ -713,8 +467,8 @@ msgid ""
 "A popup window has been blocked. You may need to change your browser "
 "settings to allow popup windows for this page."
 msgstr ""
-"หน้าต่างป๊อปอัปถูกบล็อก "
-"คุณอาจต้องเปลี่ยนการตั้งค่าเบราว์เซอร์ของคุณเพื่ออนุญาตหน้าต่างป๊อปอัปสำหรับหน้านี้"
+"หน้าต่างป๊อปอัปถูกบล็อก คุณอาจต้องเปลี่ยนการตั้งค่าเบราว์เซอร์ของคุณเพื่ออนุญาตหน้าต่างป๊อปอัปสำหรับห"
+"น้านี้"
 
 #. module: web
 #. odoo-javascript
@@ -811,8 +565,20 @@ msgstr "การดำเนินการ"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/search/cog_menu/cog_menu.xml:0
+msgid "Actions menu"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/debug/debug_menu_items.js:0
 msgid "Activate Test Mode"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/debug/debug_providers.js:0
+msgid "Activate debug mode"
 msgstr ""
 
 #. module: web
@@ -847,44 +613,37 @@ msgstr "กิจกรรม"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/search_model.js:0
-#: code:addons/web/static/src/views/fields/x2many/x2many_field.js:0
 #: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
 #: code:addons/web/static/src/views/kanban/kanban_record_quick_create.xml:0
+#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
+#: code:addons/web/static/src/views/view_components/multi_create_popover.xml:0
+#: code:addons/web/static/src/views/view_components/multi_selection_buttons.xml:0
 msgid "Add"
 msgstr "เพิ่ม"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/search_bar/search_bar.xml:0
-#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
-#: code:addons/web/static/src/search/search_model.js:0
-msgid "Add Custom Filter"
-msgstr "เพิ่มตัวกรองกำหนดเอง"
+#: code:addons/web/static/src/views/fields/x2many/x2many_field.js:0
+msgid "Add %s"
+msgstr "เพิ่ม %s"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/custom_group_by_item/custom_group_by_item.xml:0
-msgid "Add Custom Group"
-msgstr "เพิ่มกลุ่มกำหนดเอง"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
-msgid "Add New Rule"
-msgstr "เพิ่มกฎใหม่"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/form/form_controller.js:0
-msgid "Add Properties"
-msgstr "เพิ่มคุณสมบัติ"
+#: code:addons/web/static/src/views/fields/contact_image/contact_image_field.xml:0
+msgid "Add Photo"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/properties_field.xml:0
-msgid "Add a Property"
-msgstr "เพิ่มคุณสมบัติ"
+msgid "Add Property"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/list/list_renderer.xml:0
+msgid "Add a"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -907,12 +666,6 @@ msgstr "เพิ่มรายการ"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
-msgid "Add branch"
-msgstr "เพิ่มสาขา"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
 msgid "Add column"
 msgstr "เพิ่มคอลัมภ์"
@@ -925,9 +678,9 @@ msgstr "เพิ่มเงื่อนไข"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/datetime/datetime_field.xml:0
-msgid "Add end date"
-msgstr "เพิ่มวันที่สิ้นสุด"
+#: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
+msgid "Add nested rule"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -937,9 +690,9 @@ msgstr "เพิ่มบริบทของคำสั่ง qweb"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/datetime/datetime_field.xml:0
-msgid "Add start date"
-msgstr "เพิ่มวันที่เริ่มต้น"
+#: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
+msgid "Add rule"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -983,6 +736,16 @@ msgid "Africa"
 msgstr "แอฟริกา"
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Aggregate SQL"
+msgstr ""
+
+#. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Aggregation mode"
+msgstr ""
+
+#. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/confirmation_dialog/confirmation_dialog.js:0
 msgid "Alert"
@@ -992,7 +755,7 @@ msgstr "การเตือน"
 #. odoo-javascript
 #: code:addons/web/static/src/search/search_arch_parser.js:0
 #: code:addons/web/static/src/search/search_panel/search_panel.xml:0
-#: code:addons/web/static/src/views/list/list_controller.xml:0
+#: code:addons/web/static/src/views/view_components/selection_box.xml:0
 msgid "All"
 msgstr "ทั้งหมด"
 
@@ -1013,6 +776,18 @@ msgstr "ทั้งวัน"
 #: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 msgid "All users"
 msgstr "ผู้ใช้ทั้งหมด"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+msgid "Allow expressions"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/binary/binary_field.js:0
+msgid "Allowed file mimetype"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -1040,9 +815,11 @@ msgstr "อเมริกา"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
-msgid "Among the"
-msgstr "ท่ามกลาง"
+#: code:addons/web/static/src/views/list/list_confirmation_dialog.js:0
+msgid ""
+"Among the %(total)s selected records, %(valid_count)s are valid for this "
+"update."
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -1088,7 +865,9 @@ msgstr "ราศีกุมภ์"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/model/relational_model/dynamic_list.js:0
 #: code:addons/web/static/src/views/form/form_controller.js:0
+#: code:addons/web/static/src/views/kanban/kanban_controller.js:0
 #: code:addons/web/static/src/views/kanban/kanban_renderer.js:0
 #: code:addons/web/static/src/views/list/list_controller.js:0
 msgid "Archive"
@@ -1096,20 +875,7 @@ msgstr "เก็บถาวร"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
-msgid "Archive All"
-msgstr "เก็บถาวรทั้งหมด"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
-msgid ""
-"Are you sure that you want to archive all the records from this column?"
-msgstr "คุณแน่ใจหรือไม่ว่าต้องการเก็บถาวรบันทึกทั้งหมดจากคอลัมน์นี้?"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/list/list_controller.js:0
+#: code:addons/web/static/src/model/relational_model/dynamic_list.js:0
 msgid "Are you sure that you want to archive all the selected records?"
 msgstr "คุณแน่ใจหรือไม่ว่าต้องการเก็บถาวรบันทึกที่เลือกทั้งหมด?"
 
@@ -1122,44 +888,51 @@ msgstr "คุณแน่ใจหรือไม่ว่าต้องกา
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/model/relational_model/dynamic_list.js:0
+msgid "Are you sure that you want to duplicate all the selected records?"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/search/control_panel/control_panel.js:0
 msgid "Are you sure that you want to remove this embedded action?"
 msgstr "คุณแน่ใจหรือไม่ว่าต้องการลบการดำเนินการฝังตัวนี้"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.js:0
-msgid "Are you sure that you want to remove this filter?"
-msgstr "คุณแน่ใจหรือว่าต้องการลบตัวกรองนี้?"
+#: code:addons/web/static/src/views/view_components/multi_selection_buttons.js:0
+msgid "Are you sure you want to delete the %(nbSelected)s selected records?"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_controller.js:0
+#: code:addons/web/static/src/views/view_components/multi_selection_buttons.js:0
+msgid "Are you sure you want to delete the selected record?"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/view_hook.js:0
 msgid "Are you sure you want to delete these records?"
 msgstr "คุณแน่ใจหรือไม่ว่าต้องการลบบันทึกเหล่านี้?"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
+#: code:addons/web/static/src/views/view_components/group_config_menu.js:0
 msgid "Are you sure you want to delete this column?"
 msgstr "คุณแน่ใจหรือไม่ว่าต้องการลบคอลัมน์นี้"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
-msgid ""
-"Are you sure you want to delete this property field? It will be removed for "
-"everyone using the \"%(parentName)s\" %(parentFieldLabel)s."
+msgid "Are you sure you want to delete this property field?"
 msgstr ""
-"คุณแน่ใจหรือไม่ว่าต้องการลบฟิลด์คุณสมบัตินี้ "
-"ฟิลด์คุณสมบัตินี้จะถูกลบออกสำหรับทุกคนที่ใช้ %(parentFieldLabel) "
-"\"%(parentName)\""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
-msgid "Are you sure you want to perform the following update on those"
-msgstr "คุณแน่ใจหรือว่าต้องการทำการอัปเดตต่อไปนี้บนสิ่งเหล่านั้น"
+#: code:addons/web/static/src/views/list/list_confirmation_dialog.js:0
+msgid "Are you sure you want to update %(count)s records?"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -1196,7 +969,7 @@ msgstr "เอเชีย"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/many2many_tags_avatar/many2many_tags_avatar_field.xml:0
-#: code:addons/web/static/src/views/fields/many2one_avatar/many2one_avatar_field.xml:0
+#: code:addons/web/static/src/views/fields/many2one/many2one.xml:0
 msgid "Assign"
 msgstr "มอบหมาย"
 
@@ -1253,10 +1026,15 @@ msgstr "ฟิลด์ที่มีอยู่"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.xml:0
-#: code:addons/web/static/src/views/kanban/kanban_renderer.xml:0
+#: code:addons/web/static/src/views/calendar/calendar_filter_section/calendar_filter_section.xml:0
 msgid "Avatar"
 msgstr "อวตาร"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "B"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -1330,6 +1108,12 @@ msgstr "เหรียญรางวัล"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/badge_selection_with_filter/badge_selection_field_with_filter.js:0
+msgid "Badges for Selection With Filter"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/graph/graph_controller.xml:0
 msgid "Bar Chart"
 msgstr "แผนภูมิแท่ง"
@@ -1361,11 +1145,11 @@ msgstr "มาเป็นผู้ใช้ขั้นสูง"
 #. odoo-python
 #: code:addons/web/controllers/export.py:0
 msgid ""
-"Binary fields can not be exported to Excel unless their content is "
-"base64-encoded. That does not seem to be the case for %s."
+"Binary fields can not be exported to Excel unless their content is base64-"
+"encoded. That does not seem to be the case for %s."
 msgstr ""
-"ไม่สามารถส่งออกฟิลด์ไบนารีไปยัง Excel ได้เว้นแต่เนื้อหาจะเข้ารหัสแบบ base64 "
-"ดูเหมือนจะไม่เป็นเช่นนั้นสำหรับ %s"
+"ไม่สามารถส่งออกฟิลด์ไบนารีไปยัง Excel ได้เว้นแต่เนื้อหาจะเข้ารหัสแบบ base64 ดูเหมือนจะไม่เป็นเ"
+"ช่นนั้นสำหรับ %s"
 
 #. module: web
 #. odoo-javascript
@@ -1398,8 +1182,7 @@ msgstr "ไอคอนบูลีน"
 msgid ""
 "Boolean field from the model used in the relation, which indicates whether "
 "the state is folded or not."
-msgstr ""
-"ฟิลด์บูลีนจากแบบจำลองที่ใช้ในความสัมพันธ์ ซึ่งระบุว่าสถานะถูกพับหรือไม่"
+msgstr "ฟิลด์บูลีนจากแบบจำลองที่ใช้ในความสัมพันธ์ ซึ่งระบุว่าสถานะถูกพับหรือไม่"
 
 #. module: web
 #. odoo-javascript
@@ -1438,21 +1221,19 @@ msgstr "ประเภทปุ่ม:"
 #. odoo-javascript
 #: code:addons/web/static/src/core/signature/signature_dialog.xml:0
 msgid ""
-"By clicking Adopt & Sign, I agree that the chosen signature/initials will be"
-" a valid electronic representation of my hand-written signature/initials for"
-" all purposes when it is used on documents, including legally binding "
+"By clicking Adopt & Sign, I agree that the chosen signature/initials will be "
+"a valid electronic representation of my hand-written signature/initials for "
+"all purposes when it is used on documents, including legally binding "
 "contracts."
 msgstr ""
-"เมื่อคลิกยอมรับและลงนาม "
-"ฉันยอมรับว่าลายเซ็น/ชื่อย่อที่เลือกจะเป็นลายเซ็น/ชื่อย่อที่เขียนด้วยลายมือของฉันทางอิเล็กทรอนิกส์ที่ถูกต้องสำหรับวัตถุประสงค์ทั้งหมดเมื่อใช้กับเอกสาร"
-" รวมถึงสัญญาที่มีผลผูกพันทางกฎหมาย"
+"เมื่อคลิกยอมรับและลงนาม ฉันยอมรับว่าลายเซ็น/ชื่อย่อที่เลือกจะเป็นลายเซ็น/ชื่อย่อที่เขียนด้วยลายมือของ"
+"ฉันทางอิเล็กทรอนิกส์ที่ถูกต้องสำหรับวัตถุประสงค์ทั้งหมดเมื่อใช้กับเอกสาร รวมถึงสัญญาที่มีผลผูกพันทางกฎห"
+"มาย"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/calendar/calendar_controller.js:0
-#: code:addons/web/static/src/views/form/form_controller.js:0
-#: code:addons/web/static/src/views/kanban/kanban_controller.js:0
-#: code:addons/web/static/src/views/list/list_controller.js:0
+#: code:addons/web/static/src/views/view_hook.js:0
 msgid "Bye-bye, record!"
 msgstr "ลาก่อน บันทึก!"
 
@@ -1467,6 +1248,12 @@ msgstr "ไบต์"
 #: code:addons/web/static/src/core/utils/binary.js:0
 msgid "Bytes|Kb|Mb|Gb|Tb|Pb|Eb|Zb|Yb"
 msgstr "Bytes|Kb|Mb|Gb|Tb|Pb|Eb|Zb|Yb"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "C"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -1544,7 +1331,6 @@ msgstr "สามารถแก้ไขค่าได้"
 #. odoo-javascript
 #: code:addons/web/static/src/core/confirmation_dialog/confirmation_dialog.js:0
 #: code:addons/web/static/src/core/signature/signature_dialog.xml:0
-#: code:addons/web/static/src/search/search_model.js:0
 #: code:addons/web/static/src/views/calendar/quick_create/calendar_quick_create.xml:0
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
 #: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
@@ -1569,6 +1355,12 @@ msgstr "ราศีกรกฎ"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Capricorn"
 msgstr "ราศีมังกร"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/public/caps_lock_warning.xml:0
+msgid "Caps Lock is on!"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -1599,8 +1391,7 @@ msgid ""
 "Check your network connection and come back here. Odoo will load as soon as "
 "you're back online."
 msgstr ""
-"ตรวจสอบการเชื่อมต่อเครือข่ายของคุณและกลับมาที่นี่ Odoo "
-"จะโหลดทันทีที่คุณออนไลน์อีกครั้ง"
+"ตรวจสอบการเชื่อมต่อเครือข่ายของคุณและกลับมาที่นี่ Odoo จะโหลดทันทีที่คุณออนไลน์อีกครั้ง"
 
 #. module: web
 #. odoo-javascript
@@ -1649,8 +1440,7 @@ msgid ""
 "Choose which minimal precision (days, months, ...) you want in the datetime "
 "picker."
 msgstr ""
-"เลือกความแม่นยำขั้นต่ำ (วัน, เดือน, ...) "
-"ที่คุณต้องการในตัวเลือกวันที่และเวลา"
+"เลือกความแม่นยำขั้นต่ำ (วัน, เดือน, ...) ที่คุณต้องการในตัวเลือกวันที่และเวลา"
 
 #. module: web
 #. odoo-javascript
@@ -1684,7 +1474,9 @@ msgstr "ซานตาคลอส"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/datetime/datetime_picker_popover.xml:0
 #: code:addons/web/static/src/core/model_field_selector/model_field_selector.xml:0
+#: code:addons/web/static/src/core/select_menu/select_menu.xml:0
 #: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
 #: code:addons/web/static/src/views/fields/binary/binary_field.xml:0
 #: code:addons/web/static/src/views/fields/image/image_field.xml:0
@@ -1701,13 +1493,18 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/kanban/kanban_record.xml:0
+msgid "Click to select"
+msgstr "คลิกเพื่อเลือก"
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/statusbar/statusbar_field.js:0
 msgid "Clickable"
 msgstr "คลิกได้"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/datetime/datetime_picker_popover.xml:0
 #: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 #: code:addons/web/static/src/core/dialog/dialog.xml:0
 #: code:addons/web/static/src/core/domain_selector_dialog/domain_selector_dialog.xml:0
@@ -1747,6 +1544,8 @@ msgstr "เครื่องมือเลือกสี"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/badge/badge_field.js:0
+#: code:addons/web/static/src/views/fields/badge_selection/list_badge_selection_field.js:0
 #: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
 msgid "Color field"
 msgstr "ฟิลด์สี"
@@ -1755,12 +1554,6 @@ msgstr "ฟิลด์สี"
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "Colors"
 msgstr "สี"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_renderer.js:0
-msgid "Column %s"
-msgstr "คอลัมน์%s"
 
 #. module: web
 #. odoo-javascript
@@ -1828,25 +1621,13 @@ msgid ""
 "Company tagline, which is included in a printed document's header or footer "
 "(depending on the selected layout)."
 msgstr ""
-"สโลแกนของบริษัท ซึ่งรวมอยู่ในส่วนหัวหรือส่วนท้ายของเอกสารที่พิมพ์ "
-"(ขึ้นอยู่กับเค้าโครงที่เลือก)"
+"สโลแกนของบริษัท ซึ่งรวมอยู่ในส่วนหัวหรือส่วนท้ายของเอกสารที่พิมพ์ (ขึ้นอยู่กับเค้าโครงที่เลือก)"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
-msgid "Comparison"
-msgstr "การเปรียบเทียบ"
-
-#. module: web
-#. odoo-javascript
+#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 #: code:addons/web/static/src/views/debug_items.js:0
 msgid "Computed Arch"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
-msgid "Condensed display"
 msgstr ""
 
 #. module: web
@@ -1869,7 +1650,7 @@ msgstr "กำหนดค่าเค้าโครงเอกสารขอ
 #. odoo-javascript
 #: code:addons/web/static/src/core/domain_selector_dialog/domain_selector_dialog.js:0
 #: code:addons/web/static/src/core/expression_editor_dialog/expression_editor_dialog.xml:0
-#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
+#: code:addons/web/static/src/model/relational_model/dynamic_list.js:0
 #: code:addons/web/static/src/webclient/switch_company_menu/switch_company_menu.xml:0
 msgid "Confirm"
 msgstr "ยืนยัน"
@@ -1895,9 +1676,20 @@ msgid "Connection restored. You are back online."
 msgstr "กู้คืนการเชื่อมต่อแล้ว คุณต้องกลับมาออนไลน์"
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Constant Time"
+msgstr ""
+
+#. module: web
 #: model:ir.model,name:web.model_res_partner
 msgid "Contact"
 msgstr "ติดต่อ"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/contact_statistics/contact_statistics.js:0
+msgid "Contact Statistics"
+msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.external_layout_bold
@@ -1945,8 +1737,7 @@ msgstr "ปุ่มบนแผงควบคุม"
 msgid ""
 "Control the number of minutes in the time selection. E.g. set it to 15 to "
 "work in quarters."
-msgstr ""
-"ควบคุมจำนวนนาทีในการเลือกเวลา เช่น ตั้งค่าเป็น 15 เพื่อทำงานเป็นไตรมาส"
+msgstr "ควบคุมจำนวนนาทีในการเลือกเวลา เช่น ตั้งค่าเป็น 15 เพื่อทำงานเป็นไตรมาส"
 
 #. module: web
 #. odoo-javascript
@@ -2036,6 +1827,12 @@ msgid "Count"
 msgstr "จำนวน"
 
 #. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+msgid "Count Limit"
+msgstr ""
+
+#. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__country_id
 msgid "Country"
 msgstr "ประเทศ"
@@ -2044,7 +1841,6 @@ msgstr "ประเทศ"
 #. odoo-javascript
 #: code:addons/web/static/src/views/calendar/calendar_year/calendar_year_popover.xml:0
 #: code:addons/web/static/src/views/calendar/quick_create/calendar_quick_create.xml:0
-#: code:addons/web/static/src/views/fields/many2one/many2one_field.xml:0
 #: code:addons/web/static/src/views/kanban/kanban_record_quick_create.js:0
 msgid "Create"
 msgstr "สร้าง"
@@ -2058,15 +1854,14 @@ msgstr "สร้าง \"%s\""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
-msgid "Create %(value)s as a new %(field)s?"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 msgid "Create %s"
 msgstr "สร้าง %s"
+
+#. module: web
+#: model:ir.model,website_form_label:web.model_res_partner
+msgid "Create a Customer"
+msgstr "สร้างลูกค้า"
 
 #. module: web
 #. odoo-javascript
@@ -2075,12 +1870,20 @@ msgid "Create and edit..."
 msgstr "สร้างและแก้ไข..."
 
 #. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/relational_utils.js:0
+msgid "Create..."
+msgstr ""
+
+#. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__create_uid
+#: model:ir.model.fields,field_description:web.field_res_users_settings_embedded_action__create_uid
 msgid "Created by"
 msgstr "สร้างโดย"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__create_date
+#: model:ir.model.fields,field_description:web.field_res_users_settings_embedded_action__create_date
 msgid "Created on"
 msgstr "สร้างเมื่อ"
 
@@ -2110,15 +1913,21 @@ msgstr "สกุลเงิน"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/statusbar/statusbar_field.js:0
-msgid "Current state"
-msgstr "สถานะปัจจุบัน"
+#: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
+msgid "Currency field"
+msgstr "ฟิลด์สกุลเงิน"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/progress_bar/progress_bar_field.js:0
 msgid "Current value field"
 msgstr "ค่าปัจจุบันของฟิลด์"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/color_picker/tabs/color_picker_custom_tab.js:0
+msgid "Custom"
+msgstr "กำหนดเอง"
 
 #. module: web
 #. odoo-javascript
@@ -2135,6 +1944,32 @@ msgstr "สีที่กำหนดเอง"
 #. odoo-javascript
 #: code:addons/web/static/src/search/control_panel/control_panel.js:0
 msgid "Custom Embedded Action"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/search/search_bar/search_bar.js:0
+#: code:addons/web/static/src/search/search_model.js:0
+msgid "Custom Filter"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/search/search_bar/search_bar.xml:0
+#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
+msgid "Custom Filter..."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/search/custom_group_by_item/custom_group_by_item.xml:0
+msgid "Custom Group"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
+msgid "Custom range"
 msgstr ""
 
 #. module: web
@@ -2196,6 +2031,12 @@ msgstr "วันที่"
 #: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 msgid "Date & Time"
 msgstr "วันที่และเวลา"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
+msgid "Date Format"
+msgstr "รูปแบบวันที่"
 
 #. module: web
 #. odoo-javascript
@@ -2298,6 +2139,15 @@ msgstr "ค่าเริ่มต้น:"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
+#: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
+msgid ""
+"Defines the minimum number of characters to perform the search. If not set, "
+"the search is performed on focus."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/image/image_field.js:0
 msgid "Delay the apparition of the zoomed image with a value in milliseconds"
 msgstr "ชะลอการแสดงภาพที่ซูมด้วยค่าเป็นมิลลิวินาที"
@@ -2306,25 +2156,25 @@ msgstr "ชะลอการแสดงภาพที่ซูมด้วย
 #. odoo-javascript
 #: code:addons/web/static/src/core/tags_list/tags_list.xml:0
 #: code:addons/web/static/src/search/control_panel/control_panel.js:0
-#: code:addons/web/static/src/views/calendar/calendar_common/calendar_common_popover.xml:0
 #: code:addons/web/static/src/views/calendar/calendar_controller.js:0
 #: code:addons/web/static/src/views/fields/many2many_binary/many2many_binary_field.xml:0
-#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 #: code:addons/web/static/src/views/form/form_controller.js:0
 #: code:addons/web/static/src/views/kanban/kanban_controller.js:0
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
 #: code:addons/web/static/src/views/list/list_controller.js:0
+#: code:addons/web/static/src/views/view_components/group_config_menu.js:0
+#: code:addons/web/static/src/views/view_components/multi_selection_buttons.xml:0
 #: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
+#: code:addons/web/static/src/views/view_hook.js:0
 msgid "Delete"
 msgstr "ลบ"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.js:0
-msgid "Delete Filter"
-msgstr "ลบตัวกรอง"
+#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
+msgid "Delete Field"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -2335,21 +2185,20 @@ msgstr "ลบฟิลด์คุณสมบัติ"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/search/control_panel/control_panel.xml:0
-#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
 msgid "Delete item"
 msgstr "ลบรายการ"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
-msgid "Delete node"
-msgstr "ลบโหนด"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/list/list_renderer.xml:0
 msgid "Delete row"
 msgstr "ลบแถว"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
+msgid "Delete rule"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -2362,12 +2211,6 @@ msgstr "จากมากไปน้อย"
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_dev_tool.xml:0
 msgid "Developer Tools"
 msgstr "เครื่องมือของนักพัฒนา"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/list/list_renderer.js:0
-msgid "Different currencies cannot be aggregated"
-msgstr "ไม่สามารถรวมสกุลเงินที่แตกต่างกันได้"
 
 #. module: web
 #. odoo-javascript
@@ -2411,15 +2254,24 @@ msgstr "ปิดการใช้งานแบบอ่านอย่าง
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
+msgid "Disabled due to invalid configuration"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/domain_selector_dialog/domain_selector_dialog.js:0
 #: code:addons/web/static/src/core/expression_editor_dialog/expression_editor_dialog.xml:0
+#: code:addons/web/static/src/search/search_bar/search_bar.js:0
+#: code:addons/web/static/src/search/search_model.js:0
 #: code:addons/web/static/src/views/fields/dynamic_placeholder_popover.xml:0
-#: code:addons/web/static/src/views/fields/many2one/many2one_field.xml:0
+#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.xml:0
 #: code:addons/web/static/src/views/fields/translation_dialog.xml:0
 #: code:addons/web/static/src/views/form/form_controller.xml:0
 #: code:addons/web/static/src/views/kanban/kanban_cover_image_dialog.xml:0
 #: code:addons/web/static/src/views/list/list_controller.xml:0
+#: code:addons/web/static/src/views/view_components/multi_create_popover.xml:0
 #: code:addons/web/static/src/webclient/settings_form_view/settings_confirmation_dialog.xml:0
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "Discard"
@@ -2438,9 +2290,20 @@ msgid "Discard changes"
 msgstr "ยกเลิกการเปลี่ยนแปลง"
 
 #. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_record_quick_create.js:0
 #: model:ir.model.fields,field_description:web.field_base_document_layout__display_name
+#: model:ir.model.fields,field_description:web.field_ir_http__display_name
+#: model:ir.model.fields,field_description:web.field_ir_model__display_name
+#: model:ir.model.fields,field_description:web.field_ir_qweb_field_image__display_name
+#: model:ir.model.fields,field_description:web.field_ir_qweb_field_image_url__display_name
+#: model:ir.model.fields,field_description:web.field_ir_ui_menu__display_name
+#: model:ir.model.fields,field_description:web.field_ir_ui_view__display_name
+#: model:ir.model.fields,field_description:web.field_properties_base_definition__display_name
+#: model:ir.model.fields,field_description:web.field_res_company__display_name
+#: model:ir.model.fields,field_description:web.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:web.field_res_partner__display_name
+#: model:ir.model.fields,field_description:web.field_res_users__display_name
+#: model:ir.model.fields,field_description:web.field_res_users_settings__display_name
+#: model:ir.model.fields,field_description:web.field_res_users_settings_embedded_action__display_name
 msgid "Display Name"
 msgstr "แสดงชื่อ"
 
@@ -2455,6 +2318,11 @@ msgstr "แสดงผลในแนวนอน"
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 msgid "Display in Cards"
 msgstr "แสดงในการ์ด"
+
+#. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Display presets"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -2477,8 +2345,10 @@ msgstr "แสดงไอคอนคำเตือนหากวันที
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
-msgid "Displays or hides the seconds in the datetime value."
-msgstr "แสดงหรือซ่อนวินาทีในค่าวันที่เวลา"
+msgid ""
+"Displays or hides the seconds in the datetime value. Affect only the "
+"readable datetime format."
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -2488,13 +2358,19 @@ msgstr "แสดงหรือซ่อนเวลาในค่าวัน
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
+msgid "Displays the date either in 31/01/%(year)s or in Jan 31, %(year)s"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/char/char_field.js:0
 msgid ""
 "Displays the value of the selected field as a textual hint. If the selected "
 "field is empty, the static placeholder attribute is displayed instead."
 msgstr ""
-"แสดงค่าของฟิลด์ที่เลือกเป็นคำแนะนำข้อความ หากฟิลด์ที่เลือกว่างเปล่า "
-"แอตทริบิวต์ตัวแทนคงที่จะแสดงแทน"
+"แสดงค่าของฟิลด์ที่เลือกเป็นคำแนะนำข้อความ หากฟิลด์ที่เลือกว่างเปล่า แอตทริบิวต์ตัวแทนคงที่จะแสดงแท"
+"น"
 
 #. module: web
 #. odoo-javascript
@@ -2516,7 +2392,6 @@ msgstr "เทมเพลตเอกสาร"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/widgets/documentation_link/documentation_link.xml:0
-#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
 msgid "Documentation"
 msgstr "เอกสารประกอบ"
 
@@ -2558,6 +2433,7 @@ msgstr "อย่าเพิ่งไป"
 #: code:addons/web/static/src/core/file_viewer/file_viewer.xml:0
 #: code:addons/web/static/src/views/fields/binary/binary_field.xml:0
 #: code:addons/web/static/src/views/fields/many2many_binary/many2many_binary_field.xml:0
+#: code:addons/web/static/src/views/fields/pdf_viewer/pdf_viewer_field.xml:0
 msgid "Download"
 msgstr "ดาวน์โหลด"
 
@@ -2599,6 +2475,7 @@ msgstr "เมนูดรอปดาว์น"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/form/form_controller.js:0
+#: code:addons/web/static/src/views/kanban/kanban_controller.js:0
 #: code:addons/web/static/src/views/list/list_controller.js:0
 msgid "Duplicate"
 msgstr "ทำซ้ำ"
@@ -2606,7 +2483,20 @@ msgstr "ทำซ้ำ"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/char/char_field.js:0
+#: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
+#: code:addons/web/static/src/views/fields/email/email_field.js:0
+#: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
+#: code:addons/web/static/src/views/fields/phone/phone_field.js:0
+#: code:addons/web/static/src/views/fields/selection/selection_field.js:0
+#: code:addons/web/static/src/views/fields/text/text_field.js:0
+#: code:addons/web/static/src/views/fields/url/url_field.js:0
 msgid "Dynamic Placeholder"
+msgstr "ตัวยึดตำแหน่งแบบไดนามิก"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
+msgid "Dynamic placeholder"
 msgstr "ตัวยึดตำแหน่งแบบไดนามิก"
 
 #. module: web
@@ -2629,13 +2519,14 @@ msgstr "วันที่ยอมรับเร็วที่สุด"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/search/custom_favorite_item/custom_favorite_item.xml:0
 #: code:addons/web/static/src/views/calendar/calendar_common/calendar_common_popover.xml:0
 #: code:addons/web/static/src/views/calendar/quick_create/calendar_quick_create.xml:0
 #: code:addons/web/static/src/views/fields/binary/binary_field.xml:0
 #: code:addons/web/static/src/views/fields/image/image_field.xml:0
 #: code:addons/web/static/src/views/fields/pdf_viewer/pdf_viewer_field.xml:0
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
 #: code:addons/web/static/src/views/kanban/kanban_record_quick_create.xml:0
+#: code:addons/web/static/src/views/view_components/group_config_menu.js:0
 msgid "Edit"
 msgstr "แก้ไข"
 
@@ -2653,8 +2544,20 @@ msgstr "แก้ไขโดเมน"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/form/form_controller.js:0
+msgid "Edit Properties"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
 msgid "Edit Tags"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
+msgid "Edit favorite"
 msgstr ""
 
 #. module: web
@@ -2666,7 +2569,7 @@ msgstr "แก้ไขในกล่องโต้ตอบ"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
+#: code:addons/web/static/src/views/view_components/group_config_menu.js:0
 msgid "Edit: %s"
 msgstr "แก้ไข: %s"
 
@@ -2677,6 +2580,11 @@ msgstr "แก้ไข: %s"
 #: model_terms:ir.ui.view,arch_db:web.login
 msgid "Email"
 msgstr "อีเมล"
+
+#. module: web
+#: model:ir.model.fields,field_description:web.field_res_users_settings__embedded_actions_config_ids
+msgid "Embedded Actions Config"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -2721,6 +2629,16 @@ msgid "Enter an email"
 msgstr ""
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.login
+msgid "Enter your email"
+msgstr ""
+
+#. module: web
+#: model_terms:ir.ui.view,arch_db:web.login
+msgid "Enter your password"
+msgstr ""
+
+#. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/highlight_text/form_label_highlight_text.xml:0
 msgid "Enterprise"
@@ -2728,15 +2646,9 @@ msgstr "องค์กร"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/file_upload/file_upload_service.js:0
-msgid "Error"
-msgstr "ผิดพลาด"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
-msgid "Esc"
-msgstr "Esc"
+#: code:addons/web/static/src/webclient/debug/profiling/profiling_item.xml:0
+msgid "Entry Count"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -2752,15 +2664,9 @@ msgstr "ยุโรป"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/calendar/calendar_model.js:0
-msgid "Everybody's calendars"
-msgstr "ปฏิทินของทุกคน"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/calendar/calendar_model.js:0
-msgid "Everything"
-msgstr "ทุกอย่าง"
+#: code:addons/web/static/src/webclient/res_user_group_ids_field/res_user_group_ids_popover.xml:0
+msgid "Exclusively implies"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -2776,6 +2682,7 @@ msgstr "ขยายทั้งหมด"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/kanban/kanban_controller.js:0
 #: code:addons/web/static/src/views/list/list_controller.js:0
 #: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
 msgid "Export"
@@ -2815,9 +2722,15 @@ msgstr "ตัวสั่งงานไม่ถูกต้อง กรุ�
 #. odoo-javascript
 #. odoo-python
 #: code:addons/web/controllers/export.py:0
-#: code:addons/web/static/src/views/list/list_controller.js:0
+#: code:addons/web/static/src/views/view_hook.js:0
 msgid "External ID"
 msgstr "ไอดีจากภายนอก"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/res_user_group_ids_field/res_user_group_ids_field.js:0
+msgid "Extra Rights"
+msgstr "สิทธิ์เพิ่มเติม"
 
 #. module: web
 #. odoo-javascript
@@ -2847,22 +2760,8 @@ msgstr "ปัจจัย"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/search/search_model.js:0
-msgid ""
-"Failed to evaluate the context: %(context)s.\n"
-"%(error)s"
+msgid "Failed to evaluate the context: %(context)s."
 msgstr ""
-"ไม่สามารถประเมินบริบทได้: %(context)s\n"
-"%(error)s"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/search/search_model.js:0
-msgid ""
-"Failed to evaluate the domain: %(domain)s.\n"
-"%(error)s"
-msgstr ""
-"ประเมินโดเมนไม่สำเร็จ: %(domain)s\n"
-"%(error)s"
 
 #. module: web
 #. odoo-javascript
@@ -2908,6 +2807,12 @@ msgstr "Ferris"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/field_selector/field_selector_field.js:0
+msgid "Field Selector"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 msgid "Field Type"
 msgstr "ประเภทฟิลด์"
@@ -2925,8 +2830,7 @@ msgid ""
 "Field that holds the maximum value of the progress bar. If set, will be "
 "displayed next to the progress bar (e.g. 10 / 200)."
 msgstr ""
-"ฟิลด์ที่เก็บค่าสูงสุดของแถบความคืบหน้า หากตั้งค่าไว้ "
-"จะแสดงถัดจากแถบความคืบหน้า (เช่น 10/200)"
+"ฟิลด์ที่เก็บค่าสูงสุดของแถบความคืบหน้า หากตั้งค่าไว้ จะแสดงถัดจากแถบความคืบหน้า (เช่น 10/200)"
 
 #. module: web
 #. odoo-javascript
@@ -2974,6 +2878,7 @@ msgstr "ลอย"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 #: code:addons/web/static/src/views/kanban/kanban_header.js:0
 msgid "Fold"
 msgstr "พับ"
@@ -2992,7 +2897,7 @@ msgstr "พับเก็บได้"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/dynamic_widget/dynamic_model_field_selector_char.js:0
+#: code:addons/web/static/src/views/fields/field_selector/field_selector_field.js:0
 msgid "Follow relations"
 msgstr "ติดตามความสัมพันธ์"
 
@@ -3027,13 +2932,22 @@ msgstr "ข้อความส่วนท้ายแสดงอยู่ด
 #. odoo-javascript
 #: code:addons/web/static/src/views/pivot/pivot_renderer.js:0
 msgid ""
-"For Excel compatibility, data cannot be exported if there are more than 16384 columns.\n"
+"For Excel compatibility, data cannot be exported if there are more than "
+"16384 columns.\n"
 "\n"
 "Tip: try to flip axis, filter further or reduce the number of measures."
 msgstr ""
 "เพื่อความเข้ากันได้กับ Excel ข้อมูลจะไม่สามารถส่งออกได้ถ้ามีมากกว่า 16384 คอลัมน์\n"
 "\n"
 "เคล็ดลับ: ลองพลิกแกน กรองเพิ่มเติม หรือลดจำนวนหน่วยวัด"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
+msgid ""
+"For example, if the value is \"1\" and you enter \"+=2\", it will be updated "
+"to \"3\"."
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -3059,6 +2973,16 @@ msgid ""
 "separators, rounding, etc."
 msgstr ""
 "จัดรูปแบบค่าตามการตั้งค่าภาษาของคุณ เช่น ตัวคั่นหลักพัน การปัดเศษ เป็นต้น"
+
+#. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Frames"
+msgstr ""
+
+#. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Frames + sql (Combined)"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -3122,12 +3046,6 @@ msgstr "ราศีเมถุน"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
-msgid "Get View"
-msgstr "รับมุมมอง"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/fields/upgrade_dialog.xml:0
 msgid "Get this feature and much more with Odoo Enterprise!"
 msgstr "รับฟีเจอร์นี้และฟีเจอร์อื่น ๆ อีกมากมายด้วย Odoo สำหรับองค์กร"
@@ -3153,6 +3071,12 @@ msgstr "สีเขียว"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/webclient/res_user_group_ids_field/res_user_group_ids_popover.xml:0
+msgid "Group"
+msgstr "กลุ่ม"
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 msgid "Group %s"
 msgstr "กลุ่ม %s"
@@ -3162,6 +3086,12 @@ msgstr "กลุ่ม %s"
 #: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
 msgid "Group By"
 msgstr "กลุ่มโดย"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/property_definition.js:0
+msgid "HTML"
+msgstr "HTML"
 
 #. module: web
 #: model:ir.model,name:web.model_ir_http
@@ -3190,17 +3120,20 @@ msgstr "ข้อความส่วนหัวแสดงที่ด้า
 #: code:addons/web/static/src/model/relational_model/record.js:0
 msgid ""
 "Heads up! Your recent changes are too large to save automatically. Please "
-"click the <i class=\"fa fa-cloud-upload fa-fw\"></i> button now to ensure "
-"your work is saved before you exit this tab."
+"click the %(upload_icon)s button now to ensure your work is saved before you "
+"exit this tab."
 msgstr ""
-"ระวัง! การเปลี่ยนแปลงล่าสุดของคุณมีขนาดใหญ่เกินกว่าจะบันทึกโดยอัตโนมัติ "
-"โปรดคลิกปุ่ม<i class=\"fa fa-cloud-upload fa-"
-"fw\"></i>ตอนนี้เพื่อให้แน่ใจว่างานของคุณได้รับการบันทึกไว้ก่อนที่คุณจะออกจากแท็บนี้"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
+msgid "Help"
+msgstr "ช่วยเหลือ"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.xml:0
-msgid "Hide in kanban"
+msgid "Hide in Kanban"
 msgstr "ซ่อนในคัมบัง"
 
 #. module: web
@@ -3229,6 +3162,27 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/float/float_field.js:0
+#: code:addons/web/static/src/views/fields/monetary/monetary_field.js:0
+msgid "Hide trailing zeros"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/password/password_field.js:0
+msgid "Hide value"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/float/float_field.js:0
+#: code:addons/web/static/src/views/fields/monetary/monetary_field.js:0
+msgid ""
+"Hide zeros to the right of the last non-zero digit, e.g. 1.20 becomes 1.2"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Hindu"
 msgstr "ฮินดู"
@@ -3240,6 +3194,12 @@ msgid "Home Menu"
 msgstr "เมนูหลัก"
 
 #. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/search/utils/dates.js:0
+msgid "Hour"
+msgstr "ชั่วโมง"
+
+#. module: web
 #. odoo-python
 #: code:addons/web/controllers/database.py:0
 msgid ""
@@ -3247,15 +3207,20 @@ msgid ""
 "numbers, underscores, hyphens, or dots in the database name, and you'll be "
 "golden."
 msgstr ""
-"ฮูสตัน เรามีปัญหาเรื่องการตั้งชื่อฐานข้อมูล! "
-"ตรวจสอบให้แน่ใจว่าคุณใช้เฉพาะตัวอักษร ตัวเลข ขีดล่าง ยัติภังค์ "
-"หรือจุดในชื่อฐานข้อมูล จากนั้นคุณจะมีสีทอง"
+"ฮูสตัน เรามีปัญหาเรื่องการตั้งชื่อฐานข้อมูล! ตรวจสอบให้แน่ใจว่าคุณใช้เฉพาะตัวอักษร ตัวเลข ขีดล่าง ยั"
+"ติภังค์ หรือจุดในชื่อฐานข้อมูล จากนั้นคุณจะมีสีทอง"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/pwa/install_prompt.xml:0
 msgid "How to get the application"
 msgstr "วิธีรับใบสมัคร"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/color_picker/custom_color_picker/custom_color_picker.xml:0
+msgid "Hue"
+msgstr "สี"
 
 #. module: web
 #. odoo-javascript
@@ -3267,6 +3232,19 @@ msgstr "ฉันต้องการอัปเดตข้อมูล (น�
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #: model:ir.model.fields,field_description:web.field_base_document_layout__id
+#: model:ir.model.fields,field_description:web.field_ir_http__id
+#: model:ir.model.fields,field_description:web.field_ir_model__id
+#: model:ir.model.fields,field_description:web.field_ir_qweb_field_image__id
+#: model:ir.model.fields,field_description:web.field_ir_qweb_field_image_url__id
+#: model:ir.model.fields,field_description:web.field_ir_ui_menu__id
+#: model:ir.model.fields,field_description:web.field_ir_ui_view__id
+#: model:ir.model.fields,field_description:web.field_properties_base_definition__id
+#: model:ir.model.fields,field_description:web.field_res_company__id
+#: model:ir.model.fields,field_description:web.field_res_config_settings__id
+#: model:ir.model.fields,field_description:web.field_res_partner__id
+#: model:ir.model.fields,field_description:web.field_res_users__id
+#: model:ir.model.fields,field_description:web.field_res_users_settings__id
+#: model:ir.model.fields,field_description:web.field_res_users_settings_embedded_action__id
 msgid "ID"
 msgstr "ไอดี"
 
@@ -3303,8 +3281,7 @@ msgstr "ไอคอน"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/url/url_field.js:0
-msgid ""
-"If True, the url will be used as it is, without any prefix added to it."
+msgid "If True, the url will be used as it is, without any prefix added to it."
 msgstr "หากเป็น True ระบบจะใช้ URL เดิมโดยไม่มีการเพิ่มคำนำหน้า"
 
 #. module: web
@@ -3315,9 +3292,16 @@ msgid ""
 "edit it. Note that if a color field is also set, the tag edition will "
 "prevail. So, the color picker will not be displayed on click on the tag."
 msgstr ""
-"หากทำเครื่องหมายไว้ การคลิกที่แท็กจะเปิดฟอร์มที่ให้คุณแก้ไขแท็กได้โดยตรง "
-"โปรดทราบว่าหากตั้งค่าช่องสีไว้ด้วย การแก้ไขแท็กจะมีผลเหนือกว่า ดังนั้น "
-"ตัวเลือกสีจะไม่ปรากฏขึ้นเมื่อคลิกที่แท็ก"
+"หากทำเครื่องหมายไว้ การคลิกที่แท็กจะเปิดฟอร์มที่ให้คุณแก้ไขแท็กได้โดยตรง โปรดทราบว่าหากตั้งค่าช่อง"
+"สีไว้ด้วย การแก้ไขแท็กจะมีผลเหนือกว่า ดังนั้น ตัวเลือกสีจะไม่ปรากฏขึ้นเมื่อคลิกที่แท็ก"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/json_checkboxes/json_checkboxes_field.js:0
+msgid ""
+"If checked, the checkboxes will be displayed in a column. Otherwise, they "
+"will be inlined."
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -3337,8 +3321,8 @@ msgid ""
 "If checked, users will not be able to create records based on the text "
 "input; they will still be able to create records via a popup form."
 msgstr ""
-"หากทำเครื่องหมาย ผู้ใช้จะไม่สามารถสร้างบันทึกตามการป้อนข้อความได้ "
-"พวกเขายังสามารถสร้างบันทึกผ่านแบบฟอร์มป๊อปอัปได้"
+"หากทำเครื่องหมาย ผู้ใช้จะไม่สามารถสร้างบันทึกตามการป้อนข้อความได้ พวกเขายังสามารถสร้างบันทึกผ่"
+"านแบบฟอร์มป๊อปอัปได้"
 
 #. module: web
 #. odoo-javascript
@@ -3348,8 +3332,8 @@ msgid ""
 "If checked, users will not be able to create records based through a popup "
 "form; they will still be able to create records based on the text input."
 msgstr ""
-"หากทำเครื่องหมาย ผู้ใช้จะไม่สามารถสร้างบันทึกตามแบบฟอร์มป๊อปอัปได้ "
-"พวกเขายังคงสามารถสร้างบันทึกตามการป้อนข้อความได้"
+"หากทำเครื่องหมาย ผู้ใช้จะไม่สามารถสร้างบันทึกตามแบบฟอร์มป๊อปอัปได้ พวกเขายังคงสามารถสร้างบันทึ"
+"กตามการป้อนข้อความได้"
 
 #. module: web
 #. odoo-javascript
@@ -3359,8 +3343,13 @@ msgid ""
 "If checked, users won't be able to create records through the autocomplete "
 "dropdown at all."
 msgstr ""
-"หากทำเครื่องหมาย "
-"ผู้ใช้จะไม่สามารถสร้างบันทึกผ่านทางดรอปดาวน์เติมข้อความอัตโนมัติได้เลย"
+"หากทำเครื่องหมาย ผู้ใช้จะไม่สามารถสร้างบันทึกผ่านทางดรอปดาวน์เติมข้อความอัตโนมัติได้เลย"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+msgid "If true, non-literals are accepted"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -3374,16 +3363,16 @@ msgstr "รูปภาพ"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
-msgid "In %s days"
-msgstr "ใน %s วัน"
+#: code:addons/web/static/src/webclient/res_user_group_ids_field/res_user_group_ids_popover.xml:0
+msgid "Implied by"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/record_selectors/multi_record_selector.js:0
 #: code:addons/web/static/src/core/record_selectors/record_selector.js:0
 #: code:addons/web/static/src/core/tree_editor/tree_editor_autocomplete.js:0
-#: code:addons/web/static/src/core/tree_editor/utils.js:0
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
 msgid "Inaccessible/missing record ID: %s"
 msgstr "ID บันทึกที่ไม่สามารถเข้าถึงได้/ขาดหาย: %s"
 
@@ -3392,6 +3381,12 @@ msgstr "ID บันทึกที่ไม่สามารถเข้าถ
 #: code:addons/web/static/src/core/domain_selector/domain_selector.xml:0
 msgid "Include archived"
 msgstr "รวมที่เก็บถาวร"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/res_user_group_ids_field/res_user_group_ids_popover.xml:0
+msgid "Incompatibility"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -3432,8 +3427,7 @@ msgid ""
 "Install the app on your device to access it easily. Here are the steps to "
 "follow:"
 msgstr ""
-"ติดตั้งแอปบนอุปกรณ์ของคุณเพื่อเข้าถึงได้อย่างง่ายดาย "
-"นี่คือขั้นตอนในการปฏิบัติตาม:"
+"ติดตั้งแอปบนอุปกรณ์ของคุณเพื่อเข้าถึงได้อย่างง่ายดาย นี่คือขั้นตอนในการปฏิบัติตาม:"
 
 #. module: web
 #. odoo-javascript
@@ -3444,7 +3438,7 @@ msgstr "ตัวเลขจำนวนเต็ม"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/many2one/many2one_field.xml:0
+#: code:addons/web/static/src/views/fields/many2one/many2one.xml:0
 #: code:addons/web/static/src/views/fields/properties/property_value.xml:0
 msgid "Internal link"
 msgstr "ลิงค์ภายใน"
@@ -3454,6 +3448,12 @@ msgstr "ลิงค์ภายใน"
 #: code:addons/web/static/src/webclient/debug/profiling/profiling_item.xml:0
 msgid "Interval"
 msgstr "ช่วงเวลา"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/kanban/kanban_record_quick_create.js:0
+msgid "Invalid Display Name"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -3488,14 +3488,14 @@ msgstr "ที่อยู่อีเมลที่ไม่ถูกต้อ
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_invite_users.js:0
-msgid "Invalid email addresses: %(2 addresses)s"
-msgstr "ที่อยู่อีเมลที่ไม่ถูกต้อง: %(2 addresses)s"
+msgid "Invalid email addresses: %(addresses)s"
+msgstr "ที่อยู่อีเมลที่ไม่ถูกต้อง: %(addresses)s"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_invite_users.js:0
-msgid "Invalid email addresses: %(addresses)s"
-msgstr "ที่อยู่อีเมลที่ไม่ถูกต้อง: %(addresses)s"
+msgid "Invalid email addresses: %(two_addresses)s"
+msgstr "ที่อยู่อีเมลที่ไม่ถูกต้อง: %(two_addresses)s"
 
 #. module: web
 #. odoo-javascript
@@ -3511,13 +3511,6 @@ msgid "Invalid fields"
 msgstr "ฟิลด์ไม่ถูกต้อง"
 
 #. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/model/relational_model/record.js:0
-#: code:addons/web/static/src/views/kanban/kanban_record_quick_create.js:0
-msgid "Invalid fields: "
-msgstr "ฟิลด์ไม่ถูกต้อง:"
-
-#. module: web
 #. odoo-python
 #: code:addons/web/controllers/domain.py:0
 msgid "Invalid model: %s"
@@ -3528,6 +3521,12 @@ msgstr "โมเดลไม่ถูกต้อง: %s"
 #: code:addons/web/static/src/core/tree_editor/tree_editor_autocomplete.js:0
 msgid "Invalid record ID: %s"
 msgstr "รหัสบันทึกไม่ถูกต้อง: %s"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/view_components/multi_create_popover.js:0
+msgid "Invalid time range"
+msgstr ""
 
 #. module: web
 #. odoo-python
@@ -3581,16 +3580,22 @@ msgstr "อิสลาม"
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/debug/profiling/profiling_qweb.xml:0
 msgid ""
-"It is possible that the \"t-call\" time does not correspond to the overall time of the\n"
-"            template. Because the global time (in the drop down) does not take into account the\n"
-"            duration which is not in the rendering (look for the template, read, inheritance,\n"
-"            compilation...). During rendering, the global time also takes part of the time to make\n"
-"            the profile as well as some part not logged in the function generated by the qweb."
+"It is possible that the \"t-call\" time does not correspond to the overall "
+"time of the\n"
+"            template. Because the global time (in the drop down) does not "
+"take into account the\n"
+"            duration which is not in the rendering (look for the template, "
+"read, inheritance,\n"
+"            compilation...). During rendering, the global time also takes "
+"part of the time to make\n"
+"            the profile as well as some part not logged in the function "
+"generated by the qweb."
 msgstr ""
 "เป็นไปได้ว่าเวลา \"t-call\" ไม่ตรงกับเวลาโดยรวมของ\n"
 "          เทมเพลต เนื่องจากเวลาทั่วโลก (ในเมนูดรอปดาวน์) ไม่ได้คำนึงถึง\n"
 "            ระยะเวลาที่ไม่ได้อยู่ในการแสดงผล (มองหาเทมเพลต อ่าน สืบทอด\n"
-"           เรียบเรียง...) ในระหว่างการเรนเดอร์ เวลาทั่วโลกก็เป็นเวลาส่วนหนึ่งของการสร้าง\n"
+"           เรียบเรียง...) ในระหว่างการเรนเดอร์ เวลาทั่วโลกก็เป็นเวลาส่วนหนึ่งของการสร้า"
+"ง\n"
 "            โปรไฟล์และบางส่วนที่ไม่ได้เข้าสู่ระบบในฟังก์ชันที่สร้างโดย qweb"
 
 #. module: web
@@ -3600,6 +3605,26 @@ msgid ""
 "It seems the records with IDs %s cannot be found. They might have been "
 "deleted."
 msgstr "ดูเหมือนว่าไม่พบบันทึกที่มี ID %s มันอาจถูกลบไปแล้ว"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
+msgid ""
+"It will be removed for everyone using the \"%(parentName)s\" %"
+"(parentFieldLabel)s."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
+msgid "It will be removed for everyone!"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
+msgid "Jan 31, %s"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -3759,13 +3784,19 @@ msgstr "ชาวยิว"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/webclient/res_user_group_ids_field/res_user_group_ids_popover.xml:0
+msgid "Jointly implies"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Jolly Roger"
 msgstr "Jolly Roger"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/jsonb/jsonb.js:0
+#: code:addons/web/static/src/views/fields/json/json_field.js:0
 msgid "Json"
 msgstr "Json"
 
@@ -3819,6 +3850,12 @@ msgid "Label:"
 msgstr "ป้ายกำกับ:"
 
 #. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/kanban/kanban_renderer.xml:0
+msgid "Lack of inspiration?"
+msgstr ""
+
+#. module: web
 #. odoo-python
 #: code:addons/web/controllers/session.py:0
 msgid "Languages"
@@ -3833,14 +3870,40 @@ msgid "Large"
 msgstr "ใหญ่"
 
 #. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
+msgid "Last 12 months"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
+msgid "Last 30 days"
+msgstr "30 วันล่าสุด"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
+msgid "Last 7 days"
+msgstr "7 วันล่าสุด"
+
+#. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__write_uid
+#: model:ir.model.fields,field_description:web.field_res_users_settings_embedded_action__write_uid
 msgid "Last Updated by"
 msgstr "อัปเดตครั้งล่าสุดโดย"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__write_date
+#: model:ir.model.fields,field_description:web.field_res_users_settings_embedded_action__write_date
 msgid "Last Updated on"
 msgstr "อัปเดตครั้งล่าสุดเมื่อ"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
+msgid "Last month"
+msgstr "เดือนที่แล้ว"
 
 #. module: web
 #. odoo-javascript
@@ -3926,7 +3989,7 @@ msgstr "ตัวอย่าง ข้อมูล"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/graph/graph_controller.xml:0
+#: code:addons/web/static/src/views/graph/graph_renderer.xml:0
 msgid "Load everything anyway."
 msgstr ""
 
@@ -3956,7 +4019,8 @@ msgstr "กำลังโหลด"
 #: code:addons/web/static/src/core/model_selector/model_selector.js:0
 #: code:addons/web/static/src/core/record_selectors/record_autocomplete.js:0
 #: code:addons/web/static/src/core/ui/block_ui.js:0
-#: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.js:0
+#: code:addons/web/static/src/core/ui/block_ui.xml:0
+#: code:addons/web/static/src/views/calendar/calendar_filter_section/calendar_filter_section.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 msgid "Loading..."
 msgstr "กำลังโหลด..."
@@ -3977,6 +4041,12 @@ msgstr "เข้าสู่ระบบในฐานะผู้ใช้ข
 #: model_terms:ir.ui.view,arch_db:web.login_successful
 msgid "Log out"
 msgstr "ออกระบบ"
+
+#. module: web
+#. odoo-python
+#: code:addons/web/controllers/home.py:0
+msgid "Login"
+msgstr "เข้าสู่ระบบ"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.external_layout_bold
@@ -4005,6 +4075,12 @@ msgstr "สีรองโลโก้"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "M"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Mahjong"
 msgstr "ไพ่นกกระจอก"
 
@@ -4023,8 +4099,6 @@ msgstr "ข้อยกเว้นการส่งจดหมาย"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/graph/graph_controller.xml:0
-#: code:addons/web/static/src/views/kanban/kanban_controller.xml:0
-#: code:addons/web/static/src/views/list/list_controller.xml:0
 #: code:addons/web/static/src/views/pivot/pivot_controller.xml:0
 msgid "Main actions"
 msgstr "การดำเนินการหลัก"
@@ -4034,12 +4108,6 @@ msgstr "การดำเนินการหลัก"
 #: code:addons/web/static/src/search/control_panel/control_panel.xml:0
 msgid "Make this embedded action available to other users"
 msgstr "ทำให้การดำเนินการฝังนี้พร้อมใช้งานสำหรับผู้ใช้รายอื่น"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/search/custom_favorite_item/custom_favorite_item.xml:0
-msgid "Make this filter available to other users"
-msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login_layout
@@ -4136,6 +4204,11 @@ msgid "Meeting Subject"
 msgstr "หัวเรื่องในการประชุม"
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Memory (heuristic)"
+msgstr ""
+
+#. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/burger_menu/burger_menu.xml:0
 #: model:ir.model,name:web.model_ir_ui_menu
@@ -4181,6 +4254,12 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/float/float_field.js:0
+msgid "Minimum Digits"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/timezone_mismatch/timezone_mismatch_field.js:0
 msgid "Mismatch title"
 msgstr "ชื่อไม่ตรงกัน"
@@ -4205,6 +4284,12 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/model/relational_model/record.js:0
+msgid "Missing required fields"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/fields/upgrade_dialog.xml:0
 msgid "Mobile support"
 msgstr "รองรับโทรศัพท์มือถือ"
@@ -4218,7 +4303,7 @@ msgstr "โหมด"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/domain/domain_field.js:0
-#: code:addons/web/static/src/views/fields/dynamic_widget/dynamic_model_field_selector_char.js:0
+#: code:addons/web/static/src/views/fields/field_selector/field_selector_field.js:0
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 msgid "Model"
 msgstr "โมเดล"
@@ -4260,12 +4345,6 @@ msgstr "โมเดล"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/search_bar/search_bar.js:0
-msgid "Modify Condition"
-msgstr "ปรับเปลี่ยนสภาพ"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/fields/domain/domain_field.xml:0
 msgid "Modify filter"
 msgstr ""
@@ -4279,6 +4358,7 @@ msgstr "จันทร์"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/monetary/monetary_field.js:0
+#: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 msgid "Monetary"
 msgstr "การเงิน"
 
@@ -4291,14 +4371,22 @@ msgstr "เดือน"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
+msgid "Month to date"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 msgid "Months"
 msgstr "เดือน"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/search/control_panel/control_panel.xml:0
 #: code:addons/web/static/src/views/fields/statusbar/statusbar_field.js:0
 #: code:addons/web/static/src/views/form/button_box/button_box.xml:0
+#: code:addons/web/static/src/views/form/status_bar_buttons/status_bar_buttons.xml:0
 msgid "More"
 msgstr "เพิ่มเติม"
 
@@ -4310,6 +4398,7 @@ msgstr "เมนูเพิ่มเติม"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
 #: code:addons/web/static/src/views/fields/statusbar/statusbar_field.xml:0
 msgid "More..."
 msgstr "มากกว่า..."
@@ -4376,9 +4465,15 @@ msgstr "ภรรยาซานตาคลอส"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 #: code:addons/web/static/src/views/fields/text/text_field.js:0
 msgid "Multiline Text"
 msgstr "ข้อความหลายบรรทัด"
+
+#. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Multiple profile"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -4395,8 +4490,14 @@ msgstr "มุสลิม"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
-msgid "My Odoo.com account"
-msgstr "บัญชี Odoo.com ของฉัน"
+msgid "My Odoo.com Account"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
+msgid "My Preferences"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -4480,12 +4581,6 @@ msgstr "ใหม่:"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
-msgid "New: %s"
-msgstr "ใหม่: %s"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/file_viewer/file_viewer.xml:0
 #: code:addons/web/static/src/core/pager/pager.xml:0
 #: code:addons/web/static/src/views/calendar/calendar_controller.xml:0
@@ -4524,9 +4619,8 @@ msgstr "ปีถัดไป"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/model/relational_model/utils.js:0
 #: code:addons/web/static/src/search/search_bar/search_bar.js:0
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
-#: code:addons/web/static/src/views/list/list_renderer.js:0
 #: code:addons/web/static/src/views/pivot/pivot_model.js:0
 msgid "No"
 msgstr "ไม่"
@@ -4565,21 +4659,22 @@ msgstr "ไม่พบคำสั่ง"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_renderer.js:0
-msgid "No currency provided"
-msgstr "ไม่มีการระบุสกุลเงิน"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/graph/graph_renderer.js:0
 msgid "No data"
 msgstr "ไม่มีข้อมูล"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/action_helper.xml:0
 #: code:addons/web/static/src/views/no_content_helpers.xml:0
 msgid "No data to display"
 msgstr "ไม่มีข้อมูลให้แสดง"
+
+#. module: web
+#. odoo-python
+#: code:addons/web/controllers/pivot.py:0
+msgid "No data to export"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -4596,7 +4691,7 @@ msgstr "ไม่พบอุปกรณ์"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_picker.xml:0
-msgid "No emoji matches your search"
+msgid "No emojis match your search"
 msgstr ""
 
 #. module: web
@@ -4620,7 +4715,7 @@ msgstr "ไม่พบบันทึก"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/model_selector/model_selector.js:0
-#: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.js:0
+#: code:addons/web/static/src/views/calendar/calendar_filter_section/calendar_filter_section.js:0
 #: code:addons/web/static/src/views/fields/formatters.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 msgid "No records"
@@ -4641,16 +4736,26 @@ msgstr "ไม่มีผลลัพธ์"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/commands/command_palette.js:0
-#: code:addons/web/static/src/core/select_menu/select_menu.xml:0
 msgid "No result found"
 msgstr "ไม่พบผลลัพธ์"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/model/relational_model/dynamic_list.js:0
-#: code:addons/web/static/src/model/relational_model/record.js:0
-msgid "No valid record to save"
-msgstr "ไม่มีบันทึกที่ถูกต้องที่จะบันทึก"
+#: code:addons/web/static/src/core/select_menu/select_menu.xml:0
+msgid "No results"
+msgstr "ไม่มีผลลัพธ์"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/settings_form_view/settings_form_view.xml:0
+msgid "No settings found"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/kanban/kanban_renderer.xml:0
+msgid "No stages yet, let's create some!"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -4661,18 +4766,17 @@ msgstr "ไม่มีมุมมองของประเภท '%s' สา
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/calendar/calendar_controller.js:0
-#: code:addons/web/static/src/views/form/form_controller.js:0
-#: code:addons/web/static/src/views/kanban/kanban_controller.js:0
-#: code:addons/web/static/src/views/list/list_controller.js:0
+#: code:addons/web/static/src/views/view_hook.js:0
 msgid "No, keep it"
 msgstr "ไม่ เก็บมันไว้"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/model/relational_model/utils.js:0
 #: code:addons/web/static/src/views/graph/graph_model.js:0
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
-#: code:addons/web/static/src/views/list/list_renderer.js:0
+#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
 #: code:addons/web/static/src/views/pivot/pivot_model.js:0
+#: code:addons/web/static/src/webclient/debug/profiling/profiling_item.xml:0
 msgid "None"
 msgstr "ไม่มี"
 
@@ -4690,21 +4794,23 @@ msgstr "ไม่ถูกต้อง %s"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/statusbar/statusbar_field.js:0
-msgid "Not active state"
-msgstr "สถานะไม่ใช้งาน"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/statusbar/statusbar_field.js:0
-msgid "Not active state, click to change it"
-msgstr "สถานะไม่ใช้งาน คลิกเพื่อเปลี่ยน"
+#: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
+msgid ""
+"Not possible to create monetary field because there is no currency on "
+"current model."
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/many2many_binary/many2many_binary_field.js:0
 msgid "Number of files"
 msgstr "จำนวนไฟล์"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "O"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -4805,8 +4911,7 @@ msgid ""
 "Odoo Push notifications have been blocked. Go to your browser settings to "
 "allow them."
 msgstr ""
-"การแจ้งเตือน Odoo Push ถูกปิดกั้น "
-"ไปที่การตั้งค่าเบราว์เซอร์ของคุณเพื่อทำการอนุญาตก่อน"
+"การแจ้งเตือน Odoo Push ถูกปิดกั้น ไปที่การตั้งค่าเบราว์เซอร์ของคุณเพื่อทำการอนุญาตก่อน"
 
 #. module: web
 #. odoo-javascript
@@ -4852,8 +4957,8 @@ msgid ""
 "Of the %(selectedRecord)s selected records, only the first %(firstRecords)s "
 "have been archived/unarchived."
 msgstr ""
-"จาก %(selectedRecord)s รายการที่เลือก มีเพียง %(firstRecords)s "
-"รายการแรกเท่านั้นที่ได้รับการเก็บถาวร/ยกเลิกการจัดเก็บ"
+"จาก %(selectedRecord)s รายการที่เลือก มีเพียง %(firstRecords)s รายการแรกเท่านั้นที่ได้รับ"
+"การเก็บถาวร/ยกเลิกการจัดเก็บ"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.webclient_offline
@@ -4869,24 +4974,11 @@ msgstr "โอ้ว!"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/confirmation_dialog/confirmation_dialog.js:0
-#: code:addons/web/static/src/core/dialog/dialog.xml:0
 #: code:addons/web/static/src/public/error_notifications.js:0
 #: code:addons/web/static/src/views/calendar/calendar_year/calendar_year_popover.xml:0
 #: code:addons/web/static/src/views/view_dialogs/form_view_dialog.xml:0
 msgid "Ok"
 msgstr "ตกลง"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/webclient/settings_form_view/widgets/mobile_apps_funnel.xml:0
-msgid "On Apple Store"
-msgstr "บน Apple Store"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/webclient/settings_form_view/widgets/mobile_apps_funnel.xml:0
-msgid "On Google Play"
-msgstr "บน Google Play"
 
 #. module: web
 #. odoo-python
@@ -4898,7 +4990,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/dynamic_widget/dynamic_model_field_selector_char.js:0
+#: code:addons/web/static/src/views/fields/field_selector/field_selector_field.js:0
 msgid "Only searchable"
 msgstr "ค้นหาได้เท่านั้น"
 
@@ -4915,8 +5007,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/web/models/models.py:0
 msgid ""
-"Only types %(supported_types)s are supported for category (found type "
-"%(field_type)s)"
+"Only types %(supported_types)s are supported for category (found type %"
+"(field_type)s)"
 msgstr ""
 "เฉพาะประเภท %(supported_types)sรองรับหมวดหมู่ (ประเภทที่พบ %(field_type)s)"
 
@@ -4924,10 +5016,9 @@ msgstr ""
 #. odoo-python
 #: code:addons/web/models/models.py:0
 msgid ""
-"Only types %(supported_types)s are supported for filter (found type "
-"%(field_type)s)"
-msgstr ""
-"เฉพาะประเภท %(supported_types)s รองรับตัวกรอง (พบประเภท %(field_type)s)"
+"Only types %(supported_types)s are supported for filter (found type %"
+"(field_type)s)"
+msgstr "เฉพาะประเภท %(supported_types)s รองรับตัวกรอง (พบประเภท %(field_type)s)"
 
 #. module: web
 #. odoo-javascript
@@ -4940,6 +5031,37 @@ msgstr "คุณเท่านั้น"
 #: code:addons/web/static/src/core/errors/error_dialogs.xml:0
 msgid "Oops!"
 msgstr "อุ๊ปส์!"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/file_handler.js:0
+msgid "Oops! '%(fileName)s' didn’t upload since its format isn’t allowed."
+msgstr "อุ๊ย! '%(fileName)s' ไม่สามารถอัปโหลดได้ เนื่องจากรูปแบบไม่ได้รับอนุญาต"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
+msgid "Oops! A %(parentFieldLabel)s is needed to add property fields."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
+msgid "Oops! You cannot edit the %(parentFieldLabel)s \"%(parentName)s\"."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/color_picker/custom_color_picker/custom_color_picker.xml:0
+msgid "Opacity"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Open"
+msgstr "เปิด"
 
 #. module: web
 #. odoo-javascript
@@ -5011,6 +5133,7 @@ msgstr "ไม้กางเขนออร์ทอดอกซ์"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/kanban/progress_bar_hook.js:0
+#: code:addons/web/static/src/webclient/res_user_group_ids_field/res_user_group_ids_field.js:0
 msgid "Other"
 msgstr "อื่น ๆ"
 
@@ -5019,6 +5142,12 @@ msgstr "อื่น ๆ"
 #: code:addons/web/static/src/views/fields/progress_bar/progress_bar_field.js:0
 msgid "Overflow style"
 msgstr "แบบล้น"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "P"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -5060,7 +5189,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/pager/pager.xml:0
 msgid "Pager"
-msgstr "เพจเจอร์"
+msgstr "แถบเลือกหน้า"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__paperformat_id
@@ -5073,6 +5202,8 @@ msgid "Partner"
 msgstr "พาร์ทเนอร์"
 
 #. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/password/password_field.js:0
 #: model_terms:ir.ui.view,arch_db:web.login
 msgid "Password"
 msgstr "ใส่รหัส"
@@ -5126,8 +5257,7 @@ msgid ""
 "Pie chart cannot mix positive and negative numbers. Try to change your "
 "domain to only display positive results"
 msgstr ""
-"แผนภูมิวงกลมไม่สามารถผสมตัวเลขบวกและลบได้ "
-"ลองเปลี่ยนโดเมนของคุณให้แสดงผลในเชิงบวกเท่านั้น"
+"แผนภูมิวงกลมไม่สามารถผสมตัวเลขบวกและลบได้ ลองเปลี่ยนโดเมนของคุณให้แสดงผลในเชิงบวกเท่านั้น"
 
 #. module: web
 #. odoo-javascript
@@ -5166,7 +5296,26 @@ msgid "Please enter save field list name"
 msgstr "โปรดใส่บันทึกฟิลด์รายการชื่อ"
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.view_view_form_inherit_view
+msgid ""
+"Please note that your view includes invalid locators.<br/>\n"
+"                    These nodes could not be anchored to the parent view and "
+"have no effect.<br/>\n"
+"                    This issue may have arisen as a result of manual "
+"modifications or during the upgrade process.<br/>\n"
+"                    For your reference, invalid xpath nodes are highlighted "
+"in red."
+msgstr ""
+"โปรดทราบว่าในมุมมองของคุณมีตัวระบุตำแหน่งที่ไม่ถูกต้อง<br/>\n"
+"                    โหนดเหล่านี้ไม่สามารถเชื่อมโยงกับมุมมองหลักได้และจะไม่มีผลใดๆ<br/>\n"
+"                    ปัญหานี้อาจเกิดจากการปรับแก้ไขด้วยตนเองหรือระหว่างกระบวนการอัปเกร"
+"ด<br/>\n"
+"                    เพื่อความสะดวกในการตรวจสอบ โหนด xpath ที่ไม่ถูกต้องจะถูกไฮไลต์เป็นสี"
+"แดง"
+
+#. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/x2many/x2many_field.js:0
 #: code:addons/web/static/src/views/list/list_renderer.js:0
 msgid "Please save your changes first"
 msgstr ""
@@ -5179,7 +5328,7 @@ msgstr "โปรดเลือกฟิลด์เพื่อบันทึ
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
+#: code:addons/web/static/src/views/fields/many2one/many2one.js:0
 msgid "Please, scan again!"
 msgstr "กรุณาสแกนอีกครั้ง!"
 
@@ -5195,21 +5344,15 @@ msgstr "สนับสนุนโดย <span>Odoo</span>"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
-msgid "Preferences"
-msgstr "การตั้งค่า"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/fields/signature/signature_field.js:0
 msgid "Prefill with"
 msgstr "กรอกล่วงหน้าด้วย"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
-msgid "Press"
-msgstr "กด"
+#: code:addons/web/static/src/core/tree_editor/tree_editor_value_editors.js:0
+msgid "Press \"Enter\" to add criterion"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -5267,18 +5410,6 @@ msgstr "ก่อนหน้า (ลูกศรซ้าย)"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/utils/dates.js:0
-msgid "Previous Period"
-msgstr "ช่วงก่อนหน้า"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/search/utils/dates.js:0
-msgid "Previous Year"
-msgstr "ปีก่อนหน้า"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/datetime/datetime_picker.js:0
 msgid "Previous century"
 msgstr "ศตวรรษก่อน"
@@ -5316,6 +5447,12 @@ msgstr "พิมพ์"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/search/cog_menu/cog_menu.js:0
+msgid "Print report: %s"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/priority/priority_field.js:0
 #: code:addons/web/static/src/views/fields/priority/priority_field.xml:0
 msgid "Priority"
@@ -5344,6 +5481,11 @@ msgstr "แถบความคืบหน้า"
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 msgid "Properties"
 msgstr "คุณสมบัติ"
+
+#. module: web
+#: model:ir.model,name:web.model_properties_base_definition
+msgid "Properties Base Definition"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -5408,7 +5550,7 @@ msgstr "เพิ่มด่วน"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/record_selectors/record_autocomplete.js:0
-#: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.js:0
+#: code:addons/web/static/src/views/calendar/calendar_filter_section/calendar_filter_section.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 msgid "Quick search: %s"
 msgstr "ค้นหาด่วน: %s"
@@ -5421,21 +5563,15 @@ msgstr "ฟิลด์รูปภาพ QWeb"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/colorpicker/colorpicker.xml:0
-msgid "RGB"
-msgstr "RGB"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/colorpicker/colorpicker.xml:0
-msgid "RGBA"
-msgstr "RGBA"
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "R"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/radio/radio_field.js:0
 msgid "Radio"
-msgstr "คลื่นวิทยุ"
+msgstr "ปุ่มตัวเลือก"
 
 #. module: web
 #. odoo-javascript
@@ -5481,6 +5617,12 @@ msgstr "บันทึก"
 #: code:addons/web/static/src/webclient/actions/debug_items.js:0
 msgid "Record Rules"
 msgstr "บันทึกกฎ"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/debug/profiling/profiling_item.xml:0
+msgid "Record memory"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -5572,6 +5714,7 @@ msgstr "วันที่เหลือ"
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.xml:0
 #: code:addons/web/static/src/views/form/form_controller.xml:0
+#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
 msgid "Remove"
 msgstr "นำออก"
 
@@ -5602,7 +5745,7 @@ msgstr "ลบออกจากรายการโปรด"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.xml:0
+#: code:addons/web/static/src/views/calendar/calendar_filter_section/calendar_filter_section.xml:0
 msgid "Remove this favorite from the list"
 msgstr "ลบรายการโปรดนี้ออกจากรายการ"
 
@@ -5649,6 +5792,7 @@ msgstr "ต้องระบุ:"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/color_picker/color_picker.xml:0
 #: code:addons/web/static/src/webclient/switch_company_menu/switch_company_menu.xml:0
 msgid "Reset"
 msgstr "ตั้งค่าใหม่"
@@ -5675,6 +5819,12 @@ msgstr "รีเซ็ตตัวสั่งงาน"
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "Reset to logo colors"
 msgstr "รีเซ็ตเป็นสีโลโก้"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/password/password_field.js:0
+msgid "Reveal value"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -5726,6 +5876,16 @@ msgid "SOS button"
 msgstr "ปุ่ม SOS"
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "SQL density"
+msgstr ""
+
+#. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "SQL no gap"
+msgstr ""
+
+#. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "SUV"
@@ -5757,12 +5917,25 @@ msgstr "เสาร์"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/color_picker/custom_color_picker/custom_color_picker.xml:0
+msgid "Saturation and brightness color picker."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/color_picker/custom_color_picker/custom_color_picker.js:0
+msgid "Saturation: %(saturationLvl)s %. Brightness: %(brightnessLvl)s %"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/search/control_panel/control_panel.xml:0
 #: code:addons/web/static/src/search/custom_favorite_item/custom_favorite_item.xml:0
 #: code:addons/web/static/src/views/fields/relational_utils.xml:0
 #: code:addons/web/static/src/views/fields/translation_dialog.xml:0
 #: code:addons/web/static/src/views/form/form_controller.xml:0
 #: code:addons/web/static/src/views/list/list_controller.xml:0
+#: code:addons/web/static/src/views/view_dialogs/form_view_dialog.xml:0
 #: code:addons/web/static/src/webclient/settings_form_view/settings_confirmation_dialog.xml:0
 msgid "Save"
 msgstr "บันทึก"
@@ -5770,7 +5943,6 @@ msgstr "บันทึก"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/relational_utils.xml:0
-#: code:addons/web/static/src/views/view_dialogs/form_view_dialog.xml:0
 msgid "Save & Close"
 msgstr "บันทึกและปิด"
 
@@ -5813,7 +5985,13 @@ msgstr "บันทึกด้วยตนเอง"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/many2one/many2one_field.xml:0
+#: code:addons/web/static/src/views/fields/translation_button.js:0
+msgid "Save this record and its parent to translate"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/many2one/many2one.xml:0
 msgid "Scan barcode"
 msgstr "สแกนบาร์โค้ด"
 
@@ -5831,7 +6009,11 @@ msgstr "แมงป่อง"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/record_selectors/record_autocomplete.js:0
+#: code:addons/web/static/src/search/search_bar/search_bar.js:0
 #: code:addons/web/static/src/search/search_bar/search_bar.xml:0
+#: code:addons/web/static/src/search/search_model.js:0
+#: code:addons/web/static/src/views/fields/relational_utils.js:0
 #: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
 #: code:addons/web/static/src/webclient/settings_form_view/settings/settings_app.xml:0
 msgid "Search"
@@ -5840,14 +6022,13 @@ msgstr "ค้นหา"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/record_selectors/record_autocomplete.js:0
-#: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.js:0
-#: code:addons/web/static/src/views/fields/relational_utils.js:0
+#: code:addons/web/static/src/views/calendar/calendar_filter_section/calendar_filter_section.js:0
 msgid "Search More..."
 msgstr "ค้นหาเพิ่มเติม..."
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_picker.xml:0
+#: code:addons/web/static/src/core/emoji_picker/emoji_picker.js:0
 msgid "Search emoji"
 msgstr ""
 
@@ -5865,7 +6046,13 @@ msgstr "ค้นหาเมนู..."
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/many2one_avatar/many2one_avatar_field.js:0
+#: code:addons/web/static/src/views/fields/relational_utils.js:0
+msgid "Search more..."
+msgstr "ค้นหาเพิ่มเติม..."
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/many2one/many2one.js:0
 msgid "Search user..."
 msgstr "ค้นหาผู้ใช้..."
 
@@ -5880,7 +6067,6 @@ msgstr "ค้นหาผู้ใช้..."
 #: code:addons/web/static/src/core/commands/command_palette.js:0
 #: code:addons/web/static/src/core/emoji_picker/emoji_picker.xml:0
 #: code:addons/web/static/src/core/model_field_selector/model_field_selector_popover.xml:0
-#: code:addons/web/static/src/core/select_menu/select_menu.js:0
 #: code:addons/web/static/src/search/search_bar/search_bar.xml:0
 #: code:addons/web/static/src/webclient/settings_form_view/settings_form_view.xml:0
 #: code:addons/web/static/src/webclient/switch_company_menu/switch_company_menu.xml:0
@@ -5890,7 +6076,7 @@ msgstr "ค้นหา..."
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/record_selectors/record_autocomplete.js:0
-#: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.js:0
+#: code:addons/web/static/src/views/calendar/calendar_filter_section/calendar_filter_section.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 msgid "Search: %s"
 msgstr "ค้นหา: %s"
@@ -5914,7 +6100,7 @@ msgstr "ความปลอดภัย"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
+#: code:addons/web/static/src/views/kanban/kanban_renderer.xml:0
 msgid "See examples"
 msgstr "ดูตัวอย่าง"
 
@@ -5978,13 +6164,13 @@ msgstr "เลือกมุมมอง"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_controller.xml:0
+#: code:addons/web/static/src/views/view_components/selection_box.xml:0
 msgid "Select all"
 msgstr "เลือกทั้งหมด"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_controller.xml:0
+#: code:addons/web/static/src/views/view_components/selection_box.xml:0
 msgid "Select all records matching the search"
 msgstr ""
 
@@ -6011,6 +6197,12 @@ msgstr "เลือกฟิลด์"
 #: code:addons/web/static/src/core/datetime/datetime_picker.js:0
 msgid "Select month"
 msgstr "เลือกเดือน"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_value_editors.js:0
+msgid "Select one or several criteria"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -6077,6 +6269,13 @@ msgstr "กำหนดเขตเวลาสำหรับผู้ใช้
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/badge/badge_field.js:0
+#: code:addons/web/static/src/views/fields/badge_selection/list_badge_selection_field.js:0
+msgid "Set an integer field to use colors with the badge."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
 msgid "Set an integer field to use colors with the tags."
 msgstr "ตั้งค่าฟิลด์จำนวนเต็มให้ใช้สีด้วยแท็ก"
@@ -6097,23 +6296,13 @@ msgstr "ตั้งค่าลำดับความสำคัญ..."
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 msgid ""
-"Set to true the full range input has to be display by default, even if "
-"empty."
+"Set to true the full range input has to be display by default, even if empty."
 msgstr ""
-"หากตั้งค่าเป็นจริง จะต้องแสดงการป้อนข้อมูลแบบเต็มช่วงตามค่าเริ่มต้น "
-"แม้ว่าจะว่างเปล่าก็ตาม"
+"หากตั้งค่าเป็นจริง จะต้องแสดงการป้อนข้อมูลแบบเต็มช่วงตามค่าเริ่มต้น แม้ว่าจะว่างเปล่าก็ตาม"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
-msgid "Set to true to display days, months (and hours) with unpadded numbers"
-msgstr ""
-"ตั้งค่าให้เป็นจริงเพื่อแสดงวัน เดือน (และชั่วโมง) "
-"พร้อมตัวเลขที่ไม่เติมช่องว่าง"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_header.xml:0
+#: code:addons/web/static/src/views/view_components/group_config_menu.xml:0
 #: code:addons/web/static/src/webclient/settings_form_view/settings_form_controller.js:0
 msgid "Settings"
 msgstr "การตั้งค่า"
@@ -6127,15 +6316,8 @@ msgstr "ชากา"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/search/control_panel/control_panel.xml:0
-#: code:addons/web/static/src/search/custom_favorite_item/custom_favorite_item.xml:0
 msgid "Shared"
 msgstr "แบ่งปัน"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
-msgid "Shared filters"
-msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -6151,12 +6333,6 @@ msgstr "ชินโตะ"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
-msgid "Shortcuts"
-msgstr "คีย์ลัด"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/search/control_panel/control_panel.js:0
 msgid "Show %s view"
 msgstr "แสดงมุมมอง %s"
@@ -6165,6 +6341,12 @@ msgstr "แสดงมุมมอง %s"
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/domain/domain_field.xml:0
 msgid "Show matching records"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/model_field_selector/model_field_selector_popover.xml:0
+msgid "Show options"
 msgstr ""
 
 #. module: web
@@ -6215,6 +6397,12 @@ msgstr "รอยยิ้มและอารมณ์"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/color_picker/tabs/color_picker_solid_tab.js:0
+msgid "Solid"
+msgstr "ของแข็ง"
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/model/relational_model/dynamic_list.js:0
 msgid "Some records could not be duplicated"
 msgstr "บันทึกบางรายการไม่สามารถทำซ้ำได้"
@@ -6232,8 +6420,7 @@ msgid ""
 "Something went wrong... If you really are stuck, share the report with your "
 "friendly support service"
 msgstr ""
-"มีบางอย่างผิดพลาด... หากคุณยังคงพบปัญหา "
-"โปรดแชร์รายงานกับฝ่ายบริการสนับสนุนของคุณ"
+"มีบางอย่างผิดพลาด... หากคุณยังคงพบปัญหา โปรดแชร์รายงานกับฝ่ายบริการสนับสนุนของคุณ"
 
 #. module: web
 #. odoo-javascript
@@ -6248,7 +6435,13 @@ msgid "Special:"
 msgstr "พิเศษ:"
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Speedscope"
+msgstr "Speedscope"
+
+#. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/json_checkboxes/json_checkboxes_field.js:0
 #: code:addons/web/static/src/views/graph/graph_controller.xml:0
 msgid "Stacked"
 msgstr "ซ้อนกัน"
@@ -6264,6 +6457,18 @@ msgstr "ดาวแห่งเดวิด"
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 msgid "Start date field"
 msgstr "ฟิลด์วันที่เริ่มต้น"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/view_components/multi_create_popover.js:0
+msgid "Start time should be before end time"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/relational_utils.js:0
+msgid "Start typing %s characters"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -6336,27 +6541,21 @@ msgstr "ข้อผิดพลาดในรูปแบบ"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
+msgid "Suffix"
+msgstr "คำต่อท้าย"
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/graph/graph_model.js:0
 msgid "Sum"
 msgstr "ผลรวม"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/graph/graph_model.js:0
-msgid "Sum (%s)"
-msgstr "ผลรวม (%s)"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/widgets/week_days/week_days.js:0
 msgid "Sun"
 msgstr "อาทิตย์"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
-msgid "Support"
-msgstr "สนับสนุน"
 
 #. module: web
 #. odoo-javascript
@@ -6414,12 +6613,6 @@ msgid "TV"
 msgstr "TV"
 
 #. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
-msgid "Tag"
-msgstr "แท็ก"
-
-#. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "Tagline"
 msgstr ""
@@ -6428,6 +6621,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
 #: code:addons/web/static/src/views/fields/properties/property_definition.js:0
+#: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 msgid "Tags"
 msgstr "แท็ก"
 
@@ -6493,12 +6687,6 @@ msgstr "เทมเพลต:"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/debug/debug_menu_basic.js:0
-msgid "Testing"
-msgstr "ทดสอบ"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/fields/char/char_field.js:0
 #: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
@@ -6510,16 +6698,6 @@ msgstr "ข้อความ"
 #: code:addons/web/static/src/core/file_viewer/file_viewer.xml:0
 msgid "Text file"
 msgstr "ไฟล์ข้อความ"
-
-#. module: web
-#: model:ir.model.fields,help:web.field_base_document_layout__vat
-msgid ""
-"The Tax Identification Number. Values here will be validated based on the "
-"country format. You can use '/' to indicate that the partner is not subject "
-"to tax."
-msgstr ""
-"หมายเลขประจำตัวผู้เสียภาษี ค่าที่นี่จะได้รับการตรวจสอบตามรูปแบบประเทศ "
-"คุณสามารถใช้ '/' เพื่อระบุว่าพาร์ทเนอร์ไม่ต้องเสียภาษี"
 
 #. module: web
 #. odoo-python
@@ -6552,19 +6730,62 @@ msgid ""
 "The content of this cell is too long for an XLSX file (more than %s "
 "characters). Please use the CSV format for this export."
 msgstr ""
-"เนื้อหาในเซลล์นี้ยาวเกินไปสำหรับไฟล์ XLSX (มากกว่า %s ตัวอักษร) "
-"โปรดใช้รูปแบบ CSV สำหรับการส่งออกนี้"
+"เนื้อหาในเซลล์นี้ยาวเกินไปสำหรับไฟล์ XLSX (มากกว่า %s ตัวอักษร) โปรดใช้รูปแบบ CSV สำหรับการ"
+"ส่งออกนี้"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+msgid "The domain involves non-literals. Their evaluation might fail."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+msgid "The domain should not involve non-literals"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/utils/files.js:0
+msgid "The file is not an image, resizing is not possible"
+msgstr ""
+
+#. module: web
+#. odoo-python
+#: code:addons/web/models/res_users_settings_embedded_action.py:0
+msgid "The ids in %(field_name)s must not be duplicated: “%(action_ids)s”"
+msgstr ""
+
+#. module: web
+#. odoo-python
+#: code:addons/web/models/res_users_settings_embedded_action.py:0
+msgid ""
+"The ids in %(field_name)s must only be integers or \"false\": “%"
+"(action_ids)s”"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/errors/error_dialogs.xml:0
 #: code:addons/web/static/src/public/error_notifications.js:0
 msgid ""
-"The operation was interrupted. This usually means that the current operation"
-" is taking too much time."
+"The operation was interrupted. This usually means that the current operation "
+"is taking too much time."
 msgstr ""
-"การปฏิบัติการถูกขัดจังหวะ "
-"ซึ่งมักจะหมายความว่าการดำเนินการปัจจุบันใช้เวลามากเกินไป"
+"การปฏิบัติการถูกขัดจังหวะ ซึ่งมักจะหมายความว่าการดำเนินการปัจจุบันใช้เวลามากเกินไป"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/errors/error_dialogs.js:0
+msgid "The request sent to the server was too large"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/utils/files.js:0
+msgid "The resizing of the image failed"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -6576,11 +6797,10 @@ msgstr "ช่องที่เลือกจะถูกใช้เพื่
 #. odoo-javascript
 #: code:addons/web/static/src/core/utils/files.js:0
 msgid ""
-"The selected file (%(size)sB) is larger than the maximum allowed file size "
-"(%(maxSize)sB)."
+"The selected file (%(size)sB) is larger than the maximum allowed file size (%"
+"(maxSize)sB)."
 msgstr ""
-"ไฟล์ที่เลือก (%(size)sB) มีขนาดใหญ่กว่าขนาดไฟล์สูงสุดที่อนุญาต "
-"(%(maxSize)sB)"
+"ไฟล์ที่เลือก (%(size)sB) มีขนาดใหญ่กว่าขนาดไฟล์สูงสุดที่อนุญาต (%(maxSize)sB)"
 
 #. module: web
 #. odoo-javascript
@@ -6590,19 +6810,24 @@ msgid ""
 "that must be fixed for the entire database before continuing working. See "
 "browser console or server logs for details."
 msgstr ""
-"การรวบรวมสไตล์ล้มเหลว "
-"นี่เป็นข้อผิดพลาดของผู้ดูแลระบบหรือนักพัฒนาที่ต้องแก้ไขสำหรับฐานข้อมูลทั้งหมดก่อนที่จะทำงานต่อ"
-" ดูคอนโซลของเบราว์เซอร์หรือบันทึกเซิร์ฟเวอร์เพื่อดูรายละเอียดเพิ่มเติม"
+"การรวบรวมสไตล์ล้มเหลว นี่เป็นข้อผิดพลาดของผู้ดูแลระบบหรือนักพัฒนาที่ต้องแก้ไขสำหรับฐานข้อมูลทั้งหมด"
+"ก่อนที่จะทำงานต่อ ดูคอนโซลของเบราว์เซอร์หรือบันทึกเซิร์ฟเวอร์เพื่อดูรายละเอียดเพิ่มเติม"
+
+#. module: web
+#: model:ir.model.constraint,message:web.constraint_res_users_settings_embedded_action_res_user_settings_e_91890fa3
+msgid ""
+"The user should have one unique embedded action setting per user setting, "
+"action and record id."
+msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/graph/graph_controller.xml:0
+#: code:addons/web/static/src/views/graph/graph_renderer.xml:0
 msgid ""
 "There are too many data. The graph only shows a sample. Use the filters to "
 "refine the scope."
 msgstr ""
-"มีข้อมูลมากเกินไป กราฟแสดงเฉพาะตัวอย่างเท่านั้น "
-"ใช้ตัวกรองเพื่อปรับแต่งขอบเขต"
+"มีข้อมูลมากเกินไป กราฟแสดงเฉพาะตัวอย่างเท่านั้น ใช้ตัวกรองเพื่อปรับแต่งขอบเขต"
 
 #. module: web
 #. odoo-python
@@ -6611,8 +6836,8 @@ msgid ""
 "There are too many rows (%(count)s rows, limit: %(limit)s) to export as "
 "Excel 2007-2013 (.xlsx) format. Consider splitting the export."
 msgstr ""
-"มีแถวมากเกินไป (%(count)s แถว ลิมิต: %(limit)s) ที่จะส่งออกเป็นรูปแบบ Excel "
-"2007-2013 (.xlsx) ลองแยกการส่งออก"
+"มีแถวมากเกินไป (%(count)s แถว ลิมิต: %(limit)s) ที่จะส่งออกเป็นรูปแบบ Excel 2007-2013 "
+"(.xlsx) ลองแยกการส่งออก"
 
 #. module: web
 #. odoo-javascript
@@ -6633,9 +6858,9 @@ msgstr "บล็อกนี้อาจไม่แสดงเสมอไป
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/datetime/datetime_field.xml:0
-msgid "This date is on the future. Make sure it is what you expected."
-msgstr "วันที่นี้เป็นวันที่ในอนาคต ตรวจสอบให้แน่ใจว่าเป็นสิ่งที่คุณคาดหวัง"
+#: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
+msgid "This date is in the future"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -6674,12 +6899,6 @@ msgid "This file is invalid. Please select an image."
 msgstr "ไฟล์นี้ไม่ถูกต้อง โปรดเลือกรูปภาพ"
 
 #. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.js:0
-msgid "This filter is global and will be removed for everyone."
-msgstr "ตัวกรองนี้เป็นตัวกรองส่วนกลางและจะถูกลบออกสำหรับทุกคน"
-
-#. module: web
 #: model_terms:ir.ui.view,arch_db:web.preview_externalreport
 msgid "This is a sample of an external report."
 msgstr "นี่คือตัวอย่างของรายงานภายนอก"
@@ -6696,8 +6915,7 @@ msgid ""
 "This record belongs to a different parent so you can not change this "
 "property."
 msgstr ""
-"บันทึกนี้เป็นของบันทึกหลักอื่น "
-"ดังนั้นคุณจึงไม่สามารถเปลี่ยนแปลงคุณสมบัตินี้ได้"
+"บันทึกนี้เป็นของบันทึกหลักอื่น ดังนั้นคุณจึงไม่สามารถเปลี่ยนแปลงคุณสมบัตินี้ได้"
 
 #. module: web
 #. odoo-javascript
@@ -6725,6 +6943,12 @@ msgstr "เวลา"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/webclient/debug/profiling/profiling_item.xml:0
+msgid "Time Limit (seconds)"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 msgid "Time interval"
 msgstr "ช่วงเวลา"
@@ -6734,10 +6958,12 @@ msgstr "ช่วงเวลา"
 #: code:addons/web/static/src/views/fields/timezone_mismatch/timezone_mismatch_field.js:0
 msgid ""
 "Timezone Mismatch : This timezone is different from that of your browser.\n"
-"Please, set the same timezone as your browser's to avoid time discrepancies in your system."
+"Please, set the same timezone as your browser's to avoid time discrepancies "
+"in your system."
 msgstr ""
 "เขตเวลาไม่ตรงกัน : เขตเวลานี้แตกต่างจากของเบราว์เซอร์ของคุณ\n"
-"โปรดตั้งค่าเขตเวลาเดียวกันกับเบราว์เซอร์ของคุณเพื่อหลีกเลี่ยงความคลาดเคลื่อนของเวลาในระบบของคุณ"
+"โปรดตั้งค่าเขตเวลาเดียวกันกับเบราว์เซอร์ของคุณเพื่อหลีกเลี่ยงความคลาดเคลื่อนของเวลาในระบบของคุ"
+"ณ"
 
 #. module: web
 #. odoo-javascript
@@ -6772,8 +6998,8 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
 #: code:addons/web/static/src/views/calendar/calendar_controller.xml:0
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
 msgid "Today"
 msgstr "วันนี้"
 
@@ -6785,15 +7011,15 @@ msgstr "สลับ"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/control_panel/control_panel.xml:0
-msgid "Toggle Dropdown"
-msgstr "สลับเมนูแบบเลื่อนลง"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
 msgid "Toggle Search Panel"
 msgstr "สลับแผงการค้นหา"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/datetime/datetime_picker.xml:0
+msgid "Toggle date range mode"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -6812,12 +7038,6 @@ msgstr "โตเกียว"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Tokyo tower"
 msgstr "หอคอยโตเกียว"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
-msgid "Tomorrow"
-msgstr "พรุ่งนี้"
 
 #. module: web
 #. odoo-python
@@ -6846,6 +7066,12 @@ msgstr "รวม"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/debug/debug_menu_basic.js:0
+msgid "Tours & Testing"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Tower"
 msgstr "หอคอย"
@@ -6870,9 +7096,17 @@ msgstr "ไทรทัน"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_value_editors.js:0
-msgid "True"
-msgstr "จริง"
+#: code:addons/web/static/src/webclient/settings_form_view/settings_form_view.xml:0
+msgid "Try searching for another keyword"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/action_helper.xml:0
+msgid ""
+"Try to add some records, or make sure that there is no\n"
+"                        active filter in the search bar."
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -6901,7 +7135,7 @@ msgstr "ประเภท"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/model_selector/model_selector.xml:0
+#: code:addons/web/static/src/core/model_selector/model_selector.js:0
 msgid "Type a model here..."
 msgstr "พิมพ์โมเดลที่นี่..."
 
@@ -6916,6 +7150,13 @@ msgstr "พิมพ์ชื่อของคุณเพื่อลงนา
 #: code:addons/web/static/src/views/fields/field_tooltip.xml:0
 msgid "Type:"
 msgstr "ประเภท:"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
+#: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
+msgid "Typeahead search"
+msgstr "การค้นหาแบบพิมพ์ล่วงหน้า"
 
 #. module: web
 #. odoo-javascript
@@ -6974,8 +7215,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/actions/reports/utils.js:0
 msgid ""
-"Unable to find Wkhtmltopdf on this system. The report will be shown in "
-"html.%(link)s"
+"Unable to find Wkhtmltopdf on this system. The report will be shown in html.%"
+"(link)s"
 msgstr "ไม่พบ Wkhtmltopdf ในระบบนี้ รายงานจะแสดงในรูปแบบ html.%(link)s"
 
 #. module: web
@@ -6987,15 +7228,10 @@ msgstr "ไม่สามารถบันทึกได้ แก้ไข�
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/form/form_controller.js:0
+#: code:addons/web/static/src/views/kanban/kanban_controller.js:0
 #: code:addons/web/static/src/views/list/list_controller.js:0
 msgid "Unarchive"
 msgstr "ยกเลิกการเก็บถาวร"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
-msgid "Unarchive All"
-msgstr "ยกเลิกการเก็บถาวรทั้งหมด"
 
 #. module: web
 #. odoo-javascript
@@ -7016,7 +7252,7 @@ msgstr "กางออก"
 #: code:addons/web/static/src/core/record_selectors/record_autocomplete.js:0
 #: code:addons/web/static/src/search/breadcrumbs/breadcrumbs.xml:0
 #: code:addons/web/static/src/views/fields/formatters.js:0
-#: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
+#: code:addons/web/static/src/views/fields/many2one/many2one.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 msgid "Unnamed"
 msgstr "ไม่มีชื่อ"
@@ -7030,7 +7266,8 @@ msgstr "การเปลี่ยนแปลงที่ไม่ได้บ
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_controller.xml:0
+#: code:addons/web/static/src/views/view_components/multi_selection_buttons.xml:0
+#: code:addons/web/static/src/views/view_components/selection_box.xml:0
 msgid "Unselect All"
 msgstr "ไม่เลือกทั้งหมด"
 
@@ -7050,6 +7287,12 @@ msgstr "ไม่มีชื่อ"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
+msgid "Update"
+msgstr "อัปเดต"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
 msgid "Update to:"
 msgstr "อัปเดตเป็น:"
 
@@ -7058,12 +7301,6 @@ msgstr "อัปเดตเป็น:"
 #: code:addons/web/static/src/webclient/settings_form_view/fields/upgrade_dialog.xml:0
 msgid "Upgrade now"
 msgstr "อัปเกรดตอนนี้"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/webclient/settings_form_view/fields/upgrade_dialog.xml:0
-msgid "Upgrade to enterprise"
-msgstr "อัปเกรดเป็นระดับองค์กร"
 
 #. module: web
 #. odoo-javascript
@@ -7117,7 +7354,7 @@ msgstr "กำลังอัปโหลด... (%s%)"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_column_quick_create.js:0
+#: code:addons/web/static/src/views/kanban/kanban_renderer.js:0
 msgid "Use This For My Kanban"
 msgstr "ใช้สิ่งนี้เพื่อคัมบังของฉัน"
 
@@ -7126,13 +7363,17 @@ msgstr "ใช้สิ่งนี้เพื่อคัมบังของ
 #: code:addons/web/static/src/views/fields/float/float_field.js:0
 #: code:addons/web/static/src/views/fields/integer/integer_field.js:0
 msgid "Use a human readable format (e.g.: 500G instead of 500,000,000,000)."
-msgstr ""
-"ใช้รูปแบบที่ทุกคนสามารถอ่านได้ (เช่น 500G แทนที่จะเป็น 500,000,000,000)"
+msgstr "ใช้รูปแบบที่ทุกคนสามารถอ่านได้ (เช่น 500G แทนที่จะเป็น 500,000,000,000)"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/user_switch/user_switch.xml:0
 msgid "Use another user"
+msgstr ""
+
+#. module: web
+#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
+msgid "Use execution context"
 msgstr ""
 
 #. module: web
@@ -7142,6 +7383,14 @@ msgstr ""
 msgid ""
 "Use it with the 'User-friendly format' option to customize the formatting."
 msgstr "ใช้ร่วมกับตัวเลือก \"รูปแบบที่ใช้งานง่าย\" เพื่อปรับแต่งการจัดรูปแบบ"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
+msgid ""
+"Use the operators \"+=\", \"-=\", \"*=\" and \"/=\" to update the current "
+"value."
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -7156,9 +7405,19 @@ msgid ""
 "Use to override the display value (e.g. if your progress bar is a computed "
 "percentage but you want to display the actual field value instead)."
 msgstr ""
-"ใช้เพื่อแทนที่ค่าที่แสดง (เช่น "
-"หากแถบความคืบหน้าของคุณเป็นเปอร์เซ็นต์ที่คำนวณไว้ "
-"แต่คุณต้องการแสดงค่าฟิลด์จริงแทน)"
+"ใช้เพื่อแทนที่ค่าที่แสดง (เช่น หากแถบความคืบหน้าของคุณเป็นเปอร์เซ็นต์ที่คำนวณไว้ แต่คุณต้องการแสดงค่"
+"าฟิลด์จริงแทน)"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/color_picker/custom_color_picker/custom_color_picker.xml:0
+msgid ""
+"Use up and down arrow keys to adapt the brightness. Use left and right arrow "
+"keys to adapt the saturation. Press the Control or Command key at the same "
+"time to have finer control."
+msgstr ""
+"ใช้ปุ่มลูกศรขึ้นและลงเพื่อปรับความสว่าง ใช้ปุ่มลูกศรซ้ายและขวาเพื่อปรับความอิ่มของสี หากต้องการควบคุ"
+"มอย่างละเอียดมากขึ้น ให้กดปุ่ม Control หรือ Command พร้อมกันขณะปรับ"
 
 #. module: web
 #. odoo-javascript
@@ -7172,6 +7431,16 @@ msgstr "ผู้ใช้"
 #: code:addons/web/static/src/core/debug/debug_menu_basic.js:0
 msgid "User Interface"
 msgstr "ส่วนติดต่อผู้ใช้"
+
+#. module: web
+#: model:ir.model,name:web.model_res_users_settings
+msgid "User Settings"
+msgstr "การตั้งค่าผู้ใช้"
+
+#. module: web
+#: model:ir.model,name:web.model_res_users_settings_embedded_action
+msgid "User Settings for Embedded Actions"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -7247,18 +7516,13 @@ msgstr "ค่าที่ตั้งไว้นี้เป็นค่าเ
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/pivot/pivot_model.js:0
-msgid "Variation"
-msgstr "ตัวแปร"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/file_viewer/file_viewer.xml:0
 msgid "Video"
 msgstr "วิดีโอ"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/calendar/calendar_common/calendar_common_popover.xml:0
 #: code:addons/web/static/src/views/list/list_renderer.xml:0
 #: model:ir.model,name:web.model_ir_ui_view
 msgid "View"
@@ -7281,6 +7545,18 @@ msgstr ""
 #: code:addons/web/static/src/views/debug_items.js:0
 msgid "View Metadata"
 msgstr "มุมมองข้อมูลอภิพันธุ์"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/res_user_group_ids_field/res_user_group_ids_popover.xml:0
+msgid "View extra groups"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/search/control_panel/control_panel.xml:0
+msgid "View related documents"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -7321,10 +7597,9 @@ msgstr "WC"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/errors/error_dialogs.js:0
-#: code:addons/web/static/src/model/relational_model/dynamic_list.js:0
 #: code:addons/web/static/src/search/control_panel/control_panel.js:0
-#: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.js:0
 #: code:addons/web/static/src/views/fields/domain/domain_field.xml:0
+#: code:addons/web/static/src/views/fields/json_checkboxes/json_checkboxes_field.xml:0
 msgid "Warning"
 msgstr "คำเตือน"
 
@@ -7350,11 +7625,6 @@ msgstr "ทาง"
 #: model:ir.model.fields,field_description:web.field_res_config_settings__web_app_name
 msgid "Web App Name"
 msgstr "ชื่อแอปเว็บ"
-
-#. module: web
-#: model_terms:ir.ui.view,arch_db:web.qunit_mobile_suite
-msgid "Web Mobile Tests"
-msgstr "การทดสอบเว็บมือถือ"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.qunit_suite
@@ -7461,6 +7731,12 @@ msgstr "ปี"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
+msgid "Year to date"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 msgid "Years"
 msgstr "ปี"
@@ -7473,19 +7749,12 @@ msgstr "สีเหลือง"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/model/relational_model/utils.js:0
 #: code:addons/web/static/src/search/search_bar/search_bar.js:0
 #: code:addons/web/static/src/views/fields/field_tooltip.xml:0
-#: code:addons/web/static/src/views/kanban/kanban_header.js:0
-#: code:addons/web/static/src/views/list/list_renderer.js:0
 #: code:addons/web/static/src/views/pivot/pivot_model.js:0
 msgid "Yes"
 msgstr "ใช่"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
-msgid "Yesterday"
-msgstr "เมื่อวาน"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login_successful
@@ -7510,6 +7779,17 @@ msgid "You can install the app from the browser menu"
 msgstr "คุณสามารถติดตั้งแอปได้จากเมนูเบราว์เซอร์"
 
 #. module: web
+#. odoo-python
+#: code:addons/web/models/properties_base_definition.py:0
+msgid "You can not read that field definition."
+msgstr ""
+
+#. module: web
+#: model:ir.model.fields,help:web.field_base_document_layout__vat
+msgid "You can use '/' to indicate that the customer has no Tax ID."
+msgstr ""
+
+#. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 msgid "You do not have access to the model \"%s\"."
@@ -7528,23 +7808,10 @@ msgid "You may not believe it,"
 msgstr "คุณอาจไม่เชื่อ"
 
 #. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
-msgid ""
-"You need edit access on the parent document to update these property fields"
-msgstr "คุณต้องมีสิทธิ์แก้ไขในเอกสารหลักจึงจะอัปเดตช่องคุณสมบัติเหล่านี้ได้"
-
-#. module: web
 #. odoo-python
 #: code:addons/web/controllers/json.py:0
 msgid "You need export permissions to use the /json route"
 msgstr "คุณต้องมีสิทธิ์ส่งออกเพื่อใช้เส้นทาง /json"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/properties/property_tags.js:0
-msgid "You need to be able to edit parent first to add property tags"
-msgstr "คุณต้องสามารถแก้ไขพาเรนต์ก่อนจึงจะเพิ่มแท็กคุณสมบัติได้"
 
 #. module: web
 #. odoo-javascript
@@ -7567,12 +7834,11 @@ msgstr ""
 #: code:addons/web/static/src/webclient/actions/reports/utils.js:0
 msgid ""
 "You should upgrade your version of Wkhtmltopdf to at least 0.12.0 in order "
-"to get a correct display of headers and footers as well as support for "
-"table-breaking between pages.%(link)s"
+"to get a correct display of headers and footers as well as support for table-"
+"breaking between pages.%(link)s"
 msgstr ""
-"คุณควรอัปเกรดเวอร์ชัน Wkhtmltopdf ของคุณเป็นเวอร์ชั่น 0.12.0 "
-"เพื่อให้สามารถแสดงส่วนหัวและส่วนท้ายได้อย่างถูกต้อง "
-"รวมทั้งรองรับการแบ่งตารางระหว่างหน้าต่างๆ %(link)s"
+"คุณควรอัปเกรดเวอร์ชัน Wkhtmltopdf ของคุณเป็นเวอร์ชั่น 0.12.0 เพื่อให้สามารถแสดงส่วนหัวและส่ว"
+"นท้ายได้อย่างถูกต้อง รวมทั้งรองรับการแบ่งตารางระหว่างหน้าต่างๆ %(link)s"
 
 #. module: web
 #. odoo-javascript
@@ -7616,12 +7882,6 @@ msgstr "ความล่าช้าในการซูม"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "a day ago"
-msgstr "วันที่ผ่านมา"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "abacus"
 msgstr "ลูกคิด"
@@ -7637,30 +7897,6 @@ msgstr "abc"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "abcd"
 msgstr "abcd"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "about a minute ago"
-msgstr "ประมาณนาทีที่ผ่านมา"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "about a month ago"
-msgstr "ประมาณเดือนที่ผ่านมา"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "about a year ago"
-msgstr "ประมาณปีที่ผ่านมา"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "about an hour ago"
-msgstr "ประมาณหนึ่งชั่วโมงที่ผ่านมา"
 
 #. module: web
 #. odoo-javascript
@@ -7766,6 +8002,12 @@ msgstr "เอสคิวลาเปียส"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
+msgid "after"
+msgstr "หลังจาก"
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "age restriction"
 msgstr "ข้อจำกัดอายุ"
@@ -7832,8 +8074,8 @@ msgstr "สัตว์ต่างดาว"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 #: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
 msgid "all"
 msgstr "ทั้งหมด"
 
@@ -7913,7 +8155,7 @@ msgstr "สมอ"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/commands/command_items.xml:0
-#: code:addons/web/static/src/core/tree_editor/utils.js:0
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
 msgid "and"
 msgstr "และ"
 
@@ -8004,6 +8246,7 @@ msgstr "หน้าวิตกกังวลด้วยเหงื่อ"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
 msgid "any"
 msgstr "ใดๆ"
 
@@ -8042,12 +8285,6 @@ msgstr "นักธนู"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "architect"
 msgstr "สถาปนิก"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
-msgid "are valid for this update."
-msgstr "ถูกต้องสำหรับการอัปเดตนี้"
 
 #. module: web
 #. odoo-javascript
@@ -8154,6 +8391,7 @@ msgstr "นักบินอวกาศ"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/search/search_bar/search_bar.js:0
+#: code:addons/web/static/src/views/view_components/multi_currency_popover.xml:0
 msgid "at"
 msgstr "ที่"
 
@@ -8741,6 +8979,12 @@ msgstr "ด้วง"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
+msgid "before"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "begging"
 msgstr "ขอร้อง"
@@ -8798,6 +9042,12 @@ msgstr "ผลเบอร์รี่"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "berry"
 msgstr "เบอร์รี่"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
+msgid "between"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -11423,12 +11673,6 @@ msgstr "วันที่"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
-msgid "days"
-msgstr "วัน"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "dazed"
 msgstr "มึนงง"
@@ -12358,8 +12602,8 @@ msgstr "เอ็มปานาดา"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
-msgid "ends with"
+#: code:addons/web/static/src/webclient/actions/blank_component.xml:0
+msgid "empty"
 msgstr ""
 
 #. module: web
@@ -13307,24 +13551,6 @@ msgstr "ธงอยู่ในหลุม"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "flag: England"
-msgstr "ธง: อังกฤษ"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "flag: Scotland"
-msgstr "ธง: สกอตแลนด์"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "flag: Wales"
-msgstr "ธง: เวลส์"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "flamboyant"
 msgstr "สีสันสดใส"
 
@@ -14206,6 +14432,18 @@ msgstr "ตั๊กแตน"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
+msgid "greater or equal to"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
+msgid "greater than"
+msgstr "มากกว่า"
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "green"
 msgstr "สีเขียว"
@@ -14806,7 +15044,7 @@ msgstr "เฮโรอีน"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/colorpicker/colorpicker.xml:0
+#: code:addons/web/static/src/core/color_picker/custom_color_picker/custom_color_picker.xml:0
 msgid "hex"
 msgstr "hex"
 
@@ -15233,6 +15471,12 @@ msgstr "อั่งเปา"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "i"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "ice"
 msgstr "น้ำแข็ง"
 
@@ -15563,14 +15807,8 @@ msgstr "เยาะเย้ย"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
-msgid "is"
-msgstr "เป็น"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
-msgid "is between"
-msgstr "ระหว่าง"
+msgid "is equal to"
+msgstr "เท่ากับ"
 
 #. module: web
 #. odoo-javascript
@@ -15581,8 +15819,8 @@ msgstr "อยู่ใน"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
-msgid "is not"
-msgstr "ไม่ใช่"
+msgid "is not equal to"
+msgstr "ไม่เท่ากับ"
 
 #. module: web
 #. odoo-javascript
@@ -15601,12 +15839,6 @@ msgstr "ไม่ได้ตั้งค่าไว้"
 #: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
 msgid "is set"
 msgstr "ถูกตั้งค่าไว้"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
-msgid "is within"
-msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -16354,12 +16586,6 @@ msgstr "เสือดาว"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/l10n/translation.js:0
-msgid "less than a minute ago"
-msgstr "น้อยกว่านาทีที่ผ่านมา"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "letter"
 msgstr "ตัวอักษร"
@@ -16675,6 +16901,18 @@ msgstr "ท่ารักคุณ"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "low"
 msgstr "ต่ำ"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
+msgid "lower or equal to"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
+msgid "lower than"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -17866,12 +18104,6 @@ msgstr "สัตว์ประหลาด"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
-msgid "months"
-msgstr "เดือน"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "moon"
 msgstr "พระจันทร์"
@@ -18304,12 +18536,6 @@ msgstr "แท็บใหม่"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
-msgid "new_template"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "news"
 msgstr "ข่าว"
@@ -18330,7 +18556,7 @@ msgstr "ฉากถัดไป"
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "next track"
-msgstr "เพลงถัดไป"
+msgstr "หัวข้อถัดไป"
 
 #. module: web
 #. odoo-javascript
@@ -18424,6 +18650,12 @@ msgstr "ไม่มีทางเท้า"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
+msgid "no records"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "no smoking"
 msgstr "ไม่สูบบุหรี่"
@@ -18455,6 +18687,7 @@ msgstr "น้ำดื่มไม่ได้"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
 msgid "none"
 msgstr "ไม่มี"
 
@@ -18496,7 +18729,20 @@ msgstr "ไม่"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
+msgid "not %(operator_label)s"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
+msgid "not ="
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
 msgid "not all"
 msgstr "ไม่ทั้งหมด"
 
@@ -18505,13 +18751,6 @@ msgstr "ไม่ทั้งหมด"
 #: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
 msgid "not like"
 msgstr "ไม่ชอบ"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_value_editors.js:0
-#: code:addons/web/static/src/core/tree_editor/utils.js:0
-msgid "not set"
-msgstr "ไม่ได้ตั้งค่า"
 
 #. module: web
 #. odoo-javascript
@@ -18572,6 +18811,12 @@ msgstr "น็อตและสลักเกลียว"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "nuts"
 msgstr "ถั่ว"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "o"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -18869,7 +19114,20 @@ msgstr "ออปติคัลดิสก์"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/utils.js:0
+#: code:addons/web/static/src/core/autocomplete/autocomplete.xml:0
+msgid "option.label"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/record_selectors/record_autocomplete.xml:0
+#: code:addons/web/static/src/views/fields/relational_utils.xml:0
+msgid "optionScope.label"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/tree_editor/tree_processor.js:0
 #: code:addons/web/static/src/search/search_model.js:0
 #: code:addons/web/static/src/views/fields/dynamic_placeholder_popover.xml:0
 msgid "or"
@@ -19059,7 +19317,7 @@ msgstr "หน้ามีขด"
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "pager"
-msgstr "เพจเจอร์"
+msgstr "แถบเลือกหน้า"
 
 #. module: web
 #. odoo-javascript
@@ -19881,7 +20139,7 @@ msgstr "กองอุจจาระ"
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "pill"
-msgstr "ยา"
+msgstr "ปุ่มขอบมน"
 
 #. module: web
 #. odoo-javascript
@@ -20409,7 +20667,7 @@ msgstr "เพลงก่อนหน้า"
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "pride"
-msgstr " เกย์ไพรด์"
+msgstr "เกย์ไพรด์"
 
 #. module: web
 #. odoo-javascript
@@ -20648,6 +20906,12 @@ msgstr "เงียบ"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "r"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "rabbit"
 msgstr "กระต่าย"
 
@@ -20691,13 +20955,13 @@ msgstr "ไม้เทนนิส"
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "radio"
-msgstr "วิทยุ"
+msgstr "ปุ่มตัวเลือก"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "radio button"
-msgstr "ปุ่มวิทยุ"
+msgstr "ปุ่มตัวเลือก"
 
 #. module: web
 #. odoo-javascript
@@ -20861,12 +21125,6 @@ msgstr "ปุ่มบันทึก"
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 msgid "record(s)"
 msgstr "บันทึก"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
-msgid "records?"
-msgstr "บันทึก?"
 
 #. module: web
 #. odoo-javascript
@@ -21807,21 +22065,10 @@ msgstr "ต้นกล้า"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_controller.xml:0
+#: code:addons/web/static/src/views/view_components/multi_selection_buttons.xml:0
+#: code:addons/web/static/src/views/view_components/selection_box.xml:0
 msgid "selected"
 msgstr "ถูกเลือก"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
-msgid "selected records,"
-msgstr "บันทึกที่ถูกเลือก"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
-msgid "self"
-msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -21862,8 +22109,6 @@ msgstr "สุนัขบริการ"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/tree_editor/tree_editor_value_editors.js:0
-#: code:addons/web/static/src/core/tree_editor/utils.js:0
 msgid "set"
 msgstr "ตั้งค่า"
 
@@ -24143,12 +24388,6 @@ msgstr "หน้าเหนื่อยล้า"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
-msgid "to discard"
-msgstr "เพื่อยกเลิก"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 msgid "to trigger a shortcut."
 msgstr "เพื่อเรียกใช้ทางลัด"
@@ -24864,6 +25103,12 @@ msgstr "โกศ"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "v"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "vague"
 msgstr "คลุมเครือ"
 
@@ -25022,6 +25267,12 @@ msgstr "เวอร์จิ้น"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "virus"
 msgstr "ไวรัส"
+
+#. module: web
+#. odoo-python
+#: code:addons/web/controllers/vcard.py:0
+msgid "vobject library is not installed"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -25292,12 +25543,6 @@ msgstr "เว็บ"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "wedding"
 msgstr "งานแต่งงาน"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
-msgid "weeks"
-msgstr "สัปดาห์"
 
 #. module: web
 #. odoo-javascript
@@ -26244,6 +26489,12 @@ msgstr "บูด"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "x"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "yacht"
 msgstr "เรือยอชท์"
 
@@ -26276,12 +26527,6 @@ msgstr "หน้าหาว"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "yay"
 msgstr "เย่"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/tree_editor/tree_editor_components.js:0
-msgid "years"
-msgstr "ปี"
 
 #. module: web
 #. odoo-javascript
@@ -26411,18 +26656,6 @@ msgstr "ซอมบี้"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/view_components/column_progress.xml:0
-msgid "{{ bar.count }} {{ bar.string }}"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
-msgid "{{ relatedFieldName }}..."
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 msgid "— press"
 msgstr "— กด"
@@ -26540,3 +26773,963 @@ msgstr "“ว่าง”"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "ココ"
 msgstr "ココ"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "サ"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "割"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "可"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "合"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "営"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "得"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "指"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "月"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "有"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "満"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "無"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "申"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "祝"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "禁"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "秘"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "空"
+msgstr ""
+
+#~ msgid ""
+#~ "The Tax Identification Number. Values here will be validated based on the "
+#~ "country format. You can use '/' to indicate that the partner is not "
+#~ "subject to tax."
+#~ msgstr ""
+#~ "หมายเลขประจำตัวผู้เสียภาษี ค่าที่นี่จะได้รับการตรวจสอบตามรูปแบบประเทศ คุณสามารถใช้ '/' "
+#~ "เพื่อระบุว่าพาร์ทเนอร์ไม่ต้องเสียภาษี"
+
+#~ msgid "00"
+#~ msgstr "00"
+
+#~ msgid "07/08/2020"
+#~ msgstr "07/08/2020"
+
+#~ msgid "08/07/2020"
+#~ msgstr "08/07/2020"
+
+#~ msgid "1.30"
+#~ msgstr "1.30"
+
+#~ msgid "10"
+#~ msgstr "10"
+
+#~ msgid "10.30"
+#~ msgstr "10.30"
+
+#~ msgid "100"
+#~ msgstr "100"
+
+#~ msgid "10:00"
+#~ msgstr "10:00"
+
+#~ msgid "10:30"
+#~ msgstr "10:30"
+
+#~ msgid "11"
+#~ msgstr "11"
+
+#~ msgid "11.30"
+#~ msgstr "11.30"
+
+#~ msgid "11:00"
+#~ msgstr "11:00"
+
+#~ msgid "11:30"
+#~ msgstr "11:30"
+
+#~ msgid "12"
+#~ msgstr "12"
+
+#~ msgid "12.30"
+#~ msgstr "12.30"
+
+#~ msgid "1234"
+#~ msgstr "1234"
+
+#~ msgid "12:00"
+#~ msgstr "12:00"
+
+#~ msgid "12:30"
+#~ msgstr "12:30"
+
+#~ msgid "18"
+#~ msgstr "18"
+
+#~ msgid "1:00"
+#~ msgstr "1:00"
+
+#~ msgid "1:30"
+#~ msgstr "1:30"
+
+#~ msgid "2.30"
+#~ msgstr "2.30"
+
+#~ msgid "2:00"
+#~ msgstr "2:00"
+
+#~ msgid "2:30"
+#~ msgstr "2:30"
+
+#~ msgid "3.30"
+#~ msgstr "3.30"
+
+#~ msgid "3:00"
+#~ msgstr "3:00"
+
+#~ msgid "3:30"
+#~ msgstr "3:30"
+
+#~ msgid "4.30"
+#~ msgstr "4.30"
+
+#~ msgid "4:00"
+#~ msgstr "4:00"
+
+#~ msgid "4:30"
+#~ msgstr "4:30"
+
+#~ msgid "5.30"
+#~ msgstr "5.30"
+
+#~ msgid "5:00"
+#~ msgstr "5:00"
+
+#~ msgid "5:30"
+#~ msgstr "5:30"
+
+#~ msgid "6.30"
+#~ msgstr "6.30"
+
+#~ msgid "6:00"
+#~ msgstr "6:00"
+
+#~ msgid "6:30"
+#~ msgstr "6:30"
+
+#~ msgid "7.30"
+#~ msgstr "7.30"
+
+#~ msgid "7:00"
+#~ msgstr "7:00"
+
+#~ msgid "7:30"
+#~ msgstr "7:30"
+
+#~ msgid "8.30"
+#~ msgstr "8.30"
+
+#~ msgid "8:00"
+#~ msgstr "8:00"
+
+#~ msgid "8:30"
+#~ msgstr "8:30"
+
+#~ msgid "9.30"
+#~ msgstr "9.30"
+
+#~ msgid "9:00"
+#~ msgstr "9:00"
+
+#~ msgid "9:30"
+#~ msgstr "9:30"
+
+#~ msgid "<span itemprop=\"name\">Deco Addict</span>"
+#~ msgstr "<span itemprop=\"name\">Deco Addict</span>"
+
+#~ msgid "Angle"
+#~ msgstr "มุม"
+
+#~ msgid "Define a custom gradient"
+#~ msgstr "กำหนดการไล่สีที่กำหนดเอง"
+
+#~ msgid "Error"
+#~ msgstr "ผิดพลาด"
+
+#~ msgid "Extend to the closest corner"
+#~ msgstr "ขยายไปยังมุมที่ใกล้ที่สุด"
+
+#~ msgid "Extend to the closest side"
+#~ msgstr "ขยายไปยังด้านที่ใกล้ที่สุด"
+
+#~ msgid "Extend to the farthest corner"
+#~ msgstr "ขยายไปยังมุมที่ไกลที่สุด"
+
+#~ msgid "Extend to the farthest side"
+#~ msgstr "ขยายออกไปด้านที่ไกลที่สุด"
+
+#~ msgid "Gradient"
+#~ msgstr "การไล่สี"
+
+#~ msgid "Invalid fields: "
+#~ msgstr "ฟิลด์ไม่ถูกต้อง: "
+
+#~ msgid "Linear"
+#~ msgstr "เชิงเส้น"
+
+#~ msgid "Position X"
+#~ msgstr "ตำแหน่ง X"
+
+#~ msgid "Position Y"
+#~ msgstr "ตำแหน่ง Y"
+
+#~ msgid "Radial"
+#~ msgstr "เรเดียล"
+
+#~ msgid "Theme"
+#~ msgstr "ธีม"
+
+#~ msgid " records"
+#~ msgstr "บันทึก"
+
+#~ msgid "%d days ago"
+#~ msgstr "%d วันที่แล้ว"
+
+#~ msgid "%d hours ago"
+#~ msgstr "%d ชั่วโมงที่แล้ว"
+
+#~ msgid "%d minutes ago"
+#~ msgstr "%d นาทีก่อน"
+
+#~ msgid "%d months ago"
+#~ msgstr "%d เดือนที่แล้ว"
+
+#~ msgid "%d years ago"
+#~ msgstr "%d ปีที่ผ่านมา"
+
+#~ msgid "'%s' is not a correct date"
+#~ msgstr "'%s' วันที่ไม่ถูกต้อง"
+
+#~ msgid "'%s' is not a correct date, datetime nor time"
+#~ msgstr "'%s' เป็นวันที่ที่ไม่ถูกต้อง, เฉพาะวันที่ไม่ใช่เวลา"
+
+#~ msgid "'%s' is not a correct datetime"
+#~ msgstr "'%s' เป็นวันที่และเวลาที่ไม่ถูกต้อง"
+
+#~ msgid "'%s' is not a correct float"
+#~ msgstr "'%s' เป็นเลขทศนิยมไม่ถูกต้อง"
+
+#~ msgid "'%s' is not a correct integer"
+#~ msgstr "'%s' จำนวนเต็มไม่ถูกต้อง"
+
+#~ msgid "'%s' is not a correct monetary field"
+#~ msgstr "'%s' ฟิลด์การเงินไม่ถูกต้อง"
+
+#~ msgid "'%s' is not convertible to date, datetime nor time"
+#~ msgstr "'%s' ไม่สามารถแปลงเป็นวันที่ได้ เฉพาะวันเวลาไม่ใช่เวลา"
+
+#~ msgid "'%s' is unsynchronized with '%s'."
+#~ msgstr "'%s' ไม่ซิงโครไนซ์กับ '%s'."
+
+#~ msgid "(current)"
+#~ msgstr "(ปัจจุบัน)"
+
+#~ msgid "(nolabel)"
+#~ msgstr "(ไม่มีป้าย)"
+
+#~ msgid ""
+#~ "<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">\n"
+#~ "                                                       22,137.50</span></"
+#~ "span>"
+#~ msgstr ""
+#~ "<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">\n"
+#~ "                                                       22,137.50</span></"
+#~ "span>"
+
+#~ msgid ""
+#~ "<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa "
+#~ "Barbara\n"
+#~ "                                                   Rd<br/>Pleasant Hill "
+#~ "CA 94523<br/>United States</span>"
+#~ msgstr ""
+#~ "<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa "
+#~ "Barbara\n"
+#~ "                                                   Rd<br/>Pleasant Hill "
+#~ "CA 94523<br/>United States</span>"
+
+#~ msgid "<span id=\"line_tax_ids\">15.00%</span>"
+#~ msgstr "<span id=\"line_tax_ids\">15.00%</span>"
+
+#~ msgid "<span>5.000</span>"
+#~ msgstr "<span>5.000</span>"
+
+#~ msgid ""
+#~ "<span>Invoice</span>\n"
+#~ "                           <span>INV/2020/07/0003</span>"
+#~ msgstr ""
+#~ "<span>ใบแจ้งหนี้</span>\n"
+#~ "                           <span>INV/2020/07/0003</span>"
+
+#~ msgid "<strong>Due Date:</strong>"
+#~ msgstr "<strong>วันที่ครบกำหนด:</strong>"
+
+#~ msgid "<strong>Invoice Date:</strong>"
+#~ msgstr "<strong>วันที่แจ้งหนี้:</strong>"
+
+#~ msgid "<strong>Subtotal</strong>"
+#~ msgstr "<strong>ยอดรวมย่อย</strong>"
+
+#~ msgid "A filter with same name already exists."
+#~ msgstr "มีตัวกรองที่มีชื่อเดียวกันนี้แล้ว"
+
+#~ msgid "ALL"
+#~ msgstr "ทั้งหมด"
+
+#~ msgid "ANY"
+#~ msgstr "ใด ๆ"
+
+#~ msgid "Activate Assets Debugging"
+#~ msgstr "เปิดใช้งานการดีบักของ asset"
+
+#~ msgid "Activate Tests Assets Debugging"
+#~ msgstr "เปิดใช้งานการทดสอบการดีบักของ asset"
+
+#~ msgid "Add Custom Filter"
+#~ msgstr "เพิ่มตัวกรองกำหนดเอง"
+
+#~ msgid "Add Custom Group"
+#~ msgstr "เพิ่มกลุ่มกำหนดเอง"
+
+#~ msgid "Add a condition"
+#~ msgstr "เพิ่มเงื่อนไข"
+
+#~ msgid "Add branch"
+#~ msgstr "เพิ่มสาขา"
+
+#~ msgid "Add filter"
+#~ msgstr "เพิ่มตัวกรอง"
+
+#~ msgid "Add new value"
+#~ msgstr "เพิ่มค่าใหม่"
+
+#~ msgid "Add node"
+#~ msgstr "เพิ่มโหนด"
+
+#~ msgid "Add tag"
+#~ msgstr "เพิ่มแท็ก"
+
+#~ msgid "Among the"
+#~ msgstr "ท่ามกลาง"
+
+#~ msgid "An error occurred"
+#~ msgstr "เกิดข้อผิดพลาด"
+
+#~ msgid "Any"
+#~ msgstr "ใด ๆ "
+
+#~ msgid ""
+#~ "Appears by default on the top right corner of your printed documents "
+#~ "(report header)."
+#~ msgstr "ปรากฏตามค่าเริ่มต้นที่มุมบนขวาของเอกสารที่พิมพ์ของคุณ (ส่วนหัวของรายงาน)"
+
+#~ msgid "Archive All"
+#~ msgstr "เก็บถาวรทั้งหมด"
+
+#~ msgid ""
+#~ "Are you sure that you want to archive all the records from this column?"
+#~ msgstr "คุณแน่ใจหรือไม่ว่าต้องการเก็บถาวรบันทึกทั้งหมดจากคอลัมน์นี้?"
+
+#~ msgid "Are you sure that you want to remove this filter?"
+#~ msgstr "คุณแน่ใจหรือว่าต้องการลบตัวกรองนี้?"
+
+#~ msgid "Are you sure you want to delete this record?"
+#~ msgstr "คุณแน่ใจหรือไม่ว่าต้องการลบบันทึกนี้?"
+
+#~ msgid "Are you sure you want to perform the following update on those"
+#~ msgstr "คุณแน่ใจหรือว่าต้องการทำการอัปเดตต่อไปนี้บนสิ่งเหล่านั้น"
+
+#~ msgid "Choose"
+#~ msgstr "เลือก"
+
+#~ msgid "Column %s"
+#~ msgstr "คอลัมน์%s"
+
+#~ msgid "Comparison"
+#~ msgstr "การเปรียบเทียบ"
+
+#~ msgid "Could not connect to the server"
+#~ msgstr "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้"
+
+#~ msgid "Could not display the specified image url."
+#~ msgstr "ไม่สามารถแสดง URL รูปภาพที่ระบุ"
+
+#~ msgid "Could not serialize XML"
+#~ msgstr "ไม่สามารถจัดลำดับ XML ได้"
+
+#~ msgid "Could not start scanning. "
+#~ msgstr "ไม่สามารถเริ่มการสแกน"
+
+#~ msgid "Create \"<strong>%s</strong>\""
+#~ msgstr "สร้าง \"<strong>%s</strong>\""
+
+#~ msgid "Create and Edit..."
+#~ msgstr "สร้างและแก้ไข ..."
+
+#~ msgid "Create: "
+#~ msgstr "สร้าง: "
+
+#~ msgid "Create: %s"
+#~ msgstr "สร้าง: %s"
+
+#~ msgid "Current state"
+#~ msgstr "สถานะปัจจุบัน"
+
+#~ msgid "Dark blue"
+#~ msgstr "ฟ้าเข้ม"
+
+#~ msgid "Dark purple"
+#~ msgstr "สีม่วงเข้ม"
+
+#~ msgid "Default value"
+#~ msgstr "ค่าเริ่มต้น"
+
+#~ msgid "Delete node"
+#~ msgstr "ลบโหนด"
+
+#~ msgid "Domain not properly formed"
+#~ msgstr "โดเมนไม่ถูกสร้างขึ้นอย่างถูกต้อง"
+
+#~ msgid "Domain not supported"
+#~ msgstr "ไม่รองรับโดเมน"
+
+#~ msgid "Don't leave yet,<br />it's still loading..."
+#~ msgstr "รอก่อน<br />กำลังโหลด..."
+
+#~ msgid "Download PDF Preview"
+#~ msgstr "ดาวน์โหลดตัวอย่าง PDF"
+
+#~ msgid "Edit Action"
+#~ msgstr "แก้ไขการดำเนินการ"
+
+#~ msgid "Edit SearchView"
+#~ msgstr "แก้ไขมุมมองค้นหา"
+
+#~ msgid "Edit View: "
+#~ msgstr "แก้ไขมุมมอง: "
+
+#~ msgid "Enter e-mail address"
+#~ msgstr "ใส่ที่อยู่อีเมล"
+
+#~ msgid "Everybody's calendars"
+#~ msgstr "ปฏิทินของทุกคน"
+
+#~ msgid "Everything"
+#~ msgstr "ทุกอย่าง"
+
+#~ msgid "External link"
+#~ msgstr "ลิงก์จากภายนอก"
+
+#~ msgid "FILTER"
+#~ msgstr "ตัวกรอง"
+
+#~ msgid "Failed to evaluate search context"
+#~ msgstr "ไม่สามารถประเมินบริบทการค้นหา"
+
+#~ msgid "File upload"
+#~ msgstr "อัปโหลดไฟล์"
+
+#~ msgid "Filter with same name already exists."
+#~ msgstr "ชื่อตัวกรองนี้มีอยู่แล้ว"
+
+#~ msgid "Fushia"
+#~ msgstr "ฟูเชีย"
+
+#~ msgid "Graph"
+#~ msgstr "กราฟ"
+
+#~ msgid "Hit DOWN to navigate to the list below"
+#~ msgstr "กดลงเพื่อไปยังรายการด้านล่าง"
+
+#~ msgid "Hit ENTER to"
+#~ msgstr "กด ENTER เพื่อ"
+
+#~ msgid "Hit ENTER to CREATE"
+#~ msgstr "กด ENTER เพื่อ สร้าง"
+
+#~ msgid "I am sure about this."
+#~ msgstr "ฉันแน่ใจเกี่ยวกับเรื่องนี้"
+
+#~ msgid ""
+#~ "If you change %s or %s, the synchronization will be reapplied and the "
+#~ "data will be modified."
+#~ msgstr "ถ้าคุณเปลี่ยน %s หรือ %sการซิงโครไนซ์จะถูกนำมาใช้ใหม่และข้อมูลจะถูกแก้ไข"
+
+#~ msgid "In"
+#~ msgstr "ใน"
+
+#~ msgid ""
+#~ "Invalid database name. Only alphanumerical characters, underscore, hyphen "
+#~ "and dot are allowed."
+#~ msgstr ""
+#~ "ชื่อฐานข้อมูลไม่ถูกต้อง อนุญาตให้ใช้เฉพาะอักขระที่เป็นตัวอักษรและตัวเลขคละกัน ขีดล่าง ขีดกลาง "
+#~ "และจุดเท่านั้น"
+
+#~ msgid ""
+#~ "Invalid field chain. You may have used a non-existing field name or "
+#~ "followed a non-relational field."
+#~ msgstr "ฟิลด์เชนไม่ถูกต้อง คุณอาจใช้ชื่อฟิลด์ที่ไม่มีอยู่หรือตามฟิลด์ที่ไม่เกี่ยวข้องกัน"
+
+#~ msgid "Kanban: no action for type: "
+#~ msgstr "คัมบัง: ไม่มีการดำเนินการสำหรับประเภท:"
+
+#~ msgid "Leave the Developer Tools"
+#~ msgstr "ออกจากโหมดนักพัฒนา"
+
+#~ msgid "Light blue"
+#~ msgstr "ฟ้าอ่อน"
+
+#~ msgid "Loading, please wait..."
+#~ msgstr "กำลังโหลด โปรดรอสักครู่..."
+
+#~ msgid "Manage Attachments"
+#~ msgstr "จัดการสิ่งที่แนบมา"
+
+#~ msgid "Manage Filters"
+#~ msgstr "จัดการตัวกรอง"
+
+#~ msgid "Match records with"
+#~ msgstr "จับคู่บันทึกกับ"
+
+#~ msgid "Match records with the following rule:"
+#~ msgstr "บันทึกการจับคู่กับกฎต่อไปนี้:"
+
+#~ msgid "Medium blue"
+#~ msgstr "ฟ้ากลาง"
+
+#~ msgid "Meeting Subject:"
+#~ msgstr "หัวข้อการประชุม:"
+
+#~ msgid "Modifiers:"
+#~ msgstr "ตัวปรับเปลี่ยน:"
+
+#~ msgid "My Odoo.com account"
+#~ msgstr "บัญชี Odoo.com ของฉัน"
+
+#~ msgid "NONE"
+#~ msgstr "ไม่มี"
+
+#~ msgid "New %s"
+#~ msgstr "ใหม่ %s"
+
+#~ msgid "Next page"
+#~ msgstr "หน้าถัดไป"
+
+#~ msgid "No action with id '%s' could be found"
+#~ msgstr "ไม่มีการดำเนินการกับ id '%s' สามารถพบได้"
+
+#~ msgid "No records found!"
+#~ msgstr "ไม่พบบันทึก!"
+
+#~ msgid "No valid record to save"
+#~ msgstr "ไม่มีบันทึกที่ถูกต้องที่จะบันทึก"
+
+#~ msgid "Not active state"
+#~ msgstr "สถานะไม่ใช้งาน"
+
+#~ msgid "Not active state, click to change it"
+#~ msgstr "สถานะไม่ใช้งาน คลิกเพื่อเปลี่ยน"
+
+#~ msgid "On change:"
+#~ msgstr "เมื่อเปลี่ยนแปลง:"
+
+#~ msgid "Open: "
+#~ msgstr "เปิด: "
+
+#~ msgid ""
+#~ "Page:\n"
+#~ "                    <span class=\"page\"/>\n"
+#~ "                    of\n"
+#~ "                    <span class=\"topage\"/>"
+#~ msgstr ""
+#~ "หน้า:\n"
+#~ "                    <span class=\"page\"/>\n"
+#~ "                    ของ\n"
+#~ "                    <span class=\"topage\"/>"
+
+#~ msgid "Page: <span class=\"page\"/> / <span class=\"topage\"/>"
+#~ msgstr "หน้า: <span class=\"page\"/> / <span class=\"topage\"/>"
+
+#~ msgid "Pick a color"
+#~ msgstr "เลือกสี"
+
+#~ msgid "Pivot"
+#~ msgstr "หมุน"
+
+#~ msgid "Please click on the \"save\" button first"
+#~ msgstr "กรุณาคลิกที่ปุ่ม \"บันทึก\" ก่อน"
+
+#~ msgid ""
+#~ "Please use the copy button to report the error to your support service."
+#~ msgstr "โปรดใช้ปุ่มคัดลอกเพื่อรายงานข้อผิดพลาดไปยังบริการสนับสนุนของคุณ"
+
+#~ msgid "Preferences"
+#~ msgstr "การตั้งค่า"
+
+#~ msgid "Previous Period"
+#~ msgstr "ช่วงก่อนหน้า"
+
+#~ msgid "Previous Year"
+#~ msgstr "ปีก่อนหน้า"
+
+#~ msgid "Previous menu"
+#~ msgstr "เมนูก่อนหน้า"
+
+#~ msgid "Previous page"
+#~ msgstr "หน้าก่อนหน้า"
+
+#~ msgid "RGB"
+#~ msgstr "RGB"
+
+#~ msgid "RGBA"
+#~ msgstr "RGBA"
+
+#~ msgid "Regenerate Assets Bundles"
+#~ msgstr "สร้างการรวมกลุ่มของสินทรัพย์ใหม่"
+
+#~ msgid "Relation not allowed"
+#~ msgstr "ไม่อนุญาตให้มีความสัมพันธ์"
+
+#~ msgid "Remove tag"
+#~ msgstr "นำแท็กอออก"
+
+#~ msgid "Run Click Everywhere Test"
+#~ msgstr "ดำเนินการทดสอบ Click Everywhere"
+
+#~ msgid "Run JS Mobile Tests"
+#~ msgstr "ดำเนินการทดสอบมือถือ JS"
+
+#~ msgid "Run JS Tests"
+#~ msgstr "ดำเนินการทดสอบ JS "
+
+#~ msgid "SEE RESULT"
+#~ msgstr "ดูผลลัพธ์"
+
+#~ msgid "Salmon pink"
+#~ msgstr "ชมพูแซลมอน"
+
+#~ msgid "Search for records"
+#~ msgstr "ค้นหาบันทึก"
+
+#~ msgid "See details"
+#~ msgstr "ดูรายละเอียด"
+
+#~ msgid "Set Defaults"
+#~ msgstr "ตั้งค่าเริ่มต้น"
+
+#~ msgid "Share with all users"
+#~ msgstr "แชร์กับผู้ใช้ทั้งหมด"
+
+#~ msgid "Shortcuts"
+#~ msgstr "คีย์ลัด"
+
+#~ msgid "Size:"
+#~ msgstr "ขนาด:"
+
+#~ msgid ""
+#~ "Something happened while trying to contact the server, check that the "
+#~ "server is online and that you still have a working network connection."
+#~ msgstr ""
+#~ "มีบางอย่างเกิดขึ้นขณะพยายามติดต่อเซิร์ฟเวอร์ "
+#~ "ให้ตรวจสอบว่าเซิร์ฟเวอร์ออนไลน์อยู่และคุณยังมีการเชื่อมต่อเครือข่ายที่ใช้งานได้"
+
+#~ msgid "Still loading...<br />Please be patient."
+#~ msgstr "กำลังโหลดอยู่ ... <br />กรุณาอดทนรอ"
+
+#~ msgid "Style"
+#~ msgstr "สไตล์"
+
+#~ msgid "Styles"
+#~ msgstr "สไตล์"
+
+#~ msgid "Support"
+#~ msgstr "สนับสนุน"
+
+#~ msgid "Syntax error"
+#~ msgstr "ข้อผิดพลาดทางไวยากรณ์"
+
+#~ msgid "Take a minute to get a coffee,<br />because it's loading..."
+#~ msgstr "ใช้เวลาสักครู่ จิปกาแฟรอได้เลย <br /> เพราะกำลังโหลด ..."
+
+#~ msgid "The field is empty, there's nothing to save."
+#~ msgstr "ฟิลด์ว่างเปล่า ไม่มีอะไรให้บันทึก"
+
+#~ msgid "The selected file exceed the maximum file size of %s."
+#~ msgstr "ไฟล์ที่ถูกเลือกมีขนาดใหญ่เกิน %s"
+
+#~ msgid ""
+#~ "There are too many rows (%s rows, limit: %s) to export as Excel 2007-2013 "
+#~ "(.xlsx) format. Consider splitting the export."
+#~ msgstr ""
+#~ "มีแถวมากเกินไป(%s แถว ลิมิต: %s)เพื่อส่งออกในรูปแบบ Excel 2007-2013 (.xlsx) "
+#~ "พิจารณาแยกการส่งออก"
+
+#~ msgid "There was a problem while uploading your file"
+#~ msgstr "พบปัญหาในขณะที่อัปโหลดไฟล์ของคุณ"
+
+#~ msgid "This date is in the future. Make sure this is what you expect."
+#~ msgstr "วันที่นี้อยู่ในอนาคต ตรวจสอบให้แน่ใจว่านี่คือสิ่งที่คุณคาดหวัง"
+
+#~ msgid "This date is on the future. Make sure it is what you expected."
+#~ msgstr "วันที่นี้เป็นวันที่ในอนาคต ตรวจสอบให้แน่ใจว่าเป็นสิ่งที่คุณคาดหวัง"
+
+#~ msgid ""
+#~ "This filter is global and will be removed for everybody if you continue."
+#~ msgstr "ตัวกรองนี้เป็นแบบทั่วโลก และจะกรองออกสำหรับทุกคน ถ้าคุณดำเนินการต่อ"
+
+#~ msgid "Tomorrow"
+#~ msgstr "พรุ่งนี้"
+
+#~ msgid "True"
+#~ msgstr "จริง"
+
+#~ msgid ""
+#~ "Unable to find Wkhtmltopdf on this system. The report will be shown in "
+#~ "html."
+#~ msgstr "ไม่พบ Wkhtmltopdf ในระบบนี้ รายงานจะแสดงเป็น html"
+
+#~ msgid "Unarchive All"
+#~ msgstr "ยกเลิกการเก็บถาวรทั้งหมด"
+
+#~ msgid "Uncaught CORS Error"
+#~ msgstr "ข้อผิดพลาด CORS ที่ไม่ถูกตรวจจับ"
+
+#~ msgid "Uncaught Javascript Error"
+#~ msgstr "ข้อผิดพลาด Javascript ที่ไม่ถูกตรวจจับ"
+
+#~ msgid "Uncaught Promise"
+#~ msgstr "สัญญาที่ไม่ถูกตรวจจับ"
+
+#~ msgid ""
+#~ "Unknown CORS error\n"
+#~ "\n"
+#~ "An unknown CORS error occured.\n"
+#~ "The error probably originates from a JavaScript file served from a "
+#~ "different origin.\n"
+#~ "(Opening your browser console might give you a hint on the error.)"
+#~ msgstr ""
+#~ "ข้อผิดพลาด CORS ที่ไม่รู้จัก\n"
+#~ "\n"
+#~ "เกิดข้อผิดพลาด CORS ที่ไม่รู้จัก\n"
+#~ "ข้อผิดพลาดอาจมาจากไฟล์ JavaScript ที่ให้บริการจากแหล่งที่มาอื่น ๆ\n"
+#~ "(การเปิดคอนโซลเบราว์เซอร์ของคุณอาจให้คำแนะนำเกี่ยวกับข้อผิดพลาด)"
+
+#~ msgid "Unknown nonliteral type "
+#~ msgstr "ประเภทไม่ใช่ตัวอักษรที่ไม่รู้จัก"
+
+#~ msgid "Upgrade to enterprise"
+#~ msgstr "อัปเกรดเป็นระดับองค์กร"
+
+#~ msgid "Use by default"
+#~ msgstr "ใช้เป็นค่าเริ่มต้น"
+
+#~ msgid "User Error"
+#~ msgstr "ข้อผิดพลาดของผู้ใช้"
+
+#~ msgid "Variation"
+#~ msgstr "ตัวแปร"
+
+#~ msgid "View %s"
+#~ msgstr "ดู %s"
+
+#~ msgid "View Access Rights"
+#~ msgstr "ดูสิทธิ์การเข้าถึง"
+
+#~ msgid "View Fields"
+#~ msgstr "ดูฟิลด์"
+
+#~ msgid "View Record Rules"
+#~ msgstr "ดูกฎการบันทึก"
+
+#~ msgid "View switcher"
+#~ msgstr "ตัวสลับมุมมอง"
+
+#~ msgid "Web Mobile Tests"
+#~ msgstr "การทดสอบเว็บมือถือ"
+
+#~ msgid "Yesterday"
+#~ msgstr "เมื่อวาน"
+
+#~ msgid "You cannot follow relations for this field chain construction"
+#~ msgstr "คุณไม่สามารถติดตามความสัมพันธ์สำหรับการสร้างฟิลด์เชนนี้"
+
+#~ msgid ""
+#~ "You may not believe it,<br />but the application is actually loading..."
+#~ msgstr "คุณอาจไม่เชื่อมัน <br />แต่มั่นใจได้แอปพลิเคชันกำลังโหลด ..."
+
+#~ msgid ""
+#~ "You need to save this new record before editing the translation. Do you "
+#~ "want to proceed?"
+#~ msgstr "คุณต้องบันทึกบันทึกใหม่นี้ก่อนที่จะแก้ไขการแปล คุณต้องการดำเนินการต่อหรือไม่?"
+
+#~ msgid ""
+#~ "You should upgrade your version of Wkhtmltopdf to at least 0.12.0 in "
+#~ "order to get a correct display of headers and footers as well as support "
+#~ "for table-breaking between pages."
+#~ msgstr ""
+#~ "คุณควรอัปเกรดเวอร์ชันของ Wkhtmltopdf เป็นอย่างน้อย 0.12.0 "
+#~ "เพื่อให้แสดงส่วนหัวและส่วนท้ายที่ถูกต้อง รวมทั้งรองรับการแบ่งตารางระหว่างหน้าต่างๆ"
+
+#~ msgid ""
+#~ "Your installation of Wkhtmltopdf seems to be broken. The report will be "
+#~ "shown in html."
+#~ msgstr "การติดตั้ง Wkhtmltopdf ของคุณดูเหมือนจะใช้งานไม่ได้ รายงานจะแสดงเป็น html"
+
+#~ msgid "a day ago"
+#~ msgstr "วันที่ผ่านมา"
+
+#~ msgid "about a minute ago"
+#~ msgstr "ประมาณนาทีที่ผ่านมา"
+
+#~ msgid "about a month ago"
+#~ msgstr "ประมาณเดือนที่ผ่านมา"
+
+#~ msgid "about a year ago"
+#~ msgstr "ประมาณปีที่ผ่านมา"
+
+#~ msgid "about an hour ago"
+#~ msgstr "ประมาณหนึ่งชั่วโมงที่ผ่านมา"
+
+#~ msgid "are valid for this update."
+#~ msgstr "ถูกต้องสำหรับการอัปเดตนี้"
+
+#~ msgid "as a new"
+#~ msgstr "เหมือนใหม่"
+
+#~ msgid "at:"
+#~ msgstr "ที่:"
+
+#~ msgid "days"
+#~ msgstr "วัน"
+
+#~ msgid "doesn't contain"
+#~ msgstr "ไม่มี"
+
+#~ msgid "for:"
+#~ msgstr "สำหรับ:"
+
+#~ msgid "greater than or equal to"
+#~ msgstr "มากกว่าหรือเท่ากับ"
+
+#~ msgid "is"
+#~ msgstr "เป็น"
+
+#~ msgid "is after"
+#~ msgstr "หลัง"
+
+#~ msgid "is after or equal to"
+#~ msgstr "อยู่หลังหรือเท่ากับ"
+
+#~ msgid "is before"
+#~ msgstr "ก่อน"
+
+#~ msgid "is before or equal to"
+#~ msgstr "ก่อนหรือเท่ากับ"
+
+#~ msgid "is between"
+#~ msgstr "ระหว่าง"
+
+#~ msgid "is not"
+#~ msgstr "ไม่ใช่"
+
+#~ msgid "is not ="
+#~ msgstr "ไม่ใช้ ="
+
+#~ msgid "less than"
+#~ msgstr "น้อยกว่า"
+
+#~ msgid "less than a minute ago"
+#~ msgstr "น้อยกว่านาทีที่ผ่านมา"
+
+#~ msgid "less than or equal to"
+#~ msgstr "น้อยกว่าหรือเท่ากับ"
+
+#~ msgid "not in"
+#~ msgstr "ไม่อยู่ใน"
+
+#~ msgid "not set (false)"
+#~ msgstr "ไม่ได้ตั้งค่า (เท็จ)"
+
+#~ msgid "selected records,"
+#~ msgstr "บันทึกที่ถูกเลือก"
+
+#~ msgid "set (true)"
+#~ msgstr "ตั้งค่า (จริง)"

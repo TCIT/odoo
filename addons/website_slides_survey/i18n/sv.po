@@ -1,28 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_slides_survey
-# 
-# Translators:
-# Mikael Åkerberg <mikael.akerberg@mariaakerberg.com>, 2024
-# Larissa Manderfeld, 2024
-# Kim Asplund <kim.asplund@gmail.com>, 2024
-# Anders Wallenquist <anders.wallenquist@vertel.se>, 2024
-# Lasse L, 2024
-# Jakob Krabbe <jakob.krabbe@vertel.se>, 2024
-# 
+# * website_slides_survey
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
+# Hanna Kharraziha <hakha@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:41+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Jakob Krabbe <jakob.krabbe@vertel.se>, 2024\n"
-"Language-Team: Swedish (https://app.transifex.com/odoo/teams/41243/sv/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-06 16:51+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Swedish <https://translate.odoo.com/projects/odoo-19/"
+"website_slides_survey/sv/>\n"
+"Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: sv\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_slides_survey
 #: model:ir.model.fields,field_description:website_slides_survey.field_slide_channel__members_certified_count
@@ -49,11 +45,19 @@ msgstr ""
 msgid ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        Dear <t t-out=\"object.partner_id.name or 'participant' or ''\">participant</t><br/><br/>\n"
-"        Unfortunately, you have failed the certification and are no longer a member of the course: <t t-out=\"object.slide_partner_id.channel_id.name or ''\">Basics of Gardening</t>.<br/><br/>\n"
+"        Dear <t t-out=\"object.partner_id.name or 'participant' or "
+"''\">participant</t><br/><br/>\n"
+"        Unfortunately, you have failed the certification and are no longer a "
+"member of the course: <t t-out=\"object.slide_partner_id.channel_id.name or "
+"''\">Basics of Gardening</t>.<br/><br/>\n"
 "        Don't hesitate to enroll again!\n"
 "        </p><div style=\"margin: 16px 0px 16px 0px;\">\n"
-"            <a t-att-href=\"(object.slide_partner_id.channel_id.website_url)\" style=\"background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;\">\n"
+"            <a t-att-"
+"href=\"(object.slide_partner_id.channel_id.website_absolute_url)\" t-attf-"
+"style=\"background-color: {{user.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
+"{{user.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
+"font-size:13px;\">\n"
 "                Enroll now\n"
 "            </a>\n"
 "        </div>\n"
@@ -89,10 +93,12 @@ msgstr ""
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.survey_fill_form_done_inherit_website_slides
 msgid ""
-"<i class=\"fa fa-share-alt\" aria-label=\"Share certification\" title=\"Share certification\"/>\n"
+"<i class=\"fa fa-share-alt\" aria-label=\"Share certification\" "
+"title=\"Share certification\"/>\n"
 "                        Share your certification"
 msgstr ""
-"<i class=\"fa fa-share-alt\" aria-label=\"Share certification\" title=\"Share certification\"/>\n"
+"<i class=\"fa fa-share-alt\" aria-label=\"Share certification\" "
+"title=\"Share certification\"/>\n"
 "                        Dela med dig av din certifiering"
 
 #. module: website_slides_survey
@@ -123,7 +129,7 @@ msgid "<i class=\"text-muted\"> awarded users</i>"
 msgstr "<i class=\"text-muted\"> belönad användare</i>"
 
 #. module: website_slides_survey
-#: model_terms:ir.ui.view,arch_db:website_slides_survey.courses_home_inherit_survey
+#: model_terms:ir.ui.view,arch_db:website_slides_survey.courses_search_bar_inherit_survey
 msgid "<span class=\"ms-1\">Certifications</span>"
 msgstr "<span class=\"ms-1\">Certifieringar</span>"
 
@@ -144,8 +150,10 @@ msgstr "<span class=\"text-muted\">Certifieringar</span>"
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.course_main
-msgid "<span>Start Now</span><i class=\"oi oi-chevron-right ms-2 align-middle\"/>"
-msgstr "<span>Börja nu</span><i class=\"oi oi-chevron-right ms-2 align-middle\"/>"
+msgid ""
+"<span>Start Now</span><i class=\"oi oi-chevron-right ms-2 align-middle\"/>"
+msgstr ""
+"<span>Börja nu</span><i class=\"oi oi-chevron-right ms-2 align-middle\"/>"
 
 #. module: website_slides_survey
 #: model:ir.model.constraint,message:website_slides_survey.constraint_slide_slide_check_survey_id
@@ -179,16 +187,6 @@ msgstr "Lägg till en ny certifiering"
 #: model:ir.model.fields,field_description:website_slides_survey.field_slide_slide__is_preview
 msgid "Allow Preview"
 msgstr "Tillåt förhandsvisning"
-
-#. module: website_slides_survey
-#. odoo-python
-#: code:addons/website_slides_survey/models/survey_survey.py:0
-msgid ""
-"Any Survey listed below is currently used as a Course Certification and cannot be deleted:\n"
-"%s"
-msgstr ""
-"Alla undersökningar som listas nedan används för närvarande som kurscertifiering och kan inte tas bort:\n"
-"%s"
 
 #. module: website_slides_survey
 #: model:survey.question.answer,value:website_slides_survey.furniture_certification_page_1_question_1_choice_3
@@ -247,6 +245,7 @@ msgstr "Kategori"
 #: model:ir.model.fields,field_description:website_slides_survey.field_slide_slide__survey_id
 #: model:ir.model.fields.selection,name:website_slides_survey.selection__slide_slide__slide_category__certification
 #: model:ir.model.fields.selection,name:website_slides_survey.selection__slide_slide__slide_type__certification
+#: model_terms:ir.ui.view,arch_db:website_slides_survey.courses_search_results_inherit_survey
 msgid "Certification"
 msgstr "Certifiering"
 
@@ -354,7 +353,7 @@ msgstr "Kurs"
 #: code:addons/website_slides_survey/models/survey_survey.py:0
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.survey_survey_view_form
 msgid "Courses"
-msgstr "Löpningar"
+msgstr "Kurser"
 
 #. module: website_slides_survey
 #: model:ir.model.fields,field_description:website_slides_survey.field_survey_survey__slide_channel_count
@@ -377,6 +376,16 @@ msgid "Desk"
 msgstr "Skrivbord"
 
 #. module: website_slides_survey
+#: model:ir.model.fields,field_description:website_slides_survey.field_slide_channel__display_name
+#: model:ir.model.fields,field_description:website_slides_survey.field_slide_channel_partner__display_name
+#: model:ir.model.fields,field_description:website_slides_survey.field_slide_slide__display_name
+#: model:ir.model.fields,field_description:website_slides_survey.field_slide_slide_partner__display_name
+#: model:ir.model.fields,field_description:website_slides_survey.field_survey_survey__display_name
+#: model:ir.model.fields,field_description:website_slides_survey.field_survey_user_input__display_name
+msgid "Display Name"
+msgstr "Visningsnamn"
+
+#. module: website_slides_survey
 #. odoo-javascript
 #: code:addons/website_slides_survey/static/src/xml/website_slides_fullscreen.xml:0
 msgid "Download certification"
@@ -396,7 +405,7 @@ msgstr "Möbler"
 #: model:slide.slide,name:website_slides_survey.slide_slide_demo_5_4
 #: model:survey.survey,title:website_slides_survey.furniture_certification
 msgid "Furniture Creation Certification"
-msgstr "Certifiering av möbeltillverkning"
+msgstr "Certifiering av möbelproduktion"
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.survey_fill_form_done_inherit_website_slides
@@ -408,6 +417,16 @@ msgstr "Återgå till kursen"
 #: code:addons/website_slides_survey/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.xml:0
 msgid "How to upload a certification on your course?"
 msgstr "Hur laddar jag upp en certifiering på din kurs?"
+
+#. module: website_slides_survey
+#: model:ir.model.fields,field_description:website_slides_survey.field_slide_channel__id
+#: model:ir.model.fields,field_description:website_slides_survey.field_slide_channel_partner__id
+#: model:ir.model.fields,field_description:website_slides_survey.field_slide_slide__id
+#: model:ir.model.fields,field_description:website_slides_survey.field_slide_slide_partner__id
+#: model:ir.model.fields,field_description:website_slides_survey.field_survey_survey__id
+#: model:ir.model.fields,field_description:website_slides_survey.field_survey_user_input__id
+msgid "ID"
+msgstr "ID"
 
 #. module: website_slides_survey
 #: model_terms:slide.slide,description:website_slides_survey.slide_slide_demo_6_0
@@ -543,11 +562,11 @@ msgstr "Information om abonnenten"
 #. module: website_slides_survey
 #: model:ir.model.fields,help:website_slides_survey.field_slide_slide__slide_type
 msgid ""
-"Subtype of the slide category, allows more precision on the actual file type"
-" / source type."
+"Subtype of the slide category, allows more precision on the actual file "
+"type / source type."
 msgstr ""
-"Subtyp av slide-kategorin, tillåter mer precision på den faktiska filtypen /"
-" källtypen."
+"Subtyp av slide-kategorin, tillåter mer precision på den faktiska filtypen / "
+"källtypen."
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.survey_survey_view_tree_slides
@@ -598,16 +617,14 @@ msgid ""
 "The course is accessible by anyone : the users don't need to join the "
 "channel to access the content of the course."
 msgstr ""
-"Kursen är tillgänglig för alla: användarna behöver inte gå med i kanalen för"
-" att få tillgång till innehållet i kursen."
+"Kursen är tillgänglig för alla: användarna behöver inte gå med i kanalen för "
+"att få tillgång till innehållet i kursen."
 
 #. module: website_slides_survey
 #: model:ir.model.fields,help:website_slides_survey.field_survey_survey__slide_channel_ids
-msgid ""
-"The courses this survey is linked to through the e-learning application"
+msgid "The courses this survey is linked to through the e-learning application"
 msgstr ""
-"De kurser som denna undersökning är kopplad till via e-learning-"
-"applikationen"
+"De kurser som denna undersökning är kopplad till via e-learning-applikationen"
 
 #. module: website_slides_survey
 #: model:ir.model.fields,help:website_slides_survey.field_survey_user_input__slide_id
@@ -625,6 +642,16 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_slides_survey.field_slide_slide__name
 msgid "Title"
 msgstr "Titel"
+
+#. module: website_slides_survey
+#. odoo-python
+#: code:addons/website_slides_survey/models/survey_survey.py:0
+msgid ""
+"Uh-oh! You can’t delete surveys used as a Course Certification! Otherwise, "
+"students might think diplomas just grow on trees.\n"
+"The courses that need them are:\n"
+"%s"
+msgstr ""
 
 #. module: website_slides_survey
 #: model:survey.question,title:website_slides_survey.furniture_certification_page_1_question_3
@@ -651,11 +678,15 @@ msgstr "Det är inte tillåtet att länka en certifiering."
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.badge_content
 msgid ""
-"You can gain badges by passing certifications. Here is a list of all available certification badges.\n"
-"                            <br/>Follow the links to reach new heights and skill up!"
+"You can gain badges by passing certifications. Here is a list of all "
+"available certification badges.\n"
+"                            <br/>Follow the links to reach new heights and "
+"skill up!"
 msgstr ""
-"Du kan få utmärkelser genom att klara certifieringar. Här är en lista över alla tillgängliga certifieringsmärken.\n"
-"                           <br/>Följ länkarna för att nå nya höjder och förbättra dina färdigheter!"
+"Du kan få utmärkelser genom att klara certifieringar. Här är en lista över "
+"alla tillgängliga certifieringsmärken.\n"
+"                           <br/>Följ länkarna för att nå nya höjder och "
+"förbättra dina färdigheter!"
 
 #. module: website_slides_survey
 #: model:mail.template,subject:website_slides_survey.mail_template_user_input_certification_failed

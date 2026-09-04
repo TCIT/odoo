@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Component } from '@odoo/owl';
 import { _t } from '@web/core/l10n/translation';
 
@@ -24,7 +22,8 @@ export class LocationSchedule extends Component {
      * @return {Object} the localized name of the day (long version).
      */
     getWeekDay(weekday) {
-        return luxon.Info.weekdays()[weekday]
+        const dayName = luxon.Info.weekdays()[weekday];
+        return dayName.charAt(0).toUpperCase() + dayName.slice(1);
     }
 
     get closedLabel() {

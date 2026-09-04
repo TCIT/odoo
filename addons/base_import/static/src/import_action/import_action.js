@@ -1,20 +1,17 @@
-/** @odoo-module **/
-
+import { Component, onWillStart, useRef, useState } from "@odoo/owl";
+import { useDropzone } from "@web/core/dropzone/dropzone_hook";
+import { FileInput } from "@web/core/file_input/file_input";
 import { _t } from "@web/core/l10n/translation";
-import { Component, onWillStart, onMounted, useRef, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useFileUploader } from "@web/core/utils/files";
 import { useService } from "@web/core/utils/hooks";
-import { FileInput } from "@web/core/file_input/file_input";
-import { useDropzone } from "@web/core/dropzone/dropzone_hook";
-import { useImportModel } from "../import_model";
+import { Layout } from "@web/search/layout";
+import { DocumentationLink } from "@web/views/widgets/documentation_link/documentation_link";
+import { standardActionServiceProps } from "@web/webclient/actions/action_service";
 import { ImportDataContent } from "../import_data_content/import_data_content";
 import { ImportDataProgress } from "../import_data_progress/import_data_progress";
 import { ImportDataSidepanel } from "../import_data_sidepanel/import_data_sidepanel";
-import { Layout } from "@web/search/layout";
-import { router } from "@web/core/browser/router";
-import { standardActionServiceProps } from "@web/webclient/actions/action_service";
-import { DocumentationLink } from "@web/views/widgets/documentation_link/documentation_link";
+import { useImportModel } from "../import_model";
 
 export class ImportAction extends Component {
     static template = "ImportAction";
@@ -27,55 +24,58 @@ export class ImportAction extends Component {
         DocumentationLink,
     };
     static props = { ...standardActionServiceProps };
+    static path = "import";
+    static displayName = _t("Import a File");
 
     setup() {
+        this.actionService = useService("action");
         this.notification = useService("notification");
-        this.orm = useService("orm");
         this.env.config.setDisplayName(this.props.action.name || _t("Import a File"));
-        // this.props.action.params.model is there for retro-compatiblity issues
-        this.resModel = this.props.action.params.model || this.props.action.params.active_model;
-        if (this.resModel) {
-            this.props.updateActionState({ active_model: this.resModel });
-        }
         this.model = useImportModel({
             env: this.env,
-            resModel: this.resModel,
-            context: this.props.action.params.context || {},
-            orm: this.orm,
+            context: this.props.action.params?.context || {},
         });
 
         this.state = useState({
             filename: undefined,
-            fileLength: 0,
+            numRows: 0,
             importMessages: [],
             importProgress: {
                 value: 0,
                 step: 1,
             },
             isPaused: false,
+            isTested: false,
             previewError: "",
         });
 
         this.uploadFiles = useFileUploader();
-        useDropzone(useRef("root"), async event => {
+        useDropzone(useRef("root"), async (event) => {
             const { files } = event.dataTransfer;
             if (files.length === 0) {
-                this.notification.add(_t("Please upload an Excel (.xls or .xlsx) or .csv file to import."), {
-                    type: "danger",
-                });
+                this.notification.add(
+                    _t("Please upload an Excel (.xls or .xlsx) or .csv file to import."),
+                    {
+                        type: "danger",
+                    }
+                );
             } else if (files.length > 1) {
                 this.notification.add(_t("Please upload a single file."), {
                     type: "danger",
                 });
             } else {
                 const file = files[0];
-                const isValidFile = file.name.endsWith(".csv")
-                                 || file.name.endsWith(".xls")
-                                 || file.name.endsWith(".xlsx");
+                const isValidFile =
+                    file.name.endsWith(".csv") ||
+                    file.name.endsWith(".xls") ||
+                    file.name.endsWith(".xlsx");
                 if (!isValidFile) {
-                    this.notification.add(_t("Please upload an Excel (.xls or .xlsx) or .csv file to import."), {
-                        type: "danger",
-                    });
+                    this.notification.add(
+                        _t("Please upload an Excel (.xls or .xlsx) or .csv file to import."),
+                        {
+                            type: "danger",
+                        }
+                    );
                 } else {
                     await this.uploadFiles(this.uploadFilesRoute, {
                         csrf_token: odoo.csrf_token,
@@ -88,17 +88,54 @@ export class ImportAction extends Component {
             }
         });
 
-        onWillStart(() => this.model.init());
-        onMounted(() => this.enter());
+        onWillStart(this.onWillStart);
     }
 
-    enter() {
-        const newState = { action: "import", model: this.resModel };
-        router.pushState(newState, { replace: true });
+    async onWillStart() {
+        const action = await this.actionService.currentAction;
+        // this.props.action.params.model is there for retro-compatiblity issues
+        const activeModel =
+            this.props.action.params?.model || this.props.action.params?.active_model;
+        if (activeModel) {
+            this.resModel = activeModel;
+            if (action?.type === "ir.actions.act_window" && action?.res_model === this.resModel) {
+                this.action = action;
+            } else {
+                this.props.updateActionState({ active_model: this.resModel });
+            }
+        } else {
+            if (!action) {
+                return this.env.config.historyBack();
+            }
+            if (action.type !== "ir.actions.act_window") {
+                return this.actionService.restore(this.actionService.currentController.jsId);
+            }
+            this.action = action;
+            this.resModel = this.action.res_model;
+        }
+        this.model.setResModel(this.resModel);
+        return this.model.init();
     }
 
-    exit(resIds) {
+    cancel() {
         this.env.config.historyBack();
+    }
+
+    openRecords(resIds) {
+        this.actionService.doAction({
+            type: "ir.actions.act_window",
+            name: _t("Imported records"),
+            res_model: this.model.resModel,
+            view_mode: this.action?.view_mode || "list,form",
+            views: this.action?.views || [
+                [false, "list"],
+                [false, "form"],
+            ],
+            domain: [["id", "in", resIds]],
+            context: this.model.context,
+            target: "current",
+            path: "imported-records",
+        });
     }
 
     get display() {
@@ -111,7 +148,7 @@ export class ImportAction extends Component {
         return this.model.importTemplates;
     }
 
-    get uploadFilesRoute () {
+    get uploadFilesRoute() {
         return "/base_import/set_file";
     }
 
@@ -124,7 +161,7 @@ export class ImportAction extends Component {
     }
 
     get totalToImport() {
-        return this.state.fileLength - parseInt(this.importOptions.skip);
+        return this.state.numRows - parseInt(this.importOptions.skip);
     }
 
     get totalSteps() {
@@ -139,10 +176,10 @@ export class ImportAction extends Component {
         return this.state.filename !== undefined;
     }
 
-    // Activate the batch configuration panel only if the file length > 100. (In order to let the user choose
+    // Activate the batch configuration panel only if the number of rows > 100. (In order to let the user choose
     // the batch size even for medium size file. Could be useful to reduce the batch size for complex models).
     get isBatched() {
-        return this.state.fileLength > 100;
+        return this.state.numRows > 100;
     }
 
     async onOptionChanged(name, value, fieldName = null) {
@@ -150,8 +187,11 @@ export class ImportAction extends Component {
         const result = await this.model.setOption(name, value, fieldName);
         if (result) {
             const { res, error } = result;
-            if (!error && res.file_length) {
-                this.state.fileLength = res.file_length;
+            if (!error && res.num_rows) {
+                this.state.numRows = res.num_rows;
+                this.state.previewError = undefined;
+            } else {
+                this.state.previewError = error;
             }
         }
         this.model.unblock();
@@ -181,9 +221,10 @@ export class ImportAction extends Component {
         if (error) {
             this.state.previewError = error;
         } else {
-            this.state.fileLength = res.file_length;
+            this.state.numRows = res.num_rows;
             this.state.previewError = undefined;
         }
+        this.state.isTested = false;
         this.model.unblock();
     }
 
@@ -220,11 +261,20 @@ export class ImportAction extends Component {
             this.state.isPaused = true;
         }
 
-        if (!isTest && res.ids.length) {
-            this.notification.add(_t("%s records successfully imported", res.ids.length), {
-                type: "success",
-            });
-            this.exit(res.ids);
+        if (res.ids.length) {
+            if (!isTest) {
+                if (res.hasError) {
+                    return;
+                }
+                this.notification.add(_t("%s records successfully imported", res.ids.length), {
+                    type: "success",
+                });
+                if (!this.state.isPaused) {
+                    this.openRecords(res.ids);
+                }
+            } else {
+                this.state.isTested = true;
+            }
         }
     }
 

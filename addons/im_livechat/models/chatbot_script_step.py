@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import _, api, models, fields
 from odoo.exceptions import ValidationError
-from odoo.fields import Command
-from odoo.osv import expression
-from odoo.tools import html2plaintext, is_html_empty, email_normalize, plaintext2html
+from odoo.fields import Command, Domain
+from odoo.tools import html2plaintext, email_normalize
 from odoo.addons.mail.tools.discuss import Store
 
 from collections import defaultdict
@@ -16,12 +14,12 @@ class ChatbotScriptStep(models.Model):
     _name = 'chatbot.script.step'
     _description = 'Chatbot Script Step'
     _order = 'sequence, id'
-    _rec_name = 'message'
 
-    message = fields.Text(string='Message', translate=True)
+    name = fields.Char(string="Name", compute="_compute_name")
+    message = fields.Html(string="Message", translate=True)
     sequence = fields.Integer(string='Sequence')
     chatbot_script_id = fields.Many2one(
-        'chatbot.script', string='Chatbot', required=True, ondelete='cascade')
+        'chatbot.script', string='Chatbot', required=True, index=True, ondelete='cascade')
     step_type = fields.Selection([
         ('text', 'Text'),
         ('question_selection', 'Question'),
@@ -36,12 +34,28 @@ class ChatbotScriptStep(models.Model):
         'chatbot.script.answer', 'script_step_id',
         copy=True, string='Answers')
     triggering_answer_ids = fields.Many2many(
-        'chatbot.script.answer', domain="[('script_step_id.sequence', '<', sequence)]",
+        'chatbot.script.answer', domain="[('script_step_id.sequence', '<', sequence), ('script_step_id.chatbot_script_id', '=', chatbot_script_id)]",
         compute='_compute_triggering_answer_ids', readonly=False, store=True,
         copy=False,  # copied manually, see chatbot.script#copy
         string='Only If', help='Show this step only if all of these answers have been selected.')
     # forward-operator specifics
+    is_forward_operator = fields.Boolean(compute="_compute_is_forward_operator")
     is_forward_operator_child = fields.Boolean(compute='_compute_is_forward_operator_child')
+    operator_expertise_ids = fields.Many2many(
+        "im_livechat.expertise",
+        string="Operator Expertise",
+        help="When forwarding live chat conversations, the chatbot will prioritize users with matching expertise.",
+    )
+
+    @api.depends("sequence", "chatbot_script_id")
+    @api.depends_context('lang')
+    def _compute_name(self):
+        for step in self:
+            step.name = self.env._(
+                "%(title)s - Step %(sequence)d",
+                title=step.chatbot_script_id.title,
+                sequence=step.sequence,
+            )
 
     @api.depends('sequence')
     def _compute_triggering_answer_ids(self):
@@ -51,13 +65,25 @@ class ChatbotScriptStep(models.Model):
             if update_command:
                 step.triggering_answer_ids = update_command
 
-    @api.depends('sequence', 'triggering_answer_ids', 'chatbot_script_id.script_step_ids.triggering_answer_ids',
-                 'chatbot_script_id.script_step_ids.answer_ids', 'chatbot_script_id.script_step_ids.sequence')
+    @api.depends("step_type")
+    def _compute_is_forward_operator(self):
+        for step in self:
+            step.is_forward_operator = step.step_type == "forward_operator"
+
+    @api.depends(
+        "chatbot_script_id.script_step_ids.answer_ids",
+        "chatbot_script_id.script_step_ids.is_forward_operator",
+        "chatbot_script_id.script_step_ids.sequence",
+        "chatbot_script_id.script_step_ids.step_type",
+        "chatbot_script_id.script_step_ids.triggering_answer_ids",
+        "sequence",
+        "triggering_answer_ids",
+    )
     def _compute_is_forward_operator_child(self):
         parent_steps_by_chatbot = {}
         for chatbot in self.chatbot_script_id:
             parent_steps_by_chatbot[chatbot.id] = chatbot.script_step_ids.filtered(
-                lambda step: step.step_type in ['forward_operator', 'question_selection']
+                lambda step: step.is_forward_operator or step.step_type == "question_selection"
             ).sorted(lambda s: s.sequence, reverse=True)
         for step in self:
             parent_steps = parent_steps_by_chatbot[step.chatbot_script_id.id].filtered(
@@ -66,9 +92,9 @@ class ChatbotScriptStep(models.Model):
             parent = step
             while True:
                 parent = parent._get_parent_step(parent_steps)
-                if not parent or parent.step_type == 'forward_operator':
+                if not parent or parent.is_forward_operator:
                     break
-            step.is_forward_operator_child = parent and parent.step_type == 'forward_operator'
+            step.is_forward_operator_child = parent and parent.is_forward_operator
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -144,7 +170,7 @@ class ChatbotScriptStep(models.Model):
         :param bool update_partner: whether or not to set update the email and phone on the res.partner
           from the environment (if not a public user) if those are not set yet. Defaults to True.
 
-        :return dict: a dict containing the customer values."""
+        :returns: a dict containing the customer values."""
 
         partner = False
         user_inputs = discuss_channel._chatbot_find_customer_values_in_messages({
@@ -174,9 +200,9 @@ class ChatbotScriptStep(models.Model):
 
         description = Markup('')
         if input_email:
-            description += Markup('%s<strong>%s</strong><br>') % (_('Please contact me on: '), input_email)
+            description += Markup("%s<strong>%s</strong><br>") % (_("Email: "), input_email)
         if input_phone:
-            description += Markup('%s<strong>%s</strong><br>') % (_('Please call me on: '), input_phone)
+            description += Markup("%s<strong>%s</strong><br>") % (_("Phone: "), input_phone)
         if description:
             description += Markup('<br>')
 
@@ -186,6 +212,17 @@ class ChatbotScriptStep(models.Model):
             'phone': input_phone,
             'description': description,
         }
+
+    def _find_first_user_free_input(self, discuss_channel):
+        """Find the first message from the visitor responding to a free_input step."""
+        chatbot_partner = self.chatbot_script_id.operator_partner_id
+        user_answers = discuss_channel.sudo().chatbot_message_ids.filtered(
+            lambda m: m.mail_message_id.author_id != chatbot_partner
+        ).sorted("id")
+        for answer in user_answers:
+            if answer.script_step_id.step_type in ("free_input_single", "free_input_multi"):
+                return answer.mail_message_id
+        return self.env["mail.message"]
 
     def _fetch_next_step(self, selected_answer_ids):
         """ Fetch the next step depending on the user's selected answers.
@@ -217,12 +254,9 @@ class ChatbotScriptStep(models.Model):
             -> NOK
         """
         self.ensure_one()
-        domain = [('chatbot_script_id', '=', self.chatbot_script_id.id), ('sequence', '>', self.sequence)]
+        domain = Domain('chatbot_script_id', '=', self.chatbot_script_id.id) & Domain('sequence', '>', self.sequence)
         if selected_answer_ids:
-            domain = expression.AND([domain, [
-                '|',
-                ('triggering_answer_ids', '=', False),
-                ('triggering_answer_ids', 'in', selected_answer_ids.ids)]])
+            domain &= Domain('triggering_answer_ids', 'in', selected_answer_ids.ids + [False])
         steps = self.env['chatbot.script.step'].search(domain)
         for step in steps:
             if not step.triggering_answer_ids:
@@ -289,7 +323,12 @@ class ChatbotScriptStep(models.Model):
             # if this error is raised, display an error message but do not go to next step
             raise ValidationError(_('"%s" is not a valid email.', user_text_answer))
 
-        if self.step_type in ['question_email', 'question_phone']:
+        if self.step_type in [
+            "question_email",
+            "question_phone",
+            "free_input_single",
+            "free_input_multi",
+        ]:
             chatbot_message = self.env['chatbot.message'].search([
                 ('discuss_channel_id', '=', discuss_channel.id),
                 ('script_step_id', '=', self.id),
@@ -311,101 +350,15 @@ class ChatbotScriptStep(models.Model):
         Those will have a dedicated processing method with specific docstrings.
 
         Returns the mail.message posted by the chatbot's operator_partner_id. """
-
         self.ensure_one()
-        # sudo: discuss.channel - updating current step on the channel is allowed
-        discuss_channel.sudo().chatbot_current_step_id = self.id
-
         if self.step_type == 'forward_operator':
-            return self._process_step_forward_operator(discuss_channel)
-        return discuss_channel._chatbot_post_message(self.chatbot_script_id, plaintext2html(self.message))
+            return discuss_channel._forward_human_operator(chatbot_script_step=self)
+        return discuss_channel._chatbot_post_message(self.chatbot_script_id, self.message)
 
-    def _process_step_forward_operator(self, discuss_channel):
-        """ Special type of step that will add a human operator to the conversation when reached,
-        which stops the script and allow the visitor to discuss with a real person.
-
-        In case we don't find any operator (e.g: no-one is available) we don't post any messages.
-        The script will continue normally, which allows to add extra steps when it's the case
-        (e.g: ask for the visitor's email and create a lead). """
-
-        human_operator = False
-        posted_message = self.env["mail.message"]
-
-        if discuss_channel.livechat_channel_id:
-            # sudo: res.users - visitor can access operator of their channel
-            # sudo: res.lang - visitor can access their own lang
-            human_operator = discuss_channel.livechat_channel_id.sudo()._get_operator(
-                lang=self.env.context.get("lang"), country_id=discuss_channel.country_id.id
-            )
-
-        # handle edge case where we found yourself as available operator -> don't do anything
-        # it will act as if no-one is available (which is fine)
-        if human_operator and human_operator != self.env.user:
-            if self.message:
-                # first post the message of the step (if we have one)
-                posted_message = discuss_channel._chatbot_post_message(self.chatbot_script_id, plaintext2html(self.message))
-
-            # next, add the human_operator to the channel and post a "Operator joined the channel" notification
-            discuss_channel.with_user(human_operator).sudo().add_members(human_operator.partner_id.ids, open_chat_window=True)
-
-            # finally, rename the channel to include the operator's name
-            discuss_channel.sudo().name = ' '.join([
-                self.env.user.display_name if not self.env.user._is_public() else discuss_channel.anonymous_name,
-                human_operator.livechat_username if human_operator.livechat_username else human_operator.name
-            ])
-            step_message = next((
-                # sudo - chatbot.message.id: visitor can access chat bot messages.
-                m.mail_message_id for m in discuss_channel.sudo().chatbot_message_ids
-                if m.script_step_id == self
-                and m.mail_message_id.author_id == self.chatbot_script_id.operator_partner_id
-            ), self.env["mail.message"])
-            discuss_channel._bus_send_store(
-                Store(
-                    "ChatbotStep",
-                    {
-                        "id": (self.id, step_message.id),
-                        "scriptStep": self.id,
-                        "message": step_message.id,
-                        "operatorFound": True,
-                    },
-                )
-            )
-            discuss_channel._broadcast(human_operator.partner_id.ids)
-            discuss_channel.channel_pin(pinned=True)
-
-        return posted_message
-
-    def _to_store(self, store: Store, /, *, fields=None):
-        if fields is None:
-            fields = ["answer_ids", "message", "type"]
-        for step in self:
-            data = step._read_format(
-                [f for f in fields if f not in {"answer_ids", "message", "type"}], load=False
-            )[0]
-            if "answer_ids" in fields:
-                data["answers"] = Store.many(step.answer_ids)
-            if "message" in fields:
-                data["message"] = plaintext2html(step.message) if step.message else False
-            if "type" in fields:
-                data["type"] = step.step_type
-            store.add("chatbot.script.step", data)
-
-    # --------------------------
-    # Tooling / Misc
-    # --------------------------
-
-    def _format_for_frontend(self):
-        """ Small utility method that formats the step into a dict usable by the frontend code. """
-        self.ensure_one()
-
-        return {
-            'id': self.id,
-            'answers': [{
-                'id': answer.id,
-                "name": answer.name,
-                "redirect_link": answer.redirect_link,
-            } for answer in self.answer_ids],
-            'message': plaintext2html(self.message) if not is_html_empty(self.message) else False,
-            'isLast': self._is_last_step(),
-            'type': self.step_type
-        }
+    def _to_store_defaults(self, target):
+        return [
+            Store.Many("answer_ids"),
+            Store.Attr("is_last", lambda step: step._is_last_step()),
+            "message",
+            "step_type",
+        ]

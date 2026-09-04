@@ -29,38 +29,47 @@ class TestProjectSharingPortalAccess(TestProjectSharingCommon):
         })
 
         Task = cls.env['project.task']
+        readable_fields, writeable_fields = Task._portal_accessible_fields()
+
+        # html_field_history is always silently ignored.
+        field_exception = {"html_field_history"}
+
         cls.read_protected_fields_task = OrderedDict([
             (k, v)
             for k, v in Task._fields.items()
-            if k in Task.SELF_READABLE_FIELDS
+            if k in readable_fields and k not in field_exception
         ])
         cls.write_protected_fields_task = OrderedDict([
             (k, v)
             for k, v in Task._fields.items()
-            if k in Task.SELF_WRITABLE_FIELDS
+            if k in writeable_fields and k not in field_exception
         ])
         cls.readonly_protected_fields_task = OrderedDict([
             (k, v)
             for k, v in Task._fields.items()
-            if k in Task.SELF_READABLE_FIELDS and k not in Task.SELF_WRITABLE_FIELDS
+            if k in readable_fields and k not in writeable_fields and k not in field_exception
         ])
         cls.other_fields_task = OrderedDict([
             (k, v)
             for k, v in Task._fields.items()
-            if k not in Task.SELF_READABLE_FIELDS
+            if k not in readable_fields and k not in field_exception
         ])
 
     def test_mention_suggestions(self):
-        suggestion_ids = {
-            partner.get("id")
-            for partner in self.task_portal.with_user(self.user_portal)
-            .get_mention_suggestions(search="")
-            .get("res.partner")
-        }
+        data = self.task_portal.with_user(self.user_portal).get_mention_suggestions(search="")
+        suggestion_ids = {partner.get("id") for partner in data.get("res.partner")}
         self.assertEqual(
             suggestion_ids,
             {self.user_projectuser.partner_id.id, self.user_portal.partner_id.id},
             "Portal user as a project collaborator should have access to mention suggestions",
+        )
+        self.assertEqual(
+            data["res.partner"][0]["mention_token"],
+            self.user_projectuser.partner_id._get_mention_token(),
+        )
+        self.assertEqual(
+            data["res.partner"][1]["mention_token"],
+            self.user_portal.partner_id._get_mention_token(),
         )
         # remove portal user from the project collaborators
         self.project_portal.collaborator_ids.filtered(
@@ -87,19 +96,56 @@ class TestProjectSharingPortalAccess(TestProjectSharingCommon):
                     form.__setattr__(field, 'coucou')
 
     def test_read_task_with_portal_user(self):
-        self.task_portal.with_user(self.user_portal).read(self.read_protected_fields_task)
-
-        with self.assertRaises(AccessError):
-            self.task_portal.with_user(self.user_portal).read(self.other_fields_task)
-
-    def test_write_with_portal_user(self):
-        for field in self.readonly_protected_fields_task:
-            with self.assertRaises(AccessError):
-                self.task_portal.with_user(self.user_portal).write({field: 'dummy'})
+        task = self.task_portal.with_user(self.user_portal)
+        task.check_access('read')
+        task.read(self.read_protected_fields_task)
 
         for field in self.other_fields_task:
-            with self.assertRaises(AccessError):
-                self.task_portal.with_user(self.user_portal).write({field: 'dummy'})
+            task.invalidate_recordset()
+            with self.assertRaises(AccessError, msg=f"Field {field} should be inaccessible"):
+                task.read([field])
+
+    def test_write_task_with_portal_user(self):
+        task = self.task_portal.with_user(self.user_portal)
+        task.check_access('write')
+
+        def dummy_value(field_name):
+            field = task._fields[field_name]
+            if field.is_text:
+                value = 'dummy'
+                if field.type == 'html':
+                    value = f'<p>{value}</p>'
+                return value
+            if field.relational and field.comodel_name != 'ir.attachment':
+                value = task.env[field.comodel_name].search([], limit=1).id
+                if field.type != 'many2one':
+                    value = [value]
+                return value
+            if field.name == 'id':
+                return 42
+            return task.default_get([field_name]).get(field_name, False)
+
+        for field_name in self.write_protected_fields_task:
+            field = task._fields[field_name]
+            if field.comodel_name == 'project.task':
+                other_task = self.env['project.task'].create({'name': 'Parent task', 'project_id': task.project_id.id})
+                value = other_task.id if field.type == 'many2one' else other_task.ids
+                task.write({field_name: value})
+                self.assertEqual(task[field_name], other_task)
+            else:
+                value = dummy_value(field_name)
+                task.write({field_name: value})
+                actual_value = task[field_name]
+                expected_value = field.convert_to_record(value, task)
+                self.assertEqual(actual_value, expected_value, f"Field {field} should be editable.")
+
+        for field in self.readonly_protected_fields_task:
+            with self.assertRaises(AccessError, msg=f"Field {field} should be readonly"):
+                task.write({field: dummy_value(field)})
+
+        for field in self.other_fields_task:
+            with self.assertRaises(AccessError, msg=f"Field {field} should be inaccessible"):
+                task.write({field: dummy_value(field)})
 
     def test_wizard_confirm(self):
         partner_portal_no_user = self.env['res.partner'].create({
@@ -127,6 +173,15 @@ class TestProjectSharingPortalAccess(TestProjectSharingCommon):
         self.assertTrue(mail_partner, 'A mail should have been sent to the non portal user')
         self.assertIn(f'href="http://localhost:{config["http_port"]}/web/signup', str(mail_partner.body), 'The message link should contain the url to register to the portal')
         self.assertIn('token=', str(mail_partner.body), 'The message link should contain a personalized token to register to the portal')
+
+    def test_followers_task_created_by_portal_user(self):
+        """Tests that the auto-subscription system properly add the followers of
+        the parent project when a portal user creates a task
+        """
+        self.project_portal.message_subscribe(self.user_projectmanager.partner_id.ids)
+        task = self.env["project.task"].with_user(self.user_portal).with_context(default_project_id=self.project_portal.id).create({'name': 'Task created by portal_user'})
+        self.assertIn(self.user_portal.partner_id, task.sudo().message_partner_ids)
+        self.assertIn(self.user_projectmanager.partner_id, task.sudo().message_partner_ids)
 
 
 class TestProjectSharingChatterAccess(TestProjectSharingCommon, HttpCase):

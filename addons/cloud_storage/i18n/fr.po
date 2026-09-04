@@ -1,24 +1,29 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* cloud_storage
-# 
-# Translators:
-# Manon Rondou, 2024
-# Wil Odoo, 2024
-# 
+# * cloud_storage
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# "Manon Rondou (ronm)" <ronm@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-29 00:00+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 13:51+0000\n"
+"Last-Translator: \"Manon Rondou (ronm)\" <ronm@odoo.com>\n"
+"Language-Team: French <https://translate.odoo.com/projects/odoo-19/"
+"cloud_storage/fr/>\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fr\n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
+
+#. module: cloud_storage
+#: model_terms:ir.ui.view,arch_db:cloud_storage.cloud_storage_config_settings_view_form
+msgid "<span>MB</span>"
+msgstr "<span>Mo</span>"
 
 #. module: cloud_storage
 #: model:ir.model,name:cloud_storage.model_ir_attachment
@@ -35,11 +40,6 @@ msgstr "Cloud Storage"
 #: model:ir.model.fields,field_description:cloud_storage.field_res_config_settings__cloud_storage_provider
 msgid "Cloud Storage Provider for new attachments"
 msgstr "Fournisseur Cloud Storage pour les nouvelles pièces jointes"
-
-#. module: cloud_storage
-#: model_terms:ir.ui.view,arch_db:cloud_storage.cloud_storage_config_settings_view_form
-msgid "Cloud Storage Settings"
-msgstr "Paramètres Cloud Storage"
 
 #. module: cloud_storage
 #. odoo-python
@@ -65,9 +65,42 @@ msgid "Config Settings"
 msgstr "Paramètres de config"
 
 #. module: cloud_storage
+#: model:ir.model.fields,field_description:cloud_storage.field_ir_attachment__display_name
+#: model:ir.model.fields,field_description:cloud_storage.field_ir_http__display_name
+#: model:ir.model.fields,field_description:cloud_storage.field_res_config_settings__display_name
+msgid "Display Name"
+msgstr "Nom d'affichage"
+
+#. module: cloud_storage
+#. odoo-python
+#: code:addons/cloud_storage/models/ir_attachment.py:0
+msgid ""
+"Failed to download attachment (%(id)s) from cloud: %(code)s - %(reason)s"
+msgstr ""
+"Échec du téléchargement de la pièce jointe (%(id)s) depuis le cloud : %(code)"
+"s - %(reason)s"
+
+#. module: cloud_storage
 #: model:ir.model,name:cloud_storage.model_ir_http
 msgid "HTTP Routing"
 msgstr "Routage HTTP"
+
+#. module: cloud_storage
+#: model:ir.model.fields,field_description:cloud_storage.field_ir_attachment__id
+#: model:ir.model.fields,field_description:cloud_storage.field_ir_http__id
+#: model:ir.model.fields,field_description:cloud_storage.field_res_config_settings__id
+msgid "ID"
+msgstr "ID"
+
+#. module: cloud_storage
+#: model_terms:ir.ui.view,arch_db:cloud_storage.cloud_storage_config_settings_view_form
+msgid "Minimum File Size"
+msgstr "Taille minimale de fichier"
+
+#. module: cloud_storage
+#: model:ir.model.fields,field_description:cloud_storage.field_res_config_settings__cloud_storage_min_file_size_mb
+msgid "Minimum File Size (MB)"
+msgstr "Taille minimale de fichier (Mo)"
 
 #. module: cloud_storage
 #: model:ir.model.fields,field_description:cloud_storage.field_res_config_settings__cloud_storage_min_file_size
@@ -76,8 +109,8 @@ msgstr "Taille minimale du fichier (bytes)"
 
 #. module: cloud_storage
 #: model_terms:ir.ui.view,arch_db:cloud_storage.cloud_storage_config_settings_view_form
-msgid "Minimum size(bytes) for attachments to be stored in the cloud storage"
-msgstr "Taille minimale (octets) des pièces jointes à stocker dans le cloud"
+msgid "Minimum size for attachments to be stored in the cloud storage"
+msgstr "Taille minimale des pièces jointes à stocker dans le cloud"
 
 #. module: cloud_storage
 #. odoo-python
@@ -110,16 +143,26 @@ msgid ""
 "You can either upload a file from your computer or copy/paste an internet "
 "link to your file."
 msgstr ""
-"Vous pouvez soit charger un fichier depuis votre ordinateur, soit "
-"copier/coller une adresse internet qui y renvoie."
+"Vous pouvez soit charger un fichier depuis votre ordinateur, soit copier/"
+"coller une adresse internet qui y renvoie."
 
 #. module: cloud_storage
 #: model:ir.model.fields,help:cloud_storage.field_res_config_settings__cloud_storage_min_file_size
 msgid ""
 "webclient can upload files larger than the minimum file size\n"
-"        (in bytes) as url attachments to the server and then upload the file to\n"
+"        (in bytes) as url attachments to the server and then upload the file "
+"to\n"
 "        the cloud storage."
 msgstr ""
-"webclient peut télécharger des fichiers d'une taille supérieure à la taille minimale\n"
-"        (en octets) sous forme de pièces jointes vers le serveur, puis télécharger le fichier vers\n"
+"webclient peut télécharger des fichiers d'une taille supérieure à la taille "
+"minimale\n"
+"        (en octets) sous forme de pièces jointes vers le serveur, puis "
+"télécharger le fichier vers\n"
 "        le stockage cloud."
+
+#~ msgid "Cloud Storage Settings"
+#~ msgstr "Paramètres Cloud Storage"
+
+#~ msgid ""
+#~ "Minimum size(bytes) for attachments to be stored in the cloud storage"
+#~ msgstr "Taille minimale (octets) des pièces jointes à stocker dans le cloud"

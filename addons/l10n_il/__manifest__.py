@@ -14,7 +14,7 @@ This module consists of:
  - Taxes and tax report
  - Multiple Fiscal positions
  """,
-    'website': 'https://www.odoo.com/documentation/master/applications/finance/fiscal_localizations.html',
+    'website': 'https://www.odoo.com/documentation/latest/applications/finance/fiscal_localizations.html',
     'depends': [
         'account',
     ],
@@ -26,5 +26,6 @@ This module consists of:
     'demo': [
         'demo/demo_company.xml',
     ],
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

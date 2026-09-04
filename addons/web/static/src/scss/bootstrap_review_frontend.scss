@@ -15,11 +15,6 @@
     @include text-emphasis-variant(".text-#{$color}", $value);
 }
 
-// TODO: To be removed in master (18.1)
-// Define `text-primary-emphasis` class here in order to take priority when in
-// conjunction with other text-[x] classes
-@include text-emphasis-variant(".text-primary-emphasis", $primary-text-emphasis);
-
 // Cards
 
 .card {
@@ -42,7 +37,7 @@
     // case, which is not what we want.
     --body-color: var(--card-color);
 }
-:where(.card:not([data-vxml])) .card-body {
+:where(.card:not([data-vxml])) .card-body:not(.card[data-vxml] .card-body) {
     // BS4 colored cards do not have a very popular design. This will reset them
     // to a BS3-like one: only the header and footer are colored and the body
     // will use the color of a default card background with a light opacity.
@@ -79,7 +74,7 @@ $o-btn-border-colors: () !default;
 }
 @each $color, $value in $theme-colors {
     $-bg-color: map-get($o-btn-bg-colors, $color) or $value;
-    $-border-color: map-get($o-btn-border-colors, $color) or $-bg-color;
+    $-border-color: increase-contrast(map-get($o-btn-border-colors, $color) or $-bg-color, $body-bg);
     .btn-outline-#{$color} {
         @include button-outline-variant($-border-color);
     }
@@ -141,9 +136,32 @@ $o-navbar-nav-pills-link-border-radius: $nav-pills-border-radius !default;
     left: 50%; // Avoid horizontal scrollbar in Chrome
 }
 
+// Pagination
 .pagination {
-    // Ensure circle for one digit numbers
     font-variant-numeric: tabular-nums;
+}
+
+// Ensure circle pagination
+.page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+    width: 2.5em;
+    aspect-ratio: 1 / 1;
+}
+
+// Ensure the readability of numbers when there are many (>3) and
+// they overflow the circle.
+.page-link.active, .active > .page-link {
+    text-shadow: 0 0 .1em var(--pagination-active-bg);
+}
+
+// Show the page content behind the offcanvas < sm, fallback at 400px above.
+.offcanvas {
+    @include media-breakpoint-down(sm) {
+        --Offcanvas-horizontal-width: calc(100vw - #{map-get($spacers, 5)});
+    }
 }
 
 // Modal
@@ -221,7 +239,14 @@ $o-navbar-nav-pills-link-border-radius: $nav-pills-border-radius !default;
     color: inherit;
 }
 .form-control.bg-light {
+    @include o-search-cancel-button(adjust-color-to-background($input-color, $light));
+
     color: adjust-color-to-background($input-color, $light);
+}
+
+// Default style inputs
+input[type="search"] {
+    @include o-search-cancel-button($input-color);
 }
 
 $-color-for-gray-200-bg: adjust-color-to-background($body-color, $gray-200);
@@ -274,9 +299,18 @@ $-color-for-gray-200-bg: adjust-color-to-background($body-color, $gray-200);
 }
 
 // Dropdown
-.dropdown .dropdown-menu {
+.dropdown-menu {
     .text-muted {
         color: adjust-color-to-background($text-muted, $dropdown-bg, mute-color($color-contrast-light), mute-color($color-contrast-dark)) !important;
+    }
+
+    // Since we define the $dropdown-link-active-bg variable, we need to
+    // redefine the .active state of the dropdown items to differentiate
+    // an active class from the active state. This allows a discreet effect for
+    // the active state while keeping an active navigation element prominent.
+    .dropdown-item.active {
+        --dropdown-link-active-bg: #{$component-active-bg};
+        --dropdown-link-active-color: #{$component-active-color};
     }
 }
 

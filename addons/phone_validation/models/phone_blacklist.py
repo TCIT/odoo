@@ -2,25 +2,26 @@
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
-from odoo.tools import _, SQL
+from odoo.tools import _
 
 
-class PhoneBlackList(models.Model):
+class PhoneBlacklist(models.Model):
     """ Blacklist of phone numbers. Used to avoid sending unwanted messages to people. """
     _name = 'phone.blacklist'
     _inherit = ['mail.thread']
     _description = 'Phone Blacklist'
     _rec_name = 'number'
 
-    number = fields.Char(string='Phone Number', required=True, tracking=True, help='Number should be E164 formatted')
+    number = fields.Char(string='Phone Number', required=True, tracking=True, search='_search_number', help='Number should be E164 formatted')
     active = fields.Boolean(default=True, tracking=True)
 
-    _sql_constraints = [
-        ('unique_number', 'unique (number)', 'Number already exists')
-    ]
+    _unique_number = models.Constraint(
+        'unique (number)',
+        'Number already exists',
+    )
 
     @api.model_create_multi
-    def create(self, values):
+    def create(self, vals_list):
         """ Create new (or activate existing) blacklisted numbers.
                 A. Note: Attempt to create a number that already exists, but is non-active, will result in its activation.
                 B. Note: If the number already exists and it's active, it will be added to returned set, (it won't be re-created)
@@ -29,7 +30,7 @@ class PhoneBlackList(models.Model):
         # Extract and sanitize numbers, ensuring uniques
         to_create = []
         done = set()
-        for value in values:
+        for value in vals_list:
             try:
                 sanitized_value = self.env.user._phone_format(number=value['number'], raise_exception=True)
             except UserError as err:
@@ -57,24 +58,22 @@ class PhoneBlackList(models.Model):
         numbers_to_id = {record.number: record.id for record in existing | created}
         return self.browse(numbers_to_id[number] for number in numbers_requested)
 
-    def write(self, values):
-        if 'number' in values:
+    def write(self, vals):
+        if 'number' in vals:
             try:
-                sanitized = self.env.user._phone_format(number=values['number'], raise_exception=True)
+                sanitized = self.env.user._phone_format(number=vals['number'], raise_exception=True)
             except UserError as err:
                 raise UserError(_("%(error)s Please correct the number and try again.", error=str(err))) from err
-            values['number'] = sanitized
-        return super(PhoneBlackList, self).write(values)
+            vals['number'] = sanitized
+        return super().write(vals)
 
-    def _condition_to_sql(self, alias: str, fname: str, operator: str, value, query) -> SQL:
-        if fname == 'number':
-            # sanitize the phone number
-            sanitize = self.env.user._phone_format
-            if isinstance(value, str):
-                value = sanitize(number=value) or value
-            elif isinstance(value, list) and all(isinstance(number, str) for number in value):
-                value = [sanitize(number=number) or number for number in value]
-        return super()._condition_to_sql(alias, fname, operator, value, query)
+    def _search_number(self, operator, value):
+        sanitize = self.env.user._phone_format
+        if operator in ('in', 'not in'):
+            value = [sanitize(number=number) or number for number in value]
+        else:
+            value = sanitize(number=value) or value
+        return [('number', operator, value)]
 
     def add(self, number, message=None):
         sanitized = self.env.user._phone_format(number=number)
@@ -96,7 +95,7 @@ class PhoneBlackList(models.Model):
         new = records - existing
         if new and message:
             for record in new:
-                record.with_context(mail_create_nosubscribe=True).message_post(
+                record.with_context(mail_post_autofollow_author_skip=True).message_post(
                     body=message,
                     subtype_xmlid='mail.mt_note',
                 )
@@ -120,7 +119,7 @@ class PhoneBlackList(models.Model):
             new_records = self.create([{'number': n, 'active': False} for n in todo])
             if message:
                 for record in new_records:
-                    record.with_context(mail_create_nosubscribe=True).message_post(
+                    record.with_context(mail_post_autofollow_author_skip=True).message_post(
                         body=message,
                         subtype_xmlid='mail.mt_note',
                     )

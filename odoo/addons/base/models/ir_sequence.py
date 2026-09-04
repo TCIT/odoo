@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from datetime import datetime, timedelta
 import logging
@@ -33,7 +32,12 @@ def _alter_sequence(cr, seq_name, number_increment=None, number_next=None):
     """ Alter a PostreSQL sequence. """
     if number_increment == 0:
         raise UserError(_("Step must not be zero."))
-    cr.execute("SELECT relname FROM pg_class WHERE relkind=%s AND relname=%s", ('S', seq_name))
+    cr.execute(
+        "SELECT relname FROM pg_class"
+        " WHERE relkind = %s AND relname = %s"
+        "   AND relnamespace = current_schema::regnamespace",
+        ('S', seq_name)
+    )
     if not cr.fetchone():
         # sequence is not created yet, we're inside create() so ignore it, will be set later
         return
@@ -54,8 +58,8 @@ def _select_nextval(cr, seq_name):
 def _update_nogap(self, number_increment):
     self.flush_recordset(['number_next'])
     number_next = self.number_next
-    self._cr.execute("SELECT number_next FROM %s WHERE id=%%s FOR UPDATE NOWAIT" % self._table, [self.id])
-    self._cr.execute("UPDATE %s SET number_next=number_next+%%s WHERE id=%%s " % self._table, (number_increment, self.id))
+    self.env.cr.execute("SELECT number_next FROM %s WHERE id=%%s FOR UPDATE NOWAIT" % self._table, [self.id])
+    self.env.cr.execute("UPDATE %s SET number_next=number_next+%%s WHERE id=%%s " % self._table, (number_increment, self.id))
     self.invalidate_recordset(['number_next'])
     return number_next
 
@@ -88,7 +92,7 @@ class IrSequence(models.Model):
     """
     _name = 'ir.sequence'
     _description = 'Sequence'
-    _order = 'name'
+    _order = 'name, id'
     _allow_sudo_commands = False
 
     def _get_number_next_actual(self):
@@ -155,47 +159,47 @@ class IrSequence(models.Model):
         seqs = super().create(vals_list)
         for seq in seqs:
             if seq.implementation == 'standard':
-                _create_sequence(self._cr, "ir_sequence_%03d" % seq.id, seq.number_increment or 1, seq.number_next or 1)
+                _create_sequence(self.env.cr, "ir_sequence_%03d" % seq.id, seq.number_increment or 1, seq.number_next or 1)
         return seqs
 
     def unlink(self):
-        _drop_sequences(self._cr, ["ir_sequence_%03d" % x.id for x in self])
+        _drop_sequences(self.env.cr, ["ir_sequence_%03d" % x.id for x in self])
         return super(IrSequence, self).unlink()
 
-    def write(self, values):
-        new_implementation = values.get('implementation')
+    def write(self, vals):
+        new_implementation = vals.get('implementation')
         for seq in self:
             # 4 cases: we test the previous impl. against the new one.
-            i = values.get('number_increment', seq.number_increment)
-            n = values.get('number_next', seq.number_next)
+            i = vals.get('number_increment', seq.number_increment)
+            n = vals.get('number_next', seq.number_next)
             if seq.implementation == 'standard':
                 if new_implementation in ('standard', None):
                     # Implementation has NOT changed.
                     # Only change sequence if really requested.
-                    if values.get('number_next'):
-                        _alter_sequence(self._cr, "ir_sequence_%03d" % seq.id, number_next=n)
+                    if vals.get('number_next'):
+                        _alter_sequence(self.env.cr, "ir_sequence_%03d" % seq.id, number_next=n)
                     if seq.number_increment != i:
-                        _alter_sequence(self._cr, "ir_sequence_%03d" % seq.id, number_increment=i)
+                        _alter_sequence(self.env.cr, "ir_sequence_%03d" % seq.id, number_increment=i)
                         seq.date_range_ids._alter_sequence(number_increment=i)
                 else:
-                    _drop_sequences(self._cr, ["ir_sequence_%03d" % seq.id])
+                    _drop_sequences(self.env.cr, ["ir_sequence_%03d" % seq.id])
                     for sub_seq in seq.date_range_ids:
-                        _drop_sequences(self._cr, ["ir_sequence_%03d_%03d" % (seq.id, sub_seq.id)])
+                        _drop_sequences(self.env.cr, ["ir_sequence_%03d_%03d" % (seq.id, sub_seq.id)])
             else:
                 if new_implementation in ('no_gap', None):
                     pass
                 else:
-                    _create_sequence(self._cr, "ir_sequence_%03d" % seq.id, i, n)
+                    _create_sequence(self.env.cr, "ir_sequence_%03d" % seq.id, i, n)
                     for sub_seq in seq.date_range_ids:
-                        _create_sequence(self._cr, "ir_sequence_%03d_%03d" % (seq.id, sub_seq.id), i, n)
-        res = super(IrSequence, self).write(values)
+                        _create_sequence(self.env.cr, "ir_sequence_%03d_%03d" % (seq.id, sub_seq.id), i, n)
+        res = super().write(vals)
         # DLE P179
-        self.flush_model(values.keys())
+        self.flush_model(vals.keys())
         return res
 
     def _next_do(self):
         if self.implementation == 'standard':
-            number_next = _select_nextval(self._cr, 'ir_sequence_%03d' % self.id)
+            number_next = _select_nextval(self.env.cr, 'ir_sequence_%03d' % self.id)
         else:
             number_next = _update_nogap(self, self.number_increment)
         return self.get_next_char(number_next)
@@ -205,15 +209,16 @@ class IrSequence(models.Model):
             return (s % d) if s else ''
 
         def _interpolation_dict():
-            now = range_date = effective_date = datetime.now(pytz.timezone(self._context.get('tz') or 'UTC'))
-            if date or self._context.get('ir_sequence_date'):
-                effective_date = fields.Datetime.from_string(date or self._context.get('ir_sequence_date'))
-            if date_range or self._context.get('ir_sequence_date_range'):
-                range_date = fields.Datetime.from_string(date_range or self._context.get('ir_sequence_date_range'))
+            now = range_date = effective_date = datetime.now(self.env.tz)
+            if date or self.env.context.get('ir_sequence_date'):
+                effective_date = fields.Datetime.from_string(date or self.env.context.get('ir_sequence_date'))
+            if date_range or self.env.context.get('ir_sequence_date_range'):
+                range_date = fields.Datetime.from_string(date_range or self.env.context.get('ir_sequence_date_range'))
 
             sequences = {
                 'year': '%Y', 'month': '%m', 'day': '%d', 'y': '%y', 'doy': '%j', 'woy': '%W',
-                'weekday': '%w', 'h24': '%H', 'h12': '%I', 'min': '%M', 'sec': '%S'
+                'weekday': '%w', 'h24': '%H', 'h12': '%I', 'min': '%M', 'sec': '%S',
+                'isoyear': '%G', 'isoy': '%g', 'isoweek': '%V',
             }
             res = {}
             for key, format in sequences.items():
@@ -228,7 +233,7 @@ class IrSequence(models.Model):
         try:
             interpolated_prefix = _interpolate(self.prefix, d)
             interpolated_suffix = _interpolate(self.suffix, d)
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, KeyError):
             raise UserError(_('Invalid prefix or suffix for sequence “%s”', self.name))
         return interpolated_prefix, interpolated_suffix
 
@@ -258,11 +263,12 @@ class IrSequence(models.Model):
         if not self.use_date_range:
             return self._next_do()
         # date mode
-        dt = sequence_date or self._context.get('ir_sequence_date', fields.Date.today())
+        dt = sequence_date or self.env.context.get('ir_sequence_date', fields.Datetime.now())
         seq_date = self.env['ir.sequence.date_range'].search([('sequence_id', '=', self.id), ('date_from', '<=', dt), ('date_to', '>=', dt)], limit=1)
         if not seq_date:
             seq_date = self._create_date_range_seq(dt)
-        return seq_date.with_context(ir_sequence_date_range=seq_date.date_from)._next()
+        ir_sequence_date = dt.replace(tzinfo=None) if isinstance(dt, datetime) else dt
+        return seq_date.with_context(ir_sequence_date_range=seq_date.date_from, ir_sequence_date=ir_sequence_date)._next()
 
     def next_by_id(self, sequence_date=None):
         """ Draw an interpolated string using the specified sequence."""
@@ -285,36 +291,17 @@ class IrSequence(models.Model):
         seq_id = seq_ids[0]
         return seq_id._next(sequence_date=sequence_date)
 
-    @api.model
-    def get_id(self, sequence_code_or_id, code_or_id='id'):
-        """ Draw an interpolated string using the specified sequence.
 
-        The sequence to use is specified by the ``sequence_code_or_id``
-        argument, which can be a code or an id (as controlled by the
-        ``code_or_id`` argument. This method is deprecated.
-        """
-        _logger.warning("ir_sequence.get() and ir_sequence.get_id() are deprecated. "
-                        "Please use ir_sequence.next_by_code() or ir_sequence.next_by_id().")
-        if code_or_id == 'id':
-            return self.browse(sequence_code_or_id).next_by_id()
-        else:
-            return self.next_by_code(sequence_code_or_id)
-
-    @api.model
-    def get(self, code):
-        """ Draw an interpolated string using the specified sequence.
-
-        The sequence to use is specified by its code. This method is
-        deprecated.
-        """
-        return self.get_id(code, 'code')
-
-
-class IrSequenceDateRange(models.Model):
+class IrSequenceDate_Range(models.Model):
     _name = 'ir.sequence.date_range'
     _description = 'Sequence Date Range'
     _rec_name = "sequence_id"
     _allow_sudo_commands = False
+
+    _unique_range_per_sequence = models.Constraint(
+        'UNIQUE(sequence_id, date_from, date_to)',
+        "You cannot create two date ranges for the same sequence with the same date range.",
+    )
 
     def _get_number_next_actual(self):
         '''Return number from ir_sequence row when no_gap implementation,
@@ -332,7 +319,7 @@ class IrSequenceDateRange(models.Model):
 
     @api.model
     def default_get(self, fields):
-        result = super(IrSequenceDateRange, self).default_get(fields)
+        result = super().default_get(fields)
         if 'number_next_actual' in fields:
             result['number_next_actual'] = 1
         return result
@@ -348,14 +335,14 @@ class IrSequenceDateRange(models.Model):
 
     def _next(self):
         if self.sequence_id.implementation == 'standard':
-            number_next = _select_nextval(self._cr, 'ir_sequence_%03d_%03d' % (self.sequence_id.id, self.id))
+            number_next = _select_nextval(self.env.cr, 'ir_sequence_%03d_%03d' % (self.sequence_id.id, self.id))
         else:
             number_next = _update_nogap(self, self.sequence_id.number_increment)
         return self.sequence_id.get_next_char(number_next)
 
     def _alter_sequence(self, number_increment=None, number_next=None):
         for seq in self:
-            _alter_sequence(self._cr, "ir_sequence_%03d_%03d" % (seq.sequence_id.id, seq.id), number_increment=number_increment, number_next=number_next)
+            _alter_sequence(self.env.cr, "ir_sequence_%03d_%03d" % (seq.sequence_id.id, seq.id), number_increment=number_increment, number_next=number_next)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -365,17 +352,17 @@ class IrSequenceDateRange(models.Model):
         for seq in seqs:
             main_seq = seq.sequence_id
             if main_seq.implementation == 'standard':
-                _create_sequence(self._cr, "ir_sequence_%03d_%03d" % (main_seq.id, seq.id), main_seq.number_increment, seq.number_next_actual or 1)
+                _create_sequence(self.env.cr, "ir_sequence_%03d_%03d" % (main_seq.id, seq.id), main_seq.number_increment, seq.number_next_actual or 1)
         return seqs
 
     def unlink(self):
-        _drop_sequences(self._cr, ["ir_sequence_%03d_%03d" % (x.sequence_id.id, x.id) for x in self])
-        return super(IrSequenceDateRange, self).unlink()
+        _drop_sequences(self.env.cr, ["ir_sequence_%03d_%03d" % (x.sequence_id.id, x.id) for x in self])
+        return super().unlink()
 
-    def write(self, values):
-        if values.get('number_next'):
+    def write(self, vals):
+        if vals.get('number_next'):
             seq_to_alter = self.filtered(lambda seq: seq.sequence_id.implementation == 'standard')
-            seq_to_alter._alter_sequence(number_next=values.get('number_next'))
+            seq_to_alter._alter_sequence(number_next=vals.get('number_next'))
         # DLE P179: `test_in_invoice_line_onchange_sequence_number_1`
         # _update_nogap do a select to get the next sequence number_next
         # When changing (writing) the number next of a sequence, the number next must be flushed before doing the select.
@@ -384,6 +371,6 @@ class IrSequenceDateRange(models.Model):
         #  - Changing the number next of a sequence is really really rare,
         #  - But selecting the number next happens a lot,
         # Therefore, if I chose to put the flush just above the select, it would check the flush most of the time for no reason.
-        res = super(IrSequenceDateRange, self).write(values)
-        self.flush_model(values.keys())
+        res = super().write(vals)
+        self.flush_model(vals.keys())
         return res

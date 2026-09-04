@@ -8,7 +8,7 @@
                 <form string="Email message" duplicate="0">
                     <header>
                         <field name="message_type" invisible="1"/>
-                        <button name="send" string="Send Now" type="object" class="oe_highlight" invisible="state != 'outgoing' or message_type == 'user_notification'"/>
+                        <button name="action_send_and_close" string="Send &amp; Close" type="object" class="oe_highlight" invisible="state != 'outgoing' or message_type == 'user_notification'"/>
                         <button name="mark_outgoing" string="Retry" type="object" invisible="state not in ('exception', 'cancel')"/>
                         <button name="cancel" string="Cancel" type="object" invisible="state != 'outgoing'"/>
                         <field name="state" widget="statusbar" statusbar_visible="outgoing,sent,received,exception,cancel"/>
@@ -47,7 +47,6 @@
                         <notebook>
                             <page string="Body" name="body">
                                 <field name="body_content"/>
-                                <field name="body_html" invisible="1"/><!--to be removed-->
                             </page>
                             <page string="Advanced" name="advanced" groups="base.group_no_one">
                                 <group>
@@ -132,13 +131,13 @@
                             domain="[('message_type','=','comment')]"/>
                     <filter name="filter_type_notification" string="Notification"
                             domain="[('message_type','=','notification')]"/>
-                    <group expand="0" string="Extended Filters...">
+                    <group>
                         <field name="author_id"/>
                         <field name="recipient_ids"/>
                         <field name="model"/>
                         <field name="res_id"/>
                     </group>
-                    <group expand="0" string="Group By">
+                    <group>
                         <filter string="Status" name="status" domain="[]" context="{'group_by':'state'}"/>
                         <filter string="Author" name="author" context="{'group_by':'author_id'}"/>
                         <filter string="Thread" name="thread" domain="[]" context="{'group_by':'message_id'}"/>

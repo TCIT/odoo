@@ -3,7 +3,7 @@
 {
     'name': 'Partners Geolocation',
     'version': '2.1',
-    'category': 'Hidden/Tools',
+    'category': 'Sales/Sales',
     'description': """
 Partners Geolocation
 ========================
@@ -17,5 +17,6 @@ Partners Geolocation
         'data/data.xml',
     ],
     'installable': True,
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

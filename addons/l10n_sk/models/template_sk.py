@@ -13,10 +13,6 @@ class AccountChartTemplate(models.AbstractModel):
             'use_storno_accounting': True,
             'property_account_receivable_id': 'chart_sk_311000',
             'property_account_payable_id': 'chart_sk_321000',
-            'property_account_expense_categ_id': 'chart_sk_504000',
-            'property_account_income_categ_id': 'chart_sk_604000',
-            'property_stock_account_input_categ_id': 'chart_sk_131000',
-            'property_stock_account_output_categ_id': 'chart_sk_504000',
             'property_stock_valuation_account_id': 'chart_sk_132000',
         }
 
@@ -37,5 +33,18 @@ class AccountChartTemplate(models.AbstractModel):
                 'default_cash_difference_expense_account_id': 'chart_sk_568000',
                 'account_sale_tax_id': 'vy_tuz_23',
                 'account_purchase_tax_id': 'vs_tuz_23',
+                'expense_account_id': 'chart_sk_504000',
+                'income_account_id': 'chart_sk_604000',
+                'account_stock_journal_id': 'inventory_valuation',
+                'account_stock_valuation_id': 'chart_sk_112000',
+            },
+        }
+
+    @template('sk', 'account.account')
+    def _get_sk_account_account(self):
+        return {
+            'chart_sk_112000': {
+                'account_stock_expense_id': 'chart_sk_568000',
+                'account_stock_variation_id': 'chart_sk_501000',
             },
         }

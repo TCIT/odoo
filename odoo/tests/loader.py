@@ -3,7 +3,6 @@ import importlib.util
 import inspect
 import logging
 import sys
-import threading
 from pathlib import Path
 from unittest import case
 
@@ -105,18 +104,16 @@ def make_suite(module_names, position='at_install'):
         for t in get_module_test_cases(m)
         if position_tag.check(t) and config_tags.check(t)
     )
-    return OdooSuite(sorted(tests, key=lambda t: t.test_sequence))
+    return OdooSuite(sorted(tests, key=lambda t: getattr(t, 'test_sequence', 0)))
 
 
-def run_suite(suite):
+def run_suite(suite, global_report=None):
     # avoid dependency hell
     from ..modules import module
     module.current_test = True
-    threading.current_thread().testing = True
 
-    results = OdooTestResult()
+    results = OdooTestResult(global_report=global_report)
     suite(results)
 
-    threading.current_thread().testing = False
     module.current_test = False
     return results

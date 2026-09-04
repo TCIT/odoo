@@ -27,8 +27,8 @@ partnerCompareRegistry.add(
 partnerCompareRegistry.add(
     "mail.internal-users",
     (p1, p2) => {
-        const isAInternalUser = p1.isInternalUser;
-        const isBInternalUser = p2.isInternalUser;
+        const isAInternalUser = p1.main_user_id?.share === false;
+        const isBInternalUser = p2.main_user_id?.share === false;
         if (isAInternalUser && !isBInternalUser) {
             return -1;
         }
@@ -47,8 +47,8 @@ partnerCompareRegistry.add(
             if (thread.selfFollower) {
                 followerList.push(thread.selfFollower);
             }
-            const isFollower1 = followerList.some((follower) => p1.eq(follower.partner));
-            const isFollower2 = followerList.some((follower) => p2.eq(follower.partner));
+            const isFollower1 = followerList.some((follower) => p1.eq(follower.partner_id));
+            const isFollower2 = followerList.some((follower) => p2.eq(follower.partner_id));
             if (isFollower1 && !isFollower2) {
                 return -1;
             }
@@ -57,7 +57,7 @@ partnerCompareRegistry.add(
             }
         }
     },
-    { sequence: 45 }
+    { sequence: 25 }
 );
 
 partnerCompareRegistry.add(
@@ -86,10 +86,10 @@ partnerCompareRegistry.add(
     (p1, p2, { searchTerm }) => {
         const cleanedEmail1 = cleanTerm(p1.email);
         const cleanedEmail2 = cleanTerm(p2.email);
-        if (cleanedEmail1.startsWith(searchTerm) && !cleanedEmail1.startsWith(searchTerm)) {
+        if (cleanedEmail1.startsWith(searchTerm) && !cleanedEmail2.startsWith(searchTerm)) {
             return -1;
         }
-        if (!cleanedEmail2.startsWith(searchTerm) && cleanedEmail2.startsWith(searchTerm)) {
+        if (!cleanedEmail1.startsWith(searchTerm) && cleanedEmail2.startsWith(searchTerm)) {
             return 1;
         }
         if (cleanedEmail1 < cleanedEmail2) {
@@ -102,10 +102,4 @@ partnerCompareRegistry.add(
     { sequence: 55 }
 );
 
-partnerCompareRegistry.add(
-    "mail.id",
-    (p1, p2) => {
-        return p1.id - p2.id;
-    },
-    { sequence: 75 }
-);
+partnerCompareRegistry.add("mail.id", (p1, p2) => p1.id - p2.id, { sequence: 75 });

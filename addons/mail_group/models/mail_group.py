@@ -14,7 +14,7 @@ from werkzeug import urls
 from odoo import _, api, fields, models, tools
 from odoo.addons.mail.tools.alias_error import AliasError
 from odoo.exceptions import ValidationError, UserError
-from odoo.osv import expression
+from odoo.fields import Domain
 from odoo.tools import hmac
 from odoo.tools.mail import email_normalize, generate_tracking_message_id, append_content_to_html
 
@@ -35,7 +35,7 @@ class MailGroup(models.Model):
     _description = 'Mail Group'
     # TDE CHECK: use blaclist mixin
     _inherit = ['mail.alias.mixin']
-    _order = 'create_date DESC, id DESC'
+    _order = 'is_closed ASC, create_date DESC, id DESC'
 
     @api.model
     def default_get(self, fields):
@@ -48,6 +48,7 @@ class MailGroup(models.Model):
     name = fields.Char('Name', required=True, translate=True)
     description = fields.Text('Description')
     image_128 = fields.Image('Image', max_width=128, max_height=128)
+    is_closed = fields.Boolean('Is Closed', help='Closed groups might still be accessed, but emails sent to it will bounce', copy=False)
     # Messages
     mail_group_message_ids = fields.One2many('mail.group.message', 'mail_group_id', string='Pending Messages')
     mail_group_message_last_month_count = fields.Integer('Messages Per Month', compute='_compute_mail_group_message_last_month_count')
@@ -60,17 +61,17 @@ class MailGroup(models.Model):
     member_count = fields.Integer('Members Count', compute='_compute_member_count')
     # Moderation
     is_moderator = fields.Boolean(string='Moderator', help='Current user is a moderator of the group', compute='_compute_is_moderator')
-    moderation = fields.Boolean(string='Moderate this group')
+    moderation = fields.Boolean(string='Moderate')
     moderation_rule_count = fields.Integer(string='Moderated emails count', compute='_compute_moderation_rule_count')
     moderation_rule_ids = fields.One2many('mail.group.moderation', 'mail_group_id', string='Moderated Emails')
     moderator_ids = fields.Many2many('res.users', 'mail_group_moderator_rel', string='Moderators',
-                                     domain=lambda self: [('groups_id', 'in', self.env.ref('base.group_user').id)])
+                                     domain=lambda self: [('all_group_ids', 'in', self.env.ref('base.group_user').id)])
     moderation_notify = fields.Boolean(
         string='Automatic notification',
         help='People receive an automatic notification about their message being waiting for moderation.')
     moderation_notify_msg = fields.Html(string='Notification message')
     moderation_guidelines = fields.Boolean(
-        string='Send guidelines to new subscribers',
+        string='Send guidelines to new members',
         help='Newcomers on this moderated group will automatically receive the guidelines.')
     moderation_guidelines_msg = fields.Html(string='Guidelines')
     # ACLs
@@ -235,6 +236,14 @@ class MailGroup(models.Model):
         values['alias_defaults'] = literal_eval(self.alias_defaults or '{}')
         return values
 
+    def action_close(self):
+        self.ensure_one()
+        self.is_closed = True
+
+    def action_open(self):
+        self.ensure_one()
+        self.is_closed = False
+
     # ------------------------------------------------------------
     # MAILING
     # ------------------------------------------------------------
@@ -246,7 +255,7 @@ class MailGroup(models.Model):
 
         # Error Case: Selected group of users, but no user found for that email
         email = email_normalize(message_dict.get('email_from', ''))
-        email_has_access = self.search_count([('id', '=', self.id), ('access_group_id.users.email_normalized', '=', email)])
+        email_has_access = self.search_count([('id', '=', self.id), ('access_group_id.user_ids.email_normalized', '=', email)])
         if self.access_mode == 'groups' and not email_has_access:
             return AliasError('error_mail_group_members_restricted',
                                   _('Only selected groups of users can send email to the mailing list.'))
@@ -268,7 +277,6 @@ class MailGroup(models.Model):
         """Add the method to make the mail gateway flow work with this model."""
         return
 
-    @api.returns('mail.message', lambda value: value.id)
     def message_post(self, body='', subject=None, email_from=None, author_id=None, **kwargs):
         """ Custom posting process. This model does not inherit from ``mail.thread``
         but uses the mail gateway so few methods should be defined.
@@ -280,13 +288,13 @@ class MailGroup(models.Model):
             format used in mail groups;
           * apply moderation rules;
 
-        :return message: newly-created mail.message
+        :returns: newly-created mail.message
         """
         self.ensure_one()
         # First create the <mail.message>
         Mailthread = self.env['mail.thread']
         values = dict((key, val) for key, val in kwargs.items() if key in self.env['mail.message']._fields)
-        author_id, email_from = Mailthread._message_compute_author(author_id, email_from, raise_on_email=True)
+        author_id, email_from = Mailthread._message_compute_author(author_id, email_from)
 
         values.update({
             'author_id': author_id,
@@ -369,6 +377,9 @@ class MailGroup(models.Model):
 
         if not self.moderation_guidelines_msg:
             raise UserError(_('The guidelines description is empty.'))
+
+        if self.is_closed:
+            raise UserError(_("You can not send guidelines for a closed group."))
 
         template = self.env.ref('mail_group.mail_template_guidelines', raise_if_not_found=False)
         if not template:
@@ -507,7 +518,6 @@ class MailGroup(models.Model):
                     body=body,
                     email_from=email_from,
                     model='mail.group',
-                    notify_author=True,
                     res_id=group.id,
                 )
 
@@ -523,12 +533,30 @@ class MailGroup(models.Model):
 
         return lxml.etree.tostring(tree, encoding='utf-8').decode()
 
+    @api.model
+    def _routing_check_route(self, message, message_dict, route, raise_exception=True):
+        """Bounce the incoming emails if the group is closed."""
+        if route[0] == 'mail.group' and self.browse(route[1]).is_closed:
+            body = self.env["ir.qweb"]._render(
+                "mail_group.email_template_mail_group_closed"
+            )
+            self.env['mail.thread']._routing_create_bounce_email(
+                message_dict["from"],
+                body,
+                message,
+                references=message_dict.get("message_id", ""),
+            )
+            return ()
+        return self.env['mail.thread']._routing_check_route(message, message_dict, route, raise_exception)
+
     # ------------------------------------------------------------
     # MEMBERSHIP
     # ------------------------------------------------------------
 
     def action_join(self):
         self.check_access('read')
+        if self.is_closed:
+            raise UserError(_("You can not join a closed group."))
         partner = self.env.user.partner_id
         self.sudo()._join_group(partner.email, partner.id)
 
@@ -645,7 +673,7 @@ class MailGroup(models.Model):
             })
         )
         base_url = self.get_base_url()
-        confirm_action_url = urls.url_join(base_url, confirm_action_url)
+        confirm_action_url = tools.urls.urljoin(base_url, confirm_action_url)
         return confirm_action_url
 
     def _generate_action_token(self, email, action):
@@ -679,9 +707,9 @@ class MailGroup(models.Model):
             'email': email_to,
             'token': self._generate_email_access_token(email_to),
         })
-        return urls.url_join(
+        return tools.urls.urljoin(
             self.get_base_url(),
-            f'group/{self.id}/unsubscribe_oneclick?{params}'
+            f'group/{self.id}/unsubscribe_oneclick?{params}',
         )
 
     def _find_member(self, email, partner_id=None):
@@ -714,18 +742,12 @@ class MailGroup(models.Model):
             # empty email should match nobody
             return {}
 
-        domain = [('email_normalized', '=', email_normalize(email))]
+        domain = Domain('email_normalized', '=', email_normalize(email))
         if partner_id:
-            domain = expression.OR([
-                expression.AND([
-                    [('partner_id', '=', False)],
-                    domain,
-                ]),
-                [('partner_id', '=', partner_id)],
-            ])
+            domain = (Domain('partner_id', '=', False) & domain) | Domain('partner_id', '=', partner_id)
             order = 'partner_id DESC'
 
-        domain = expression.AND([domain, [('mail_group_id', 'in', self.ids)]])
+        domain &= Domain('mail_group_id', 'in', self.ids)
         members_data = self.env['mail.group.member'].sudo().search(domain, order=order)
         return {
             member.mail_group_id.id: member

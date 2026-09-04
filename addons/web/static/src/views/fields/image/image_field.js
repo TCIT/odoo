@@ -1,4 +1,10 @@
-import { isMobileOS } from "@web/core/browser/feature_detection";
+import {
+    isAndroid,
+    isAndroidApp,
+    isBrowserFirefox,
+    isBrowserSafari,
+    isMobileOS,
+} from "@web/core/browser/feature_detection";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -7,8 +13,7 @@ import { isBinarySize } from "@web/core/utils/binary";
 import { FileUploader } from "../file_handler";
 import { standardFieldProps } from "../standard_field_props";
 
-import { Component, useState, onWillRender } from "@odoo/owl";
-const { DateTime } = luxon;
+import { Component, useState } from "@odoo/owl";
 
 export const fileTypeMagicWordMap = {
     "/": "jpg",
@@ -18,6 +23,9 @@ export const fileTypeMagicWordMap = {
     U: "webp",
 };
 const placeholder = "/web/static/img/placeholder.png";
+// invalid mimetype used to force the browsers based on Chromium to suggest the "Camera"
+// option, see the acceptedFileExtensions getter
+const cameraHintMimetype = "dummy/allowAndroidCamera";
 
 export class ImageField extends Component {
     static template = "web.ImageField";
@@ -58,24 +66,34 @@ export class ImageField extends Component {
                 "ImageField: previewImage must be provided when set on a many2one field"
             );
         }
-        if (this.props.record.fields[this.props.name].related) {
-            this.lastUpdate = DateTime.now();
-            let key = this.props.value;
-            onWillRender(() => {
-                const nextKey = this.props.value;
+        const field = this.props.record.fields[this.props.name];
+        this.isImageOnAnotherRecord = field.related?.includes(".") || this.fieldType === "many2one";
+    }
 
-                if (key !== nextKey) {
-                    this.lastUpdate = DateTime.now();
-                }
-
-                key = nextKey;
-            });
+    /**
+     * Since Android 14, Chromium sends a file input accepting only images straight to the photo
+     * picker, which has no "Camera" entry, so the user cannot take a photo anymore. Appending a
+     * mimetype which is not an image is enough to get the generic chooser, and its camera, back.
+     *
+     * The workaround is limited to the browsers needing it: it is an Android issue, the native app
+     * builds its own file chooser out of the accept attribute, and Firefox and Safari are not
+     * based on Chromium.
+     *
+     * @returns {string} the accepted file extensions of the file uploader
+     */
+    get acceptedFileExtensions() {
+        const acceptedFileExtensions = this.props.acceptedFileExtensions;
+        if (!isAndroid() || isAndroidApp() || isBrowserFirefox() || isBrowserSafari()) {
+            return acceptedFileExtensions;
         }
+        return acceptedFileExtensions
+            ? `${acceptedFileExtensions},${cameraHintMimetype}`
+            : cameraHintMimetype;
     }
 
     get imgAlt() {
         if (this.fieldType === "many2one" && this.props.record.data[this.props.name]) {
-            return this.props.record.data[this.props.name][1];
+            return this.props.record.data[this.props.name].display_name;
         }
         return this.props.alt;
     }
@@ -89,8 +107,8 @@ export class ImageField extends Component {
     }
 
     get rawCacheKey() {
-        if (this.props.record.fields[this.props.name].related) {
-            return this.lastUpdate;
+        if (this.isImageOnAnotherRecord) {
+            return null;
         }
         return this.props.record.data.write_date;
     }
@@ -132,7 +150,7 @@ export class ImageField extends Component {
         if (this.fieldType === "many2one") {
             this.lastURL = imageUrl(
                 this.props.record.fields[this.props.name].relation,
-                this.props.record.data[this.props.name][0],
+                this.props.record.data[this.props.name].id,
                 imageFieldName,
                 { unique: this.rawCacheKey }
             );
@@ -170,7 +188,7 @@ export class ImageField extends Component {
             const ctx = canvas.getContext("2d");
             ctx.drawImage(image, 0, 0);
 
-            info.data = canvas.toDataURL("image/webp", 0.75).split(",")[1];
+            info.data = canvas.toDataURL("image/webp").split(",")[1];
             info.type = "image/webp";
             info.name = info.name.replace(/\.[^/.]+$/, ".webp");
         }
@@ -180,7 +198,7 @@ export class ImageField extends Component {
             image.src = `data:image/webp;base64,${info.data}`;
             await new Promise((resolve) => image.addEventListener("load", resolve));
             const originalSize = Math.max(image.width, image.height);
-            const smallerSizes = [1024, 512, 256, 128].filter((size) => size < originalSize);
+            const smallerSizes = [1920, 1024, 512, 256, 128].filter((size) => size < originalSize);
             let referenceId = undefined;
             for (const size of [originalSize, ...smallerSizes]) {
                 const ratio = size / originalSize;
@@ -188,8 +206,10 @@ export class ImageField extends Component {
                 canvas.width = image.width * ratio;
                 canvas.height = image.height * ratio;
                 const ctx = canvas.getContext("2d");
-                ctx.fillStyle = "rgb(255, 255, 255)";
+                ctx.fillStyle = "transparent";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = "high";
                 ctx.drawImage(
                     image,
                     0,
@@ -209,7 +229,7 @@ export class ImageField extends Component {
                             datas:
                                 size === originalSize
                                     ? info.data
-                                    : canvas.toDataURL("image/webp", 0.75).split(",")[1],
+                                    : canvas.toDataURL("image/webp").split(",")[1],
                             res_id: referenceId,
                             res_model: "ir.attachment",
                             mimetype: "image/webp",
@@ -217,12 +237,13 @@ export class ImageField extends Component {
                     ],
                 ]);
                 referenceId = referenceId || resizedId; // Keep track of original.
+                // Converted to JPEG for use in PDF files, alpha values will default to white
                 await this.orm.call("ir.attachment", "create_unique", [
                     [
                         {
                             name: info.name.replace(/\.webp$/, ".jpg"),
                             description: "format: jpeg",
-                            datas: canvas.toDataURL("image/jpeg", 0.75).split(",")[1],
+                            datas: canvas.toDataURL("image/jpeg").split(",")[1],
                             res_id: resizedId,
                             res_model: "ir.attachment",
                             mimetype: "image/jpeg",
@@ -304,8 +325,8 @@ export const imageField = {
         zoomDelay: options.zoom_delay,
         previewImage: options.preview_image,
         acceptedFileExtensions: options.accepted_file_extensions,
-        width: options.size && Boolean(options.size[0]) ? options.size[0] : attrs.width,
-        height: options.size && Boolean(options.size[1]) ? options.size[1] : attrs.height,
+        width: options.size && Boolean(options.size[0]) ? options.size[0] : undefined,
+        height: options.size && Boolean(options.size[1]) ? options.size[1] : undefined,
         reload: "reload" in options ? Boolean(options.reload) : true,
     }),
 };

@@ -5,7 +5,7 @@ from odoo import fields, models, _
 from odoo.exceptions import AccessError
 
 
-class Digest(models.Model):
+class DigestDigest(models.Model):
     _inherit = 'digest.digest'
 
     kpi_project_task_opened = fields.Boolean('Open Tasks')
@@ -22,6 +22,6 @@ class Digest(models.Model):
         )
 
     def _compute_kpis_actions(self, company, user):
-        res = super(Digest, self)._compute_kpis_actions(company, user)
+        res = super()._compute_kpis_actions(company, user)
         res['kpi_project_task_opened'] = 'project.open_view_project_all?menu_id=%s' % self.env.ref('project.menu_main_pm').id
         return res

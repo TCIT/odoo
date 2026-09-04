@@ -2,20 +2,21 @@ import { App, EventBus } from "@odoo/owl";
 import { SERVICES_METADATA } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { getTemplate } from "@web/core/templates";
-import { _t } from "@web/core/l10n/translation";
+import { appTranslateFn } from "@web/core/l10n/translation";
 import { session } from "@web/session";
+import { isMacOS } from "@web/core/browser/feature_detection";
 
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
 
 /**
- * @typedef {Object} OdooEnv
- * @property {import("services").Services} services
- * @property {EventBus} bus
- * @property {string} debug
- * @property {(str: string) => string} _t
- * @property {boolean} [isSmall]
+ * @typedef {{
+ *  bus: EventBus;
+ *  debug: string;
+ *  services: import("services").Services;
+ *  readonly isSmall: boolean;
+ * }} OdooEnv
  */
 
 // -----------------------------------------------------------------------------
@@ -28,8 +29,13 @@ import { session } from "@web/session";
  * @returns {OdooEnv}
  */
 export function makeEnv() {
+    const bus = new EventBus();
+    const prom = new Promise((resolve) => {
+        bus.addEventListener("SERVICES-LOADED", resolve, { once: true });
+    });
     return {
-        bus: new EventBus(),
+        bus,
+        isReady: prom,
         services: {},
         debug: odoo.debug,
         get isSmall() {
@@ -132,6 +138,7 @@ async function _startServices(env, toStart) {
         startServicesPromise = null;
     });
     await startServicesPromise;
+    env.bus.trigger("SERVICES-LOADED");
     if (toStart.size) {
         const missingDeps = new Set();
         for (const service of toStart.values()) {
@@ -163,6 +170,48 @@ async function _startServices(env, toStart) {
     }
 }
 
+export const customDirectives = {
+    // t-custom-click="handler"
+    // This custom directive will add two even listeners ("click"; "auxclick") and call the global value "click".
+    // The global value "click" will call the handler with two parameters :
+    //      - ev (the original event)
+    //      - isMiddleClick (a boolean that says if the user middle clicked, or if he did a ctrl+click)
+    //
+    click: (node, value, modifiers) => {
+        let mods = "";
+        if (modifiers.includes("synthetic")) {
+            mods += ".synthetic";
+        }
+        if (modifiers.includes("capture")) {
+            mods += ".capture";
+        }
+        const handlerFunction = `(ev) => __globals__.click(ev, (${value}).bind(this), '${JSON.stringify(
+            modifiers
+        )}')`;
+        node.setAttribute(`t-on-click${mods}`, handlerFunction);
+        node.setAttribute(`t-on-auxclick${mods}`, handlerFunction);
+    },
+};
+
+export const globalValues = {
+    click: (ev, value, modifiers) => {
+        if (ev.button === 0 || ev.button === 1) {
+            modifiers = JSON.parse(modifiers);
+            for (const modifier of modifiers) {
+                if (modifier === "stop") {
+                    ev.stopPropagation();
+                }
+                if (modifier === "prevent") {
+                    ev.preventDefault();
+                }
+            }
+            const ctrlKey = isMacOS() ? ev.metaKey : ev.ctrlKey;
+            const isMiddleClick = (ctrlKey && ev.button === 0) || ev.button === 1;
+            value(ev, isMiddleClick);
+        }
+    },
+};
+
 /**
  * Create an application with a given component as root and mount it. If no env
  * is provided, the application will be treated as a "root": an env will be
@@ -188,7 +237,9 @@ export async function mountComponent(component, target, appConfig = {}) {
         warnIfNoStaticProps: !session.test_mode,
         name: component.constructor.name,
         translatableAttributes: ["data-tooltip"],
-        translateFn: _t,
+        translateFn: appTranslateFn,
+        customDirectives,
+        globalValues,
         ...appConfig,
     });
     const root = await app.mount(target);

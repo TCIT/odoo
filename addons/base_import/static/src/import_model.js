@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { checkFileSize, DEFAULT_MAX_FILE_SIZE } from "@web/core/utils/files";
@@ -80,13 +78,12 @@ const strftimeToHumanFormat = memoize(function strftimeToHumanFormat(value) {
  *
  */
 export class BaseImportModel {
-    constructor({ env, resModel, context, orm }) {
+    constructor({ env, context, orm }) {
         this.id = 1;
         this.env = env;
         this.orm = orm;
         this.handleInterruption = false;
 
-        this.resModel = resModel;
         this.context = context || {};
 
         this.fields = [];
@@ -232,6 +229,10 @@ export class BaseImportModel {
         mainComponentRegistry.remove("ImportBlockUI");
     }
 
+    setResModel(resModel) {
+        this.resModel = resModel;
+    }
+
     async init() {
         [this.importTemplates, this.id] = await Promise.all([
             this.orm.call(this.resModel, "get_import_templates", [], {
@@ -266,8 +267,11 @@ export class BaseImportModel {
             const error = await this._executeImportStep(isTest, importRes);
             if (error) {
                 const errorData = error.data || {};
-                const message = errorData.arguments && (errorData.arguments[1] || errorData.arguments[0])
-                    || _t("An unknown issue occurred during import (possibly lost connection, data limit exceeded or memory limits exceeded). Please retry in case the issue is transient. If the issue still occurs, try to split the file rather than import it at once.");
+                const message =
+                    (errorData.arguments && (errorData.arguments[1] || errorData.arguments[0])) ||
+                    _t(
+                        "An unknown issue occurred during import (possibly lost connection, data limit exceeded or memory limits exceeded). Please retry in case the issue is transient. If the issue still occurs, try to split the file rather than import it at once."
+                    );
 
                 if (error.message) {
                     this._addMessage("danger", [error.message, message]);
@@ -286,7 +290,7 @@ export class BaseImportModel {
         }
 
         if (!importRes.hasError) {
-            if (importRes.nextrow) {
+            if (!isTest && importRes.nextrow) {
                 this._addMessage("warning", [
                     _t(
                         "Click 'Resume' to proceed with the import, resuming at line %s.",
@@ -297,6 +301,7 @@ export class BaseImportModel {
             }
             if (isTest) {
                 this._addMessage("info", [_t("Everything seems valid.")]);
+                this.setOption("skip", 0);
             }
         } else {
             importRes.nextrow = startRow;
@@ -425,6 +430,7 @@ export class BaseImportModel {
             importRes.nextrow = nextrow;
         } else {
             // Falsy `nextrow` signals there's nothing left to import
+            importRes.nextrow = 0;
             this.stopImport();
         }
         return false;
@@ -608,16 +614,16 @@ export class BaseImportModel {
         }
 
         if (this.importOptions.has_headers && res.headers && res.preview.length > 0) {
-            return res.headers.flatMap((header, index) => {
-                return this._createColumn(
+            return res.headers.flatMap((header, index) =>
+                this._createColumn(
                     res,
                     getId(res, index),
                     header,
                     index,
                     res.preview[index],
                     res.preview[index][0]
-                );
-            });
+                )
+            );
         } else if (res.preview && res.preview.length >= 2) {
             return res.preview.flatMap((preview, index) =>
                 this._createColumn(
@@ -739,7 +745,7 @@ export class BaseImportModel {
 
             // Fields of type "char", "text" or "many2many" can be specified multiple
             // times and they will be concatenated, fields of other types must be unique.
-            if (["char", "text", "many2many"].includes(column.fieldInfo.type)) {
+            if (["char", "text", "html", "many2many"].includes(column.fieldInfo.type)) {
                 if (column.fieldInfo.type === "many2many") {
                     column.comments.push({
                         type: "info",
@@ -862,6 +868,7 @@ export class BaseImportModel {
 /**
  * @returns {BaseImportModel}columns
  */
-export function useImportModel({ env, resModel, context, orm }) {
-    return useState(new BaseImportModel({ env, resModel, context, orm }));
+export function useImportModel({ env, context }) {
+    const orm = useService("orm");
+    return useState(new BaseImportModel({ env, context, orm }));
 }

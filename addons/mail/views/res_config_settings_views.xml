@@ -67,21 +67,24 @@
                                 </div>
                             </div>
                         </setting>
-                        <setting help="Add your twilio credentials for ICE servers">
+                        <setting string="Custom ICE Server with Twilio"
+                                 help="Set up your own server for small group calls using peer-to-peer connections"
+                                 documentation="https://www.odoo.com/documentation/latest/applications/productivity/discuss/ice_servers.html">
                             <field name="use_twilio_rtc_servers"/>
-                            <div class="content-group"  invisible="not use_twilio_rtc_servers">
+                            <div class="content-group" invisible="not use_twilio_rtc_servers">
                                 <div class="row mt16" id="mail_twilio_sid">
                                     <label for="twilio_account_sid" class="col-lg-3"/>
-                                    <field name="twilio_account_sid" placeholder="e.g. ACd5543a0b450ar4c7t95f1b6e8a39t543"/>
+                                    <field name="twilio_account_sid" string="Account SID" placeholder="e.g. ACd5543a0b450ar4c7t95f1b6e8a39t543"/>
                                 </div>
                                 <div class="row mt16" id="mail_twilio_auth_token">
                                     <label for="twilio_account_token" class="col-lg-3"/>
-                                    <field name="twilio_account_token" placeholder="e.g. 65ea4f9e948b693N5156F350256bd152"/>
+                                    <field name="twilio_account_token" string="Account Auth Token" placeholder="e.g. 65ea4f9e948b693N5156F350256bd152"/>
                                 </div>
                             </div>
                         </setting>
-                        <setting string="SFU server">
-                            <div class="content-group">
+                        <setting string="Custom SFU Server" help="Set up your own server for large group calls by routing connections centrally">
+                            <field name="use_sfu_server"/>
+                            <div class="content-group" invisible="not use_sfu_server">
                                 <div class="row mt16">
                                     <label for="sfu_server_url" string="URL" class="col-lg-3"/>
                                     <field name="sfu_server_url"/>
@@ -92,21 +95,14 @@
                                 </div>
                             </div>
                         </setting>
-                        <setting string="Custom ICE server list" help="Configure your ICE server list for webRTC">
-                            <div class="content-group">
-                                <div class="row col-lg-4">
-                                    <button type="action" name="%(mail.action_ice_servers)d" string="ICE Servers" icon="oi-arrow-right" class="btn-link"/>
-                                </div>
-                            </div>
+                        <setting string="Custom ICE Servers" help="Use your own servers for calls to manage heavy traffic and ensure reliability if Twilio is unavailable"
+                                 documentation="https://www.odoo.com/documentation/latest/applications/productivity/discuss/ice_servers.html#define-a-list-of-custom-ice-servers">
+                                 <div class="content-group">
+                                        <button type="action" name="%(mail.action_ice_servers)d" string="Configure ICE Servers" icon="oi-arrow-right" class="btn-link"/>
+                                 </div>
                         </setting>
-                        <setting id="tenor_api_key" string="Tenor GIF API key" help="Add a Tenor GIF API key to enable GIFs support." documentation="https://developers.google.com/tenor/guides/quickstart#setup">
+                        <setting id="tenor_api_key" string="Klipy GIF API key" help="Add a Klipy GIF API key to enable GIFs support. If you were using a Tenor GIF API key (service shutdown on June 30, 2026), please replace it here with a Klipy GIF API key" documentation="https://docs.klipy.com/getting-started">
                             <field name="tenor_api_key" placeholder="Paste your API key"/>
-                        </setting>
-                        <setting id="tenor_content_filter" string="Tenor GIF content filter" help="Select the content filter used for filtering GIFs" documentation="https://developers.google.com/tenor/guides/content-filtering">
-                            <field name="tenor_content_filter"/>
-                        </setting>
-                        <setting id="tenor_gif_limit" string="Tenor GIF limits" help="Fetch up to the specified number of GIF.">
-                            <field name="tenor_gif_limit"/>
                         </setting>
                         <setting string="Message Translation" help="Google Translate Integration" id="message_translation_setting" documentation="https://cloud.google.com/translate/docs/setup">
                             <field name="google_translate_api_key" placeholder="Paste your API key"/>
@@ -114,9 +110,9 @@
                     </block>
                 </div>
                 <setting id="document_layout_setting" position="after">
-                    <setting string="Email Templates" help="Customize the look and feel of automated emails" id="mail_templates_setting" groups="mail.group_mail_template_editor,base.group_system">
+                    <setting string="Email Templates" help="Customize the look and feel of automated emails" id="mail_templates_setting" groups="mail.group_mail_template_editor,base.group_system" company_dependent="1">
                         <div class="w-50 row">
-                            <span class="d-block w-75 py-2">Header Color</span>
+                            <span class="d-block w-75 py-2">Button Text</span>
                             <field name="email_primary_color" class="d-block w-25 p-0 m-0" widget="color"/>
                         </div>
                         <div class="w-50 row mt-1">

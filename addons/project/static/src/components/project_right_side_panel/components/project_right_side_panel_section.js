@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { Component } from "@odoo/owl";
 
 export class ProjectRightSidePanelSection extends Component {
@@ -16,7 +14,7 @@ export class ProjectRightSidePanelSection extends Component {
                 title: { type: Object, optional: true },
             },
         },
-        dataClassName: { type: String, optional: true },
+        dataClassName: { type: Object, optional: true },
         headerClassName: { type: String, optional: true },
     };
     static defaultProps = {

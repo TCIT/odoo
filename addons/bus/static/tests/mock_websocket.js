@@ -1,104 +1,124 @@
+import { after, Deferred, mockWorker } from "@odoo/hoot";
+import { MockServer, patchWithCleanup } from "@web/../tests/web_test_helpers";
+
 import { WebsocketWorker } from "@bus/workers/websocket_worker";
-import { after } from "@odoo/hoot";
-import { browser } from "@web/core/browser/browser";
-import { patchWithCleanup } from "@web/../tests/web_test_helpers";
+import { patch } from "@web/core/utils/patch";
 
-class WebSocketMock extends EventTarget {
-    constructor() {
-        super();
-        this.readyState = 0;
+//-----------------------------------------------------------------------------
+// Internal
+//-----------------------------------------------------------------------------
 
-        queueMicrotask(() => {
-            this.readyState = 1;
-            const openEv = new Event("open");
-            this.onopen(openEv);
-            this.dispatchEvent(openEv);
-        });
-    }
-
-    close(code = 1000, reason) {
-        this.readyState = 3;
-        const closeEv = new CloseEvent("close", {
-            code,
-            reason,
-            wasClean: code === 1000,
-        });
-        this.onclose(closeEv);
-        this.dispatchEvent(closeEv);
-    }
-
-    onclose(closeEv) {}
-    onerror(errorEv) {}
-    onopen(openEv) {}
-
-    send(data) {
-        if (this.readyState !== 1) {
-            const errorEv = new Event("error");
-            this.onerror(errorEv);
-            this.dispatchEvent(errorEv);
-            throw new DOMException("Failed to execute 'send' on 'WebSocket': State is not OPEN");
-        }
-    }
+function cleanupWebSocketCallbacks() {
+    wsCallbacks?.clear();
+    wsCallbacks = null;
 }
 
-class SharedWorkerMock extends EventTarget {
-    constructor(websocketWorker) {
-        super();
-        this._websocketWorker = websocketWorker;
-        this._messageChannel = new MessageChannel();
-        this.port = this._messageChannel.port1;
-        // port 1 should be started by the service itself.
-        this._messageChannel.port2.start();
-        this._websocketWorker.registerClient(this._messageChannel.port2);
+function cleanupWebSocketWorker() {
+    if (currentWebSocketWorker.connectTimeout) {
+        clearTimeout(currentWebSocketWorker.connectTimeout);
     }
+
+    currentWebSocketWorker.firstSubscribeDeferred = new Deferred();
+    currentWebSocketWorker.websocket = null;
+    currentWebSocketWorker = null;
 }
 
-class WorkerMock extends SharedWorkerMock {
-    constructor(websocketWorker) {
-        super(websocketWorker);
-        this.port.start();
-        this.postMessage = this.port.postMessage.bind(this.port);
+function getWebSocketCallbacks() {
+    if (!wsCallbacks) {
+        wsCallbacks = new Map();
+
+        after(cleanupWebSocketCallbacks);
     }
+
+    return wsCallbacks;
 }
 
-let websocketWorker;
+function setupWebSocketWorker() {
+    currentWebSocketWorker = new WebsocketWorker();
+    // Fixed reconnect delay, longer than the mocked WebSocket's open/close ticks.
+    currentWebSocketWorker.INITIAL_RECONNECT_DELAY = 1000;
+    currentWebSocketWorker.RECONNECT_JITTER = 0;
+    currentWebSocketWorker.connectRetryDelay = 1000;
+
+    mockWorker(function onWorkerConnected(worker) {
+        currentWebSocketWorker.registerClient(worker._messageChannel.port2);
+    });
+}
+
+/** @type {WebsocketWorker | null} */
+let currentWebSocketWorker = null;
+/** @type {Map<string, (data: any) => any> | null} */
+let wsCallbacks = null;
+
+//-----------------------------------------------------------------------------
+// Exports
+//-----------------------------------------------------------------------------
+
+export function getWebSocketWorker() {
+    return currentWebSocketWorker;
+}
+
 /**
- * @param {*} params Parameters used to patch the websocket worker.
- * @returns {WebsocketWorker} Instance of the worker which will run during the
- * test. Usefull to interact with the worker in order to test the
- * websocket behavior.
+ * @param {string} eventName
+ * @param {(data: any) => any} callback
  */
-export function patchWebsocketWorkerWithCleanup(params = {}) {
-    patchWithCleanup(window, {
-        WebSocket: WebSocketMock,
-    });
-    patchWithCleanup(websocketWorker || WebsocketWorker.prototype, params);
-    websocketWorker = websocketWorker || new WebsocketWorker();
-    websocketWorker.INITIAL_RECONNECT_DELAY = 0;
-    websocketWorker.RECONNECT_JITTER = 5;
-    patchWithCleanup(browser, {
-        SharedWorker: function () {
-            const sharedWorker = new SharedWorkerMock(websocketWorker);
-            after(() => {
-                sharedWorker._messageChannel.port1.close();
-                sharedWorker._messageChannel.port2.close();
-            });
-            return sharedWorker;
-        },
-        Worker: function () {
-            const worker = new WorkerMock(websocketWorker);
-            after(() => {
-                worker._messageChannel.port1.close();
-                worker._messageChannel.port2.close();
-            });
-            return worker;
-        },
-    });
-    after(() => {
-        if (websocketWorker) {
-            clearTimeout(websocketWorker.connectTimeout);
-            websocketWorker = null;
-        }
-    });
-    return websocketWorker;
+export function onWebsocketEvent(eventName, callback) {
+    const callbacks = getWebSocketCallbacks();
+    if (!callbacks.has(eventName)) {
+        callbacks.set(eventName, new Set());
+    }
+    callbacks.get(eventName).add(callback);
+
+    return function offWebsocketEvent() {
+        callbacks.get(eventName).delete(callback);
+    };
 }
+
+//-----------------------------------------------------------------------------
+// Setup
+//-----------------------------------------------------------------------------
+
+patchWithCleanup(MockServer.prototype, {
+    start() {
+        setupWebSocketWorker();
+        after(cleanupWebSocketWorker);
+        return super.start(...arguments);
+    },
+});
+
+patch(WebsocketWorker.prototype, {
+    // `runAllTimers` advances time based on the longest registered timeout.
+    // Some tests rely on the fragile assumption that time won’t advance too much.
+    // Disable the interval until those tests are rewritten to be more robust.
+    enableCheckInterval: false,
+
+    _restartConnectionCheckInterval() {
+        if (this.enableCheckInterval) {
+            super._restartConnectionCheckInterval(...arguments);
+        }
+    },
+
+    _sendToServer(message) {
+        const { env } = MockServer;
+        if (!env) {
+            return;
+        }
+
+        if ("bus.bus" in env && "ir.websocket" in env) {
+            if (message.event_name === "update_presence") {
+                const { inactivity_period, im_status_ids_by_model } = message.data;
+                env["ir.websocket"]._update_presence(inactivity_period, im_status_ids_by_model);
+            } else if (message.event_name === "subscribe") {
+                const { channels } = message.data;
+                env["bus.bus"].channelsByUser[env.uid] = channels;
+            }
+        }
+
+        // Custom callbacks
+        for (const callback of wsCallbacks?.get(message.event_name) || []) {
+            callback(message.data);
+        }
+
+        return super._sendToServer(message);
+    },
+});
